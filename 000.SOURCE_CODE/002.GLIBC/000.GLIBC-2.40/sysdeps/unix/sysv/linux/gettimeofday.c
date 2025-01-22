@@ -93,5 +93,12 @@ __gettimeofday (struct timeval *restrict tv, void *restrict tz)
   return 0;
 }
 # endif
+
+/**
+ * weak_alias(original, alias): 宏，其目的是为函数添加一个”弱”别名，
+ *  original：原始符号（通常是函数）。
+ *  alias：别名符号。
+ * 与”强”符号函数名区分: 如果调用函数无对应的函数无”强”符号对应的函数，则会调用该别名对应的函数
+ */
 weak_alias (__gettimeofday, gettimeofday)
 #endif
