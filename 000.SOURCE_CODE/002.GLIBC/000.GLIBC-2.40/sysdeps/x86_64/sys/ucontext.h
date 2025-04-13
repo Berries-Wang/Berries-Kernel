@@ -136,6 +136,17 @@ typedef struct
     __extension__ unsigned long long __reserved1 [8];
 } mcontext_t;
 
+/**
+ * typedef struct ucontext_t {
+ *     unsigned long uc_flags;            // 标记，通常用于描述上下文的状态
+ *     struct ucontext_t *uc_link;        // 链接到上一个上下文
+ *     stack_t uc_stack;                  // 保存当前栈的上下文
+ *     sigset_t uc_sigmask;               // 当前上下文的信号掩码
+ *     mcontext_t uc_mcontext;            // 处理器寄存器的上下文（包括程序计数器等）
+ *     __aligned(8) char __unused[128];   // 保证对齐，系统保留字段
+ * } ucontext_t;
+ */
+
 /* Userlevel context.  */
 typedef struct ucontext_t
   {
