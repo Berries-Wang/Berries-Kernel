@@ -19,12 +19,15 @@ struct css_set;
 #define CLONE_LEGACY_FLAGS 0xffffffffULL
 
 struct kernel_clone_args {
+	// 000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/include/uapi/linux/sched.h
 	u64 flags;
 	int __user *pidfd;
 	int __user *child_tid;
 	int __user *parent_tid;
 	int exit_signal;
+	// 用户态栈的起始位置?
 	unsigned long stack;
+	// 用户态栈大小
 	unsigned long stack_size;
 	unsigned long tls;
 	pid_t *set_tid;

@@ -2438,7 +2438,10 @@ long __attribute__((optimize("O0"))) _do_fork(struct kernel_clone_args *args)
 	 */
 	trace_sched_process_fork(current, p);
 
+	// 000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/kernel/pid.c
 	pid = get_task_pid(p, PIDTYPE_PID);
+
+	// 000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/include/linux/pid.h
 	nr = pid_vnr(pid);
 
 	if (clone_flags & CLONE_PARENT_SETTID)
@@ -2450,6 +2453,7 @@ long __attribute__((optimize("O0"))) _do_fork(struct kernel_clone_args *args)
 		get_task_struct(p);
 	}
 
+	// 000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/kernel/sched/core.c
 	wake_up_new_task(p);
 
 	/* forking complete and child started to run, tell ptracer */
@@ -2481,6 +2485,9 @@ pid_t kernel_thread(int (*fn)(void *), void *arg, unsigned long flags)
 	return _do_fork(&args);
 }
 
+/**
+ * fork函数
+ */
 #ifdef __ARCH_WANT_SYS_FORK
 SYSCALL_DEFINE0(fork)
 {

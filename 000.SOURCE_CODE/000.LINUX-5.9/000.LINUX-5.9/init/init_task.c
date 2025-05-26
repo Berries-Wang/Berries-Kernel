@@ -59,7 +59,7 @@ unsigned long init_shadow_call_stack[SCS_SIZE / sizeof(long)]
 
 /*
  * Set up the first task table, touch at your own risk!. Base=0,
- * limit=0x1fffff (=2MB)
+ * limit=0x1fffff (=2MB) (设置第一个任务表，风险自负！Base=0，limit=0x1fffff (=2MB))
  */
 struct task_struct init_task
 #ifdef CONFIG_ARCH_TASK_STRUCT_ON_STACK

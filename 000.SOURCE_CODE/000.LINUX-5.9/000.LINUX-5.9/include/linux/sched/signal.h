@@ -149,7 +149,11 @@ struct signal_struct {
 	/* Empty if CONFIG_POSIX_TIMERS=n */
 	struct posix_cputimers posix_cputimers;
 
-	/* PID/PID hash table linkage. */
+	/** 
+	 * PID/PID hash table linkage.
+	 * 存储了相关进程的PID
+	 * 例如: 发送信号给线程组（kill(pid, sig)）时，内核会通过 pids[PIDTYPE_TGID] 找到线程组 ID。
+	*/
 	struct pid *pids[PIDTYPE_MAX];
 
 #ifdef CONFIG_NO_HZ_FULL

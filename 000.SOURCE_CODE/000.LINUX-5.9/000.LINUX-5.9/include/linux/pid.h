@@ -8,11 +8,11 @@
 
 enum pid_type
 {
-	PIDTYPE_PID,
-	PIDTYPE_TGID,
-	PIDTYPE_PGID,
-	PIDTYPE_SID,
-	PIDTYPE_MAX,
+	PIDTYPE_PID,   // 进程的 PID（进程本身的标识符）
+	PIDTYPE_TGID,  // 线程组 ID（即用户视角的“进程 ID”，getpid() 返回的值）
+	PIDTYPE_PGID,  // 进程组 ID（getpgid() 返回的值）
+	PIDTYPE_SID,   // 会话 ID（getsid() 返回的值）
+	PIDTYPE_MAX,   //就是散列表的个数
 };
 
 /*
