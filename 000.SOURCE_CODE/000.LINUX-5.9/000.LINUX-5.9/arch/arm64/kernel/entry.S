@@ -735,7 +735,7 @@ el0_error_naked:
 SYM_CODE_END(el0_error)
 
 /*
- * "slow" syscall return path.
+ * "slow" syscall return path. 返回用户态
  */
 SYM_CODE_START_LOCAL(ret_to_user)
 	disable_daif
@@ -917,14 +917,15 @@ NOKPROBE(cpu_switch_to)
 
 /*
  * This is how we return from a fork.
+  * 001.UNIX-DOCS/002.ret_from_fork.md
  */
 SYM_CODE_START(ret_from_fork)
-	bl	schedule_tail
-	cbz	x19, 1f				// not a kernel thread
+	bl	schedule_tail        // 调用schedule_tail函数
+	cbz	x19, 1f				// not a kernel thread ， 若x19为0,则跳转到1标签处
 	mov	x0, x20
-	blr	x19
+	blr	x19                 // 跳转到寄存器指定的地址，并保存返回地址到 LR
 1:	get_current_task tsk
-	b	ret_to_user
+	b	ret_to_user         // 直接跳转，不保存返回地址。
 SYM_CODE_END(ret_from_fork)
 NOKPROBE(ret_from_fork)
 
