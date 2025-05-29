@@ -649,6 +649,9 @@ struct task_struct {
 	refcount_t			usage;
 	/* Per task flags (PF_*), defined further below: */
 	unsigned int			flags;
+	/**
+	 * ptrace：调试相关标志（如 PTRACE_TRACEME）。
+	 */
 	unsigned int			ptrace;
 
 #ifdef CONFIG_SMP
@@ -1488,6 +1491,13 @@ extern struct pid *cad_pid;
 
 /*
  * Per process flags
+ * 在 Linux 内核中，task_struct 是描述进程或线程的核心数据结构，其中的 flags 字段（全称 unsigned int flags）是一个位掩码（bitmask），
+ * 用于存储进程的多种状态和属性标志。这些标志通过按位或（|）组合，用于快速检查进程的当前状态或行为。
+ * 
+ * flags 的作用
+ * 1. 快速状态检查：内核通过检查 flags 的位掩码，可以高效判断进程的当前状态（例如是否是内核线程、是否正在退出等）。
+ * 2. 控制流程行为：某些标志会影响内核的调度或资源管理策略（例如 PF_MEMALLOC 会允许进程在内存紧张时优先分配内存）。
+ * 
  */
 #define PF_IDLE			0x00000002	/* I am an IDLE thread */
 #define PF_EXITING		0x00000004	/* Getting shut down */
