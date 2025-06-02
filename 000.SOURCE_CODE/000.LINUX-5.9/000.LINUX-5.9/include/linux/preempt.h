@@ -85,12 +85,12 @@
 /*
  * Are we doing bottom half or hardware interrupt processing?
  *
- * in_irq()       - We're in (hard) IRQ context
- * in_softirq()   - We have BH disabled, or are processing softirqs
- * in_interrupt() - We're in NMI,IRQ,SoftIRQ context or have BH disabled
- * in_serving_softirq() - We're in softirq context
- * in_nmi()       - We're in NMI context
- * in_task()	  - We're in task context
+ * in_irq()             - We're in (hard) IRQ context -- 处于硬件中断上下文
+ * in_softirq()         - We have BH disabled, or are processing softirqs 处于软中断: 1. BH disabled;2. 正处于一个软中断上下文处理当中;
+ * in_interrupt()       - We're in NMI,IRQ,SoftIRQ context or have BH disabled -- 是否为几种场景中的一种
+ * in_serving_softirq() - We're in softirq context   -- 处于软中断
+ * in_nmi()             - We're in NMI context  -- 处于不可中断上下文
+ * in_task()	        - We're in task context -- 进程上下文
  *
  * Note: due to the BH disabled confusion: in_softirq(),in_interrupt() really
  *       should not be used in new code.
