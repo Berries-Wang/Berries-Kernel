@@ -83,7 +83,8 @@
 				 | NMI_MASK))
 
 /*
- * Are we doing bottom half or hardware interrupt processing?
+ * Are we doing bottom half or hardware interrupt processing?(我们正在进行下半部分或硬件中断处理吗？)
+ * 
  *
  * in_irq()             - We're in (hard) IRQ context -- 处于硬件中断上下文
  * in_softirq()         - We have BH disabled, or are processing softirqs 处于软中断: 1. BH disabled;2. 正处于一个软中断上下文处理当中;
