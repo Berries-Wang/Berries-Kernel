@@ -39,7 +39,9 @@ __libc_open (const char *file, int oflag, ...)
       mode = va_arg (arg, int);
       va_end (arg);
     }
-
+  /**
+   * SYSCALL_CANCEL	封装可取消的系统调用
+   */
   return SYSCALL_CANCEL (openat, AT_FDCWD, file, oflag, mode);
 }
 libc_hidden_def (__libc_open)

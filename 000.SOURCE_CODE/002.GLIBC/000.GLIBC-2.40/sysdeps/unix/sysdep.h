@@ -104,7 +104,10 @@
    required.  Any error will be handled using arch defined macros and errno
    will be set accordingly.
    It is similar to INLINE_SYSCALL macro, but without the need to pass the
-   expected argument number as second parameter.  */
+   expected argument number as second parameter.
+   *
+   * #define INLINE_SYSCALL(name, nr, args...) __syscall_##name (args)
+   *   */
 #define INLINE_SYSCALL_CALL(...) \
   __INLINE_SYSCALL_DISP (__INLINE_SYSCALL, __VA_ARGS__)
 
@@ -115,6 +118,9 @@
 # define NO_SYSCALL_CANCEL_CHECKING SINGLE_THREAD_P
 #endif
 
+/**
+ * 如何理解
+ */
 #define SYSCALL_CANCEL(...) \
   ({									     \
     long int sc_ret;							     \
