@@ -66,13 +66,22 @@ static void notrace el1_dbg(struct pt_regs *regs, unsigned long esr)
 }
 NOKPROBE_SYMBOL(el1_dbg);
 
+/**
+ * 
+ * 在 Linux 内核中，notrace 是一个函数属性（attribute），用于指示编译器不要为该函数生成跟踪（tracing）相关的代码。
+ */
 asmlinkage void notrace el1_sync_handler(struct pt_regs *regs)
 {
+	/**
+	 * 获取异常原因: `Exception-handling-examples` (006.REFS/learn_the_architecture_-_aarch64_exception_model_102412_0103_02_en.pdf)
+	 * 
+	 * Types of privilege: ESR_ELx (Exception Syndrome Register)
+	 */
 	unsigned long esr = read_sysreg(esr_el1);
 
 	switch (ESR_ELx_EC(esr)) {
-	case ESR_ELx_EC_DABT_CUR:
-	case ESR_ELx_EC_IABT_CUR:
+	case ESR_ELx_EC_DABT_CUR: // 读取 esr_el1 的 EC 域，判断异常类型
+	case ESR_ELx_EC_IABT_CUR: // 发生在EL1的指令异常
 		el1_abort(regs, esr);
 		break;
 	/*
