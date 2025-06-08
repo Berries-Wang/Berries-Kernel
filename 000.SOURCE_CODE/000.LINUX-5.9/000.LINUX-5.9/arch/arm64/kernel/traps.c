@@ -216,6 +216,9 @@ static void arm64_show_signal(int signo, const char *str)
 				      DEFAULT_RATELIMIT_BURST);
 	struct task_struct *tsk = current;
 	unsigned int esr = tsk->thread.fault_code;
+	/**
+	 * 获取指定任务的 pt_regs 结构体指针
+	 */
 	struct pt_regs *regs = task_pt_regs(tsk);
 
 	/* Leave if the signal won't be shown */

@@ -153,6 +153,7 @@ alternative_cb_end
 	.if	\regsize == 32
 	mov	w0, w0				// zero upper 32 bits of x0
 	.endif
+	// 下边这些是将寄存器x0~x29压栈，后续可以使用struct pt_regs指针访问
 	stp	x0, x1, [sp, #16 * 0]
 	stp	x2, x3, [sp, #16 * 1]
 	stp	x4, x5, [sp, #16 * 2]
@@ -171,9 +172,9 @@ alternative_cb_end
 
 	.if	\el == 0
 	clear_gp_regs
-	mrs	x21, sp_el0
-	ldr_this_cpu	tsk, __entry_task, x20
-	msr	sp_el0, tsk
+	mrs	x21, sp_el0  // 将 sp_el0 寄存器的值读取到通用寄存器 x21 中（是为了下面的将task写入到sp_el0做准备吧）。在 Linux 内核中，sp_el0 被用来存储 当前用户态任务的 struct task_struct 指针（即 current 宏的实现）
+	ldr_this_cpu	tsk, __entry_task, x20   // ldr_this_cpu 是 Linux 内核的宏，用于访问 每 CPU 变量（Per-CPU variable）| __entry_task 是一个每 CPU 变量，通常指向 当前 CPU 正在运行的任务的 task_struct。(定义在：000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/kernel/process.c)
+	msr	sp_el0, tsk   // 将 tsk（新任务的 task_struct 指针）写入 sp_el0 寄存器。
 
 	/*
 	 * Ensure MDSCR_EL1.SS is clear, since we can unmask debug exceptions
