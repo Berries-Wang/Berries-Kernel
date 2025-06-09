@@ -729,7 +729,7 @@ SYM_CODE_END(el0_irq)
 
 SYM_CODE_START_LOCAL(el1_error)
 	kernel_entry 1
-	mrs	x1, esr_el1
+	mrs	x1, esr_el1    // MRS 是一条汇编指令，用于 将系统寄存器的值读取到通用寄存器: MRS <Xt>, <system_register>
 	gic_prio_kentry_setup tmp=x2
 	enable_dbg
 	mov	x0, sp

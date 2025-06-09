@@ -238,6 +238,9 @@ NOKPROBE_SYMBOL(el0_svc);
 
 asmlinkage void notrace el0_sync_handler(struct pt_regs *regs)
 {
+	/**
+	 * 读取寄存器 esr_el1 ， 关于这个寄存器，得阅读[001.UNIX-DOCS/005.syscall-发起系统调用.md]
+	 */
 	unsigned long esr = read_sysreg(esr_el1);
 
 	switch (ESR_ELx_EC(esr)) {
