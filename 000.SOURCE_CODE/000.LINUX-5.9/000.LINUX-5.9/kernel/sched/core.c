@@ -8465,7 +8465,10 @@ const int sched_prio_to_weight[40] = {
  *
  * In cases where the weight does not change often, we can use the
  * precalculated inverse to speed up arithmetics by turning divisions
- * into multiplications:
+ * into multiplications:(在权重不经常变化的情况下，我们可以使用预先计算的逆运算，将除法转换为乘法，从而加快算术运算速度：)
+ * 
+ * sched_prio_to_wmult[i] = 2^32 / sched_prio_to_weight[i] , 是为了在计算vruntime时会涉及浮点运算，将除法改为乘法和移位操作（calc_delta_fair()函数实现），提高计算效率
+ * calc_delta_fair: 000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/kernel/sched/fair.c
  */
 const u32 sched_prio_to_wmult[40] = {
  /* -20 */     48388,     59856,     76040,     92818,    118348,

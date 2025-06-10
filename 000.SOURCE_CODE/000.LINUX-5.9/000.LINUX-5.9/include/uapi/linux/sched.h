@@ -109,17 +109,18 @@ struct clone_args {
 #define CLONE_ARGS_SIZE_VER2 88 /* sizeof third published struct */
 
 /*
- * Scheduling policies
+ * Scheduling policies (调度策略)
+ *
  */
-#define SCHED_NORMAL		0
-#define SCHED_FIFO		1
-#define SCHED_RR		2
-#define SCHED_BATCH		3
+#define SCHED_NORMAL		0    // CFS 调度器
+#define SCHED_FIFO		    1    // realtime 调度器
+#define SCHED_RR		    2    // realtime 调度器
+#define SCHED_BATCH		    3    // CFS 调度器
 /* SCHED_ISO: reserved but not implemented yet */
-#define SCHED_IDLE		5
-#define SCHED_DEADLINE		6
+#define SCHED_IDLE		5        // idle 调度
+#define SCHED_DEADLINE		6    // deadline 调度器
 
-/* Can be ORed in to make sure the process is reverted back to SCHED_NORMAL on fork */
+/* Can be ORed in to make sure the process is reverted back to SCHED_NORMAL on fork （可以进行“或”运算，以确保进程在 fork 时恢复到 SCHED_NORMAL 状态） */
 #define SCHED_RESET_ON_FORK     0x40000000
 
 /*

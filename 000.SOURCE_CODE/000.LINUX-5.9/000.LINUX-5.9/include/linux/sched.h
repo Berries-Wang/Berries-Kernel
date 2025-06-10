@@ -321,8 +321,12 @@ struct sched_info {
 # define SCHED_CAPACITY_SHIFT		SCHED_FIXEDPOINT_SHIFT
 # define SCHED_CAPACITY_SCALE		(1L << SCHED_CAPACITY_SHIFT)
 
+/**
+ * 记录调度实体的权重信息
+ */
 struct load_weight {
 	unsigned long			weight;
+	// inverse weight的缩写，指权重被倒转了
 	u32				inv_weight;
 };
 
@@ -447,16 +451,19 @@ struct sched_statistics {
 #endif
 };
 
+/**
+ * 调度实体
+ */
 struct sched_entity {
 	/* For load-balancing: */
-	struct load_weight		load;
-	struct rb_node			run_node;
-	struct list_head		group_node;
-	unsigned int			on_rq;
+	struct load_weight		load;       // load 表示该调度实体的权重
+	struct rb_node			run_node;   // run_node 表示该调度实体在红黑树中的节点
+	struct list_head		group_node; 
+	unsigned int			on_rq;      // on_rq 表示该调度实体是否在就绪队列中接受调度
 
 	u64				exec_start;
 	u64				sum_exec_runtime;
-	u64				vruntime;
+	u64				vruntime;           // vruntime 表示虚拟运行时间
 	u64				prev_sum_exec_runtime;
 
 	u64				nr_migrations;
@@ -481,7 +488,7 @@ struct sched_entity {
 	 * Put into separate cache line so it does not
 	 * collide with read-mostly values above.
 	 */
-	struct sched_avg		avg;
+	struct sched_avg		avg;             // avg 表示该调度实体的负载信息
 #endif
 };
 
@@ -633,6 +640,7 @@ struct task_struct {
 	/*
 	 * For reasons of header soup (see current_thread_info()), this
 	 * must be the first element of task_struct.
+	 * struct thread_info : 数据结构用于存储进程描述符频繁访问和硬件快速访问的字段，它的定义依赖于具体体系结构的实现
 	 */
 	struct thread_info		thread_info;
 #endif
@@ -677,11 +685,29 @@ struct task_struct {
 #endif
 	int				on_rq;
 
+	/**
+	 * prio 保存着进程的动态优先级，是调度类考虑的优先级，有些情况下需要暂时提高进程优先级，例如实时互斥量等
+	 */
 	int				prio;
+	/**
+	 * 静态优先级: 在进程启动时分配
+	 */
 	int				static_prio;
-	int				normal_prio;
-	unsigned int			rt_priority;
 
+	/**
+	 * normal_prio 是基于 static_prio 和调度策略计算出来的优先级，在创建进程时会继承父进程的 normal_prio
+	 * 对于普通进程来说，normal_prio 等同于 static_prio，对于实时进程，会根据 rt_priority 重新计算 normal_prio，详见 effective_prio()函数
+	 */
+	int				normal_prio;
+	
+	/**
+	 * rt_priority 是实时进程的优先级 
+	 */
+	unsigned int			rt_priority;
+    
+	/**
+	 * task调度类
+	 */
 	const struct sched_class	*sched_class;
 	struct sched_entity		se;
 	struct sched_rt_entity		rt;

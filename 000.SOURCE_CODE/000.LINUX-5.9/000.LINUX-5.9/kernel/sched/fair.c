@@ -11136,6 +11136,7 @@ static unsigned int get_rr_interval_fair(struct rq *rq, struct task_struct *task
 
 /*
  * All the scheduling class methods:
+ * 每个调度类都定义了一套操作方法集，调用 CFS 调度器的 task_fork 方法做一些 fork相关的初始化。 CFS 调度器调度类定义的操作方法集如下
  */
 const struct sched_class fair_sched_class
 	__attribute__((section("__fair_sched_class"))) = {
