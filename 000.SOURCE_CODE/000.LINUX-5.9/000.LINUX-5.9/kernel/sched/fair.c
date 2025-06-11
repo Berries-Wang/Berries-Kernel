@@ -240,6 +240,7 @@ static u64 __calc_delta(u64 delta_exec, unsigned long weight, struct load_weight
 		}
 	}
 
+	// fact = fact * lw->inv_weight
 	fact = mul_u32_u32(fact, lw->inv_weight);
 
 	while (fact >> 32) {
@@ -676,7 +677,8 @@ static inline u64 calc_delta_fair(u64 delta, struct sched_entity *se)
 	return delta;
 }
 
-/*
+/**
+ * __sched_period() 函数会计算 CFS 就绪队列中的一个调度周期的长度，可以理解为一个调度周期的时间片，它根据当前运行的进程数目来计算
  * The idea is to set a period in which each task runs once.
  *
  * When there are too many tasks (sched_nr_latency) we have to stretch

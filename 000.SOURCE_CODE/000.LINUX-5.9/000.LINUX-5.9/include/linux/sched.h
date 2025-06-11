@@ -358,7 +358,9 @@ struct util_est {
 #define UTIL_EST_WEIGHT_SHIFT		2
 } __attribute__((__aligned__(sizeof(u64))));
 
-/*
+/**
+ * 用于计算CPU负载
+ * 
  * The load/runnable/util_avg accumulates an infinite geometric series
  * (see __update_load_avg_cfs_rq() in kernel/sched/pelt.c).
  *
@@ -406,11 +408,11 @@ struct util_est {
 struct sched_avg {
 	u64				last_update_time;
 	u64				load_sum;
-	u64				runnable_sum;
+	u64				runnable_sum;  // runnable_sum 表示该调度实体在就绪队列里（ se->on_rq=1 ）可运行状态（ runnable ）的总时间。调度实体在就绪队列中的时间包括两部分，一是正在运行的时间，称为 running时间，二是在就绪队列中等待的时间
 	u32				util_sum;
 	u32				period_contrib;
 	unsigned long			load_avg;
-	unsigned long			runnable_avg;
+	unsigned long			runnable_avg;       
 	unsigned long			util_avg;
 	struct util_est			util_est;
 } ____cacheline_aligned;
@@ -463,6 +465,9 @@ struct sched_entity {
 
 	u64				exec_start;
 	u64				sum_exec_runtime;
+	/**
+	 * vruntime计算函数: calc_delta_fair (kernel/sched/fair.c)
+	 */
 	u64				vruntime;           // vruntime 表示虚拟运行时间
 	u64				prev_sum_exec_runtime;
 
@@ -691,6 +696,8 @@ struct task_struct {
 	int				prio;
 	/**
 	 * 静态优先级: 在进程启动时分配
+	 * 
+	 * 宏 NICE_TO_PRIO() (include/linux/sched/prio.h)实现由 nice 值转换成 static_prio
 	 */
 	int				static_prio;
 
@@ -774,6 +781,9 @@ struct task_struct {
 	struct rb_node			pushable_dl_tasks;
 #endif
 
+    /**
+	 * mm为空，则说明父进程没有自己的运行空间，只是一个“寄人篱下”的线程或内核线程
+	 */
 	struct mm_struct		*mm;
 	struct mm_struct		*active_mm;
 
@@ -860,8 +870,8 @@ struct task_struct {
 	/*
 	 * Children/sibling form the list of natural children:
 	 */
-	struct list_head		children;
-	struct list_head		sibling;
+	struct list_head		children; // 子进程链表
+	struct list_head		sibling;  // 兄弟进程链表
 	struct task_struct		*group_leader;
 
 	/*

@@ -3059,6 +3059,8 @@ int wake_up_state(struct task_struct *p, unsigned int state)
  * p is forked by current.
  *
  * __sched_fork() is basic setup used by init_idle() too:
+ * 
+ * __sched_fork()初始化进程调度相关的数据结构，调度实体用 struct sched_entity数据结构来抽象，每个进程或线程都是一个调度实体，另外也包括组调度（sched group）
  */
 static void __sched_fork(unsigned long clone_flags, struct task_struct *p)
 {
@@ -3219,21 +3221,27 @@ static inline void init_schedstats(void) {}
 
 /*
  * fork()/clone()-time setup:
+ * 
  */
 int sched_fork(unsigned long clone_flags, struct task_struct *p)
 {
 	unsigned long flags;
 
+	/**
+	 * __sched_fork()初始化进程调度相关的数据结构，调度实体用 struct sched_entity数据结构来抽象，每个进程或线程都是一个调度实体，另外也包括组调度（sched group）
+	 */
 	__sched_fork(clone_flags, p);
+
 	/*
 	 * We mark the process as NEW here. This guarantees that
 	 * nobody will actually run it, and a signal or other external
 	 * event cannot wake it up and insert it on the runqueue either.
+	 * (我们在这里将进程标记为 NEW。这保证了没有人会真正运行它，并且信号或其他外部事件也无法唤醒它并将其插入运行队列。)
 	 */
 	p->state = TASK_NEW;
 
 	/*
-	 * Make sure we do not leak PI boosting priority to the child.
+	 * Make sure we do not leak PI boosting priority to the child.(确保我们不会将 PI 提升优先权泄露给子进程)
 	 */
 	p->prio = current->normal_prio;
 
@@ -3294,6 +3302,7 @@ int sched_fork(unsigned long clone_flags, struct task_struct *p)
 #if defined(CONFIG_SMP)
 	p->on_cpu = 0;
 #endif
+    // 初始化 thread_info 数据结构中的 preempt_count 计数，为了支持内核抢占而引入该字段。当 preempt_count 为 0 时，表示内核可以被安全地抢占，大于 0 时，则禁止抢占
 	init_task_preempt_count(p);
 #ifdef CONFIG_SMP
 	plist_node_init(&p->pushable_tasks, MAX_PRIO);
@@ -8448,6 +8457,8 @@ void dump_cpu_task(int cpu)
  * it's +10% CPU usage. (to achieve that we use a multiplier of 1.25.
  * If a task goes up by ~10% and another task goes down by ~10% then
  * the relative distance between them is ~25%.)
+ * 
+ * 因此，nice值越小，权重越大，优先级越高
  */
 const int sched_prio_to_weight[40] = {
  /* -20 */     88761,     71755,     56483,     46273,     36291,

@@ -1121,6 +1121,10 @@ static inline int copy_p4d_range(struct mm_struct *dst_mm, struct mm_struct *src
 	return 0;
 }
 
+/**
+ * VMA（Virtual Memory Area，虚拟内存区域）
+ * 
+ */
 int copy_page_range(struct mm_struct *dst_mm, struct mm_struct *src_mm,
 		    struct vm_area_struct *vma, struct vm_area_struct *new)
 {

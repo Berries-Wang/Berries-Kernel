@@ -18,6 +18,7 @@ static inline void preempt_count_set(u64 pc)
 	WRITE_ONCE(current_thread_info()->preempt.count, pc);
 }
 
+// 初始化 thread_info 数据结构中的 preempt_count 计数，为了支持内核抢占而引入该字段。当 preempt_count 为 0 时，表示内核可以被安全地抢占，大于 0 时，则禁止抢占
 #define init_task_preempt_count(p) do { \
 	task_thread_info(p)->preempt_count = FORK_PREEMPT_COUNT; \
 } while (0)
