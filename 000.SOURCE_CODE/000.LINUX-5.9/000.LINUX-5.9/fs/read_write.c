@@ -563,7 +563,8 @@ ssize_t kernel_write(struct file *file, const void *buf, size_t count,
 }
 EXPORT_SYMBOL(kernel_write);
 
-ssize_t vfs_write(struct file *file, const char __user *buf, size_t count, loff_t *pos)
+
+ssize_t __attribute__((optimize("O0"))) vfs_write(struct file *file, const char __user *buf, size_t count, loff_t *pos)
 {
 	ssize_t ret;
 
@@ -625,7 +626,27 @@ SYSCALL_DEFINE3(read, unsigned int, fd, char __user *, buf, size_t, count)
 	return ksys_read(fd, buf, count);
 }
 
-ssize_t ksys_write(unsigned int fd, const char __user *buf, size_t count)
+/**
+ *在 Linux 内核中，__user 是一个宏，用于标记指针是指向用户空间内存的
+ * 
+ * Linux 操作系统将内存分为用户空间和内核空间。用户空间的代码（如应用程序）不能直接访问内核内存，反之亦然。
+ * 
+ * __user 告诉开发者/维护者：这个指针指向的是用户空间的内存地址，不能在内核中直接解引用（直接访问）。
+ * 
+ * 需要从用户空间拷贝到内核空间才能使用： 调用链:
+ * <pre>
+ *  write() syscall.c
+ * → ksys_write()
+ *   → vfs_write()
+ *     → vfs_writev()
+ *       → ext4_file_write_iter()         [fs/ext4/file.c]
+ *         → __generic_file_write_iter()
+ *           → generic_perform_write()
+ *             → iov_iter_copy_from_user_atomic()  # 实际拷贝点
+ * </pre>
+ * 
+ */
+ssize_t __attribute__((optimize("O0"))) ksys_write(unsigned int fd, const char __user *buf, size_t count)
 {
 	struct fd f = fdget_pos(fd);
 	ssize_t ret = -EBADF;

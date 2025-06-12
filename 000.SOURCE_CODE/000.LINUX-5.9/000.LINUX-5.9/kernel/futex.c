@@ -388,7 +388,7 @@ enum futex_access {
 };
 
 /**
- * futex_setup_timer - set up the sleeping hrtimer.
+ * futex_setup_timer - set up the sleeping hrtimer(计时器).
  * @time:	ptr to the given timeout value
  * @timeout:	the hrtimer_sleeper structure to be set up
  * @flags:	futex flags
@@ -2570,7 +2570,7 @@ static void futex_wait_queue_me(struct futex_hash_bucket *hb, struct futex_q *q,
 	set_current_state(TASK_INTERRUPTIBLE);
 	queue_me(q, hb);
 
-	/* Arm the timer */
+	/* Arm the timer(启动计时器) */
 	if (timeout)
 		hrtimer_sleeper_start_expires(timeout, HRTIMER_MODE_ABS);
 
@@ -2582,7 +2582,7 @@ static void futex_wait_queue_me(struct futex_hash_bucket *hb, struct futex_q *q,
 		/*
 		 * If the timer has already expired, current will already be
 		 * flagged for rescheduling. Only call schedule if there
-		 * is no timeout, or if it has yet to expire.
+		 * is no timeout, or if it has yet to expire.(如果计时器已过期，current 将被标记为重新调度。仅当没有超时或尚未过期时才调用schedule。)
 		 */
 		if (!timeout || timeout->task)
 			freezable_schedule();

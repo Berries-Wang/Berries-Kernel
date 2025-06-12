@@ -1336,6 +1336,8 @@ void exec_mm_release(struct task_struct *tsk, struct mm_struct *mm)
  * content into it.
  *
  * Return: the duplicated mm or NULL on failure.
+ * 
+ * dup_mm()函数分配一个mm 数据结构，然后从父进程中复制相关内容
  */
 static struct mm_struct *dup_mm(struct task_struct *tsk,
 				struct mm_struct *oldmm)
@@ -1392,7 +1394,9 @@ static int copy_mm(unsigned long clone_flags, struct task_struct *tsk)
 	/*
 	 * Are we cloning a kernel thread?
 	 *
-	 * We need to steal a active VM for that..
+	 * We need to steal(窃取) a active VM for that..
+	 * oldmm 指父进程内存空间指针，oldmm 为空，则说明父进程没有自己的运行空间，只是一个“寄人篱下”的线程或内核线程
+	 * 
 	 */
 	oldmm = current->mm;
 	if (!oldmm)
@@ -2036,7 +2040,7 @@ static __latent_entropy struct task_struct __attribute__((optimize("O0")))  *cop
 	p->sequential_io_avg	= 0;
 #endif
 
-	/* Perform scheduler related setup. Assign this task to a CPU. */
+	/* Perform scheduler related setup. Assign this task to a CPU.(执行调度程序相关的设置。将此任务分配给 CPU。) */
 	retval = sched_fork(clone_flags, p);
 	if (retval)
 		goto bad_fork_cleanup_policy;

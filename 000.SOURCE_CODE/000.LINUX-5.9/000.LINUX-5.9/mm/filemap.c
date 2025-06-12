@@ -3461,7 +3461,7 @@ struct page *grab_cache_page_write_begin(struct address_space *mapping,
 }
 EXPORT_SYMBOL(grab_cache_page_write_begin);
 
-ssize_t generic_perform_write(struct file *file,
+ssize_t __attribute__((optimize("O0"))) generic_perform_write(struct file *file,
 				struct iov_iter *i, loff_t pos)
 {
 	struct address_space *mapping = file->f_mapping;
@@ -3502,19 +3502,20 @@ again:
 			break;
 		}
 
-		status = a_ops->write_begin(file, mapping, pos, bytes, flags,
-						&page, &fsdata);
+		/**
+		 * 场景1,写入到磁盘文件:   echo "Hello" > H.txt : mm/shmem.c shmem_write_begin , 在这里面，会分配内核页并赋值给page
+		 */
+		status = a_ops->write_begin(file, mapping, pos, bytes, flags, &page, &fsdata);
 		if (unlikely(status < 0))
 			break;
 
 		if (mapping_writably_mapped(mapping))
 			flush_dcache_page(page);
 
-		copied = iov_iter_copy_from_user_atomic(page, i, offset, bytes);
+		copied = iov_iter_copy_from_user_atomic(page, i, offset, bytes); // 将数据从用户空间拷贝到page(内核空间)
 		flush_dcache_page(page);
 
-		status = a_ops->write_end(file, mapping, pos, bytes, copied,
-						page, fsdata);
+		status = a_ops->write_end(file, mapping, pos, bytes, copied, page, fsdata);
 		if (unlikely(status < 0))
 			break;
 		copied = status;

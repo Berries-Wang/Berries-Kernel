@@ -321,8 +321,12 @@ struct sched_info {
 # define SCHED_CAPACITY_SHIFT		SCHED_FIXEDPOINT_SHIFT
 # define SCHED_CAPACITY_SCALE		(1L << SCHED_CAPACITY_SHIFT)
 
+/**
+ * 记录调度实体的权重信息
+ */
 struct load_weight {
 	unsigned long			weight;
+	// inverse weight的缩写，指权重被倒转了
 	u32				inv_weight;
 };
 
@@ -354,7 +358,9 @@ struct util_est {
 #define UTIL_EST_WEIGHT_SHIFT		2
 } __attribute__((__aligned__(sizeof(u64))));
 
-/*
+/**
+ * 用于计算CPU负载
+ * 
  * The load/runnable/util_avg accumulates an infinite geometric series
  * (see __update_load_avg_cfs_rq() in kernel/sched/pelt.c).
  *
@@ -402,11 +408,11 @@ struct util_est {
 struct sched_avg {
 	u64				last_update_time;
 	u64				load_sum;
-	u64				runnable_sum;
+	u64				runnable_sum;  // runnable_sum 表示该调度实体在就绪队列里（ se->on_rq=1 ）可运行状态（ runnable ）的总时间。调度实体在就绪队列中的时间包括两部分，一是正在运行的时间，称为 running时间，二是在就绪队列中等待的时间
 	u32				util_sum;
 	u32				period_contrib;
 	unsigned long			load_avg;
-	unsigned long			runnable_avg;
+	unsigned long			runnable_avg;       
 	unsigned long			util_avg;
 	struct util_est			util_est;
 } ____cacheline_aligned;
@@ -447,16 +453,22 @@ struct sched_statistics {
 #endif
 };
 
+/**
+ * 调度实体
+ */
 struct sched_entity {
 	/* For load-balancing: */
-	struct load_weight		load;
-	struct rb_node			run_node;
-	struct list_head		group_node;
-	unsigned int			on_rq;
+	struct load_weight		load;       // load 表示该调度实体的权重
+	struct rb_node			run_node;   // run_node 表示该调度实体在红黑树中的节点
+	struct list_head		group_node; 
+	unsigned int			on_rq;      // on_rq 表示该调度实体是否在就绪队列中接受调度
 
 	u64				exec_start;
 	u64				sum_exec_runtime;
-	u64				vruntime;
+	/**
+	 * vruntime计算函数: calc_delta_fair (kernel/sched/fair.c)
+	 */
+	u64				vruntime;           // vruntime 表示虚拟运行时间
 	u64				prev_sum_exec_runtime;
 
 	u64				nr_migrations;
@@ -481,7 +493,7 @@ struct sched_entity {
 	 * Put into separate cache line so it does not
 	 * collide with read-mostly values above.
 	 */
-	struct sched_avg		avg;
+	struct sched_avg		avg;             // avg 表示该调度实体的负载信息
 #endif
 };
 
@@ -633,6 +645,7 @@ struct task_struct {
 	/*
 	 * For reasons of header soup (see current_thread_info()), this
 	 * must be the first element of task_struct.
+	 * struct thread_info : 数据结构用于存储进程描述符频繁访问和硬件快速访问的字段，它的定义依赖于具体体系结构的实现
 	 */
 	struct thread_info		thread_info;
 #endif
@@ -677,11 +690,31 @@ struct task_struct {
 #endif
 	int				on_rq;
 
+	/**
+	 * prio 保存着进程的动态优先级，是调度类考虑的优先级，有些情况下需要暂时提高进程优先级，例如实时互斥量等
+	 */
 	int				prio;
+	/**
+	 * 静态优先级: 在进程启动时分配
+	 * 
+	 * 宏 NICE_TO_PRIO() (include/linux/sched/prio.h)实现由 nice 值转换成 static_prio
+	 */
 	int				static_prio;
-	int				normal_prio;
-	unsigned int			rt_priority;
 
+	/**
+	 * normal_prio 是基于 static_prio 和调度策略计算出来的优先级，在创建进程时会继承父进程的 normal_prio
+	 * 对于普通进程来说，normal_prio 等同于 static_prio，对于实时进程，会根据 rt_priority 重新计算 normal_prio，详见 effective_prio()函数
+	 */
+	int				normal_prio;
+	
+	/**
+	 * rt_priority 是实时进程的优先级 
+	 */
+	unsigned int			rt_priority;
+    
+	/**
+	 * task调度类
+	 */
 	const struct sched_class	*sched_class;
 	struct sched_entity		se;
 	struct sched_rt_entity		rt;
@@ -748,6 +781,9 @@ struct task_struct {
 	struct rb_node			pushable_dl_tasks;
 #endif
 
+    /**
+	 * mm为空，则说明父进程没有自己的运行空间，只是一个“寄人篱下”的线程或内核线程
+	 */
 	struct mm_struct		*mm;
 	struct mm_struct		*active_mm;
 
@@ -834,8 +870,8 @@ struct task_struct {
 	/*
 	 * Children/sibling form the list of natural children:
 	 */
-	struct list_head		children;
-	struct list_head		sibling;
+	struct list_head		children; // 子进程链表
+	struct list_head		sibling;  // 兄弟进程链表
 	struct task_struct		*group_leader;
 
 	/*

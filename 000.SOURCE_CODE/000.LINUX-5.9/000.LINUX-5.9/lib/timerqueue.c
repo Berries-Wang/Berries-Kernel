@@ -15,7 +15,7 @@
 #include <linux/export.h>
 
 /**
- * timerqueue_add - Adds timer to timerqueue.
+ * timerqueue_add - Adds timer to timerqueue.(将计时器添加到计时器队列)
  *
  * @head: head of timerqueue
  * @node: timer node to be added

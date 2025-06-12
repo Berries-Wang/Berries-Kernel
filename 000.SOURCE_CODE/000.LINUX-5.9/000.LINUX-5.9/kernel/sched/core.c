@@ -3059,6 +3059,8 @@ int wake_up_state(struct task_struct *p, unsigned int state)
  * p is forked by current.
  *
  * __sched_fork() is basic setup used by init_idle() too:
+ * 
+ * __sched_fork()初始化进程调度相关的数据结构，调度实体用 struct sched_entity数据结构来抽象，每个进程或线程都是一个调度实体，另外也包括组调度（sched group）
  */
 static void __sched_fork(unsigned long clone_flags, struct task_struct *p)
 {
@@ -3219,21 +3221,27 @@ static inline void init_schedstats(void) {}
 
 /*
  * fork()/clone()-time setup:
+ * 
  */
 int sched_fork(unsigned long clone_flags, struct task_struct *p)
 {
 	unsigned long flags;
 
+	/**
+	 * __sched_fork()初始化进程调度相关的数据结构，调度实体用 struct sched_entity数据结构来抽象，每个进程或线程都是一个调度实体，另外也包括组调度（sched group）
+	 */
 	__sched_fork(clone_flags, p);
+
 	/*
 	 * We mark the process as NEW here. This guarantees that
 	 * nobody will actually run it, and a signal or other external
 	 * event cannot wake it up and insert it on the runqueue either.
+	 * (我们在这里将进程标记为 NEW。这保证了没有人会真正运行它，并且信号或其他外部事件也无法唤醒它并将其插入运行队列。)
 	 */
 	p->state = TASK_NEW;
 
 	/*
-	 * Make sure we do not leak PI boosting priority to the child.
+	 * Make sure we do not leak PI boosting priority to the child.(确保我们不会将 PI 提升优先权泄露给子进程)
 	 */
 	p->prio = current->normal_prio;
 
@@ -3294,6 +3302,7 @@ int sched_fork(unsigned long clone_flags, struct task_struct *p)
 #if defined(CONFIG_SMP)
 	p->on_cpu = 0;
 #endif
+    // 初始化 thread_info 数据结构中的 preempt_count 计数，为了支持内核抢占而引入该字段。当 preempt_count 为 0 时，表示内核可以被安全地抢占，大于 0 时，则禁止抢占
 	init_task_preempt_count(p);
 #ifdef CONFIG_SMP
 	plist_node_init(&p->pushable_tasks, MAX_PRIO);
@@ -4337,9 +4346,10 @@ pick_next_task(struct rq *rq, struct task_struct *prev, struct rq_flags *rf)
 	 * call that function directly, but only if the @prev task wasn't of a
 	 * higher scheduling class, because otherwise those loose the
 	 * opportunity to pull in more work from other CPUs.
+	 * 
+	 * 优化：我们知道，如果所有任务都属于公平类，我们就可以直接调用该函数，但前提是@prev 任务不是更高的调度类，否则它们就会失去从其他 CPU 中获取更多工作的机会。
 	 */
-	if (likely(prev->sched_class <= &fair_sched_class &&
-		   rq->nr_running == rq->cfs.h_nr_running)) {
+	if (likely(prev->sched_class <= &fair_sched_class && rq->nr_running == rq->cfs.h_nr_running)) {
 
 		p = pick_next_task_fair(rq, prev, rf);
 		if (unlikely(p == RETRY_TASK))
@@ -4424,13 +4434,13 @@ static void __sched notrace __schedule(bool preempt)
 	if (sched_feat(HRTICK))
 		hrtick_clear(rq);
 
-	local_irq_disable();
+	local_irq_disable(); // 仅禁用当前处理器中断，其他处理器不受影响
 	rcu_note_context_switch(preempt);
 
 	/*
 	 * Make sure that signal_pending_state()->signal_pending() below
 	 * can't be reordered with __set_current_state(TASK_INTERRUPTIBLE)
-	 * done by the caller to avoid the race with signal_wake_up():
+	 * done by the caller to avoid the race with signal_wake_up():(确保下面的 signal_pending_state()->signal_pending() 不能与调用者完成的 __set_current_state(TASK_INTERRUPTIBLE) 重新排序，以避免与 signal_wake_up() 发生竞争：)
 	 *
 	 * __set_current_state(@state)		signal_wake_up()
 	 * schedule()				  set_tsk_thread_flag(p, TIF_SIGPENDING)
@@ -4560,7 +4570,8 @@ static inline void sched_submit_work(struct task_struct *tsk)
 	 * As this function is called inside the schedule() context,
 	 * we disable preemption to avoid it calling schedule() again
 	 * in the possible wakeup of a kworker and because wq_worker_sleeping()
-	 * requires it.
+	 * requires it.(如果某个 Worker 进入睡眠状态，则通知并询问 Workqueue 是否要唤醒某个任务以保持并发。
+	 * 由于此函数在 Schedule() 上下文中调用，因此我们禁用抢占功能，以避免在可能唤醒某个 Kworker 时再次调用 Schedule()，而 wq_worker_sleeping() 需要它。)
 	 */
 	if (tsk->flags & (PF_WQ_WORKER | PF_IO_WORKER)) {
 		preempt_disable();
@@ -8448,6 +8459,8 @@ void dump_cpu_task(int cpu)
  * it's +10% CPU usage. (to achieve that we use a multiplier of 1.25.
  * If a task goes up by ~10% and another task goes down by ~10% then
  * the relative distance between them is ~25%.)
+ * 
+ * 因此，nice值越小，权重越大，优先级越高
  */
 const int sched_prio_to_weight[40] = {
  /* -20 */     88761,     71755,     56483,     46273,     36291,
@@ -8465,7 +8478,10 @@ const int sched_prio_to_weight[40] = {
  *
  * In cases where the weight does not change often, we can use the
  * precalculated inverse to speed up arithmetics by turning divisions
- * into multiplications:
+ * into multiplications:(在权重不经常变化的情况下，我们可以使用预先计算的逆运算，将除法转换为乘法，从而加快算术运算速度：)
+ * 
+ * sched_prio_to_wmult[i] = 2^32 / sched_prio_to_weight[i] , 是为了在计算vruntime时会涉及浮点运算，将除法改为乘法和移位操作（calc_delta_fair()函数实现），提高计算效率
+ * calc_delta_fair: 000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/kernel/sched/fair.c
  */
 const u32 sched_prio_to_wmult[40] = {
  /* -20 */     48388,     59856,     76040,     92818,    118348,

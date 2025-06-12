@@ -985,6 +985,14 @@ size_t iov_iter_zero(size_t bytes, struct iov_iter *i)
 }
 EXPORT_SYMBOL(iov_iter_zero);
 
+/**
+ * iov_iter_copy_from_user_atomic: 将数据从用户空间安全、高效地拷贝到内核空间的页缓存
+ * > 暂时只需要知道数据从哪里拷贝到哪里
+ *
+ * 1. kmap_atomic: 以原子方式映射页面以供临时使用: https://docs.kernel.org/mm/highmem.html#c.kmap_atomic
+ * 2. kunmap_atomic: 取消映射以前由 kmap_atomic（） 映射的地址，并重新启用 pagefaults
+ *
+ */
 size_t iov_iter_copy_from_user_atomic(struct page *page,
 		struct iov_iter *i, unsigned long offset, size_t bytes)
 {
