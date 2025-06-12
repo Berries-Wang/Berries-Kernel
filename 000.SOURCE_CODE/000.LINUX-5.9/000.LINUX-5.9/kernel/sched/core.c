@@ -4346,9 +4346,10 @@ pick_next_task(struct rq *rq, struct task_struct *prev, struct rq_flags *rf)
 	 * call that function directly, but only if the @prev task wasn't of a
 	 * higher scheduling class, because otherwise those loose the
 	 * opportunity to pull in more work from other CPUs.
+	 * 
+	 * 优化：我们知道，如果所有任务都属于公平类，我们就可以直接调用该函数，但前提是@prev 任务不是更高的调度类，否则它们就会失去从其他 CPU 中获取更多工作的机会。
 	 */
-	if (likely(prev->sched_class <= &fair_sched_class &&
-		   rq->nr_running == rq->cfs.h_nr_running)) {
+	if (likely(prev->sched_class <= &fair_sched_class && rq->nr_running == rq->cfs.h_nr_running)) {
 
 		p = pick_next_task_fair(rq, prev, rf);
 		if (unlikely(p == RETRY_TASK))
@@ -4433,13 +4434,13 @@ static void __sched notrace __schedule(bool preempt)
 	if (sched_feat(HRTICK))
 		hrtick_clear(rq);
 
-	local_irq_disable();
+	local_irq_disable(); // 仅禁用当前处理器中断，其他处理器不受影响
 	rcu_note_context_switch(preempt);
 
 	/*
 	 * Make sure that signal_pending_state()->signal_pending() below
 	 * can't be reordered with __set_current_state(TASK_INTERRUPTIBLE)
-	 * done by the caller to avoid the race with signal_wake_up():
+	 * done by the caller to avoid the race with signal_wake_up():(确保下面的 signal_pending_state()->signal_pending() 不能与调用者完成的 __set_current_state(TASK_INTERRUPTIBLE) 重新排序，以避免与 signal_wake_up() 发生竞争：)
 	 *
 	 * __set_current_state(@state)		signal_wake_up()
 	 * schedule()				  set_tsk_thread_flag(p, TIF_SIGPENDING)
@@ -4569,7 +4570,8 @@ static inline void sched_submit_work(struct task_struct *tsk)
 	 * As this function is called inside the schedule() context,
 	 * we disable preemption to avoid it calling schedule() again
 	 * in the possible wakeup of a kworker and because wq_worker_sleeping()
-	 * requires it.
+	 * requires it.(如果某个 Worker 进入睡眠状态，则通知并询问 Workqueue 是否要唤醒某个任务以保持并发。
+	 * 由于此函数在 Schedule() 上下文中调用，因此我们禁用抢占功能，以避免在可能唤醒某个 Kworker 时再次调用 Schedule()，而 wq_worker_sleeping() 需要它。)
 	 */
 	if (tsk->flags & (PF_WQ_WORKER | PF_IO_WORKER)) {
 		preempt_disable();

@@ -955,7 +955,7 @@ u64 hrtimer_forward(struct hrtimer *timer, ktime_t now, ktime_t interval)
 EXPORT_SYMBOL_GPL(hrtimer_forward);
 
 /*
- * enqueue_hrtimer - internal function to (re)start a timer
+ * enqueue_hrtimer - internal function to (re)start a timer(内部函数来（重新）启动计时器)
  *
  * The timer is inserted in expiry order. Insertion into the
  * red black tree is O(log(n)). Must hold the base lock.
@@ -1108,7 +1108,7 @@ static int __hrtimer_start_range_ns(struct hrtimer *timer, ktime_t tim,
 }
 
 /**
- * hrtimer_start_range_ns - (re)start an hrtimer
+ * hrtimer_start_range_ns - (re)start an hrtimer(启动一个计时器)
  * @timer:	the timer to be added
  * @tim:	expiry time
  * @delta_ns:	"slack" range for the timer
