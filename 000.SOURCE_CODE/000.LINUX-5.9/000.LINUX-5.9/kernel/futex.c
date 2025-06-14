@@ -45,9 +45,9 @@
 #include "locking/rtmutex_common.h"
 
 /*
- * READ this before attempting to hack on futexes!
+ * READ this before attempting to hack on futexes!(在尝试破解 futexes 之前请先阅读此内容！)
  *
- * Basic futex operation and ordering guarantees
+ * Basic futex operation and ordering guarantees(基本 futex 操作和顺序保证)
  * =============================================
  *
  * The waiter reads the futex value in user space and calls
@@ -55,18 +55,20 @@
  * the hash bucket lock. After that it reads the futex user space value
  * again and verifies that the data has not changed. If it has not changed
  * it enqueues itself into the hash bucket, releases the hash bucket lock
- * and schedules.
+ * and schedules.(等待者在用户空间读取 futex 的值并调用 futex_wait()。该函数计算哈希桶并获取哈希桶锁。
+ * 之后，它再次读取 futex 的用户空间值并验证数据是否未更改。如果没有更改，它将自身加入哈希桶队列，释放哈希桶锁并进行调度。)
  *
  * The waker side modifies the user space value of the futex and calls
  * futex_wake(). This function computes the hash bucket and acquires the
  * hash bucket lock. Then it looks for waiters on that futex in the hash
- * bucket and wakes them.
+ * bucket and wakes them.(唤醒方修改 futex 的用户空间值并调用 futex_wake()。该函数计算哈希桶并获取哈希桶锁。然后，它在哈希桶中查找该 futex 的等待者并唤醒它们。)
  *
  * In futex wake up scenarios where no tasks are blocked on a futex, taking
  * the hb spinlock can be avoided and simply return. In order for this
  * optimization to work, ordering guarantees must exist so that the waiter
  * being added to the list is acknowledged when the list is concurrently being
- * checked by the waker, avoiding scenarios like the following:
+ * checked by the waker, avoiding scenarios like the following: （在 futex 唤醒场景中，如果 futex 上没有任务被阻塞，则可以避免使用 hb 自旋锁，而直接返回。
+ * 为了使此优化生效，必须保证唤醒程序在同时检查列表时，能够确认添加到列表中的等待程序，从而避免以下情况：）
  *
  * CPU 0                               CPU 1
  * val = *futex;
@@ -86,11 +88,11 @@
  *
  * This would cause the waiter on CPU 0 to wait forever because it
  * missed the transition of the user space value from val to newval
- * and the waker did not find the waiter in the hash bucket queue.
+ * and the waker did not find the waiter in the hash bucket queue.（这将导致 CPU 0 上的等待者永远等待，因为它错过了用户空间值从 val 到 newval 的转换，并且唤醒者在哈希桶队列中找不到等待者。）
  *
  * The correct serialization ensures that a waiter either observes
  * the changed user space value before blocking or is woken by a
- * concurrent waker:
+ * concurrent waker:（正确的序列化确保等待者在阻塞之前观察到更改的用户空间值，或者被并发唤醒者唤醒：）
  *
  * CPU 0                                 CPU 1
  * val = *futex;
@@ -130,19 +132,21 @@
  *
  * Which guarantees that x==0 && y==0 is impossible; which translates back into
  * the guarantee that we cannot both miss the futex variable change and the
- * enqueue.
+ * enqueue.（这保证了 x==0 && y==0 是不可能的；这又转化为保证我们不能同时错过 futex 变量变化和入队。）
  *
  * Note that a new waiter is accounted for in (a) even when it is possible that
  * the wait call can return error, in which case we backtrack from it in (b).
- * Refer to the comment in queue_lock().
+ * Refer to the comment in queue_lock().（注意，即使 wait 调用可能返回错误，(a) 中也会考虑新的等待者，在这种情况下，我们会在 (b) 中回溯。请参阅 queue_lock() 中的注释。）
  *
  * Similarly, in order to account for waiters being requeued on another
  * address we always increment the waiters for the destination bucket before
  * acquiring the lock. It then decrements them again  after releasing it -
  * the code that actually moves the futex(es) between hash buckets (requeue_futex)
  * will do the additional required waiter count housekeeping. This is done for
- * double_lock_hb() and double_unlock_hb(), respectively.
+ * double_lock_hb() and double_unlock_hb(), respectively.（类似地，为了计算在另一个地址上重新排队的等待者数量，我们总是在获取锁之前增加目标 bucket 的等待者数量。
+ * 然后在释放锁之后再次减少等待者数量——实际在哈希 bucket 之间移动 futex 的代码（requeue_futex）将执行额外所需的等待者数量管理。这分别在 double_lock_hb() 和 double_unlock_hb() 中完成。）
  */
+
 
 #ifdef CONFIG_HAVE_FUTEX_CMPXCHG
 #define futex_cmpxchg_enabled 1
