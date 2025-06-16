@@ -45,6 +45,7 @@ struct timezone {
 
 /*
  * The IDs of the various system clocks (for POSIX.1b interval timers):
+ * (各种系统时钟的 ID（用于 POSIX.1b 间隔计时器）：)
  */
 #define CLOCK_REALTIME			0
 #define CLOCK_MONOTONIC			1

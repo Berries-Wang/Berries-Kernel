@@ -64,6 +64,8 @@
  * into the timer bases by the hrtimer_base_type enum. When trying
  * to reach a base using a clockid, hrtimer_clockid_to_base()
  * is used to convert from clockid to the proper hrtimer_base_type.
+ * (时钟 ID 的数量比小时定时器基数多。因此，我们通过 hrtimer_base_type 枚举索引到定时器基数。
+ * 当尝试使用时钟 ID 访问基数时，hrtimer_clockid_to_base() 用于将时钟 ID 转换为正确的 hrtimer_base_type。)
  */
 DEFINE_PER_CPU(struct hrtimer_cpu_base, hrtimer_bases) =
 {
@@ -226,7 +228,7 @@ struct hrtimer_cpu_base *get_target_base(struct hrtimer_cpu_base *base,
  * if:
  *	- NO_HZ_COMMON is enabled
  *	- timer migration is enabled （已启用计时器迁移）
- *	- the timer callback is not running
+ *	- the timer callback is not runningsudo pow
  *	- the timer is not the first expiring timer on the new target（该计时器不是新目标上第一个到期的计时器）
  *
  * If one of the above requirements is not fulfilled we move the timer
@@ -987,6 +989,9 @@ static int enqueue_hrtimer(struct hrtimer *timer,
 	/* Pairs with the lockless read in hrtimer_is_queued() */
 	WRITE_ONCE(timer->state, HRTIMER_STATE_ENQUEUED);
 
+	/**
+	 * 这个&base->active 需要注意 , 这里是将timer加入到红黑树中
+	 */
 	return timerqueue_add(&base->active, &timer->node);
 }
 
@@ -1411,6 +1416,9 @@ static void __hrtimer_init(struct hrtimer *timer, clockid_t clock_id,
 
 	memset(timer, 0, sizeof(struct hrtimer));
 
+	/**
+	 * hrtimer软中断处理函数会使用到
+	 */
 	cpu_base = raw_cpu_ptr(&hrtimer_bases);
 
 	/*
@@ -1422,10 +1430,16 @@ static void __hrtimer_init(struct hrtimer *timer, clockid_t clock_id,
 		clock_id = CLOCK_MONOTONIC;
 
 	base = softtimer ? HRTIMER_MAX_CLOCK_BASES / 2 : 0;
+
+	// 注意，这里根据clock_id(时钟类型)来换算的
 	base += hrtimer_clockid_to_base(clock_id);
 	timer->is_soft = softtimer;
 	timer->is_hard = !!(mode & HRTIMER_MODE_HARD);
+	/**
+	 * 时钟类型?
+	 */
 	timer->base = &cpu_base->clock_base[base];
+	
 	timerqueue_init(&timer->node);
 }
 
@@ -1537,6 +1551,7 @@ static void __run_hrtimer(struct hrtimer_cpu_base *cpu_base,
 	trace_hrtimer_expire_entry(timer, now);
 	expires_in_hardirq = lockdep_hrtimer_enter(timer);
 
+	// 执行回调函数
 	restart = fn(timer);
 
 	lockdep_hrtimer_exit(expires_in_hardirq);
@@ -1575,15 +1590,25 @@ static void __hrtimer_run_queues(struct hrtimer_cpu_base *cpu_base, ktime_t now,
 	struct hrtimer_clock_base *base;
 	unsigned int active = cpu_base->active_bases & active_mask;
 
+	/**
+	 * 遍历所有指定种类的且包含有定时器的hrtimer_clock_base结构体
+	 */
 	for_each_active_base(base, cpu_base, active) {
 		struct timerqueue_node *node;
 		ktime_t basenow;
-
+        
+		// 将单调时间转换为对应类型的时间
 		basenow = ktime_add(now, base->offset);
-
+       
+		/**
+		 * 开始遍历定时器队列
+		 */
 		while ((node = timerqueue_getnext(&base->active))) {
 			struct hrtimer *timer;
-
+            
+			/**
+			 * 通过红黑树node计算 struct hrtimer *timer的地址
+			 */
 			timer = container_of(node, struct hrtimer, node);
 
 			/*
@@ -1593,15 +1618,24 @@ static void __hrtimer_run_queues(struct hrtimer_cpu_base *cpu_base, ktime_t now,
 			 * This allows us to avoid using a Priority Search
 			 * Tree, which can answer a stabbing querry for
 			 * overlapping intervals and instead use the simple
-			 * BST we already have.
+			 * BST we already have.(使用软过期机制的直接目标是尽量减少唤醒次数，
+			 * 而不是在软过期后最早的中断时运行定时器。
+			 * 这样一来，我们就可以避免使用优先级搜索树（它可以回答重叠间隔的刺入查询），
+			 * 而是使用我们已有的简单二叉搜索树。)
+			 * 
 			 * We don't add extra wakeups by delaying timers that
 			 * are right-of a not yet expired timer, because that
-			 * timer will have to trigger a wakeup anyway.
+			 * timer will have to trigger a wakeup anyway.(我们不会通过延迟尚未过期的计时器来添加额外的唤醒，
+			 * 因为该计时器无论如何都必须触发唤醒。)
 			 */
-			if (basenow < hrtimer_get_softexpires_tv64(timer))
+			// 如果当前时间早于最近要到期定时器的软到期时间则退出循环
+			if (basenow < hrtimer_get_softexpires_tv64(timer)) {
 				break;
-
+			}
+            
+			// 处理到期的定时器
 			__run_hrtimer(cpu_base, base, timer, &basenow, flags);
+
 			if (active_mask == HRTIMER_ACTIVE_SOFT)
 				hrtimer_sync_wait_running(cpu_base, flags);
 		}
@@ -2128,6 +2162,8 @@ int hrtimers_dead_cpu(unsigned int scpu)
 void __init hrtimers_init(void)
 {
 	hrtimers_prepare_cpu(smp_processor_id());
+	
+	// 注册 hrtimer 的软中断处理函数
 	open_softirq(HRTIMER_SOFTIRQ, hrtimer_run_softirq);
 }
 

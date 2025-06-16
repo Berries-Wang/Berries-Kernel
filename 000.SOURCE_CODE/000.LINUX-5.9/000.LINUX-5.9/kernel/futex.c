@@ -2690,8 +2690,7 @@ static int futex_wait(u32 __user *uaddr, unsigned int flags, u32 val,
 	q.bitset = bitset;
     
 	// 设置hrtimer_sleeper to , 是一个传出参数
-	to = futex_setup_timer(abs_time, &timeout, flags,
-			       current->timer_slack_ns);
+	to = futex_setup_timer(abs_time, &timeout, flags, current->timer_slack_ns);
 retry:
 	/*
 	 * Prepare to wait on uaddr. On success, holds hb lock and increments q.key refs.(准备等待 uaddr。成功后，持有 hb 锁并增加 q.key 引用数。)
@@ -2700,7 +2699,13 @@ retry:
 	if (ret)
 		goto out;
 
-	/* queue_me and wait for wakeup, timeout, or a signal. */
+	/**
+	 * 
+	 *  queue_me and wait for wakeup, timeout, or a signal.
+	 * 
+	 *  在函数 enqueue_hrtimer 中，会将timer加入到 hrtimer_clock_base 结构的红黑树中，
+	 *  后续在hrtimer软中断流程中被唤醒执行
+	 * */
 	futex_wait_queue_me(hb, &q, to);
 
 	/* If we were woken (and unqueued), we succeeded, whatever. */

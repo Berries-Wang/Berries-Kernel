@@ -123,7 +123,7 @@ struct hrtimer {
 	struct timerqueue_node		node;
 	ktime_t				_softexpires;
 	enum hrtimer_restart		(*function)(struct hrtimer *); // 回调函数
-	struct hrtimer_clock_base	*base; // 指向包含高分辨率定时器的hrtimer_clock_base结构体
+	struct hrtimer_clock_base	*base; // 指向包含高分辨率定时器的hrtimer_clock_base结构体 , 很重要的数据结构，与CPU相关
 	u8				state;             // 表示高分辨率定时器当前所处的状态： HRTIMER_STATE_INACTIVE、HRTIMER_STATE_ENQUEUED
 	u8				is_rel;            // 该定时器的到期时间是否是相对时间
 	u8				is_soft;           // 是否是 软 定时器
@@ -165,7 +165,7 @@ struct hrtimer_clock_base {
 	clockid_t		clockid;            // 当前时钟类型的ID值
 	seqcount_raw_spinlock_t	seq;        // 顺序锁，在处理到期定时器的函数__run_hrtimer中会用到
 	struct hrtimer		*running;       // 指向当前正在处理的那个定时器
-	struct timerqueue_head	active;     // 红黑树，包含了所有使用该时间类型的定时器
+	struct timerqueue_head	active;     // "红黑树"，包含了所有使用该时间类型的定时器 , 怎么插入的
 	ktime_t			(*get_time)(void);  // 函数指针，指定了如何获取该事件类型的当前时间函数。由于不同类型的时间在Linux中都是由时间维护层来统一管理的，因此这些函数都是在时间维护层里面定义好的
 	ktime_t			offset;             // 表示当前事件类型和单调时间的差值
 } __hrtimer_clock_base_align;
@@ -178,8 +178,8 @@ enum  hrtimer_base_type {
 	HRTIMER_BASE_MONOTONIC_SOFT,
 	HRTIMER_BASE_REALTIME_SOFT,
 	HRTIMER_BASE_BOOTTIME_SOFT,
-	HRTIMER_BASE_TAI_SOFT,
-	HRTIMER_MAX_CLOCK_BASES,
+	HRTIMER_BASE_TAI_SOFT,   // 标识 TAI(国际原子时) 时钟的软中断模式定时器基准
+	HRTIMER_MAX_CLOCK_BASES, // 内核支持的 时钟类型（clock bases） 的数量
 };
 
 /**
