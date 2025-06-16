@@ -519,12 +519,12 @@ extern bool force_irqthreads;
 #define hard_irq_disable()	do { } while(0)
 #endif
 
-/* PLEASE, avoid to allocate new softirqs, if you need not _really_ high
-   frequency threaded job scheduling. For almost all the purposes
-   tasklets are more than enough. F.e. all serial device BHs et
-   al. should be converted to tasklets, not to softirqs.
+/**
+ * PLEASE, avoid to allocate new softirqs, if you need not _really_ high frequency threaded job scheduling.
+ * For almost all the purposes tasklets are more than enough. F.e. all serial device BHs et al.
+ * should be converted to tasklets, not to softirqs.(如果您不需要真正高频的线程作业调度，请避免分配新的软中断。
+ * 对于几乎所有用途而言，tasklet 都绰绰有余。例如，所有串行设备 BH 等都应该转换为 tasklet，而不是软中断。)
  */
-
 enum
 {
 	HI_SOFTIRQ=0,
