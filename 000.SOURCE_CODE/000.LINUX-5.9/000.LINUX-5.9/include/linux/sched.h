@@ -668,7 +668,18 @@ struct task_struct {
 	unsigned int			ptrace;
 
 #ifdef CONFIG_SMP
-	int				on_cpu;
+    /**
+	 * 1. 当前运行状态：指示该任务(进程/线程)当前是否正在某个 CPU 上运行
+	 * 2. CPU标识：当任务正在运行时，其值表示任务所在的 CPU 编号(从0开始)
+	 * 3. 非运行状态：当任务不在任何 CPU 上运行时，其值为 -1
+	 */
+	int				on_cpu; 
+	/**
+	 * wake_entry 是 Linux 内核调度器中用于实现 唤醒跟踪 (wakeup tracing) 功能的字段
+	 *   1. 记录唤醒路径：当任务被唤醒时，记录唤醒的调用链信息
+     *   2. 性能分析：帮助开发者分析任务唤醒的延迟和调用关系
+     *   3. 调试功能：用于调度器相关的调试和诊断
+	 */
 	struct __call_single_node	wake_entry;
 #ifdef CONFIG_THREAD_INFO_IN_TASK
 	/* Current CPU: */
@@ -688,6 +699,10 @@ struct task_struct {
 	int				recent_used_cpu;
 	int				wake_cpu;
 #endif
+    /**
+	 * 0：表示该任务不在任何运行队列(runqueue)中
+     * 1：表示该任务在某个运行队列中
+	 */
 	int				on_rq;
 
 	/**

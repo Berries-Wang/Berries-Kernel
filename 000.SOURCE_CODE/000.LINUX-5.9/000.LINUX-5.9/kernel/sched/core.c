@@ -1592,8 +1592,10 @@ static inline void dequeue_task(struct rq *rq, struct task_struct *p, int flags)
 
 void activate_task(struct rq *rq, struct task_struct *p, int flags)
 {
+	// 将任务放入到调度器类的运行队列中
 	enqueue_task(rq, p, flags);
-
+    
+	// 表示进程在运行队列中
 	p->on_rq = TASK_ON_RQ_QUEUED;
 }
 
@@ -2457,7 +2459,7 @@ ttwu_stat(struct task_struct *p, int cpu, int wake_flags)
 }
 
 /*
- * Mark the task runnable and perform wakeup-preemption.
+ * Mark the task runnable and perform wakeup-preemption.(将任务标记为可运行并执行唤醒抢占。)
  */
 static void ttwu_do_wakeup(struct rq *rq, struct task_struct *p, int wake_flags,
 			   struct rq_flags *rf)
@@ -2467,6 +2469,9 @@ static void ttwu_do_wakeup(struct rq *rq, struct task_struct *p, int wake_flags,
 	trace_sched_wakeup(p);
 
 #ifdef CONFIG_SMP
+    /**
+	 * p->sched_class->task_woken功能:当任务被唤醒并且即将被放入运行队列时，调度器会调用此回调函数，通知特定调度类进行相应的处理
+	 */
 	if (p->sched_class->task_woken) {
 		/*
 		 * Our task @p is fully woken up and running; so its safe to
@@ -2544,6 +2549,8 @@ static int ttwu_runnable(struct task_struct *p, int wake_flags)
 	int ret = 0;
 
 	rq = __task_rq_lock(p, &rf);
+
+	// 进程已经在某个CPU的运行队列
 	if (task_on_rq_queued(p)) {
 		/* check_preempt_curr() may use rq clock */
 		update_rq_clock(rq);
@@ -2658,6 +2665,8 @@ static inline bool ttwu_queue_cond(int cpu, int wake_flags)
 	 * CPU then use the wakelist to offload the task activation to
 	 * the soon-to-be-idle CPU as the current CPU is likely busy.
 	 * nr_running is checked to avoid unnecessary task stacking.
+	 * (如果任务正在取消调度并且是 CPU 上唯一正在运行的任务，则使用唤醒列表将任务激活卸载到即将空闲的 CPU，因为当前 CPU 可能很忙。
+	 * 检查 nr_running 以避免不必要的任务堆叠。)
 	 */
 	if ((wake_flags & WF_ON_CPU) && cpu_rq(cpu)->nr_running <= 1)
 		return true;
@@ -2698,7 +2707,7 @@ static void ttwu_queue(struct task_struct *p, int cpu, int wake_flags)
 
 	rq_lock(rq, &rf);
 	update_rq_clock(rq);
-	ttwu_do_activate(rq, p, wake_flags, &rf);
+	ttwu_do_activate(rq, p, wake_flags, &rf); // 激活任务
 	rq_unlock(rq, &rf);
 }
 
@@ -2929,6 +2938,9 @@ try_to_wake_up(struct task_struct *p, unsigned int state, int wake_flags)
 	 * == 0), which means we need to do an enqueue, change p->state to
 	 * TASK_WAKING such that we can unlock p->pi_lock before doing the
 	 * enqueue, such as ttwu_queue_wakelist().
+	 * (我们正在进行唤醒（@success == 1），他们进行了出队（p->on_rq == 0），这意味着我们需要进行入队，
+	 * 将 p->state 更改为 TASK_WAKING，以便我们可以在进行入队之前解锁 p->pi_lock，
+	 * 例如 ttwu_queue_wakelist()。)
 	 */
 	p->state = TASK_WAKING;
 
@@ -2938,6 +2950,10 @@ try_to_wake_up(struct task_struct *p, unsigned int state, int wake_flags)
 	 * which potentially sends an IPI instead of spinning on p->on_cpu to
 	 * let the waker make forward progress. This is safe because IRQs are
 	 * disabled and the IPI will deliver after on_cpu is cleared.
+	 * (如果所属（远程）CPU 仍在执行 Schedule() 任务，且该任务为上一个任务，
+	 * 则考虑将 p 放入远程 CPU 的 wake_list 队列中，
+	 * 这可能会发送 IPI 消息，而不是在 p->on_cpu 上旋转，从而让唤醒程序继续执行。这样做是安全的，
+	 * 因为 IRQ 已被禁用，并且 IPI 消息将在 on_cpu 清除后发送。)
 	 *
 	 * Ensure we load task_cpu(p) after p->on_cpu:
 	 *
@@ -2958,14 +2974,19 @@ try_to_wake_up(struct task_struct *p, unsigned int state, int wake_flags)
 	/*
 	 * If the owning (remote) CPU is still in the middle of schedule() with
 	 * this task as prev, wait until its done referencing the task.
+	 * (如果拥有（远程）CPU 仍然处于schedule() 的中间，并且该任务作为前一个任务，
+	 * 则等待其完成对该任务的引用。)
 	 *
 	 * Pairs with the smp_store_release() in finish_task().
+	 * (与 finish_task() 中的 smp_store_release() 配对。)
 	 *
 	 * This ensures that tasks getting woken will be fully ordered against
 	 * their previous state and preserve Program Order.
+	 * (这确保被唤醒的任务将完全按照其先前的状态排序并保留程序顺序。)
 	 */
 	smp_cond_load_acquire(&p->on_cpu, !VAL);
 
+	// 将任务迁移到另一个CPU上执行
 	cpu = select_task_rq(p, p->wake_cpu, SD_BALANCE_WAKE, wake_flags);
 	if (task_cpu(p) != cpu) {
 		wake_flags |= WF_MIGRATED;
@@ -2975,7 +2996,12 @@ try_to_wake_up(struct task_struct *p, unsigned int state, int wake_flags)
 #else
 	cpu = task_cpu(p);
 #endif /* CONFIG_SMP */
-
+    
+    /**
+	 * 执行到此处，说明当前hrtimer还是需要在当前CPU上执行
+	 * 1. 入调度器队列
+	 * 2. 设置任务状态
+	 */
 	ttwu_queue(p, cpu, wake_flags);
 unlock:
 	raw_spin_unlock_irqrestore(&p->pi_lock, flags);

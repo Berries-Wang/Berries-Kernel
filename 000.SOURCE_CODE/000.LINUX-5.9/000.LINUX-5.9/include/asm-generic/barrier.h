@@ -164,6 +164,12 @@ do {									\
 } while (0)
 #endif
 
+/**
+ * smp_load_acquire 是 Linux 内核中用于实现内存屏障(memory barrier)的宏，主要用于多处理器(SMP)系统中的内存顺序控制
+ *   1. 保证加载顺序性：确保在加载操作之后的所有内存访问操作不会被重排序到加载操作之前执行。
+ *   2. 获取语义(Acquire Semantics)：建立获取-释放语义中的"获取"部分，确保临界区的进入操作不会被重排到实际进入临界区之后。
+ *   3. 多处理器同步：在SMP系统中保证不同CPU核心之间的内存访问顺序一致性。
+ */
 #ifndef smp_load_acquire
 #define smp_load_acquire(p)						\
 ({									\

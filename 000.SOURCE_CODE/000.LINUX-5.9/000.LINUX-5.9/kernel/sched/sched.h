@@ -88,8 +88,8 @@ struct rq;
 struct cpuidle_state;
 
 /* task_struct::on_rq states: */
-#define TASK_ON_RQ_QUEUED	1
-#define TASK_ON_RQ_MIGRATING	2
+#define TASK_ON_RQ_QUEUED	1       // 进程已经在某个CPU的运行队列
+#define TASK_ON_RQ_MIGRATING	2   // 为了CPU之间的负载均衡，进程正在从一个CPU的运行队列迁移到另个CPU的运行队列
 
 extern __read_mostly int scheduler_running;
 
@@ -1791,7 +1791,10 @@ struct sched_class {
 	int (*balance)(struct rq *rq, struct task_struct *prev, struct rq_flags *rf);
 	int  (*select_task_rq)(struct task_struct *p, int task_cpu, int sd_flag, int flags);
 	void (*migrate_task_rq)(struct task_struct *p, int new_cpu);
-
+    
+	/**
+	 * 当任务被唤醒并且即将被放入运行队列时，调度器会调用此回调函数，通知特定调度类进行相应的处理
+	 */
 	void (*task_woken)(struct rq *this_rq, struct task_struct *task);
 
 	void (*set_cpus_allowed)(struct task_struct *p,
