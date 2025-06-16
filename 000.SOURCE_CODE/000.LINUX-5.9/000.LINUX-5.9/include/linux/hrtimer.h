@@ -95,22 +95,26 @@ enum hrtimer_restart {
 #define HRTIMER_STATE_ENQUEUED	0x01
 
 /**
- * struct hrtimer - the basic hrtimer structure
+ * struct hrtimer - the basic hrtimer structure (基础的定时器结构)
  * @node:	timerqueue node, which also manages node.expires,
  *		the absolute expiry time in the hrtimers internal
  *		representation. The time is related to the clock on
  *		which the timer is based. Is setup by adding
  *		slack to the _softexpires value. For non range timers
- *		identical to _softexpires.
+ *		identical to _softexpires.(timerqueue 节点，它还管理 node.expires，即 hrtimers 内部表示的绝对到期时间。
+ *       该时间与计时器所基于的时钟相关。通过在 _softexpires 值上添加 slack 来设置。对于非范围计时器，与 _softexpires 相同。)
+ *
  * @_softexpires: the absolute earliest expiry time of the hrtimer.
  *		The time which was given as expiry time when the timer
  *		was armed.
- * @function:	timer expiry callback function
- * @base:	pointer to the timer base (per cpu and per clock)
+ * 
+ * @function:	timer expiry callback function 定时器到期回调函数
+ * 
+ * @base:	pointer to the timer base (per cpu and per clock)(指向定时器基址的指针（每个 CPU 和每个时钟）)
  * @state:	state information (See bit values above)
  * @is_rel:	Set if the timer was armed relative
- * @is_soft:	Set if hrtimer will be expired in soft interrupt context.
- * @is_hard:	Set if hrtimer will be expired in hard interrupt context
+ * @is_soft:	Set if hrtimer will be expired in soft interrupt context. (设置 hrtimer 在软中断上下文中是否过期。)
+ * @is_hard:	Set if hrtimer will be expired in hard interrupt context (设置 hrtimer 在硬中断上下文中是否过期)
  *		even on RT.
  *
  * The hrtimer structure must be initialized by hrtimer_init()
@@ -118,20 +122,20 @@ enum hrtimer_restart {
 struct hrtimer {
 	struct timerqueue_node		node;
 	ktime_t				_softexpires;
-	enum hrtimer_restart		(*function)(struct hrtimer *);
-	struct hrtimer_clock_base	*base;
-	u8				state;
-	u8				is_rel;
-	u8				is_soft;
-	u8				is_hard;
+	enum hrtimer_restart		(*function)(struct hrtimer *); // 回调函数
+	struct hrtimer_clock_base	*base; // 指向包含高分辨率定时器的hrtimer_clock_base结构体
+	u8				state;             // 表示高分辨率定时器当前所处的状态： HRTIMER_STATE_INACTIVE、HRTIMER_STATE_ENQUEUED
+	u8				is_rel;            // 该定时器的到期时间是否是相对时间
+	u8				is_soft;           // 是否是 软 定时器
+	u8				is_hard;           // 是否是 硬 定时器
 };
 
 /**
  * struct hrtimer_sleeper - simple sleeper structure
- * @timer:	embedded timer structure
- * @task:	task to wake up
+ * @timer:	embedded timer structure (嵌入式定时器结构)
+ * @task:	task to wake up (需要唤醒的任务)
  *
- * task is set to NULL, when the timer expires.
+ * task is set to NULL, when the timer expires.(当计时器到期时，任务被设置为 NULL。)
  */
 struct hrtimer_sleeper {
 	struct hrtimer timer;
@@ -147,24 +151,23 @@ struct hrtimer_sleeper {
 /**
  * struct hrtimer_clock_base - the timer base for a specific clock
  * @cpu_base:		per cpu clock base
- * @index:		clock type index for per_cpu support when moving a
- *			timer to a base on another cpu.
+ * @index:		    clock type index for per_cpu support when moving a timer to a base on another cpu.
  * @clockid:		clock id for per_cpu support
- * @seq:		seqcount around __run_hrtimer
+ * @seq:		    seqcount around __run_hrtimer
  * @running:		pointer to the currently running hrtimer
- * @active:		red black tree root node for the active timers
+ * @active:		    red black tree root node for the active timers
  * @get_time:		function to retrieve the current time of the clock
- * @offset:		offset of this clock to the monotonic base
+ * @offset:		    offset of this clock to the monotonic base
  */
 struct hrtimer_clock_base {
-	struct hrtimer_cpu_base	*cpu_base;
-	unsigned int		index;
-	clockid_t		clockid;
-	seqcount_raw_spinlock_t	seq;
-	struct hrtimer		*running;
-	struct timerqueue_head	active;
-	ktime_t			(*get_time)(void);
-	ktime_t			offset;
+	struct hrtimer_cpu_base	*cpu_base;  // 指向所属CPU的hrtimer_cpu_base 结构体
+	unsigned int		index;          // 指向该结构体再当前CPU的hrtimer_cpu_base结构体中clock_base数组中所处的下标
+	clockid_t		clockid;            // 当前时钟类型的ID值
+	seqcount_raw_spinlock_t	seq;        // 顺序锁，在处理到期定时器的函数__run_hrtimer中会用到
+	struct hrtimer		*running;       // 指向当前正在处理的那个定时器
+	struct timerqueue_head	active;     // 红黑树，包含了所有使用该时间类型的定时器
+	ktime_t			(*get_time)(void);  // 函数指针，指定了如何获取该事件类型的当前时间函数。由于不同类型的时间在Linux中都是由时间维护层来统一管理的，因此这些函数都是在时间维护层里面定义好的
+	ktime_t			offset;             // 表示当前事件类型和单调时间的差值
 } __hrtimer_clock_base_align;
 
 enum  hrtimer_base_type {
@@ -180,6 +183,8 @@ enum  hrtimer_base_type {
 };
 
 /**
+ * 每个CPU单独管理属于自己的高分辨率定时器
+ * 
  * struct hrtimer_cpu_base - the per cpu clock bases
  * @lock:		lock protecting the base and associated clock bases
  *			and timers
@@ -234,7 +239,7 @@ struct hrtimer_cpu_base {
 	struct hrtimer			*next_timer;
 	ktime_t				softirq_expires_next;
 	struct hrtimer			*softirq_next_timer;
-	struct hrtimer_clock_base	clock_base[HRTIMER_MAX_CLOCK_BASES];
+	struct hrtimer_clock_base	clock_base[HRTIMER_MAX_CLOCK_BASES]; // 到期时间基于定义的几种时间类型
 } ____cacheline_aligned;
 
 static inline void hrtimer_set_expires(struct hrtimer *timer, ktime_t time)

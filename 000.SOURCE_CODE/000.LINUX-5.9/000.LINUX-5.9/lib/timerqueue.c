@@ -15,14 +15,14 @@
 #include <linux/export.h>
 
 /**
- * timerqueue_add - Adds timer to timerqueue.(将计时器添加到计时器队列)
+ * timerqueue_add - Adds timer to timerqueue.(将计时器添加到计时器队列-红黑树实现)
  *
  * @head: head of timerqueue
  * @node: timer node to be added
  *
  * Adds the timer node to the timerqueue, sorted by the node's expires
  * value. Returns true if the newly added timer is the first expiring timer in
- * the queue.
+ * the queue.(将计时器节点添加到计时器队列，并按节点的过期时间排序。如果新添加的计时器是队列中第一个过期的计时器，则返回 true。)
  */
 bool timerqueue_add(struct timerqueue_head *head, struct timerqueue_node *node)
 {

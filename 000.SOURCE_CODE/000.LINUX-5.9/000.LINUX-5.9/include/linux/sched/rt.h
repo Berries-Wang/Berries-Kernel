@@ -18,6 +18,9 @@ static inline int rt_task(struct task_struct *p)
 	return rt_prio(p->prio);
 }
 
+/**
+ * Linux内核中的task_is_realtime函数用于判断给定任务（进程）是否具有实时调度属性。
+ */
 static inline bool task_is_realtime(struct task_struct *tsk)
 {
 	int policy = tsk->policy;

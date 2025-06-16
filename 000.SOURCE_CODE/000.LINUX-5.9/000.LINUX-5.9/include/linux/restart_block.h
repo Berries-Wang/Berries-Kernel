@@ -20,7 +20,7 @@ enum timespec_type {
 };
 
 /*
- * System call restart block.
+ * System call restart block.(系统调用重启块?)
  */
 struct restart_block {
 	long (*fn)(struct restart_block *);

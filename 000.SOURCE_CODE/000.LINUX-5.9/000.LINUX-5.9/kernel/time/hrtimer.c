@@ -58,7 +58,7 @@
 #define HRTIMER_ACTIVE_ALL	(HRTIMER_ACTIVE_SOFT | HRTIMER_ACTIVE_HARD)
 
 /*
- * The timer bases:
+ * The timer bases: (每个CPU都有一份)
  *
  * There are more clockids than hrtimer bases. Thus, we index
  * into the timer bases by the hrtimer_base_type enum. When trying
@@ -133,6 +133,9 @@ static const int hrtimer_clock_to_base_table[MAX_CLOCKS] = {
  * We require the migration_base for lock_hrtimer_base()/switch_hrtimer_base()
  * such that hrtimer_callback_running() can unconditionally dereference
  * timer->base->cpu_base
+ * 我们需要 lock_hrtimer_base()/switch_hrtimer_base() 的 migration_base，
+ * 以便 hrtimer_callback_running() 可以无条件地取消引用 timer->base->cpu_base
+ * ? 不理解
  */
 static struct hrtimer_cpu_base migration_cpu_base = {
 	.clock_base = { {
@@ -152,14 +155,14 @@ static inline bool is_migration_base(struct hrtimer_clock_base *base)
 /*
  * We are using hashed locking: holding per_cpu(hrtimer_bases)[n].lock
  * means that all timers which are tied to this base via timer->base are
- * locked, and the base itself is locked too.
+ * locked, and the base itself is locked too.(我们使用散列锁定：持有 per_cpu(hrtimer_bases)[n].lock 意味着所有通过 timer->base 绑定到该基址的计时器都被锁定，并且基址本身也被锁定。)
  *
  * So __run_timers/migrate_timers can safely modify all timers which could
- * be found on the lists/queues.
+ * be found on the lists/queues. (因此 __run_timers/migrate_timers 可以安全地修改列表/队列上的所有计时器。)
  *
  * When the timer's base is locked, and the timer removed from list, it is
  * possible to set timer->base = &migration_base and drop the lock: the timer
- * remains locked.
+ * remains locked.(当计时器的基础被锁定，并且计时器从列表中删除时，可以设置 timer->base = &migration_base 并删除锁：计时器保持锁定状态。)
  */
 static
 struct hrtimer_clock_base *lock_hrtimer_base(const struct hrtimer *timer,
@@ -173,7 +176,7 @@ struct hrtimer_clock_base *lock_hrtimer_base(const struct hrtimer *timer,
 			raw_spin_lock_irqsave(&base->cpu_base->lock, *flags);
 			if (likely(base == timer->base))
 				return base;
-			/* The timer has migrated to another CPU: */
+			/* The timer has migrated to another CPU:(定时器已迁移到另一个 CPU) */
 			raw_spin_unlock_irqrestore(&base->cpu_base->lock, *flags);
 		}
 		cpu_relax();
@@ -210,16 +213,27 @@ struct hrtimer_cpu_base *get_target_base(struct hrtimer_cpu_base *base,
 }
 
 /*
+ * 将定时器切换到其他CPU执行 
+ * Linux内核高精度定时器能够支持CPU热插拔和负载均衡的关键组件之一
+ *
+ * 典型调用场景
+ *  CPU热插拔： 当CPU下线时，其上的定时器需要迁移到其他CPU
+ *  负载均衡：内核可能决定将定时器重新分配到负载较轻的CPU
+ *  定时器修改：当修改定时器参数可能导致基变化时
+ *
  * We switch the timer base to a power-optimized selected CPU target,
+ * (我们将定时器基座切换到功率优化的选定 CPU 目标)
  * if:
  *	- NO_HZ_COMMON is enabled
- *	- timer migration is enabled
+ *	- timer migration is enabled （已启用计时器迁移）
  *	- the timer callback is not running
- *	- the timer is not the first expiring timer on the new target
+ *	- the timer is not the first expiring timer on the new target（该计时器不是新目标上第一个到期的计时器）
  *
  * If one of the above requirements is not fulfilled we move the timer
  * to the current CPU or leave it on the previously assigned CPU if
- * the timer callback is currently running.
+ * the timer callback is currently running.(如果上述要求之一未满足，我们会将计时器移至当前 CPU，
+ * 或者如果计时器回调当前正在运行，则将其留在先前分配的 CPU 上。)
+ * --- 切换CPU
  */
 static inline struct hrtimer_clock_base *
 switch_hrtimer_base(struct hrtimer *timer, struct hrtimer_clock_base *base,
@@ -853,7 +867,7 @@ static void hrtimer_reprogram(struct hrtimer *timer, bool reprogram)
 
 	/*
 	 * Program the timer hardware. We enforce the expiry for
-	 * events which are already in the past.
+	 * events which are already in the past.(对定时器硬件进行编程。我们强制执行已经过去的事件的到期时间。)
 	 */
 	tick_program_event(expires, 1);
 }
@@ -1101,7 +1115,9 @@ static int __hrtimer_start_range_ns(struct hrtimer *timer, ktime_t tim,
 
 	hrtimer_set_expires_range_ns(timer, tim, delta_ns);
 
-	/* Switch the timer base, if necessary: */
+	/**
+	 *  Switch the timer base, if necessary:
+	*/
 	new_base = switch_hrtimer_base(timer, base, mode & HRTIMER_MODE_PINNED);
 
 	return enqueue_hrtimer(timer, new_base, mode);
@@ -1765,7 +1781,7 @@ void hrtimer_run_queues(void)
 }
 
 /*
- * Sleep related functions:
+ * Sleep related functions:(睡眠相关功能)
  */
 static enum hrtimer_restart hrtimer_wakeup(struct hrtimer *timer)
 {
@@ -1774,19 +1790,20 @@ static enum hrtimer_restart hrtimer_wakeup(struct hrtimer *timer)
 	struct task_struct *task = t->task;
 
 	t->task = NULL;
-	if (task)
+	if (task) {
+		// 000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/kernel/sched/core.c
 		wake_up_process(task);
-
+	}
 	return HRTIMER_NORESTART;
 }
 
 /**
- * hrtimer_sleeper_start_expires - Start a hrtimer sleeper timer
+ * hrtimer_sleeper_start_expires - Start a hrtimer sleeper timer(启动 hrtimer 睡眠定时器)
  * @sl:		sleeper to be started
  * @mode:	timer mode abs/rel
  *
  * Wrapper around hrtimer_start_expires() for hrtimer_sleeper based timers
- * to allow PREEMPT_RT to tweak the delivery mode (soft/hardirq context)
+ * to allow PREEMPT_RT to tweak the delivery mode (soft/hardirq context)(围绕基于 hrtimer_sleeper 的计时器的 hrtimer_start_expires() 进行包装，以允许 PREEMPT_RT 调整传送模式（软/硬中断上下文）)
  */
 void hrtimer_sleeper_start_expires(struct hrtimer_sleeper *sl,
 				   enum hrtimer_mode mode)
@@ -1796,7 +1813,10 @@ void hrtimer_sleeper_start_expires(struct hrtimer_sleeper *sl,
 	 * was initialized for hard interrupt delivery, force the mode bit.
 	 * This is a special case for hrtimer_sleepers because
 	 * hrtimer_init_sleeper() determines the delivery mode on RT so the
-	 * fiddling with this decision is avoided at the call sites.
+	 * fiddling with this decision is avoided at the call sites.(使入队传送模式检查在 RT 上有效。
+	 * 如果 sleeper 已初始化为硬中断传送，则强制设置模式位。
+	 * 对于 hrtimer_sleepers 来说，这是一个特殊情况，因为 hrtimer_init_sleeper() 决定了 RT 上的传送模式，因此可以避免在调用点处进行调整。)
+	 * 现在不是很懂!
 	 */
 	if (IS_ENABLED(CONFIG_PREEMPT_RT) && sl->timer.is_hard)
 		mode |= HRTIMER_MODE_HARD;
@@ -1814,34 +1834,39 @@ static void __hrtimer_init_sleeper(struct hrtimer_sleeper *sl,
 	 * interrupt context either for latency reasons or because the
 	 * hrtimer callback takes regular spinlocks or invokes other
 	 * functions which are not suitable for hard interrupt context on
-	 * PREEMPT_RT.
+	 * PREEMPT_RT.(在启用 PREEMPT_RT 的内核上，未明确标记为硬中断到期模式的 hrtimer 将被移入软中断上下文，
+	 * 这可能是由于延迟原因，或者是因为 hrtimer 回调采用常规自旋锁或调用不适合 PREEMPT_RT 上的硬中断上下文的其他函数。)
 	 *
 	 * The hrtimer_sleeper callback is RT compatible in hard interrupt
 	 * context, but there is a latency concern: Untrusted userspace can
 	 * spawn many threads which arm timers for the same expiry time on
 	 * the same CPU. That causes a latency spike due to the wakeup of
-	 * a gazillion threads.
+	 * a gazillion threads.(hrtimer_sleeper 回调在硬中断上下文中兼容实时中断 (RT)，
+	 * 但存在延迟问题：不受信任的用户空间可能会在同一 CPU 上生成多个线程，这些线程会为相同的到期时间设置定时器。这会由于唤醒大量线程而导致延迟激增。)
 	 *
 	 * OTOH, priviledged real-time user space applications rely on the
 	 * low latency of hard interrupt wakeups. If the current task is in
 	 * a real-time scheduling class, mark the mode for hard interrupt
-	 * expiry.
+	 * expiry.(另一方面，特权实时用户空间应用程序依赖于硬中断唤醒的低延迟。如果当前任务处于实时调度类，则将模式标记为硬中断到期。)
 	 */
 	if (IS_ENABLED(CONFIG_PREEMPT_RT)) {
+		// 判断是否是实时调度的
 		if (task_is_realtime(current) && !(mode & HRTIMER_MODE_SOFT))
 			mode |= HRTIMER_MODE_HARD;
 	}
 
 	__hrtimer_init(&sl->timer, clock_id, mode);
+
+	// 设置定时器到期回调函数
 	sl->timer.function = hrtimer_wakeup;
 	sl->task = current;
 }
 
 /**
- * hrtimer_init_sleeper - initialize sleeper to the given clock
- * @sl:		sleeper to be initialized
+ * hrtimer_init_sleeper - initialize sleeper to the given clock(将 sleeper 初始化为给定的时钟)
+ * @sl:		    sleeper to be initialized
  * @clock_id:	the clock to be used
- * @mode:	timer mode abs/rel
+ * @mode:	    timer mode abs/rel
  */
 void hrtimer_init_sleeper(struct hrtimer_sleeper *sl, clockid_t clock_id,
 			  enum hrtimer_mode mode)

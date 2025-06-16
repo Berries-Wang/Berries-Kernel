@@ -234,7 +234,7 @@ static const struct futex_q futex_q_init = {
 /*
  * Hash buckets are shared by all the futex_keys that hash to the same
  * location.  Each key may have multiple futex_q structures, one for each task
- * waiting on a futex.
+ * waiting on a futex.(所有哈希到同一位置的 futex_keys 共享哈希桶。每个 key 可能有多个 futex_q 结构体，每个等待 futex 的任务对应一个。)
  */
 struct futex_hash_bucket {
 	atomic_t waiters;
@@ -245,13 +245,13 @@ struct futex_hash_bucket {
 /*
  * The base of the bucket array and its size are always used together
  * (after initialization only in hash_futex()), so ensure that they
- * reside in the same cacheline.
+ * reside in the same cacheline. (bucket 数组的基数和它的大小总是一起用（仅在 hash_futex() 中初始化之后），因此确保它们位于同一个缓存行中。)
  */
 static struct {
 	struct futex_hash_bucket *queues;
 	unsigned long            hashsize;
 } __futex_data __read_mostly __aligned(2*sizeof(long));
-#define futex_queues   (__futex_data.queues)
+#define futex_queues   (__futex_data.queues)    // 访问queues的快捷方式
 #define futex_hashsize (__futex_data.hashsize)
 
 
@@ -392,10 +392,10 @@ enum futex_access {
 };
 
 /**
- * futex_setup_timer - set up the sleeping hrtimer(计时器).
- * @time:	ptr to the given timeout value
- * @timeout:	the hrtimer_sleeper structure to be set up
- * @flags:	futex flags
+ * futex_setup_timer - set up the sleeping hrtimer(设置sleeping计时器).
+ * @time:	    ptr to the given timeout value
+ * @timeout:	the hrtimer_sleeper structure to be set up (即 这是一个传出参数)
+ * @flags:	    futex flags
  * @range_ns:	optional range in ns
  *
  * Return: Initialized hrtimer_sleeper structure or NULL if no timeout
@@ -408,12 +408,14 @@ futex_setup_timer(ktime_t *time, struct hrtimer_sleeper *timeout,
 	if (!time)
 		return NULL;
 
+	// 初始化 hrtimer_sleeper
 	hrtimer_init_sleeper_on_stack(timeout, (flags & FLAGS_CLOCKRT) ?
 				      CLOCK_REALTIME : CLOCK_MONOTONIC,
 				      HRTIMER_MODE_ABS);
 	/*
 	 * If range_ns is 0, calling hrtimer_set_expires_range_ns() is
 	 * effectively the same as calling hrtimer_set_expires().
+	 * (如果 range_ns 为 0，则调用 hrtimer_set_expires_range_ns() 实际上与调用 hrtimer_set_expires() 相同。)
 	 */
 	hrtimer_set_expires_range_ns(&timeout->timer, *time, range_ns);
 
@@ -2236,7 +2238,7 @@ static inline void __queue_me(struct futex_q *q, struct futex_hash_bucket *hb)
 }
 
 /**
- * queue_me() - Enqueue the futex_q on the futex_hash_bucket
+ * queue_me() - Enqueue the futex_q on the futex_hash_bucket(将 futex_q 放入 futex_hash_bucket 队列)
  * @q:	The futex_q to enqueue
  * @hb:	The destination hash bucket
  *
@@ -2245,7 +2247,9 @@ static inline void __queue_me(struct futex_q *q, struct futex_hash_bucket *hb)
  * exceptions involve the PI related operations, which may use unqueue_me_pi()
  * or nothing if the unqueue is done as part of the wake process and the unqueue
  * state is implicit in the state of woken task (see futex_wait_requeue_pi() for
- * an example).
+ * an example).(hb->lock 必须由调用者持有，并在此释放。queue_me() 的调用通常与 unqueue_me() 的调用配对。
+ * 例外情况涉及 PI 相关操作，如果取消队列是作为唤醒过程的一部分完成的，并且取消队列状态隐含在唤醒任务的状态中（例如 futex_wait_requeue_pi()），
+ * 则可能使用 unqueue_me_pi() 或不执行任何操作。)
  */
 static inline void queue_me(struct futex_q *q, struct futex_hash_bucket *hb)
 	__releases(&hb->lock)
@@ -2557,7 +2561,7 @@ static int fixup_owner(u32 __user *uaddr, struct futex_q *q, int locked)
 }
 
 /**
- * futex_wait_queue_me() - queue_me() and wait for wakeup, timeout, or signal
+ * futex_wait_queue_me() - queue_me() and wait for wakeup, timeout, or signal (queue_me() 并等待唤醒、超时或信号)
  * @hb:		the futex hash bucket, must be locked by the caller
  * @q:		the futex_q to queue up on
  * @timeout:	the prepared hrtimer_sleeper, or null for no timeout
@@ -2572,6 +2576,10 @@ static void futex_wait_queue_me(struct futex_hash_bucket *hb, struct futex_q *q,
 	 * access to the hash list and forcing another memory barrier.
 	 */
 	set_current_state(TASK_INTERRUPTIBLE);
+
+	/**
+	 * 入到什么队列，存储在什么地方? 全局数据结构 __futex_data.queues 
+	 */
 	queue_me(q, hb);
 
 	/* Arm the timer(启动计时器) */
@@ -2581,6 +2589,7 @@ static void futex_wait_queue_me(struct futex_hash_bucket *hb, struct futex_q *q,
 	/*
 	 * If we have been removed from the hash list, then another task
 	 * has tried to wake us, and we can skip the call to schedule().
+	 * (如果我们已经从哈希列表中删除，那么另一个任务已经尝试唤醒我们，我们可以跳过对schedule（）的调用。)
 	 */
 	if (likely(!plist_node_empty(&q->list))) {
 		/*
@@ -2588,14 +2597,15 @@ static void futex_wait_queue_me(struct futex_hash_bucket *hb, struct futex_q *q,
 		 * flagged for rescheduling. Only call schedule if there
 		 * is no timeout, or if it has yet to expire.(如果计时器已过期，current 将被标记为重新调度。仅当没有超时或尚未过期时才调用schedule。)
 		 */
-		if (!timeout || timeout->task)
+		if (!timeout || timeout->task) {
 			freezable_schedule();
+		}
 	}
 	__set_current_state(TASK_RUNNING);
 }
 
 /**
- * futex_wait_setup() - Prepare to wait on a futex
+ * futex_wait_setup() - Prepare to wait on a futex(准备等待 futex)
  * @uaddr:	the futex userspace address
  * @val:	the expected value
  * @flags:	futex flags (FLAGS_SHARED, etc.)
@@ -2605,7 +2615,7 @@ static void futex_wait_queue_me(struct futex_hash_bucket *hb, struct futex_q *q,
  * Setup the futex_q and locate the hash_bucket.  Get the futex value and
  * compare it with the expected value.  Handle atomic faults internally.
  * Return with the hb lock held and a q.key reference on success, and unlocked
- * with no q.key reference on failure.
+ * with no q.key reference on failure.(设置 futex_q 并定位 hash_bucket。获取 futex 值并将其与预期值进行比较。内部处理原子故障。成功时返回持有的 hb 锁和 q.key 引用；失败时返回解锁状态，且没有 q.key 引用。)
  *
  * Return:
  *  -  0 - uaddr contains val and hb has been locked;
@@ -2678,13 +2688,13 @@ static int futex_wait(u32 __user *uaddr, unsigned int flags, u32 val,
 	if (!bitset)
 		return -EINVAL;
 	q.bitset = bitset;
-
+    
+	// 设置hrtimer_sleeper to , 是一个传出参数
 	to = futex_setup_timer(abs_time, &timeout, flags,
 			       current->timer_slack_ns);
 retry:
 	/*
-	 * Prepare to wait on uaddr. On success, holds hb lock and increments
-	 * q.key refs.
+	 * Prepare to wait on uaddr. On success, holds hb lock and increments q.key refs.(准备等待 uaddr。成功后，持有 hb 锁并增加 q.key 引用数。)
 	 */
 	ret = futex_wait_setup(uaddr, val, flags, &q, &hb);
 	if (ret)

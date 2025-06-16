@@ -2531,7 +2531,8 @@ ttwu_do_activate(struct rq *rq, struct task_struct *p, int wake_flags,
  * By taking task_rq(p)->lock we serialize against schedule(), if @p->on_rq
  * then schedule() must still happen and p->state can be changed to
  * TASK_RUNNING. Otherwise we lost the race, schedule() has happened, and we
- * need to do a full wakeup with enqueue.
+ * need to do a full wakeup with enqueue.（通过获取 task_rq(p)->lock，我们可以对schedule()进行序列化。如果 @p->on_rq 成功，则schedule()仍必须执行，
+ * 并且p->state可以更改为TASK_RUNNING。否则，我们就会失败，schedule()已经执行，我们需要使用enqueue进行完全唤醒。）
  *
  * Returns: %true when the wakeup is done,
  *          %false otherwise.
@@ -2786,37 +2787,37 @@ static void ttwu_queue(struct task_struct *p, int cpu, int wake_flags)
 
 /**
  * try_to_wake_up - wake up a thread
- * @p: the thread to be awakened
+ * @p: the thread to be awakened (被唤醒的线程)
  * @state: the mask of task states that can be woken
  * @wake_flags: wake modifier flags (WF_*)
  *
- * Conceptually does:
+ * Conceptually does:(从概念上来说)
  *
  *   If (@state & @p->state) @p->state = TASK_RUNNING.
  *
- * If the task was not queued/runnable, also place it back on a runqueue.
+ * If the task was not queued/runnable, also place it back on a runqueue. 
  *
- * This function is atomic against schedule() which would dequeue the task.
+ * This function is atomic against schedule() which would dequeue the task.(这个函数是相对于schedule（）的原子函数，schedule（）会将任务从队列中取出。)
  *
  * It issues a full memory barrier before accessing @p->state, see the comment
  * with set_current_state().
  *
- * Uses p->pi_lock to serialize against concurrent wake-ups.
+ * Uses p->pi_lock to serialize against concurrent wake-ups.(使用 p->pi_lock 来序列化并发唤醒。)
  *
- * Relies on p->pi_lock stabilizing:
+ * Relies on p->pi_lock stabilizing:(依赖于p->pi_lock稳定：)
  *  - p->sched_class
  *  - p->cpus_ptr
  *  - p->sched_task_group
  * in order to do migration, see its use of select_task_rq()/set_task_cpu().
  *
- * Tries really hard to only take one task_rq(p)->lock for performance.
+ * Tries really hard to only take one task_rq(p)->lock for performance.(为了提高性能，尽力只采用一个 task_rq(p)->lock。)
  * Takes rq->lock in:
  *  - ttwu_runnable()    -- old rq, unavoidable, see comment there;
  *  - ttwu_queue()       -- new rq, for enqueue of the task;
  *  - psi_ttwu_dequeue() -- much sadness :-( accounting will kill us.
  *
  * As a consequence we race really badly with just about everything. See the
- * many memory barriers and their comments for details.
+ * many memory barriers and their comments for details.(结果就是，我们几乎在所有情况下都表现得很糟糕。详情请参阅各种内存屏障及其注释。)
  *
  * Return: %true if @p->state changes (an actual wakeup was done),
  *	   %false otherwise.
@@ -3037,11 +3038,11 @@ bool try_invoke_on_locked_down_task(struct task_struct *p, bool (*func)(struct t
  * @p: The process to be woken up.
  *
  * Attempt to wake up the nominated process and move it to the set of runnable
- * processes.
+ * processes.(尝试唤醒指定进程并将其移至可运行进程集合。)
  *
  * Return: 1 if the process was woken up, 0 if it was already running.
  *
- * This function executes a full memory barrier before accessing the task state.
+ * This function executes a full memory barrier before accessing the task state.(此函数在访问任务状态之前执行完整的内存屏障。)
  */
 int wake_up_process(struct task_struct *p)
 {
