@@ -329,7 +329,7 @@ rq_csd_init(struct rq *rq, call_single_data_t *csd, smp_call_func_t func)
 
 #ifdef CONFIG_SCHED_HRTICK
 /*
- * Use HR-timers to deliver accurate preemption points.
+ * Use HR-timers to deliver accurate preemption points.(使用 HR 计时器来提供准确的抢占点。)
  */
 
 static void hrtick_clear(struct rq *rq)
@@ -4405,43 +4405,45 @@ restart:
 }
 
 /*
- * __schedule() is the main scheduler function.
+ * __schedule() is the main scheduler function. (__schedule() 是主调度器函数)
  *
- * The main means of driving the scheduler and thus entering this function are:
+ * The main means of driving the scheduler and thus entering this function are:(驱动调度程序并进入该函数的主要手段是：)
  *
- *   1. Explicit blocking: mutex, semaphore, waitqueue, etc.
+ *   1. Explicit blocking: mutex, semaphore, waitqueue, etc.(显式阻塞：互斥锁、信号量、等待队列等。)
  *
  *   2. TIF_NEED_RESCHED flag is checked on interrupt and userspace return
- *      paths. For example, see arch/x86/entry_64.S.
+ *      paths. For example, see arch/x86/entry_64.S. (在中断和用户空间返回路径上检查 TIF_NEED_RESCHED 标志。例如，参见 arch/x86/entry_64.S。)
  *
  *      To drive preemption between tasks, the scheduler sets the flag in timer
- *      interrupt handler scheduler_tick().
+ *      interrupt handler scheduler_tick(). (为了驱动任务之间的抢占，调度程序在定时器中断处理程序scheduler_tick()中设置标志。)
  *
  *   3. Wakeups don't really cause entry into schedule(). They add a
- *      task to the run-queue and that's it.
+ *      task to the run-queue and that's it. (唤醒实际上并不会导致进入schedule()。它们只是将任务添加到运行队列中，仅此而已。)
  *
  *      Now, if the new task added to the run-queue preempts the current
  *      task, then the wakeup sets TIF_NEED_RESCHED and schedule() gets
- *      called on the nearest possible occasion:
+ *      called on the nearest possible occasion:(现在，如果添加到运行队列的新任务抢占了当前任务，则唤醒将设置 TIF_NEED_RESCHED 并在最近的可能场合调用schedule()：)
  *
- *       - If the kernel is preemptible (CONFIG_PREEMPTION=y):
+ *       - If the kernel is preemptible (CONFIG_PREEMPTION=y):(如果内核是可抢占的)
  *
  *         - in syscall or exception context, at the next outmost
  *           preempt_enable(). (this might be as soon as the wake_up()'s
- *           spin_unlock()!)
+ *           spin_unlock()!) (在系统调用或异常上下文中，在下一个最外层的 preempt_enable()。（这可能与 wake_up() 的 spin_unlock() 一样快！）)
  *
  *         - in IRQ context, return from interrupt-handler to
- *           preemptible context
+ *           preemptible context (在 IRQ 上下文中，从中断处理程序返回到可抢占上下文
  *
  *       - If the kernel is not preemptible (CONFIG_PREEMPTION is not set)
- *         then at the next:
+ *         then at the next: (如果内核不可抢占（未设置 CONFIG_PREEMPTION），则下一步：)
  *
  *          - cond_resched() call
  *          - explicit schedule() call
  *          - return from syscall or exception to user-space
  *          - return from interrupt-handler to user-space
  *
- * WARNING: must be called with preemption disabled!
+ * WARNING: must be called with preemption disabled! (警告： 必须在禁止抢占的情况下调用)
+ * 
+ * @param preempt 
  */
 static void __sched notrace __schedule(bool preempt)
 {
@@ -4452,16 +4454,30 @@ static void __sched notrace __schedule(bool preempt)
 	struct rq *rq;
 	int cpu;
 
+	// 获取当前正在执行代码的CPU的逻辑ID（处理器编号）
 	cpu = smp_processor_id();
+
+	// 获取当前CPU上的通用就绪队列
 	rq = cpu_rq(cpu);
+
+	// 获取正在运行的进程
 	prev = rq->curr;
 
 	schedule_debug(prev, preempt);
-
-	if (sched_feat(HRTICK))
+    
+	/**
+	 * 000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/kernel/sched/features.h
+	 * 
+	 * 如果高精度定时器(hrtimer) 
+	 */
+	if (sched_feat(HRTICK)) {
 		hrtick_clear(rq);
+	}
 
 	local_irq_disable(); // 仅禁用当前处理器中断，其他处理器不受影响
+	/**
+	 * RCU 
+	 */
 	rcu_note_context_switch(preempt);
 
 	/*
@@ -4630,16 +4646,33 @@ static void sched_update_worker(struct task_struct *tsk)
 	}
 }
 
+/**
+ * Linux 内核中负责进程调度的核心函数，它决定哪个进程应该获得 CPU 使用权
+ * 
+ * asmlinkage : 强制参数通过栈传递，兼容汇编调用约定 (确保正确的 ABI)
+ *  __visible : 防止符号被优化或隐藏，确保外部可见性 (控制符号可见性)
+ * __sched    : 将函数放入特殊段，避免调度相关函数被跟踪工具干扰 (优化调试和分析)
+ * 
+ * ABI: 在 Linux 内核中，ABI（Application Binary Interface，应用二进制接口）,
+ * 定义了内核与用户空间程序（或内核模块）之间的二进制兼容性规则，确保即使内核版本升级，
+ * 已有的二进制程序（如编译好的应用程序或内核模块）仍能正确运行
+ */
 asmlinkage __visible void __sched schedule(void)
 {
 	struct task_struct *tsk = current;
 
 	sched_submit_work(tsk);
+
 	do {
+		// 禁用内核抢占-具体实现参考 CONFIG_PREEMPT_COUNT 配置
 		preempt_disable();
+		
 		__schedule(false);
+
+		// 与 preempt_disable(); 调用匹配
 		sched_preempt_enable_no_resched();
 	} while (need_resched());
+
 	sched_update_worker(tsk);
 }
 EXPORT_SYMBOL(schedule);

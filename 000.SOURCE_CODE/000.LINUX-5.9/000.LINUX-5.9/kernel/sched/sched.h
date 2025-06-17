@@ -946,7 +946,7 @@ struct rq {
 	 */
 	unsigned long		nr_uninterruptible;
 
-	struct task_struct __rcu	*curr;
+	struct task_struct __rcu	*curr;  // 当前正在此CPU上运行的进程
 	struct task_struct	*idle;
 	struct task_struct	*stop;
 	unsigned long		next_balance;
@@ -1654,7 +1654,9 @@ extern struct static_key sched_feat_keys[__SCHED_FEAT_NR];
 /*
  * Each translation unit has its own copy of sysctl_sched_features to allow
  * constants propagation at compile time and compiler optimization based on
- * features default.
+ * features default.（每个翻译单元都有自己的 sysctl_sched_features 副本，以允许在编译时传播常量并根据默认功能进行编译器优化。）
+ * 
+ * sysctl_sched_features 是 Linux 内核中一个用于控制调度器特性的位掩码变量，它允许动态启用或禁用某些调度器功能而无需重新编译内核。
  */
 #define SCHED_FEAT(name, enabled)	\
 	(1UL << __SCHED_FEAT_##name) * enabled |

@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "type_traits": "c",
-        "variant": "c"
+        "variant": "c",
+        "*.tbl": "c"
     }
 }

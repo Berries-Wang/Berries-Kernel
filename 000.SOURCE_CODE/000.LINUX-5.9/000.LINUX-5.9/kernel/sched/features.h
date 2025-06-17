@@ -37,6 +37,11 @@ SCHED_FEAT(CACHE_HOT_BUDDY, true)
  */
 SCHED_FEAT(WAKEUP_PREEMPTION, true)
 
+/**
+ * 控制高分辨率定时器 tick（HRTICK）功能
+ * 启用后使用高精度定时器(hrtimer)替代传统周期tick , 提供更精确的任务调度和时间统计
+ * 
+ */
 SCHED_FEAT(HRTICK, false)
 SCHED_FEAT(DOUBLE_TICK, false)
 

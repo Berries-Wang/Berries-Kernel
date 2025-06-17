@@ -95,6 +95,9 @@ static inline void eieio(void)
 	asm volatile("eieio" : : : "memory");
 }
 
+/**
+ * 编译器和内存屏障宏，用于防止编译器或 CPU 对指令进行不安全的优化重排，确保内存访问的顺序符合预期
+ */
 static inline void barrier(void)
 {
 	asm volatile("" : : : "memory");
