@@ -1163,7 +1163,7 @@ void hrtimer_start_range_ns(struct hrtimer *timer, ktime_t tim,
 EXPORT_SYMBOL_GPL(hrtimer_start_range_ns);
 
 /**
- * hrtimer_try_to_cancel - try to deactivate a timer
+ * hrtimer_try_to_cancel - try to deactivate a timer(尝试停用计时器)
  * @timer:	hrtimer to stop
  *
  * Returns:
@@ -1288,7 +1288,7 @@ static inline void hrtimer_sync_wait_running(struct hrtimer_cpu_base *base,
 #endif
 
 /**
- * hrtimer_cancel - cancel a timer and wait for the handler to finish.
+ * hrtimer_cancel - cancel a timer and wait for the handler to finish.(取消计时器并等待处理程序完成。)
  * @timer:	the timer to be cancelled
  *
  * Returns:
@@ -1466,7 +1466,7 @@ EXPORT_SYMBOL_GPL(hrtimer_init);
 /*
  * A timer is active, when it is enqueued into the rbtree or the
  * callback function is running or it's in the state of being migrated
- * to another cpu.
+ * to another cpu.(当计时器进入红黑树队列或回调函数正在运行或处于迁移到另一个 CPU 的状态时，计时器处于活动状态。)
  *
  * It is important for this function to not return a false negative.
  */

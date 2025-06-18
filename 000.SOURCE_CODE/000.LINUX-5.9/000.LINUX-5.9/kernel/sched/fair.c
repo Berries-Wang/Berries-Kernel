@@ -10643,7 +10643,7 @@ static void rq_offline_fair(struct rq *rq)
 #endif /* CONFIG_SMP */
 
 /*
- * scheduler tick hitting a task of our scheduling class.
+ * scheduler tick hitting a task of our scheduling class.(调度程序勾选我们调度类的任务。)
  *
  * NOTE: This function can be called remotely by the tick offload that
  * goes along full dynticks. Therefore no local assumption can be made

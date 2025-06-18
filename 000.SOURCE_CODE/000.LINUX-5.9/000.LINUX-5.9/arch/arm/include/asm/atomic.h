@@ -31,6 +31,18 @@
  * ARMv6 UP and SMP safe atomic ops.  We use load exclusive and
  * store exclusive to ensure that these are atomic.  We may loop
  * to ensure that the update happens.
+ * 
+ * ARM 使用ldrex 和strex 指令来保证add 操作的原子性，指令后缀ex 表示exclusive。
+ * 这两条指令的格式如下:
+ *   ldrex  Rt, [Rn]    把Rn寄存器指向内存地址的内容加载到Rt寄存器中 
+ *   strex Rd, Rt, [Rn] 把Rt寄存器的值保存到Rn寄存器指向的内存地址中，Rd保存更新的结果，0表示更新成功，1表示失败
+ * 
+ * GCC 嵌入式汇编格式: 
+ *   __asm__ __volatile__(指令部: 输出部: 输入部: 损坏部)
+ * 
+ * 
+ * __volatile__防止编译器优化。其中“@”符号标识是注释。
+ * 损坏部一般以“memory”结束。“memory”告诉 GCC 编译器内嵌汇编指令改变了内存中的值，强迫编译器在执行该汇编代码前存储所有缓存的值，在执行完汇编代码之后重新加载该值，目的是防止编译乱序
  */
 
 #define ATOMIC_OP(op, c_op, asm_op)					\

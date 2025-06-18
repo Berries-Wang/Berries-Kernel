@@ -1023,6 +1023,10 @@ struct rq {
 #ifdef CONFIG_SMP
 	call_single_data_t	hrtick_csd;
 #endif
+    /**
+	 * 高精度定时器（High-Resolution Timer，HRTICK），用于实现 高精度的任务调度时间片控制
+	 * core.c hrtick_rq_init
+	 */
 	struct hrtimer		hrtick_timer;
 #endif
 

@@ -48,7 +48,7 @@ struct timezone {
  * (各种系统时钟的 ID（用于 POSIX.1b 间隔计时器）：)
  */
 #define CLOCK_REALTIME			0
-#define CLOCK_MONOTONIC			1
+#define CLOCK_MONOTONIC			1                          // 单调时钟（Monotonic Clock） 的标识符，用于表示一种稳定递增、不受系统时间调整影响的时钟类型
 #define CLOCK_PROCESS_CPUTIME_ID	2
 #define CLOCK_THREAD_CPUTIME_ID		3
 #define CLOCK_MONOTONIC_RAW		4

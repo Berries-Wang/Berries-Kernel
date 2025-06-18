@@ -340,7 +340,8 @@ static void hrtick_clear(struct rq *rq)
 
 /*
  * High-resolution timer tick.
- * Runs from hardirq context with interrupts disabled.
+ * Runs from hardirq context with interrupts disabled.(在禁用中断的情况下从 hardirq 上下文运行。)
+ * HardIRQ（Hardware Interrupt Request，硬件中断请求）
  */
 static enum hrtimer_restart hrtick(struct hrtimer *timer)
 {
@@ -4468,7 +4469,9 @@ static void __sched notrace __schedule(bool preempt)
 	/**
 	 * 000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/kernel/sched/features.h
 	 * 
-	 * 如果高精度定时器(hrtimer) 
+	 * 如果启用高精度定时器(hrtimer) 
+	 * 
+	 * 
 	 */
 	if (sched_feat(HRTICK)) {
 		hrtick_clear(rq);

@@ -32,7 +32,15 @@ asm_ops "\n"								\
 /*
  * AArch64 UP and SMP safe atomic ops.  We use load exclusive and
  * store exclusive to ensure that these are atomic.  We may loop
- * to ensure that the update happens.
+ * to ensure that the update happens.(AArch64 UP 和 SMP 安全的原子操作。我们使用独占加载和独占存储来确保这些操作的原子性。我们可能会使用循环来确保更新操作的发生。)
+ * 
+ * 结合'000.LINUX-5.9/arch/arm/include/asm/atomic.h'一起阅读
+ * 
+ * LDXR（Load Exclusive Register）： 独占加载指令，用于原子操作的读阶段，与 STXR 配对实现 LL/SC（Load-Link/Store-Conditional） 机制
+ * STXR（Store Exclusive Register）： 独占存储指令，与 LDXR 配对，仅在目标内存未被修改时写入
+ * CBNZ（Compare and Branch if Non-Zero）： 条件分支指令，比较寄存器是否为非零，若是则跳转。
+ * PSTL1STRM（Prefetch for Store, L1 Stream）： PRFM 的一种变体，专为 流式存储（Streaming Store） 优化，提示 CPU 数据将被顺序写入且无需缓存污染。
+ * PRFM（Prefetch Memory）： 缓存预取指令，用于提前将数据加载到缓存，减少内存访问延迟
  */
 
 #define ATOMIC_OP(op, asm_op, constraint)				\

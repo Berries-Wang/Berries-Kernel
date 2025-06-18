@@ -4,6 +4,10 @@
 
 #include <asm/atomic_ll_sc.h>
 
+/**
+ * CONFIG_ARM64_LSE_ATOMICS 是 Linux 内核中针对 ARM64（AArch64）架构 的配置选项，
+ * 用于启用 ARMv8.1 Large System Extensions (LSE) 原子指令 的支持。它的主要功能是优化多核系统上的原子操作（atomic operations），提高并发性能
+ */
 #ifdef CONFIG_ARM64_LSE_ATOMICS
 
 #define __LSE_PREAMBLE	".arch_extension lse\n"

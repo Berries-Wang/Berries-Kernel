@@ -68,6 +68,9 @@ typedef struct raw_spinlock {
 
 #define DEFINE_RAW_SPINLOCK(x)	raw_spinlock_t x = __RAW_SPIN_LOCK_UNLOCKED(x)
 
+/**
+ * spinlock 数据结构的定义
+ */
 typedef struct spinlock {
 	union {
 		struct raw_spinlock rlock;

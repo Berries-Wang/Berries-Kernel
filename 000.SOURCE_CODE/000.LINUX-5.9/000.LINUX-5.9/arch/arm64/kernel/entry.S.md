@@ -613,7 +613,7 @@ SYM_CODE_START_LOCAL_NOALIGN(el1_sync)
 SYM_CODE_END(el1_sync)
 
 	.align	6
-SYM_CODE_START_LOCAL_NOALIGN(el1_irq)
+SYM_CODE_START_LOCAL_NOALIGN(el1_irq) // 硬件中断
 	kernel_entry 1
 	gic_prio_irq_setup pmr=x20, tmp=x1
 	enable_da_f
@@ -621,7 +621,7 @@ SYM_CODE_START_LOCAL_NOALIGN(el1_irq)
 #ifdef CONFIG_ARM64_PSEUDO_NMI
 	test_irqs_unmasked	res=x0, pmr=x20
 	cbz	x0, 1f
-	bl	asm_nmi_enter
+	bl	asm_nmi_enter   //000.LINUX-5.9/arch/arm64/kernel/irq.c
 1:
 #endif
 

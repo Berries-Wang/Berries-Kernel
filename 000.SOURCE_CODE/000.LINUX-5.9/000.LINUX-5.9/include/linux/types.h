@@ -163,6 +163,9 @@ typedef phys_addr_t resource_size_t;
  */
 typedef unsigned long irq_hw_number_t;
 
+/**
+ * Linux 内核原子变量
+ */
 typedef struct {
 	int counter;
 } atomic_t;
