@@ -629,7 +629,7 @@ SYM_CODE_START_LOCAL_NOALIGN(el1_irq) // 硬件中断
 	bl	trace_hardirqs_off
 #endif
 
-	irq_handler
+	irq_handler   // 就定义在本文件中，是一个宏
 
 #ifdef CONFIG_PREEMPTION
 	ldr	x24, [tsk, #TSK_TI_PREEMPT]	// get preempt count
