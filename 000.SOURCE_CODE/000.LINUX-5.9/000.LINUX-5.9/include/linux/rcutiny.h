@@ -62,10 +62,6 @@ static inline void rcu_softirq_qs(void)
 	rcu_qs();
 }
 
-/**
- *  RCU（Read-Copy-Update，读-复制-更新）是Linux内核中一种重要的同步机制，主要用于解决多核系统中读多写少的同步问题。
- * 
- */
 #define rcu_note_context_switch(preempt) \
 	do { \
 		rcu_qs(); \
