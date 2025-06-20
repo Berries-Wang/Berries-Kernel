@@ -138,8 +138,13 @@ static inline void __raw_spin_lock_bh(raw_spinlock_t *lock)
 
 static inline void __raw_spin_lock(raw_spinlock_t *lock)
 {
+	// 关闭内核抢占
 	preempt_disable();
+	
+	// 
 	spin_acquire(&lock->dep_map, 0, 0, _RET_IP_);
+    
+	// lockdep.h
 	LOCK_CONTENDED(lock, do_raw_spin_trylock, do_raw_spin_lock);
 }
 

@@ -167,6 +167,8 @@ extern void preempt_count_sub(int val);
 
 /**
  * CONFIG_PREEMPT_COUNT 是Linux内核抢占系统的核心基础设施，它既保证了抢占机制的正确性，又为调试复杂的并发问题提供了有力工具
+ * 
+ * 禁止内核抢占的真正实现
  */
 #ifdef CONFIG_PREEMPT_COUNT
 
@@ -245,7 +247,7 @@ do { \
  * 这样我们就不会出现像 get_user/put_user 这样可能导致故障和调度迁移到我们的抢占保护区域的事情。)
  */
 
-// 禁用内核抢占
+// 禁用内核抢占: 注意，真正的实现在上面，不是这里
 #define preempt_disable()			barrier()
 #define sched_preempt_enable_no_resched()	barrier()
 #define preempt_enable_no_resched()		barrier()

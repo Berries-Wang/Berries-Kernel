@@ -2,6 +2,7 @@
     "files.associations": {
         "type_traits": "c",
         "variant": "c",
-        "*.tbl": "c"
+        "*.tbl": "c",
+        "qspinlock.h": "c"
     }
 }
