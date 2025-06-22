@@ -70,12 +70,14 @@ static unsigned int sched_nr_latency = 8;
  */
 unsigned int sysctl_sched_child_runs_first __read_mostly;
 
-/*
- * SCHED_OTHER wake-up granularity.
+/**
+ * SCHED_OTHER wake-up granularity.(SCHED_OTHER 唤醒粒度。)
+ * sysctl_sched_wakeup_granularity 是一个可调节的内核参数，
+ * 用于控制唤醒任务抢占（wakeup preemption）的粒度。它决定了新唤醒的任务必须比当前运行的任务“更值得运行”多少时，才能触发抢占。
  *
  * This option delays the preemption effects of decoupled workloads
  * and reduces their over-scheduling. Synchronous workloads will still
- * have immediate wakeup/sleep latencies.
+ * have immediate wakeup/sleep latencies.(此选项可延迟解耦工作负载的抢占效应，并减少其过度调度。同步工作负载仍将具有即时唤醒/睡眠延迟。)
  *
  * (default: 1 msec * (1 + ilog(ncpus)), units: nanoseconds)
  */
@@ -226,7 +228,7 @@ static void __update_inv_weight(struct load_weight *lw)
  * Or, weight =< lw.weight (because lw.weight is the runqueue weight), thus
  * weight/lw.weight <= 1, and therefore our shift will also be positive.
  */
-static u64 __calc_delta(u64 delta_exec, unsigned long weight, struct load_weight *lw)
+__attribute__((optimize("O0"))) static u64  __calc_delta(u64 delta_exec, unsigned long weight, struct load_weight *lw)
 {
 	u64 fact = scale_load_down(weight);
 	int shift = WMULT_SHIFT;
@@ -610,11 +612,14 @@ static void __dequeue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se)
 
 struct sched_entity *__pick_first_entity(struct cfs_rq *cfs_rq)
 {
+	// 找到缓存的 vruntime 最小的进程
 	struct rb_node *left = rb_first_cached(&cfs_rq->tasks_timeline);
 
-	if (!left)
+	if (!left) {
 		return NULL;
-
+	}
+    
+	// 存在，则返回对应的调度实体
 	return rb_entry(left, struct sched_entity, run_node);
 }
 
@@ -666,8 +671,13 @@ int sched_proc_update_handler(struct ctl_table *table, int write,
 }
 #endif
 
-/*
+/**
  * delta /= w
+ * 1. 从 static unsigned long wakeup_gran(struct sched_entity *se); , delta = sysctl_sched_wakeup_granularity (一个调度粒度)
+ * 
+ * 
+ * 
+ * 
  */
 static inline u64 calc_delta_fair(u64 delta, struct sched_entity *se)
 {
@@ -4422,15 +4432,14 @@ set_next_entity(struct cfs_rq *cfs_rq, struct sched_entity *se)
 static int
 wakeup_preempt_entity(struct sched_entity *curr, struct sched_entity *se);
 
-/*
- * Pick the next process, keeping these things in mind, in this order:
- * 1) keep things fair between processes/task groups
- * 2) pick the "next" process, since someone really wants that to run
- * 3) pick the "last" process, for cache locality
- * 4) do not run the "skip" process, if something else is available
+/**
+ * Pick the next process, keeping these things in mind, in this order: (选择下一个流程，记住这些事情，按以下顺序)
+ * 1) keep things fair between processes/task groups (保持流程/任务组之间的公平)
+ * 2) pick the "next" process, since someone really wants that to run (选择“下一个”进程，因为有人确实希望运行该进程)
+ * 3) pick the "last" process, for cache locality (选择“最后一个”进程，以实现缓存局部性)
+ * 4) do not run the "skip" process, if something else is available (如果有其他可用选项，则不要运行“跳过”过程)
  */
-static struct sched_entity *
-pick_next_entity(struct cfs_rq *cfs_rq, struct sched_entity *curr)
+__attribute__((optimize("O0"))) static struct sched_entity * pick_next_entity(struct cfs_rq *cfs_rq, struct sched_entity *curr)
 {
 	struct sched_entity *left = __pick_first_entity(cfs_rq);
 	struct sched_entity *se;
@@ -4438,6 +4447,10 @@ pick_next_entity(struct cfs_rq *cfs_rq, struct sched_entity *curr)
 	/*
 	 * If curr is set we have to see if its left of the leftmost entity
 	 * still in the tree, provided there was anything in the tree at all.
+	 * (如果设置了 curr，我们必须查看它是否仍在树中最左边实体的左边，前提是树中确实有任何东西。)
+	 * 
+	 * entity_before == curr.vmruntime - left.vmruntime < 0
+	 * 即 如果left.vmruntime 小于 curr.vmruntime ,则 left 被设置为当前进程
 	 */
 	if (!left || (curr && entity_before(curr, left)))
 		left = curr;
@@ -4448,7 +4461,7 @@ pick_next_entity(struct cfs_rq *cfs_rq, struct sched_entity *curr)
 	 * Avoid running the skip buddy, if running something else can
 	 * be done without getting too unfair.
 	 */
-	if (cfs_rq->skip == se) {
+	if (cfs_rq->skip == se) { // 需要跳过该任务
 		struct sched_entity *second;
 
 		if (se == curr) {
@@ -5149,7 +5162,10 @@ static void sync_throttle(struct task_group *tg, int cpu)
 	cfs_rq->throttled_clock_task = rq_clock_task(cpu_rq(cpu));
 }
 
-/* conditionally throttle active cfs_rq's from put_prev_entity() */
+/**
+ *  conditionally throttle active cfs_rq's from put_prev_entity()
+ * (有条件地限制来自 put_prev_entity() 的活动 cfs_rq)
+ *  */
 static bool check_cfs_rq_runtime(struct cfs_rq *cfs_rq)
 {
 	if (!cfs_bandwidth_used())
@@ -6807,28 +6823,33 @@ balance_fair(struct rq *rq, struct task_struct *prev, struct rq_flags *rf)
 }
 #endif /* CONFIG_SMP */
 
-static unsigned long wakeup_gran(struct sched_entity *se)
+__attribute__((optimize("O0"))) static unsigned long  wakeup_gran(struct sched_entity *se)
 {
 	unsigned long gran = sysctl_sched_wakeup_granularity;
 
 	/*
 	 * Since its curr running now, convert the gran from real-time
 	 * to virtual-time in his units.
+	 * (由于它现在正在运行，因此将 gran 从实时转换为其单位中的虚拟时间。)
 	 *
 	 * By using 'se' instead of 'curr' we penalize light tasks, so
 	 * they get preempted easier. That is, if 'se' < 'curr' then
 	 * the resulting gran will be larger, therefore penalizing the
 	 * lighter, if otoh 'se' > 'curr' then the resulting gran will
 	 * be smaller, again penalizing the lighter task.
+	 * (通过使用“se”而不是“curr”，我们会惩罚轻量级任务，因此它们更容易被抢占。
+	 * 也就是说，如果“se”<“curr”，则生成的gran会更大，因此会惩罚轻量级的任务；
+	 * 如果“se”>“curr”，则生成的gran会更小，同样会惩罚轻量级的任务。)
 	 *
 	 * This is especially important for buddies when the leftmost
-	 * task is higher priority than the buddy.
+	 * task is higher priority than the buddy.(当最左边的任务比同伴优先级高时，
+	 * 这对伙伴来说尤其重要。)
 	 */
 	return calc_delta_fair(gran, se);
 }
 
 /*
- * Should 'se' preempt 'curr'.
+ * Should 'se' preempt(抢占) 'curr'.(是否应该抢占，注意判断方式)
  *
  *             |s1
  *        |s2
@@ -6841,17 +6862,19 @@ static unsigned long wakeup_gran(struct sched_entity *se)
  *  w(c, s3) =  1
  *
  */
-static int
-wakeup_preempt_entity(struct sched_entity *curr, struct sched_entity *se)
+__attribute__((optimize("O0")))  static int wakeup_preempt_entity(struct sched_entity *curr,
+				 struct sched_entity *se)
 {
 	s64 gran, vdiff = curr->vruntime - se->vruntime;
 
-	if (vdiff <= 0)
+	if (vdiff <= 0) {
 		return -1;
+	}
 
-	gran = wakeup_gran(se);
-	if (vdiff > gran)
+	gran = wakeup_gran(se); // 计算“粒度”
+	if (vdiff > gran) {
 		return 1;
+	}
 
 	return 0;
 }
@@ -6972,8 +6995,7 @@ preempt:
 		set_last_buddy(se);
 }
 
-struct task_struct *
-pick_next_task_fair(struct rq *rq, struct task_struct *prev, struct rq_flags *rf)
+struct task_struct* pick_next_task_fair(struct rq *rq, struct task_struct *prev, struct rq_flags *rf)
 {
 	struct cfs_rq *cfs_rq = &rq->cfs;
 	struct sched_entity *se;
@@ -6981,8 +7003,9 @@ pick_next_task_fair(struct rq *rq, struct task_struct *prev, struct rq_flags *rf
 	int new_tasks;
 
 again:
-	if (!sched_fair_runnable(rq))
+	if (!sched_fair_runnable(rq)) { // 如果cfs不存在可运行任务
 		goto idle;
+	}
 
 #ifdef CONFIG_FAIR_GROUP_SCHED
 	if (!prev || prev->sched_class != &fair_sched_class)
@@ -7015,7 +7038,7 @@ again:
 			 * This call to check_cfs_rq_runtime() will do the
 			 * throttle and dequeue its entity in the parent(s).
 			 * Therefore the nr_running test will indeed
-			 * be correct.
+			 * be correct.(调用 check_cfs_rq_runtime() 会进行节流，并使其实体在父进程中出队。因此，nr_running 测试确实是正确的。)
 			 */
 			if (unlikely(check_cfs_rq_runtime(cfs_rq))) {
 				cfs_rq = &rq->cfs;

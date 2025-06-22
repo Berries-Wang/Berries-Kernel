@@ -139,7 +139,9 @@ extern void call_trace_sched_update_nr_running(struct rq *rq, int count);
  * Task weight (visible to users) and its load (invisible to users) have
  * independent resolution, but they should be well calibrated. We use
  * scale_load() and scale_load_down(w) to convert between them. The
- * following must be true:
+ * following must be true:(任务权重（用户可见）及其负载（用户不可见）具有独立的分辨率，
+ * 但应进行良好的校准。我们使用 scale_load() 和 scale_load_down(w) 在它们之间进行转换。
+ * 以下条件必须成立：)
  *
  *  scale_load(sched_prio_to_weight[USER_PRIO(NICE_TO_PRIO(0))]) == NICE_0_LOAD
  *
@@ -527,7 +529,10 @@ struct cfs_rq {
 #ifndef CONFIG_64BIT
 	u64			min_vruntime_copy;
 #endif
-
+    /**
+	 * 用于 管理所有可运行（RUNNABLE）进程的红黑树，其核心功能是 按进程的虚拟运行时间（vruntime）排序，实现公平调度。
+	 * 
+	 */
 	struct rb_root_cached	tasks_timeline;
 
 	/*
@@ -537,6 +542,13 @@ struct cfs_rq {
 	struct sched_entity	*curr;
 	struct sched_entity	*next;
 	struct sched_entity	*last;
+
+	/**
+	 * skip 主要用于以下场景： 有待验证
+     *   避免重复选择：当某个调度实体（如任务或任务组）因特定原因（如被限流、处于非活跃状态或需要迁移）需要被临时排除出调度决策时，CFS 会将其标记为 skip，确保调度器在下次选择时不重复选中它。
+     *   负载均衡或迁移：在 CPU 负载均衡过程中，若某个任务正在被迁移到其他 CPU，skip 可防止原 CPU 的 CFS 再次选中该任务。
+     *   嵌套调度组：在组调度（CONFIG_FAIR_GROUP_SCHED）中，若某个任务组的配额用尽，其关联的 sched_entity 可能被标记为 skip。
+	 */
 	struct sched_entity	*skip;
 
 #ifdef	CONFIG_SCHED_DEBUG
