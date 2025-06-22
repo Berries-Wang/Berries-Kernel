@@ -4292,7 +4292,7 @@ static int __lock_is_held(const struct lockdep_map *lock, int read);
  * otherwise we could get an interrupt which would want to take locks,
  * which would end up in lockdep again.
  */
-static int __lock_acquire(struct lockdep_map *lock, unsigned int subclass,
+static int __attribute__((optimize("O0")))  __lock_acquire(struct lockdep_map *lock, unsigned int subclass,
 			  int trylock, int read, int check, int hardirqs_off,
 			  struct lockdep_map *nest_lock, unsigned long ip,
 			  int references, int pin_count)
@@ -4994,7 +4994,7 @@ static bool lockdep_nmi(void)
  * We are not always called with irqs disabled - do that here,
  * and also avoid lockdep recursion:
  */
-void lock_acquire(struct lockdep_map *lock, unsigned int subclass,
+void __attribute__((optimize("O0")))  lock_acquire(struct lockdep_map *lock, unsigned int subclass,
 			  int trylock, int read, int check,
 			  struct lockdep_map *nest_lock, unsigned long ip)
 {
@@ -5197,8 +5197,7 @@ __lock_contended(struct lockdep_map *lock, unsigned long ip)
 		stats->bounces[bounce_contended + !!hlock->read]++;
 }
 
-static void
-__lock_acquired(struct lockdep_map *lock, unsigned long ip)
+static void __attribute__((optimize("O0"))) __lock_acquired(struct lockdep_map *lock, unsigned long ip)
 {
 	struct task_struct *curr = current;
 	struct held_lock *hlock;
@@ -5266,7 +5265,7 @@ void lock_contended(struct lockdep_map *lock, unsigned long ip)
 }
 EXPORT_SYMBOL_GPL(lock_contended);
 
-void lock_acquired(struct lockdep_map *lock, unsigned long ip)
+void __attribute__((optimize("O0")))  lock_acquired(struct lockdep_map *lock, unsigned long ip)
 {
 	unsigned long flags;
 

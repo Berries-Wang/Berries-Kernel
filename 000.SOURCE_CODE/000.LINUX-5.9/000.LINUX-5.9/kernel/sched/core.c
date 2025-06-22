@@ -4361,10 +4361,9 @@ static void put_prev_task_balance(struct rq *rq, struct task_struct *prev,
 }
 
 /*
- * Pick up the highest-prio task:
+ * Pick up the highest-prio task:(选择优先级最高的任务：)
  */
-static inline struct task_struct *
-pick_next_task(struct rq *rq, struct task_struct *prev, struct rq_flags *rf)
+static inline struct task_struct * pick_next_task(struct rq *rq, struct task_struct *prev, struct rq_flags *rf)
 {
 	const struct sched_class *class;
 	struct task_struct *p;
@@ -4444,7 +4443,7 @@ restart:
  *
  * WARNING: must be called with preemption disabled! (警告： 必须在禁止抢占的情况下调用)
  * 
- * @param preempt 
+ * @param preempt 是否支持抢占???
  */
 static void __sched notrace __schedule(bool preempt)
 {
@@ -4509,12 +4508,13 @@ static void __sched notrace __schedule(bool preempt)
 
 	/*
 	 * We must load prev->state once (task_struct::state is volatile), such
-	 * that:
+	 * that: (我们必须加载 prev->state 一次（task_struct::state 是易失性的），这样：)
 	 *
-	 *  - we form a control dependency vs deactivate_task() below.
-	 *  - ptrace_{,un}freeze_traced() can change ->state underneath us.
+	 *  - we form a control dependency vs deactivate_task() below.(我们在下面形成与 deactivate_task() 的控制依赖关系。)
+	 *  - ptrace_{,un}freeze_traced() can change ->state underneath us. (ptrace_{,un}freeze_traced() 可以改变我们下面的 ->state。)
 	 */
 	prev_state = prev->state;
+
 	if (!preempt && prev_state) {
 		if (signal_pending_state(prev_state, prev)) {
 			prev->state = TASK_RUNNING;

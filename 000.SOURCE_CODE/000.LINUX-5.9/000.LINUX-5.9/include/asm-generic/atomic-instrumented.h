@@ -704,7 +704,7 @@ atomic_try_cmpxchg_acquire(atomic_t *v, int *old, int new)
 {
 	instrument_atomic_write(v, sizeof(*v));
 	instrument_atomic_write(old, sizeof(*old));
-	return arch_atomic_try_cmpxchg_acquire(v, old, new);
+	return arch_atomic_try_cmpxchg_acquire(v, old, new); // arm64: include/linux/atomic-arch-fallback.h
 }
 #define atomic_try_cmpxchg_acquire atomic_try_cmpxchg_acquire
 #endif

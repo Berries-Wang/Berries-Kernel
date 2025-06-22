@@ -61,7 +61,7 @@ static __always_inline void instrument_atomic_read(const volatile void *v, size_
  * instrument_atomic_write - instrument atomic write access
  *
  * Instrument an atomic write access. The instrumentation should be inserted
- * before the actual write happens.
+ * before the actual write happens. (检测原子写入访问。该检测应在实际写入操作发生之前插入。)
  *
  * @ptr address of access
  * @size size of access

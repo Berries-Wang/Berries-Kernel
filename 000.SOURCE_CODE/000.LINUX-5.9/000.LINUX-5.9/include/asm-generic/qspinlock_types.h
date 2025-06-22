@@ -13,7 +13,7 @@
 
 typedef struct qspinlock {
 	union {
-		atomic_t val;
+		atomic_t val;   // 存储两个数值?next  、 owner
 
 		/*
 		 * By using the whole 2nd least significant byte for the

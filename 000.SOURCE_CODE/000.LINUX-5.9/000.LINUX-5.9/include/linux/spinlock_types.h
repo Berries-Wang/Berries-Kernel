@@ -18,7 +18,7 @@
 #include <linux/lockdep_types.h>
 
 typedef struct raw_spinlock {
-	arch_spinlock_t raw_lock;
+	arch_spinlock_t raw_lock;   // arm64: include/asm-generic/qspinlock_types.h
 #ifdef CONFIG_DEBUG_SPINLOCK
 	unsigned int magic, owner_cpu;
 	void *owner;

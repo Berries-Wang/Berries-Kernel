@@ -479,6 +479,9 @@ static inline void print_irqtrace_events(struct task_struct *curr)
 /*
  * Map the dependency ops to NOP or to real lockdep ops, depending
  * on the per lock-class debug mode:
+ * 
+ * lock_acquire : 
+ *   arm64: kernel/locking/lockdep.c
  */
 
 #define lock_acquire_exclusive(l, s, t, n, i)		lock_acquire(l, s, t, 0, 1, n, i)

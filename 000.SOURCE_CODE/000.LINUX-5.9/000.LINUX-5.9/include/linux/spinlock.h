@@ -180,7 +180,7 @@ do {									\
 static inline void do_raw_spin_lock(raw_spinlock_t *lock) __acquires(lock)
 {
 	__acquire(lock);
-	arch_spin_lock(&lock->raw_lock);
+	arch_spin_lock(&lock->raw_lock);  // include/asm-generic/qspinlock.h  #define arch_spin_lock(l)		queued_spin_lock(l)
 	mmiowb_spin_lock();
 }
 

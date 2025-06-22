@@ -146,8 +146,11 @@ EXPORT_SYMBOL(_raw_spin_trylock_bh);
 #endif
 
 #ifndef CONFIG_INLINE_SPIN_LOCK
-void __lockfunc _raw_spin_lock(raw_spinlock_t *lock)
+void __lockfunc __attribute__((optimize("O0"))) _raw_spin_lock(raw_spinlock_t *lock)
 {
+	/**
+	 * arm64: include/linux/spinlock_api_smp.h
+	 */
 	__raw_spin_lock(lock);
 }
 EXPORT_SYMBOL(_raw_spin_lock);

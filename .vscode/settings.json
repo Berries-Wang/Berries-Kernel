@@ -3,6 +3,13 @@
         "type_traits": "c",
         "variant": "c",
         "*.tbl": "c",
-        "qspinlock.h": "c"
+        "qspinlock.h": "c",
+        "mutex": "c",
+        "shared_mutex": "c",
+        "array": "c",
+        "bitset": "c",
+        "initializer_list": "c",
+        "string_view": "c",
+        "utility": "c"
     }
 }
