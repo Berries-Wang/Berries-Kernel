@@ -894,7 +894,7 @@ DECLARE_STATIC_KEY_FALSE(sched_uclamp_used);
  */
 struct rq {
 	/* runqueue lock: */
-	raw_spinlock_t		lock;
+	raw_spinlock_t		lock; // 自旋锁
 
 	/*
 	 * nr_running and cpu_load should be in the same cacheline because
@@ -1289,8 +1289,7 @@ rq_lock_irq(struct rq *rq, struct rq_flags *rf)
 	rq_pin_lock(rq, rf);
 }
 
-static inline void
-rq_lock(struct rq *rq, struct rq_flags *rf)
+static inline void rq_lock(struct rq *rq, struct rq_flags *rf)
 	__acquires(rq->lock)
 {
 	raw_spin_lock(&rq->lock);

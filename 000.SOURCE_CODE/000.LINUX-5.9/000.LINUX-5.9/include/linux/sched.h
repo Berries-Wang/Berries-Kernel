@@ -928,8 +928,8 @@ struct task_struct {
 	atomic_t			tick_dep_mask;
 #endif
 	/* Context switch counts: */
-	unsigned long			nvcsw;
-	unsigned long			nivcsw;
+	unsigned long			nvcsw;  //  自愿上下文切换次数（Number of Voluntary Context Switches）。它表示进程 主动放弃 CPU 的次数（例如等待 I/O、锁或其他资源时调用 schedule()）
+	unsigned long			nivcsw; //  非自愿上下文切换次数（Number of InVoluntary Context Switches）进程被内核强制调度出去的次数
 
 	/* Monotonic time in nsecs: */
 	u64				start_time;

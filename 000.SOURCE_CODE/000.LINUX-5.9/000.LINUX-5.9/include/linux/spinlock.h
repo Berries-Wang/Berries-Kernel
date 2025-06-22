@@ -7,7 +7,7 @@
  *
  * here's the role of the various spinlock/rwlock related include files:
  *
- * on SMP builds:
+ * on SMP(对称多处理（Symmetric Multi-Processing）) builds:
  *
  *  asm/spinlock_types.h: contains the arch_spinlock_t/arch_rwlock_t and the
  *                        initializers
@@ -180,7 +180,7 @@ do {									\
 static inline void do_raw_spin_lock(raw_spinlock_t *lock) __acquires(lock)
 {
 	__acquire(lock);
-	arch_spin_lock(&lock->raw_lock);
+	arch_spin_lock(&lock->raw_lock);  // include/asm-generic/qspinlock.h  #define arch_spin_lock(l)		queued_spin_lock(l)
 	mmiowb_spin_lock();
 }
 

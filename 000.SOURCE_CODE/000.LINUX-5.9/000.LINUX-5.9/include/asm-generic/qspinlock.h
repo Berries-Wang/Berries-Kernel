@@ -72,16 +72,33 @@ extern void queued_spin_lock_slowpath(struct qspinlock *lock, u32 val);
 
 #ifndef queued_spin_lock
 /**
- * queued_spin_lock - acquire a queued spinlock
+ * queued_spin_lock - acquire a queued spinlock (获取排队自旋锁)
  * @lock: Pointer to queued spinlock structure
+ * 
+ * 
+ * ### arm64:
+ * #0  arch_static_branch_jump (branch=<optimized out>, key=<optimized out>) at ./arch/arm64/include/asm/jump_label.h:38
+ * #1  system_uses_lse_atomics () at ./arch/arm64/include/asm/lse.h:28
+ * #2  __cmpxchg_case_acq_32 (new=<optimized out>, old=<optimized out>, ptr=<optimized out>) at ./arch/arm64/include/asm/cmpxchg.h:121
+ * #3  __cmpxchg_acq (size=<optimized out>, new=<optimized out>, old=<optimized out>, ptr=<optimized out>) at ./arch/arm64/include/asm/cmpxchg.h:173
+ * #4  arch_atomic_try_cmpxchg_acquire (new=<optimized out>, old=<optimized out>, v=<optimized out>) at ./include/linux/atomic-arch-fallback.h:933
+ * #5  atomic_try_cmpxchg_acquire (new=<optimized out>, old=<optimized out>, v=<optimized out>) at ./include/asm-generic/atomic-instrumented.h:707
+ * #6  queued_spin_lock (lock=<optimized out>) at ./include/asm-generic/qspinlock.h:82
+ * #7  do_raw_spin_lock (lock=<optimized out>) at ./include/linux/spinlock.h:183
+ * #8  __raw_spin_lock (lock=0xffff800011e2abd8 <logbuf_lock>) at ./include/linux/spinlock_api_smp.h:154
+ *
  */
-static __always_inline void queued_spin_lock(struct qspinlock *lock)
+static __always_inline  void queued_spin_lock(struct qspinlock *lock)
 {
 	u32 val = 0;
-
+    
+	/**
+	 * 先加乐观锁
+	 */
 	if (likely(atomic_try_cmpxchg_acquire(&lock->val, &val, _Q_LOCKED_VAL)))
 		return;
 
+	// 没有获取到锁，进入队列等待获取锁
 	queued_spin_lock_slowpath(lock, val);
 }
 #endif
