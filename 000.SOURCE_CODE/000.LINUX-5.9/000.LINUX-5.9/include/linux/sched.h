@@ -310,9 +310,18 @@ struct sched_info {
 /*
  * Integer metrics need fixed point arithmetic, e.g., sched/fair
  * has a few: load, load_avg, util_avg, freq, and capacity.
+ * (整数指标需要定点运算，例如，sched/fair 有几个：load、load_avg、util_avg、freq 和 capacity。)
  *
  * We define a basic fixed point arithmetic range, and then formalize
  * all these metrics based on that basic range.
+ * (我们定义一个基本的定点算术范围，然后根据该基本范围将所有这些指标形式化。)
+ * 
+ * 在 Linux 内核中，SCHED_FIXEDPOINT_SHIFT 是一个用于调度器（scheduler）中定点数运算的宏，
+ * 它定义了在计算进程权重、负载等参数时所使用的定点数的小数点位置（即移位位数）
+ * 
+ * 定点数的概念：
+ *     定点数是指在计算机中，用固定数量的二进制位来表示一个数值，其中一部分位用于表示整数部分，
+ *       另一部分位用于表示小数部分。小数点的位置是固定的，不随数值大小变化。
  */
 # define SCHED_FIXEDPOINT_SHIFT		10
 # define SCHED_FIXEDPOINT_SCALE		(1L << SCHED_FIXEDPOINT_SHIFT)
@@ -476,11 +485,27 @@ struct sched_entity {
 	struct sched_statistics		statistics;
 
 #ifdef CONFIG_FAIR_GROUP_SCHED
+    /* 组调度相关 */
+    /**
+	 * depth: 用于表示调度实体在调度组层次结构中的深度，主要与组调度（Group Scheduling）功能相关
+	 * 1. 用于表示调度实体在调度组层次结构中的深度，主要与组调度（Group Scheduling）功能相关
+	 * 2. 防止循环依赖：调度器通过 depth 检测层次结构中的循环引用（类似树的环检测）
+	 */
 	int				depth;
+	
+	/**
+	 * parent 指上一级的组调度节点，系统中有一个组调度的根，命名为root_task_group
+	 */
 	struct sched_entity		*parent;
-	/* rq on which this entity is (to be) queued: */
+	/**
+	 *  rq on which this entity is (to be) queued:(该实体正在（将要）排队的 rq：)
+	 *  调度实体se 的cfs_rq 成员指向系统中(CPU的，可以看文档,有图)的CFS 调度队列  P384 《Run Linux Kernel-Base On 4.x.pdf》
+	 *  */
 	struct cfs_rq			*cfs_rq;
-	/* rq "owned" by this entity/group: */
+	/**
+	 *  rq "owned" by this entity/group: (rq 由该实体/团体“拥有”：)
+	 *  my_q 成员指向组调度里自身的CFS 调度队列  P384 《Run Linux Kernel-Base On 4.x.pdf》
+	 * */
 	struct cfs_rq			*my_q;
 	/* cached value of my_q->h_nr_running */
 	unsigned long			runnable_weight;

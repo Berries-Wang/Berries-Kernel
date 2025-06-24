@@ -71,6 +71,8 @@ static unsigned int sched_nr_latency = 8;
 unsigned int sysctl_sched_child_runs_first __read_mostly;
 
 /**
+ * sysctl_sched_wakeup_granularity 是最小抢占时间（物理时间）
+ * 
  * SCHED_OTHER wake-up granularity.(SCHED_OTHER 唤醒粒度。)
  * sysctl_sched_wakeup_granularity 是一个可调节的内核参数，
  * 用于控制唤醒任务抢占（wakeup preemption）的粒度。它决定了新唤醒的任务必须比当前运行的任务“更值得运行”多少时，才能触发抢占。
@@ -80,6 +82,10 @@ unsigned int sysctl_sched_child_runs_first __read_mostly;
  * have immediate wakeup/sleep latencies.(此选项可延迟解耦工作负载的抢占效应，并减少其过度调度。同步工作负载仍将具有即时唤醒/睡眠延迟。)
  *
  * (default: 1 msec * (1 + ilog(ncpus)), units: nanoseconds)
+ * 
+ * 
+ * 若机器是4C，那么 ‘sysctl_sched_wakeup_granularity’ 的值是多少呢?
+ * > 还是 1000000UL 
  */
 unsigned int sysctl_sched_wakeup_granularity			= 1000000UL;
 static unsigned int normalized_sysctl_sched_wakeup_granularity	= 1000000UL;
@@ -230,6 +236,9 @@ static void __update_inv_weight(struct load_weight *lw)
  */
 __attribute__((optimize("O0"))) static u64  __calc_delta(u64 delta_exec, unsigned long weight, struct load_weight *lw)
 {
+	/**
+	 * weight 右移10位： 获取定点数的整数部分?
+	 */
 	u64 fact = scale_load_down(weight);
 	int shift = WMULT_SHIFT;
 
@@ -399,9 +408,12 @@ static inline void assert_list_leaf_cfs_rq(struct rq *rq)
 	list_for_each_entry_safe(cfs_rq, pos, &rq->leaf_cfs_rq_list,	\
 				 leaf_cfs_rq_list)
 
-/* Do the two (enqueued) entities belong to the same group ? */
-static inline struct cfs_rq *
-is_same_group(struct sched_entity *se, struct sched_entity *pse)
+/**
+ *  Do the two (enqueued) entities belong to the same group ? 
+ * 
+ *  这个调度组 和 组调度不是同一个!!! , 这里含义是 是否在同一个CPU的cfs队列中 
+ **/
+static inline struct cfs_rq * is_same_group(struct sched_entity *se, struct sched_entity *pse)
 {
 	if (se->cfs_rq == pse->cfs_rq)
 		return se->cfs_rq;
@@ -623,7 +635,7 @@ struct sched_entity *__pick_first_entity(struct cfs_rq *cfs_rq)
 	return rb_entry(left, struct sched_entity, run_node);
 }
 
-static struct sched_entity *__pick_next_entity(struct sched_entity *se)
+__attribute__((optimize("O0"))) static struct sched_entity *__pick_next_entity(struct sched_entity *se)
 {
 	struct rb_node *next = rb_next(&se->run_node);
 
@@ -677,7 +689,10 @@ int sched_proc_update_handler(struct ctl_table *table, int write,
  * 
  * 
  * 
+ * 计算虚拟时间(vruntime)的核心函数
+ * >> 通过 基准值(sysctl_sched_wakeup_granularity) + weight 来计算???
  * 
+ * @param delta ： 实际运行时间
  */
 static inline u64 calc_delta_fair(u64 delta, struct sched_entity *se)
 {
@@ -6823,7 +6838,7 @@ balance_fair(struct rq *rq, struct task_struct *prev, struct rq_flags *rf)
 }
 #endif /* CONFIG_SMP */
 
-__attribute__((optimize("O0"))) static unsigned long  wakeup_gran(struct sched_entity *se)
+__attribute__((optimize("O0"))) static unsigned long wakeup_gran(struct sched_entity *se)
 {
 	unsigned long gran = sysctl_sched_wakeup_granularity;
 
@@ -6995,7 +7010,7 @@ preempt:
 		set_last_buddy(se);
 }
 
-struct task_struct* pick_next_task_fair(struct rq *rq, struct task_struct *prev, struct rq_flags *rf)
+__attribute__((optimize("O0"))) struct task_struct* pick_next_task_fair(struct rq *rq, struct task_struct *prev, struct rq_flags *rf)
 {
 	struct cfs_rq *cfs_rq = &rq->cfs;
 	struct sched_entity *se;
@@ -7051,7 +7066,13 @@ again:
 		}
 
 		se = pick_next_entity(cfs_rq, curr);
+
+		// 获取组调度实体: 获取的是 my_q属性
 		cfs_rq = group_cfs_rq(se);
+
+		/**
+		 * 退出循环，那就是 cfs_rq 为NULL , 即 当前task是个普通任务(不在组调度中)
+		 */
 	} while (cfs_rq);
 
 	p = task_of(se);
@@ -7060,10 +7081,12 @@ again:
 	 * Since we haven't yet done put_prev_entity and if the selected task
 	 * is a different task than we started out with, try and touch the
 	 * least amount of cfs_rqs.
+	 * (由于我们尚未完成 put_prev_entity，并且如果所选任务与我们开始时的任务不同，请尝试触及最少量的 cfs_rqs。)
 	 */
 	if (prev != p) {
 		struct sched_entity *pse = &prev->se;
 
+		// 若 se pse 在同一个cfs_rq中
 		while (!(cfs_rq = is_same_group(se, pse))) {
 			int se_depth = se->depth;
 			int pse_depth = pse->depth;
