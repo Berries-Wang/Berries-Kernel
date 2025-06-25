@@ -124,15 +124,19 @@ int __weak arch_asym_cpu_priority(int cpu)
 #endif
 
 #ifdef CONFIG_CFS_BANDWIDTH
-/*
+/**
  * Amount of runtime to allocate from global (tg) to local (per-cfs_rq) pool
  * each time a cfs_rq requests quota.
+ * (每次 cfs_rq 请求配额时，从全局（tg）到本地（每个 cfs_rq）池分配的运行时间量。)
  *
  * Note: in the case that the slice exceeds the runtime remaining (either due
  * to consumption or the quota being specified to be smaller than the slice)
  * we will always only issue the remaining available time.
+ * (注意：如果切片超过剩余运行时间（由于消耗或指定的配额小于切片），我们将始终只发放剩余的可用时间。)
  *
  * (default: 5 msec, units: microseconds)
+ * 
+ * 用于控制 CFS（Completely Fair Scheduler）带宽控制（CFS Bandwidth Control） 的时间切片粒度
  */
 unsigned int sysctl_sched_cfs_bandwidth_slice		= 5000UL;
 #endif
@@ -4531,8 +4535,8 @@ __attribute__((optimize("O0"))) static void put_prev_entity(struct cfs_rq *cfs_r
 	 * was not called and update_curr() has to be done:
 	 * (如果仍在运行队列中，则不会调用 deactivate_task() 并且必须执行 update_curr()：)
 	 */
-	if (prev->on_rq)
-		update_curr(cfs_rq);
+	if (prev->on_rq){
+		update_curr(cfs_rq);}
 
 	/* throttle cfs_rqs exceeding runtime */
 	check_cfs_rq_runtime(cfs_rq);
@@ -4631,8 +4635,11 @@ static inline u64 default_cfs_period(void)
 	return 100000000ULL;
 }
 
+/**
+ * 获取时间片粒度， 单位: 微秒
+ */
 static inline u64 sched_cfs_bandwidth_slice(void)
-{
+{   
 	return (u64)sysctl_sched_cfs_bandwidth_slice * NSEC_PER_USEC;
 }
 
@@ -4654,7 +4661,12 @@ static inline struct cfs_bandwidth *tg_cfs_bandwidth(struct task_group *tg)
 	return &tg->cfs_bandwidth;
 }
 
-/* returns 0 on failure to allocate runtime */
+/**
+ * returns 0 on failure to allocate runtime
+ * (分配运行时间失败时返回 0)
+ * 
+ * @param target_runtime 即 切片时间大小
+ **/
 static int __assign_cfs_rq_runtime(struct cfs_bandwidth *cfs_b,
 				   struct cfs_rq *cfs_rq, u64 target_runtime)
 {
@@ -4665,9 +4677,9 @@ static int __assign_cfs_rq_runtime(struct cfs_bandwidth *cfs_b,
 	/* note: this is a positive sum as runtime_remaining <= 0 */
 	min_amount = target_runtime - cfs_rq->runtime_remaining;
 
-	if (cfs_b->quota == RUNTIME_INF)
+	if (cfs_b->quota == RUNTIME_INF) { // CFS 带宽配额是否无限制（即是否未启用 CPU 时间限制）
 		amount = min_amount;
-	else {
+	} else {
 		start_cfs_bandwidth(cfs_b);
 
 		if (cfs_b->runtime > 0) {
@@ -4677,14 +4689,19 @@ static int __assign_cfs_rq_runtime(struct cfs_bandwidth *cfs_b,
 		}
 	}
 
+	// 就是为了计算 cfs_rq->runtime_remaining 
 	cfs_rq->runtime_remaining += amount;
 
 	return cfs_rq->runtime_remaining > 0;
 }
 
-/* returns 0 on failure to allocate runtime */
+/**
+ *  returns 0 on failure to allocate runtime 
+ * 
+ * */
 static int assign_cfs_rq_runtime(struct cfs_rq *cfs_rq)
 {
+	// 获取CFS带宽控制信息
 	struct cfs_bandwidth *cfs_b = tg_cfs_bandwidth(cfs_rq->tg);
 	int ret;
 

@@ -157,6 +157,8 @@ extern void call_trace_sched_update_nr_running(struct rq *rq, int count);
 
 /*
  * Single value that denotes runtime == period, ie unlimited time.
+ * (表示运行时间 == 周期的单一值，即无限时间。)
+ * 0xFFFFFFFFFFFFFFFF
  */
 #define RUNTIME_INF		((u64)~0ULL)
 
@@ -360,20 +362,33 @@ struct rt_rq;
 
 extern struct list_head task_groups;
 
+/**
+ * https://docs.kernel.org/5.10/scheduler/sched-bwc.html
+ * 
+ * The bandwidth allowed for a group is specified using a quota and period.
+ *  Within each given “period” (microseconds), a task group is allocated up to “quota” microseconds of CPU time.
+ *  That quota is assigned to per-cpu run queues in slices as threads in the cgroup become runnable. Once all quota has been assigned any additional requests for quota will result in those threads being throttled.
+ *  Throttled threads will not be able to run again until the next period when the quota is replenished.
+ *  组允许的带宽是使用配额和周期指定的。在每个给定的“周期”（微秒）内，任务组最多分配 “quota” 微秒的 CPU 时间。当 cgroup 中的线程变为可运行时，该配额将分配给切片中的每 CPU 运行队列。分配所有配额后，对配额的任何其他请求都将导致这些线程受到限制。受限制的线程将无法再次运行，直到下一个时段补充配额。
+ * 
+ * 
+ * cpu.cfs_quota_us：  一段时间内的总可用运行时（以微秒为单位）
+ * cpu.cfs_period_us： 一个时间段的长度（以微秒为单位）
+ */
 struct cfs_bandwidth {
 #ifdef CONFIG_CFS_BANDWIDTH
-	raw_spinlock_t		lock;
-	ktime_t			period;
-	u64			quota;
-	u64			runtime;
-	s64			hierarchical_quota;
+	raw_spinlock_t		lock; // 保护带宽数据的自旋锁
+	ktime_t			period;   // 周期长度（`cpu.cfs_period_us`，默认 100ms）
+	u64			quota;        // 周期内允许的 CPU 时间( 任务组允许执行的总长度-在一个周期内 )（`cpu.cfs_quota_us`）
+	u64			runtime;      // 当前周期内剩余的可用时间（动态调整）
+	s64			hierarchical_quota;  // 层级化调度中的配额（考虑父组限制）
 
-	u8			idle;
+	u8			idle;                // 标记带宽是否未被使用（可优化性能）
 	u8			period_active;
 	u8			slack_started;
-	struct hrtimer		period_timer;
-	struct hrtimer		slack_timer;
-	struct list_head	throttled_cfs_rq;
+	struct hrtimer		period_timer;      // 高精度定时器，用于周期重置
+	struct hrtimer		slack_timer;       // 延迟返还剩余时间的定时器
+	struct list_head	throttled_cfs_rq;  // 被限制的 CFS 运行队列列表
 
 	/* Statistics: */
 	int			nr_periods;
@@ -382,14 +397,26 @@ struct cfs_bandwidth {
 #endif
 };
 
-/* Task group related information */
+/**
+ *  Task group related information （任务组相关信息）
+ * 
+ * struct task_group 是 Linux 控制组（cgroup） 调度子系统的核心数据结构，
+ * 用于实现组调度（Group Scheduling）。它允许将一组任务（进程/线程）作为一个整体进行资源分配和调度。
+ * 
+ * */
 struct task_group {
 	struct cgroup_subsys_state css;
 
 #ifdef CONFIG_FAIR_GROUP_SCHED
-	/* schedulable entities of this group on each CPU */
+	/**
+	 * schedulable entities of this group on each CPU
+	 * (每个 CPU 上该组的可调度实体)
+	 */
 	struct sched_entity	**se;
-	/* runqueue "owned" by this group on each CPU */
+	/**
+	 *  runqueue "owned" by this group on each CPU
+	 * (每个 CPU 上由该组“拥有”的运行队列)
+	 **/
 	struct cfs_rq		**cfs_rq;
 	unsigned long		shares;
 
@@ -398,6 +425,8 @@ struct task_group {
 	 * load_avg can be heavily contended at clock tick time, so put
 	 * it in its own cacheline separated from the fields above which
 	 * will also be accessed at each tick.
+	 * (load_avg 在时钟滴答时可能会受到严重竞争，因此请将其放在自己的缓存行中，
+	 * 与上面的字段分开，这些字段也会在每个滴答时被访问。)
 	 */
 	atomic_long_t		load_avg ____cacheline_aligned;
 #endif
@@ -420,7 +449,11 @@ struct task_group {
 #ifdef CONFIG_SCHED_AUTOGROUP
 	struct autogroup	*autogroup;
 #endif
-
+    
+    /**
+	 * CFS 带宽控制（CFS Bandwidth Control），
+	 * 即通过 cpu.cfs_quota_us 和 cpu.cfs_period_us 限制任务组（Task Group）的 CPU 使用时间
+	 */
 	struct cfs_bandwidth	cfs_bandwidth;
 
 #ifdef CONFIG_UCLAMP_TASK_GROUP
@@ -601,7 +634,12 @@ struct cfs_rq {
 	 */
 	int			on_list;
 	struct list_head	leaf_cfs_rq_list;
-	struct task_group	*tg;	/* group that "owns" this runqueue */
+	
+	/**
+	 * group that "owns" this runqueue(“拥有”此运行队列的组)
+	 * 
+	 */
+	struct task_group	*tg;
 
 #ifdef CONFIG_CFS_BANDWIDTH
 	int			runtime_enabled;
