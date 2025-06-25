@@ -1089,8 +1089,9 @@ update_stats_dequeue(struct cfs_rq *cfs_rq, struct sched_entity *se, int flags)
 static inline void
 update_stats_curr_start(struct cfs_rq *cfs_rq, struct sched_entity *se)
 {
-	/*
+	/**
 	 * We are starting a new run period:
+	 *看来，统计CPU执行时长是根据累计时长的增量来计算的 
 	 */
 	se->exec_start = rq_clock_task(rq_of(cfs_rq));
 }
@@ -3814,8 +3815,10 @@ static void detach_entity_load_avg(struct cfs_rq *cfs_rq, struct sched_entity *s
 #define SKIP_AGE_LOAD	0x2
 #define DO_ATTACH	0x4
 
-/* Update task and its cfs_rq load average */
-static inline void update_load_avg(struct cfs_rq *cfs_rq, struct sched_entity *se, int flags)
+/**
+ *  Update task and its cfs_rq load average
+ *  */
+__attribute__((optimize("O0"))) static inline void update_load_avg(struct cfs_rq *cfs_rq, struct sched_entity *se, int flags)
 {
 	u64 now = cfs_rq_clock_pelt(cfs_rq);
 	int decayed;
@@ -4424,22 +4427,30 @@ check_preempt_tick(struct cfs_rq *cfs_rq, struct sched_entity *curr)
 		resched_curr(rq_of(cfs_rq));
 }
 
-static void
-set_next_entity(struct cfs_rq *cfs_rq, struct sched_entity *se)
+/**
+ * 设置下一个任务信息
+ */
+__attribute__((optimize("O0"))) static void set_next_entity(struct cfs_rq *cfs_rq, struct sched_entity *se)
 {
-	/* 'current' is not kept within the tree. */
+	/**
+	 *  'current' is not kept within the tree.
+	 * (当前任务不在树中(树指代的是cfs_rq吧?))
+	 **/
 	if (se->on_rq) {
-		/*
+		/**
 		 * Any task has to be enqueued before it get to execute on
 		 * a CPU. So account for the time it spent waiting on the
-		 * runqueue.
+		 * runqueue.(任何任务在 CPU 上执行之前都必须先入队。因此，请计算它在运行队列中等待的时间。)
 		 */
 		update_stats_wait_end(cfs_rq, se);
 		__dequeue_entity(cfs_rq, se);
 		update_load_avg(cfs_rq, se, UPDATE_TG);
 	}
 
+	// 更新当前任务本次调度的开始执行时间
 	update_stats_curr_start(cfs_rq, se);
+
+	// 更新cfs_rq正在执行的线程
 	cfs_rq->curr = se;
 
 	/*
@@ -4524,8 +4535,7 @@ __attribute__((optimize("O0"))) static struct sched_entity * pick_next_entity(st
 static bool check_cfs_rq_runtime(struct cfs_rq *cfs_rq);
 
 /**
- * 
- * 
+ * 在切换出当前运行的调度实体（sched_entity）时更新其状态（如虚拟时间、权重等），确保公平调度的正确性。
  * 
  */
 __attribute__((optimize("O0"))) static void put_prev_entity(struct cfs_rq *cfs_rq, struct sched_entity *prev)
@@ -4535,21 +4545,35 @@ __attribute__((optimize("O0"))) static void put_prev_entity(struct cfs_rq *cfs_r
 	 * was not called and update_curr() has to be done:
 	 * (如果仍在运行队列中，则不会调用 deactivate_task() 并且必须执行 update_curr()：)
 	 */
-	if (prev->on_rq){
-		update_curr(cfs_rq);}
+	if (prev->on_rq) {
+		// 更新当前任务的运行时统计信息 (当前任务信息&任务组信息)
+		update_curr(cfs_rq);
+	}
 
-	/* throttle cfs_rqs exceeding runtime */
+	/**
+	 *  throttle cfs_rqs exceeding runtime
+	 *  (对超出运行时间限制的 CFS 运行队列进行限流)
+	 **/
 	check_cfs_rq_runtime(cfs_rq);
 
 	check_spread(cfs_rq, prev);
 
-	if (prev->on_rq) {
+	if (prev->on_rq) { // 如果任务在某个队列中
 		update_stats_wait_start(cfs_rq, prev);
-		/* Put 'current' back into the tree. */
+
+		/** 
+		 * Put 'current' back into the tree.
+		 *  塞回去?
+		 */
 		__enqueue_entity(cfs_rq, prev);
-		/* in !on_rq case, update occurred at dequeue */
+
+		/** 
+		 * in !on_rq case, update occurred at dequeue
+		 * 
+		 */
 		update_load_avg(cfs_rq, prev, 0);
 	}
+	// 正在运行的任务设置为NULL,表示没有任务在运行
 	cfs_rq->curr = NULL;
 }
 
@@ -4667,52 +4691,61 @@ static inline struct cfs_bandwidth *tg_cfs_bandwidth(struct task_group *tg)
  * 
  * @param target_runtime 即 切片时间大小
  **/
-static int __assign_cfs_rq_runtime(struct cfs_bandwidth *cfs_b,
+__attribute__((optimize("O0"))) static int __assign_cfs_rq_runtime(struct cfs_bandwidth *cfs_b,
 				   struct cfs_rq *cfs_rq, u64 target_runtime)
 {
 	u64 min_amount, amount = 0;
 
 	lockdep_assert_held(&cfs_b->lock);
 
-	/* note: this is a positive sum as runtime_remaining <= 0 */
+	/**
+	 * note: this is a positive sum as runtime_remaining <= 0
+	 * 注意：这是一个正和，因为runtime_remaining <= 0 (因为这是调度的时候才执行的??? 是的)
+	 */
 	min_amount = target_runtime - cfs_rq->runtime_remaining;
 
 	if (cfs_b->quota == RUNTIME_INF) { // CFS 带宽配额是否无限制（即是否未启用 CPU 时间限制）
 		amount = min_amount;
-	} else {
+	} else { // 带宽配额限制
 		start_cfs_bandwidth(cfs_b);
 
-		if (cfs_b->runtime > 0) {
+		if (cfs_b->runtime > 0) { // 周期内剩余可用时间还有
 			amount = min(cfs_b->runtime, min_amount);
-			cfs_b->runtime -= amount;
+			cfs_b->runtime -= amount; // 更新剩余可用时间
 			cfs_b->idle = 0;
 		}
 	}
 
-	// 就是为了计算 cfs_rq->runtime_remaining 
+	/**
+	 * 就是为了计算 cfs_rq->runtime_remaining 
+	 * ___为这个cfs队列分配CPU时间
+	 */
 	cfs_rq->runtime_remaining += amount;
 
+	// 时间分配完成: 剩余可执行时间还有
 	return cfs_rq->runtime_remaining > 0;
 }
 
 /**
  *  returns 0 on failure to allocate runtime 
- * 
+ *  
+ *  计算当前cfs_rq队列剩余的可执行时间 (从带宽配额中申请CPU时间)
  * */
-static int assign_cfs_rq_runtime(struct cfs_rq *cfs_rq)
+__attribute__((optimize("O0"))) static int assign_cfs_rq_runtime(struct cfs_rq *cfs_rq)
 {
 	// 获取CFS带宽控制信息
 	struct cfs_bandwidth *cfs_b = tg_cfs_bandwidth(cfs_rq->tg);
 	int ret;
 
 	raw_spin_lock(&cfs_b->lock);
+	// 计算当前cfs_rq 剩余的可执行时间
 	ret = __assign_cfs_rq_runtime(cfs_b, cfs_rq, sched_cfs_bandwidth_slice());
 	raw_spin_unlock(&cfs_b->lock);
 
 	return ret;
 }
 
-static void __account_cfs_rq_runtime(struct cfs_rq *cfs_rq, u64 delta_exec)
+__attribute__((optimize("O0"))) static void __account_cfs_rq_runtime(struct cfs_rq *cfs_rq, u64 delta_exec)
 {
 	/**
 	 *  dock delta_exec before expiring quota (as it could span periods)
@@ -4732,8 +4765,11 @@ static void __account_cfs_rq_runtime(struct cfs_rq *cfs_rq, u64 delta_exec)
 	 * if we're unable to extend our runtime we resched so that the active
 	 * hierarchy can be throttled
 	 * (如果无法延长运行时间，我们会重新安排，以便活动层次结构能够受到限制)
+	 * 
+	 * !assign_cfs_rq_runtime(cfs_rq) 表示当前cfs_rq配额(cgroup)申请失败,需要重新调度
 	 */
 	if (!assign_cfs_rq_runtime(cfs_rq) && likely(cfs_rq->curr)) {
+		// 重新调度当前任务
 		resched_curr(rq_of(cfs_rq));
 	}
 }
@@ -4808,7 +4844,12 @@ static int tg_throttle_down(struct task_group *tg, void *data)
 	return 0;
 }
 
-static bool throttle_cfs_rq(struct cfs_rq *cfs_rq)
+/**
+ * 对超出运行时间限制的 CFS 运行队列进行限流
+ * 
+ * @param cfs_rq 需要限流的运行队列
+ */
+__attribute__((optimize("O0"))) static bool throttle_cfs_rq(struct cfs_rq *cfs_rq)
 {
 	struct rq *rq = rq_of(cfs_rq);
 	struct cfs_bandwidth *cfs_b = tg_cfs_bandwidth(cfs_rq->tg);
@@ -5225,20 +5266,25 @@ static void sync_throttle(struct task_group *tg, int cpu)
  *  conditionally throttle active cfs_rq's from put_prev_entity()
  * (有条件地限制来自 put_prev_entity() 的活动 cfs_rq)
  *  */
-static bool check_cfs_rq_runtime(struct cfs_rq *cfs_rq)
+__attribute__((optimize("O0"))) static bool check_cfs_rq_runtime(struct cfs_rq *cfs_rq)
 {
-	if (!cfs_bandwidth_used())
+	if (!cfs_bandwidth_used()) {
 		return false;
+	}
 
-	if (likely(!cfs_rq->runtime_enabled || cfs_rq->runtime_remaining > 0))
+	// 没有超过执行时间
+	if (likely(!cfs_rq->runtime_enabled || cfs_rq->runtime_remaining > 0)) {
 		return false;
+	}
 
-	/*
+	/**
 	 * it's possible for a throttled entity to be forced into a running
 	 * state (e.g. set_curr_task), in this case we're finished.
+	 * (被限制的实体可能会被强制进入运行状态（例如 set_curr_task），在这种情况下我们就完成了。)
 	 */
-	if (cfs_rq_throttled(cfs_rq))
+	if (cfs_rq_throttled(cfs_rq)) { // 如果已经被限流
 		return true;
+	}
 
 	return throttle_cfs_rq(cfs_rq);
 }
@@ -5330,12 +5376,16 @@ static void init_cfs_rq_runtime(struct cfs_rq *cfs_rq)
 	INIT_LIST_HEAD(&cfs_rq->throttled_list);
 }
 
-void start_cfs_bandwidth(struct cfs_bandwidth *cfs_b)
+/**
+ * 开始执行配额管理 
+ */
+__attribute__((optimize("O0"))) void start_cfs_bandwidth(struct cfs_bandwidth *cfs_b)
 {
 	lockdep_assert_held(&cfs_b->lock);
 
-	if (cfs_b->period_active)
+	if (cfs_b->period_active) {
 		return;
+	}
 
 	cfs_b->period_active = 1;
 	hrtimer_forward_now(&cfs_b->period_timer, cfs_b->period);

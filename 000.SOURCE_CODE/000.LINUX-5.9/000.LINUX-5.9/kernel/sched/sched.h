@@ -363,13 +363,13 @@ struct rt_rq;
 extern struct list_head task_groups;
 
 /**
- * https://docs.kernel.org/5.10/scheduler/sched-bwc.html
+ *  https://docs.kernel.org/5.10/scheduler/sched-bwc.html
  * 
  * The bandwidth allowed for a group is specified using a quota and period.
  *  Within each given “period” (microseconds), a task group is allocated up to “quota” microseconds of CPU time.
  *  That quota is assigned to per-cpu run queues in slices as threads in the cgroup become runnable. Once all quota has been assigned any additional requests for quota will result in those threads being throttled.
  *  Throttled threads will not be able to run again until the next period when the quota is replenished.
- *  组允许的带宽是使用配额和周期指定的。在每个给定的“周期”（微秒）内，任务组最多分配 “quota” 微秒的 CPU 时间。当 cgroup 中的线程变为可运行时，该配额将分配给切片中的每 CPU 运行队列。分配所有配额后，对配额的任何其他请求都将导致这些线程受到限制。受限制的线程将无法再次运行，直到下一个时段补充配额。
+ *  组允许的CPU带宽是使用配额和周期指定的。在每个给定的“周期”（微秒）内，任务组最多分配 “quota” 微秒的 CPU 时间。当 cgroup 中的线程变为可运行时，该配额将分配给切片中的每 CPU 运行队列。分配所有配额后，对配额的任何其他请求都将导致这些线程受到限制。受限制的线程将无法再次运行，直到下一个时段补充配额。
  * 
  * 
  * cpu.cfs_quota_us：  一段时间内的总可用运行时（以微秒为单位）
@@ -383,8 +383,8 @@ struct cfs_bandwidth {
 	u64			runtime;      // 当前周期内剩余的可用时间（动态调整）
 	s64			hierarchical_quota;  // 层级化调度中的配额（考虑父组限制）
 
-	u8			idle;                // 标记带宽是否未被使用（可优化性能）
-	u8			period_active;
+	u8			idle;                // 标记带宽是否未被使用（可优化性能）:;  1:正在使用
+	u8			period_active;       // 当前是否处于活跃的带宽控制周期（即是否正在执行配额管理）
 	u8			slack_started;
 	struct hrtimer		period_timer;      // 高精度定时器，用于周期重置
 	struct hrtimer		slack_timer;       // 延迟返还剩余时间的定时器
@@ -398,7 +398,7 @@ struct cfs_bandwidth {
 };
 
 /**
- *  Task group related information （任务组相关信息）
+ * Task group related information （任务组相关信息）
  * 
  * struct task_group 是 Linux 控制组（cgroup） 调度子系统的核心数据结构，
  * 用于实现组调度（Group Scheduling）。它允许将一组任务（进程/线程）作为一个整体进行资源分配和调度。

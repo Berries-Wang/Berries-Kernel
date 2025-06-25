@@ -599,14 +599,17 @@ void wake_up_q(struct wake_q_head *head)
 	}
 }
 
-/*
+/**
  * resched_curr - mark rq's current task 'to be rescheduled now'.
+ * (将 rq 的当前任务标记为“现在重新调度”)
+ * 请求重新调度当前运行队列（rq）上的当前任务，触发调度器尽快选择更高优先级的任务运行
  *
  * On UP this means the setting of the need_resched flag, on SMP it
  * might also involve a cross-CPU call to trigger the scheduler on
  * the target CPU.
+ * (在 UP 上，这意味着设置 need_resched 标志，在 SMP 上，它可能还涉及跨 CPU 调用以触发目标 CPU 上的调度程序。)
  */
-void resched_curr(struct rq *rq)
+__attribute__((optimize("O0"))) void resched_curr(struct rq *rq)
 {
 	struct task_struct *curr = rq->curr;
 	int cpu;
@@ -4377,7 +4380,7 @@ static inline struct task_struct * pick_next_task(struct rq *rq, struct task_str
 	 * 优化：我们知道，如果所有任务都属于公平类，我们就可以直接调用该函数，但前提是@prev 任务不是更高的调度类，否则它们就会失去从其他 CPU 中获取更多工作的机会。
 	 */
 	if (likely(prev->sched_class <= &fair_sched_class && rq->nr_running == rq->cfs.h_nr_running)) {
-
+        // 从cfs_rq中选择下一个执行的任务 -- cfs调度策略的应用
 		p = pick_next_task_fair(rq, prev, rf);
 		if (unlikely(p == RETRY_TASK))
 			goto restart;
@@ -4547,8 +4550,10 @@ static void __sched notrace __schedule(bool preempt)
 		}
 		switch_count = &prev->nvcsw;
 	}
-
+    
+	// 选择下一个可执行任务: cfs_rq中的某个任务 | idle队列任务
 	next = pick_next_task(rq, prev, &rf);
+
 	clear_tsk_need_resched(prev);
 	clear_preempt_need_resched();
 
@@ -4585,7 +4590,8 @@ static void __sched notrace __schedule(bool preempt)
 		rq->clock_update_flags &= ~(RQCF_ACT_SKIP|RQCF_REQ_SKIP);
 		rq_unlock_irq(rq, &rf);
 	}
-
+    
+	// 执行 rq 的 balance_callback 函数
 	balance_callback(rq);
 }
 
