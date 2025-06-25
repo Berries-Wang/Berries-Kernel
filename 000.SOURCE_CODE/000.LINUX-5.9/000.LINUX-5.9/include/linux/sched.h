@@ -471,11 +471,32 @@ struct sched_entity {
 	struct rb_node			run_node;   // run_node 表示该调度实体在红黑树中的节点
 	struct list_head		group_node; 
 	unsigned int			on_rq;      // on_rq 表示该调度实体是否在就绪队列中接受调度
-
+    
+	/**
+	 * 记录任务开始时间: exec_start 是一个时间戳（通常基于 rq->clock_task），
+	 *                 表示当前任务最近一次被调度到 CPU 上开始执行的时间。
+     *                  当任务被调度器选中并投入运行时，exec_start 会被更新为当前运行队列的 clock_task 值。
+     * 
+     * 计算实际运行时间（delta_exec）:
+     *               在任务被抢占或主动让出 CPU 时，内核通过比较当前 rq->clock_task 和 exec_start 的差值，
+	 *               得到该任务本次连续执行的实际时间（delta_exec），用于：
+     *                     1. 更新任务的虚拟运行时间（vruntime，用于 CFS 公平调度）。
+     *                     2. 统计任务的实际 CPU 占用。
+     * 
+     * 支持公平调度（CFS）:
+     *             CFS 调度器依赖 exec_start 和 rq->clock_task 计算任务的 vruntime，
+	 *             确保所有任务按权重公平分配 CPU 时间。
+	 */
 	u64				exec_start;
+
+	/**
+	 * static void update_curr(struct cfs_rq *cfs_rq);
+	 * 在该函数中，会更新该字段，即 将运行的时间累加
+	 */
 	u64				sum_exec_runtime;
 	/**
 	 * vruntime计算函数: calc_delta_fair (kernel/sched/fair.c)
+	 * 在函数 static void update_curr(struct cfs_rq *cfs_rq); 中会更新该值
 	 */
 	u64				vruntime;           // vruntime 表示虚拟运行时间
 	u64				prev_sum_exec_runtime;

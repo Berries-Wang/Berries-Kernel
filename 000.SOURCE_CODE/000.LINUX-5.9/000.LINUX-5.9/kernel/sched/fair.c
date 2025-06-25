@@ -863,30 +863,39 @@ static void update_tg_load_avg(struct cfs_rq *cfs_rq, int force)
 }
 #endif /* CONFIG_SMP */
 
-/*
- * Update the current task's runtime statistics.
+/**
+ * 
+ * Update the current task's runtime statistics.(更新当前任务的运行时统计信息。)
+ * 
  */
-static void update_curr(struct cfs_rq *cfs_rq)
+__attribute__((optimize("O0"))) static void update_curr(struct cfs_rq *cfs_rq)
 {
 	struct sched_entity *curr = cfs_rq->curr;
+	// 获取当前CPU上所有任务使用的所有的CPU时间
 	u64 now = rq_clock_task(rq_of(cfs_rq));
 	u64 delta_exec;
 
-	if (unlikely(!curr))
+	if (unlikely(!curr)) {
 		return;
+	}
 
+	// 计算任务实际运行时间
 	delta_exec = now - curr->exec_start;
-	if (unlikely((s64)delta_exec <= 0))
+	if (unlikely((s64)delta_exec <= 0)) {
 		return;
+	}
 
+    // 更新exec_start，即 属于下一次调度了?
 	curr->exec_start = now;
 
 	schedstat_set(curr->statistics.exec_max,
 		      max(delta_exec, curr->statistics.exec_max));
 
+	// 累计运行时间维护
 	curr->sum_exec_runtime += delta_exec;
 	schedstat_add(cfs_rq->exec_clock, delta_exec);
 
+	// 这个累加就不一样了，需要将实际运行时间转为vruntime，再累加
 	curr->vruntime += calc_delta_fair(delta_exec, curr);
 	update_min_vruntime(cfs_rq);
 
@@ -4510,11 +4519,17 @@ __attribute__((optimize("O0"))) static struct sched_entity * pick_next_entity(st
 
 static bool check_cfs_rq_runtime(struct cfs_rq *cfs_rq);
 
-static void put_prev_entity(struct cfs_rq *cfs_rq, struct sched_entity *prev)
+/**
+ * 
+ * 
+ * 
+ */
+__attribute__((optimize("O0"))) static void put_prev_entity(struct cfs_rq *cfs_rq, struct sched_entity *prev)
 {
 	/*
 	 * If still on the runqueue then deactivate_task()
 	 * was not called and update_curr() has to be done:
+	 * (如果仍在运行队列中，则不会调用 deactivate_task() 并且必须执行 update_curr()：)
 	 */
 	if (prev->on_rq)
 		update_curr(cfs_rq);
@@ -4572,6 +4587,10 @@ entity_tick(struct cfs_rq *cfs_rq, struct sched_entity *curr, int queued)
 
 /**************************************************
  * CFS bandwidth control machinery
+ * CONFIG_CFS_BANDWIDTH：  
+ *    限制 CFS 任务的 CPU 使用率，使其不超过分配的配额（cpu.cfs_quota_us）。
+ *    防止 CPU 资源被单个进程或 cgroup 耗尽，确保公平调度。
+ *    适用于 CPU 带宽控制（CFS Bandwidth Control），常用于容器（如 Docker、Kubernetes）和虚拟化环境中限制 CPU 使用。
  */
 
 #ifdef CONFIG_CFS_BANDWIDTH
@@ -4678,20 +4697,28 @@ static int assign_cfs_rq_runtime(struct cfs_rq *cfs_rq)
 
 static void __account_cfs_rq_runtime(struct cfs_rq *cfs_rq, u64 delta_exec)
 {
-	/* dock delta_exec before expiring quota (as it could span periods) */
+	/**
+	 *  dock delta_exec before expiring quota (as it could span periods)
+	 *  (在配额到期之前停靠 delta_exec（因为它可能跨越一段时间）) 暂时不理解!!!
+	 *  */
 	cfs_rq->runtime_remaining -= delta_exec;
 
-	if (likely(cfs_rq->runtime_remaining > 0))
+	if (likely(cfs_rq->runtime_remaining > 0)) {
 		return;
+	}
 
-	if (cfs_rq->throttled)
+	// 被限流?
+	if (cfs_rq->throttled) {
 		return;
+	}
 	/*
 	 * if we're unable to extend our runtime we resched so that the active
 	 * hierarchy can be throttled
+	 * (如果无法延长运行时间，我们会重新安排，以便活动层次结构能够受到限制)
 	 */
-	if (!assign_cfs_rq_runtime(cfs_rq) && likely(cfs_rq->curr))
+	if (!assign_cfs_rq_runtime(cfs_rq) && likely(cfs_rq->curr)) {
 		resched_curr(rq_of(cfs_rq));
+	}
 }
 
 static __always_inline

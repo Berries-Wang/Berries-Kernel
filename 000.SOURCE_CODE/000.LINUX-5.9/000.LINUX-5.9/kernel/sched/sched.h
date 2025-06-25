@@ -605,11 +605,28 @@ struct cfs_rq {
 
 #ifdef CONFIG_CFS_BANDWIDTH
 	int			runtime_enabled;
+	/**
+	 * runtime_remaining 字段用于 跟踪当前 CFS 运行队列（cgroup）剩余的可用 CPU 时间配额，
+	 * 是 CFS 带宽控制（CONFIG_CFS_BANDWIDTH）机制的核心组成部分
+	 * 
+	 * 记录剩余配额时间：
+	 *   runtime_remaining 表示当前 CFS 运行队列（对应一个 cgroup）在当前的带宽控制周期（cfs_period_us）内，还能使用多少 CPU 时间（单位：纳秒）。
+	 *      初始值 = quota（cpu.cfs_quota_us 转换的纳秒值）。
+     *      任务运行逐渐减少，归零时触发限流（throttling）。
+	 * 
+	 * 支持带宽限制：
+     * 与 struct cfs_bandwidth 协同工作，确保 cgroup 的 CPU 使用量不超过 cpu.cfs_quota_us 设定的上限。
+	 */
 	s64			runtime_remaining;
 
 	u64			throttled_clock;
 	u64			throttled_clock_task;
 	u64			throttled_clock_task_time;
+	/**
+	 * 一个 标记位，用于标识当前 CFS 运行队列（通常对应一个 cgroup）是否因超出 CPU 带宽限制（CONFIG_CFS_BANDWIDTH）而被 限流（throttled）
+	 *   throttled = 1：表示该 cgroup 的任务已被限流，无法被调度执行。
+     *   throttled = 0：表示正常状态，任务可被调度。
+	 */
 	int			throttled;
 	int			throttle_count;
 	struct list_head	throttled_list;
@@ -965,8 +982,23 @@ struct rq {
 	struct mm_struct	*prev_mm;
 
 	unsigned int		clock_update_flags;
+	/**
+	 * 包含所有时间（任务、中断、软中断等）
+	 */
 	u64			clock;
-	/* Ensure that all clocks are in the same cache line */
+	/**
+	 *  Ensure that all clocks are in the same cache line(确保所有时钟都在同一个缓存行中) 
+	 *  用于记录任务实际消耗的 CPU 时间
+	 * 任务运行时间统计： clock_task 记录了当前运行队列（CPU 核心）上所有任务实际执行的时间（单位：纳秒）。
+	 *                 与 clock（包含所有时间，如中断、软中断等）不同，clock_task 排除了中断处理、
+	 *                 软中断等非任务执行时间，更精确反映任务本身的 CPU 占用。
+	 * 
+	 * 用于公平调度： 在 CFS（完全公平调度器）中，clock_task 用于计算进程的虚拟运行时间（vruntime），
+	 *              确保调度器能公平分配 CPU 时间片。任务的 vruntime 基于 clock_task 的增量进行更新。
+	 * 
+	 * 性能监控与负载计算： 内核通过 clock_task 结合其他字段（如 rq->clock）计算 CPU 利用率、
+	 *                   任务负载等指标，供负载均衡（如 CFS 负载权重）或性能分析工具（如 perf）使用。
+	 * */
 	u64			clock_task ____cacheline_aligned;
 	u64			clock_pelt;
 	unsigned long		lost_idle_time;
