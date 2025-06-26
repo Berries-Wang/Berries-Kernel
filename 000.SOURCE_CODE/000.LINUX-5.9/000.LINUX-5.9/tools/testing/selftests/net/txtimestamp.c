@@ -50,7 +50,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#define NSEC_PER_USEC	1000L
+#define NSEC_PER_USEC	1000L  /* Nanoseconds per microsecond.  表示 1 微秒（microsecond）等于多少纳秒（nanosecond）*/
 #define USEC_PER_SEC	1000000L
 #define NSEC_PER_SEC	1000000000LL
 

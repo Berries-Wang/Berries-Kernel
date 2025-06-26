@@ -5,7 +5,7 @@
 ### 单个函数优化
 ```c
 // 添加编译优化修饰: __attribute__((optimize("O0"))) 
-static __latent_entropy struct task_struct __attribute__((optimize("O0")))  *copy_process(
+__attribute__((optimize("O0")))  static __latent_entropy struct task_struct  *copy_process(
 					struct pid *pid,
 					int trace,
 					int node,

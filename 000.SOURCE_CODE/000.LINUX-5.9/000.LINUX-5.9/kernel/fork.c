@@ -1822,7 +1822,7 @@ static __always_inline void delayed_free_task(struct task_struct *tsk)
  * parts of the process environment (as per the clone
  * flags). The actual kick-off is left to the caller.
  */
-static __latent_entropy struct task_struct __attribute__((optimize("O0")))  *copy_process(
+__attribute__((optimize("O0"))) static __latent_entropy struct task_struct  *copy_process(
 					struct pid *pid,
 					int trace,
 					int node,
@@ -2389,7 +2389,7 @@ struct mm_struct *copy_init_mm(void)
  *
  * args->exit_signal is expected to be checked for sanity by the caller.
  */
-long __attribute__((optimize("O0"))) _do_fork(struct kernel_clone_args *args)
+__attribute__((optimize("O0"))) long  _do_fork(struct kernel_clone_args *args)
 {
 	u64 clone_flags = args->flags;
 	struct completion vfork;
