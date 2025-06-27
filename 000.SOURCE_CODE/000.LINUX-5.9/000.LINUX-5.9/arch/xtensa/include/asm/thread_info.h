@@ -107,7 +107,7 @@ static inline struct thread_info *current_thread_info(void)
  * - these are process state flags that various assembly files may need to access
  */
 #define TIF_SYSCALL_TRACE	0	/* syscall trace active */
-#define TIF_SIGPENDING		1	/* signal pending */
+#define TIF_SIGPENDING		1	/* signal pending：表示当前线程有挂起（pending）的信号需要处理 */
 #define TIF_NEED_RESCHED	2	/* rescheduling necessary */
 #define TIF_SINGLESTEP		3	/* restore singlestep on return to user mode */
 #define TIF_SYSCALL_TRACEPOINT	4	/* syscall tracepoint instrumentation */

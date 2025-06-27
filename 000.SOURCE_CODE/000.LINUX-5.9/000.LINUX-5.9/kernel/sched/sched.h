@@ -1820,7 +1820,7 @@ extern const u32		sched_prio_to_wmult[40];
 /*
  * {de,en}queue flags:
  *
- * DEQUEUE_SLEEP  - task is no longer runnable
+ * DEQUEUE_SLEEP  - task is no longer runnable(任务不再可运行)
  * ENQUEUE_WAKEUP - task just became runnable
  *
  * SAVE/RESTORE - an otherwise spurious dequeue/enqueue, done to ensure tasks
@@ -1839,7 +1839,7 @@ extern const u32		sched_prio_to_wmult[40];
 #define DEQUEUE_SLEEP		0x01
 #define DEQUEUE_SAVE		0x02 /* Matches ENQUEUE_RESTORE */
 #define DEQUEUE_MOVE		0x04 /* Matches ENQUEUE_MOVE */
-#define DEQUEUE_NOCLOCK		0x08 /* Matches ENQUEUE_NOCLOCK */
+#define DEQUEUE_NOCLOCK		0x08 /* Matches ENQUEUE_NOCLOCK(禁止在任务出队时更新调度器时钟统计信息) */
 
 #define ENQUEUE_WAKEUP		0x01
 #define ENQUEUE_RESTORE		0x02

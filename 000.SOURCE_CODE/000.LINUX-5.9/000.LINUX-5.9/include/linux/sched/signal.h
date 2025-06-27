@@ -357,6 +357,9 @@ static inline int restart_syscall(void)
 	return -ERESTARTNOINTR;
 }
 
+/**
+ * 是否有挂起的信号需要处理
+ */
 static inline int signal_pending(struct task_struct *p)
 {
 	return unlikely(test_tsk_thread_flag(p,TIF_SIGPENDING));
@@ -372,8 +375,16 @@ static inline int fatal_signal_pending(struct task_struct *p)
 	return signal_pending(p) && __fatal_signal_pending(p);
 }
 
+/**
+ * 任务p是否有信号(中断)需要处理
+ * 
+ * --> signal_pending_state() 是 Linux 内核中用于检查指定状态下进程是否有待处理信号的函数
+ */
 static inline int signal_pending_state(long state, struct task_struct *p)
 {
+	/**
+	 * 如果不是 (可中断状态，且允许被致命信号唤醒) 这种状态
+	 */
 	if (!(state & (TASK_INTERRUPTIBLE | TASK_WAKEKILL)))
 		return 0;
 	if (!signal_pending(p))

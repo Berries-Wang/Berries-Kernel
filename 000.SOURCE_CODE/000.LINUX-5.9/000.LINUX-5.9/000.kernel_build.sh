@@ -1,5 +1,5 @@
 #!/bin/bash
-make clean
+#make clean
 export ARCH=arm
 export CROSS_COMPILE=aarch64-linux-gnu-
 #make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- defconfig

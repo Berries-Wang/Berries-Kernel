@@ -1603,8 +1603,12 @@ void activate_task(struct rq *rq, struct task_struct *p, int flags)
 	p->on_rq = TASK_ON_RQ_QUEUED;
 }
 
+/**
+ * 移出调度器类的运行队列
+ */
 void deactivate_task(struct rq *rq, struct task_struct *p, int flags)
 {
+	// 注意 TASK_ON_RQ_MIGRATING 的含义，表示任务正在迁移到另一个CPU
 	p->on_rq = (flags & DEQUEUE_SLEEP) ? 0 : TASK_ON_RQ_MIGRATING;
 
 	dequeue_task(rq, p, flags);
@@ -4519,9 +4523,10 @@ static void __sched notrace __schedule(bool preempt)
 	prev_state = prev->state;
 
 	if (!preempt && prev_state) {
+		// 是否有特别信号(挂起、KILL)需要处理
 		if (signal_pending_state(prev_state, prev)) {
 			prev->state = TASK_RUNNING;
-		} else {
+		} else { // 无中断处理
 			prev->sched_contributes_to_load =
 				(prev_state & TASK_UNINTERRUPTIBLE) &&
 				!(prev_state & TASK_NOLOAD) &&
@@ -4530,7 +4535,7 @@ static void __sched notrace __schedule(bool preempt)
 			if (prev->sched_contributes_to_load)
 				rq->nr_uninterruptible++;
 
-			/*
+			/**
 			 * __schedule()			ttwu()
 			 *   prev_state = prev->state;    if (p->on_rq && ...)
 			 *   if (prev_state)		    goto out;
@@ -4540,7 +4545,9 @@ static void __sched notrace __schedule(bool preempt)
 			 * Where __schedule() and ttwu() have matching control dependencies.
 			 *
 			 * After this, schedule() must not care about p->state any more.
+			 * (在此之后,schedule() 不再关心 p->state。)
 			 */
+			// 将当前任务移出当前调度器类的运行队列
 			deactivate_task(rq, prev, DEQUEUE_SLEEP | DEQUEUE_NOCLOCK);
 
 			if (prev->in_iowait) {
