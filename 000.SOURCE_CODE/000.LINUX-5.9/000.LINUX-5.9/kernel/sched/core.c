@@ -3738,6 +3738,9 @@ static inline void balance_callback(struct rq *rq)
 
 /**
  * schedule_tail - first thing a freshly forked thread must call.
+ * (新创建的线程必须调用的第一件事。)
+ * > [001.UNIX-DOCS/002.ret_from_fork.md] 文档中含有从fork返回(从中断/异常返回)的执行流程图
+ * 
  * @prev: the thread we just switched away from.
  */
 asmlinkage __visible void schedule_tail(struct task_struct *prev)
@@ -3764,8 +3767,9 @@ asmlinkage __visible void schedule_tail(struct task_struct *prev)
 	calculate_sigpending();
 }
 
-/*
+/**
  * context_switch - switch to the new MM and the new thread's register state.
+ * 切换到新的MM和新线程的寄存器状态。
  */
 static __always_inline struct rq *
 context_switch(struct rq *rq, struct task_struct *prev,
