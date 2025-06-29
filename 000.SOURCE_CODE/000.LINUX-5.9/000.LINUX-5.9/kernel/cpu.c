@@ -145,7 +145,7 @@ static struct cpuhp_step *cpuhp_get_step(enum cpuhp_state state)
  *
  * Called from cpu hotplug and from the state register machinery.
  */
-static int cpuhp_invoke_callback(unsigned int cpu, enum cpuhp_state state,
+__attribute__((optimize("O0")))  static int cpuhp_invoke_callback(unsigned int cpu, enum cpuhp_state state,
 				 bool bringup, struct hlist_node *node,
 				 struct hlist_node **lastp)
 {
@@ -604,7 +604,7 @@ static inline bool can_rollback_cpu(struct cpuhp_cpu_state *st)
 	return st->state <= CPUHP_BRINGUP_CPU;
 }
 
-static int cpuhp_up_callbacks(unsigned int cpu, struct cpuhp_cpu_state *st,
+__attribute__((optimize("O0")))  static int cpuhp_up_callbacks(unsigned int cpu, struct cpuhp_cpu_state *st,
 			      enum cpuhp_state target)
 {
 	enum cpuhp_state prev_state = st->state;
@@ -1187,7 +1187,7 @@ void cpuhp_online_idle(enum cpuhp_state state)
 }
 
 /* Requires cpu_add_remove_lock to be held */
-static int _cpu_up(unsigned int cpu, int tasks_frozen, enum cpuhp_state target)
+__attribute__((optimize("O0")))  static int _cpu_up(unsigned int cpu, int tasks_frozen, enum cpuhp_state target)
 {
 	struct cpuhp_cpu_state *st = per_cpu_ptr(&cpuhp_state, cpu);
 	struct task_struct *idle;

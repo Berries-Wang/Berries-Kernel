@@ -170,7 +170,7 @@ static bool set_one_prio_perm(struct task_struct *p)
  * set the priority of a task
  * - the caller must hold the RCU read lock
  */
-static int set_one_prio(struct task_struct *p, int niceval, int error)
+__attribute__((optimize("O0")))  static int set_one_prio(struct task_struct *p, int niceval, int error)
 {
 	int no_nice;
 

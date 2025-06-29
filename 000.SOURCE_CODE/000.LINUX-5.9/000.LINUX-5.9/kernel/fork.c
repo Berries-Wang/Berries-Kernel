@@ -831,9 +831,26 @@ void __init fork_init(void)
 	uprobes_init();
 }
 
-int __weak arch_dup_task_struct(struct task_struct *dst,
+/**
+ * __weak 是 Linux 内核中一个重要的编译器属性（Compiler Attribute），用于定义弱符号（Weak Symbol）。它在内核开发中主要用于提供默认实现或允许函数/变量的覆盖
+ * 
+ * 基本功能:
+ *   允许符号（函数或变量）被重定义
+ *   如果存在多个定义，链接器会选择非弱符号版本
+ *   如果没有其他定义，则使用弱符号版本
+ * 
+ * 例如，在arm64环境中，该函数被 [000.LINUX-5.9/arch/arm64/kernel/process.c] 中的arch_dup_task_struct函数覆盖
+ */
+__attribute__((optimize("O0"))) int __weak arch_dup_task_struct(struct task_struct *dst,
 					       struct task_struct *src)
 {
+	/**
+	 * 在 Linux 内核中，*dst = *src; 是一个指针解引用赋值语句，
+	 * 它的功能是将 src 指针指向的内容复制到 dst 指针指向的位置。
+	 * 
+	 * 等效操作:
+	 *     memcpy(dst, src, sizeof(*dst));  // 当dst和src类型相同时
+	 */
 	*dst = *src;
 	return 0;
 }
@@ -846,7 +863,7 @@ void set_task_stack_end_magic(struct task_struct *tsk)
 	*stackend = STACK_END_MAGIC;	/* for overflow detection */
 }
 
-static struct task_struct *dup_task_struct(struct task_struct *orig, int node)
+__attribute__((optimize("O0"))) static struct task_struct *dup_task_struct(struct task_struct *orig, int node)
 {
 	struct task_struct *tsk;
 	unsigned long *stack;
@@ -868,12 +885,17 @@ static struct task_struct *dup_task_struct(struct task_struct *orig, int node)
 
 	stack_vm_area = task_stack_vm_area(tsk);
 
+	/**
+	 * ?
+	 */
 	err = arch_dup_task_struct(tsk, orig);
 
 	/*
 	 * arch_dup_task_struct() clobbers the stack-related fields.  Make
 	 * sure they're properly initialized before using any stack-related
 	 * functions again.
+	 * (arch_dup_task_struct() 会破坏与堆栈相关的字段。
+	 * 在再次使用任何与堆栈相关的函数之前，请确保它们已正确初始化。)
 	 */
 	tsk->stack = stack;
 #ifdef CONFIG_VMAP_STACK
@@ -1814,19 +1836,21 @@ static __always_inline void delayed_free_task(struct task_struct *tsk)
 		free_task(tsk);
 }
 
-/*
+/**
  * This creates a new process as a copy of the old one,
  * but does not actually start it yet.
  *
  * It copies the registers, and all the appropriate
  * parts of the process environment (as per the clone
  * flags). The actual kick-off is left to the caller.
+ * (它复制寄存器以及进程环境的所有相关部分（根据克隆标志）。实际的启动留给调用者。)
+ * 
+ * @param node
+ * 
  */
-__attribute__((optimize("O0"))) static __latent_entropy struct task_struct  *copy_process(
-					struct pid *pid,
-					int trace,
-					int node,
-					struct kernel_clone_args *args)
+__attribute__((optimize("O0"))) static __latent_entropy struct task_struct *
+copy_process(struct pid *pid, int trace, int node,
+	     struct kernel_clone_args *args)
 {
 	int pidfd = -1, retval;
 	struct task_struct *p;
@@ -1904,6 +1928,8 @@ __attribute__((optimize("O0"))) static __latent_entropy struct task_struct  *cop
 	 * before the fork happens.  Collect up signals sent to multiple
 	 * processes that happen during the fork and delay them so that
 	 * they appear to happen after the fork.
+	 * (强制在此时间点之前收到的任何信号在 fork 发生之前传递。
+	 * 收集在 fork 期间发送给多个进程的信号，并延迟它们，使它们看起来像是在 fork 之后发生的。)
 	 */
 	sigemptyset(&delayed.signal);
 	INIT_HLIST_NODE(&delayed.node);
@@ -1972,7 +1998,10 @@ __attribute__((optimize("O0"))) static __latent_entropy struct task_struct  *cop
 	rcu_copy_process(p);
 	p->vfork_done = NULL;
 	spin_lock_init(&p->alloc_lock);
-
+    
+	/**
+	 * ?
+	 */
 	init_sigpending(&p->pending);
 
 	p->utime = p->stime = p->gtime = 0;
@@ -2040,7 +2069,9 @@ __attribute__((optimize("O0"))) static __latent_entropy struct task_struct  *cop
 	p->sequential_io_avg	= 0;
 #endif
 
-	/* Perform scheduler related setup. Assign this task to a CPU.(执行调度程序相关的设置。将此任务分配给 CPU。) */
+	/** Perform scheduler related setup. Assign this task to a CPU.
+	 * (执行调度程序相关的设置。将此任务分配给 CPU。) 
+	 * */
 	retval = sched_fork(clone_flags, p);
 	if (retval)
 		goto bad_fork_cleanup_policy;
@@ -2384,10 +2415,11 @@ struct mm_struct *copy_init_mm(void)
 /*
  *  Ok, this is the main fork-routine.
  *
- * It copies the process, and if successful kick-starts
- * it and waits for it to finish using the VM if required.
+ * It copies the process, and if successful kick-starts (它复制该过程，如果成功，则启动)
+ * it and waits for it to finish using the VM if required. (并等待它完成使用 VM（如果需要）。)
  *
  * args->exit_signal is expected to be checked for sanity by the caller.
+ * (调用者需要检查 args->exit_signal 的健全性。)
  */
 __attribute__((optimize("O0"))) long  _do_fork(struct kernel_clone_args *args)
 {
@@ -2405,7 +2437,11 @@ __attribute__((optimize("O0"))) long  _do_fork(struct kernel_clone_args *args)
 	 * field in struct clone_args and it still doesn't make sense to have
 	 * them both point at the same memory location. Performing this check
 	 * here has the advantage that we don't need to have a separate helper
-	 * to check for legacy clone().
+	 * to check for legacy clone.
+	 * (对于旧版 clone() 调用，CLONE_PIDFD 使用 parent_tid 参数返回 pidfd。
+	 * 因此，CLONE_PIDFD 和 CLONE_PARENT_SETTID 是互斥的。
+	 * 使用 clone3() 时，CLONE_PIDFD 在 struct clone_args 中增加了一个单独的字段，因此让它们指向同一内存位置仍然没有意义。
+	 * 在这里执行此检查的好处是，我们不需要单独的辅助函数来检查旧版 clone()。)
 	 */
 	if ((args->flags & CLONE_PIDFD) &&
 	    (args->flags & CLONE_PARENT_SETTID) &&
@@ -2417,6 +2453,8 @@ __attribute__((optimize("O0"))) long  _do_fork(struct kernel_clone_args *args)
 	 * called from kernel_thread or CLONE_UNTRACED is explicitly
 	 * requested, no event is reported; otherwise, report if the event
 	 * for the type of forking is enabled.
+	 * (确定是否以及向 ptracer 报告哪个事件。当从 kernel_thread 调用或明确请求 CLONE_UNTRACED 时，
+	 * 不报告任何事件；否则，如果启用了分叉类型的事件，则报告该事件。)
 	 */
 	if (!(clone_flags & CLONE_UNTRACED)) {
 		if (clone_flags & CLONE_VFORK)
@@ -2429,7 +2467,8 @@ __attribute__((optimize("O0"))) long  _do_fork(struct kernel_clone_args *args)
 		if (likely(!ptrace_event_enabled(current, trace)))
 			trace = 0;
 	}
-
+    
+	// !!!
 	p = copy_process(NULL, trace, NUMA_NO_NODE, args);
 	add_latent_entropy();
 

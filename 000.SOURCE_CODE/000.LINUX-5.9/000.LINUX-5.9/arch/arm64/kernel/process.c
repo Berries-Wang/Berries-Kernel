@@ -347,7 +347,15 @@ void arch_release_task_struct(struct task_struct *tsk)
 	fpsimd_release_task(tsk);
 }
 
-int arch_dup_task_struct(struct task_struct *dst, struct task_struct *src)
+
+/**
+ * 在 Linux 内核中，*dst = *src; 是一个指针解引用赋值语句，
+ * 它的功能是将 src 指针指向的内容复制到 dst 指针指向的位置。
+ * 
+ * 等效操作:
+ *     memcpy(dst, src, sizeof(*dst));  // 当dst和src类型相同时
+ */
+__attribute__((optimize("O0"))) int arch_dup_task_struct(struct task_struct *dst, struct task_struct *src)
 {
 	if (current->mm)
 		fpsimd_preserve_current_state();

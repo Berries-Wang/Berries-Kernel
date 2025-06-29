@@ -321,8 +321,9 @@ struct cred *prepare_exec_creds(void)
 	return new;
 }
 
-/*
+/**
  * Copy credentials for the new process created by fork()
+ *（复制 fork() 创建的新进程的凭证）
  *
  * We share if we can, but under some circumstances we have to generate a new
  * set.

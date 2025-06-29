@@ -952,7 +952,10 @@ struct task_struct {
 
 	struct completion		*vfork_done;
 
-	/* CLONE_CHILD_SETTID: */
+	/**
+	 *  CLONE_CHILD_SETTID: 
+	 * 内核会将新线程/进程的 TID 写入用户空间指定的这个地址
+	 * */
 	int __user			*set_child_tid;
 
 	/* CLONE_CHILD_CLEARTID: */
@@ -1193,6 +1196,9 @@ struct task_struct {
 	/* Protected by alloc_lock: */
 	struct mempolicy		*mempolicy;
 	short				il_prev;
+	/**
+	 * 用于在进程(fork)创建时指定优先选择的 NUMA 节点。
+	 */
 	short				pref_node_fork;
 #endif
 #ifdef CONFIG_NUMA_BALANCING

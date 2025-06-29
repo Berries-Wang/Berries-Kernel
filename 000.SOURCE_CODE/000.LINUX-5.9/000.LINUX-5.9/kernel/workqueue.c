@@ -1903,7 +1903,7 @@ static void worker_detach_from_pool(struct worker *worker)
  * Return:
  * Pointer to the newly created worker.
  */
-static struct worker *create_worker(struct worker_pool *pool)
+__attribute__((optimize("O0")))  static struct worker *create_worker(struct worker_pool *pool)
 {
 	struct worker *worker = NULL;
 	int id = -1;

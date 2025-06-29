@@ -848,7 +848,7 @@ int tg_nop(struct task_group *tg, void *data)
 }
 #endif
 
-static void set_load_weight(struct task_struct *p, bool update_load)
+__attribute__((optimize("O0"))) static void set_load_weight(struct task_struct *p, bool update_load)
 {
 	int prio = p->static_prio - MAX_RT_PRIO;
 	struct load_weight *load = &p->se.load;
@@ -1648,8 +1648,9 @@ static inline int normal_prio(struct task_struct *p)
  * be boosted by RT tasks, or might be boosted by
  * interactivity modifiers. Will be RT if the task got
  * RT-boosted. If not then it returns p->normal_prio.
+ * (计算当前优先级，即调度程序考虑的优先级。此值可能会因 RT 任务或交互性修饰符而提升。如果任务获得了 RT 提升，则返回 RT。如果不是，则返回 p->normal_prio。)
  */
-static int effective_prio(struct task_struct *p)
+__attribute__((optimize("O0"))) static int effective_prio(struct task_struct *p)
 {
 	p->normal_prio = normal_prio(p);
 	/*
@@ -3095,7 +3096,8 @@ int wake_up_state(struct task_struct *p, unsigned int state)
  *
  * __sched_fork() is basic setup used by init_idle() too:
  * 
- * __sched_fork()初始化进程调度相关的数据结构，调度实体用 struct sched_entity数据结构来抽象，每个进程或线程都是一个调度实体，另外也包括组调度（sched group）
+ * __sched_fork()初始化进程调度相关的数据结构，调度实体用 struct sched_entity数据结构来抽象，
+ * 每个进程或线程都是一个调度实体，另外也包括组调度（sched group）
  */
 static void __sched_fork(unsigned long clone_flags, struct task_struct *p)
 {
@@ -3258,12 +3260,14 @@ static inline void init_schedstats(void) {}
  * fork()/clone()-time setup:
  * 
  */
-int sched_fork(unsigned long clone_flags, struct task_struct *p)
+__attribute__((optimize("O0")))  int sched_fork(unsigned long clone_flags, struct task_struct *p)
 {
 	unsigned long flags;
 
 	/**
-	 * __sched_fork()初始化进程调度相关的数据结构，调度实体用 struct sched_entity数据结构来抽象，每个进程或线程都是一个调度实体，另外也包括组调度（sched group）
+	 * __sched_fork()初始化进程调度相关的数据结构，
+	 * 调度实体用 struct sched_entity数据结构来抽象，
+	 * 每个进程或线程都是一个调度实体，另外也包括组调度（sched group）
 	 */
 	__sched_fork(clone_flags, p);
 
@@ -3271,27 +3275,34 @@ int sched_fork(unsigned long clone_flags, struct task_struct *p)
 	 * We mark the process as NEW here. This guarantees that
 	 * nobody will actually run it, and a signal or other external
 	 * event cannot wake it up and insert it on the runqueue either.
-	 * (我们在这里将进程标记为 NEW。这保证了没有人会真正运行它，并且信号或其他外部事件也无法唤醒它并将其插入运行队列。)
+	 * (我们在这里将进程标记为 NEW。这保证了没有人会真正运行它，
+	 * 并且信号或其他外部事件也无法唤醒它并将其插入运行队列。)
 	 */
 	p->state = TASK_NEW;
 
-	/*
-	 * Make sure we do not leak PI boosting priority to the child.(确保我们不会将 PI 提升优先权泄露给子进程)
+	/**
+	 * Make sure we do not leak PI boosting priority to the child.
+	 * (确保我们不会将 PI 提升优先权泄露给子进程)
 	 */
 	p->prio = current->normal_prio;
 
 	uclamp_fork(p);
 
-	/*
+	/**
 	 * Revert to default priority/policy on fork if requested.
+	 * 都需要重置吗? 不重置 ， 默认是什么样的，初始是什么样的呢
 	 */
 	if (unlikely(p->sched_reset_on_fork)) {
+		/**
+		 * 判断调度策略: realtime/deadline
+		 */
 		if (task_has_dl_policy(p) || task_has_rt_policy(p)) {
 			p->policy = SCHED_NORMAL;
 			p->static_prio = NICE_TO_PRIO(0);
 			p->rt_priority = 0;
-		} else if (PRIO_TO_NICE(p->static_prio) < 0)
+		} else if (PRIO_TO_NICE(p->static_prio) < 0) {
 			p->static_prio = NICE_TO_PRIO(0);
+		}
 
 		p->prio = p->normal_prio = __normal_prio(p);
 		set_load_weight(p, false);
@@ -3303,12 +3314,16 @@ int sched_fork(unsigned long clone_flags, struct task_struct *p)
 		p->sched_reset_on_fork = 0;
 	}
 
-	if (dl_prio(p->prio))
+	/**
+	 * 设置调度类: 根据优先级
+	 */
+	if (dl_prio(p->prio)) {
 		return -EAGAIN;
-	else if (rt_prio(p->prio))
+	} else if (rt_prio(p->prio)) {
 		p->sched_class = &rt_sched_class;
-	else
+	} else {
 		p->sched_class = &fair_sched_class;
+	}
 
 	init_entity_runnable_average(&p->se);
 
@@ -3337,7 +3352,10 @@ int sched_fork(unsigned long clone_flags, struct task_struct *p)
 #if defined(CONFIG_SMP)
 	p->on_cpu = 0;
 #endif
-    // 初始化 thread_info 数据结构中的 preempt_count 计数，为了支持内核抢占而引入该字段。当 preempt_count 为 0 时，表示内核可以被安全地抢占，大于 0 时，则禁止抢占
+    /**
+	 * 初始化 thread_info 数据结构中的 preempt_count 计数，为了支持内核抢占而引入该字段。
+	 * 当 preempt_count 为 0 时，表示内核可以被安全地抢占，大于 0 时，则禁止抢占
+	 */
 	init_task_preempt_count(p);
 #ifdef CONFIG_SMP
 	plist_node_init(&p->pushable_tasks, MAX_PRIO);
@@ -5041,7 +5059,7 @@ static inline int rt_effective_prio(struct task_struct *p, int prio)
 }
 #endif
 
-void set_user_nice(struct task_struct *p, long nice)
+__attribute__((optimize("O0"))) void set_user_nice(struct task_struct *p, long nice)
 {
 	bool queued, running;
 	int old_prio;
@@ -5622,7 +5640,7 @@ int sched_setattr_nocheck(struct task_struct *p, const struct sched_attr *attr)
  *
  * Return: 0 on success. An error code otherwise.
  */
-int sched_setscheduler_nocheck(struct task_struct *p, int policy,
+__attribute__((optimize("O0"))) int sched_setscheduler_nocheck(struct task_struct *p, int policy,
 			       const struct sched_param *param)
 {
 	return _sched_setscheduler(p, policy, param, false);
