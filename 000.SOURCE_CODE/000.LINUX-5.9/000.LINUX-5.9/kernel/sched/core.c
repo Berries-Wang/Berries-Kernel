@@ -1627,7 +1627,9 @@ static inline int __normal_prio(struct task_struct *p)
  * without taking RT-inheritance into account. Might be
  * boosted by interactivity modifiers. Changes upon fork,
  * setprio syscalls, and whenever the interactivity
- * estimator recalculates.
+ * estimator recalculates.(计算预期的正常优先级：即不考虑 RT 继承的优先级。
+ * 可能会因交互性修饰符而提升。
+ * fork、setprio 系统调用以及交互性估算器重新计算时会发生变化。)
  */
 static inline int normal_prio(struct task_struct *p)
 {
@@ -1652,11 +1654,13 @@ static inline int normal_prio(struct task_struct *p)
  */
 __attribute__((optimize("O0"))) static int effective_prio(struct task_struct *p)
 {
+
 	p->normal_prio = normal_prio(p);
 	/*
 	 * If we are RT tasks or we were boosted to RT priority,
 	 * keep the priority unchanged. Otherwise, update priority
-	 * to the normal priority:
+	 * to the normal priority:(如果是 RT 任务，或者优先级被提升到 RT，
+	 * 则保持优先级不变。否则，将优先级更新为正常优先级：)
 	 */
 	if (!rt_prio(p->prio))
 		return p->normal_prio;

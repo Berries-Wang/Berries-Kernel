@@ -2071,6 +2071,8 @@ copy_process(struct pid *pid, int trace, int node,
 
 	/** Perform scheduler related setup. Assign this task to a CPU.
 	 * (执行调度程序相关的设置。将此任务分配给 CPU。) 
+	 * 
+	 * [kernel/sched/core.c]
 	 * */
 	retval = sched_fork(clone_flags, p);
 	if (retval)
