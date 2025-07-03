@@ -162,6 +162,9 @@ extern void call_trace_sched_update_nr_running(struct rq *rq, int count);
  */
 #define RUNTIME_INF		((u64)~0ULL)
 
+/**
+ * 判断进程的调度策略
+ */
 static inline int idle_policy(int policy)
 {
 	return policy == SCHED_IDLE;

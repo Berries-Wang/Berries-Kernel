@@ -382,7 +382,7 @@ __attribute__((optimize("O0"))) int arch_dup_task_struct(struct task_struct *dst
 // 000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/kernel/entry.S
 asmlinkage void ret_from_fork(void) asm("ret_from_fork");
 
-int copy_thread(unsigned long clone_flags, unsigned long stack_start,
+__attribute__((optimize("O0")))  int copy_thread(unsigned long clone_flags, unsigned long stack_start,
 		unsigned long stk_sz, struct task_struct *p, unsigned long tls)
 {
 	struct pt_regs *childregs = task_pt_regs(p);

@@ -746,8 +746,9 @@ struct task_struct {
 	int				wake_cpu;
 #endif
     /**
-	 * 0：表示该任务不在任何运行队列(runqueue)中
-     * 1：表示该任务在某个运行队列中
+	 * 用于设置进程的状态，支持的状态如下。
+     *  TASK_ON_RQ_QUEUED：表示进程正在就绪队列中运行。
+     *  TASK_ON_RQ_MIGRATING：表示处于迁移过程中的进程，它可能不在就绪队列里
 	 */
 	int				on_rq;
 
@@ -777,11 +778,22 @@ struct task_struct {
 	 * task调度类
 	 */
 	const struct sched_class	*sched_class;
+
+	/**
+	 * 普通进程调度实体
+	 */
 	struct sched_entity		se;
+
+	/**
+	 * 实时进程调度实体
+	 */
 	struct sched_rt_entity		rt;
 #ifdef CONFIG_CGROUP_SCHED
 	struct task_group		*sched_task_group;
 #endif
+   /**
+    *  deadline进程调度实体
+    */
 	struct sched_dl_entity		dl;
 
 #ifdef CONFIG_UCLAMP_TASK
@@ -805,10 +817,22 @@ struct task_struct {
 #ifdef CONFIG_BLK_DEV_IO_TRACE
 	unsigned int			btrace_seq;
 #endif
-    /**/
+    /**
+	 * 用于确定进程的类型，比如是普通进程还是实时进程。
+	*/
 	unsigned int			policy;
+	/**
+	 * 进程允许运行的CPU个数
+	 */
 	int				nr_cpus_allowed;
+	/**
+	 * cpus_ptr 是一个 指向 cpumask_t 的指针，表示任务 当前实际使用的 CPU 亲和性掩码
+	 */
 	const cpumask_t			*cpus_ptr;
+	/**
+	 * cpus_mask 是一个 位掩码（cpumask_t），表示该任务默认允许运行的 CPU 核心集合。
+	 * (表示当前任务允许在哪些CPU上执行)
+	 */
 	cpumask_t			cpus_mask;
 
 #ifdef CONFIG_PREEMPT_RCU

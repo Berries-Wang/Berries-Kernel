@@ -1361,21 +1361,27 @@ void exec_mm_release(struct task_struct *tsk, struct mm_struct *mm)
  * 
  * dup_mm()函数分配一个mm 数据结构，然后从父进程中复制相关内容
  */
-static struct mm_struct *dup_mm(struct task_struct *tsk,
+__attribute__((optimize("O0"))) static struct mm_struct *dup_mm(struct task_struct *tsk,
 				struct mm_struct *oldmm)
 {
 	struct mm_struct *mm;
 	int err;
 
+	/**
+	 * 分配内存描述符
+	 */
 	mm = allocate_mm();
 	if (!mm)
 		goto fail_nomem;
 
+	// 父进程内存描述符内容复制到子进程内存描述符(仅数据结构内容，而不是内存)
 	memcpy(mm, oldmm, sizeof(*mm));
 
+	// mm_init 初始化内存描述符: 
 	if (!mm_init(mm, tsk, mm->user_ns))
 		goto fail_nomem;
 
+	// dup_mmap()复制父进程的进程地址空间的页表到子进程。 
 	err = dup_mmap(mm, oldmm);
 	if (err)
 		goto free_pt;
@@ -1398,7 +1404,7 @@ fail_nomem:
 	return NULL;
 }
 
-static int copy_mm(unsigned long clone_flags, struct task_struct *tsk)
+__attribute__((optimize("O0"))) static int copy_mm(unsigned long clone_flags, struct task_struct *tsk)
 {
 	struct mm_struct *mm, *oldmm;
 	int retval;
@@ -1427,6 +1433,9 @@ static int copy_mm(unsigned long clone_flags, struct task_struct *tsk)
 	/* initialize the new vmacache entries */
 	vmacache_flush(tsk);
 
+	/**
+	 * CLONE_VM: 父子进程共享地址空间
+	 */
 	if (clone_flags & CLONE_VM) {
 		mmget(oldmm);
 		mm = oldmm;
@@ -1844,6 +1853,10 @@ static __always_inline void delayed_free_task(struct task_struct *tsk)
  * parts of the process environment (as per the clone
  * flags). The actual kick-off is left to the caller.
  * (它复制寄存器以及进程环境的所有相关部分（根据克隆标志）。实际的启动留给调用者。)
+ * 
+ * <p>
+ *   注意： 寄存器的复制，查阅 copy_thread 函数.
+ * </p>
  * 
  * @param node
  * 
@@ -2422,6 +2435,8 @@ struct mm_struct *copy_init_mm(void)
  *
  * args->exit_signal is expected to be checked for sanity by the caller.
  * (调用者需要检查 args->exit_signal 的健全性。)
+ * 
+ * @return 0: 子线程; 正数： 父进程，值为父进程ID
  */
 __attribute__((optimize("O0"))) long  _do_fork(struct kernel_clone_args *args)
 {

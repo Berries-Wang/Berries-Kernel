@@ -24,6 +24,9 @@ static inline struct task_struct *get_current(void)
 	return current_thread_info()->task;
 }
 
+/**
+ * 000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/include/asm/current.h
+ */
 #define current get_current()
 
 #else

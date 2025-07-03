@@ -11,6 +11,14 @@ struct task_struct;
 /*
  * We don't use read_sysreg() as we want the compiler to cache the value where
  * possible.
+ * 
+ * mrs 指令全称为 "Move to Register from System register"，用于将系统寄存器（System Register）的值读取到通用寄存器（General-Purpose Register, GPR）中。
+ * 
+ * 将 sp_el0 读取到 0寄存器中
+ * 
+ * 在 ARM64（AArch64）架构中，SP_EL0 是一个系统寄存器，用于存储当前异常级别（EL0，即用户态）的栈指针（Stack Pointer）
+ * 
+ * 在内核态中，ARM64处理器运行在EL1里，SP_EL0寄存器在EL1上下文中是没有使用的。利用SP_EL0寄存器来存放当前进程的task_struct数据结构的地址是一个简洁有效的办法
  */
 static __always_inline struct task_struct *get_current(void)
 {
