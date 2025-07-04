@@ -1594,6 +1594,9 @@ static inline void dequeue_task(struct rq *rq, struct task_struct *p, int flags)
 	p->sched_class->dequeue_task(rq, p, flags);
 }
 
+/**
+ * 将任务添加到调度器的运行队列中
+ */
 void activate_task(struct rq *rq, struct task_struct *p, int flags)
 {
 	// 将任务放入到调度器类的运行队列中
@@ -3394,19 +3397,24 @@ unsigned long to_ratio(u64 period, u64 runtime)
 	return div64_u64(runtime << BW_SHIFT, period);
 }
 
-/*
+/**
  * wake_up_new_task - wake up a newly created task for the first time.
  *
  * This function will do some initial scheduler statistics housekeeping
  * that must be done for every newly created context, then puts the task
  * on the runqueue and wakes it.
+ * (该函数会执行一些针对每个新创建上下文必须完成的初始调度器统计管理工作，随后将任务加入运行队列并唤醒它)
+ * 
+ * 注释的后一句： 加入调度器队列，等待被唤醒执行
  */
-void wake_up_new_task(struct task_struct *p)
+__attribute__((optimize("O0"))) void wake_up_new_task(struct task_struct *p)
 {
 	struct rq_flags rf;
 	struct rq *rq;
 
 	raw_spin_lock_irqsave(&p->pi_lock, rf.flags);
+
+	// 设置进程状态为 TASK_RUNNING
 	p->state = TASK_RUNNING;
 #ifdef CONFIG_SMP
 	/*
@@ -3418,13 +3426,17 @@ void wake_up_new_task(struct task_struct *p)
 	 * as we're not fully set-up yet.
 	 */
 	p->recent_used_cpu = task_cpu(p);
+
 	rseq_migrate(p);
+    
+	// 设置子进程即将运行的CPU
 	__set_task_cpu(p, select_task_rq(p, task_cpu(p), SD_BALANCE_FORK, 0));
 #endif
 	rq = __task_rq_lock(p, &rf);
 	update_rq_clock(rq);
 	post_init_entity_util_avg(p);
 
+	// 子进程入队，并设置on_rq状态(设置为 TASK_ON_RQ_QUEUED )
 	activate_task(rq, p, ENQUEUE_NOCLOCK);
 	trace_sched_wakeup_new(p);
 	check_preempt_curr(rq, p, WF_FORK);

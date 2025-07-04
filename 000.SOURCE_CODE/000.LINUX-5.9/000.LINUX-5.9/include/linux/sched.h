@@ -728,11 +728,18 @@ struct task_struct {
 	 */
 	struct __call_single_node	wake_entry;
 #ifdef CONFIG_THREAD_INFO_IN_TASK
-	/* Current CPU: */
+	/** 
+	 * Current CPU: 
+	 *  正运行在哪个CPU上
+	*/
 	unsigned int			cpu;
 #endif
 	unsigned int			wakee_flips;
 	unsigned long			wakee_flip_decay_ts;
+	
+	/**
+	 * 表示上一次唤醒的是哪个进程
+	 */
 	struct task_struct		*last_wakee;
 
 	/*
@@ -743,6 +750,10 @@ struct task_struct {
 	 * used CPU that may be idle.
 	 */
 	int				recent_used_cpu;
+
+	/**
+	 * 表示进程上一次运行在哪个CPU上
+	 */
 	int				wake_cpu;
 #endif
     /**

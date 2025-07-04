@@ -2513,7 +2513,10 @@ __attribute__((optimize("O0"))) long  _do_fork(struct kernel_clone_args *args)
 		get_task_struct(p);
 	}
 
-	// 000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/kernel/sched/core.c
+	/**
+	 * 000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/kernel/sched/core.c
+	 *  加入调度器队列，等待被唤醒执行
+	 */
 	wake_up_new_task(p);
 
 	/* forking complete and child started to run, tell ptracer */
