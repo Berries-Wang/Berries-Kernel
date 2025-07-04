@@ -3340,13 +3340,18 @@ __attribute__((optimize("O0")))  int sched_fork(unsigned long clone_flags, struc
 	 */
 	raw_spin_lock_irqsave(&p->pi_lock, flags);
 	rseq_migrate(p);
-	/*
+	/**
 	 * We're setting the CPU for the first time, we don't migrate,
 	 * so use __set_task_cpu().
+	 * (我们正在首次设置 CPU，我们不会迁移，所以使用 __set_task_cpu )
 	 */
 	__set_task_cpu(p, smp_processor_id());
-	if (p->sched_class->task_fork)
+	/**
+	 * 每个调度类都定义了一个操作方法集，调用CFS的调度类的task_fork方法做一些与fork相关的初始化
+	 */
+	if (p->sched_class->task_fork) {
 		p->sched_class->task_fork(p);
+	}
 	raw_spin_unlock_irqrestore(&p->pi_lock, flags);
 
 #ifdef CONFIG_SCHED_INFO

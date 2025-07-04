@@ -568,15 +568,23 @@ struct cfs_rq {
     /**
 	 * 用于 管理所有可运行（RUNNABLE）进程的红黑树，其核心功能是 按进程的虚拟运行时间（vruntime）排序，实现公平调度。
 	 * 
+	 * CFS的红黑树的根
 	 */
 	struct rb_root_cached	tasks_timeline;
 
-	/*
+	/**
 	 * 'curr' points to currently running entity on this cfs_rq.
 	 * It is set to NULL otherwise (i.e when none are currently running).
+	 * 指向当前正在运行的进程
 	 */
 	struct sched_entity	*curr;
+	/**
+	 * 用于切换下一个即将运行的进程
+	 */
 	struct sched_entity	*next;
+	/**
+	 * 用于抢占内核，当唤醒进程抢占了当前进程时，last指向这个当前进程
+	 */
 	struct sched_entity	*last;
 
 	/**
@@ -592,8 +600,9 @@ struct cfs_rq {
 #endif
 
 #ifdef CONFIG_SMP
-	/*
+	/**
 	 * CFS load tracking
+	 * 基于PELT算法的负载计算
 	 */
 	struct sched_avg	avg;
 #ifndef CONFIG_64BIT
@@ -955,12 +964,19 @@ struct uclamp_rq {
 DECLARE_STATIC_KEY_FALSE(sched_uclamp_used);
 #endif /* CONFIG_UCLAMP_TASK */
 
-/*
- * This is the main, per-CPU runqueue data structure.
+/**
+ * This is the main, per-CPU runqueue data structure. (每个CPU都有这样一个数据结构)
  *
  * Locking rule: those places that want to lock multiple runqueues
  * (such as the load balancing or the thread migration code), lock
  * acquire operations must be ordered by ascending &runqueue.
+ * (加锁规则：在需要对多个runqueue进行加锁的​​地方（比如负载均衡或者线程迁移的代码），加锁操作必须按照&runqueue升序排列。)
+ * 
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub] 8.1.2　调度器的数据结构
+ * 
+ * rq数据结构是描述CPU的通用就绪队列，rq数据结构中记录了一个就绪队列所需要的全部信息，
+ * 包括一个CFS就绪队列数据结构cfs_rq、一个实时进程调度器就绪队列数据结构rt_rq和一个实时调度器就绪队列数据结构dl_rq，
+ * 以及就绪队列的负载权重等信息
  */
 struct rq {
 	/* runqueue lock: */
@@ -1178,6 +1194,9 @@ static inline void update_idle_core(struct rq *rq)
 static inline void update_idle_core(struct rq *rq) { }
 #endif
 
+/**
+ * 系统中每个CPU有一个就绪队列，它是PER-CPU类型的，即每个CPU有一个rq数据结构
+ */
 DECLARE_PER_CPU_SHARED_ALIGNED(struct rq, runqueues);
 
 #define cpu_rq(cpu)		(&per_cpu(runqueues, (cpu)))

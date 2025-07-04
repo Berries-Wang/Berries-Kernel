@@ -34,8 +34,11 @@
  *  run vmstat and monitor the context-switches (cs) field)
  *
  * (default: 6ms * (1 + ilog(ncpus)), units: nanoseconds)
+ * 
+ * 
+ * 系统默认的调度时间片： sysctl_sched_latency
  */
-unsigned int sysctl_sched_latency			= 6000000ULL;
+unsigned int sysctl_sched_latency			= 6000000ULL; // 6ms
 static unsigned int normalized_sysctl_sched_latency	= 6000000ULL;
 
 /*
@@ -56,7 +59,7 @@ enum sched_tunable_scaling sysctl_sched_tunable_scaling = SCHED_TUNABLESCALING_L
  *
  * (default: 0.75 msec * (1 + ilog(ncpus)), units: nanoseconds)
  */
-unsigned int sysctl_sched_min_granularity			= 750000ULL;
+unsigned int sysctl_sched_min_granularity			= 750000ULL; // 0.75ms
 static unsigned int normalized_sysctl_sched_min_granularity	= 750000ULL;
 
 /*
@@ -707,7 +710,8 @@ static inline u64 calc_delta_fair(u64 delta, struct sched_entity *se)
 }
 
 /**
- * __sched_period() 函数会计算 CFS 就绪队列中的一个调度周期的长度，可以理解为一个调度周期的时间片，它根据当前运行的进程数目来计算
+ * __sched_period() 函数会计算 CFS 就绪队列中的一个调度周期的长度，
+ * 可以理解为一个调度周期的时间片，它根据当前运行的进程数目来计算
  * The idea is to set a period in which each task runs once.
  *
  * When there are too many tasks (sched_nr_latency) we have to stretch
@@ -715,7 +719,7 @@ static inline u64 calc_delta_fair(u64 delta, struct sched_entity *se)
  *
  * p = (nr <= nl) ? l : l*nr/nl
  */
-static u64 __sched_period(unsigned long nr_running)
+__attribute__((optimize("O0")))  static u64 __sched_period(unsigned long nr_running)
 {
 	if (unlikely(nr_running > sched_nr_latency))
 		return nr_running * sysctl_sched_min_granularity;
@@ -723,13 +727,14 @@ static u64 __sched_period(unsigned long nr_running)
 		return sysctl_sched_latency;
 }
 
-/*
+/**
  * We calculate the wall-time slice from the period by taking a part
  * proportional to the weight.
+ * (我们通过按权重比例抽取部分周期时长，计算出实际分配的运行时间片。) -- 真实CPU时间，而非 vruntime
  *
  * s = p*P[w/rw]
  */
-static u64 sched_slice(struct cfs_rq *cfs_rq, struct sched_entity *se)
+__attribute__((optimize("O0")))  static u64 sched_slice(struct cfs_rq *cfs_rq, struct sched_entity *se)
 {
 	u64 slice = __sched_period(cfs_rq->nr_running + !se->on_rq);
 
@@ -756,8 +761,11 @@ static u64 sched_slice(struct cfs_rq *cfs_rq, struct sched_entity *se)
  *
  * vs = s/w
  */
-static u64 sched_vslice(struct cfs_rq *cfs_rq, struct sched_entity *se)
+__attribute__((optimize("O0")))  static u64 sched_vslice(struct cfs_rq *cfs_rq, struct sched_entity *se)
 {
+	/**
+	 * calc_delta_fair 将时间转换为vruntime
+	 */
 	return calc_delta_fair(sched_slice(cfs_rq, se), se);
 }
 
@@ -877,6 +885,8 @@ __attribute__((optimize("O0"))) static void update_curr(struct cfs_rq *cfs_rq)
 	struct sched_entity *curr = cfs_rq->curr;
 	// 获取当前CPU上所有任务使用的所有的CPU时间
 	u64 now = rq_clock_task(rq_of(cfs_rq));
+
+	// delta_exec计算该进程从上次调用update_curr()函数到现在的时间差
 	u64 delta_exec;
 
 	if (unlikely(!curr)) {
@@ -901,6 +911,7 @@ __attribute__((optimize("O0"))) static void update_curr(struct cfs_rq *cfs_rq)
 
 	// 这个累加就不一样了，需要将实际运行时间转为vruntime，再累加
 	curr->vruntime += calc_delta_fair(delta_exec, curr);
+
 	update_min_vruntime(cfs_rq);
 
 	if (entity_is_task(curr)) {
@@ -4143,27 +4154,39 @@ static void check_spread(struct cfs_rq *cfs_rq, struct sched_entity *se)
 #endif
 }
 
-static void
+/**
+ * place_entity()函数根据情况对进程虚拟时间进行一些惩罚
+ * 
+ * @param se 新创建的进程
+ * 
+ */
+__attribute__((optimize("O0"))) static void
 place_entity(struct cfs_rq *cfs_rq, struct sched_entity *se, int initial)
 {
 	u64 vruntime = cfs_rq->min_vruntime;
 
-	/*
+	/**
 	 * The 'current' period is already promised to the current tasks,
 	 * however the extra weight of the new task will slow them down a
 	 * little, place the new task so that it fits in the slot that
 	 * stays open at the end.
+	 * (当前时段已分配给现有任务，但新任务的额外负载会略微拖慢它们的执行速度，
+	 * 因此将新任务放置在末尾的空闲时段中)
+	 * 
+	 * 怎么放在末尾？根据红黑树特性，增加vruntime就可以了
 	 */
-	if (initial && sched_feat(START_DEBIT))
+	if (initial && sched_feat(START_DEBIT)) {
 		vruntime += sched_vslice(cfs_rq, se);
+	}
 
 	/* sleeps up to a single latency don't count. */
 	if (!initial) {
 		unsigned long thresh = sysctl_sched_latency;
 
-		/*
+		/**
 		 * Halve their sleep time's effect, to allow
 		 * for a gentler effect of sleepers:
+		 * (将睡眠时间的效果减半，以使睡眠任务的影响更为温和)
 		 */
 		if (sched_feat(GENTLE_FAIR_SLEEPERS))
 			thresh >>= 1;
@@ -10807,12 +10830,19 @@ static void task_tick_fair(struct rq *rq, struct task_struct *curr, int queued)
 	update_overutilized_status(task_rq(curr));
 }
 
-/*
+/**
  * called on fork with the child task as argument from the parent's context
  *  - child not yet on the tasklist
  *  - preemption disabled
+ * 
+ * 
+ * 每个调度类都定义了一个操作方法集，调用CFS的调度类的task_fork方法做一些与fork相关的初始化
+ * 
+ * 调用方式: p->sched_class->task_fork(p); 
+ * 
+ * @param p 新创建的线程
  */
-static void task_fork_fair(struct task_struct *p)
+__attribute__((optimize("O0")))  static void task_fork_fair(struct task_struct *p)
 {
 	struct cfs_rq *cfs_rq;
 	struct sched_entity *se = &p->se, *curr;
@@ -10825,9 +10855,13 @@ static void task_fork_fair(struct task_struct *p)
 	cfs_rq = task_cfs_rq(current);
 	curr = cfs_rq->curr;
 	if (curr) {
+		// update_curr()函数是CFS中的核心函数，用于更新进程的虚拟时间（vruntime）。
 		update_curr(cfs_rq);
 		se->vruntime = curr->vruntime;
 	}
+	/**
+	 * place_entity()函数根据情况对进程虚拟时间进行一些惩罚
+	 */
 	place_entity(cfs_rq, se, 1);
 
 	if (sysctl_sched_child_runs_first && curr && entity_before(curr, se)) {
@@ -10839,6 +10873,12 @@ static void task_fork_fair(struct task_struct *p)
 		resched_curr(rq);
 	}
 
+	/**
+	 * 为什么 place_entity 函数计算到的vruntime 要在这里减去 min_vruntime???
+	 * 
+	 * 因为: 新进程在place_entity()函数中得到了一定的惩罚，
+	 * 惩罚的虚拟时间由sched_vslice()计算，在某种程度上这也是为了防止新进程恶意占用CPU时间
+	 */
 	se->vruntime -= cfs_rq->min_vruntime;
 	rq_unlock(rq, &rf);
 }
