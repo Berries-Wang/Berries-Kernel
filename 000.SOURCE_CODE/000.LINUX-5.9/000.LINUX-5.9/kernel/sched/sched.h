@@ -401,6 +401,9 @@ struct cfs_bandwidth {
 };
 
 /**
+ * 
+ * 通过task_group来抽象和描述组调度
+ * 
  * Task group related information （任务组相关信息）
  * 
  * struct task_group 是 Linux 控制组（cgroup） 调度子系统的核心数据结构，

@@ -283,7 +283,12 @@ static inline struct task_struct *task_of(struct sched_entity *se)
 	return container_of(se, struct task_struct, se);
 }
 
-/* Walk up scheduling entities hierarchy */
+/**
+ *  Walk up scheduling entities hierarchy 
+ *  (向上推进调度实体层次)
+ * 
+ * 实现了组调度
+*/
 #define for_each_sched_entity(se) \
 		for (; se; se = se->parent)
 
@@ -472,6 +477,9 @@ static inline struct task_struct *task_of(struct sched_entity *se)
 	return container_of(se, struct task_struct, se);
 }
 
+/**
+ * 没有实现组调度
+ */
 #define for_each_sched_entity(se) \
 		for (; se; se = NULL)
 
@@ -4410,17 +4418,27 @@ dequeue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se, int flags)
 		update_min_vruntime(cfs_rq);
 }
 
-/*
+/**
+ * check_preempt_tick()函数检查当前进程是否需要调度
+ * 
  * Preempt the current task with a newly woken task if needed:
+ * (如果需要，用新唤醒的任务抢占当前任务：)
  */
-static void
+__attribute__((optimize("O0"))) static void
 check_preempt_tick(struct cfs_rq *cfs_rq, struct sched_entity *curr)
 {
 	unsigned long ideal_runtime, delta_exec;
 	struct sched_entity *se;
 	s64 delta;
 
+	/**
+	 * ideal_runtime是理论运行时间，即该进程根据权重在一个调度周期里分到的实际运行时间，由sched_slice()函数计算
+	 */
 	ideal_runtime = sched_slice(cfs_rq, curr);
+
+	/**
+	 * delta_exec是实际运行时间，如果实际运行时间已经超过了理论运行时间，那么该进程要被调度出去。resched_curr()函数设置该进程thread_info中的TIF_NEED_RESCHED标志位。
+	 */
 	delta_exec = curr->sum_exec_runtime - curr->prev_sum_exec_runtime;
 	if (delta_exec > ideal_runtime) {
 		resched_curr(rq_of(cfs_rq));
@@ -4432,22 +4450,32 @@ check_preempt_tick(struct cfs_rq *cfs_rq, struct sched_entity *curr)
 		return;
 	}
 
-	/*
+	/**
 	 * Ensure that a task that missed wakeup preemption by a
 	 * narrow margin doesn't have to wait for a full slice.
 	 * This also mitigates buddy induced latencies under load.
+	 * 
+	 * 系统中使用一个变量定义进程最短运行时间，即sysctl_sched_min_granularity，它的默认值是0.75ms。如果该进程实际运行时间小于这个值，它不需要被调度
 	 */
-	if (delta_exec < sysctl_sched_min_granularity)
+	if (delta_exec < sysctl_sched_min_granularity) {
 		return;
+	}
 
+	/**
+	 * 最后，根据vruntime来判断是否需要被调度
+	 * 
+	 * 将该进程的虚拟时间和就绪队列红黑树中最左边的调度实体的虚拟时间做比较，差值为delta。如果差值小于最左边的调度实体的虚拟时间，则不用触发调度；如果差值大于该进程的理论运行时间，则会触发调度
+	 */
 	se = __pick_first_entity(cfs_rq);
 	delta = curr->vruntime - se->vruntime;
 
-	if (delta < 0)
+	if (delta < 0) {
 		return;
+	}
 
-	if (delta > ideal_runtime)
+	if (delta > ideal_runtime) {
 		resched_curr(rq_of(cfs_rq));
+	}
 }
 
 /**
@@ -4600,16 +4628,20 @@ __attribute__((optimize("O0"))) static void put_prev_entity(struct cfs_rq *cfs_r
 	cfs_rq->curr = NULL;
 }
 
-static void
-entity_tick(struct cfs_rq *cfs_rq, struct sched_entity *curr, int queued)
+/**
+ * 检查是否需要被调度
+ */
+__attribute__((optimize("O0"))) static void entity_tick(struct cfs_rq *cfs_rq, struct sched_entity *curr, int queued)
 {
-	/*
+	/**
 	 * Update run-time statistics of the 'current'.
+	 * update_curr()函数更新当前进程的vruntime和就绪队列的min_vruntime。
 	 */
 	update_curr(cfs_rq);
 
-	/*
+	/**
 	 * Ensure that runnable average is periodically updated.
+	 * update_load_avg()函数更新该进程调度实体的负载和就绪队列的负载
 	 */
 	update_load_avg(cfs_rq, curr, UPDATE_TG);
 	update_cfs_group(curr);
@@ -4631,8 +4663,12 @@ entity_tick(struct cfs_rq *cfs_rq, struct sched_entity *curr, int queued)
 		return;
 #endif
 
-	if (cfs_rq->nr_running > 1)
+	if (cfs_rq->nr_running > 1) {
+		/**
+		 * 检查当前进程是否需要调度
+		 */
 		check_preempt_tick(cfs_rq, curr);
+	}
 }
 
 

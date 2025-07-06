@@ -239,10 +239,9 @@ struct rq *task_rq_lock(struct task_struct *p, struct rq_flags *rf)
 	}
 }
 
-/*
+/**
  * RQ-clock updating methods:
  */
-
 static void update_rq_clock_task(struct rq *rq, s64 delta)
 {
 /*
@@ -297,6 +296,9 @@ static void update_rq_clock_task(struct rq *rq, s64 delta)
 	update_rq_clock_pelt(rq, delta);
 }
 
+/**
+ * 更新当前CPU就绪队列（rq）中的时钟计数clock和clock_task成员。
+ */
 void update_rq_clock(struct rq *rq)
 {
 	s64 delta;
@@ -3550,6 +3552,7 @@ static inline void prepare_task(struct task_struct *next)
 	 *
 	 * See the ttwu() WF_ON_CPU case and its ordering comment.
 	 */
+	// 设置next进程描述符中的on_cpu成员为1，表示next进程即将进入执行状态
 	WRITE_ONCE(next->on_cpu, 1);
 #endif
 }
@@ -3634,11 +3637,20 @@ prepare_task_switch(struct rq *rq, struct task_struct *prev,
 	perf_event_task_sched_out(prev, next);
 	rseq_preempt(prev);
 	fire_sched_out_preempt_notifiers(prev, next);
+	// 设置next进程描述符中的on_cpu成员为1，表示next进程即将进入执行状态
 	prepare_task(next);
 	prepare_arch_switch(next);
 }
 
 /**
+ * 
+ * <pre>
+ *    finish_task_switch 是由谁执行的呢?
+ * next进程执行finish_task_switch(last)函数来对last进程进行清理工作，
+ * 通常last进程指的是prev进程。需要注意的是，这里执行的finish_task_switch()函数属于next进程，
+ * 只是把last进程的进程描述符作为参数传递给finish_task_switch()函数。
+ * </pre>
+ * 
  * finish_task_switch - clean up after a task-switch
  * @prev: the thread we just switched away from.
  *
@@ -3646,16 +3658,25 @@ prepare_task_switch(struct rq *rq, struct task_struct *prev,
  * with a prepare_task_switch call before the context switch.
  * finish_task_switch will reconcile locking set up by prepare_task_switch,
  * and do any other architecture-specific cleanup actions.
+ * (finish_task_switch 必须在上下文切换之后调用，
+ * 并在上下文切换之前与 prepare_task_switch 调用配对。
+ * finish_task_switch 将协调 prepare_task_switch 设置的锁定，
+ * 并执行任何其他特定于体系结构的清理操作。)
  *
  * Note that we may have delayed dropping an mm in context_switch(). If
  * so, we finish that here outside of the runqueue lock. (Doing it
  * with the lock held can cause deadlocks; see schedule() for
  * details.)
+ * (请注意，我们可能在 context_switch() 中延迟了 mm 的丢弃。如果是这样，
+ * 我们会在运行队列锁之外完成该操作。
+ * （在持有锁的情况下执行此操作可能会导致死锁；详情请参阅 Schedule()。）)
  *
  * The context switch have flipped the stack from under us and restored the
  * local variables which were saved when this task called schedule() in the
  * past. prev == current is still correct but we need to recalculate this_rq
  * because prev may have moved to another CPU.
+ * (上下文切换已经将我们下面的堆栈翻转，并恢复了此任务在过去调用schedule（）时保存的局部变量。
+ * prev == current 仍然正确，但我们需要重新计算this_rq，因为prev可能已经移动到另一个CPU。)
  */
 static struct rq *finish_task_switch(struct task_struct *prev)
 	__releases(rq->lock)
@@ -3809,6 +3830,8 @@ asmlinkage __visible void schedule_tail(struct task_struct *prev)
 /**
  * context_switch - switch to the new MM and the new thread's register state.
  * 切换到新的MM和新线程的寄存器状态。
+ * 
+ * 请阅读: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#8.1.6进程切换#3．switch_to()函数
  */
 static __always_inline struct rq *
 context_switch(struct rq *rq, struct task_struct *prev,
@@ -3861,10 +3884,28 @@ context_switch(struct rq *rq, struct task_struct *prev,
 
 	prepare_lock_switch(rq, next, rf);
 
-	/* Here we just switch the register state and the stack. */
+	/** Here we just switch the register state and the stack. 
+	 * 
+	 * switch_to 切换到next进程进行执行
+	 * 
+	 * 该函数执行完成后，CPU运行next进程，prev进程被调度出去，俗称“睡眠了”。
+	 * 
+	 * 当被调度出去的prev进程再次被调度时，它可能在原来的CPU上，也可能被迁移到其他CPU上。总之，是在switch_to()函数切换完进程后开始运行的。
+	 * 
+	 * arm64: arch/arm64/kernel/process.c
+	 * 
+	 * 栈空间的切换
+	 * 
+	 * [include/asm-generic/switch_to.h]
+	*/
 	switch_to(prev, next, prev);
 	barrier();
 
+	/**
+	 * switch_to 执行后，那么CPU就已经运行了next进程了
+	 */
+
+	// 这个函数是由谁执行的呢?
 	return finish_task_switch(prev);
 }
 
@@ -4066,8 +4107,14 @@ unsigned long long task_sched_runtime(struct task_struct *p)
 /*
  * This function gets called by the timer code, with HZ frequency.
  * We call it with interrupts disabled.
+ * 
+ * 调用场景:
+ * 1. 时钟中断发生后的函数调用
+ * 
+ * 
+ * 参考: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#8.1.7　调度节拍
  */
-void scheduler_tick(void)
+__attribute__((optimize("O0"))) void scheduler_tick(void)
 {
 	int cpu = smp_processor_id();
 	struct rq *rq = cpu_rq(cpu);
@@ -4083,6 +4130,10 @@ void scheduler_tick(void)
 	update_rq_clock(rq);
 	thermal_pressure = arch_scale_thermal_pressure(cpu_of(rq));
 	update_thermal_load_avg(rq_clock_thermal(rq), rq, thermal_pressure);
+
+	/**
+	 * task_tick()是调度类中实现的方法，用于处理时钟节拍到来时与调度器相关的事情
+	 */
 	curr->sched_class->task_tick(rq, curr, 0);
 	calc_global_load_tick(rq);
 	psi_task_tick(rq);
@@ -4093,6 +4144,7 @@ void scheduler_tick(void)
 
 #ifdef CONFIG_SMP
 	rq->idle_balance = idle_cpu(cpu);
+	// trigger_load_balance()函数触发SMP负载均衡机制
 	trigger_load_balance(rq);
 #endif
 }
@@ -4493,7 +4545,7 @@ restart:
  *
  * WARNING: must be called with preemption disabled! (警告： 必须在禁止抢占的情况下调用)
  * 
- * @param preempt 是否支持抢占???
+ * @param preempt 本次调度是否为抢占调度
  */
 static void __sched notrace __schedule(bool preempt)
 {
@@ -4526,6 +4578,7 @@ static void __sched notrace __schedule(bool preempt)
 		hrtick_clear(rq);
 	}
 
+	// local_irq_disable()函数关闭本地CPU中断。
 	local_irq_disable(); // 仅禁用当前处理器中断，其他处理器不受影响
 	/**
 	 * RCU 
@@ -7573,8 +7626,14 @@ static void sched_free_group(struct task_group *tg)
 	kmem_cache_free(task_group_cache, tg);
 }
 
-/* allocate runqueue etc for a new task group */
-struct task_group *sched_create_group(struct task_group *parent)
+/** 
+ * allocate runqueue etc for a new task group
+ * (创建一个新的组调度)
+ * 
+ * 
+ * @param parent 指向上一级的组调度节点，系统中有一个组调度的根，命名为root_task_group
+ **/
+__attribute__((optimize("O0"))) struct task_group *sched_create_group(struct task_group *parent)
 {
 	struct task_group *tg;
 
