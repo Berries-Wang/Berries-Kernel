@@ -526,6 +526,8 @@ struct sched_entity {
 	/**
 	 *  rq "owned" by this entity/group: (rq 由该实体/团体“拥有”：)
 	 *  my_q 成员指向组调度里自身的CFS 调度队列  P384 《Run Linux Kernel-Base On 4.x.pdf》
+	 * 
+	 *   为NULL ， 则说明是个普通进程；否则，是个组调度实体；
 	 * */
 	struct cfs_rq			*my_q;
 	/* cached value of my_q->h_nr_running */

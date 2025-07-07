@@ -632,6 +632,9 @@ static void __enqueue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se)
 			       &cfs_rq->tasks_timeline, leftmost);
 }
 
+/**
+ * erase: 擦除
+ */
 static void __dequeue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se)
 {
 	rb_erase_cached(&se->run_node, &cfs_rq->tasks_timeline);
@@ -3376,12 +3379,14 @@ static inline void update_tg_load_avg(struct cfs_rq *cfs_rq, int force)
 	}
 }
 
-/*
+/**
  * Called within set_task_rq() right before setting a task's CPU. The
  * caller only guarantees p->pi_lock is held; no other assumptions,
  * including the state of rq->lock, should be made.
+ * (在 set_task_rq() 中设置任务 CPU 之前调用。调用者仅保证 p->pi_lock 被持有；
+ * 无需做任何其他假设，包括 rq->lock 的状态。)
  */
-void set_task_rq_fair(struct sched_entity *se,
+__attribute__((optimize("O0"))) void set_task_rq_fair(struct sched_entity *se,
 		      struct cfs_rq *prev, struct cfs_rq *next)
 {
 	u64 p_last_update_time;
@@ -4366,7 +4371,7 @@ static void clear_buddies(struct cfs_rq *cfs_rq, struct sched_entity *se)
 
 static __always_inline void return_cfs_rq_runtime(struct cfs_rq *cfs_rq);
 
-static void
+__attribute__((optimize("O0"))) static void
 dequeue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se, int flags)
 {
 	/*
@@ -5653,7 +5658,7 @@ static int sched_idle_cpu(int cpu)
  * increased. Here we update the fair scheduling stats and
  * then put the task into the rbtree:
  */
-static void
+__attribute__((optimize("O0"))) static void
 enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 {
 	struct cfs_rq *cfs_rq;
@@ -5679,7 +5684,7 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 	for_each_sched_entity(se) {
 		if (se->on_rq)
 			break;
-		cfs_rq = cfs_rq_of(se);
+		cfs_rq = cfs_rq_of(se); // 直接通过 se->cfs_rq
 		enqueue_entity(cfs_rq, se, flags);
 
 		cfs_rq->h_nr_running++;
@@ -7218,9 +7223,15 @@ again:
 			}
 		}
 
+		/**
+		 * 这段代码需要注意了!!!
+		 */
 		se = pick_next_entity(cfs_rq, curr);
 
-		// 获取组调度实体: 获取的是 my_q属性
+		/**
+		 * 获取组调度实体: 获取的是 my_q属性
+		 *  my_q 为NULL , 是普通进程实体;否则，是组调度实体。
+		 */
 		cfs_rq = group_cfs_rq(se);
 
 		/**
@@ -11077,10 +11088,11 @@ static void switched_to_fair(struct rq *rq, struct task_struct *p)
 	}
 }
 
-/* Account for a task changing its policy or group.
+/** Account for a task changing its policy or group.
  *
  * This routine is mostly called to set cfs_rq->curr field when a task
  * migrates between groups/classes.
+ * (当任务在组/类之间迁移时，主要调用此例程来设置 cfs_rq->curr 字段。)
  */
 static void set_next_task_fair(struct rq *rq, struct task_struct *p, bool first)
 {
@@ -11088,9 +11100,10 @@ static void set_next_task_fair(struct rq *rq, struct task_struct *p, bool first)
 
 #ifdef CONFIG_SMP
 	if (task_on_rq_queued(p)) {
-		/*
+		/**
 		 * Move the next running task to the front of the list, so our
 		 * cfs_tasks list becomes MRU one.
+		 * (将下一个正在运行的任务移到列表的前面，这样我们的 cfs_tasks 列表就变成了 MRU 列表。?)
 		 */
 		list_move(&se->group_node, &rq->cfs_tasks);
 	}
@@ -11126,9 +11139,10 @@ static void task_set_group_fair(struct task_struct *p)
 	se->depth = se->parent ? se->parent->depth + 1 : 0;
 }
 
-static void task_move_group_fair(struct task_struct *p)
+__attribute__((optimize("O0")))  static void task_move_group_fair(struct task_struct *p)
 {
 	detach_task_cfs_rq(p);
+	//000.LINUX-5.9/kernel/sched/sched.h
 	set_task_rq(p, task_cpu(p));
 
 #ifdef CONFIG_SMP
@@ -11168,36 +11182,56 @@ void free_fair_sched_group(struct task_group *tg)
 	kfree(tg->se);
 }
 
-int alloc_fair_sched_group(struct task_group *tg, struct task_group *parent)
+/**
+ * 组调度相关
+ */
+__attribute__((optimize("O0"))) int alloc_fair_sched_group(struct task_group *tg, struct task_group *parent)
 {
 	struct sched_entity *se;
 	struct cfs_rq *cfs_rq;
 	int i;
 
+	/**
+	 * 分配 nr_cpu_ids 个cfs_rq数据结构并将其复制到指针数组中
+	 * 在这里，也只是分配了指针的空间
+	 */
 	tg->cfs_rq = kcalloc(nr_cpu_ids, sizeof(cfs_rq), GFP_KERNEL);
-	if (!tg->cfs_rq)
+	if (!tg->cfs_rq) {
 		goto err;
-	tg->se = kcalloc(nr_cpu_ids, sizeof(se), GFP_KERNEL);
-	if (!tg->se)
+	}
+	tg->se = kcalloc(nr_cpu_ids, sizeof(se),GFP_KERNEL); // 注意，这里只分配了指针的空间
+	if (!tg->se) {
 		goto err;
+	}
 
 	tg->shares = NICE_0_LOAD;
 
+	// 初始化CFS中与带宽控制相关的信息
 	init_cfs_bandwidth(tg_cfs_bandwidth(tg));
-
+    
+	/**
+	 * 遍历所有的CPU
+	 * 
+	 */
 	for_each_possible_cpu(i) {
-		cfs_rq = kzalloc_node(sizeof(struct cfs_rq),
-				      GFP_KERNEL, cpu_to_node(i));
-		if (!cfs_rq)
+		// 真正地分配空间
+		cfs_rq = kzalloc_node(sizeof(struct cfs_rq), GFP_KERNEL, cpu_to_node(i));
+		if (!cfs_rq) {
 			goto err;
+		}
 
+		// 真正地分配空间
 		se = kzalloc_node(sizeof(struct sched_entity),
 				  GFP_KERNEL, cpu_to_node(i));
-		if (!se)
+		if (!se) {
 			goto err_free_rq;
+		}
 
 		init_cfs_rq(cfs_rq);
+
+		// init_tg_cfs_entry()函数对组调度的相关数据结构进行初始化
 		init_tg_cfs_entry(tg, cfs_rq, se, i, parent->se[i]);
+
 		init_entity_runnable_average(se);
 	}
 
@@ -11209,7 +11243,10 @@ err:
 	return 0;
 }
 
-void online_fair_sched_group(struct task_group *tg)
+/**
+ * 
+ */
+__attribute__((optimize("O0"))) void online_fair_sched_group(struct task_group *tg)
 {
 	struct sched_entity *se;
 	struct rq_flags rf;
@@ -11252,7 +11289,12 @@ void unregister_fair_sched_group(struct task_group *tg)
 	}
 }
 
-void init_tg_cfs_entry(struct task_group *tg, struct cfs_rq *cfs_rq,
+/**
+ * 注意，tb->se->mq_rq , tg->se->cfs_rq 分别指向什么
+ * 
+ */
+__attribute__((optimize("O0"))) void init_tg_cfs_entry(struct task_group *tg,
+	        struct cfs_rq *cfs_rq,
 			struct sched_entity *se, int cpu,
 			struct sched_entity *parent)
 {
@@ -11262,6 +11304,9 @@ void init_tg_cfs_entry(struct task_group *tg, struct cfs_rq *cfs_rq,
 	cfs_rq->rq = rq;
 	init_cfs_rq_runtime(cfs_rq);
 
+	/**
+	 * 在tg中，每个CPU都有一个cfs_rq 和 se 与之对应
+	 */
 	tg->cfs_rq[cpu] = cfs_rq;
 	tg->se[cpu] = se;
 
@@ -11270,6 +11315,7 @@ void init_tg_cfs_entry(struct task_group *tg, struct cfs_rq *cfs_rq,
 		return;
 
 	if (!parent) {
+		// cfs_rq 还是指向原来的CPU的cfs_rq
 		se->cfs_rq = &rq->cfs;
 		se->depth = 0;
 	} else {

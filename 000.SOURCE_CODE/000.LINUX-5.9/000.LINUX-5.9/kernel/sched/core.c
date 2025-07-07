@@ -7700,14 +7700,19 @@ void sched_offline_group(struct task_group *tg)
 	spin_unlock_irqrestore(&task_group_lock, flags);
 }
 
-static void sched_change_group(struct task_struct *tsk, int type)
+/**
+ * 
+ */
+__attribute__((optimize("O0"))) static void sched_change_group(struct task_struct *tsk, int type)
 {
 	struct task_group *tg;
 
-	/*
+	/**
 	 * All callers are synchronized by task_rq_lock(); we do not use RCU
 	 * which is pointless here. Thus, we pass "true" to task_css_check()
 	 * to prevent lockdep warnings.
+	 * (所有调用者都通过 task_rq_lock() 进行同步；我们不使用 RCU，这在这里毫无意义。
+	 * 因此，我们将“true”传递给 task_css_check() 以避免 lockdep 警告。)
 	 */
 	tg = container_of(task_css_check(tsk, cpu_cgrp_id, true),
 			  struct task_group, css);
@@ -7722,14 +7727,18 @@ static void sched_change_group(struct task_struct *tsk, int type)
 		set_task_rq(tsk, task_cpu(tsk));
 }
 
-/*
- * Change task's runqueue when it moves between groups.
+/**
+ * 
+ * 函数功能: sched_move_task()函数将进程迁移到组调度中。
+ * 
+ * Change task's runqueue when it moves between groups.(当任务在组之间移动时更改其运行队列。)
  *
  * The caller of this function should have put the task in its new group by
  * now. This function just updates tsk->se.cfs_rq and tsk->se.parent to reflect
  * its new group.
+ * (此函数的调用者现在应该已经将任务放入其新组中。此函数仅更新 tsk->se.cfs_rq 和 tsk->se.parent 以反映其新组。)
  */
-void sched_move_task(struct task_struct *tsk)
+__attribute__((optimize("O0"))) void sched_move_task(struct task_struct *tsk)
 {
 	int queued, running, queue_flags =
 		DEQUEUE_SAVE | DEQUEUE_MOVE | DEQUEUE_NOCLOCK;
@@ -7738,25 +7747,55 @@ void sched_move_task(struct task_struct *tsk)
 
 	rq = task_rq_lock(tsk, &rf);
 	update_rq_clock(rq);
-
+    
+	// 当前正在运行的进程是否是tsk
 	running = task_current(rq, tsk);
+
+	// 进程tsk是否在运行队列中
 	queued = task_on_rq_queued(tsk);
 
-	if (queued)
+	// 如果在队列中，则出队: 即 >>> 从原来是的队列中退出来
+	if (queued) {
 		dequeue_task(rq, tsk, queue_flags);
-	if (running)
+	}
+	
+	// 如果正在执行中，则更新其状态???
+	if (running) {
 		put_prev_task(rq, tsk);
+	}
 
+	/**
+	 * #0  set_task_rq (cpu=<optimized out>, p=<optimized out>) at kernel/sched/sched.h:1682  将进程添加到task_group的cfs_rq中
+     * #1  task_set_group_fair (p=<optimized out>) at kernel/sched/fair.c:11125
+     * #2  task_change_group_fair (type=<optimized out>, p=<optimized out>) at kernel/sched/fair.c:11145
+     * #3  task_change_group_fair (p=0xffff00003d888e00, type=0) at kernel/sched/fair.c:11141
+     * #4  0xffff8000100aeadc in sched_change_group (tsk=0xffff00003d888e00, type=0) at kernel/sched/core.c:7719
+	 */
 	sched_change_group(tsk, TASK_MOVE_GROUP);
 
-	if (queued)
+	if (queued) {
+		/**
+		 * 任务重新入队，添加到调度器类的cfs_rq中
+		 * 
+		 * 通过源码可知,经过 sched_change_group 执行后，
+		 * tsk的se被设置为了task_group中的se，这里再次入队，是将tsk加入到
+		 * task_group里面的cfs_rq中
+		 * 
+		 * >>> 在此函数执行之前，已经将进程tsk从原来的cfs_rq移出了 <<< 
+		 * 
+		 */
 		enqueue_task(rq, tsk, queue_flags);
+	}
+
+
 	if (running) {
 		set_next_task(rq, tsk);
-		/*
+		/**
 		 * After changing group, the running task may have joined a
 		 * throttled one but it's still the running task. Trigger a
 		 * resched to make sure that task can still run.
+		 * (更改组后，正在运行的任务可能已加入受限制的组，
+		 * 但它仍然是正在运行的任务。触发重新调度以确保该任务仍可运行。)
 		 */
 		resched_curr(rq);
 	}
@@ -7788,7 +7827,7 @@ cpu_cgroup_css_alloc(struct cgroup_subsys_state *parent_css)
 }
 
 /* Expose task group only after completing cgroup initialization */
-static int cpu_cgroup_css_online(struct cgroup_subsys_state *css)
+__attribute__((optimize("O0"))) static int cpu_cgroup_css_online(struct cgroup_subsys_state *css)
 {
 	struct task_group *tg = css_tg(css);
 	struct task_group *parent = css_tg(css->parent);
@@ -7869,7 +7908,10 @@ static int cpu_cgroup_can_attach(struct cgroup_taskset *tset)
 	return ret;
 }
 
-static void cpu_cgroup_attach(struct cgroup_taskset *tset)
+/**
+ * 把进程添加到组调度的情况
+ */
+__attribute__((optimize("O0"))) static void cpu_cgroup_attach(struct cgroup_taskset *tset)
 {
 	struct task_struct *task;
 	struct cgroup_subsys_state *css;

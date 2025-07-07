@@ -411,7 +411,7 @@ struct cfs_bandwidth {
  * 
  * */
 struct task_group {
-	struct cgroup_subsys_state css;
+	struct cgroup_subsys_state css; // cgroup 控制信息
 
 #ifdef CONFIG_FAIR_GROUP_SCHED
 	/**
@@ -1671,7 +1671,10 @@ static inline struct task_group *task_group(struct task_struct *p)
 	return p->sched_task_group;
 }
 
-/* Change a task's cfs_rq and parent entity if it moves across CPUs/groups */
+/** 
+ * Change a task's cfs_rq and parent entity if it moves across CPUs/groups 
+ * (如果任务跨 CPU/组移动，则更改其 cfs_rq 和父实体)
+*/
 static inline void set_task_rq(struct task_struct *p, unsigned int cpu)
 {
 #if defined(CONFIG_FAIR_GROUP_SCHED) || defined(CONFIG_RT_GROUP_SCHED)
@@ -1680,6 +1683,7 @@ static inline void set_task_rq(struct task_struct *p, unsigned int cpu)
 
 #ifdef CONFIG_FAIR_GROUP_SCHED
 	set_task_rq_fair(&p->se, p->se.cfs_rq, tg->cfs_rq[cpu]);
+	// 将p添加到tg的cfs_rq中去
 	p->se.cfs_rq = tg->cfs_rq[cpu];
 	p->se.parent = tg->se[cpu];
 #endif

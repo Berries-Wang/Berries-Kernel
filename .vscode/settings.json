@@ -12,6 +12,7 @@
         "string_view": "c",
         "utility": "c",
         "random": "c",
-        "atomic": "c"
+        "atomic": "c",
+        "workqueue_internal.h": "c"
     }
 }
