@@ -22,34 +22,50 @@
  *
  *  Move PELT related code from fair.c into this pelt.c file
  *  Author: Vincent Guittot <vincent.guittot@linaro.org>
+ * 
+ * 
+ * NOTE:[001.UNIX-DOCS/016.负载计算.md]
  */
 
 #include <linux/sched.h>
 #include "sched.h"
 #include "pelt.h"
 
-/*
- * Approximate:
+/**
+ * Approximate(近似):
  *   val * y^n,    where y^32 ~= 0.5 (~1 scheduling period)
+ * 
+ * 计算第n个周期的衰减值
+ * 
+ * @param val  表示n个周期前的负载值
+ * @param n    第n个周期 ， 单位 ms
+ *             周期的定义:  1ms（准确来说是1024μs，为了方便移位操作）的时间跨度算成一个周期（period），简称PI
  */
 static u64 decay_load(u64 val, u64 n)
 {
 	unsigned int local_n;
-
-	if (unlikely(n > LOAD_AVG_PERIOD * 63))
+    
+	/**
+	 * 为什么返回0 , 即 周期太大，衰减后的值会太小，接近于0
+	 */
+	if (unlikely(n > LOAD_AVG_PERIOD * 63)) {
 		return 0;
+	}
 
 	/* after bounds checking we can collapse to 32-bit */
 	local_n = n;
 
-	/*
+	/**
 	 * As y^PERIOD = 1/2, we can combine
 	 *    y^n = 1/2^(n/PERIOD) * y^(n%PERIOD)
 	 * With a look-up table which covers y^n (n<PERIOD)
 	 *
 	 * To achieve constant time decay_load.
+	 * 
+	 * LOAD_AVG_PERIOD 即半衰期，32ms
 	 */
 	if (unlikely(local_n >= LOAD_AVG_PERIOD)) {
+		// 每增加 LOAD_AVG_PERIOD 就要衰减1/2  [半衰期]
 		val >>= local_n / LOAD_AVG_PERIOD;
 		local_n %= LOAD_AVG_PERIOD;
 	}

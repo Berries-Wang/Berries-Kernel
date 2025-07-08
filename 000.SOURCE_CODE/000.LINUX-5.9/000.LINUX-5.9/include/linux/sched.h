@@ -368,6 +368,7 @@ struct util_est {
 } __attribute__((__aligned__(sizeof(u64))));
 
 /**
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]8.2　负载计算
  * 用于计算CPU负载
  * 
  * The load/runnable/util_avg accumulates an infinite geometric series
@@ -413,15 +414,53 @@ struct util_est {
  *
  * Then it is the load_weight's responsibility to consider overflow
  * issues.
+ * 
  */
 struct sched_avg {
+	/**
+	 * 上一次更新的时间点，用于计算时间间隔
+	 */
 	u64				last_update_time;
+
+	/**
+	 * 对于调度实体来说，它的统计对象是进程的调度实体在可运行状态下的累计衰减总时间。
+	 * 对于调度队列来说，它是调度队列中所有进程的累计工作总负载（decay_sum_load）
+	 */
 	u64				load_sum;
-	u64				runnable_sum;  // runnable_sum 表示该调度实体在就绪队列里（ se->on_rq=1 ）可运行状态（ runnable ）的总时间。调度实体在就绪队列中的时间包括两部分，一是正在运行的时间，称为 running时间，二是在就绪队列中等待的时间
+
+	/**
+	 * 对于调度实体来说，它是在就绪队列里可运行状态下的累计衰减总时间（decay_sum_time）。
+	 * 对于调度队列来说，它统计就绪队列里所有可运行状态下进程的累计工作总负载（decay_sum_load）
+	 */
+	u64				runnable_sum;
+
+	/**
+	 * 对于调度实体来说，它是正在运行状态下的累计衰减总时间（decay_sum_time）。使用cfs_rq->curr == se来判断当前进程是否正在运行。
+	 * 对于调度队列来说，它整个就绪队列中所有处于运行状态进程的累计衰减总时间（decay_sum_time）。只要就绪队列里有正在运行的进程，它就会去计算和累加
+	 *  */ 
 	u32				util_sum;
+
+	/**
+	 * 存放着上一次时间采样时，不能凑成一个周期（1024μs）的剩余的时间
+	 */
 	u32				period_contrib;
+
+	/**
+	 * 对于调度实体来说，它是可运行状态下的量化负载（decay_avg_load）。在负载均衡算法中，使用该成员来衡量一个进程的负载贡献值，如衡量迁移进程的负载量。
+	 * 对于调度队列来说，它是调度队列中总的量化负载
+	 */
 	unsigned long			load_avg;
-	unsigned long			runnable_avg;       
+
+	/**
+	 * 对于调度实体来说，它是可运行状态下的量化负载，等于load_avg。
+	 * 对于调度队列来说，它统计就绪队列里所有可运行状态下进程的总量化负载，在SMP负载均衡算法中使用该成员来比较CPU的负载大小
+	 */
+	unsigned long			runnable_avg; 
+
+	/**
+	 * 实际算力。通常用于体现一个调度实体或者CPU的实际算力需求，类似于CPU使用率的概念
+	 * util_avg指的是实际算力，表示一个进程或者CPU的当前实际使用率。
+	 *  */   
 	unsigned long			util_avg;
 	struct util_est			util_est;
 } ____cacheline_aligned;
