@@ -7770,6 +7770,8 @@ __attribute__((optimize("O0"))) void sched_move_task(struct task_struct *tsk)
      * #2  task_change_group_fair (type=<optimized out>, p=<optimized out>) at kernel/sched/fair.c:11145
      * #3  task_change_group_fair (p=0xffff00003d888e00, type=0) at kernel/sched/fair.c:11141
      * #4  0xffff8000100aeadc in sched_change_group (tsk=0xffff00003d888e00, type=0) at kernel/sched/core.c:7719
+	 * 
+	 * 
 	 */
 	sched_change_group(tsk, TASK_MOVE_GROUP);
 
@@ -7915,7 +7917,7 @@ __attribute__((optimize("O0"))) static void cpu_cgroup_attach(struct cgroup_task
 {
 	struct task_struct *task;
 	struct cgroup_subsys_state *css;
-
+   
 	cgroup_taskset_for_each(task, css, tset)
 		sched_move_task(task);
 }

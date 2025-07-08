@@ -1685,6 +1685,10 @@ static inline void set_task_rq(struct task_struct *p, unsigned int cpu)
 	set_task_rq_fair(&p->se, p->se.cfs_rq, tg->cfs_rq[cpu]);
 	// 将p添加到tg的cfs_rq中去
 	p->se.cfs_rq = tg->cfs_rq[cpu];
+
+	/**
+	 * 这一行代码很重要!!! -> 答案: 组调度调度实体se是如何添加到cpu的cfs_rq的 
+	 */
 	p->se.parent = tg->se[cpu];
 #endif
 

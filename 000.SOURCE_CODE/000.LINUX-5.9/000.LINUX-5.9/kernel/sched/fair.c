@@ -599,8 +599,9 @@ static void update_min_vruntime(struct cfs_rq *cfs_rq)
 #endif
 }
 
-/*
+/**
  * Enqueue an entity into the rb-tree:
+ * 将调度实体se添加到cfs_rq的调度队列中
  */
 static void __enqueue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se)
 {
@@ -5678,13 +5679,29 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 	 * utilization updates, so do it here explicitly with the IOWAIT flag
 	 * passed.
 	 */
-	if (p->in_iowait)
+	if (p->in_iowait) {
 		cpufreq_update_util(rq, SCHED_CPUFREQ_IOWAIT);
+	}
 
+	/**
+	 * 组调度开启: 
+	 * #define for_each_sched_entity(se) \
+	 *	for (; se; se = se->parent)
+	 *
+	 * 结合着 kernel/sched.h#set_task_rq 来看
+	 * 
+	 * task->se.parent = tg->se[cpu]
+	 * 
+	 * 结合这里的迭代，那么就会将 组调度实体se 添加到 cpu的cfs_rq中
+	 * 
+	 */
 	for_each_sched_entity(se) {
 		if (se->on_rq)
 			break;
 		cfs_rq = cfs_rq_of(se); // 直接通过 se->cfs_rq
+		/**
+		 * 将se添加到cfs_rq中
+		 */
 		enqueue_entity(cfs_rq, se, flags);
 
 		cfs_rq->h_nr_running++;
@@ -5696,7 +5713,12 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 
 		flags = ENQUEUE_WAKEUP;
 	}
-
+   
+	/**
+	 * 组调度开启: 
+	 * #define for_each_sched_entity(se) \
+	 *	for (; se; se = se->parent)
+	 */
 	for_each_sched_entity(se) {
 		cfs_rq = cfs_rq_of(se);
 
@@ -11229,7 +11251,11 @@ __attribute__((optimize("O0"))) int alloc_fair_sched_group(struct task_group *tg
 
 		init_cfs_rq(cfs_rq);
 
-		// init_tg_cfs_entry()函数对组调度的相关数据结构进行初始化
+		/**
+		 * init_tg_cfs_entry()函数对组调度的相关数据结构进行初始化
+		 * 
+		 * se 是新建的se
+		 */
 		init_tg_cfs_entry(tg, cfs_rq, se, i, parent->se[i]);
 
 		init_entity_runnable_average(se);
@@ -11326,6 +11352,10 @@ __attribute__((optimize("O0"))) void init_tg_cfs_entry(struct task_group *tg,
 	se->my_q = cfs_rq;
 	/* guarantee group entities always have weight */
 	update_load_set(&se->load, NICE_0_LOAD);
+
+	/**
+	 * task_group的下一级可以是task_group，也可以是task_group
+	 */
 	se->parent = parent;
 }
 
