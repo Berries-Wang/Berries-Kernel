@@ -34,8 +34,11 @@
  *  run vmstat and monitor the context-switches (cs) field)
  *
  * (default: 6ms * (1 + ilog(ncpus)), units: nanoseconds)
+ * 
+ * 
+ * 系统默认的调度时间片： sysctl_sched_latency
  */
-unsigned int sysctl_sched_latency			= 6000000ULL;
+unsigned int sysctl_sched_latency			= 6000000ULL; // 6ms
 static unsigned int normalized_sysctl_sched_latency	= 6000000ULL;
 
 /*
@@ -56,7 +59,7 @@ enum sched_tunable_scaling sysctl_sched_tunable_scaling = SCHED_TUNABLESCALING_L
  *
  * (default: 0.75 msec * (1 + ilog(ncpus)), units: nanoseconds)
  */
-unsigned int sysctl_sched_min_granularity			= 750000ULL;
+unsigned int sysctl_sched_min_granularity			= 750000ULL; // 0.75ms
 static unsigned int normalized_sysctl_sched_min_granularity	= 750000ULL;
 
 /*
@@ -280,7 +283,12 @@ static inline struct task_struct *task_of(struct sched_entity *se)
 	return container_of(se, struct task_struct, se);
 }
 
-/* Walk up scheduling entities hierarchy */
+/**
+ *  Walk up scheduling entities hierarchy 
+ *  (向上推进调度实体层次)
+ * 
+ * 实现了组调度
+*/
 #define for_each_sched_entity(se) \
 		for (; se; se = se->parent)
 
@@ -469,6 +477,9 @@ static inline struct task_struct *task_of(struct sched_entity *se)
 	return container_of(se, struct task_struct, se);
 }
 
+/**
+ * 没有实现组调度
+ */
 #define for_each_sched_entity(se) \
 		for (; se; se = NULL)
 
@@ -588,8 +599,9 @@ static void update_min_vruntime(struct cfs_rq *cfs_rq)
 #endif
 }
 
-/*
+/**
  * Enqueue an entity into the rb-tree:
+ * 将调度实体se添加到cfs_rq的调度队列中
  */
 static void __enqueue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se)
 {
@@ -621,6 +633,9 @@ static void __enqueue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se)
 			       &cfs_rq->tasks_timeline, leftmost);
 }
 
+/**
+ * erase: 擦除
+ */
 static void __dequeue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se)
 {
 	rb_erase_cached(&se->run_node, &cfs_rq->tasks_timeline);
@@ -707,7 +722,8 @@ static inline u64 calc_delta_fair(u64 delta, struct sched_entity *se)
 }
 
 /**
- * __sched_period() 函数会计算 CFS 就绪队列中的一个调度周期的长度，可以理解为一个调度周期的时间片，它根据当前运行的进程数目来计算
+ * __sched_period() 函数会计算 CFS 就绪队列中的一个调度周期的长度，
+ * 可以理解为一个调度周期的时间片，它根据当前运行的进程数目来计算
  * The idea is to set a period in which each task runs once.
  *
  * When there are too many tasks (sched_nr_latency) we have to stretch
@@ -715,7 +731,7 @@ static inline u64 calc_delta_fair(u64 delta, struct sched_entity *se)
  *
  * p = (nr <= nl) ? l : l*nr/nl
  */
-static u64 __sched_period(unsigned long nr_running)
+__attribute__((optimize("O0")))  static u64 __sched_period(unsigned long nr_running)
 {
 	if (unlikely(nr_running > sched_nr_latency))
 		return nr_running * sysctl_sched_min_granularity;
@@ -723,13 +739,14 @@ static u64 __sched_period(unsigned long nr_running)
 		return sysctl_sched_latency;
 }
 
-/*
+/**
  * We calculate the wall-time slice from the period by taking a part
  * proportional to the weight.
+ * (我们通过按权重比例抽取部分周期时长，计算出实际分配的运行时间片。) -- 真实CPU时间，而非 vruntime
  *
  * s = p*P[w/rw]
  */
-static u64 sched_slice(struct cfs_rq *cfs_rq, struct sched_entity *se)
+__attribute__((optimize("O0")))  static u64 sched_slice(struct cfs_rq *cfs_rq, struct sched_entity *se)
 {
 	u64 slice = __sched_period(cfs_rq->nr_running + !se->on_rq);
 
@@ -756,8 +773,11 @@ static u64 sched_slice(struct cfs_rq *cfs_rq, struct sched_entity *se)
  *
  * vs = s/w
  */
-static u64 sched_vslice(struct cfs_rq *cfs_rq, struct sched_entity *se)
+__attribute__((optimize("O0")))  static u64 sched_vslice(struct cfs_rq *cfs_rq, struct sched_entity *se)
 {
+	/**
+	 * calc_delta_fair 将时间转换为vruntime
+	 */
 	return calc_delta_fair(sched_slice(cfs_rq, se), se);
 }
 
@@ -877,6 +897,8 @@ __attribute__((optimize("O0"))) static void update_curr(struct cfs_rq *cfs_rq)
 	struct sched_entity *curr = cfs_rq->curr;
 	// 获取当前CPU上所有任务使用的所有的CPU时间
 	u64 now = rq_clock_task(rq_of(cfs_rq));
+
+	// delta_exec计算该进程从上次调用update_curr()函数到现在的时间差
 	u64 delta_exec;
 
 	if (unlikely(!curr)) {
@@ -901,6 +923,7 @@ __attribute__((optimize("O0"))) static void update_curr(struct cfs_rq *cfs_rq)
 
 	// 这个累加就不一样了，需要将实际运行时间转为vruntime，再累加
 	curr->vruntime += calc_delta_fair(delta_exec, curr);
+
 	update_min_vruntime(cfs_rq);
 
 	if (entity_is_task(curr)) {
@@ -3145,7 +3168,7 @@ static void reweight_entity(struct cfs_rq *cfs_rq, struct sched_entity *se,
 
 }
 
-void reweight_task(struct task_struct *p, int prio)
+__attribute__((optimize("O0")))  void reweight_task(struct task_struct *p, int prio)
 {
 	struct sched_entity *se = &p->se;
 	struct cfs_rq *cfs_rq = cfs_rq_of(se);
@@ -3357,12 +3380,14 @@ static inline void update_tg_load_avg(struct cfs_rq *cfs_rq, int force)
 	}
 }
 
-/*
+/**
  * Called within set_task_rq() right before setting a task's CPU. The
  * caller only guarantees p->pi_lock is held; no other assumptions,
  * including the state of rq->lock, should be made.
+ * (在 set_task_rq() 中设置任务 CPU 之前调用。调用者仅保证 p->pi_lock 被持有；
+ * 无需做任何其他假设，包括 rq->lock 的状态。)
  */
-void set_task_rq_fair(struct sched_entity *se,
+__attribute__((optimize("O0"))) void set_task_rq_fair(struct sched_entity *se,
 		      struct cfs_rq *prev, struct cfs_rq *next)
 {
 	u64 p_last_update_time;
@@ -4143,27 +4168,39 @@ static void check_spread(struct cfs_rq *cfs_rq, struct sched_entity *se)
 #endif
 }
 
-static void
+/**
+ * place_entity()函数根据情况对进程虚拟时间进行一些惩罚
+ * 
+ * @param se 新创建的进程
+ * 
+ */
+__attribute__((optimize("O0"))) static void
 place_entity(struct cfs_rq *cfs_rq, struct sched_entity *se, int initial)
 {
 	u64 vruntime = cfs_rq->min_vruntime;
 
-	/*
+	/**
 	 * The 'current' period is already promised to the current tasks,
 	 * however the extra weight of the new task will slow them down a
 	 * little, place the new task so that it fits in the slot that
 	 * stays open at the end.
+	 * (当前时段已分配给现有任务，但新任务的额外负载会略微拖慢它们的执行速度，
+	 * 因此将新任务放置在末尾的空闲时段中)
+	 * 
+	 * 怎么放在末尾？根据红黑树特性，增加vruntime就可以了
 	 */
-	if (initial && sched_feat(START_DEBIT))
+	if (initial && sched_feat(START_DEBIT)) {
 		vruntime += sched_vslice(cfs_rq, se);
+	}
 
 	/* sleeps up to a single latency don't count. */
 	if (!initial) {
 		unsigned long thresh = sysctl_sched_latency;
 
-		/*
+		/**
 		 * Halve their sleep time's effect, to allow
 		 * for a gentler effect of sleepers:
+		 * (将睡眠时间的效果减半，以使睡眠任务的影响更为温和)
 		 */
 		if (sched_feat(GENTLE_FAIR_SLEEPERS))
 			thresh >>= 1;
@@ -4335,7 +4372,7 @@ static void clear_buddies(struct cfs_rq *cfs_rq, struct sched_entity *se)
 
 static __always_inline void return_cfs_rq_runtime(struct cfs_rq *cfs_rq);
 
-static void
+__attribute__((optimize("O0"))) static void
 dequeue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se, int flags)
 {
 	/*
@@ -4387,17 +4424,27 @@ dequeue_entity(struct cfs_rq *cfs_rq, struct sched_entity *se, int flags)
 		update_min_vruntime(cfs_rq);
 }
 
-/*
+/**
+ * check_preempt_tick()函数检查当前进程是否需要调度
+ * 
  * Preempt the current task with a newly woken task if needed:
+ * (如果需要，用新唤醒的任务抢占当前任务：)
  */
-static void
+__attribute__((optimize("O0"))) static void
 check_preempt_tick(struct cfs_rq *cfs_rq, struct sched_entity *curr)
 {
 	unsigned long ideal_runtime, delta_exec;
 	struct sched_entity *se;
 	s64 delta;
 
+	/**
+	 * ideal_runtime是理论运行时间，即该进程根据权重在一个调度周期里分到的实际运行时间，由sched_slice()函数计算
+	 */
 	ideal_runtime = sched_slice(cfs_rq, curr);
+
+	/**
+	 * delta_exec是实际运行时间，如果实际运行时间已经超过了理论运行时间，那么该进程要被调度出去。resched_curr()函数设置该进程thread_info中的TIF_NEED_RESCHED标志位。
+	 */
 	delta_exec = curr->sum_exec_runtime - curr->prev_sum_exec_runtime;
 	if (delta_exec > ideal_runtime) {
 		resched_curr(rq_of(cfs_rq));
@@ -4409,22 +4456,32 @@ check_preempt_tick(struct cfs_rq *cfs_rq, struct sched_entity *curr)
 		return;
 	}
 
-	/*
+	/**
 	 * Ensure that a task that missed wakeup preemption by a
 	 * narrow margin doesn't have to wait for a full slice.
 	 * This also mitigates buddy induced latencies under load.
+	 * 
+	 * 系统中使用一个变量定义进程最短运行时间，即sysctl_sched_min_granularity，它的默认值是0.75ms。如果该进程实际运行时间小于这个值，它不需要被调度
 	 */
-	if (delta_exec < sysctl_sched_min_granularity)
+	if (delta_exec < sysctl_sched_min_granularity) {
 		return;
+	}
 
+	/**
+	 * 最后，根据vruntime来判断是否需要被调度
+	 * 
+	 * 将该进程的虚拟时间和就绪队列红黑树中最左边的调度实体的虚拟时间做比较，差值为delta。如果差值小于最左边的调度实体的虚拟时间，则不用触发调度；如果差值大于该进程的理论运行时间，则会触发调度
+	 */
 	se = __pick_first_entity(cfs_rq);
 	delta = curr->vruntime - se->vruntime;
 
-	if (delta < 0)
+	if (delta < 0) {
 		return;
+	}
 
-	if (delta > ideal_runtime)
+	if (delta > ideal_runtime) {
 		resched_curr(rq_of(cfs_rq));
+	}
 }
 
 /**
@@ -4577,16 +4634,20 @@ __attribute__((optimize("O0"))) static void put_prev_entity(struct cfs_rq *cfs_r
 	cfs_rq->curr = NULL;
 }
 
-static void
-entity_tick(struct cfs_rq *cfs_rq, struct sched_entity *curr, int queued)
+/**
+ * 检查是否需要被调度
+ */
+__attribute__((optimize("O0"))) static void entity_tick(struct cfs_rq *cfs_rq, struct sched_entity *curr, int queued)
 {
-	/*
+	/**
 	 * Update run-time statistics of the 'current'.
+	 * update_curr()函数更新当前进程的vruntime和就绪队列的min_vruntime。
 	 */
 	update_curr(cfs_rq);
 
-	/*
+	/**
 	 * Ensure that runnable average is periodically updated.
+	 * update_load_avg()函数更新该进程调度实体的负载和就绪队列的负载
 	 */
 	update_load_avg(cfs_rq, curr, UPDATE_TG);
 	update_cfs_group(curr);
@@ -4608,8 +4669,12 @@ entity_tick(struct cfs_rq *cfs_rq, struct sched_entity *curr, int queued)
 		return;
 #endif
 
-	if (cfs_rq->nr_running > 1)
+	if (cfs_rq->nr_running > 1) {
+		/**
+		 * 检查当前进程是否需要调度
+		 */
 		check_preempt_tick(cfs_rq, curr);
+	}
 }
 
 
@@ -5594,7 +5659,7 @@ static int sched_idle_cpu(int cpu)
  * increased. Here we update the fair scheduling stats and
  * then put the task into the rbtree:
  */
-static void
+__attribute__((optimize("O0"))) static void
 enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 {
 	struct cfs_rq *cfs_rq;
@@ -5614,13 +5679,29 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 	 * utilization updates, so do it here explicitly with the IOWAIT flag
 	 * passed.
 	 */
-	if (p->in_iowait)
+	if (p->in_iowait) {
 		cpufreq_update_util(rq, SCHED_CPUFREQ_IOWAIT);
+	}
 
+	/**
+	 * 组调度开启: 
+	 * #define for_each_sched_entity(se) \
+	 *	for (; se; se = se->parent)
+	 *
+	 * 结合着 kernel/sched.h#set_task_rq 来看
+	 * 
+	 * task->se.parent = tg->se[cpu]
+	 * 
+	 * 结合这里的迭代，那么就会将 组调度实体se 添加到 cpu的cfs_rq中
+	 * 
+	 */
 	for_each_sched_entity(se) {
 		if (se->on_rq)
 			break;
-		cfs_rq = cfs_rq_of(se);
+		cfs_rq = cfs_rq_of(se); // 直接通过 se->cfs_rq
+		/**
+		 * 将se添加到cfs_rq中
+		 */
 		enqueue_entity(cfs_rq, se, flags);
 
 		cfs_rq->h_nr_running++;
@@ -5632,7 +5713,12 @@ enqueue_task_fair(struct rq *rq, struct task_struct *p, int flags)
 
 		flags = ENQUEUE_WAKEUP;
 	}
-
+   
+	/**
+	 * 组调度开启: 
+	 * #define for_each_sched_entity(se) \
+	 *	for (; se; se = se->parent)
+	 */
 	for_each_sched_entity(se) {
 		cfs_rq = cfs_rq_of(se);
 
@@ -7159,9 +7245,15 @@ again:
 			}
 		}
 
+		/**
+		 * 这段代码需要注意了!!!
+		 */
 		se = pick_next_entity(cfs_rq, curr);
 
-		// 获取组调度实体: 获取的是 my_q属性
+		/**
+		 * 获取组调度实体: 获取的是 my_q属性
+		 *  my_q 为NULL , 是普通进程实体;否则，是组调度实体。
+		 */
 		cfs_rq = group_cfs_rq(se);
 
 		/**
@@ -10807,12 +10899,19 @@ static void task_tick_fair(struct rq *rq, struct task_struct *curr, int queued)
 	update_overutilized_status(task_rq(curr));
 }
 
-/*
+/**
  * called on fork with the child task as argument from the parent's context
  *  - child not yet on the tasklist
  *  - preemption disabled
+ * 
+ * 
+ * 每个调度类都定义了一个操作方法集，调用CFS的调度类的task_fork方法做一些与fork相关的初始化
+ * 
+ * 调用方式: p->sched_class->task_fork(p); 
+ * 
+ * @param p 新创建的线程
  */
-static void task_fork_fair(struct task_struct *p)
+__attribute__((optimize("O0")))  static void task_fork_fair(struct task_struct *p)
 {
 	struct cfs_rq *cfs_rq;
 	struct sched_entity *se = &p->se, *curr;
@@ -10825,9 +10924,13 @@ static void task_fork_fair(struct task_struct *p)
 	cfs_rq = task_cfs_rq(current);
 	curr = cfs_rq->curr;
 	if (curr) {
+		// update_curr()函数是CFS中的核心函数，用于更新进程的虚拟时间（vruntime）。
 		update_curr(cfs_rq);
 		se->vruntime = curr->vruntime;
 	}
+	/**
+	 * place_entity()函数根据情况对进程虚拟时间进行一些惩罚
+	 */
 	place_entity(cfs_rq, se, 1);
 
 	if (sysctl_sched_child_runs_first && curr && entity_before(curr, se)) {
@@ -10839,6 +10942,12 @@ static void task_fork_fair(struct task_struct *p)
 		resched_curr(rq);
 	}
 
+	/**
+	 * 为什么 place_entity 函数计算到的vruntime 要在这里减去 min_vruntime???
+	 * 
+	 * 因为: 新进程在place_entity()函数中得到了一定的惩罚，
+	 * 惩罚的虚拟时间由sched_vslice()计算，在某种程度上这也是为了防止新进程恶意占用CPU时间
+	 */
 	se->vruntime -= cfs_rq->min_vruntime;
 	rq_unlock(rq, &rf);
 }
@@ -11001,10 +11110,11 @@ static void switched_to_fair(struct rq *rq, struct task_struct *p)
 	}
 }
 
-/* Account for a task changing its policy or group.
+/** Account for a task changing its policy or group.
  *
  * This routine is mostly called to set cfs_rq->curr field when a task
  * migrates between groups/classes.
+ * (当任务在组/类之间迁移时，主要调用此例程来设置 cfs_rq->curr 字段。)
  */
 static void set_next_task_fair(struct rq *rq, struct task_struct *p, bool first)
 {
@@ -11012,9 +11122,10 @@ static void set_next_task_fair(struct rq *rq, struct task_struct *p, bool first)
 
 #ifdef CONFIG_SMP
 	if (task_on_rq_queued(p)) {
-		/*
+		/**
 		 * Move the next running task to the front of the list, so our
 		 * cfs_tasks list becomes MRU one.
+		 * (将下一个正在运行的任务移到列表的前面，这样我们的 cfs_tasks 列表就变成了 MRU 列表。?)
 		 */
 		list_move(&se->group_node, &rq->cfs_tasks);
 	}
@@ -11050,9 +11161,10 @@ static void task_set_group_fair(struct task_struct *p)
 	se->depth = se->parent ? se->parent->depth + 1 : 0;
 }
 
-static void task_move_group_fair(struct task_struct *p)
+__attribute__((optimize("O0")))  static void task_move_group_fair(struct task_struct *p)
 {
 	detach_task_cfs_rq(p);
+	//000.LINUX-5.9/kernel/sched/sched.h
 	set_task_rq(p, task_cpu(p));
 
 #ifdef CONFIG_SMP
@@ -11092,36 +11204,60 @@ void free_fair_sched_group(struct task_group *tg)
 	kfree(tg->se);
 }
 
-int alloc_fair_sched_group(struct task_group *tg, struct task_group *parent)
+/**
+ * 组调度相关
+ */
+__attribute__((optimize("O0"))) int alloc_fair_sched_group(struct task_group *tg, struct task_group *parent)
 {
 	struct sched_entity *se;
 	struct cfs_rq *cfs_rq;
 	int i;
 
+	/**
+	 * 分配 nr_cpu_ids 个cfs_rq数据结构并将其复制到指针数组中
+	 * 在这里，也只是分配了指针的空间
+	 */
 	tg->cfs_rq = kcalloc(nr_cpu_ids, sizeof(cfs_rq), GFP_KERNEL);
-	if (!tg->cfs_rq)
+	if (!tg->cfs_rq) {
 		goto err;
-	tg->se = kcalloc(nr_cpu_ids, sizeof(se), GFP_KERNEL);
-	if (!tg->se)
+	}
+	tg->se = kcalloc(nr_cpu_ids, sizeof(se),GFP_KERNEL); // 注意，这里只分配了指针的空间
+	if (!tg->se) {
 		goto err;
+	}
 
 	tg->shares = NICE_0_LOAD;
 
+	// 初始化CFS中与带宽控制相关的信息
 	init_cfs_bandwidth(tg_cfs_bandwidth(tg));
-
+    
+	/**
+	 * 遍历所有的CPU
+	 * 
+	 */
 	for_each_possible_cpu(i) {
-		cfs_rq = kzalloc_node(sizeof(struct cfs_rq),
-				      GFP_KERNEL, cpu_to_node(i));
-		if (!cfs_rq)
+		// 真正地分配空间
+		cfs_rq = kzalloc_node(sizeof(struct cfs_rq), GFP_KERNEL, cpu_to_node(i));
+		if (!cfs_rq) {
 			goto err;
+		}
 
+		// 真正地分配空间
 		se = kzalloc_node(sizeof(struct sched_entity),
 				  GFP_KERNEL, cpu_to_node(i));
-		if (!se)
+		if (!se) {
 			goto err_free_rq;
+		}
 
 		init_cfs_rq(cfs_rq);
+
+		/**
+		 * init_tg_cfs_entry()函数对组调度的相关数据结构进行初始化
+		 * 
+		 * se 是新建的se
+		 */
 		init_tg_cfs_entry(tg, cfs_rq, se, i, parent->se[i]);
+
 		init_entity_runnable_average(se);
 	}
 
@@ -11133,7 +11269,10 @@ err:
 	return 0;
 }
 
-void online_fair_sched_group(struct task_group *tg)
+/**
+ * 
+ */
+__attribute__((optimize("O0"))) void online_fair_sched_group(struct task_group *tg)
 {
 	struct sched_entity *se;
 	struct rq_flags rf;
@@ -11176,7 +11315,12 @@ void unregister_fair_sched_group(struct task_group *tg)
 	}
 }
 
-void init_tg_cfs_entry(struct task_group *tg, struct cfs_rq *cfs_rq,
+/**
+ * 注意，tb->se->mq_rq , tg->se->cfs_rq 分别指向什么
+ * 
+ */
+__attribute__((optimize("O0"))) void init_tg_cfs_entry(struct task_group *tg,
+	        struct cfs_rq *cfs_rq,
 			struct sched_entity *se, int cpu,
 			struct sched_entity *parent)
 {
@@ -11186,6 +11330,9 @@ void init_tg_cfs_entry(struct task_group *tg, struct cfs_rq *cfs_rq,
 	cfs_rq->rq = rq;
 	init_cfs_rq_runtime(cfs_rq);
 
+	/**
+	 * 在tg中，每个CPU都有一个cfs_rq 和 se 与之对应
+	 */
 	tg->cfs_rq[cpu] = cfs_rq;
 	tg->se[cpu] = se;
 
@@ -11194,6 +11341,7 @@ void init_tg_cfs_entry(struct task_group *tg, struct cfs_rq *cfs_rq,
 		return;
 
 	if (!parent) {
+		// cfs_rq 还是指向原来的CPU的cfs_rq
 		se->cfs_rq = &rq->cfs;
 		se->depth = 0;
 	} else {
@@ -11204,6 +11352,10 @@ void init_tg_cfs_entry(struct task_group *tg, struct cfs_rq *cfs_rq,
 	se->my_q = cfs_rq;
 	/* guarantee group entities always have weight */
 	update_load_set(&se->load, NICE_0_LOAD);
+
+	/**
+	 * task_group的下一级可以是task_group，也可以是task_group
+	 */
 	se->parent = parent;
 }
 

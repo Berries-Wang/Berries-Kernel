@@ -347,7 +347,15 @@ void arch_release_task_struct(struct task_struct *tsk)
 	fpsimd_release_task(tsk);
 }
 
-int arch_dup_task_struct(struct task_struct *dst, struct task_struct *src)
+
+/**
+ * 在 Linux 内核中，*dst = *src; 是一个指针解引用赋值语句，
+ * 它的功能是将 src 指针指向的内容复制到 dst 指针指向的位置。
+ * 
+ * 等效操作:
+ *     memcpy(dst, src, sizeof(*dst));  // 当dst和src类型相同时
+ */
+__attribute__((optimize("O0"))) int arch_dup_task_struct(struct task_struct *dst, struct task_struct *src)
 {
 	if (current->mm)
 		fpsimd_preserve_current_state();
@@ -374,8 +382,9 @@ int arch_dup_task_struct(struct task_struct *dst, struct task_struct *src)
 // 000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/kernel/entry.S
 asmlinkage void ret_from_fork(void) asm("ret_from_fork");
 
+
 int copy_thread(unsigned long clone_flags, unsigned long stack_start,
-		unsigned long stk_sz, struct task_struct *p, unsigned long tls)
+	    unsigned long stk_sz, struct task_struct *p, unsigned long tls)
 {
 	struct pt_regs *childregs = task_pt_regs(p);
 
@@ -433,7 +442,6 @@ int copy_thread(unsigned long clone_flags, unsigned long stack_start,
 	}
 
 	// 000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/include/asm/processor.h
-	
 	p->thread.cpu_context.pc = (unsigned long)ret_from_fork;
 	p->thread.cpu_context.sp = (unsigned long)childregs;
 
@@ -550,8 +558,14 @@ static void erratum_1418040_thread_switch(struct task_struct *prev,
 	write_sysreg(val, cntkctl_el1);
 }
 
-/*
- * Thread switching.
+/**
+ * Thread switching.(线程切换)
+ * 
+ * <pre>
+ *     #0  __switch_to (prev=0xffff00003d8b3800, next=0xffff00003d9ec600) at arch/arm64/kernel/process.c:569
+ *     #1  0xffff800010d85530 in context_switch (rf=<optimized out>, next=<optimized out>, prev=<optimized out>, rq=<optimized out>) at kernel/sched/core.c:3865
+ *     #2  __schedule (preempt=<optimized out>) at kernel/sched/core.c:4638
+ * </pre>
  */
 __notrace_funcgraph struct task_struct *__switch_to(struct task_struct *prev,
 				struct task_struct *next)
@@ -575,7 +589,13 @@ __notrace_funcgraph struct task_struct *__switch_to(struct task_struct *prev,
 	 */
 	dsb(ish);
 
-	/* the actual thread switch */
+	/**
+	 *  the actual thread switch 
+	 * 
+	 * 定位: [000.LINUX-5.9/arch/arm64/kernel/entry.S]
+	 * 
+	 * 关注: [000.LINUX-5.9/arch/arm64/include/asm/processor.h]
+	*/
 	last = cpu_switch_to(prev, next);
 
 	return last;

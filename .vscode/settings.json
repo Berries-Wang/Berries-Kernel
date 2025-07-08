@@ -11,6 +11,8 @@
         "initializer_list": "c",
         "string_view": "c",
         "utility": "c",
-        "random": "c"
+        "random": "c",
+        "atomic": "c",
+        "workqueue_internal.h": "c"
     }
 }

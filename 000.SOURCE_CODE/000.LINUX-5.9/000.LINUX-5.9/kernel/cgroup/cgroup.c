@@ -5883,10 +5883,12 @@ out:
 
 /**
  * cgroup_fork - initialize cgroup related fields during copy_process()
+ * (在 copy_process() 过程中初始化 cgroup 相关字段)
+ * 
  * @child: pointer to task_struct of forking parent process.
  *
  * A task is associated with the init_css_set until cgroup_post_fork()
- * attaches it to the target css_set.
+ * attaches it to the target css_set.(任务与 init_css_set 相关联，直到 cgroup_post_fork() 将其附加到目标 css_set。)
  */
 void cgroup_fork(struct task_struct *child)
 {

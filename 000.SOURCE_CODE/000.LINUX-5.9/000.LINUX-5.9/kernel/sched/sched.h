@@ -162,6 +162,9 @@ extern void call_trace_sched_update_nr_running(struct rq *rq, int count);
  */
 #define RUNTIME_INF		((u64)~0ULL)
 
+/**
+ * 判断进程的调度策略
+ */
 static inline int idle_policy(int policy)
 {
 	return policy == SCHED_IDLE;
@@ -398,6 +401,9 @@ struct cfs_bandwidth {
 };
 
 /**
+ * 
+ * 通过task_group来抽象和描述组调度
+ * 
  * Task group related information （任务组相关信息）
  * 
  * struct task_group 是 Linux 控制组（cgroup） 调度子系统的核心数据结构，
@@ -405,7 +411,7 @@ struct cfs_bandwidth {
  * 
  * */
 struct task_group {
-	struct cgroup_subsys_state css;
+	struct cgroup_subsys_state css; // cgroup 控制信息
 
 #ifdef CONFIG_FAIR_GROUP_SCHED
 	/**
@@ -565,15 +571,23 @@ struct cfs_rq {
     /**
 	 * 用于 管理所有可运行（RUNNABLE）进程的红黑树，其核心功能是 按进程的虚拟运行时间（vruntime）排序，实现公平调度。
 	 * 
+	 * CFS的红黑树的根
 	 */
 	struct rb_root_cached	tasks_timeline;
 
-	/*
+	/**
 	 * 'curr' points to currently running entity on this cfs_rq.
 	 * It is set to NULL otherwise (i.e when none are currently running).
+	 * 指向当前正在运行的进程
 	 */
 	struct sched_entity	*curr;
+	/**
+	 * 用于切换下一个即将运行的进程
+	 */
 	struct sched_entity	*next;
+	/**
+	 * 用于抢占内核，当唤醒进程抢占了当前进程时，last指向这个当前进程
+	 */
 	struct sched_entity	*last;
 
 	/**
@@ -589,8 +603,9 @@ struct cfs_rq {
 #endif
 
 #ifdef CONFIG_SMP
-	/*
+	/**
 	 * CFS load tracking
+	 * 基于PELT算法的负载计算
 	 */
 	struct sched_avg	avg;
 #ifndef CONFIG_64BIT
@@ -952,12 +967,19 @@ struct uclamp_rq {
 DECLARE_STATIC_KEY_FALSE(sched_uclamp_used);
 #endif /* CONFIG_UCLAMP_TASK */
 
-/*
- * This is the main, per-CPU runqueue data structure.
+/**
+ * This is the main, per-CPU runqueue data structure. (每个CPU都有这样一个数据结构)
  *
  * Locking rule: those places that want to lock multiple runqueues
  * (such as the load balancing or the thread migration code), lock
  * acquire operations must be ordered by ascending &runqueue.
+ * (加锁规则：在需要对多个runqueue进行加锁的​​地方（比如负载均衡或者线程迁移的代码），加锁操作必须按照&runqueue升序排列。)
+ * 
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub] 8.1.2　调度器的数据结构
+ * 
+ * rq数据结构是描述CPU的通用就绪队列，rq数据结构中记录了一个就绪队列所需要的全部信息，
+ * 包括一个CFS就绪队列数据结构cfs_rq、一个实时进程调度器就绪队列数据结构rt_rq和一个实时调度器就绪队列数据结构dl_rq，
+ * 以及就绪队列的负载权重等信息
  */
 struct rq {
 	/* runqueue lock: */
@@ -1175,6 +1197,9 @@ static inline void update_idle_core(struct rq *rq)
 static inline void update_idle_core(struct rq *rq) { }
 #endif
 
+/**
+ * 系统中每个CPU有一个就绪队列，它是PER-CPU类型的，即每个CPU有一个rq数据结构
+ */
 DECLARE_PER_CPU_SHARED_ALIGNED(struct rq, runqueues);
 
 #define cpu_rq(cpu)		(&per_cpu(runqueues, (cpu)))
@@ -1646,7 +1671,10 @@ static inline struct task_group *task_group(struct task_struct *p)
 	return p->sched_task_group;
 }
 
-/* Change a task's cfs_rq and parent entity if it moves across CPUs/groups */
+/** 
+ * Change a task's cfs_rq and parent entity if it moves across CPUs/groups 
+ * (如果任务跨 CPU/组移动，则更改其 cfs_rq 和父实体)
+*/
 static inline void set_task_rq(struct task_struct *p, unsigned int cpu)
 {
 #if defined(CONFIG_FAIR_GROUP_SCHED) || defined(CONFIG_RT_GROUP_SCHED)
@@ -1655,7 +1683,12 @@ static inline void set_task_rq(struct task_struct *p, unsigned int cpu)
 
 #ifdef CONFIG_FAIR_GROUP_SCHED
 	set_task_rq_fair(&p->se, p->se.cfs_rq, tg->cfs_rq[cpu]);
+	// 将p添加到tg的cfs_rq中去
 	p->se.cfs_rq = tg->cfs_rq[cpu];
+
+	/**
+	 * 这一行代码很重要!!! -> 答案: 组调度调度实体se是如何添加到cpu的cfs_rq的 
+	 */
 	p->se.parent = tg->se[cpu];
 #endif
 
@@ -1675,6 +1708,9 @@ static inline struct task_group *task_group(struct task_struct *p)
 
 #endif /* CONFIG_CGROUP_SCHED */
 
+/**
+ * 设置子进程即将运行的CPU
+ */
 static inline void __set_task_cpu(struct task_struct *p, unsigned int cpu)
 {
 	set_task_rq(p, cpu);
@@ -1820,7 +1856,7 @@ extern const u32		sched_prio_to_wmult[40];
 /*
  * {de,en}queue flags:
  *
- * DEQUEUE_SLEEP  - task is no longer runnable
+ * DEQUEUE_SLEEP  - task is no longer runnable(任务不再可运行)
  * ENQUEUE_WAKEUP - task just became runnable
  *
  * SAVE/RESTORE - an otherwise spurious dequeue/enqueue, done to ensure tasks
@@ -1839,7 +1875,7 @@ extern const u32		sched_prio_to_wmult[40];
 #define DEQUEUE_SLEEP		0x01
 #define DEQUEUE_SAVE		0x02 /* Matches ENQUEUE_RESTORE */
 #define DEQUEUE_MOVE		0x04 /* Matches ENQUEUE_MOVE */
-#define DEQUEUE_NOCLOCK		0x08 /* Matches ENQUEUE_NOCLOCK */
+#define DEQUEUE_NOCLOCK		0x08 /* Matches ENQUEUE_NOCLOCK(禁止在任务出队时更新调度器时钟统计信息) */
 
 #define ENQUEUE_WAKEUP		0x01
 #define ENQUEUE_RESTORE		0x02

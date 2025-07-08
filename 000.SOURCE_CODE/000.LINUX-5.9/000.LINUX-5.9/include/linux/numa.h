@@ -11,6 +11,7 @@
 
 #define MAX_NUMNODES    (1 << NODES_SHIFT)
 
+// 表示"无 NUMA 节点"或"无效 NUMA 节点"的特殊常量。在非统一内存访问(NUMA)系统中，它用于表示内存或设备不属于任何特定的 NUMA 节点。
 #define	NUMA_NO_NODE	(-1)
 
 /* optionally keep NUMA memory info available post init */

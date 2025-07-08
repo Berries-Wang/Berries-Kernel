@@ -110,6 +110,15 @@ struct debug_info {
 #endif
 };
 
+/**
+ * 硬件上下文
+ * 
+ * 保存进程切换时，CPU需要保留哪些寄存器 
+ * 
+ * 根据ARM64架构函数调用的标准和规范，X19～X28寄存器在函数调用过程中是需要保存到栈里的，
+ * 因为它们是函数调用者和被调用者共用的数据，而X0～X7寄存器用于传递函数参数，
+ * 剩余的通用寄存器大多数用作临时寄存器，它们在进程切换过程中不需要保存。
+ */
 struct cpu_context {
 	unsigned long x19;
 	unsigned long x20;
@@ -127,6 +136,7 @@ struct cpu_context {
 };
 
 struct thread_struct {
+	// 保存进程上下文的相关信息到CPU的相关通用寄存器中
 	struct cpu_context	cpu_context;	/* cpu context */
 
 	/*
@@ -141,7 +151,7 @@ struct thread_struct {
 	} uw;
 
 	unsigned int		fpsimd_cpu;
-	void			*sve_state;	/* SVE registers, if any */
+	void			    *sve_state;	/* SVE registers, if any */
 	unsigned int		sve_vl;		/* SVE vector length */
 	unsigned int		sve_vl_onexec;	/* SVE vl after next exec */
 	unsigned long		fault_address;	/* fault info */

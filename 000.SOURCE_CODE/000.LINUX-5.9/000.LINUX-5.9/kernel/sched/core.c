@@ -239,10 +239,9 @@ struct rq *task_rq_lock(struct task_struct *p, struct rq_flags *rf)
 	}
 }
 
-/*
+/**
  * RQ-clock updating methods:
  */
-
 static void update_rq_clock_task(struct rq *rq, s64 delta)
 {
 /*
@@ -297,6 +296,9 @@ static void update_rq_clock_task(struct rq *rq, s64 delta)
 	update_rq_clock_pelt(rq, delta);
 }
 
+/**
+ * 更新当前CPU就绪队列（rq）中的时钟计数clock和clock_task成员。
+ */
 void update_rq_clock(struct rq *rq)
 {
 	s64 delta;
@@ -848,7 +850,7 @@ int tg_nop(struct task_group *tg, void *data)
 }
 #endif
 
-static void set_load_weight(struct task_struct *p, bool update_load)
+__attribute__((optimize("O0"))) static void set_load_weight(struct task_struct *p, bool update_load)
 {
 	int prio = p->static_prio - MAX_RT_PRIO;
 	struct load_weight *load = &p->se.load;
@@ -1594,6 +1596,9 @@ static inline void dequeue_task(struct rq *rq, struct task_struct *p, int flags)
 	p->sched_class->dequeue_task(rq, p, flags);
 }
 
+/**
+ * 将任务添加到调度器的运行队列中
+ */
 void activate_task(struct rq *rq, struct task_struct *p, int flags)
 {
 	// 将任务放入到调度器类的运行队列中
@@ -1603,8 +1608,12 @@ void activate_task(struct rq *rq, struct task_struct *p, int flags)
 	p->on_rq = TASK_ON_RQ_QUEUED;
 }
 
+/**
+ * 移出调度器类的运行队列
+ */
 void deactivate_task(struct rq *rq, struct task_struct *p, int flags)
 {
+	// 注意 TASK_ON_RQ_MIGRATING 的含义，表示任务正在迁移到另一个CPU
 	p->on_rq = (flags & DEQUEUE_SLEEP) ? 0 : TASK_ON_RQ_MIGRATING;
 
 	dequeue_task(rq, p, flags);
@@ -1623,7 +1632,9 @@ static inline int __normal_prio(struct task_struct *p)
  * without taking RT-inheritance into account. Might be
  * boosted by interactivity modifiers. Changes upon fork,
  * setprio syscalls, and whenever the interactivity
- * estimator recalculates.
+ * estimator recalculates.(计算预期的正常优先级：即不考虑 RT 继承的优先级。
+ * 可能会因交互性修饰符而提升。
+ * fork、setprio 系统调用以及交互性估算器重新计算时会发生变化。)
  */
 static inline int normal_prio(struct task_struct *p)
 {
@@ -1644,14 +1655,17 @@ static inline int normal_prio(struct task_struct *p)
  * be boosted by RT tasks, or might be boosted by
  * interactivity modifiers. Will be RT if the task got
  * RT-boosted. If not then it returns p->normal_prio.
+ * (计算当前优先级，即调度程序考虑的优先级。此值可能会因 RT 任务或交互性修饰符而提升。如果任务获得了 RT 提升，则返回 RT。如果不是，则返回 p->normal_prio。)
  */
-static int effective_prio(struct task_struct *p)
+__attribute__((optimize("O0"))) static int effective_prio(struct task_struct *p)
 {
+
 	p->normal_prio = normal_prio(p);
 	/*
 	 * If we are RT tasks or we were boosted to RT priority,
 	 * keep the priority unchanged. Otherwise, update priority
-	 * to the normal priority:
+	 * to the normal priority:(如果是 RT 任务，或者优先级被提升到 RT，
+	 * 则保持优先级不变。否则，将优先级更新为正常优先级：)
 	 */
 	if (!rt_prio(p->prio))
 		return p->normal_prio;
@@ -3091,7 +3105,8 @@ int wake_up_state(struct task_struct *p, unsigned int state)
  *
  * __sched_fork() is basic setup used by init_idle() too:
  * 
- * __sched_fork()初始化进程调度相关的数据结构，调度实体用 struct sched_entity数据结构来抽象，每个进程或线程都是一个调度实体，另外也包括组调度（sched group）
+ * __sched_fork()初始化进程调度相关的数据结构，调度实体用 struct sched_entity数据结构来抽象，
+ * 每个进程或线程都是一个调度实体，另外也包括组调度（sched group）
  */
 static void __sched_fork(unsigned long clone_flags, struct task_struct *p)
 {
@@ -3254,12 +3269,14 @@ static inline void init_schedstats(void) {}
  * fork()/clone()-time setup:
  * 
  */
-int sched_fork(unsigned long clone_flags, struct task_struct *p)
+__attribute__((optimize("O0")))  int sched_fork(unsigned long clone_flags, struct task_struct *p)
 {
 	unsigned long flags;
 
 	/**
-	 * __sched_fork()初始化进程调度相关的数据结构，调度实体用 struct sched_entity数据结构来抽象，每个进程或线程都是一个调度实体，另外也包括组调度（sched group）
+	 * __sched_fork()初始化进程调度相关的数据结构，
+	 * 调度实体用 struct sched_entity数据结构来抽象，
+	 * 每个进程或线程都是一个调度实体，另外也包括组调度（sched group）
 	 */
 	__sched_fork(clone_flags, p);
 
@@ -3267,27 +3284,34 @@ int sched_fork(unsigned long clone_flags, struct task_struct *p)
 	 * We mark the process as NEW here. This guarantees that
 	 * nobody will actually run it, and a signal or other external
 	 * event cannot wake it up and insert it on the runqueue either.
-	 * (我们在这里将进程标记为 NEW。这保证了没有人会真正运行它，并且信号或其他外部事件也无法唤醒它并将其插入运行队列。)
+	 * (我们在这里将进程标记为 NEW。这保证了没有人会真正运行它，
+	 * 并且信号或其他外部事件也无法唤醒它并将其插入运行队列。)
 	 */
 	p->state = TASK_NEW;
 
-	/*
-	 * Make sure we do not leak PI boosting priority to the child.(确保我们不会将 PI 提升优先权泄露给子进程)
+	/**
+	 * Make sure we do not leak PI boosting priority to the child.
+	 * (确保我们不会将 PI 提升优先权泄露给子进程)
 	 */
 	p->prio = current->normal_prio;
 
 	uclamp_fork(p);
 
-	/*
+	/**
 	 * Revert to default priority/policy on fork if requested.
+	 * 都需要重置吗? 不重置 ， 默认是什么样的，初始是什么样的呢
 	 */
 	if (unlikely(p->sched_reset_on_fork)) {
+		/**
+		 * 判断调度策略: realtime/deadline
+		 */
 		if (task_has_dl_policy(p) || task_has_rt_policy(p)) {
 			p->policy = SCHED_NORMAL;
 			p->static_prio = NICE_TO_PRIO(0);
 			p->rt_priority = 0;
-		} else if (PRIO_TO_NICE(p->static_prio) < 0)
+		} else if (PRIO_TO_NICE(p->static_prio) < 0) {
 			p->static_prio = NICE_TO_PRIO(0);
+		}
 
 		p->prio = p->normal_prio = __normal_prio(p);
 		set_load_weight(p, false);
@@ -3299,12 +3323,16 @@ int sched_fork(unsigned long clone_flags, struct task_struct *p)
 		p->sched_reset_on_fork = 0;
 	}
 
-	if (dl_prio(p->prio))
+	/**
+	 * 设置调度类: 根据优先级
+	 */
+	if (dl_prio(p->prio)) {
 		return -EAGAIN;
-	else if (rt_prio(p->prio))
+	} else if (rt_prio(p->prio)) {
 		p->sched_class = &rt_sched_class;
-	else
+	} else {
 		p->sched_class = &fair_sched_class;
+	}
 
 	init_entity_runnable_average(&p->se);
 
@@ -3317,13 +3345,18 @@ int sched_fork(unsigned long clone_flags, struct task_struct *p)
 	 */
 	raw_spin_lock_irqsave(&p->pi_lock, flags);
 	rseq_migrate(p);
-	/*
+	/**
 	 * We're setting the CPU for the first time, we don't migrate,
 	 * so use __set_task_cpu().
+	 * (我们正在首次设置 CPU，我们不会迁移，所以使用 __set_task_cpu )
 	 */
 	__set_task_cpu(p, smp_processor_id());
-	if (p->sched_class->task_fork)
+	/**
+	 * 每个调度类都定义了一个操作方法集，调用CFS的调度类的task_fork方法做一些与fork相关的初始化
+	 */
+	if (p->sched_class->task_fork) {
 		p->sched_class->task_fork(p);
+	}
 	raw_spin_unlock_irqrestore(&p->pi_lock, flags);
 
 #ifdef CONFIG_SCHED_INFO
@@ -3333,7 +3366,10 @@ int sched_fork(unsigned long clone_flags, struct task_struct *p)
 #if defined(CONFIG_SMP)
 	p->on_cpu = 0;
 #endif
-    // 初始化 thread_info 数据结构中的 preempt_count 计数，为了支持内核抢占而引入该字段。当 preempt_count 为 0 时，表示内核可以被安全地抢占，大于 0 时，则禁止抢占
+    /**
+	 * 初始化 thread_info 数据结构中的 preempt_count 计数，为了支持内核抢占而引入该字段。
+	 * 当 preempt_count 为 0 时，表示内核可以被安全地抢占，大于 0 时，则禁止抢占
+	 */
 	init_task_preempt_count(p);
 #ifdef CONFIG_SMP
 	plist_node_init(&p->pushable_tasks, MAX_PRIO);
@@ -3363,19 +3399,24 @@ unsigned long to_ratio(u64 period, u64 runtime)
 	return div64_u64(runtime << BW_SHIFT, period);
 }
 
-/*
+/**
  * wake_up_new_task - wake up a newly created task for the first time.
  *
  * This function will do some initial scheduler statistics housekeeping
  * that must be done for every newly created context, then puts the task
  * on the runqueue and wakes it.
+ * (该函数会执行一些针对每个新创建上下文必须完成的初始调度器统计管理工作，随后将任务加入运行队列并唤醒它)
+ * 
+ * 注释的后一句： 加入调度器队列，等待被唤醒执行
  */
-void wake_up_new_task(struct task_struct *p)
+__attribute__((optimize("O0"))) void wake_up_new_task(struct task_struct *p)
 {
 	struct rq_flags rf;
 	struct rq *rq;
 
 	raw_spin_lock_irqsave(&p->pi_lock, rf.flags);
+
+	// 设置进程状态为 TASK_RUNNING
 	p->state = TASK_RUNNING;
 #ifdef CONFIG_SMP
 	/*
@@ -3387,13 +3428,17 @@ void wake_up_new_task(struct task_struct *p)
 	 * as we're not fully set-up yet.
 	 */
 	p->recent_used_cpu = task_cpu(p);
+
 	rseq_migrate(p);
+    
+	// 设置子进程即将运行的CPU
 	__set_task_cpu(p, select_task_rq(p, task_cpu(p), SD_BALANCE_FORK, 0));
 #endif
 	rq = __task_rq_lock(p, &rf);
 	update_rq_clock(rq);
 	post_init_entity_util_avg(p);
 
+	// 子进程入队，并设置on_rq状态(设置为 TASK_ON_RQ_QUEUED )
 	activate_task(rq, p, ENQUEUE_NOCLOCK);
 	trace_sched_wakeup_new(p);
 	check_preempt_curr(rq, p, WF_FORK);
@@ -3507,6 +3552,7 @@ static inline void prepare_task(struct task_struct *next)
 	 *
 	 * See the ttwu() WF_ON_CPU case and its ordering comment.
 	 */
+	// 设置next进程描述符中的on_cpu成员为1，表示next进程即将进入执行状态
 	WRITE_ONCE(next->on_cpu, 1);
 #endif
 }
@@ -3591,11 +3637,20 @@ prepare_task_switch(struct rq *rq, struct task_struct *prev,
 	perf_event_task_sched_out(prev, next);
 	rseq_preempt(prev);
 	fire_sched_out_preempt_notifiers(prev, next);
+	// 设置next进程描述符中的on_cpu成员为1，表示next进程即将进入执行状态
 	prepare_task(next);
 	prepare_arch_switch(next);
 }
 
 /**
+ * 
+ * <pre>
+ *    finish_task_switch 是由谁执行的呢?
+ * next进程执行finish_task_switch(last)函数来对last进程进行清理工作，
+ * 通常last进程指的是prev进程。需要注意的是，这里执行的finish_task_switch()函数属于next进程，
+ * 只是把last进程的进程描述符作为参数传递给finish_task_switch()函数。
+ * </pre>
+ * 
  * finish_task_switch - clean up after a task-switch
  * @prev: the thread we just switched away from.
  *
@@ -3603,16 +3658,25 @@ prepare_task_switch(struct rq *rq, struct task_struct *prev,
  * with a prepare_task_switch call before the context switch.
  * finish_task_switch will reconcile locking set up by prepare_task_switch,
  * and do any other architecture-specific cleanup actions.
+ * (finish_task_switch 必须在上下文切换之后调用，
+ * 并在上下文切换之前与 prepare_task_switch 调用配对。
+ * finish_task_switch 将协调 prepare_task_switch 设置的锁定，
+ * 并执行任何其他特定于体系结构的清理操作。)
  *
  * Note that we may have delayed dropping an mm in context_switch(). If
  * so, we finish that here outside of the runqueue lock. (Doing it
  * with the lock held can cause deadlocks; see schedule() for
  * details.)
+ * (请注意，我们可能在 context_switch() 中延迟了 mm 的丢弃。如果是这样，
+ * 我们会在运行队列锁之外完成该操作。
+ * （在持有锁的情况下执行此操作可能会导致死锁；详情请参阅 Schedule()。）)
  *
  * The context switch have flipped the stack from under us and restored the
  * local variables which were saved when this task called schedule() in the
  * past. prev == current is still correct but we need to recalculate this_rq
  * because prev may have moved to another CPU.
+ * (上下文切换已经将我们下面的堆栈翻转，并恢复了此任务在过去调用schedule（）时保存的局部变量。
+ * prev == current 仍然正确，但我们需要重新计算this_rq，因为prev可能已经移动到另一个CPU。)
  */
 static struct rq *finish_task_switch(struct task_struct *prev)
 	__releases(rq->lock)
@@ -3734,6 +3798,9 @@ static inline void balance_callback(struct rq *rq)
 
 /**
  * schedule_tail - first thing a freshly forked thread must call.
+ * (新创建的线程必须调用的第一件事。)
+ * > [001.UNIX-DOCS/002.ret_from_fork.md] 文档中含有从fork返回(从中断/异常返回)的执行流程图
+ * 
  * @prev: the thread we just switched away from.
  */
 asmlinkage __visible void schedule_tail(struct task_struct *prev)
@@ -3760,8 +3827,11 @@ asmlinkage __visible void schedule_tail(struct task_struct *prev)
 	calculate_sigpending();
 }
 
-/*
+/**
  * context_switch - switch to the new MM and the new thread's register state.
+ * 切换到新的MM和新线程的寄存器状态。
+ * 
+ * 请阅读: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#8.1.6进程切换#3．switch_to()函数
  */
 static __always_inline struct rq *
 context_switch(struct rq *rq, struct task_struct *prev,
@@ -3814,10 +3884,28 @@ context_switch(struct rq *rq, struct task_struct *prev,
 
 	prepare_lock_switch(rq, next, rf);
 
-	/* Here we just switch the register state and the stack. */
+	/** Here we just switch the register state and the stack. 
+	 * 
+	 * switch_to 切换到next进程进行执行
+	 * 
+	 * 该函数执行完成后，CPU运行next进程，prev进程被调度出去，俗称“睡眠了”。
+	 * 
+	 * 当被调度出去的prev进程再次被调度时，它可能在原来的CPU上，也可能被迁移到其他CPU上。总之，是在switch_to()函数切换完进程后开始运行的。
+	 * 
+	 * arm64: arch/arm64/kernel/process.c
+	 * 
+	 * 栈空间的切换
+	 * 
+	 * [include/asm-generic/switch_to.h]
+	*/
 	switch_to(prev, next, prev);
 	barrier();
 
+	/**
+	 * switch_to 执行后，那么CPU就已经运行了next进程了
+	 */
+
+	// 这个函数是由谁执行的呢?
 	return finish_task_switch(prev);
 }
 
@@ -4019,8 +4107,14 @@ unsigned long long task_sched_runtime(struct task_struct *p)
 /*
  * This function gets called by the timer code, with HZ frequency.
  * We call it with interrupts disabled.
+ * 
+ * 调用场景:
+ * 1. 时钟中断发生后的函数调用
+ * 
+ * 
+ * 参考: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#8.1.7　调度节拍
  */
-void scheduler_tick(void)
+__attribute__((optimize("O0"))) void scheduler_tick(void)
 {
 	int cpu = smp_processor_id();
 	struct rq *rq = cpu_rq(cpu);
@@ -4036,6 +4130,10 @@ void scheduler_tick(void)
 	update_rq_clock(rq);
 	thermal_pressure = arch_scale_thermal_pressure(cpu_of(rq));
 	update_thermal_load_avg(rq_clock_thermal(rq), rq, thermal_pressure);
+
+	/**
+	 * task_tick()是调度类中实现的方法，用于处理时钟节拍到来时与调度器相关的事情
+	 */
 	curr->sched_class->task_tick(rq, curr, 0);
 	calc_global_load_tick(rq);
 	psi_task_tick(rq);
@@ -4046,6 +4144,7 @@ void scheduler_tick(void)
 
 #ifdef CONFIG_SMP
 	rq->idle_balance = idle_cpu(cpu);
+	// trigger_load_balance()函数触发SMP负载均衡机制
 	trigger_load_balance(rq);
 #endif
 }
@@ -4446,7 +4545,7 @@ restart:
  *
  * WARNING: must be called with preemption disabled! (警告： 必须在禁止抢占的情况下调用)
  * 
- * @param preempt 是否支持抢占???
+ * @param preempt 本次调度是否为抢占调度
  */
 static void __sched notrace __schedule(bool preempt)
 {
@@ -4479,6 +4578,7 @@ static void __sched notrace __schedule(bool preempt)
 		hrtick_clear(rq);
 	}
 
+	// local_irq_disable()函数关闭本地CPU中断。
 	local_irq_disable(); // 仅禁用当前处理器中断，其他处理器不受影响
 	/**
 	 * RCU 
@@ -4519,9 +4619,10 @@ static void __sched notrace __schedule(bool preempt)
 	prev_state = prev->state;
 
 	if (!preempt && prev_state) {
+		// 是否有特别信号(挂起、KILL)需要处理
 		if (signal_pending_state(prev_state, prev)) {
 			prev->state = TASK_RUNNING;
-		} else {
+		} else { // 无中断处理
 			prev->sched_contributes_to_load =
 				(prev_state & TASK_UNINTERRUPTIBLE) &&
 				!(prev_state & TASK_NOLOAD) &&
@@ -4530,7 +4631,7 @@ static void __sched notrace __schedule(bool preempt)
 			if (prev->sched_contributes_to_load)
 				rq->nr_uninterruptible++;
 
-			/*
+			/**
 			 * __schedule()			ttwu()
 			 *   prev_state = prev->state;    if (p->on_rq && ...)
 			 *   if (prev_state)		    goto out;
@@ -4540,7 +4641,9 @@ static void __sched notrace __schedule(bool preempt)
 			 * Where __schedule() and ttwu() have matching control dependencies.
 			 *
 			 * After this, schedule() must not care about p->state any more.
+			 * (在此之后,schedule() 不再关心 p->state。)
 			 */
+			// 将当前任务移出当前调度器类的运行队列
 			deactivate_task(rq, prev, DEQUEUE_SLEEP | DEQUEUE_NOCLOCK);
 
 			if (prev->in_iowait) {
@@ -5030,7 +5133,7 @@ static inline int rt_effective_prio(struct task_struct *p, int prio)
 }
 #endif
 
-void set_user_nice(struct task_struct *p, long nice)
+__attribute__((optimize("O0"))) void set_user_nice(struct task_struct *p, long nice)
 {
 	bool queued, running;
 	int old_prio;
@@ -5611,7 +5714,7 @@ int sched_setattr_nocheck(struct task_struct *p, const struct sched_attr *attr)
  *
  * Return: 0 on success. An error code otherwise.
  */
-int sched_setscheduler_nocheck(struct task_struct *p, int policy,
+__attribute__((optimize("O0"))) int sched_setscheduler_nocheck(struct task_struct *p, int policy,
 			       const struct sched_param *param)
 {
 	return _sched_setscheduler(p, policy, param, false);
@@ -7523,8 +7626,14 @@ static void sched_free_group(struct task_group *tg)
 	kmem_cache_free(task_group_cache, tg);
 }
 
-/* allocate runqueue etc for a new task group */
-struct task_group *sched_create_group(struct task_group *parent)
+/** 
+ * allocate runqueue etc for a new task group
+ * (创建一个新的组调度)
+ * 
+ * 
+ * @param parent 指向上一级的组调度节点，系统中有一个组调度的根，命名为root_task_group
+ **/
+__attribute__((optimize("O0"))) struct task_group *sched_create_group(struct task_group *parent)
 {
 	struct task_group *tg;
 
@@ -7591,14 +7700,19 @@ void sched_offline_group(struct task_group *tg)
 	spin_unlock_irqrestore(&task_group_lock, flags);
 }
 
-static void sched_change_group(struct task_struct *tsk, int type)
+/**
+ * 
+ */
+__attribute__((optimize("O0"))) static void sched_change_group(struct task_struct *tsk, int type)
 {
 	struct task_group *tg;
 
-	/*
+	/**
 	 * All callers are synchronized by task_rq_lock(); we do not use RCU
 	 * which is pointless here. Thus, we pass "true" to task_css_check()
 	 * to prevent lockdep warnings.
+	 * (所有调用者都通过 task_rq_lock() 进行同步；我们不使用 RCU，这在这里毫无意义。
+	 * 因此，我们将“true”传递给 task_css_check() 以避免 lockdep 警告。)
 	 */
 	tg = container_of(task_css_check(tsk, cpu_cgrp_id, true),
 			  struct task_group, css);
@@ -7613,14 +7727,18 @@ static void sched_change_group(struct task_struct *tsk, int type)
 		set_task_rq(tsk, task_cpu(tsk));
 }
 
-/*
- * Change task's runqueue when it moves between groups.
+/**
+ * 
+ * 函数功能: sched_move_task()函数将进程迁移到组调度中。
+ * 
+ * Change task's runqueue when it moves between groups.(当任务在组之间移动时更改其运行队列。)
  *
  * The caller of this function should have put the task in its new group by
  * now. This function just updates tsk->se.cfs_rq and tsk->se.parent to reflect
  * its new group.
+ * (此函数的调用者现在应该已经将任务放入其新组中。此函数仅更新 tsk->se.cfs_rq 和 tsk->se.parent 以反映其新组。)
  */
-void sched_move_task(struct task_struct *tsk)
+__attribute__((optimize("O0"))) void sched_move_task(struct task_struct *tsk)
 {
 	int queued, running, queue_flags =
 		DEQUEUE_SAVE | DEQUEUE_MOVE | DEQUEUE_NOCLOCK;
@@ -7629,25 +7747,57 @@ void sched_move_task(struct task_struct *tsk)
 
 	rq = task_rq_lock(tsk, &rf);
 	update_rq_clock(rq);
-
+    
+	// 当前正在运行的进程是否是tsk
 	running = task_current(rq, tsk);
+
+	// 进程tsk是否在运行队列中
 	queued = task_on_rq_queued(tsk);
 
-	if (queued)
+	// 如果在队列中，则出队: 即 >>> 从原来是的队列中退出来
+	if (queued) {
 		dequeue_task(rq, tsk, queue_flags);
-	if (running)
+	}
+	
+	// 如果正在执行中，则更新其状态???
+	if (running) {
 		put_prev_task(rq, tsk);
+	}
 
+	/**
+	 * #0  set_task_rq (cpu=<optimized out>, p=<optimized out>) at kernel/sched/sched.h:1682  将进程添加到task_group的cfs_rq中
+     * #1  task_set_group_fair (p=<optimized out>) at kernel/sched/fair.c:11125
+     * #2  task_change_group_fair (type=<optimized out>, p=<optimized out>) at kernel/sched/fair.c:11145
+     * #3  task_change_group_fair (p=0xffff00003d888e00, type=0) at kernel/sched/fair.c:11141
+     * #4  0xffff8000100aeadc in sched_change_group (tsk=0xffff00003d888e00, type=0) at kernel/sched/core.c:7719
+	 * 
+	 * 
+	 */
 	sched_change_group(tsk, TASK_MOVE_GROUP);
 
-	if (queued)
+	if (queued) {
+		/**
+		 * 任务重新入队，添加到调度器类的cfs_rq中
+		 * 
+		 * 通过源码可知,经过 sched_change_group 执行后，
+		 * tsk的se被设置为了task_group中的se，这里再次入队，是将tsk加入到
+		 * task_group里面的cfs_rq中
+		 * 
+		 * >>> 在此函数执行之前，已经将进程tsk从原来的cfs_rq移出了 <<< 
+		 * 
+		 */
 		enqueue_task(rq, tsk, queue_flags);
+	}
+
+
 	if (running) {
 		set_next_task(rq, tsk);
-		/*
+		/**
 		 * After changing group, the running task may have joined a
 		 * throttled one but it's still the running task. Trigger a
 		 * resched to make sure that task can still run.
+		 * (更改组后，正在运行的任务可能已加入受限制的组，
+		 * 但它仍然是正在运行的任务。触发重新调度以确保该任务仍可运行。)
 		 */
 		resched_curr(rq);
 	}
@@ -7679,7 +7829,7 @@ cpu_cgroup_css_alloc(struct cgroup_subsys_state *parent_css)
 }
 
 /* Expose task group only after completing cgroup initialization */
-static int cpu_cgroup_css_online(struct cgroup_subsys_state *css)
+__attribute__((optimize("O0"))) static int cpu_cgroup_css_online(struct cgroup_subsys_state *css)
 {
 	struct task_group *tg = css_tg(css);
 	struct task_group *parent = css_tg(css->parent);
@@ -7760,11 +7910,14 @@ static int cpu_cgroup_can_attach(struct cgroup_taskset *tset)
 	return ret;
 }
 
-static void cpu_cgroup_attach(struct cgroup_taskset *tset)
+/**
+ * 把进程添加到组调度的情况
+ */
+__attribute__((optimize("O0"))) static void cpu_cgroup_attach(struct cgroup_taskset *tset)
 {
 	struct task_struct *task;
 	struct cgroup_subsys_state *css;
-
+   
 	cgroup_taskset_for_each(task, css, tset)
 		sched_move_task(task);
 }

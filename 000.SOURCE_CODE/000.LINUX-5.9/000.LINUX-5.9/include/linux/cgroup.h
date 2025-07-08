@@ -264,6 +264,9 @@ void css_task_iter_end(struct css_task_iter *it);
 	     (pos) = css_next_descendant_post((pos), (css)))
 
 /**
+ * cgroup_taskset_for_each()函数遍历参数tset包含的进程链表
+ * 
+ * 
  * cgroup_taskset_for_each - iterate cgroup_taskset
  * @task: the loop cursor
  * @dst_css: the destination css

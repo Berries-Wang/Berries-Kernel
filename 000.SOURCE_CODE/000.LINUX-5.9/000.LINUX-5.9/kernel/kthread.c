@@ -33,6 +33,12 @@
 
 static DEFINE_SPINLOCK(kthread_create_lock);
 static LIST_HEAD(kthread_create_list);
+/**
+ * kthreadd_task 是 Linux 内核中一个非常重要的全局变量，它指向内核线程 kthreadd 的 task_struct 结构。
+ * 这个内核线程在内核启动过程中创建，负责管理和创建其他内核线程。
+ * 
+ * 是所有内核线程的"父线程"
+ */
 struct task_struct *kthreadd_task;
 
 struct kthread_create_info
@@ -295,7 +301,7 @@ static int kthread(void *_create)
 }
 
 /* called from do_fork() to get node information for about to be created task */
-int tsk_fork_get_node(struct task_struct *tsk)
+__attribute__((optimize("O0"))) int tsk_fork_get_node(struct task_struct *tsk)
 {
 #ifdef CONFIG_NUMA
 	if (tsk == kthreadd_task)
