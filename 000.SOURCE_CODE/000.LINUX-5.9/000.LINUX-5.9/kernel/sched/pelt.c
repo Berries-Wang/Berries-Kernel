@@ -74,6 +74,15 @@ static u64 decay_load(u64 val, u64 n)
 	return val;
 }
 
+/**
+ * 计算的是啥? 计算式（8.21）的第二项 
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5．工作负载的计算
+ * 
+ * @param periods 这次一共经历了多少个完整的周期
+ * @param d1 d3 参考 [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]# 5．工作负载的计算
+ * 
+ * 
+ */
 static u32 __accumulate_pelt_segments(u64 periods, u32 d1, u32 d3)
 {
 	u32 c1, c2, c3 = d3; /* y^0 == 1 */
@@ -97,10 +106,13 @@ static u32 __accumulate_pelt_segments(u64 periods, u32 d1, u32 d3)
 	return c1 + c2 + c3;
 }
 
-/*
+/**
+ * 计算工作负载
+ * 
  * Accumulate the three separate parts of the sum; d1 the remainder
  * of the last (incomplete) period, d2 the span of full periods and d3
  * the remainder of the (incomplete) current period.
+ * (累计总和的三个独立部分；d1 为上一个（不完整）期间的余数，d2 为完整期间的跨度，d3 为（不完整）当前期间的余数。)
  *
  *           d1          d2           d3
  *           ^           ^            ^
@@ -118,8 +130,7 @@ static u32 __accumulate_pelt_segments(u64 periods, u32 d1, u32 d3)
  *      d1 y^p + 1024 \Sum y^n + d3 y^0		(Step 2)
  *                     n=1
  */
-static __always_inline u32
-accumulate_sum(u64 delta, struct sched_avg *sa,
+static __always_inline u32 accumulate_sum(u64 delta, struct sched_avg *sa,
 	       unsigned long load, unsigned long runnable, int running)
 {
 	u32 contrib = (u32)delta; /* p == 0 -> delta < 1024 */
@@ -142,7 +153,7 @@ accumulate_sum(u64 delta, struct sched_avg *sa,
 		 */
 		delta %= 1024;
 		if (load) {
-			/*
+			/**
 			 * This relies on the:
 			 *
 			 * if (!load)
@@ -151,6 +162,9 @@ accumulate_sum(u64 delta, struct sched_avg *sa,
 			 * clause from ___update_load_sum(); this results in
 			 * the below usage of @contrib to dissapear entirely,
 			 * so no point in calculating it.
+			 * 
+			 * 这个函数重要了!!!
+			 * > `计算式（8.21）的第二项` on [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]
 			 */
 			contrib = __accumulate_pelt_segments(periods,
 					1024 - sa->period_contrib, delta);
@@ -168,7 +182,11 @@ accumulate_sum(u64 delta, struct sched_avg *sa,
 	return periods;
 }
 
-/*
+/**
+ * 
+ * 计算工作负载之和
+ * 代码不好理解，查阅:[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#8.2.7 PELT代码分析#5．工作负载的计算
+ * 
  * We can represent the historical contribution to runnable average as the
  * coefficients of a geometric series.  To do this we sub-divide our runnable
  * history into segments of approximately 1ms (1024us); label the segment that
@@ -203,18 +221,21 @@ ___update_load_sum(u64 now, struct sched_avg *sa,
 	u64 delta;
 
 	delta = now - sa->last_update_time;
-	/*
+
+	/**
 	 * This should only happen when time goes backwards, which it
 	 * unfortunately does during sched clock init when we swap over to TSC.
+	 * (这应该只在时间倒流时发生，不幸的是，当我们切换到 TSC 时，在 sched clock init 期间就会发生这种情况。)
 	 */
 	if ((s64)delta < 0) {
 		sa->last_update_time = now;
 		return 0;
 	}
 
-	/*
+	/**
 	 * Use 1024ns as the unit of measurement since it's a reasonable
 	 * approximation of 1us and fast to compute.
+	 * (使用 1024ns 作为测量单位，因为它是 1us 的合理近似值并且计算速度很快。)
 	 */
 	delta >>= 10;
 	if (!delta)
@@ -236,7 +257,7 @@ ___update_load_sum(u64 now, struct sched_avg *sa,
 	if (!load)
 		runnable = running = 0;
 
-	/*
+	/**
 	 * Now we know we crossed measurement unit boundaries. The *_avg
 	 * accrues by two steps:
 	 *
@@ -249,7 +270,10 @@ ___update_load_sum(u64 now, struct sched_avg *sa,
 	return 1;
 }
 
-/*
+/**
+ * 
+ * 计算量化负载
+ * 
  * When syncing *_avg with *_sum, we must take into account the current
  * position in the PELT segment otherwise the remaining part of the segment
  * will be considered as idle time whereas it's not yet elapsed and this will

@@ -218,10 +218,11 @@ static inline bool cpus_share_cache(int this_cpu, int that_cpu)
 
 #ifndef arch_scale_cpu_capacity
 /**
- * arch_scale_cpu_capacity - get the capacity scale factor of a given CPU.
+ * arch_scale_cpu_capacity - get the capacity scale factor of a given CPU.(获取给定 CPU 的容量比例因子)
  * @cpu: the CPU in question.
  *
  * Return: the CPU scale factor normalized against SCHED_CAPACITY_SCALE, i.e.
+ * (根据 SCHED_CAPACITY_SCALE 标准化的 CPU 比例因子)
  *
  *             max_perf(cpu)
  *      ----------------------------- * SCHED_CAPACITY_SCALE
