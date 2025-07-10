@@ -1073,7 +1073,14 @@ struct rq {
 	struct root_domain		*rd;
 	struct sched_domain __rcu	*sd;
 
+	/**
+	 * 表示 CPU 的 当前有效容量(计算能力)，会因动态调频（DVFS）、热限制（thermal throttling）或功耗管理而变化
+	 */
 	unsigned long		cpu_capacity;
+	/**
+	 * 处理器最大的处理能力
+	 * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]
+	 */
 	unsigned long		cpu_capacity_orig;
 
 	struct callback_head	*balance_callback;

@@ -340,26 +340,31 @@ struct load_weight {
 };
 
 /**
- * struct util_est - Estimation utilization of FAIR tasks
- * @enqueued: instantaneous estimated utilization of a task/cpu
+ * struct util_est - Estimation utilization of FAIR tasks (估算FAIR任务的利用率)
+ * @enqueued: instantaneous estimated utilization of a task/cpu (任务/cpu的瞬时估计利用率)
  * @ewma:     the Exponential Weighted Moving Average (EWMA)
- *            utilization of a task
+ *            utilization of a task（任务的指数加权移动平均 (EWMA) 利用率）
  *
  * Support data structure to track an Exponential Weighted Moving Average
  * (EWMA) of a FAIR task's utilization. New samples are added to the moving
  * average each time a task completes an activation. Sample's weight is chosen
  * so that the EWMA will be relatively insensitive to transient changes to the
  * task's workload.
+ * (支持数据结构，用于跟踪 FAIR 任务利用率的指数加权移动平均线 (EWMA)。每次任务完成激活时，
+ * 都会将新样本添加到移动平均线中。样本权重的选择应确保 EWMA 对任务工作负载的瞬时变化相对不敏感。)
  *
  * The enqueued attribute has a slightly different meaning for tasks and cpus:
- * - task:   the task's util_avg at last task dequeue time
- * - cfs_rq: the sum of util_est.enqueued for each RUNNABLE task on that CPU
+ * (对于任务和 CPU，enqueued 属性的含义略有不同：上次任务出队时的任务 util_avg)
+ * - task:   the task's util_avg at last task dequeue time ()
+ * - cfs_rq: the sum of util_est.enqueued for each RUNNABLE task on that CPU (该 CPU 上每个 RUNNABLE 任务的 util_est.enqueued 总和)
  * Thus, the util_est.enqueued of a task represents the contribution on the
  * estimated utilization of the CPU where that task is currently enqueued.
+ * (因此，任务的 util_est.enqueued 表示该任务当前排队的 CPU 的估计利用率的贡献。)
  *
  * Only for tasks we track a moving average of the past instantaneous
  * estimated utilization. This allows to absorb sporadic drops in utilization
  * of an otherwise almost periodic task.
+ * (我们仅针对任务跟踪过去瞬时预估利用率的移动平均值。这可以吸收原本几乎周期性的任务偶尔出现的利用率下降。)
  */
 struct util_est {
 	unsigned int			enqueued;
@@ -462,6 +467,12 @@ struct sched_avg {
 	 * util_avg指的是实际算力，表示一个进程或者CPU的当前实际使用率。
 	 *  */   
 	unsigned long			util_avg;
+	
+	/**
+	 * 任务阻塞后，其负载会不断衰减。如果一个重载任务阻塞太长时间，
+	 * 那么根据标准PELT算法计算出来的负载会非常的小，当该任务被唤醒重新参与调度的时候，
+	 * 由于负载较小会让调度器做出错误的判断。因此引入了这个成员，记录阻塞之前的load avg信息。
+	 */
 	struct util_est			util_est;
 } ____cacheline_aligned;
 

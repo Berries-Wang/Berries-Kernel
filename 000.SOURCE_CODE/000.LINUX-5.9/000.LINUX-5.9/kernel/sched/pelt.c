@@ -37,8 +37,8 @@
  * 
  * 计算第n个周期的衰减值
  * 
- * @param val  表示n个周期前的负载值
- * @param n    第n个周期 ， 单位 ms
+ * @param val  表示n个周期前的负载值 (查看 accumulate_sum 的传参)
+ * @param n    第n个周期 ， 单位 ms 
  *             周期的定义:  1ms（准确来说是1024μs，为了方便移位操作）的时间跨度算成一个周期（period），简称PI
  */
 static u64 decay_load(u64 val, u64 n)
@@ -75,6 +75,9 @@ static u64 decay_load(u64 val, u64 n)
 }
 
 /**
+ * 
+ * 得先学习:[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5．工作负载的计算
+ * 
  * 计算的是啥? 计算式（8.21）的第二项 
  * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5．工作负载的计算
  * 
@@ -92,7 +95,7 @@ static u32 __accumulate_pelt_segments(u64 periods, u32 d1, u32 d3)
 	 */
 	c1 = decay_load((u64)d1, periods);
 
-	/*
+	/**
 	 *            p-1
 	 * c2 = 1024 \Sum y^n
 	 *            n=1
@@ -107,6 +110,9 @@ static u32 __accumulate_pelt_segments(u64 periods, u32 d1, u32 d3)
 }
 
 /**
+ * 
+ * 得先学习:[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5．工作负载的计算
+ * 
  * 计算工作负载
  * 
  * Accumulate the three separate parts of the sum; d1 the remainder
@@ -137,10 +143,13 @@ static __always_inline u32 accumulate_sum(u64 delta, struct sched_avg *sa,
 	u64 periods;
 
 	delta += sa->period_contrib;
+
+	// 计算有多少个完整的周期? yes
 	periods = delta / 1024; /* A period is 1024us (~1ms) */
 
-	/*
+	/**
 	 * Step 1: decay old *_sum if we crossed period boundaries.
+	 * (步骤 1：如果我们跨越了周期边界，则衰减旧的 *_sum。)
 	 */
 	if (periods) {
 		sa->load_sum = decay_load(sa->load_sum, periods);
@@ -175,7 +184,7 @@ static __always_inline u32 accumulate_sum(u64 delta, struct sched_avg *sa,
 	if (load)
 		sa->load_sum += load * contrib;
 	if (runnable)
-		sa->runnable_sum += runnable * contrib << SCHED_CAPACITY_SHIFT;
+		sa->runnable_sum += runnable * contrib << SCHED_CAPACITY_SHIFT; // 乘法比移位优先级更高
 	if (running)
 		sa->util_sum += contrib << SCHED_CAPACITY_SHIFT;
 
@@ -184,7 +193,7 @@ static __always_inline u32 accumulate_sum(u64 delta, struct sched_avg *sa,
 
 /**
  * 
- * 计算工作负载之和
+ * 计算进程的工作负载之和(#6．量化负载的计算)
  * 代码不好理解，查阅:[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#8.2.7 PELT代码分析#5．工作负载的计算
  * 
  * We can represent the historical contribution to runnable average as the
@@ -220,6 +229,9 @@ ___update_load_sum(u64 now, struct sched_avg *sa,
 {
 	u64 delta;
 
+	/**
+	 * 计算时间差: 当前时间减去上一次计算时间
+	 */
 	delta = now - sa->last_update_time;
 
 	/**
@@ -236,14 +248,16 @@ ___update_load_sum(u64 now, struct sched_avg *sa,
 	 * Use 1024ns as the unit of measurement since it's a reasonable
 	 * approximation of 1us and fast to compute.
 	 * (使用 1024ns 作为测量单位，因为它是 1us 的合理近似值并且计算速度很快。)
+	 * 
+	 * 将时间转为us(微秒)
 	 */
 	delta >>= 10;
 	if (!delta)
 		return 0;
 
-	sa->last_update_time += delta << 10;
+	sa->last_update_time += delta << 10; // 更新 sa->last_update_time
 
-	/*
+	/**
 	 * running is a subset of runnable (weight) so running can't be set if
 	 * runnable is clear. But there are some corner cases where the current
 	 * se has been already dequeued but cfs_rq->curr still points to it.
@@ -251,6 +265,10 @@ ___update_load_sum(u64 now, struct sched_avg *sa,
 	 * but also for a cfs_rq if the latter becomes idle. As an example,
 	 * this happens during idle_balance() which calls
 	 * update_blocked_averages().
+	 * (running 是 runnable（权重）的子集，因此如果 runnable 已清除，则无法设置 running。
+	 * 但在某些情况下，当前 se 已出队，但 cfs_rq->curr 仍然指向它。这意味着 weight 将为 0，
+	 * 但对于 sched_entity 和 cfs_rq（如果后者变为空闲状态）而言，它不会处于 running 状态。
+	 * 例如，这种情况发生在调用 update_blocked_averages() 的idle_balance() 期间。)
 	 *
 	 * Also see the comment in accumulate_sum().
 	 */
@@ -278,9 +296,12 @@ ___update_load_sum(u64 now, struct sched_avg *sa,
  * position in the PELT segment otherwise the remaining part of the segment
  * will be considered as idle time whereas it's not yet elapsed and this will
  * generate unwanted oscillation in the range [1002..1024[.
+ * (当将 *_avg 与 *_sum 同步时，我们必须考虑 PELT 段中的当前位置，
+ * 否则该段的剩余部分将被视为空闲时间，而它尚未过去，这将在 [1002..1024] 范围内产生不必要的振荡。)
  *
  * The max value of *_sum varies with the position in the time segment and is
  * equals to :
+ * (*_sum 的最大值随时间段内的位置而变化，等于)
  *
  *   LOAD_AVG_MAX*y + sa->period_contrib
  *
@@ -296,10 +317,16 @@ ___update_load_sum(u64 now, struct sched_avg *sa,
  * time segment because they use the same clock. This means that we can use
  * the period_contrib of cfs_rq when updating the sched_avg of a sched_entity
  * if it's more convenient.
+ * (在 cfs_rq 中添加、更新或删除 sched 实体时，如果我们需要更新 sched_avg，也必须同样小心。
+ * 由于调度程序实体和它们所连接的 cfs rq 使用相同的时钟，因此它们在时间段中的位置相同。
+ * 这意味着，如果更方便的话，我们可以使用 cfs_rq 的 period_contrib 来更新 sched_entity 的 sched_avg。)
  */
 static __always_inline void
 ___update_load_avg(struct sched_avg *sa, unsigned long load)
 {
+	/**
+	 * 
+	 */
 	u32 divider = get_pelt_divider(sa);
 
 	/*
