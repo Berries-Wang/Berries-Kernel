@@ -6,7 +6,7 @@
 
 DEFINE_MUTEX(sched_domains_mutex);
 
-/* Protected by sched_domains_mutex: */
+/** Protected by sched_domains_mutex: */
 static cpumask_var_t sched_domains_tmpmask;
 static cpumask_var_t sched_domains_tmpmask2;
 
@@ -1236,6 +1236,9 @@ __visit_domain_allocation_hell(struct s_data *d, const struct cpumask *cpu_map)
 {
 	memset(d, 0, sizeof(*d));
 
+	/**
+	 * __sdt_alloc()来创建调度域等数据结构
+	 */
 	if (__sdt_alloc(cpu_map))
 		return sa_sd_storage;
 	d->sd = alloc_percpu(struct sched_domain *);
@@ -1414,8 +1417,17 @@ sd_init(struct sched_domain_topology_level *tl,
 	return sd;
 }
 
-/*
+/**
  * Topology list, bottom-up.
+ * 
+ * > SMT MC 是什么?参考:[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#8.3.2　CPU调度域 CPU域的分类
+ * 
+ * 
+ * 内核默认定义了一个数组default_topology[]来概括CPU物理域的层次结构
+ * 
+ * cpu_smt_mask()函数描述SMT层级的CPU位图组成方式;
+ * cpu_coregroup_mask ()描述MC层级的CPU位图组成方式;
+ * cpu_cpu_mask()描述DIE层级的CPU位图组成方式。
  */
 static struct sched_domain_topology_level default_topology[] = {
 #ifdef CONFIG_SCHED_SMT
@@ -1732,6 +1744,9 @@ int sched_numa_find_closest(const struct cpumask *cpus, int cpu)
 
 #endif /* CONFIG_NUMA */
 
+/**
+ * __sdt_alloc()来创建调度域等数据结构
+ */
 static int __sdt_alloc(const struct cpumask *cpu_map)
 {
 	struct sched_domain_topology_level *tl;
@@ -1837,6 +1852,17 @@ static void __sdt_free(const struct cpumask *cpu_map)
 	}
 }
 
+/**
+ * 得结合[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#8.3　SMP负载均衡 查看
+ * 
+ * @param tl tl指的是层级，从最底层SMT遍历到DIE
+ * @param cpu_map cpu_map指的是cpu_active_mask位图
+ * @param attr sched_domain_attr
+ * @param child 子层级的调度域，就是下一级的调度域
+ * @param dflags
+ * @param cpu 当前正在处理的CPU编号
+ * 
+ */
 static struct sched_domain *build_sched_domain(struct sched_domain_topology_level *tl,
 		const struct cpumask *cpu_map, struct sched_domain_attr *attr,
 		struct sched_domain *child, int dflags, int cpu)
@@ -1961,10 +1987,12 @@ next_level:
 	return asym_tl;
 }
 
-
-/*
+/**
+ * 得结合[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#8.3　SMP负载均衡 查看
+ * 
  * Build sched domains for a given set of CPUs and attach the sched domains
  * to the individual CPUs
+ * (为给定的一组 CPU 构建调度域，并将调度域附加到各个 CPU)
  */
 static int
 build_sched_domains(const struct cpumask *cpu_map, struct sched_domain_attr *attr)
@@ -1986,7 +2014,11 @@ build_sched_domains(const struct cpumask *cpu_map, struct sched_domain_attr *att
 
 	tl_asym = asym_cpu_capacity_level(cpu_map);
 
-	/* Set up domains for CPUs specified by the cpu_map: */
+	/** 
+	 * Set up domains for CPUs specified by the cpu_map:
+	 * (为 cpu_map 指定的 CPU 设置域：)
+	 * 创建调度域
+	 *  */
 	for_each_cpu(i, cpu_map) {
 		struct sched_domain_topology_level *tl;
 
@@ -2013,7 +2045,15 @@ build_sched_domains(const struct cpumask *cpu_map, struct sched_domain_attr *att
 		}
 	}
 
-	/* Build the groups for the domains */
+	/** 
+	 * Build the groups for the domains
+	 * @ build_sched_groups 创建调度组
+	 * 	创建调度组依然会做两次嵌套遍历：
+	 *     一次是遍历cpu_active_mask中所有的CPU
+	 *     另一次是遍历该CPU对应的调度域，因为每个CPU在每个SDTL都分配了调度域。
+	 * 
+	 * @ build_overlap_sched_groups 
+	 *  */
 	for_each_cpu(i, cpu_map) {
 		for (sd = *per_cpu_ptr(d.sd, i); sd; sd = sd->parent) {
 			sd->span_weight = cpumask_weight(sched_domain_span(sd));
@@ -2027,7 +2067,9 @@ build_sched_domains(const struct cpumask *cpu_map, struct sched_domain_attr *att
 		}
 	}
 
-	/* Calculate CPU capacity for physical packages and nodes */
+	/** 
+	 * Calculate CPU capacity for physical packages and nodes
+	 *  */
 	for (i = nr_cpumask_bits-1; i >= 0; i--) {
 		if (!cpumask_test_cpu(i, cpu_map))
 			continue;
@@ -2048,7 +2090,7 @@ build_sched_domains(const struct cpumask *cpu_map, struct sched_domain_attr *att
 		if (rq->cpu_capacity_orig > READ_ONCE(d.rd->max_cpu_capacity))
 			WRITE_ONCE(d.rd->max_cpu_capacity, rq->cpu_capacity_orig);
 
-		cpu_attach_domain(sd, d.rd, i);
+		cpu_attach_domain(sd, d.rd, i); // 把相关的调度域关联到rq的root_domain中
 	}
 	rcu_read_unlock();
 
@@ -2118,9 +2160,12 @@ void free_sched_domains(cpumask_var_t doms[], unsigned int ndoms)
 	kfree(doms);
 }
 
-/*
+/**
+ * 建立CPU调度域拓扑关系
+ * 
  * Set up scheduler domains and groups.  For now this just excludes isolated
  * CPUs, but could be used to exclude other special cases in the future.
+ * (设置调度器域和组。目前，这仅排除了孤立的 CPU，但将来可以用于排除其他特殊情况。)
  */
 int sched_init_domains(const struct cpumask *cpu_map)
 {

@@ -2,10 +2,12 @@
 #ifndef __LINUX_CPUMASK_H
 #define __LINUX_CPUMASK_H
 
-/*
+/**
  * Cpumasks provide a bitmap suitable for representing the
  * set of CPU's in a system, one bit position per CPU number.  In general,
  * only nr_cpu_ids (<= NR_CPUS) bits are valid.
+ * (Cpumasks 提供了一个位图，用于表示系统中的 CPU 集合，每个 CPU 编号对应一个位。通常，只有 nr_cpu_ids（<= NR_CPUS）位有效。)
+ * 在 Linux 内核中，NR_CPUS 是一个重要的配置参数，用于定义内核支持的 最大 CPU 数量（即系统允许的理论上限）
  */
 #include <linux/kernel.h>
 #include <linux/threads.h>
@@ -13,7 +15,12 @@
 #include <linux/atomic.h>
 #include <linux/bug.h>
 
-/* Don't assign or return these: may not be this big! */
+/**
+ *  Don't assign or return these: may not be this big!
+ *  
+ * DECLARE_BITMAP [000.LINUX-5.9/include/linux/types.h]
+ * 
+ *  */
 typedef struct cpumask { DECLARE_BITMAP(bits, NR_CPUS); } cpumask_t;
 
 /**
@@ -47,14 +54,18 @@ extern unsigned int nr_cpu_ids;
 #define nr_cpumask_bits	((unsigned int)NR_CPUS)
 #endif
 
-/*
+/**
+ * 
+ * 内核对CPU的管理是通过位图（bitmap）变量来管理的
+ * 
+ * 
  * The following particular system cpumasks and operations manage
  * possible, present, active and online cpus.
  *
- *     cpu_possible_mask- has bit 'cpu' set iff cpu is populatable
- *     cpu_present_mask - has bit 'cpu' set iff cpu is populated
- *     cpu_online_mask  - has bit 'cpu' set iff cpu available to scheduler
- *     cpu_active_mask  - has bit 'cpu' set iff cpu available to migration
+ *     cpu_possible_mask- has bit 'cpu' set iff cpu is populatable （表示系统中有多少个可以运行（现在运行或者将来某个时间点运行）的CPU内核。）
+ *     cpu_present_mask - has bit 'cpu' set iff cpu is populated (表示系统中有多少个可处于运行状态的CPU内核，它们不一定都处于运行状态，有的CPU内核可能被热插拔了。)
+ *     cpu_online_mask  - has bit 'cpu' set iff cpu available to scheduler (表示系统中有多少个正处于运行（online）状态的CPU内核。)
+ *     cpu_active_mask  - has bit 'cpu' set iff cpu available to migration (表示系统中有多少个活跃的CPU内核)
  *
  *  If !CONFIG_HOTPLUG_CPU, present == possible, and active == online.
  *
@@ -64,14 +75,20 @@ extern unsigned int nr_cpu_ids;
  *  representing which CPUs are currently plugged in.  And
  *  cpu_online_mask is the dynamic subset of cpu_present_mask,
  *  indicating those CPUs available for scheduling.
+ * (cpu_possible_mask 在启动时是固定的，因为在系统启动的整个生命周期中，一组可能的 CPU ID 都可能被插入。
+ * cpu_present_mask 是动态的(*)，表示当前插入了哪些 CPU。cpu_online_mask 是 cpu_present_mask 的动态子集，
+ * 表示哪些 CPU 可用于调度。)
  *
  *  If HOTPLUG is enabled, then cpu_possible_mask is forced to have
  *  all NR_CPUS bits set, otherwise it is just the set of CPUs that
  *  ACPI reports present at boot.
+ * (如果启用了 HOTPLUG，则强制 cpu_possible_mask 设置所有 NR_CPUS 位，否则它只是 ACPI 在启动时报告的 CPU 集。)
  *
  *  If HOTPLUG is enabled, then cpu_present_mask varies dynamically,
  *  depending on what ACPI reports as currently plugged in, otherwise
  *  cpu_present_mask is just a copy of cpu_possible_mask.
+ * (如果启用了 HOTPLUG，则 cpu_present_mask 会动态变化，具体取决于 ACPI 报告的当前插入内容，
+ * 否则 cpu_present_mask 只是 cpu_possible_mask 的副本。)
  *
  *  (*) Well, cpu_present_mask is dynamic in the hotplug case.  If not
  *      hotplug, it's a copy of cpu_possible_mask, hence fixed at boot.
@@ -85,6 +102,9 @@ extern unsigned int nr_cpu_ids;
  *    optimization - don't waste any instructions or memory references
  *    asking if you're online or how many CPUs there are if there is
  *    only one CPU.
+ * (UP 架构（NR_CPUS == 1，CONFIG_SMP 未定义）硬编码假设其单 CPU 在线。UP cpu_{online,possible,present}_masks 是安慰剂。
+ * 更改它们不会对 UP 情况下的后续 num_*_cpus() 和 cpu_*() 宏产生任何实际影响。这种不美观的设计是对 UP 的优化——如果只有一个 CPU，
+ * 就不要浪费任何指令或内存引用来询问是否在线或有多少个 CPU。)
  */
 
 extern struct cpumask __cpu_possible_mask;

@@ -7839,7 +7839,9 @@ static struct task_struct *detach_one_task(struct lb_env *env)
 
 static const unsigned int sched_nr_migrate_break = 32;
 
-/*
+/**
+ * detach_tasks()的主要作用是查找就绪队列中哪些进程可以被迁出
+ * 
  * detach_tasks() -- tries to detach up to imbalance load/util/tasks from
  * busiest_rq, as part of a balancing operation within domain "sd".
  *
@@ -7995,9 +7997,11 @@ static void attach_one_task(struct rq *rq, struct task_struct *p)
 	rq_unlock(rq, &rf);
 }
 
-/*
+/**
  * attach_tasks() -- attaches all tasks detached by detach_tasks() to their
  * new rq.
+ * 
+ * attach_tasks()函数主要用于把detach_tasks()分离出来的进程，重新添加到目标就绪队列中
  */
 static void attach_tasks(struct lb_env *env)
 {
@@ -8232,8 +8236,13 @@ static void update_blocked_averages(int cpu)
 
 /********** Helpers for find_busiest_group ************************/
 
-/*
+/**
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub] # 4．find_busiest_group()函数
+ * 
  * sg_lb_stats - stats of a sched_group required for load_balancing
+ * 负载均衡所需的调度组(sched_group)统计信息
+ * 
+ * 用于描述该调度组里的相关信息，如量化负载、总权重以及平均权重等信息
  */
 struct sg_lb_stats {
 	unsigned long avg_load; /*Avg load across the CPUs of the group */
@@ -8254,9 +8263,10 @@ struct sg_lb_stats {
 #endif
 };
 
-/*
+/**
  * sd_lb_stats - Structure to store the statistics of a sched_domain
- *		 during load balancing.
+ *		 during load balancing.(用于存储负载均衡过程中调度域(sched_domain)统计信息的数据结构)
+ * 该数据结构描述调度域中的总负载、总能力系数和量化负载等信息
  */
 struct sd_lb_stats {
 	struct sched_group *busiest;	/* Busiest group in this sd */
@@ -8570,6 +8580,8 @@ static bool update_nohz_stats(struct rq *rq, bool force)
 }
 
 /**
+ * 计算调度组的负载，即繁忙程度
+ * 
  * update_sg_lb_stats - Update sched_group's statistics for load balancing.
  * @env: The load balancing environment.
  * @group: sched_group whose statistics are to be updated.
@@ -8585,14 +8597,17 @@ static inline void update_sg_lb_stats(struct lb_env *env,
 
 	memset(sgs, 0, sizeof(*sgs));
 
+    // 当前CPU所在的调度组
 	local_group = cpumask_test_cpu(env->dst_cpu, sched_group_span(group));
 
 	for_each_cpu_and(i, sched_group_span(group), env->cpus) {
 		struct rq *rq = cpu_rq(i);
 
-		if ((env->flags & LBF_NOHZ_STATS) && update_nohz_stats(rq, false))
+		if ((env->flags & LBF_NOHZ_STATS) && update_nohz_stats(rq, false)) {
 			env->flags |= LBF_NOHZ_AGAIN;
+		}
 
+		// 以下几行，均是计算负载信息
 		sgs->group_load += cpu_load(rq);
 		sgs->group_util += cpu_util(i);
 		sgs->group_runnable += cpu_runnable(rq);
@@ -8655,14 +8670,17 @@ static inline void update_sg_lb_stats(struct lb_env *env,
  * update_sd_pick_busiest - return 1 on busiest group
  * @env: The load balancing environment.
  * @sds: sched_domain statistics
- * @sg: sched_group candidate to be checked for being the busiest
+ * @sg:  sched_group candidate to be checked for being the busiest
  * @sgs: sched_group statistics
  *
  * Determine if @sg is a busier group than the previously selected
  * busiest group.
+ * (判断当前调度组(@sg)是否比先前选定的最忙组(busiest group)负载更高)
  *
  * Return: %true if @sg is a busier group than the previously selected
  * busiest group. %false otherwise.
+ * 
+ * 即尝试将sg设置为负载最高的调度组，true:表示当前调度组比之前的调度组负载更高；反之，则不是;
  */
 static bool update_sd_pick_busiest(struct lb_env *env,
 				   struct sd_lb_stats *sds,
@@ -9109,14 +9127,20 @@ find_idlest_group(struct sched_domain *sd, struct task_struct *p, int this_cpu)
 
 /**
  * update_sd_lb_stats - Update sched_domain's statistics for load balancing.
+ * (更新调度域的负载均衡的统计信息)
+ * 
  * @env: The load balancing environment.
  * @sds: variable to hold the statistics for this sched_domain.
  */
 
 static inline void update_sd_lb_stats(struct lb_env *env, struct sd_lb_stats *sds)
 {
+	// child 表示当前调度域的子调度域
 	struct sched_domain *child = env->sd->child;
+
+	// sg 指向当前调度域的第一个调度组
 	struct sched_group *sg = env->sd->groups;
+	
 	struct sg_lb_stats *local = &sds->local_stat;
 	struct sg_lb_stats tmp_sgs;
 	int sg_status = 0;
@@ -9126,11 +9150,15 @@ static inline void update_sd_lb_stats(struct lb_env *env, struct sd_lb_stats *sd
 		env->flags |= LBF_NOHZ_STATS;
 #endif
 
+	/**
+     * 在do-while中找到负载最高的调度组 -- update_sd_pick_busiest
+     */
 	do {
 		struct sg_lb_stats *sgs = &tmp_sgs;
 		int local_group;
 
-		local_group = cpumask_test_cpu(env->dst_cpu, sched_group_span(sg));
+		local_group =
+			cpumask_test_cpu(env->dst_cpu, sched_group_span(sg));
 		if (local_group) {
 			sds->local = sg;
 			sgs = local;
@@ -9140,11 +9168,11 @@ static inline void update_sd_lb_stats(struct lb_env *env, struct sd_lb_stats *sd
 				update_group_capacity(env->sd, env->dst_cpu);
 		}
 
+		// 如何衡量一个调度组的负载程度?
 		update_sg_lb_stats(env, sg, sgs, &sg_status);
 
 		if (local_group)
 			goto next_group;
-
 
 		if (update_sd_pick_busiest(env, sds, sg, sgs)) {
 			sds->busiest = sg;
@@ -9157,7 +9185,7 @@ next_group:
 		sds->total_capacity += sgs->group_capacity;
 
 		sg = sg->next;
-	} while (sg != env->sd->groups);
+} while (sg != env->sd->groups);
 
 	/* Tag domain that child domain prefers tasks go to siblings first */
 	sds->prefer_sibling = child && child->flags & SD_PREFER_SIBLING;
@@ -9374,9 +9402,11 @@ static inline void calculate_imbalance(struct lb_env *env, struct sd_lb_stats *s
 /**
  * find_busiest_group - Returns the busiest group within the sched_domain
  * if there is an imbalance.
+ * (当检测到负载不平衡时，该函数返回调度域(sched_domain)中最繁忙的调度组(sched_group)。)
  *
  * Also calculates the amount of runnable load which should be moved
  * to restore balance.
+ * (该机制同时计算需要迁移的可运行负载量(runnable load)，以恢复系统负载平衡。)
  *
  * @env: The load balancing environment.
  *
@@ -9389,9 +9419,14 @@ static struct sched_group *find_busiest_group(struct lb_env *env)
 
 	init_sd_lb_stats(&sds);
 
-	/*
+	/**
 	 * Compute the various statistics relevant for load balancing at
-	 * this level.
+	 * this level. 
+	 * (计算当前调度层级进行负载均衡所需的各种相关统计量)
+	 * 
+	 * 利用update_sd_lb_stats()更新该调度域中负载的相关统计信息。
+	 * 
+	 * 重要函数
 	 */
 	update_sd_lb_stats(env, &sds);
 
@@ -9417,10 +9452,13 @@ static struct sched_group *find_busiest_group(struct lb_env *env)
 	if (busiest->group_type == group_asym_packing)
 		goto force_balance;
 
-	/*
+	/**
 	 * If the busiest group is imbalanced the below checks don't
 	 * work because they assume all things are equal, which typically
 	 * isn't true due to cpus_ptr constraints and the like.
+	 * (当最繁忙调度组(busiest group)处于不平衡状态时，后续的检查逻辑将失效，
+	 * 因为这些检查默认所有条件都是均等的，
+	 * 而实际情况通常由于cpus_ptr约束等因素导致条件不均等)
 	 */
 	if (busiest->group_type == group_imbalanced)
 		goto force_balance;
@@ -9694,6 +9732,9 @@ static int need_active_balance(struct lb_env *env)
 
 static int active_load_balance_cpu_stop(void *data);
 
+/**
+ * should_we_balance()函数主要用于判断当前CPU是否需要做负载均衡
+ */
 static int should_we_balance(struct lb_env *env)
 {
 	struct sched_group *sg = env->sd->groups;
@@ -10133,11 +10174,13 @@ void update_max_interval(void)
 	max_load_balance_interval = HZ*num_online_cpus()/10;
 }
 
-/*
+/**
  * It checks each scheduling domain to see if it is due to be balanced,
  * and initiates a balancing operation if so.
+ * (该机制会检查每个调度域(scheduling domain)是否到达平衡触发时机，若条件满足则启动相应的负载均衡操作。)
  *
  * Balancing parameters are set up in init_sched_domains.
+ * (负载均衡参数在init_sched_domains函数中进行初始化设置)
  */
 static void rebalance_domains(struct rq *rq, enum cpu_idle_type idle)
 {
@@ -10816,9 +10859,14 @@ out:
 	return pulled_task;
 }
 
-/*
+/**
  * run_rebalance_domains is triggered when needed from the scheduler tick.
  * Also triggered for nohz idle balancing (with nohz_balancing_kick set).
+ * (run_rebalance_domains函数会在以下情况被触发：
+ *      1) 调度器时钟周期检查到需要负载均衡时；
+ *      2) 当配置了nohz_balancing_kick时，用于无时钟空闲CPU的负载平衡。)
+ * 
+ * 负载均衡的核心入口
  */
 static __latent_entropy void run_rebalance_domains(struct softirq_action *h)
 {
@@ -10826,13 +10874,17 @@ static __latent_entropy void run_rebalance_domains(struct softirq_action *h)
 	enum cpu_idle_type idle = this_rq->idle_balance ?
 						CPU_IDLE : CPU_NOT_IDLE;
 
-	/*
+	/**
 	 * If this CPU has a pending nohz_balance_kick, then do the
 	 * balancing on behalf of the other idle CPUs whose ticks are
 	 * stopped. Do nohz_idle_balance *before* rebalance_domains to
 	 * give the idle CPUs a chance to load balance. Else we may
 	 * load balance only within the local sched_domain hierarchy
 	 * and abort nohz_idle_balance altogether if we pull some load.
+	 * (若当前CPU有待处理的nohz_balance_kick请求，则代表那些已停止时钟中断的空闲CPU执行负载均衡。
+	 * 需在rebalance_domains之前执行nohz_idle_balance，以确保空闲CPU获得负载均衡机会。
+	 * 否则我们可能仅会在本地调度域层次内进行负载均衡，且若已迁移部分负载，
+	 * 将导致nohz_idle_balance完全中止。)
 	 */
 	if (nohz_idle_balance(this_rq, idle))
 		return;

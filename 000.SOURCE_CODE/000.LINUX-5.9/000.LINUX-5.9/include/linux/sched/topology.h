@@ -7,7 +7,7 @@
 #include <linux/sched/idle.h>
 
 /*
- * sched-domains (multiprocessor balancing) declarations:
+ * sched-domains(调度域) (multiprocessor balancing) declarations:
  */
 #ifdef CONFIG_SMP
 
@@ -174,9 +174,17 @@ struct sd_data {
 	struct sched_group_capacity *__percpu *sgc;
 };
 
+/**
+ * Linux内核通过数据结构sched_domain_topology_level(SDTL)来描述CPU的层次关系
+ */
 struct sched_domain_topology_level {
+	// 函数指针，用于指定某个SDTL的cpumask位图
 	sched_domain_mask_f mask;
+
+	// 函数指针，用于指定某个SDTL的标志位
 	sched_domain_flags_f sd_flags;
+
+
 	int		    flags;
 	int		    numa_level;
 	struct sd_data      data;

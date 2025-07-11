@@ -558,7 +558,7 @@ struct cfs_bandwidth { };
 
 /* CFS-related fields in a runqueue */
 struct cfs_rq {
-	struct load_weight	load;
+	struct load_weight	load;  // load 是权重的意思
 	unsigned int		nr_running;        /*可运行任务总数*/
 	unsigned int		h_nr_running;      /* SCHED_{NORMAL,BATCH,IDLE} */
 	unsigned int		idle_h_nr_running; /* SCHED_IDLE */
