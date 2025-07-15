@@ -1075,11 +1075,21 @@ struct rq {
 
 	/**
 	 * 表示 CPU 的 当前有效容量(计算能力)，会因动态调频（DVFS）、热限制（thermal throttling）或功耗管理而变化
+	 * 
+	 * "cpu_capacity代表的计算能力不包含realtime调度类和deadline调度类的计算能力。"
 	 */
 	unsigned long		cpu_capacity;
 	/**
 	 * 处理器最大的处理能力
 	 * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]
+	 * 
+	 * cpu_capacity_orig成员表示该CPU原本的计算能力，在系统启动之初，建立系统调度域拓扑时就会计算每个CPU的计算能力。
+	 * >　在 #8.4.1　量化计算能力 中 
+	 * 
+	 * 怎么计算来的???
+	 * 
+	 * 'cpu_capacity_orig指最大的计算能力，它指所有的调度器类的计算能力之和，如realtime调度类、deadline调度类和CFS调度类'
+	 *  搜原文即可
 	 */
 	unsigned long		cpu_capacity_orig;
 

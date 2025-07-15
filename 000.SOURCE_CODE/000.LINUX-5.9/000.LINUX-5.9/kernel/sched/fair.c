@@ -6406,8 +6406,11 @@ select_idle_capacity(struct task_struct *p, struct sched_domain *sd, int target)
 	return best_cpu;
 }
 
-/*
+/**
  * Try and locate an idle core/thread in the LLC cache domain.
+ * (尝试在末级缓存(LLC)域中定位空闲的物理核心或超线程)
+ * 
+ * "LLC cache domain" 译为"末级缓存(LLC)域"（完整保留Last Level Cache技术概念）
  */
 static int select_idle_sibling(struct task_struct *p, int prev, int target)
 {
@@ -6439,8 +6442,13 @@ symmetric:
 	if (available_idle_cpu(target) || sched_idle_cpu(target))
 		return target;
 
-	/*
+	/**
 	 * If the previous CPU is cache affine and idle, don't be stupid:
+	 * (若前一CPU（prev_cpu）具有缓存亲和性且处于空闲状态，则遵循最优调度原则)
+	 * 
+	 * cpus_share_cache()函数判断两个CPU是否具有高速缓存的亲和性。
+	 * 若它们同属于一个SMT或MC调度域，则共享高速缓存，这是通过Per-CPU变量sd_llc_id来判断的，
+	 * sd_llc_id在update_top_cache_domain()函数中赋值
 	 */
 	if (prev != target && cpus_share_cache(prev, target) &&
 	    (available_idle_cpu(prev) || sched_idle_cpu(prev)))
@@ -6868,17 +6876,29 @@ fail:
 	return -1;
 }
 
-/*
+/**
  * select_task_rq_fair: Select target runqueue for the waking task in domains
  * that have the 'sd_flag' flag set. In practice, this is SD_BALANCE_WAKE,
  * SD_BALANCE_FORK, or SD_BALANCE_EXEC.
+ * 在设置了'sd_flag'标志的调度域中，为被唤醒任务选择目标运行队列。实际场景中，该标志通常为以下三种之一：
+ *   SD_BALANCE_WAKE（唤醒负载平衡）、
+ *   SD_BALANCE_FORK（fork负载平衡）、
+ *   SD_BALANCE_EXEC（执行负载平衡）。
  *
  * Balances load by selecting the idlest CPU in the idlest group, or under
  * certain conditions an idle sibling CPU if the domain has SD_WAKE_AFFINE set.
+ * (通过选择最空闲组中的最空闲 CPU 来实现负载均衡；若调度域设置了 SD_WAKE_AFFINE 标志，则在特定条件下会选择空闲的同核兄弟 CPU。)
  *
  * Returns the target CPU number.
  *
  * preempt must be disabled.
+ * 
+ * wake affine 特性?
+ *   Wake-Affine 特性 是 Linux 调度器中的一种优化策略，主要针对任务唤醒（task wakeup）场景，
+ *   旨在利用 CPU 缓存局部性 和 NUMA 架构亲和性 来提升系统性能。其核心设计思想是：当任务被唤醒时，
+ *   优先选择与任务上次运行的 CPU（prev_cpu）在 同一调度域（sched_domain）内且 具有缓存/内存访问优势 的目标 CPU
+ * 
+ * 参考: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#8.3.6　wake affine特性
  */
 static int
 select_task_rq_fair(struct task_struct *p, int prev_cpu, int sd_flag, int wake_flags)
@@ -6904,9 +6924,10 @@ select_task_rq_fair(struct task_struct *p, int prev_cpu, int sd_flag, int wake_f
 
 	rcu_read_lock();
 	for_each_domain(cpu, tmp) {
-		/*
+		/**
 		 * If both 'cpu' and 'prev_cpu' are part of this domain,
 		 * cpu is a valid SD_WAKE_AFFINE target.
+		 * (若'cpu'与'prev_cpu'同属当前调度域，则该cpu可作为有效的SD_WAKE_AFFINE目标。)
 		 */
 		if (want_affine && (tmp->flags & SD_WAKE_AFFINE) &&
 		    cpumask_test_cpu(prev_cpu, sched_domain_span(tmp))) {
@@ -6924,10 +6945,10 @@ select_task_rq_fair(struct task_struct *p, int prev_cpu, int sd_flag, int wake_f
 	}
 
 	if (unlikely(sd)) {
-		/* Slow path */
+		/* Slow path: 慢速优化路径 */
 		new_cpu = find_idlest_cpu(sd, p, cpu, prev_cpu, sd_flag);
 	} else if (sd_flag & SD_BALANCE_WAKE) { /* XXX always ? */
-		/* Fast path */
+		/* Fast path： 快速优化路径 */
 
 		new_cpu = select_idle_sibling(p, prev_cpu, new_cpu);
 

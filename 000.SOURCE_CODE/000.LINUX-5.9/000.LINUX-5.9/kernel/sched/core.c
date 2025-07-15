@@ -2368,8 +2368,13 @@ out:
 	return dest_cpu;
 }
 
-/*
+/**
  * The caller (fork, wakeup) owns p->pi_lock, ->cpus_ptr is stable.
+ * 
+ * @param p              将要唤醒的进程
+ * @param cpu            该进程上一次调度运行的CPU
+ * @param sd_flags       调度域的标志位
+ * @param wake_flags     唤醒标志位
  */
 static inline
 int select_task_rq(struct task_struct *p, int cpu, int sd_flags, int wake_flags)
@@ -2732,24 +2737,36 @@ static void ttwu_queue(struct task_struct *p, int cpu, int wake_flags)
 	rq_unlock(rq, &rf);
 }
 
-/*
+/**
  * Notes on Program-Order guarantees on SMP systems.
+ * (关于 SMP 系统上的程序顺序保证的注释。)
  *
- *  MIGRATION
+ *  MIGRATION (移民，迁徙；（计算机系统的）改变，（程序或硬件的）迁移，转移)
  *
  * The basic program-order guarantee on SMP systems is that when a task [t]
  * migrates, all its activity on its old CPU [c0] happens-before any subsequent
  * execution on its new CPU [c1].
+ * (SMP系统上的基本程序顺序保证是：当任务[t]迁移时，
+ * 其在原CPU[c0]上的所有活动都先于（happens-before）其在新CPU[c1]上的任何后续执行。)
  *
  * For migration (of runnable tasks) this is provided by the following means:
+ * (对于（可运行任务的）迁移，这一保证是通过以下方式实现的)
  *
  *  A) UNLOCK of the rq(c0)->lock scheduling out task t
+ *      (释放 rq(c0)->lock 以调度出任务 t)
+ * 
  *  B) migration for t is required to synchronize *both* rq(c0)->lock and
  *     rq(c1)->lock (if not at the same time, then in that order).
+ *     (任务 t 的迁移必须同时对 rq(c0)->lock 和 rq(c1)->lock 进行同步（若无法同时获取，则按此顺序依次获取）)
+ * 
  *  C) LOCK of the rq(c1)->lock scheduling in task
- *
+ *     (获取 rq(c1)->lock 以调度入任务 t)
+ * 
  * Release/acquire chaining guarantees that B happens after A and C after B.
+ * (释放/获取的链式顺序保证了：B 必然发生在 A 之后，且 C 必然发生在 B 之后。)
+ * 
  * Note: the CPU doing B need not be c0 or c1
+ * (注：执行 B 的 CPU 既不必是 c0 也不必是 c1)
  *
  * Example:
  *
@@ -2779,6 +2796,8 @@ static void ttwu_queue(struct task_struct *p, int cpu, int wake_flags)
  * For blocking we (obviously) need to provide the same guarantee as for
  * migration. However the means are completely different as there is no lock
  * chain to provide order. Instead we do:
+ * (对于阻塞操作，我们（显然）需要提供与任务迁移相同的保证。
+ * 但实现方式却截然不同——因为不存在用于维持顺序的锁链。为此我们采用以下方式)
  *
  *   1) smp_store_release(X->on_cpu, 0)   -- finish_task()
  *   2) smp_cond_load_acquire(!X->on_cpu) -- try_to_wake_up()
@@ -2813,6 +2832,8 @@ static void ttwu_queue(struct task_struct *p, int cpu, int wake_flags)
  * However, for wakeups there is a second guarantee we must provide, namely we
  * must ensure that CONDITION=1 done by the caller can not be reordered with
  * accesses to the task state; see try_to_wake_up() and set_current_state().
+ * (然而对于唤醒操作，我们还需要提供第二项保证：必须确保调用方执行的 CONDITION=1 操作不会被重新排序到任务状态访问之后。
+ * 具体可参阅 try_to_wake_up() 和 set_current_state() 的实现)
  */
 
 /***
@@ -2852,7 +2873,7 @@ static void ttwu_queue(struct task_struct *p, int cpu, int wake_flags)
  *
  * Return: %true if @p->state changes (an actual wakeup was done),
  *	   %false otherwise.
- * 通过代码注释发现，指令重拍对该函数流程影响很大
+ * 通过代码注释发现，指令重排对该函数流程影响很大
  */
 static int try_to_wake_up(struct task_struct *p, unsigned int state, int wake_flags)
 {
@@ -2898,7 +2919,7 @@ static int try_to_wake_up(struct task_struct *p, unsigned int state, int wake_fl
 	 * 这与等待线程中调用的set_current_state()函数内的smp_store_mb()内存屏障形成配对同步。)
 	 */
 	raw_spin_lock_irqsave(&p->pi_lock, flags);
-	smp_mb__after_spinlock();
+	smp_mb__after_spinlock(); // 该功能参考注释
 	if (!(p->state & state))
 		goto unlock;
 
