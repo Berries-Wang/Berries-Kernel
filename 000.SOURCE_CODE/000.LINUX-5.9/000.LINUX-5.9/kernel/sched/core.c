@@ -3128,7 +3128,7 @@ bool try_invoke_on_locked_down_task(struct task_struct *p, bool (*func)(struct t
  * @p: The process to be woken up.
  *
  * Attempt to wake up the nominated process and move it to the set of runnable
- * processes.(尝试唤醒指定进程并将其移至可运行进程集合。)
+ * processes.(尝试唤醒指定进程并将其移至可运行进程集合 - 涉及跨CPU)
  *
  * Return: 1 if the process was woken up, 0 if it was already running.
  *
