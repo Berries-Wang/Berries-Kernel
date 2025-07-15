@@ -149,6 +149,12 @@ static int resources_available(void)
 	return 0;
 }
 
+/**
+ * 初始化CPUfreq-dt驱动程序
+ * 
+ * 在cpufreq_init()初始化函数中会完成对OPP表和能效模型进行初始化
+ * 
+ */
 static int cpufreq_init(struct cpufreq_policy *policy)
 {
 	struct cpufreq_frequency_table *freq_table;

@@ -156,10 +156,16 @@ static void __init parse_dt_topology(void)
 		topology_normalize_cpu_scale();
 }
 
-/*
+/**
  * Look for a customed capacity of a CPU in the cpu_capacity table during the
  * boot. The update of all CPUs is in O(n^2) for heteregeneous system but the
  * function returns directly for SMP system.
+ * (在启动过程中，从cpu_capacity表中查找CPU的定制容量。对于异构系统，
+ * 所有CPU的更新复杂度为O(n^2)，但在SMP系统中该函数会直接返回。)
+ * 
+ * 
+ * 
+ * 计算CPU的计算能力
  */
 static void update_cpu_capacity(unsigned int cpu)
 {

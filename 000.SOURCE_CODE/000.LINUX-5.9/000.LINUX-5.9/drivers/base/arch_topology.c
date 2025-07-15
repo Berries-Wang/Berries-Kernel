@@ -154,6 +154,9 @@ void topology_normalize_cpu_scale(void)
 	}
 }
 
+/**
+ * 设置CPU的cpu_scale
+ */
 bool __init topology_parse_cpu_capacity(struct device_node *cpu_node, int cpu)
 {
 	struct clk *cpu_clk;
@@ -164,6 +167,7 @@ bool __init topology_parse_cpu_capacity(struct device_node *cpu_node, int cpu)
 	if (cap_parsing_failed)
 		return false;
 
+	// 设置CPU的cpu_scale
 	ret = of_property_read_u32(cpu_node, "capacity-dmips-mhz",
 				   &cpu_capacity);
 	if (!ret) {
@@ -176,6 +180,7 @@ bool __init topology_parse_cpu_capacity(struct device_node *cpu_node, int cpu)
 				return false;
 			}
 		}
+		// 这个设置操作
 		raw_capacity[cpu] = cpu_capacity;
 		pr_debug("cpu_capacity: %pOF cpu_capacity=%u (raw)\n",
 			cpu_node, raw_capacity[cpu]);
