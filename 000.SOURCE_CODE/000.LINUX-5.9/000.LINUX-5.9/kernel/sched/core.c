@@ -2370,10 +2370,11 @@ out:
 
 /**
  * The caller (fork, wakeup) owns p->pi_lock, ->cpus_ptr is stable.
+ * (调用者（例如 fork 或 wakeup 函数）持有 p->pi_lock 自旋锁，因此任务 (p) 的 ->cpus_ptr 字段在此期间是稳定的（不会被并发修改）)
  * 
  * @param p              将要唤醒的进程
  * @param cpu            该进程上一次调度运行的CPU
- * @param sd_flags       调度域的标志位
+ * @param sd_flags       调度域的标志位 ` 从wake_up_process 传来的是 SD_BALANCE_WAKE `
  * @param wake_flags     唤醒标志位
  */
 static inline
@@ -2509,7 +2510,7 @@ static void ttwu_do_wakeup(struct rq *rq, struct task_struct *p, int wake_flags,
 		u64 delta = rq_clock(rq) - rq->idle_stamp;
 		u64 max = 2*rq->max_idle_balance_cost;
 
-		update_avg(&rq->avg_idle, delta);
+		update_avg(&rq->avg_idle, delta); // 更新负载
 
 		if (rq->avg_idle > max)
 			rq->avg_idle = max;
@@ -2578,9 +2579,9 @@ static int ttwu_runnable(struct task_struct *p, int wake_flags)
 
 	// 进程已经在某个CPU的运行队列
 	if (task_on_rq_queued(p)) {
-		/* check_preempt_curr() may use rq clock */
-		update_rq_clock(rq);
-		ttwu_do_wakeup(rq, p, wake_flags, &rf);
+		/** check_preempt_curr() may use rq clock */
+		update_rq_clock(rq); // 更新时钟计数
+		ttwu_do_wakeup(rq, p, wake_flags, &rf); // 将任务标记为可运行并执行唤醒抢占
 		ret = 1;
 	}
 	__task_rq_unlock(rq, &rf);
@@ -2919,7 +2920,7 @@ static int try_to_wake_up(struct task_struct *p, unsigned int state, int wake_fl
 	 * 这与等待线程中调用的set_current_state()函数内的smp_store_mb()内存屏障形成配对同步。)
 	 */
 	raw_spin_lock_irqsave(&p->pi_lock, flags);
-	smp_mb__after_spinlock(); // 该功能参考注释
+	smp_mb__after_spinlock(); // 该功能参考注释: 时序保证
 	if (!(p->state & state))
 		goto unlock;
 
@@ -2955,6 +2956,7 @@ static int try_to_wake_up(struct task_struct *p, unsigned int state, int wake_fl
 	 * A similar smb_rmb() lives in try_invoke_on_locked_down_task().
 	 */
 	smp_rmb();
+	// p在队列上，并且唤醒成功(p->state 设置为 TASK_RUNNING)
 	if (READ_ONCE(p->on_rq) && ttwu_runnable(p, wake_flags))
 		goto unlock;
 
@@ -3004,6 +3006,8 @@ static int try_to_wake_up(struct task_struct *p, unsigned int state, int wake_fl
 	 * (我们正在进行唤醒（@success == 1），他们进行了出队（p->on_rq == 0），这意味着我们需要进行入队，
 	 * 将 p->state 更改为 TASK_WAKING，以便我们可以在进行入队之前解锁 p->pi_lock，
 	 * 例如 ttwu_queue_wakelist()。)
+	 * 
+	 * TASK_WAKING 是一个临时任务状态，用于表示任务正在被唤醒（wakeup）的过程中，但尚未完全切换到可运行状态（TASK_RUNNING）
 	 */
 	p->state = TASK_WAKING;
 
@@ -3052,6 +3056,7 @@ static int try_to_wake_up(struct task_struct *p, unsigned int state, int wake_fl
 
 	// 将任务迁移到另一个CPU上执行
 	cpu = select_task_rq(p, p->wake_cpu, SD_BALANCE_WAKE, wake_flags);
+	
 	if (task_cpu(p) != cpu) {
 		wake_flags |= WF_MIGRATED;
 		psi_ttwu_dequeue(p);

@@ -1119,6 +1119,12 @@ struct rq {
 #ifdef CONFIG_SCHED_THERMAL_PRESSURE
 	struct sched_avg	avg_thermal;
 #endif
+	/**
+      * idle_stamp 和 avg_idle 字段用于跟踪 CPU 空闲状态，并帮助调度器做出更智能的任务调度决策（如负载均衡、任务唤醒优化）
+	  * 
+	  * idle_stamp: 记录 CPU 进入空闲状态的时间戳（单位：纳秒）。
+	  * avg_idle: 统计 CPU 的平均空闲时间（动态计算的指数移动平均值，单位：纳秒）
+     */
 	u64			idle_stamp;
 	u64			avg_idle;
 
@@ -2712,6 +2718,10 @@ unsigned long scale_irq_capacity(unsigned long util, unsigned long irq, unsigned
 
 DECLARE_STATIC_KEY_FALSE(sched_energy_present);
 
+/**
+ * sched_energy_present 是一个与 能效感知调度（Energy-Aware Scheduling, EAS） 相关的标志位，
+ * 用于指示系统是否支持基于能耗模型的调度功能
+ */
 static inline bool sched_energy_enabled(void)
 {
 	return static_branch_unlikely(&sched_energy_present);

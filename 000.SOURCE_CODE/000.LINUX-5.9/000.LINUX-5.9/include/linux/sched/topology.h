@@ -14,7 +14,7 @@
 #define SD_BALANCE_NEWIDLE	0x0001	/* Balance when about to become idle */
 #define SD_BALANCE_EXEC		0x0002	/* Balance on exec */
 #define SD_BALANCE_FORK		0x0004	/* Balance on fork, clone */
-#define SD_BALANCE_WAKE		0x0008  /* Balance on wakeup */
+#define SD_BALANCE_WAKE		0x0008  /* Balance on wakeup (唤醒时的负载均衡) */
 #define SD_WAKE_AFFINE		0x0010	/* Wake task to waking CPU */
 #define SD_ASYM_CPUCAPACITY	0x0020  /* Domain members have different CPU capacities */
 #define SD_SHARE_CPUCAPACITY	0x0040	/* Domain members share CPU capacity */

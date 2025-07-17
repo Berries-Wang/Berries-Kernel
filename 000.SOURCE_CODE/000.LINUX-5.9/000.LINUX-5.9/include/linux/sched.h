@@ -89,7 +89,7 @@ struct task_group;
 #define TASK_PARKED			0x0040
 #define TASK_DEAD			0x0080
 #define TASK_WAKEKILL			0x0100
-#define TASK_WAKING			0x0200
+#define TASK_WAKING			0x0200 // TASK_WAKING 是一个临时任务状态，用于表示任务正在被唤醒（wakeup）的过程中，但尚未完全切换到可运行状态（TASK_RUNNING）
 #define TASK_NOLOAD			0x0400
 #define TASK_NEW			0x0800
 #define TASK_STATE_MAX			0x1000
@@ -786,7 +786,14 @@ struct task_struct {
 	*/
 	unsigned int			cpu;
 #endif
+    /**
+	 * 用于wake affine特性
+	 * > 任务被不同唤醒者切换的次数，受 wakee_flip_decay_ts 控制的衰减影响
+	 */
 	unsigned int			wakee_flips;
+	/**
+	 *  用于记录上一次wakee_flips的时间
+	 */
 	unsigned long			wakee_flip_decay_ts;
 	
 	/**
@@ -968,6 +975,9 @@ struct task_struct {
 
 	/* Bit to tell LSMs we're in execve(): */
 	unsigned			in_execve:1;
+	/**
+	 * in_iowait 字段用于标记一个任务是否正在等待 I/O 操作完成
+	 */
 	unsigned			in_iowait:1;
 #ifndef TIF_RESTORE_SIGMASK
 	unsigned			restore_sigmask:1;
@@ -1161,7 +1171,12 @@ struct task_struct {
 	/* Protection against (de-)allocation: mm, files, fs, tty, keyrings, mems_allowed, mempolicy: */
 	spinlock_t			alloc_lock;
 
-	/* Protection of the PI data structures: */
+	/** Protection of the PI data structures: 
+	 * PI（优先级继承）数据结构的保护机制：
+	 * PI（Priority Inheritance）是实时系统中防止优先级反转的关键技术，此处指保护其内部数据结构（如任务优先级、依赖关系等）的同步机制。
+	 * 
+	 * pi_lock 字段是一个自旋锁（spinlock）
+	*/
 	raw_spinlock_t			pi_lock;
 
 	struct wake_q_node		wake_q;

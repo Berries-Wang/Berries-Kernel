@@ -5935,12 +5935,15 @@ static unsigned long capacity_of(int cpu)
 
 static void record_wakee(struct task_struct *p)
 {
-	/*
+	/**
+	 * jiffy ： 节拍
+	 * 
 	 * Only decay a single time; tasks that have less then 1 wakeup per
 	 * jiffy will not have built up many flips.
+	 * (仅衰减一次；唤醒频率低于每 jiffy 1 次的任务不会积累多次翻转)
 	 */
 	if (time_after(jiffies, current->wakee_flip_decay_ts + HZ)) {
-		current->wakee_flips >>= 1;
+		current->wakee_flips >>= 1; // 衰减?
 		current->wakee_flip_decay_ts = jiffies;
 	}
 
@@ -6733,12 +6736,19 @@ compute_energy(struct task_struct *p, int dst_cpu, struct perf_domain *pd)
 	return em_cpu_energy(pd->em_pd, max_util, sum_util);
 }
 
-/*
+/**
+ * 函数功能: 找到能效比最优的CPU
+ * 
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#find_energy_efficient_cpu()函数分析
+ * 
  * find_energy_efficient_cpu(): Find most energy-efficient target CPU for the
  * waking task. find_energy_efficient_cpu() looks for the CPU with maximum
  * spare capacity in each performance domain and uses it as a potential
  * candidate to execute the task. Then, it uses the Energy Model to figure
  * out which of the CPU candidates is the most energy-efficient.
+ * (find_energy_efficient_cpu()：为即将唤醒的任务寻找能效最优的目标 CPU。
+ * 该函数会在每个性能域（performance domain）中筛选出空闲容量最大（spare capacity）的 CPU 作为候选，
+ * 随后利用能耗模型（Energy Model）从候选 CPU 中选出能效最高的目标)
  *
  * The rationale for this heuristic is as follows. In a performance domain,
  * all the most energy efficient CPU candidates (according to the Energy
@@ -6749,6 +6759,17 @@ compute_energy(struct task_struct *p, int dst_cpu, struct perf_domain *pd)
  * frequency requests follow utilization (e.g. using schedutil), the CPU with
  * the maximum spare capacity in a performance domain is guaranteed to be among
  * the best candidates of the performance domain.
+ * (这一启发式算法的设计逻辑基于以下原理: 
+ * 1. 能效最优的 CPU 候选集   
+ *    在同一个性能域（performance domain）中，能耗模型（Energy Model） 判定为最节能的 CPU 候选者，通常是那些可运行于较低频率的 CPU。因为低频率通常对应更低的动态功耗（active power）
+ * 2. 频率请求相同的候选 CPU
+ *    当多个 CPU 所需的目标频率相同时，能耗模型无法直接区分它们的能效差异（因其仅包含动态功耗数据，未考虑静态功耗或其他硬件特性）。此时需要额外的决策依据
+ * 3. 剩余算力（spare capacity）作为关键指标:
+ *      假设 CPU 频率调节策略（如 schedutil）根据实际利用率（utilization）动态调整频率，那么：
+ *          剩余算力最大的 CPU 在当前负载下频率需求更低（因未完全利用其算力）
+ *          这类 CPU 更可能属于该性能域中的能效最优候选集（即使频率相同，更高的空闲资源意味着更少的竞争和更稳定的低功耗状态）。
+ *      通过选择剩余算力最大的 CPU，可近似逼近能效最优解，同时避免复杂的实时功耗计算。
+ *   
  *
  * In practice, it could be preferable from an energy standpoint to pack
  * small tasks on a CPU in order to let other CPUs go in deeper idle states,
@@ -6761,6 +6782,22 @@ compute_energy(struct task_struct *p, int dst_cpu, struct perf_domain *pd)
  * not so much from breaking the tie between identical CPUs. That's also the
  * reason why EAS is enabled in the topology code only for systems where
  * SD_ASYM_CPUCAPACITY is set.
+ * (实际上，从能源角度来看，将小型任务打包到某个 CPU 上，以便让其他 CPU 进入更深的空闲状态可能更可取，
+ * 但这也可能损害我们进入集群空闲状态的几率，而且我们无法根据当前的能源模型判断这是否真的可行。
+ * 因此，find_energy_efficient_cpu() 基本上倾向于集群打包，并在集群内部进行扩展。
+ * 这至少对延迟来说应该是一件好事，并且这与 EAS 的大部分节能效果来自系统的不对称性，
+ * 而非打破相同 CPU 之间的联系这一理念相符。这也是为什么仅在设置了 SD_ASYM_CPUCAPACITY 的系统上，
+ * 拓扑代码中才会启用 EAS 的原因。)
+ * 
+ * 实践中的能效调度权衡与设计逻辑
+ *    从能效角度而言，将小任务集中调度到单个 CPU 上（以让其他 CPU 进入更深度的空闲状态）可能更优，
+ *    但这种方式可能牺牲集群（Cluster）整体空闲的机会。然而，当前的能耗模型（Energy Model） 
+ *    无法准确评估这种策略的实际收益。因此，find_energy_efficient_cpu() 的默认策略倾向于：
+ *      集群级打包（Cluster-Packing）
+ *          优先让任务集中在部分 CPU 上运行，以增加其他 CPU 进入深度空闲（如 C-states）的机会。
+ * 
+ *      集群内均衡（Spreading Inside a Cluster）
+ *          在同一个性能域（如小核集群）内部，任务仍会适当分散，以避免单个 CPU 过载。
  *
  * NOTE: Forkees are not accepted in the energy-aware wake-up path because
  * they don't have any useful utilization data yet and it's not possible to
@@ -6771,6 +6808,24 @@ compute_energy(struct task_struct *p, int dst_cpu, struct perf_domain *pd)
  * their util_avg from the parent task, but those heuristics could hurt
  * other use-cases too. So, until someone finds a better way to solve this,
  * let's keep things simple by re-using the existing slow path.
+ * ### **关于新创建任务（Forkee）在能效感知调度中的处理说明**  
+ * 
+ * **注意**：在能效感知（Energy-Aware）的唤醒路径中，**新创建的任务（Forkee）不会被直接接纳**，原因如下：  
+ * 
+ * 1. **缺乏有效的利用率数据（utilization data）**  
+ *    - 新任务刚被创建，尚未积累 `util_avg`（CPU 利用率预测值），无法准确评估其对能耗的影响。  
+ *    - 能耗模型（Energy Model）依赖历史数据预测功耗，而新任务无历史记录。  
+ * 
+ * 2. **默认降级处理**  
+ *    - 这些任务会由 **`find_idlest_cpu()`** 选择当前**负载最轻的 CPU**，但该 CPU 未必是能效最优的（例如：可能是一个高功耗的大核）。  
+ *    - *示例*：在 ARM big.LITTLE 系统中，新任务可能被分配到空闲的大核，而非能效更高的小核。  
+ * 
+ * 3. **潜在优化方案的权衡**  
+ *    - **方案 1**：将新任务偏向特定类型 CPU（如优先分配小核）。  
+ *      - *风险*：可能不适合突发高性能任务（如冷启动的应用主线程）。  
+ *    - **方案 2**：从父任务继承 `util_avg` 数据。  
+ *      - *风险*：父子任务行为可能差异巨大（如后台服务 fork 出计算密集型子进程）。  
+*真实解决方案- **当前选择**：保持简单，沿用现有的 **慢路径（slow path）** 策略（即 `find_idlest_cpu()`），直到未来找到更优解。 
  */
 static int find_energy_efficient_cpu(struct task_struct *p, int prev_cpu)
 {
@@ -6877,6 +6932,8 @@ fail:
 }
 
 /**
+ * > 为唤醒的进程选择CPU
+ * 
  * select_task_rq_fair: Select target runqueue for the waking task in domains
  * that have the 'sd_flag' flag set. In practice, this is SD_BALANCE_WAKE,
  * SD_BALANCE_FORK, or SD_BALANCE_EXEC.
@@ -6909,9 +6966,13 @@ select_task_rq_fair(struct task_struct *p, int prev_cpu, int sd_flag, int wake_f
 	int want_affine = 0;
 	int sync = (wake_flags & WF_SYNC) && !(current->flags & PF_EXITING);
 
+	/**
+	 * 从wake_up_process 传的就是 SD_BALANCE_WAKE (唤醒时负载均衡)
+	 */
 	if (sd_flag & SD_BALANCE_WAKE) {
 		record_wakee(p);
 
+		// 如果支持基于能耗的调度功能
 		if (sched_energy_enabled()) {
 			new_cpu = find_energy_efficient_cpu(p, prev_cpu);
 			if (new_cpu >= 0)
