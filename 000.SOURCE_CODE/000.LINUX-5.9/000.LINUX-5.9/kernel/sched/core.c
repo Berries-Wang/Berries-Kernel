@@ -2673,6 +2673,15 @@ out:
 	rcu_read_unlock();
 }
 
+/**
+ * 判断是否共享高速缓存? YES
+ * 
+ * cpus_share_cache()函数判断两个CPU是否具有高速缓存的亲和性。
+ * 若它们同属于一个SMT或MC调度域，则共享高速缓存，这是通过Per-CPU变量sd_llc_id来判断的，
+ * sd_llc_id在update_top_cache_domain()函数中赋值。
+ * 
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#2．快速优化路径
+ */
 bool cpus_share_cache(int this_cpu, int that_cpu)
 {
 	return per_cpu(sd_llc_id, this_cpu) == per_cpu(sd_llc_id, that_cpu);
@@ -5306,6 +5315,8 @@ int task_prio(const struct task_struct *p)
  * @cpu: the processor in question.
  *
  * Return: 1 if the CPU is currently idle. 0 otherwise.
+ * 
+ * 也是通过CPU上是否有正在执行的任务来判断的
  */
 int idle_cpu(int cpu)
 {
@@ -5327,7 +5338,9 @@ int idle_cpu(int cpu)
 
 /**
  * available_idle_cpu - is a given CPU idle for enqueuing work.
- * @cpu: the CPU in question.
+ * (判断指定CPU是否处于空闲状态以允许任务入队)
+ * 
+ * @cpu: the CPU in question. 待判断的CPU
  *
  * Return: 1 if the CPU is currently idle. 0 otherwise.
  */

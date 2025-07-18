@@ -86,6 +86,7 @@ SCHED_FEAT(RT_RUNTIME_SHARE, true)
 SCHED_FEAT(LB_MIN, false)
 SCHED_FEAT(ATTACH_AGE_LOAD, true)
 
+// WA_IDLE 是一个与 唤醒亲和性（Wake-Affinity） 相关的调度特性（Scheduling Feature），用于控制任务唤醒时是否倾向于选择 空闲 CPU
 SCHED_FEAT(WA_IDLE, true)
 SCHED_FEAT(WA_WEIGHT, true)
 SCHED_FEAT(WA_BIAS, true)

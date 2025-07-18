@@ -5953,22 +5953,41 @@ static void record_wakee(struct task_struct *p)
 	}
 }
 
-/*
- * Detect M:N waker/wakee relationships via a switching-frequency heuristic.
+/**
+ * 
+ * waker：一个正在运行的进程，通过调用wake_up_process()等唤醒接口函数来唤醒另外一个处于睡眠状态的进程。
+ * wakee：表示将要被唤醒的进程。
  *
+ * 判断是否应在多对多唤醒关系（M:N waker/wakee）中启用主动负载分散（load spreading），
+ * 避免任务过度集中在单个CPU缓存域（LLC）。
+ * 
+ * Detect M:N waker/wakee relationships via a switching-frequency heuristic.
+ * (采用切换频率启发式算法检测M:N模式的唤醒者与被唤醒任务（waker/wakee）间的关联关系)
+ * 
  * A waker of many should wake a different task than the one last awakened
  * at a frequency roughly N times higher than one of its wakees.
+ * (对于高频唤醒者（waker of many），其唤醒的任务应不同于上一次唤醒的任务，
+ * 且唤醒频率应比其任一被唤醒对象（wakee）的唤醒频率高出约N倍。)
  *
  * In order to determine whether we should let the load spread vs consolidating
  * to shared cache, we look for a minimum 'flip' frequency of llc_size in one
  * partner, and a factor of lls_size higher frequency in the other.
+ * (为了判断应当让负载分散（spread）还是整合到共享缓存（shared cache）中，我们需满足以下条件：
+ * 一个任务需达到 llc_size 的最低"翻转"频率，而另一个任务的频率需达到 lls_size 的倍数级。)
  *
  * With both conditions met, we can be relatively sure that the relationship is
  * non-monogamous, with partner count exceeding socket size.
+ * (当同时满足这两个条件时，我们可以相对确定这种唤醒关系属于多对多非独占模式（non-monogamous），
+ * 且关联任务数量已超过物理CPU插槽（socket）的容量上限)
  *
  * Waker/wakee being client/server, worker/dispatcher, interrupt source or
  * whatever is irrelevant, spread criteria is apparent partner count exceeds
  * socket size.
+ * (无论唤醒者/被唤醒对象（waker/wakee）是客户端/服务器、工作者/调度器、中断源还是其他任何形式都无关紧要——只要实际关联数量超过CPU插槽容量，就符合负载分散的条件)
+ * 
+ * @return 1则跨LLC域选核（find_idlest_cpu）; 0则优先本地唤醒（wake_affine）;
+ * 
+ * 返回1,说明有一个进程唤醒地很频繁，那么待唤醒的进程和当前进程不能放在一个CPU上!!!
  */
 static int wake_wide(struct task_struct *p)
 {
@@ -5977,23 +5996,30 @@ static int wake_wide(struct task_struct *p)
 	int factor = __this_cpu_read(sd_llc_size);
 
 	if (master < slave)
-		swap(master, slave);
+		swap(master, slave); // swap 是宏
 	if (slave < factor || master < slave * factor)
 		return 0;
 	return 1;
 }
 
-/*
+/**
  * The purpose of wake_affine() is to quickly determine on which CPU we can run
  * soonest. For the purpose of speed we only consider the waking and previous
  * CPU.
+ * (wake_affine() 函数的作用是快速确定任务能在哪个 CPU 上尽快执行。
+ * 出于效率考虑，该函数仅评估任务即将唤醒的目标 CPU 和之前运行的 CPU（即只在这两个 CPU 之间进行选择）)
  *
  * wake_affine_idle() - only considers 'now', it check if the waking CPU is
  *			cache-affine and is (or	will be) idle.
+ * (该函数仅基于当前状态进行判断，它会检测目标唤醒CPU是否具有缓存亲和性，以及该CPU当前是否（或即将）处于空闲状态。)
  *
  * wake_affine_weight() - considers the weight to reflect the average
  *			  scheduling latency of the CPUs. This seems to work
  *			  for the overloaded case.
+ *            (该算法通过权重值来反映各CPU的平均调度延迟，这种设计在CPU过载（overloaded）场景下被验证有效)
+ * 
+ * 返回值语义：
+ * nr_cpumask_bits 是系统支持的 最大 CPU 位数（通常等于 NR_CPUS）。通过返回该值，函数明确表示 不推荐任何具体的 CPU 作为唤醒目标，本质上是一种“无效选择”的标识
  */
 static int
 wake_affine_idle(int this_cpu, int prev_cpu, int sync)
@@ -6003,12 +6029,21 @@ wake_affine_idle(int this_cpu, int prev_cpu, int sync)
 	 * context. Only allow the move if cache is shared. Otherwise an
 	 * interrupt intensive workload could force all tasks onto one
 	 * node depending on the IO topology or IRQ affinity settings.
+	 * 若当前CPU（this_cpu）处于空闲状态，通常意味着此次唤醒来自中断上下文。仅在以下条件满足时才允许任务迁移：
+	 *   共享缓存：源CPU与目标CPU必须处于同一缓存域（LLC共享）
+	 *   拓扑约束：避免中断密集型负载因IO拓扑或IRQ亲和性设置，将所有任务强制压入单一NUMA节点
 	 *
 	 * If the prev_cpu is idle and cache affine then avoid a migration.
 	 * There is no guarantee that the cache hot data from an interrupt
 	 * is more important than cache hot data on the prev_cpu and from
 	 * a cpufreq perspective, it's better to have higher utilisation
 	 * on one CPU.
+	 * 若前一运行CPU（prev_cpu）处于空闲状态且具有缓存亲和性，则应避免任务迁移。原因如下：
+	 *   缓存重要性不确定：无法确保中断带来的热缓存数据比原CPU上的热缓存数据更重要
+	 *   能效优化考量：从CPU调频（cpufreq）角度而言，单个CPU的高利用率更有利于能效管理
+	 * 
+	 * available_idle_cpu 在 kernel/sched/core.c
+	 * cpus_share_cache   在 kernel/sched/core.c
 	 */
 	if (available_idle_cpu(this_cpu) && cpus_share_cache(this_cpu, prev_cpu))
 		return available_idle_cpu(prev_cpu) ? prev_cpu : this_cpu;
@@ -6062,11 +6097,16 @@ wake_affine_weight(struct sched_domain *sd, struct task_struct *p,
 	return this_eff_load < prev_eff_load ? this_cpu : nr_cpumask_bits;
 }
 
+/**
+ * 
+ */
 static int wake_affine(struct sched_domain *sd, struct task_struct *p,
 		       int this_cpu, int prev_cpu, int sync)
 {
+	//  nr_cpumask_bits 是一个关键宏，用于表示 CPU 位图（cpumask）的位数，通常与系统的 CPU 数量相关
 	int target = nr_cpumask_bits;
-
+    
+	// 000.LINUX-5.9/kernel/sched/features.h
 	if (sched_feat(WA_IDLE))
 		target = wake_affine_idle(this_cpu, prev_cpu, sync);
 
@@ -6841,9 +6881,11 @@ static int find_energy_efficient_cpu(struct task_struct *p, int prev_cpu)
 	if (!pd || READ_ONCE(rd->overutilized))
 		goto fail;
 
-	/*
+	/**
 	 * Energy-aware wake-up happens on the lowest sched_domain starting
 	 * from sd_asym_cpucapacity spanning over this_cpu and prev_cpu.
+	 * (能量感知唤醒（energy-aware wake-up）从最低层级的 sched_domain 开始，
+	 * 该层级需满足 sd_asym_cpucapacity 条件，并覆盖当前 CPU（this_cpu）和前一 CPU（prev_cpu）)
 	 */
 	sd = rcu_dereference(*this_cpu_ptr(&sd_asym_cpucapacity));
 	while (sd && !cpumask_test_cpu(prev_cpu, sched_domain_span(sd)))

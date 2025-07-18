@@ -1579,13 +1579,17 @@ static inline struct sched_domain *lowest_flag_domain(int cpu, int flag)
 	return sd;
 }
 
-DECLARE_PER_CPU(struct sched_domain __rcu *, sd_llc);
-DECLARE_PER_CPU(int, sd_llc_size);
-DECLARE_PER_CPU(int, sd_llc_id);
+/**
+ * 什么是LLC
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]# 6．LLC调度域
+ */
+DECLARE_PER_CPU(struct sched_domain __rcu *, sd_llc);  // sd_llc：指向LLC调度域。
+DECLARE_PER_CPU(int, sd_llc_size);                     // sd_llc_size：LLC调度域包含多少个CPU。
+DECLARE_PER_CPU(int, sd_llc_id);                       // LLC调度域第一个CPU的编号
 DECLARE_PER_CPU(struct sched_domain_shared __rcu *, sd_llc_shared);
 DECLARE_PER_CPU(struct sched_domain __rcu *, sd_numa);
 DECLARE_PER_CPU(struct sched_domain __rcu *, sd_asym_packing);
-DECLARE_PER_CPU(struct sched_domain __rcu *, sd_asym_cpucapacity);
+DECLARE_PER_CPU(struct sched_domain __rcu *, sd_asym_cpucapacity); // 指向第一个包含不同CPU架构的调度域，主要用于大/小核架构
 extern struct static_key_false sched_asym_cpucapacity;
 
 struct sched_group_capacity {
@@ -1809,6 +1813,10 @@ static const_debug __maybe_unused unsigned int sysctl_sched_features =
 	0;
 #undef SCHED_FEAT
 
+/**
+ * 000.LINUX-5.9/kernel/sched/features.h
+ *   WA_IDLE 
+ */
 #define sched_feat(x) !!(sysctl_sched_features & (1UL << __SCHED_FEAT_##x))
 
 #endif /* SCHED_DEBUG && CONFIG_JUMP_LABEL */
