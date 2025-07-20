@@ -539,12 +539,14 @@ do {									      \
 #define rcu_dereference_protected(p, c) \
 	__rcu_dereference_protected((p), (c), __rcu)
 
-
 /**
  * rcu_dereference() - fetch RCU-protected pointer for dereferencing
  * @p: The pointer to read, prior to dereferencing
  *
  * This is a simple wrapper around rcu_dereference_check().
+ * 在 Linux 内核中，rcu_dereference_check() 是一个用于 安全访问 RCU（Read-Copy-Update）保护数据 的宏，
+ * 它结合了 RCU 解引用 和 运行时检查 的功能，确保在访问共享数据时既满足 RCU 的同步规则，
+ * 又符合额外的条件（如锁状态、上下文约束等）
  */
 #define rcu_dereference(p) rcu_dereference_check(p, 0)
 

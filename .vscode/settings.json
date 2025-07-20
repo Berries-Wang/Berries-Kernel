@@ -28,6 +28,7 @@
         "istream": "c",
         "ostream": "c",
         "sstream": "c",
-        "streambuf": "c"
+        "streambuf": "c",
+        "err.h": "c"
     }
 }

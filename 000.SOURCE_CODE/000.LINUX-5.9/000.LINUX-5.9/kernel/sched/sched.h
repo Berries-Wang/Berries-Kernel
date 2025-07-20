@@ -1736,7 +1736,7 @@ static inline struct task_group *task_group(struct task_struct *p)
 #endif /* CONFIG_CGROUP_SCHED */
 
 /**
- * 设置子进程即将运行的CPU
+ * 设置进程即将运行的CPU
  */
 static inline void __set_task_cpu(struct task_struct *p, unsigned int cpu)
 {
@@ -2512,6 +2512,9 @@ static inline u64 irq_time_read(int cpu)
 DECLARE_PER_CPU(struct update_util_data __rcu *, cpufreq_update_util_data);
 
 /**
+ * 
+ * 请求CPU进行调频
+ * 
  * cpufreq_update_util - Take a note about CPU utilization changes.
  * @rq: Runqueue to carry out the update for.
  * @flags: Update reason flags.

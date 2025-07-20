@@ -133,21 +133,31 @@ static __always_inline void csd_unlock(call_single_data_t *csd)
 
 static DEFINE_PER_CPU_SHARED_ALIGNED(call_single_data_t, csd_data);
 
+/**
+ * 1. 将任务加入目标 CPU 的 wake_list  
+ * 2, 发送 IPI（若目标 CPU 空闲）  
+ */
 void __smp_call_single_queue(int cpu, struct llist_node *node)
 {
-	/*
+	/**
 	 * The list addition should be visible before sending the IPI
 	 * handler locks the list to pull the entry off it because of
 	 * normal cache coherency rules implied by spinlocks.
+	 * (在通过自旋锁（spinlock）的缓存一致性规则保障下，必须确保将任务加入队列的操作（list addition）在发送 IPI 中断之前完成可见性，
+	 * 以便当 IPI 处理程序加锁并从队列中提取任务时，能够正确获取到该条目。)
 	 *
 	 * If IPIs can go out of order to the cache coherency protocol
 	 * in an architecture, sufficient synchronisation should be added
 	 * to arch code to make it appear to obey cache coherency WRT
 	 * locking and barrier primitives. Generic code isn't really
 	 * equipped to do the right thing...
+	 * (若某些体系结构（architecture）中处理器间中断（IPI）的执行可能乱序于缓存一致性协议（cache coherency protocol），
+	 * 则需在该架构的底层代码（arch code）中增加足够的同步机制，使其在行为上严格遵循锁（locking）和内存屏障（barrier）原语的缓存一致性规则。
+	 * 通用代码（generic code）通常无法自行正确处理此类场景……)
 	 */
-	if (llist_add(node, &per_cpu(call_single_queue, cpu)))
-		send_call_function_single_ipi(cpu);
+	if (llist_add(node, &per_cpu(call_single_queue, cpu))) { // 将任务加入目标 CPU 的 wake_list  
+		send_call_function_single_ipi(cpu); // 发送 IPI（若目标 CPU 空闲）  
+	}
 }
 
 /*

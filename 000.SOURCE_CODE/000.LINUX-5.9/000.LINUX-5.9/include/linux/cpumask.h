@@ -219,6 +219,10 @@ static inline int cpumask_any_and_distribute(const struct cpumask *src1p,
 	return cpumask_next_and(-1, src1p, src2p);
 }
 
+/**
+ * for_each_cpu_wrap()是一个改进版的for_each_cpu()，它可以从指定的位置开始执行for循环。这里从指定CPU开始遍历调度域所管辖的CPU位图。
+ * 
+ */
 #define for_each_cpu(cpu, mask)			\
 	for ((cpu) = 0; (cpu) < 1; (cpu)++, (void)mask)
 #define for_each_cpu_not(cpu, mask)		\

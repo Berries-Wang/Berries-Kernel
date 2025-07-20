@@ -2623,21 +2623,40 @@ void sched_ttwu_pending(void *arg)
 	rq_unlock_irqrestore(rq, &rf);
 }
 
+/**
+ * 发送IPI消息
+ */
 void send_call_function_single_ipi(int cpu)
 {
 	struct rq *rq = cpu_rq(cpu);
 
+	/**
+	 * arch_send_call_function_single_ipi: 000.LINUX-5.9/arch/mips/include/asm/smp.h:
+	 */
 	if (!set_nr_if_polling(rq->idle))
 		arch_send_call_function_single_ipi(cpu);
 	else
 		trace_sched_wake_idle_without_ipi(cpu);
 }
 
-/*
+/**
  * Queue a task on the target CPUs wake_list and wake the CPU via IPI if
  * necessary. The wakee CPU on receipt of the IPI will queue the task
  * via sched_ttwu_wakeup() for activation so the wakee incurs the cost
  * of the wakeup instead of the waker.
+ * (将任务加入目标 CPU 的 wake_list 队列，并通过 IPI（处理器间中断）唤醒目标 CPU（若需要）。
+ * 接收 IPI 的被唤醒 CPU 会通过 sched_ttwu_wakeup() 函数将任务加入调度队列以激活任务，
+ * 从而将唤醒任务的开销转移至被唤醒的 CPU，而非发起唤醒操作的 CPU)
+ * 
+ * 1. 核心机制
+ *    wake_list 队列
+ *      每个 CPU 维护一个待唤醒任务队列（wake_list），用于批量处理任务唤醒请求，减少锁竞争。
+ *    
+ *    IPI（Inter-Processor Interrupt）
+ *      当目标 CPU 处于空闲状态时，源 CPU 通过发送 IPI 中断强制唤醒目标 CPU，触发任务调度。
+ *    
+ *    开销转移
+ *      任务的实际唤醒操作（如更新调度状态、负载统计）由 被唤醒 CPU 执行，避免占用 发起唤醒的 CPU 的资源。
  */
 static void __ttwu_queue_wakelist(struct task_struct *p, int cpu, int wake_flags)
 {
@@ -2710,6 +2729,9 @@ static inline bool ttwu_queue_cond(int cpu, int wake_flags)
 	return false;
 }
 
+/**
+ * 
+ */
 static bool ttwu_queue_wakelist(struct task_struct *p, int cpu, int wake_flags)
 {
 	if (sched_feat(TTWU_QUEUE) && ttwu_queue_cond(cpu, wake_flags)) {
@@ -2733,13 +2755,27 @@ static inline bool ttwu_queue_wakelist(struct task_struct *p, int cpu, int wake_
 
 #endif /* CONFIG_SMP */
 
+/**
+ * 将任务加入目标 CPU 的 wake_list 
+ *   &&
+ * 发送 IPI（若目标 CPU 空闲） 
+ *    目标 CPU 处理 IPI（Inter-Processor Interrupt），调用 sched_ttwu_wakeup()
+ *      激活任务并加入运行队列
+ * 
+ * IPI，全称是Inter-Processor Interrupt，是在soc内多个core之间触发的中断，
+ * 这一点有别与常见的外设中断，因此内核专门预留了部分中断号给IPI，在arm64架构上是0-15这16个中断号
+ *   中断处理函数: <drivers/irqchip/irq-gic-v3.c>: static asmlinkage void __exception_irq_entry gic_handle_irq(struct pt_regs *regs); 
+ *      IPI中断处理函数: arch/arm64/kernel/smp.c : void handle_IPI(int ipinr, struct pt_regs *regs);
+ * 
+ */
 static void ttwu_queue(struct task_struct *p, int cpu, int wake_flags)
 {
 	struct rq *rq = cpu_rq(cpu);
 	struct rq_flags rf;
 
-	if (ttwu_queue_wakelist(p, cpu, wake_flags))
+	if (ttwu_queue_wakelist(p, cpu, wake_flags)) {
 		return;
+	}
 
 	rq_lock(rq, &rf);
 	update_rq_clock(rq);
@@ -3074,11 +3110,9 @@ static int try_to_wake_up(struct task_struct *p, unsigned int state, int wake_fl
 #else
 	cpu = task_cpu(p);
 #endif /* CONFIG_SMP */
-    
-    /**
-	 * 执行到此处，说明当前hrtimer还是需要在当前CPU上执行
-	 * 1. 入调度器队列
-	 * 2. 设置任务状态
+
+	/**
+	 *  唤醒任务，存在两种方式: 看函数具体逻辑
 	 */
 	ttwu_queue(p, cpu, wake_flags);
 unlock:
@@ -3148,7 +3182,7 @@ bool try_invoke_on_locked_down_task(struct task_struct *p, bool (*func)(struct t
  *
  * This function executes a full memory barrier before accessing the task state.(此函数在访问任务状态之前执行完整的内存屏障。)
  */
-int wake_up_process(struct task_struct *p)
+__attribute__((optimize("O0"))) int wake_up_process(struct task_struct *p)
 {
 	return try_to_wake_up(p, TASK_NORMAL, 0);
 }

@@ -3901,7 +3901,9 @@ static inline u64 cfs_rq_last_update_time(struct cfs_rq *cfs_rq)
 
 /*
  * Synchronize entity load avg of dequeued entity without locking
- * the previous rq.
+ * the previous rq.(无需锁定先前运行队列（rq），即可同步出队实体的负载平均值（load avg）。)
+ * 
+ * sync_entity_load_avg()函数更新系统的负载信息。
  */
 static void sync_entity_load_avg(struct sched_entity *se)
 {
@@ -6054,8 +6056,10 @@ wake_affine_idle(int this_cpu, int prev_cpu, int sync)
 	return nr_cpumask_bits;
 }
 
-static int
-wake_affine_weight(struct sched_domain *sd, struct task_struct *p,
+/**
+ * 根据权重/负载来选择CPU
+ */
+static int wake_affine_weight(struct sched_domain *sd, struct task_struct *p,
 		   int this_cpu, int prev_cpu, int sync)
 {
 	s64 this_eff_load, prev_eff_load;
@@ -6098,7 +6102,7 @@ wake_affine_weight(struct sched_domain *sd, struct task_struct *p,
 }
 
 /**
- * 
+ * 选择待执行进程的CPU
  */
 static int wake_affine(struct sched_domain *sd, struct task_struct *p,
 		       int this_cpu, int prev_cpu, int sync)
@@ -6181,6 +6185,9 @@ find_idlest_group_cpu(struct sched_group *group, struct task_struct *p, int this
 	return shallowest_idle_cpu != -1 ? shallowest_idle_cpu : least_loaded_cpu;
 }
 
+/**
+ * 从调度组中选择一个负载最小的CPU作为候选者
+ */
 static inline int find_idlest_cpu(struct sched_domain *sd, struct task_struct *p,
 				  int cpu, int prev_cpu, int sd_flag)
 {
@@ -6192,9 +6199,12 @@ static inline int find_idlest_cpu(struct sched_domain *sd, struct task_struct *p
 	/*
 	 * We need task's util for cpu_util_without, sync it up to
 	 * prev_cpu's last_update_time.
+	 * (我们需要获取任务的利用率（task's util）以计算 cpu_util_without，并将其同步到先前 CPU（prev_cpu）的最后更新时间（last_update_time）。)
 	 */
-	if (!(sd_flag & SD_BALANCE_FORK))
+	if (!(sd_flag & SD_BALANCE_FORK)) {
+		// sync_entity_load_avg()函数更新系统的负载信息
 		sync_entity_load_avg(&p->se);
+	}
 
 	while (sd) {
 		struct sched_group *group;
@@ -6287,10 +6297,18 @@ unlock:
 	rcu_read_unlock();
 }
 
-/*
+/**
+ *  同一个物理核心（多核架构中的单个 Core） 中寻找一个完全空闲的 CPU。
+ *     适用于 多线程（SMT，如 Intel Hyper-Threading） 场景，检查同一物理核心下的所有逻辑 CPU 是否均空闲。
+ *     目标是避免唤醒逻辑 CPU 时因共享物理资源（如 ALU、缓存）导致的竞争。
+ * 
+ * 搜索范围: 同一物理核心的所有逻辑 CPU -- 独占物理核心（避免 SMT 竞争）
+ * 
  * Scan the entire LLC domain for idle cores; this dynamically switches off if
  * there are no idle cores left in the system; tracked through
  * sd_llc->shared->has_idle_cores and enabled through update_idle_core() above.
+ * (在整个LLC（末级缓存）域中扫描空闲核心；当系统中不存在空闲核心时，该功能会自动动态关闭；
+ * 此状态通过 sd_llc->shared->has_idle_cores 进行跟踪，并由前文提到的 update_idle_core() 函数启用)
  */
 static int select_idle_core(struct task_struct *p, struct sched_domain *sd, int target)
 {
@@ -6307,7 +6325,8 @@ static int select_idle_core(struct task_struct *p, struct sched_domain *sd, int 
 
 	for_each_cpu_wrap(core, cpus, target) {
 		bool idle = true;
-
+        
+		// for_each_cpu 是宏，所以'cpu_smt_mask(core)'不是函数调用，是替换
 		for_each_cpu(cpu, cpu_smt_mask(core)) {
 			if (!available_idle_cpu(cpu)) {
 				idle = false;
@@ -6328,8 +6347,13 @@ static int select_idle_core(struct task_struct *p, struct sched_domain *sd, int 
 	return -1;
 }
 
-/*
+/**
  * Scan the local SMT mask for idle CPUs.
+ * 同一个物理核心的 SMT 兄弟逻辑 CPU 中寻找一个空闲的 CPU
+ *   专为 SMT（Simultaneous Multi-Threading） 优化，检查当前物理核心的其他逻辑 CPU 是否空闲。
+ *   如果找到空闲的 SMT 兄弟 CPU，则优先将任务绑定到该 CPU，以利用共享缓存和流水线
+ * 
+ * 搜索范围: 同一物理核心的其他逻辑 CPU -- 超线程技术 -- 利用 SMT 共享资源（缓存/流水线）
  */
 static int select_idle_smt(struct task_struct *p, int target)
 {
@@ -6362,10 +6386,18 @@ static inline int select_idle_smt(struct task_struct *p, int target)
 
 #endif /* CONFIG_SCHED_SMT */
 
-/*
+/**
  * Scan the LLC domain for idle CPUs; this is dynamically regulated by
  * comparing the average scan cost (tracked in sd->avg_scan_cost) against the
  * average idle time for this rq (as found in rq->avg_idle).
+ * (扫描末级缓存域（LLC domain）中的空闲 CPU；此行为通过动态对比两种指标来调节
+ *    平均扫描成本（记录于 sd->avg_scan_cost）
+ *    当前运行队列的平均空闲时间（记录于 rq->avg_idle）
+ * )
+ * 
+ * 在 调度域（sched_domain）范围内 直接寻找任意一个空闲的 CPU
+ * 
+ * 搜索范围: 调度域内的所有 CPU -- 快速找到任意空闲 CPU
  */
 static int select_idle_cpu(struct task_struct *p, struct sched_domain *sd, int target)
 {
@@ -6466,13 +6498,18 @@ static int select_idle_sibling(struct task_struct *p, int prev, int target)
 	 */
 	if (static_branch_unlikely(&sched_asym_cpucapacity)) {
 		sd = rcu_dereference(per_cpu(sd_asym_cpucapacity, target));
-		/*
+		/**
 		 * On an asymmetric CPU capacity system where an exclusive
 		 * cpuset defines a symmetric island (i.e. one unique
 		 * capacity_orig value through the cpuset), the key will be set
 		 * but the CPUs within that cpuset will not have a domain with
 		 * SD_ASYM_CPUCAPACITY. These should follow the usual symmetric
 		 * capacity path.
+		 * (在 非对称CPU容量系统（asymmetric CPU capacity system）中，
+		 * 如果某个独占的 cpuset 定义了一个 对称性能岛（即该 cpuset 内的所有 CPU 具有相同的 capacity_orig 值），
+		 * 那么尽管调度域（sched_domain）的 SD_ASYM_CPUCAPACITY 标志会被设置，
+		 * 但该 cpuset 内的 CPU 不会 真正拥有一个具备 非对称容量能力 的调度域。
+		 * 因此，这些 CPU 仍然应该遵循 常规的对称容量调度路径)
 		 */
 		if (!sd)
 			goto symmetric;
@@ -6530,6 +6567,12 @@ symmetric:
 	if (!sd)
 		return target;
 
+	
+	/**
+	 *   select_idle_core         同一物理核心的所有逻辑 CPU	 
+	 *     ├─select_idle_cpu      调度域内的所有 CPU 
+	 *       ├─select_idle_smt    同一物理核心的其他逻辑 CPU 
+	 */
 	i = select_idle_core(p, sd, target);
 	if ((unsigned)i < nr_cpumask_bits)
 		return i;
@@ -6724,14 +6767,20 @@ static unsigned long cpu_util_next(int cpu, struct task_struct *p, int dst_cpu)
 	return min(util, capacity_orig_of(cpu));
 }
 
-/*
+/**
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#compute_energy()函数分析
+ * 
+ * 当进程p迁移到dst_cpu之后，计算系统的整体功耗值是多少
+ * 
  * compute_energy(): Estimates the energy that @pd would consume if @p was
  * migrated to @dst_cpu. compute_energy() predicts what will be the utilization
  * landscape of @pd's CPUs after the task migration, and uses the Energy Model
  * to compute what would be the energy if we decided to actually migrate that
  * task.
+ * (compute_energy()：估算如果将任务@p迁移到目标CPU@dst_cpu时，性能域@pd将消耗的能量。
+ * 该函数通过预测任务迁移后@pd所属CPU的利用率分布情况，并利用能量模型计算实际执行该任务迁移可能产生的能量消耗。)
  */
-static long
+__attribute__((optimize("O0")))  static long
 compute_energy(struct task_struct *p, int dst_cpu, struct perf_domain *pd)
 {
 	struct cpumask *pd_mask = perf_domain_span(pd);
@@ -6739,34 +6788,41 @@ compute_energy(struct task_struct *p, int dst_cpu, struct perf_domain *pd)
 	unsigned long max_util = 0, sum_util = 0;
 	int cpu;
 
-	/*
+	/**
 	 * The capacity state of CPUs of the current rd can be driven by CPUs
 	 * of another rd if they belong to the same pd. So, account for the
 	 * utilization of these CPUs too by masking pd with cpu_online_mask
 	 * instead of the rd span.
+	 * (当前rd（调度域）中CPU的容量状态可能受到同属一个pd（性能域）的其他rd中CPU的影响。
+	 * 因此，在计算利用率时，应使用cpu_online_mask（在线CPU掩码）而非rd范围来筛选pd中的CPU，以涵盖这些相关CPU的利用率)
 	 *
 	 * If an entire pd is outside of the current rd, it will not appear in
 	 * its pd list and will not be accounted by compute_energy().
+	 * (如果整个性能域（pd）都位于当前调度域（rd）之外，则该pd不会出现在rd的pd列表中，也不会被compute_energy()函数纳入计算范围。)
 	 */
 	for_each_cpu_and(cpu, pd_mask, cpu_online_mask) {
 		unsigned long cpu_util, util_cfs = cpu_util_next(cpu, p, dst_cpu);
 		struct task_struct *tsk = cpu == dst_cpu ? p : NULL;
 
-		/*
+		/**
 		 * Busy time computation: utilization clamping is not
 		 * required since the ratio (sum_util / cpu_capacity)
 		 * is already enough to scale the EM reported power
 		 * consumption at the (eventually clamped) cpu_capacity.
+		 * (繁忙时间计算说明：由于比率（sum_util / cpu_capacity）已足以根据（最终钳位的）cpu_capacity来缩放能量模型（EM）报告的功耗值，
+		 * 因此无需进行利用率钳位(utilization clamping)操作。)
 		 */
 		sum_util += schedutil_cpu_util(cpu, util_cfs, cpu_cap,
 					       ENERGY_UTIL, NULL);
 
-		/*
+		/**
 		 * Performance domain frequency: utilization clamping
 		 * must be considered since it affects the selection
 		 * of the performance domain frequency.
 		 * NOTE: in case RT tasks are running, by default the
 		 * FREQUENCY_UTIL's utilization can be max OPP.
+		 * (性能域频率选择说明：必须考虑利用率钳位(utilization clamping)因素，因其会影响性能域频率的选定。
+		 * 注：当有实时任务(RT tasks)运行时，默认情况下FREQUENCY_UTIL的利用率可能达到最大运行点(max OPP)。)
 		 */
 		cpu_util = schedutil_cpu_util(cpu, util_cfs, cpu_cap,
 					      FREQUENCY_UTIL, tsk);
@@ -6780,6 +6836,7 @@ compute_energy(struct task_struct *p, int dst_cpu, struct perf_domain *pd)
  * 函数功能: 找到能效比最优的CPU
  * 
  * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#find_energy_efficient_cpu()函数分析
+ *     在find_energy_efficient_cpu()函数中，绿色节能调度器在做选择时总是选择计算能力刚刚好的CPU，这样可以有效地节能
  * 
  * find_energy_efficient_cpu(): Find most energy-efficient target CPU for the
  * waking task. find_energy_efficient_cpu() looks for the CPU with maximum
@@ -6865,9 +6922,9 @@ compute_energy(struct task_struct *p, int dst_cpu, struct perf_domain *pd)
  *      - *风险*：可能不适合突发高性能任务（如冷启动的应用主线程）。  
  *    - **方案 2**：从父任务继承 `util_avg` 数据。  
  *      - *风险*：父子任务行为可能差异巨大（如后台服务 fork 出计算密集型子进程）。  
-*真实解决方案- **当前选择**：保持简单，沿用现有的 **慢路径（slow path）** 策略（即 `find_idlest_cpu()`），直到未来找到更优解。 
+ * 真实解决方案- **当前选择**：保持简单，沿用现有的 **慢路径（slow path）** 策略（即 `find_idlest_cpu()`），直到未来找到更优解。 
  */
-static int find_energy_efficient_cpu(struct task_struct *p, int prev_cpu)
+__attribute__((optimize("O0"))) static int find_energy_efficient_cpu(struct task_struct *p, int prev_cpu)
 {
 	unsigned long prev_delta = ULONG_MAX, best_delta = ULONG_MAX;
 	struct root_domain *rd = cpu_rq(smp_processor_id())->rd;
@@ -7005,6 +7062,7 @@ select_task_rq_fair(struct task_struct *p, int prev_cpu, int sd_flag, int wake_f
 	struct sched_domain *tmp, *sd = NULL;
 	int cpu = smp_processor_id();
 	int new_cpu = prev_cpu;
+	// 
 	int want_affine = 0;
 	int sync = (wake_flags & WF_SYNC) && !(current->flags & PF_EXITING);
 
@@ -7730,6 +7788,10 @@ struct lb_env {
 	struct cpumask		*dst_grpmask;
 	int			new_dst_cpu;
 	enum cpu_idle_type	idle;
+	/**
+	 * > 0: 需要负载均衡
+	 * <=0: 停止负载均衡
+	 */
 	long			imbalance;
 	/* The set of CPUs under consideration for load-balancing */
 	struct cpumask		*cpus;
@@ -9535,8 +9597,15 @@ static inline void calculate_imbalance(struct lb_env *env, struct sd_lb_stats *s
  * @env: The load balancing environment.
  *
  * Return:	- The busiest group if imbalance exists.
+ * 
+ * 
+ * find_busiest_queue()函数中有关于overutilized条件的判断，
+ * 也就是说，如果当前系统还没有触发overutilized的“Tipping Point”条件，
+ * 那么绿色节能调度器会禁止启动负载均衡。只有触发了这个条件，绿色节能调度器才会实现负载均衡，
+ * 
+ * 
  */
-static struct sched_group *find_busiest_group(struct lb_env *env)
+__attribute__((optimize("O0"))) static struct sched_group *find_busiest_group(struct lb_env *env)
 {
 	struct sg_lb_stats *local, *busiest;
 	struct sd_lb_stats sds;
@@ -9666,7 +9735,7 @@ force_balance:
 	return env->imbalance ? sds.busiest : NULL;
 
 out_balanced:
-	env->imbalance = 0;
+	env->imbalance = 0; // 停止负载均衡
 	return NULL;
 }
 

@@ -132,7 +132,9 @@ struct sched_domain {
 		struct rcu_head rcu;	/* used during destruction */
 	};
 	struct sched_domain_shared *shared;
-
+    /**
+	 * span_weight 字段表示 该调度域所覆盖的 CPU 数量（即调度域跨度中的 CPU 总数）
+	 */
 	unsigned int span_weight;
 	/*
 	 * Span of all CPUs in this domain.
