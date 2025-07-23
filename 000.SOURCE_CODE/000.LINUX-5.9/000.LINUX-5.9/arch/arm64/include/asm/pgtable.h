@@ -80,8 +80,11 @@ extern unsigned long empty_zero_page[PAGE_SIZE / sizeof(unsigned long)];
 #define pte_clear(mm,addr,ptep)	set_pte(ptep, __pte(0))
 #define pte_page(pte)		(pfn_to_page(pte_pfn(pte)))
 
-/*
+/**
  * The following only work if pte_present(). Undefined behaviour otherwise.
+ * 
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#'表2.2　　访问页表项标志位的函数'
+ * pte_present: 判断该页是否在内存中 
  */
 #define pte_present(pte)	(!!(pte_val(pte) & (PTE_VALID | PTE_PROT_NONE)))
 #define pte_young(pte)		(!!(pte_val(pte) & PTE_AF))

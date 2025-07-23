@@ -139,6 +139,9 @@ static bool pgattr_change_is_safe(u64 old, u64 new)
 	return ((old ^ new) & ~mask) == 0;
 }
 
+/**
+ * init_pte()函数最终调用set_pte()来设置PTE内容到物理页表中
+ */
 static void init_pte(pmd_t *pmdp, unsigned long addr, unsigned long end,
 		     phys_addr_t phys, pgprot_t prot)
 {
@@ -192,12 +195,20 @@ static void alloc_init_cont_pte(pmd_t *pmdp, unsigned long addr,
 		    (flags & NO_CONT_MAPPINGS) == 0)
 			__prot = __pgprot(pgprot_val(prot) | PTE_CONT);
 
+		/**
+		 * 调用init_pte()来设置PTE
+		 */
 		init_pte(pmdp, addr, next, phys, __prot);
 
 		phys += next - addr;
 	} while (addr = next, addr != end);
 }
 
+/**
+ * 
+ * 
+ * 
+ */
 static void init_pmd(pud_t *pudp, unsigned long addr, unsigned long end,
 		     phys_addr_t phys, pgprot_t prot,
 		     phys_addr_t (*pgtable_alloc)(int), int flags)
@@ -235,6 +246,9 @@ static void init_pmd(pud_t *pudp, unsigned long addr, unsigned long end,
 	pmd_clear_fixmap();
 }
 
+/**
+ * alloc_init_cont_pmd ()函数用于配置PMD页表
+ */
 static void alloc_init_cont_pmd(pud_t *pudp, unsigned long addr,
 				unsigned long end, phys_addr_t phys,
 				pgprot_t prot,
@@ -247,6 +261,7 @@ static void alloc_init_cont_pmd(pud_t *pudp, unsigned long addr,
 	 * Check for initial section mappings in the pgd/pud.
 	 */
 	BUG_ON(pud_sect(pud));
+	// 判断PUD页表项的内容是否为空。如果为空，表示PUD指向的PMD不存在，需要动态分配PMD页表，然后通过__pud_populate()来设置PUD页表项
 	if (pud_none(pud)) {
 		phys_addr_t pmd_phys;
 		BUG_ON(!pgtable_alloc);
@@ -266,6 +281,7 @@ static void alloc_init_cont_pmd(pud_t *pudp, unsigned long addr,
 		    (flags & NO_CONT_MAPPINGS) == 0)
 			__prot = __pgprot(pgprot_val(prot) | PTE_CONT);
 
+		/**调用init_pmd()函数来初始化PT与设置PMD页表项 */
 		init_pmd(pudp, addr, next, phys, __prot, pgtable_alloc, flags);
 
 		phys += next - addr;
@@ -284,6 +300,10 @@ static inline bool use_1G_block(unsigned long addr, unsigned long next,
 	return true;
 }
 
+/**
+ * 初始化PGD页表项内容和PUD
+ * 
+ */
 static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
 			   phys_addr_t phys, pgprot_t prot,
 			   phys_addr_t (*pgtable_alloc)(int),
@@ -294,7 +314,8 @@ static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
 	p4d_t *p4dp = p4d_offset(pgdp, addr);
 	p4d_t p4d = READ_ONCE(*p4dp);
 
-	if (p4d_none(p4d)) {
+	// 通过pgd_none()判断当前PGD页表项的内容是否为空
+	if (p4d_none(p4d)) { 
 		phys_addr_t pud_phys;
 		BUG_ON(!pgtable_alloc);
 		pud_phys = pgtable_alloc(PUD_SHIFT);
@@ -303,26 +324,32 @@ static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
 	}
 	BUG_ON(p4d_bad(p4d));
 
+	// 通过pud_set_fixmap_offset ()来获取相应的PUD表项
 	pudp = pud_set_fixmap_offset(p4dp, addr);
 	do {
 		pud_t old_pud = READ_ONCE(*pudp);
 
 		next = pud_addr_end(addr, end);
 
-		/*
+		/**
 		 * For 4K granule only, attempt to put down a 1GB block
+		 * (对于仅使用4K粒度的情况，尝试建立一个1GB的大块映射)
+		 * 
+		 * use_1G_block()函数会判断是否使用1GB大小的内存块来映射
 		 */
 		if (use_1G_block(addr, next, phys) &&
 		    (flags & NO_BLOCK_MAPPINGS) == 0) {
 			pud_set_huge(pudp, phys, prot);
 
-			/*
+			/**
 			 * After the PUD entry has been populated once, we
 			 * only allow updates to the permission attributes.
+			 * (在填充（配置）PUD（Page Upper Directory，页上级目录）表项后，我们仅允许对其权限属性进行更新。)
 			 */
 			BUG_ON(!pgattr_change_is_safe(pud_val(old_pud),
 						      READ_ONCE(pud_val(*pudp))));
 		} else {
+			// 用于配置PMD页表
 			alloc_init_cont_pmd(pudp, addr, next, phys, prot,
 					    pgtable_alloc, flags);
 
@@ -330,11 +357,23 @@ static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
 			       pud_val(old_pud) != READ_ONCE(pud_val(*pudp)));
 		}
 		phys += next - addr;
+
+		/**
+		 * pudp++: 以PUD_SIZE为步长循环处理
+		 * >> pudp++ , 即指向下一个 pud_t 
+		 */
 	} while (pudp++, addr = next, addr != end);
 
 	pud_clear_fixmap();
 }
 
+
+/**
+ * 
+ * 创建页表映射
+ * 
+ * 
+ */
 static void __create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys,
 				 unsigned long virt, phys_addr_t size,
 				 pgprot_t prot,
@@ -458,6 +497,12 @@ void __init mark_linear_text_alias_ro(void)
 			    PAGE_KERNEL_RO);
 }
 
+/**
+ * map_mem(pgdp)：物理内存的线性映射。物理内存会全部线性映射到以PAGE_OFFSET开始的内核空间的虚拟地址，以加速内核访问内存。
+ * 
+ * "加速访问"的含义:
+ *   通过简单的偏移量实现，虚拟地址 = 物理地址 + 固定偏移（如PAGE_OFFSET）, 提供一种快速访问物理内存的方式，避免了频繁的页表操作
+ */
 static void __init map_mem(pgd_t *pgdp)
 {
 	phys_addr_t kernel_start = __pa_symbol(_text);
@@ -695,11 +740,25 @@ static void __init map_kernel(pgd_t *pgdp)
 	kasan_copy_shadow(pgdp);
 }
 
+/**
+ * 在paging_init()函数中会对内核空间的多个内存段做重新映射 , 映射到页表
+ * 
+ * 
+ * 
+ */
 void __init paging_init(void)
 {
 	pgd_t *pgdp = pgd_set_fixmap(__pa_symbol(swapper_pg_dir));
-
+ 
+	/**
+	 * map_kernel(pgdp)：对内核映像文件的各个块重新映射。
+	 * 在head.S文件中，我们对内核映像文件做了块映射，现在需要使用页机制来重新映射。
+	 */
 	map_kernel(pgdp);
+
+	/**
+	 * 线性映射区映射,具体看代码注释
+	 */
 	map_mem(pgdp);
 
 	pgd_clear_fixmap();
