@@ -37,8 +37,18 @@ update_irq_load_avg(struct rq *rq, u64 running)
 }
 #endif
 
+/**
+ * 在计算量化负载的场景下(由 ___update_load_avg 函数调用):
+ *    函数功能: 计算就绪队列或者调度实体在所有的采样周期里全部时间的累加衰减时间。通常从进程开始执行时就计算和累计该值了。
+ * >> [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#8.2.4　量化负载的计算 & 4．LOAD_AVG_MAX宏 
+ * 
+ */
 static inline u32 get_pelt_divider(struct sched_avg *avg)
 {
+	/**
+	 * LOAD_AVG_MAX - 1024：表示完整衰减周期的基准值（扣除当前周期的贡献）。
+	 * + period_contrib：补偿未满 1ms 的残余时间，确保衰减计算的连续性。
+	 */
 	return LOAD_AVG_MAX - 1024 + avg->period_contrib;
 }
 

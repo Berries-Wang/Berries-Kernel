@@ -13,6 +13,22 @@
         "utility": "c",
         "random": "c",
         "atomic": "c",
-        "workqueue_internal.h": "c"
+        "workqueue_internal.h": "c",
+        "deque": "c",
+        "list": "c",
+        "string": "c",
+        "unordered_map": "c",
+        "vector": "c",
+        "functional": "c",
+        "thread": "c",
+        "tuple": "c",
+        "memory": "c",
+        "optional": "c",
+        "fstream": "c",
+        "istream": "c",
+        "ostream": "c",
+        "sstream": "c",
+        "streambuf": "c",
+        "err.h": "c"
     }
 }

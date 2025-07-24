@@ -7,14 +7,14 @@
 #include <linux/sched/idle.h>
 
 /*
- * sched-domains (multiprocessor balancing) declarations:
+ * sched-domains(调度域) (multiprocessor balancing) declarations:
  */
 #ifdef CONFIG_SMP
 
 #define SD_BALANCE_NEWIDLE	0x0001	/* Balance when about to become idle */
 #define SD_BALANCE_EXEC		0x0002	/* Balance on exec */
 #define SD_BALANCE_FORK		0x0004	/* Balance on fork, clone */
-#define SD_BALANCE_WAKE		0x0008  /* Balance on wakeup */
+#define SD_BALANCE_WAKE		0x0008  /* Balance on wakeup (唤醒时的负载均衡) */
 #define SD_WAKE_AFFINE		0x0010	/* Wake task to waking CPU */
 #define SD_ASYM_CPUCAPACITY	0x0020  /* Domain members have different CPU capacities */
 #define SD_SHARE_CPUCAPACITY	0x0040	/* Domain members share CPU capacity */
@@ -132,7 +132,9 @@ struct sched_domain {
 		struct rcu_head rcu;	/* used during destruction */
 	};
 	struct sched_domain_shared *shared;
-
+    /**
+	 * span_weight 字段表示 该调度域所覆盖的 CPU 数量（即调度域跨度中的 CPU 总数）
+	 */
 	unsigned int span_weight;
 	/*
 	 * Span of all CPUs in this domain.
@@ -174,9 +176,17 @@ struct sd_data {
 	struct sched_group_capacity *__percpu *sgc;
 };
 
+/**
+ * Linux内核通过数据结构sched_domain_topology_level(SDTL)来描述CPU的层次关系
+ */
 struct sched_domain_topology_level {
+	// 函数指针，用于指定某个SDTL的cpumask位图
 	sched_domain_mask_f mask;
+
+	// 函数指针，用于指定某个SDTL的标志位
 	sched_domain_flags_f sd_flags;
+
+
 	int		    flags;
 	int		    numa_level;
 	struct sd_data      data;
@@ -218,10 +228,11 @@ static inline bool cpus_share_cache(int this_cpu, int that_cpu)
 
 #ifndef arch_scale_cpu_capacity
 /**
- * arch_scale_cpu_capacity - get the capacity scale factor of a given CPU.
+ * arch_scale_cpu_capacity - get the capacity scale factor of a given CPU.(获取给定 CPU 的容量比例因子)
  * @cpu: the CPU in question.
  *
  * Return: the CPU scale factor normalized against SCHED_CAPACITY_SCALE, i.e.
+ * (根据 SCHED_CAPACITY_SCALE 标准化的 CPU 比例因子)
  *
  *             max_perf(cpu)
  *      ----------------------------- * SCHED_CAPACITY_SCALE

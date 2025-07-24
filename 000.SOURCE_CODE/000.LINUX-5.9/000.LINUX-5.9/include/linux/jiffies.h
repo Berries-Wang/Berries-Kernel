@@ -70,10 +70,23 @@ extern int register_refined_jiffies(long clock_tick_rate);
 #define __jiffy_arch_data
 #endif
 
-/*
+/**
+ * ld（1）脚本用于连接主内核映像，然后用jiffies_64变量的初值覆盖jiffies变量：jiffies=jiffies_64
+ * 在32位系统上jiffies这样就只取jiffies_64的低32位
+ * 在64位系统上两者相等通过get_jiffies_64()函数获得jiffies_64
+ * 
+ * 
+ * 在文件 [000.LINUX-5.9/arch/arm64/kernel/vmlinux.lds.S]中操作
+ *   jiffies = jiffies_64;
+ * 
+ */
+/**
  * The 64-bit value is not atomic - you MUST NOT read it
  * without sampling the sequence number in jiffies_lock.
  * get_jiffies_64() will do this for you as appropriate.
+ * (这个64位的值不是原子操作的——禁止在未对 jiffies_lock 中的序列号进行采样的情况下直接读取它。
+ * get_jiffies_64() 函数会在需要时自动处理这一问题)
+ * 
  */
 extern u64 __cacheline_aligned_in_smp jiffies_64;
 extern unsigned long volatile __cacheline_aligned_in_smp __jiffy_arch_data jiffies;

@@ -558,7 +558,7 @@ struct cfs_bandwidth { };
 
 /* CFS-related fields in a runqueue */
 struct cfs_rq {
-	struct load_weight	load;
+	struct load_weight	load;  // load 是权重的意思
 	unsigned int		nr_running;        /*可运行任务总数*/
 	unsigned int		h_nr_running;      /* SCHED_{NORMAL,BATCH,IDLE} */
 	unsigned int		idle_h_nr_running; /* SCHED_IDLE */
@@ -1073,7 +1073,24 @@ struct rq {
 	struct root_domain		*rd;
 	struct sched_domain __rcu	*sd;
 
+	/**
+	 * 表示 CPU 的 当前有效容量(计算能力)，会因动态调频（DVFS）、热限制（thermal throttling）或功耗管理而变化
+	 * 
+	 * "cpu_capacity代表的计算能力不包含realtime调度类和deadline调度类的计算能力。"
+	 */
 	unsigned long		cpu_capacity;
+	/**
+	 * 处理器最大的处理能力
+	 * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]
+	 * 
+	 * cpu_capacity_orig成员表示该CPU原本的计算能力，在系统启动之初，建立系统调度域拓扑时就会计算每个CPU的计算能力。
+	 * >　在 #8.4.1　量化计算能力 中 
+	 * 
+	 * 怎么计算来的???
+	 * 
+	 * 'cpu_capacity_orig指最大的计算能力，它指所有的调度器类的计算能力之和，如realtime调度类、deadline调度类和CFS调度类'
+	 *  搜原文即可
+	 */
 	unsigned long		cpu_capacity_orig;
 
 	struct callback_head	*balance_callback;
@@ -1102,6 +1119,12 @@ struct rq {
 #ifdef CONFIG_SCHED_THERMAL_PRESSURE
 	struct sched_avg	avg_thermal;
 #endif
+	/**
+      * idle_stamp 和 avg_idle 字段用于跟踪 CPU 空闲状态，并帮助调度器做出更智能的任务调度决策（如负载均衡、任务唤醒优化）
+	  * 
+	  * idle_stamp: 记录 CPU 进入空闲状态的时间戳（单位：纳秒）。
+	  * avg_idle: 统计 CPU 的平均空闲时间（动态计算的指数移动平均值，单位：纳秒）
+     */
 	u64			idle_stamp;
 	u64			avg_idle;
 
@@ -1556,13 +1579,17 @@ static inline struct sched_domain *lowest_flag_domain(int cpu, int flag)
 	return sd;
 }
 
-DECLARE_PER_CPU(struct sched_domain __rcu *, sd_llc);
-DECLARE_PER_CPU(int, sd_llc_size);
-DECLARE_PER_CPU(int, sd_llc_id);
+/**
+ * 什么是LLC
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]# 6．LLC调度域
+ */
+DECLARE_PER_CPU(struct sched_domain __rcu *, sd_llc);  // sd_llc：指向LLC调度域。
+DECLARE_PER_CPU(int, sd_llc_size);                     // sd_llc_size：LLC调度域包含多少个CPU。
+DECLARE_PER_CPU(int, sd_llc_id);                       // LLC调度域第一个CPU的编号
 DECLARE_PER_CPU(struct sched_domain_shared __rcu *, sd_llc_shared);
 DECLARE_PER_CPU(struct sched_domain __rcu *, sd_numa);
 DECLARE_PER_CPU(struct sched_domain __rcu *, sd_asym_packing);
-DECLARE_PER_CPU(struct sched_domain __rcu *, sd_asym_cpucapacity);
+DECLARE_PER_CPU(struct sched_domain __rcu *, sd_asym_cpucapacity); // 指向第一个包含不同CPU架构的调度域，主要用于大/小核架构
 extern struct static_key_false sched_asym_cpucapacity;
 
 struct sched_group_capacity {
@@ -1709,7 +1736,7 @@ static inline struct task_group *task_group(struct task_struct *p)
 #endif /* CONFIG_CGROUP_SCHED */
 
 /**
- * 设置子进程即将运行的CPU
+ * 设置进程即将运行的CPU
  */
 static inline void __set_task_cpu(struct task_struct *p, unsigned int cpu)
 {
@@ -1786,6 +1813,10 @@ static const_debug __maybe_unused unsigned int sysctl_sched_features =
 	0;
 #undef SCHED_FEAT
 
+/**
+ * 000.LINUX-5.9/kernel/sched/features.h
+ *   WA_IDLE 
+ */
 #define sched_feat(x) !!(sysctl_sched_features & (1UL << __SCHED_FEAT_##x))
 
 #endif /* SCHED_DEBUG && CONFIG_JUMP_LABEL */
@@ -2481,6 +2512,9 @@ static inline u64 irq_time_read(int cpu)
 DECLARE_PER_CPU(struct update_util_data __rcu *, cpufreq_update_util_data);
 
 /**
+ * 
+ * 请求CPU进行调频
+ * 
  * cpufreq_update_util - Take a note about CPU utilization changes.
  * @rq: Runqueue to carry out the update for.
  * @flags: Update reason flags.
@@ -2695,6 +2729,10 @@ unsigned long scale_irq_capacity(unsigned long util, unsigned long irq, unsigned
 
 DECLARE_STATIC_KEY_FALSE(sched_energy_present);
 
+/**
+ * sched_energy_present 是一个与 能效感知调度（Energy-Aware Scheduling, EAS） 相关的标志位，
+ * 用于指示系统是否支持基于能耗模型的调度功能
+ */
 static inline bool sched_energy_enabled(void)
 {
 	return static_branch_unlikely(&sched_energy_present);

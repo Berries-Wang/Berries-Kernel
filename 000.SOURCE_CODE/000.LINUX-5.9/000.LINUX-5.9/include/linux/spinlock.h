@@ -116,14 +116,17 @@ do {									\
 #define raw_spin_is_contended(lock)	(((void)(lock), 0))
 #endif /*arch_spin_is_contended*/
 
-/*
+/**
  * smp_mb__after_spinlock() provides the equivalent of a full memory barrier
  * between program-order earlier lock acquisitions and program-order later
  * memory accesses.
+ * (smp_mb__after_spinlock() 在程序顺序中先前的锁获取操作和后续的内存访问操作之间，提供了等同于完整内存屏障（full memory barrier）的效果。
+ * （注：该函数通常用于确保自旋锁（spinlock）获取之后的内存访问不会因 CPU 乱序执行而越过锁的获取边界，从而保证多核环境下的内存可见性和顺序一致性。）)
+ * > 用于在获取到自旋锁后调用
  *
- * This guarantees that the following two properties hold:
+ * This guarantees that the following two properties hold:(这确保了以下两个特性成立：)
  *
- *   1) Given the snippet:
+ *   1) Given the snippet:(根据这段代码片段：)
  *
  *	  { X = 0;  Y = 0; }
  *
@@ -139,6 +142,9 @@ do {									\
  *      and CPU1 does not observe CPU0's store to X (r1 = 0); see the comments
  *      preceding the call to smp_mb__after_spinlock() in __schedule() and in
  *      try_to_wake_up().
+ *      禁止出现以下情况：
+ *           CPU0 未观测到 CPU1 对变量 Y 的写入（导致 r0 = 0）
+ *           同时 CPU1 未观测到 CPU0 对变量 X 的写入（导致 r1 = 0）
  *
  *   2) Given the snippet:
  *
@@ -157,13 +163,19 @@ do {									\
  *      and CPU2 does not observe CPU0's store to X (r2 = 0); see the comments
  *      preceding the calls to smp_rmb() in try_to_wake_up() for similar
  *      snippets but "projected" onto two CPUs.
+ *      禁止出现以下情况：
+ *          CPU0 的临界区先于 CPU1 的临界区执行（导致 r0 = 1）；
+ *          CPU2 观测到 CPU1 对变量 Y 的写入（r1 = 1）
+ *          但 CPU2 未观测到 CPU0 对变量 X 的写入（r2 = 0）
  *
- * Property (2) upgrades the lock to an RCsc lock.
+ * Property (2) upgrades the lock to an RCsc lock.(特性（2）将该锁升级为 RCsc锁（强化释放一致性锁）)
  *
  * Since most load-store architectures implement ACQUIRE with an smp_mb() after
  * the LL/SC loop, they need no further barriers. Similarly all our TSO
  * architectures imply an smp_mb() for each atomic instruction and equally don't
  * need more.
+ * (由于大多数加载-存储架构（load-store architectures）在 LL/SC 循环（Load-Linked/Store-Conditional）后通过 smp_mb() 来实现 ACQUIRE 语义，因此它们无需额外的内存屏障。
+ * 同样，我们所有的 TSO 架构（Total Store Order，如 x86）中，每条原子指令隐式包含一个 smp_mb() 屏障，因此也不需要更多额外操作。)
  *
  * Architectures that can implement ACQUIRE better need to take care.
  */
@@ -268,6 +280,10 @@ static inline void do_raw_spin_unlock(raw_spinlock_t *lock) __releases(lock)
 
 #else
 
+/**
+ * _raw_spin_lock_irqsave() 是一个底层自旋锁函数，用于在禁用本地中断的情况下获取自旋锁，
+ * 确保临界区的原子性和安全性，尤其适用于中断上下文或要求严格时序的场景
+ */
 #define raw_spin_lock_irqsave(lock, flags)		\
 	do {						\
 		typecheck(unsigned long, flags);	\

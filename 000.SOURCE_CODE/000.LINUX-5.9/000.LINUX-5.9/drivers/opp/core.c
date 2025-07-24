@@ -2141,7 +2141,7 @@ unlock:
 }
 
 /**
- * dev_pm_opp_add()  - Add an OPP table from a table definitions
+ * dev_pm_opp_add()  - Add an OPP table from a table definitions (dev_pm_opp_add()函数把一个新的OPP添加到dev指定的设备里)
  * @dev:	device for which we do this operation
  * @freq:	Frequency in Hz for this OPP
  * @u_volt:	Voltage in uVolts for this OPP

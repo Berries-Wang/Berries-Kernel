@@ -2368,8 +2368,14 @@ out:
 	return dest_cpu;
 }
 
-/*
+/**
  * The caller (fork, wakeup) owns p->pi_lock, ->cpus_ptr is stable.
+ * (调用者（例如 fork 或 wakeup 函数）持有 p->pi_lock 自旋锁，因此任务 (p) 的 ->cpus_ptr 字段在此期间是稳定的（不会被并发修改）)
+ * 
+ * @param p              将要唤醒的进程
+ * @param cpu            该进程上一次调度运行的CPU
+ * @param sd_flags       调度域的标志位 ` 从wake_up_process 传来的是 SD_BALANCE_WAKE `
+ * @param wake_flags     唤醒标志位
  */
 static inline
 int select_task_rq(struct task_struct *p, int cpu, int sd_flags, int wake_flags)
@@ -2504,7 +2510,7 @@ static void ttwu_do_wakeup(struct rq *rq, struct task_struct *p, int wake_flags,
 		u64 delta = rq_clock(rq) - rq->idle_stamp;
 		u64 max = 2*rq->max_idle_balance_cost;
 
-		update_avg(&rq->avg_idle, delta);
+		update_avg(&rq->avg_idle, delta); // 更新负载
 
 		if (rq->avg_idle > max)
 			rq->avg_idle = max;
@@ -2534,8 +2540,9 @@ ttwu_do_activate(struct rq *rq, struct task_struct *p, int wake_flags,
 	ttwu_do_wakeup(rq, p, wake_flags, rf);
 }
 
-/*
+/**
  * Consider @p being inside a wait loop:
+ * (考虑任务@p处于等待循环中的情况)
  *
  *   for (;;) {
  *      set_current_state(TASK_UNINTERRUPTIBLE);
@@ -2550,6 +2557,8 @@ ttwu_do_activate(struct rq *rq, struct task_struct *p, int wake_flags,
  * between set_current_state() and schedule(). In this case @p is still
  * runnable, so all that needs doing is change p->state back to TASK_RUNNING in
  * an atomic manner.
+ * (在set_current_state()和schedule()之间出现唤醒的情况下，
+ *   此时任务@p仍处于可运行状态，因此只需以原子方式将p->state恢复为TASK_RUNNING即可。)
  *
  * By taking task_rq(p)->lock we serialize against schedule(), if @p->on_rq
  * then schedule() must still happen and p->state can be changed to
@@ -2570,9 +2579,9 @@ static int ttwu_runnable(struct task_struct *p, int wake_flags)
 
 	// 进程已经在某个CPU的运行队列
 	if (task_on_rq_queued(p)) {
-		/* check_preempt_curr() may use rq clock */
-		update_rq_clock(rq);
-		ttwu_do_wakeup(rq, p, wake_flags, &rf);
+		/** check_preempt_curr() may use rq clock */
+		update_rq_clock(rq); // 更新时钟计数
+		ttwu_do_wakeup(rq, p, wake_flags, &rf); // 将任务标记为可运行并执行唤醒抢占
 		ret = 1;
 	}
 	__task_rq_unlock(rq, &rf);
@@ -2614,21 +2623,40 @@ void sched_ttwu_pending(void *arg)
 	rq_unlock_irqrestore(rq, &rf);
 }
 
+/**
+ * 发送IPI消息
+ */
 void send_call_function_single_ipi(int cpu)
 {
 	struct rq *rq = cpu_rq(cpu);
 
+	/**
+	 * arch_send_call_function_single_ipi: 000.LINUX-5.9/arch/mips/include/asm/smp.h:
+	 */
 	if (!set_nr_if_polling(rq->idle))
 		arch_send_call_function_single_ipi(cpu);
 	else
 		trace_sched_wake_idle_without_ipi(cpu);
 }
 
-/*
+/**
  * Queue a task on the target CPUs wake_list and wake the CPU via IPI if
  * necessary. The wakee CPU on receipt of the IPI will queue the task
  * via sched_ttwu_wakeup() for activation so the wakee incurs the cost
  * of the wakeup instead of the waker.
+ * (将任务加入目标 CPU 的 wake_list 队列，并通过 IPI（处理器间中断）唤醒目标 CPU（若需要）。
+ * 接收 IPI 的被唤醒 CPU 会通过 sched_ttwu_wakeup() 函数将任务加入调度队列以激活任务，
+ * 从而将唤醒任务的开销转移至被唤醒的 CPU，而非发起唤醒操作的 CPU)
+ * 
+ * 1. 核心机制
+ *    wake_list 队列
+ *      每个 CPU 维护一个待唤醒任务队列（wake_list），用于批量处理任务唤醒请求，减少锁竞争。
+ *    
+ *    IPI（Inter-Processor Interrupt）
+ *      当目标 CPU 处于空闲状态时，源 CPU 通过发送 IPI 中断强制唤醒目标 CPU，触发任务调度。
+ *    
+ *    开销转移
+ *      任务的实际唤醒操作（如更新调度状态、负载统计）由 被唤醒 CPU 执行，避免占用 发起唤醒的 CPU 的资源。
  */
 static void __ttwu_queue_wakelist(struct task_struct *p, int cpu, int wake_flags)
 {
@@ -2664,6 +2692,15 @@ out:
 	rcu_read_unlock();
 }
 
+/**
+ * 判断是否共享高速缓存? YES
+ * 
+ * cpus_share_cache()函数判断两个CPU是否具有高速缓存的亲和性。
+ * 若它们同属于一个SMT或MC调度域，则共享高速缓存，这是通过Per-CPU变量sd_llc_id来判断的，
+ * sd_llc_id在update_top_cache_domain()函数中赋值。
+ * 
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#2．快速优化路径
+ */
 bool cpus_share_cache(int this_cpu, int that_cpu)
 {
 	return per_cpu(sd_llc_id, this_cpu) == per_cpu(sd_llc_id, that_cpu);
@@ -2692,6 +2729,9 @@ static inline bool ttwu_queue_cond(int cpu, int wake_flags)
 	return false;
 }
 
+/**
+ * 
+ */
 static bool ttwu_queue_wakelist(struct task_struct *p, int cpu, int wake_flags)
 {
 	if (sched_feat(TTWU_QUEUE) && ttwu_queue_cond(cpu, wake_flags)) {
@@ -2715,13 +2755,27 @@ static inline bool ttwu_queue_wakelist(struct task_struct *p, int cpu, int wake_
 
 #endif /* CONFIG_SMP */
 
+/**
+ * 将任务加入目标 CPU 的 wake_list 
+ *   &&
+ * 发送 IPI（若目标 CPU 空闲） 
+ *    目标 CPU 处理 IPI（Inter-Processor Interrupt），调用 sched_ttwu_wakeup()
+ *      激活任务并加入运行队列
+ * 
+ * IPI，全称是Inter-Processor Interrupt，是在soc内多个core之间触发的中断，
+ * 这一点有别与常见的外设中断，因此内核专门预留了部分中断号给IPI，在arm64架构上是0-15这16个中断号
+ *   中断处理函数: <drivers/irqchip/irq-gic-v3.c>: static asmlinkage void __exception_irq_entry gic_handle_irq(struct pt_regs *regs); 
+ *      IPI中断处理函数: arch/arm64/kernel/smp.c : void handle_IPI(int ipinr, struct pt_regs *regs);
+ * 
+ */
 static void ttwu_queue(struct task_struct *p, int cpu, int wake_flags)
 {
 	struct rq *rq = cpu_rq(cpu);
 	struct rq_flags rf;
 
-	if (ttwu_queue_wakelist(p, cpu, wake_flags))
+	if (ttwu_queue_wakelist(p, cpu, wake_flags)) {
 		return;
+	}
 
 	rq_lock(rq, &rf);
 	update_rq_clock(rq);
@@ -2729,24 +2783,36 @@ static void ttwu_queue(struct task_struct *p, int cpu, int wake_flags)
 	rq_unlock(rq, &rf);
 }
 
-/*
+/**
  * Notes on Program-Order guarantees on SMP systems.
+ * (关于 SMP 系统上的程序顺序保证的注释。)
  *
- *  MIGRATION
+ *  MIGRATION (移民，迁徙；（计算机系统的）改变，（程序或硬件的）迁移，转移)
  *
  * The basic program-order guarantee on SMP systems is that when a task [t]
  * migrates, all its activity on its old CPU [c0] happens-before any subsequent
  * execution on its new CPU [c1].
+ * (SMP系统上的基本程序顺序保证是：当任务[t]迁移时，
+ * 其在原CPU[c0]上的所有活动都先于（happens-before）其在新CPU[c1]上的任何后续执行。)
  *
  * For migration (of runnable tasks) this is provided by the following means:
+ * (对于（可运行任务的）迁移，这一保证是通过以下方式实现的)
  *
  *  A) UNLOCK of the rq(c0)->lock scheduling out task t
+ *      (释放 rq(c0)->lock 以调度出任务 t)
+ * 
  *  B) migration for t is required to synchronize *both* rq(c0)->lock and
  *     rq(c1)->lock (if not at the same time, then in that order).
+ *     (任务 t 的迁移必须同时对 rq(c0)->lock 和 rq(c1)->lock 进行同步（若无法同时获取，则按此顺序依次获取）)
+ * 
  *  C) LOCK of the rq(c1)->lock scheduling in task
- *
+ *     (获取 rq(c1)->lock 以调度入任务 t)
+ * 
  * Release/acquire chaining guarantees that B happens after A and C after B.
+ * (释放/获取的链式顺序保证了：B 必然发生在 A 之后，且 C 必然发生在 B 之后。)
+ * 
  * Note: the CPU doing B need not be c0 or c1
+ * (注：执行 B 的 CPU 既不必是 c0 也不必是 c1)
  *
  * Example:
  *
@@ -2776,6 +2842,8 @@ static void ttwu_queue(struct task_struct *p, int cpu, int wake_flags)
  * For blocking we (obviously) need to provide the same guarantee as for
  * migration. However the means are completely different as there is no lock
  * chain to provide order. Instead we do:
+ * (对于阻塞操作，我们（显然）需要提供与任务迁移相同的保证。
+ * 但实现方式却截然不同——因为不存在用于维持顺序的锁链。为此我们采用以下方式)
  *
  *   1) smp_store_release(X->on_cpu, 0)   -- finish_task()
  *   2) smp_cond_load_acquire(!X->on_cpu) -- try_to_wake_up()
@@ -2810,13 +2878,16 @@ static void ttwu_queue(struct task_struct *p, int cpu, int wake_flags)
  * However, for wakeups there is a second guarantee we must provide, namely we
  * must ensure that CONDITION=1 done by the caller can not be reordered with
  * accesses to the task state; see try_to_wake_up() and set_current_state().
+ * (然而对于唤醒操作，我们还需要提供第二项保证：必须确保调用方执行的 CONDITION=1 操作不会被重新排序到任务状态访问之后。
+ * 具体可参阅 try_to_wake_up() 和 set_current_state() 的实现)
  */
 
-/**
+/***
  * try_to_wake_up - wake up a thread
+ * 
  * @p: the thread to be awakened (被唤醒的线程)
- * @state: the mask of task states that can be woken
- * @wake_flags: wake modifier flags (WF_*)
+ * @state: the mask of task states that can be woken  醒进程的状态
+ * @wake_flags: wake modifier flags (WF_*) 唤醒标志位
  *
  * Conceptually does:(从概念上来说)
  *
@@ -2831,7 +2902,7 @@ static void ttwu_queue(struct task_struct *p, int cpu, int wake_flags)
  *
  * Uses p->pi_lock to serialize against concurrent wake-ups.(使用 p->pi_lock 来序列化并发唤醒。)
  *
- * Relies on p->pi_lock stabilizing:(依赖于p->pi_lock稳定：)
+ * Relies on p->pi_lock stabilizing:(本机制依赖于任务结构体中的优先级继承锁(p->pi_lock)提供的稳定性保证：)
  *  - p->sched_class
  *  - p->cpus_ptr
  *  - p->sched_task_group
@@ -2848,28 +2919,35 @@ static void ttwu_queue(struct task_struct *p, int cpu, int wake_flags)
  *
  * Return: %true if @p->state changes (an actual wakeup was done),
  *	   %false otherwise.
+ * 通过代码注释发现，指令重排对该函数流程影响很大
  */
-static int
-try_to_wake_up(struct task_struct *p, unsigned int state, int wake_flags)
+static int try_to_wake_up(struct task_struct *p, unsigned int state, int wake_flags)
 {
 	unsigned long flags;
 	int cpu, success = 0;
 
 	preempt_disable();
+
+	// 如果是当前进程
 	if (p == current) {
-		/*
+		/**
 		 * We're waking current, this means 'p->on_rq' and 'task_cpu(p)
 		 * == smp_processor_id()'. Together this means we can special
 		 * case the whole 'p->on_rq && ttwu_runnable()' case below
 		 * without taking any locks.
+		 * (当前正在唤醒的任务是当前CPU上正在运行的任务（满足'p->on_rq'且'task_cpu(p) == smp_processor_id()'条件），
+		 * 这种特殊场景下我们可以直接处理'p->on_rq && ttwu_runnable()'的情况而无需获取任何锁。)
 		 *
 		 * In particular:
-		 *  - we rely on Program-Order guarantees for all the ordering,
+		 *  - we rely on Program-Order guarantees for all the ordering, 
+		 *    (我们依赖处理器提供的程序顺序(Program-Order)保证来实现所有内存操作的顺序性)
 		 *  - we're serialized against set_special_state() by virtue of
 		 *    it disabling IRQs (this allows not taking ->pi_lock).
+		 *    (通过set_special_state()函数禁用中断(IRQs)的特性，我们实现了与该函数的串行化执行（这使得我们无需获取->pi_lock锁）)
 		 */
-		if (!(p->state & state))
+		if (!(p->state & state)) {
 			goto out;
+		}
 
 		success = 1;
 		trace_sched_waking(p);
@@ -2878,26 +2956,31 @@ try_to_wake_up(struct task_struct *p, unsigned int state, int wake_flags)
 		goto out;
 	}
 
-	/*
+	/**
 	 * If we are going to wake up a thread waiting for CONDITION we
 	 * need to ensure that CONDITION=1 done by the caller can not be
 	 * reordered with p->state check below. This pairs with smp_store_mb()
 	 * in set_current_state() that the waiting thread does.
+	 * (当需要唤醒等待CONDITION条件的线程时，我们必须确保调用方设置的CONDITION=1操作不会与后续的p->state状态检查发生指令重排。
+	 * 这与等待线程中调用的set_current_state()函数内的smp_store_mb()内存屏障形成配对同步。)
 	 */
 	raw_spin_lock_irqsave(&p->pi_lock, flags);
-	smp_mb__after_spinlock();
+	smp_mb__after_spinlock(); // 该功能参考注释: 时序保证
 	if (!(p->state & state))
 		goto unlock;
 
 	trace_sched_waking(p);
 
-	/* We're going to change ->state: */
+	/** 
+	 * We're going to change ->state:
+	 *  */
 	success = 1;
 
 	/*
 	 * Ensure we load p->on_rq _after_ p->state, otherwise it would
 	 * be possible to, falsely, observe p->on_rq == 0 and get stuck
 	 * in smp_cond_load_acquire() below.
+	 * (必须确保在读取p->state之后才加载p->on_rq，否则可能出现错误地观测到p->on_rq == 0的情况，导致在后续的smp_cond_load_acquire()调用中陷入阻塞。)
 	 *
 	 * sched_ttwu_pending()			try_to_wake_up()
 	 *   STORE p->on_rq = 1			  LOAD p->state
@@ -2913,10 +2996,12 @@ try_to_wake_up(struct task_struct *p, unsigned int state, int wake_flags)
 	 *
 	 * Pairs with the LOCK+smp_mb__after_spinlock() on rq->lock in
 	 * __schedule().  See the comment for smp_mb__after_spinlock().
+	 * (此操作与__schedule()函数中rq->lock锁的LOCK+smp_mb__after_spinlock()形成内存屏障配对。具体说明请参阅smp_mb__after_spinlock()的注释)
 	 *
 	 * A similar smb_rmb() lives in try_invoke_on_locked_down_task().
 	 */
 	smp_rmb();
+	// p在队列上，并且唤醒成功(p->state 设置为 TASK_RUNNING)
 	if (READ_ONCE(p->on_rq) && ttwu_runnable(p, wake_flags))
 		goto unlock;
 
@@ -2926,12 +3011,14 @@ try_to_wake_up(struct task_struct *p, unsigned int state, int wake_flags)
 	}
 
 #ifdef CONFIG_SMP
-	/*
+	/**
 	 * Ensure we load p->on_cpu _after_ p->on_rq, otherwise it would be
 	 * possible to, falsely, observe p->on_cpu == 0.
+	 * (确保我们在 p->on_rq 之后加载 p->on_cpu，否则可能会错误地观察到 p->on_cpu == 0。)
 	 *
 	 * One must be running (->on_cpu == 1) in order to remove oneself
 	 * from the runqueue.
+	 * (任务必须处于运行状态(->on_cpu == 1)才能将自己从运行队列(runqueue)中移除)
 	 *
 	 * __schedule() (switch to task 'p')	try_to_wake_up()
 	 *   STORE p->on_cpu = 1		  LOAD p->on_rq
@@ -2944,10 +3031,15 @@ try_to_wake_up(struct task_struct *p, unsigned int state, int wake_flags)
 	 *
 	 * Pairs with the LOCK+smp_mb__after_spinlock() on rq->lock in
 	 * __schedule().  See the comment for smp_mb__after_spinlock().
+	 * (此操作与__schedule()函数中针对rq->lock锁的LOCK指令 + smp_mb__after_spinlock()内存屏障形成配对关系。
+	 * 具体实现细节请参阅smp_mb__after_spinlock()函数的注释说明。)
 	 *
 	 * Form a control-dep-acquire with p->on_rq == 0 above, to ensure
 	 * schedule()'s deactivate_task() has 'happened' and p will no longer
 	 * care about it's own p->state. See the comment in __schedule().
+	 * (与上方p->on_rq == 0的条件形成控制依赖获取(control-dep-acquire)关系，
+	 * 以此确保schedule()中的deactivate_task()操作已完成，
+	 * 且任务p将不再关注自身的p->state状态。具体原理请参阅__schedule()函数中的注释说明)
 	 */
 	smp_acquire__after_ctrl_dep();
 
@@ -2959,6 +3051,8 @@ try_to_wake_up(struct task_struct *p, unsigned int state, int wake_flags)
 	 * (我们正在进行唤醒（@success == 1），他们进行了出队（p->on_rq == 0），这意味着我们需要进行入队，
 	 * 将 p->state 更改为 TASK_WAKING，以便我们可以在进行入队之前解锁 p->pi_lock，
 	 * 例如 ttwu_queue_wakelist()。)
+	 * 
+	 * TASK_WAKING 是一个临时任务状态，用于表示任务正在被唤醒（wakeup）的过程中，但尚未完全切换到可运行状态（TASK_RUNNING）
 	 */
 	p->state = TASK_WAKING;
 
@@ -2984,6 +3078,7 @@ try_to_wake_up(struct task_struct *p, unsigned int state, int wake_flags)
 	 *
 	 * to ensure we observe the correct CPU on which the task is currently
 	 * scheduling.
+	 * (以确保我们能正确观测到任务当前正在被调度的目标CPU)
 	 */
 	if (smp_load_acquire(&p->on_cpu) &&
 	    ttwu_queue_wakelist(p, task_cpu(p), wake_flags | WF_ON_CPU))
@@ -3006,6 +3101,7 @@ try_to_wake_up(struct task_struct *p, unsigned int state, int wake_flags)
 
 	// 将任务迁移到另一个CPU上执行
 	cpu = select_task_rq(p, p->wake_cpu, SD_BALANCE_WAKE, wake_flags);
+	
 	if (task_cpu(p) != cpu) {
 		wake_flags |= WF_MIGRATED;
 		psi_ttwu_dequeue(p);
@@ -3014,11 +3110,9 @@ try_to_wake_up(struct task_struct *p, unsigned int state, int wake_flags)
 #else
 	cpu = task_cpu(p);
 #endif /* CONFIG_SMP */
-    
-    /**
-	 * 执行到此处，说明当前hrtimer还是需要在当前CPU上执行
-	 * 1. 入调度器队列
-	 * 2. 设置任务状态
+
+	/**
+	 *  唤醒任务，存在两种方式: 看函数具体逻辑
 	 */
 	ttwu_queue(p, cpu, wake_flags);
 unlock:
@@ -3082,13 +3176,13 @@ bool try_invoke_on_locked_down_task(struct task_struct *p, bool (*func)(struct t
  * @p: The process to be woken up.
  *
  * Attempt to wake up the nominated process and move it to the set of runnable
- * processes.(尝试唤醒指定进程并将其移至可运行进程集合。)
+ * processes.(尝试唤醒指定进程并将其移至可运行进程集合 - 涉及跨CPU)
  *
  * Return: 1 if the process was woken up, 0 if it was already running.
  *
  * This function executes a full memory barrier before accessing the task state.(此函数在访问任务状态之前执行完整的内存屏障。)
  */
-int wake_up_process(struct task_struct *p)
+__attribute__((optimize("O0"))) int wake_up_process(struct task_struct *p)
 {
 	return try_to_wake_up(p, TASK_NORMAL, 0);
 }
@@ -3400,6 +3494,7 @@ unsigned long to_ratio(u64 period, u64 runtime)
 }
 
 /**
+ * 
  * wake_up_new_task - wake up a newly created task for the first time.
  *
  * This function will do some initial scheduler statistics housekeeping
@@ -5254,6 +5349,8 @@ int task_prio(const struct task_struct *p)
  * @cpu: the processor in question.
  *
  * Return: 1 if the CPU is currently idle. 0 otherwise.
+ * 
+ * 也是通过CPU上是否有正在执行的任务来判断的
  */
 int idle_cpu(int cpu)
 {
@@ -5275,7 +5372,9 @@ int idle_cpu(int cpu)
 
 /**
  * available_idle_cpu - is a given CPU idle for enqueuing work.
- * @cpu: the CPU in question.
+ * (判断指定CPU是否处于空闲状态以允许任务入队)
+ * 
+ * @cpu: the CPU in question. 待判断的CPU
  *
  * Return: 1 if the CPU is currently idle. 0 otherwise.
  */

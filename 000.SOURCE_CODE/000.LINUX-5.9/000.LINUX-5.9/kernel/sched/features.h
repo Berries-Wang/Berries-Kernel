@@ -86,7 +86,12 @@ SCHED_FEAT(RT_RUNTIME_SHARE, true)
 SCHED_FEAT(LB_MIN, false)
 SCHED_FEAT(ATTACH_AGE_LOAD, true)
 
+// WA_IDLE 是一个与 唤醒亲和性（Wake-Affinity） 相关的调度特性（Scheduling Feature），用于控制任务唤醒时是否倾向于选择 空闲 CPU
 SCHED_FEAT(WA_IDLE, true)
+/**
+ * 是否启用对等待状态进程（如 I/O 阻塞）的权重调整机制
+ * 当设置为 true 时，CFS 会为处于等待状态（如 I/O 阻塞）的进程应用特殊的权重（WAIT_WEIGHT，通常值为 3），减少其 vruntime 的增量，使得这些进程在唤醒后更容易被调度
+ */
 SCHED_FEAT(WA_WEIGHT, true)
 SCHED_FEAT(WA_BIAS, true)
 

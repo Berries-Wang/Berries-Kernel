@@ -80,13 +80,17 @@ extern unsigned long empty_zero_page[PAGE_SIZE / sizeof(unsigned long)];
 #define pte_clear(mm,addr,ptep)	set_pte(ptep, __pte(0))
 #define pte_page(pte)		(pfn_to_page(pte_pfn(pte)))
 
-/*
+/**
  * The following only work if pte_present(). Undefined behaviour otherwise.
+ * 
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#'表2.2　　访问页表项标志位的函数'
+ * pte_present: 判断该页是否在内存中 
  */
 #define pte_present(pte)	(!!(pte_val(pte) & (PTE_VALID | PTE_PROT_NONE)))
 #define pte_young(pte)		(!!(pte_val(pte) & PTE_AF))
 #define pte_special(pte)	(!!(pte_val(pte) & PTE_SPECIAL))
 #define pte_write(pte)		(!!(pte_val(pte) & PTE_WRITE))
+// pte_user_exec 表示该页面属于用户态映射的页面
 #define pte_user_exec(pte)	(!(pte_val(pte) & PTE_UXN))
 #define pte_cont(pte)		(!!(pte_val(pte) & PTE_CONT))
 #define pte_devmap(pte)		(!!(pte_val(pte) & PTE_DEVMAP))
@@ -218,13 +222,24 @@ static inline pte_t pte_mkdevmap(pte_t pte)
 	return set_pte_bit(pte, __pgprot(PTE_DEVMAP | PTE_SPECIAL));
 }
 
+/**
+ * 把PTE页表项写入硬件页表
+ * 
+ * @param ptep 页表中的页表项
+ * @param pte 新的页表项的内容
+ */
 static inline void set_pte(pte_t *ptep, pte_t pte)
 {
 	WRITE_ONCE(*ptep, pte);
 
-	/*
+	/**
 	 * Only if the new pte is valid and kernel, otherwise TLB maintenance
 	 * or update_mmu_cache() have the necessary barriers.
+	 * (仅当新的页表项（PTE）有效且属于内核时，否则TLB维护操作或update_mmu_cache()会自带必要的屏障指令。)
+	 */
+	/**
+	 * pte_valid_not_user()表示该页面不能在用户态访问，
+	 * 即该页面属于内核态，当它被写入硬件页表后，需要调用dsb()来保证页表更新完成
 	 */
 	if (pte_valid_not_user(pte)) {
 		dsb(ishst);

@@ -224,6 +224,8 @@ struct em_perf_domain *em_pd_get(struct device *dev)
 EXPORT_SYMBOL_GPL(em_pd_get);
 
 /**
+ * 获取一个给定CPU的性能域
+ * 
  * em_cpu_get() - Return the performance domain for a CPU
  * @cpu : CPU to find the performance domain for
  *
@@ -243,19 +245,20 @@ struct em_perf_domain *em_cpu_get(int cpu)
 EXPORT_SYMBOL_GPL(em_cpu_get);
 
 /**
- * em_dev_register_perf_domain() - Register the Energy Model (EM) for a device
+ * em_dev_register_perf_domain() - Register the Energy Model (EM) for a device (为设备注册能量模型（Energy Model，简称 EM）)
+ * 
  * @dev		: Device for which the EM is to register
- * @nr_states	: Number of performance states to register
- * @cb		: Callback functions providing the data of the Energy Model
- * @cpus	: Pointer to cpumask_t, which in case of a CPU device is
- *		obligatory. It can be taken from i.e. 'policy->cpus'. For other
- *		type of devices this should be set to NULL.
+ * @nr_states	: Number of performance states to register(nr_states表示有几个性能状态点,即 OPP)
+ * @cb		: Callback functions providing the data of the Energy Model (参数cb表示一个回调函数，用于获取每个OPP的CPU频率和功耗数据，这些数据可以从设备树或者固件中获取)
+ * @cpus	: Pointer to cpumask_t, which in case of a CPU device is obligatory. It can be taken from i.e. 'policy->cpus'. For other type of devices this should be set to NULL.
+ *            (指向 cpumask_t 的指针（对于 CPU 设备是必填参数，可从 policy->cpus 获取；其他设备类型应设为 NULL）)
  *
  * Create Energy Model tables for a performance domain using the callbacks
- * defined in cb.
+ * defined in cb. (为性能域创建能量模型表（通过回调函数 cb 中定义的方法实现）)
  *
  * If multiple clients register the same performance domain, all but the first
  * registration will be ignored.
+ * (若同一性能域被多个客户端重复注册，仅首次注册有效，后续注册请求将被忽略)
  *
  * Return 0 on success
  */

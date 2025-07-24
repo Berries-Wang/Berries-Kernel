@@ -40,9 +40,41 @@
  */
 #define ARM64_HW_PGTABLE_LEVEL_SHIFT(n)	((PAGE_SHIFT - 3) * (4 - (n)) + 3)
 
+/**
+ * PTRS_PER_PTE 用于计算 每个页表（Page Table）中可以存放的页表项（PTE）的数量
+ * 
+ * 1. **`PAGE_SHIFT`**  
+ *    - 表示 **页大小的位偏移量**，例如：
+ *      - 如果页大小是 `4KB`（`4096` 字节），则 `PAGE_SHIFT = 12`（因为 \(2^{12} = 4096\)）。
+ *      - 如果页大小是 `64KB`，则 `PAGE_SHIFT = 16`（\(2^{16} = 65536\)）。
+ * 
+ * 2. **`PAGE_SHIFT - 3`**  
+ *    - 每个 **PTE（Page Table Entry）** 通常是 `8 字节`（64 位架构），因此：
+ *      - **`PAGE_SHIFT` 决定了一个页的大小**（如 `4KB = 4096` 字节）。
+ *      - **`PAGE_SHIFT - 3`** 计算的是 **一个页能存放多少个 PTE**：
+ *        - 因为 `8 字节 = 2^3`，所以 `4096 / 8 = 512`，即 `1 << (12 - 3) = 512`。
+ * 
+ * 3. **`1 << (PAGE_SHIFT - 3)`**  
+ *    - 最终计算的是 **一个页表（Page Table）能容纳的 PTE 数量**：
+ *      - 例如，`PAGE_SHIFT = 12`（4KB 页）时：
+ *          1 << (12 - 3) = 2^9 = 512
+ *        表示 **一个页表可以存放 512 个 PTE**。
+ * 
+ * ### **为什么是 `PAGE_SHIFT - 3`？**
+ *  - **页表本身也是一个内存页**，其大小由 `PAGE_SIZE` 决定（如 `4KB`）。
+ *  - **每个 PTE 占用 8 字节**（64 位系统），所以：
+ *      > PTE数量 = (PAGE_SIZE) / (sizeof(PTE)) = (2^PAGE_SHIFT) / 8 = 2^(PAGE_SHIFT-3)
+ *  - 因此，`PTRS_PER_PTE` 的值是 **页表能存储的 PTE 数量**。
+ */
 #define PTRS_PER_PTE		(1 << (PAGE_SHIFT - 3))
 
-/*
+/**
+ * PMD页表的偏移量和大小
+ * PMD_SHIFT宏表示PMD页表在虚拟地址中的起始偏移量。 
+ * PMD_SIZE宏表示一个PMD页表项所能映射的区域大小。
+ * PMD_MASK宏用来屏蔽虚拟地址中的PT索引字段的所有位。
+ * PTRS_PER_PMD宏表示PMD页表中页表项的个数。
+ * 
  * PMD_SHIFT determines the size a level 2 page table entry can map.
  */
 #if CONFIG_PGTABLE_LEVELS > 2
@@ -52,8 +84,16 @@
 #define PTRS_PER_PMD		PTRS_PER_PTE
 #endif
 
-/*
+/**
+ * PUD页表的偏移量和大小
+ * 
+ * PUD_SHIFT宏表示PUD页表在虚拟地址中的起始偏移量
+ * PUD_SIZE宏表示一个PUD页表项所能映射的区域大小。
+ * PUD_MASK宏用来屏蔽虚拟地址中的PMD索引和PT索引字段的所有位。
+ * PTRS_PER_PUD宏表示PUD页表中页表项的个数
+ *
  * PUD_SHIFT determines the size a level 1 page table entry can map.
+ * page table entry: PTE,页表项
  */
 #if CONFIG_PGTABLE_LEVELS > 3
 #define PUD_SHIFT		ARM64_HW_PGTABLE_LEVEL_SHIFT(1)
@@ -62,9 +102,19 @@
 #define PTRS_PER_PUD		PTRS_PER_PTE
 #endif
 
-/*
+/**
+ * 计算PGD页表的偏移量和大小
+ * 
+ * PGDIR_SHIFT 宏表示PGD页表在虚拟地址中的起始偏移量
+ * PGDIR_SIZE  宏表示PGD页表项所能映射的区域大小
+ * PGDIR_MASK  宏用来屏蔽虚拟地址中的PUD索引、PMD索引以及PT索引字段的所有位。
+ * PTRS_PER_PGD宏表示PGD页表中页表项的个数
+ * 
  * PGDIR_SHIFT determines the size a top-level page table entry can map
  * (depending on the configuration, this level can be 0, 1 or 2).
+ * (PGDIR_SHIFT 决定了顶层页表项（page table entry）能够映射的内存区域大小（根据配置不同，该层级可以是第0级、第1级或第2级）)
+ * 
+ * 
  */
 #define PGDIR_SHIFT		ARM64_HW_PGTABLE_LEVEL_SHIFT(4 - CONFIG_PGTABLE_LEVELS)
 #define PGDIR_SIZE		(_AC(1, UL) << PGDIR_SHIFT)

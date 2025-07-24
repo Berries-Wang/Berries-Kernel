@@ -81,17 +81,19 @@ DECLARE_EVENT_CLASS(sched_wakeup_template,
 		  __entry->target_cpu)
 );
 
-/*
+/**
  * Tracepoint called when waking a task; this tracepoint is guaranteed to be
  * called from the waking context.
+ * (唤醒任务时调用的追踪点；该追踪点确保在唤醒上下文中被调用。)
  */
 DEFINE_EVENT(sched_wakeup_template, sched_waking,
 	     TP_PROTO(struct task_struct *p),
 	     TP_ARGS(p));
 
-/*
- * Tracepoint called when the task is actually woken; p->state == TASK_RUNNNG.
+/**
+ * Tracepoint called when the task is actually woken; p->state == TASK_RUNNING.
  * It is not always called from the waking context.
+ * (在任务实际被唤醒时调用的追踪点（此时 p->state == TASK_RUNNING）。该追踪点并不总是在唤醒上下文中被调用)
  */
 DEFINE_EVENT(sched_wakeup_template, sched_wakeup,
 	     TP_PROTO(struct task_struct *p),

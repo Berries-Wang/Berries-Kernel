@@ -89,7 +89,7 @@ struct task_group;
 #define TASK_PARKED			0x0040
 #define TASK_DEAD			0x0080
 #define TASK_WAKEKILL			0x0100
-#define TASK_WAKING			0x0200
+#define TASK_WAKING			0x0200 // TASK_WAKING 是一个临时任务状态，用于表示任务正在被唤醒（wakeup）的过程中，但尚未完全切换到可运行状态（TASK_RUNNING）
 #define TASK_NOLOAD			0x0400
 #define TASK_NEW			0x0800
 #define TASK_STATE_MAX			0x1000
@@ -340,26 +340,31 @@ struct load_weight {
 };
 
 /**
- * struct util_est - Estimation utilization of FAIR tasks
- * @enqueued: instantaneous estimated utilization of a task/cpu
+ * struct util_est - Estimation utilization of FAIR tasks (估算FAIR任务的利用率)
+ * @enqueued: instantaneous estimated utilization of a task/cpu (任务/cpu的瞬时估计利用率)
  * @ewma:     the Exponential Weighted Moving Average (EWMA)
- *            utilization of a task
+ *            utilization of a task（任务的指数加权移动平均 (EWMA) 利用率）
  *
  * Support data structure to track an Exponential Weighted Moving Average
  * (EWMA) of a FAIR task's utilization. New samples are added to the moving
  * average each time a task completes an activation. Sample's weight is chosen
  * so that the EWMA will be relatively insensitive to transient changes to the
  * task's workload.
+ * (支持数据结构，用于跟踪 FAIR 任务利用率的指数加权移动平均线 (EWMA)。每次任务完成激活时，
+ * 都会将新样本添加到移动平均线中。样本权重的选择应确保 EWMA 对任务工作负载的瞬时变化相对不敏感。)
  *
  * The enqueued attribute has a slightly different meaning for tasks and cpus:
- * - task:   the task's util_avg at last task dequeue time
- * - cfs_rq: the sum of util_est.enqueued for each RUNNABLE task on that CPU
+ * (对于任务和 CPU，enqueued 属性的含义略有不同：上次任务出队时的任务 util_avg)
+ * - task:   the task's util_avg at last task dequeue time ()
+ * - cfs_rq: the sum of util_est.enqueued for each RUNNABLE task on that CPU (该 CPU 上每个 RUNNABLE 任务的 util_est.enqueued 总和)
  * Thus, the util_est.enqueued of a task represents the contribution on the
  * estimated utilization of the CPU where that task is currently enqueued.
+ * (因此，任务的 util_est.enqueued 表示该任务当前排队的 CPU 的估计利用率的贡献。)
  *
  * Only for tasks we track a moving average of the past instantaneous
  * estimated utilization. This allows to absorb sporadic drops in utilization
  * of an otherwise almost periodic task.
+ * (我们仅针对任务跟踪过去瞬时预估利用率的移动平均值。这可以吸收原本几乎周期性的任务偶尔出现的利用率下降。)
  */
 struct util_est {
 	unsigned int			enqueued;
@@ -368,6 +373,7 @@ struct util_est {
 } __attribute__((__aligned__(sizeof(u64))));
 
 /**
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]8.2　负载计算
  * 用于计算CPU负载
  * 
  * The load/runnable/util_avg accumulates an infinite geometric series
@@ -413,16 +419,60 @@ struct util_est {
  *
  * Then it is the load_weight's responsibility to consider overflow
  * issues.
+ * 
  */
 struct sched_avg {
+	/**
+	 * 上一次更新的时间点，用于计算时间间隔
+	 */
 	u64				last_update_time;
+
+	/**
+	 * 对于调度实体来说，它的统计对象是进程的调度实体在可运行状态下的累计衰减总时间。
+	 * 对于调度队列来说，它是调度队列中所有进程的累计工作总负载（decay_sum_load）
+	 */
 	u64				load_sum;
-	u64				runnable_sum;  // runnable_sum 表示该调度实体在就绪队列里（ se->on_rq=1 ）可运行状态（ runnable ）的总时间。调度实体在就绪队列中的时间包括两部分，一是正在运行的时间，称为 running时间，二是在就绪队列中等待的时间
+
+	/**
+	 * 对于调度实体来说，它是在就绪队列里可运行状态下的累计衰减总时间（decay_sum_time）。
+	 * 对于调度队列来说，它统计就绪队列里所有可运行状态下进程的累计工作总负载（decay_sum_load）
+	 */
+	u64				runnable_sum;
+
+	/**
+	 * 对于调度实体来说，它是正在运行状态下的累计衰减总时间（decay_sum_time）。使用cfs_rq->curr == se来判断当前进程是否正在运行。
+	 * 对于调度队列来说，它整个就绪队列中所有处于运行状态进程的累计衰减总时间（decay_sum_time）。只要就绪队列里有正在运行的进程，它就会去计算和累加
+	 *  */ 
 	u32				util_sum;
+
+	/**
+	 * 存放着上一次时间采样时，不能凑成一个周期（1024μs）的剩余的时间
+	 */
 	u32				period_contrib;
+
+	/**
+	 * 对于调度实体来说，它是可运行状态下的量化负载（decay_avg_load）。在负载均衡算法中，使用该成员来衡量一个进程的负载贡献值，如衡量迁移进程的负载量。
+	 * 对于调度队列来说，它是调度队列中总的量化负载
+	 */
 	unsigned long			load_avg;
-	unsigned long			runnable_avg;       
+
+	/**
+	 * 对于调度实体来说，它是可运行状态下的量化负载，等于load_avg。
+	 * 对于调度队列来说，它统计就绪队列里所有可运行状态下进程的总量化负载，在SMP负载均衡算法中使用该成员来比较CPU的负载大小
+	 */
+	unsigned long			runnable_avg; 
+
+	/**
+	 * 实际算力。通常用于体现一个调度实体或者CPU的实际算力需求，类似于CPU使用率的概念
+	 * util_avg指的是实际算力，表示一个进程或者CPU的当前实际使用率。
+	 *  */   
 	unsigned long			util_avg;
+	
+	/**
+	 * 任务阻塞后，其负载会不断衰减。如果一个重载任务阻塞太长时间，
+	 * 那么根据标准PELT算法计算出来的负载会非常的小，当该任务被唤醒重新参与调度的时候，
+	 * 由于负载较小会让调度器做出错误的判断。因此引入了这个成员，记录阻塞之前的load avg信息。
+	 */
 	struct util_est			util_est;
 } ____cacheline_aligned;
 
@@ -736,7 +786,14 @@ struct task_struct {
 	*/
 	unsigned int			cpu;
 #endif
+    /**
+	 * 用于wake affine特性
+	 * > 任务被不同唤醒者切换的次数，受 wakee_flip_decay_ts 控制的衰减影响
+	 */
 	unsigned int			wakee_flips;
+	/**
+	 *  用于记录上一次wakee_flips的时间
+	 */
 	unsigned long			wakee_flip_decay_ts;
 	
 	/**
@@ -918,6 +975,9 @@ struct task_struct {
 
 	/* Bit to tell LSMs we're in execve(): */
 	unsigned			in_execve:1;
+	/**
+	 * in_iowait 字段用于标记一个任务是否正在等待 I/O 操作完成
+	 */
 	unsigned			in_iowait:1;
 #ifndef TIF_RESTORE_SIGMASK
 	unsigned			restore_sigmask:1;
@@ -1111,7 +1171,12 @@ struct task_struct {
 	/* Protection against (de-)allocation: mm, files, fs, tty, keyrings, mems_allowed, mempolicy: */
 	spinlock_t			alloc_lock;
 
-	/* Protection of the PI data structures: */
+	/** Protection of the PI data structures: 
+	 * PI（优先级继承）数据结构的保护机制：
+	 * PI（Priority Inheritance）是实时系统中防止优先级反转的关键技术，此处指保护其内部数据结构（如任务优先级、依赖关系等）的同步机制。
+	 * 
+	 * pi_lock 字段是一个自旋锁（spinlock）
+	*/
 	raw_spinlock_t			pi_lock;
 
 	struct wake_q_node		wake_q;
