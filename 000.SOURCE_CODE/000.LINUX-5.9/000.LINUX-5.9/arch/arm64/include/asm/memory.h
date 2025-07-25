@@ -284,8 +284,12 @@ static inline void *phys_to_virt(phys_addr_t x)
 	return (void *)(__phys_to_virt(x));
 }
 
-/*
+/**
  * Drivers should NOT use these either.
+ * 
+ * __pa_symbol: 把内核符号的虚拟地址转换为物理地址
+ * __pa: 把内核虚拟地址转换为物理地址
+ * 
  */
 #define __pa(x)			__virt_to_phys((unsigned long)(x))
 #define __pa_symbol(x)		__phys_addr_symbol(RELOC_HIDE((unsigned long)(x), 0))

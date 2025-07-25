@@ -743,11 +743,19 @@ static void __init map_kernel(pgd_t *pgdp)
 /**
  * 在paging_init()函数中会对内核空间的多个内存段做重新映射 , 映射到页表
  * 
+ * swapper_pg_dir : 内核页表的PGD页表基地址，是虚拟地址，因为在内核启动的汇编代码中会做一次简单的块映射
+ * __pa_symbol: 把内核符号的虚拟地址转换为物理地址
+ * __pa: 这时物理内存的线性映射还没建立好，因此不能直接使用__pa()宏
  * 
+ * 
+ * 1. 先做固定映射 -> 2.划分页面(PGD、PUD...) 是这个顺序吗?
  * 
  */
 void __init paging_init(void)
 {
+	/**
+	 * pgd_set_fixmap()函数做一个固定映射，把swapper_pg_dir页表重新映射到固定映射区域
+	 */
 	pgd_t *pgdp = pgd_set_fixmap(__pa_symbol(swapper_pg_dir));
  
 	/**

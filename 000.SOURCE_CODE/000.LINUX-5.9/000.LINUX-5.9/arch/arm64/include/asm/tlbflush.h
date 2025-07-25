@@ -16,7 +16,7 @@
 #include <asm/cputype.h>
 #include <asm/mmu.h>
 
-/*
+/**
  * Raw TLBI operations.
  *
  * Where necessary, use the __tlbi() macro to avoid asm()
@@ -158,12 +158,13 @@ static inline unsigned long get_trans_granule(void)
 #define __TLBI_RANGE_NUM(pages, scale)	\
 	((((pages) >> (5 * (scale) + 1)) & TLBI_RANGE_MASK) - 1)
 
-/*
- *	TLB Invalidation
+/**
+ *	TLB Invalidation (TLB 失效)
  *	================
  *
  * 	This header file implements the low-level TLB invalidation routines
  *	(sometimes referred to as "flushing" in the kernel) for arm64.
+ * (该头文件实现了arm64架构下的低级TLB失效例程（在内核中有时称为“刷新”）)
  *
  *	Every invalidation operation uses the following template:
  *
@@ -190,30 +191,36 @@ static inline unsigned long get_trans_granule(void)
  *		Note that this operation also invalidates any walk-cache
  *		entries associated with translations for the specified address
  *		range.
+ *      (使进程地址空间的某段虚拟地址区间（从start到end）对应的TLB无效)
  *
  *	flush_tlb_kernel_range(start, end)
  *		Same as flush_tlb_range(..., start, end), but applies to
  * 		kernel mappings rather than a particular user address space.
  *		Whilst not explicitly documented, this function is used when
  *		unmapping pages from vmalloc/io space.
+ *      (使内核地址空间的某段虚拟地址区间（从start到end）对应的TLB无效)
  *
  *	flush_tlb_page(vma, addr)
  *		Invalidate a single user mapping for address 'addr' in the
  *		address space corresponding to 'vma->mm'.  Note that this
  *		operation only invalidates a single, last-level page-table
  *		entry and therefore does not affect any walk-caches.
+ *      (使虚拟地址addr所映射页面的TLB页表项无效)
  *
  *
  *	Next, we have some undocumented invalidation routines that you probably
  *	don't want to call unless you know what you're doing:
+ * (接下来是一些未文档化的失效例程，除非您明确知道自己在做什么，否则最好不要调用：)
  *
  *	local_flush_tlb_all()
  *		Same as flush_tlb_all(), but only applies to the calling CPU.
+ *      （与 flush_tlb_all() 功能相同，但仅作用于当前调用的 CPU）
  *
  *	__flush_tlb_kernel_pgtable(addr)
  *		Invalidate a single kernel mapping for address 'addr' on all
  *		CPUs, ensuring that any walk-cache entries associated with the
  *		translation are also invalidated.
+ *      (在所有 CPU 上使地址 addr 对应的单个内核映射失效，并确保同时失效与之关联的所有 walk-cache 条目)
  *
  *	__flush_tlb_range(vma, start, end, stride, last_level)
  *		Invalidate the virtual-address range '[start, end)' on all
@@ -221,11 +228,14 @@ static inline unsigned long get_trans_granule(void)
  *		The invalidation operations are issued at a granularity
  *		determined by 'stride' and only affect any walk-cache entries
  *		if 'last_level' is equal to false.
+ *      (针对 vma->mm 对应的用户地址空间，在所有 CPU 上使虚拟地址范围 [start, end) 失效。
+ *        失效操作的粒度由 stride 参数决定，且仅当 last_level 为 false 时才会影响任何 walk-cache 条目。)
  *
  *
  *	Finally, take a look at asm/tlb.h to see how tlb_flush() is implemented
  *	on top of these routines, since that is our interface to the mmu_gather
  *	API as used by munmap() and friends.
+ * (最后，可以参考 asm/tlb.h 了解如何基于这些底层例程实现 tlb_flush() —— 这正是 munmap() 等函数调用 MMU 收集器（mmu_gather）API 时使用的核心接口。)
  */
 static inline void local_flush_tlb_all(void)
 {
