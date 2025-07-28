@@ -399,6 +399,7 @@ static void __create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys,
 		alloc_init_pud(pgdp, addr, next, phys, prot, pgtable_alloc,
 			       flags);
 		phys += next - addr;
+		/*指针运算: pgdp++,指向下一个pgd_t区域，即以sizeof(pgd_t)(即:PGDIR_SIZE),遍历内存区域*/
 	} while (pgdp++, addr = next, addr != end);
 }
 
@@ -588,6 +589,7 @@ static void __init map_kernel_segment(pgd_t *pgdp, void *va_start, void *va_end,
 				      pgprot_t prot, struct vm_struct *vma,
 				      int flags, unsigned long vm_flags)
 {
+	// __pa_symbol()宏和__pa()宏的作用都是把内核虚拟地址转换为物理地址
 	phys_addr_t pa_start = __pa_symbol(va_start);
 	unsigned long size = va_end - va_start;
 

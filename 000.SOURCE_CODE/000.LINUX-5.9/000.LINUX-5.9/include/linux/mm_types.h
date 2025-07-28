@@ -489,7 +489,7 @@ struct mm_struct {
 
 		struct linux_binfmt *binfmt;
 
-		/* Architecture-specific MM context */
+		/** Architecture-specific MM context */
 		mm_context_t context;
 
 		unsigned long flags; /* Must use atomic bitops to access */
