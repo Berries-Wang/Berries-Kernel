@@ -336,6 +336,8 @@ static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
 		 * (对于仅使用4K粒度的情况，尝试建立一个1GB的大块映射)
 		 * 
 		 * use_1G_block()函数会判断是否使用1GB大小的内存块来映射
+		 * 
+		 * 001.UNIX-DOCS/022.内存管理/000.arm64-内核中的页表.md### 页表项描述符
 		 */
 		if (use_1G_block(addr, next, phys) &&
 		    (flags & NO_BLOCK_MAPPINGS) == 0) {
