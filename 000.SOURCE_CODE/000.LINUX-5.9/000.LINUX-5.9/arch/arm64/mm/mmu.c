@@ -374,7 +374,7 @@ static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
  * 
  * 创建页表映射
  * 
- * 
+ * create_mapping_noalloc 看一下这个方法的注释 
  */
 static void __create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys,
 				 unsigned long virt, phys_addr_t size,
@@ -439,10 +439,14 @@ static phys_addr_t pgd_pgtable_alloc(int shift)
  * This function can only be used to modify existing table entries,
  * without allocating new levels of table. Note that this permits the
  * creation of new section or page entries.
+ * 
+ * 将起始物理地址等于phys，大小是size的这一段物理内存mapping到起始虚拟地址是virt的虚拟地址空间
+ * 
  */
 static void __init create_mapping_noalloc(phys_addr_t phys, unsigned long virt,
 				  phys_addr_t size, pgprot_t prot)
 {
+        // 内核的虚拟地址空间从VMALLOC_START开始，低于这个地址就不对了
 	if ((virt >= PAGE_END) && (virt < VMALLOC_START)) {
 		pr_warn("BUG: not creating mapping for %pa at 0x%016lx - outside kernel range\n",
 			&phys, virt);
