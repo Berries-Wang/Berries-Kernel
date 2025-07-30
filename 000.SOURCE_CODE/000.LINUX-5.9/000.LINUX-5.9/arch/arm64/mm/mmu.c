@@ -439,6 +439,7 @@ static phys_addr_t pgd_pgtable_alloc(int shift)
  * This function can only be used to modify existing table entries,
  * without allocating new levels of table. Note that this permits the
  * creation of new section or page entries.
+ * (此功能仅可用于修改现有表格条目，而不会分配新的表格层级。但请注意，该操作允许创建新的节条目或页面条目)
  * 
  * 将起始物理地址等于phys，大小是size的这一段物理内存mapping到起始虚拟地址是virt的虚拟地址空间
  * 
@@ -533,7 +534,11 @@ static void __init map_mem(pgd_t *pgdp)
 				    resource_size(&crashk_res));
 #endif
 
-	/* map all the memory banks */
+	/** map all the memory banks(映射所有存储体) 
+	 * 
+	 * for_each_memblock 定义在: 000.LINUX-5.9/include/linux/memblock.h
+	 * 这里传入的是 memory , 所以遍历的是所有可用的物理内存 (另一种是保留内存)
+	*/
 	for_each_memblock(memory, reg) {
 		phys_addr_t start = reg->base;
 		phys_addr_t end = start + reg->size;
