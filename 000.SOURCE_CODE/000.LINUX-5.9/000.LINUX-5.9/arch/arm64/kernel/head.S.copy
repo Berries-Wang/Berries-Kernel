@@ -287,6 +287,8 @@ SYM_CODE_END(preserve_boot_args)
  *     been enabled
  * 创建虚拟地址和物理地址的恒等映射(identity mapping: 用于保证虚拟地址和物理地址在数值上是相同的)： 开启MMU -- 
  *  创建两个映射
+ *
+ * 这里建立的恒等映射是小范围的，占用的空间通常是内核映像的大小，也就是几兆字节 # 2.6.4　创建恒等映射和内核映像映射
  */
 SYM_FUNC_START_LOCAL(__create_page_tables)
 	mov	x28, lr

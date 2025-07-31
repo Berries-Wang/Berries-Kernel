@@ -510,10 +510,15 @@ void __init mark_linear_text_alias_ro(void)
  * 
  * "加速访问"的含义:
  *   通过简单的偏移量实现，虚拟地址 = 物理地址 + 固定偏移（如PAGE_OFFSET）, 提供一种快速访问物理内存的方式，避免了频繁的页表操作
+ * 
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]2．map_mem()函数
  */
 static void __init map_mem(pgd_t *pgdp)
 {
 	phys_addr_t kernel_start = __pa_symbol(_text);
+	/**
+	 * 0000.LINUX-5.9/arch/arm64/kernel/vmlinux.lds.S 中的__init_begin?
+	 */
 	phys_addr_t kernel_end = __pa_symbol(__init_begin);
 	struct memblock_region *reg;
 	int flags = 0;
@@ -521,11 +526,13 @@ static void __init map_mem(pgd_t *pgdp)
 	if (rodata_full || debug_pagealloc_enabled())
 		flags = NO_BLOCK_MAPPINGS | NO_CONT_MAPPINGS;
 
-	/*
+	/**
 	 * Take care not to create a writable alias for the
 	 * read-only text and rodata sections of the kernel image.
 	 * So temporarily mark them as NOMAP to skip mappings in
 	 * the following for-loop
+	 * (注意不要为内核镜像的只读代码段（text）和只读数据段（rodata）创建可写别名。
+	 * 因此需要暂时将它们标记为 NOMAP，以便在接下来的循环映射中跳过这些区域。)
 	 */
 	memblock_mark_nomap(kernel_start, kernel_end - kernel_start);
 #ifdef CONFIG_KEXEC_CORE
@@ -548,10 +555,11 @@ static void __init map_mem(pgd_t *pgdp)
 		if (memblock_is_nomap(reg))
 			continue;
 
+		// 创建页表映射,内部是直接调用 _create_pgd_mapping
 		__map_memblock(pgdp, start, end, PAGE_KERNEL, flags);
 	}
 
-	/*
+	/**
 	 * Map the linear alias of the [_text, __init_begin) interval
 	 * as non-executable now, and remove the write permission in
 	 * mark_linear_text_alias_ro() below (which will be called after
@@ -560,9 +568,12 @@ static void __init map_mem(pgd_t *pgdp)
 	 * but protects it from inadvertent modification or execution.
 	 * Note that contiguous mappings cannot be remapped in this way,
 	 * so we should avoid them here.
+	 * (现在将 [_text, __init_begin) 区间的线性别名映射为不可执行，并在后续的 mark_linear_text_alias_ro() 函数中移除写权限（该函数将在替代修补完成后调用）。
+	 * 这样既能让休眠等子系统访问该区域内容，又能防止意外修改或执行。需要注意的是，连续映射无法以这种方式重新映射，因此我们在此应避免使用连续映射)
 	 */
 	__map_memblock(pgdp, kernel_start, kernel_end,
 		       PAGE_KERNEL, NO_CONT_MAPPINGS);
+	// 000.LINUX-5.9/mm/memblock.c
 	memblock_clear_nomap(kernel_start, kernel_end - kernel_start);
 
 #ifdef CONFIG_KEXEC_CORE
