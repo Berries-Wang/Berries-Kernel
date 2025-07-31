@@ -343,7 +343,7 @@ struct per_cpu_nodestat {
 #endif /* !__GENERATING_BOUNDS.H */
 
 enum zone_type {
-	/*
+	/**
 	 * ZONE_DMA and ZONE_DMA32 are used when there are peripherals not able
 	 * to DMA to all of the addressable memory (ZONE_NORMAL).
 	 * On architectures where this area covers the whole 32 bit address
@@ -352,6 +352,9 @@ enum zone_type {
 	 * DMA mask is assumed when ZONE_DMA32 is defined. Some 64-bit
 	 * platforms may need both zones as they support peripherals with
 	 * different DMA addressing limitations.
+	 * (ZONE_DMA（直接内存访问区域）和ZONE_DMA32用于存在无法对所有可寻址内存（ZONE_NORMAL常规区域）进行DMA操作的外设场景。
+	 * 在32位地址空间可覆盖全部寻址范围的体系架构中，会使用ZONE_DMA32区域；而寻址能力更小的设备则使用ZONE_DMA区域。
+	 * 这一区分至关重要——当定义ZONE_DMA32时，即默认设备具有32位DMA寻址能力。某些64位平台可能需要同时配置这两个区域，以支持具有不同DMA寻址限制的外设)
 	 *
 	 * Some examples:
 	 *
