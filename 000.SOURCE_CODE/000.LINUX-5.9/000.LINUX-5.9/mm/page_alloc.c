@@ -4808,6 +4808,10 @@ got_pg:
 	return page;
 }
 
+/**
+ *
+ * 
+ */
 static inline bool prepare_alloc_pages(gfp_t gfp_mask, unsigned int order,
 		int preferred_nid, nodemask_t *nodemask,
 		struct alloc_context *ac, gfp_t *alloc_mask,
@@ -4860,19 +4864,22 @@ static inline void finalise_ac(gfp_t gfp_mask, struct alloc_context *ac)
 
 /*
  * This is the 'heart' of the zoned buddy allocator.
+ * (这是分区伙伴分配器（zoned buddy allocator）的「核心」部分)
  */
 struct page *
 __alloc_pages_nodemask(gfp_t gfp_mask, unsigned int order, int preferred_nid,
 							nodemask_t *nodemask)
 {
 	struct page *page;
-	unsigned int alloc_flags = ALLOC_WMARK_LOW;
+	unsigned int alloc_flags = ALLOC_WMARK_LOW; // 允许分配内存的判断条件为低水位
 	gfp_t alloc_mask; /* The gfp_t that was actually used for allocation */
 	struct alloc_context ac = { };
 
 	/*
 	 * There are several places where we assume that the order value is sane
 	 * so bail out early if the request is out of bound.
+         * 当前有多处代码假设 order 值在合法范围内，因此若请求越界应提前终止处理。
+         * 伙伴系统能分配的最大内存块大小为 2^(MAX_ORDER - 1) 个页面。
 	 */
 	if (unlikely(order >= MAX_ORDER)) {
 		WARN_ON_ONCE(!(gfp_mask & __GFP_NOWARN));
@@ -4884,15 +4891,19 @@ __alloc_pages_nodemask(gfp_t gfp_mask, unsigned int order, int preferred_nid,
 	if (!prepare_alloc_pages(gfp_mask, order, preferred_nid, nodemask, &ac, &alloc_mask, &alloc_flags))
 		return NULL;
 
+        // finalise_ac 主要用于确定首选的zone
 	finalise_ac(gfp_mask, &ac);
 
 	/*
 	 * Forbid the first pass from falling back to types that fragment
 	 * memory until all local zones are considered.
+         * alloc_flags_nofragment 为内存碎片化做了一个优化:
 	 */
 	alloc_flags |= alloc_flags_nofragment(ac.preferred_zoneref->zone, gfp_mask);
 
-	/* First allocation attempt */
+	/* First allocation attempt
+         * get_page_from_freelist 尝试从伙伴系统的空闲列表中分配内存。
+         */
 	page = get_page_from_freelist(alloc_mask, order, alloc_flags, &ac);
 	if (likely(page))
 		goto out;
@@ -4911,7 +4922,7 @@ __alloc_pages_nodemask(gfp_t gfp_mask, unsigned int order, int preferred_nid,
 	 * &cpuset_current_mems_allowed to optimize the fast-path attempt.
 	 */
 	ac.nodemask = nodemask;
-
+        // 慢速分配路径
 	page = __alloc_pages_slowpath(alloc_mask, order, &ac);
 
 out:
