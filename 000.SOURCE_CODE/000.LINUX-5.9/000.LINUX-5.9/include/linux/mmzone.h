@@ -686,6 +686,7 @@ struct deferred_split {
  *
  * Memory statistics and page replacement data structures are maintained on a
  * per-zone basis.
+ * (内存统计信息和页面置换数据结构是基于每个内存区域（per-zone）维护的)
  */
 typedef struct pglist_data {
 	/*
