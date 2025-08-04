@@ -773,6 +773,12 @@ static void __init map_kernel(pgd_t *pgdp)
  * 
  * 
  * 1. 先做固定映射 -> 2.划分页面(PGD、PUD...) 是这个顺序吗?
+ *
+ * 看一下[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#3.3.4　物理内存映射
+ *     内核映像映射了两次： 映射到内核空间的虚拟地址；线性映射? 怎么理解? 
+ *        从示意图看，两块虚拟地址空间映射的物理内存空间是一样的!
+ *          map_kernel: 确保内核自身能继续执行：处理内核代码、数据段的映射，解决 MMU 启用前后的地址连续性问题。(在 MMU 启用瞬间，CPU 仍在通过物理地址执行指令，必须保证内核代码的虚拟地址能立即访问)
+ *          map_mem: 建立全局物理内存管理：将所有物理内存（包括内核已占用的部分）映射到线性区域，供内核全局使用。
  * 
  */
 void __init paging_init(void)
