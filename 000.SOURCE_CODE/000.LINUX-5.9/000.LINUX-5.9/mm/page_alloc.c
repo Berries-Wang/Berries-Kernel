@@ -4820,6 +4820,7 @@ static inline bool prepare_alloc_pages(gfp_t gfp_mask, unsigned int order,
 	ac->highest_zoneidx = gfp_zone(gfp_mask);
 	ac->zonelist = node_zonelist(preferred_nid, gfp_mask);
 	ac->nodemask = nodemask;
+        // 根据掩码计算内存的迁移类型
 	ac->migratetype = gfp_migratetype(gfp_mask);
 
 	if (cpusets_enabled()) {
@@ -4838,7 +4839,12 @@ static inline bool prepare_alloc_pages(gfp_t gfp_mask, unsigned int order,
 	fs_reclaim_release(gfp_mask);
 
 	might_sleep_if(gfp_mask & __GFP_DIRECT_RECLAIM);
-
+        /**
+         *
+         * should_fail_alloc_page ： 故障注入判断函数 ， 
+         * should_fail_alloc_page 是 Linux 内核中的一个调试函数，用于模拟内存分配失败，以测试内核在内存不足（OOM, Out-of-Memory）情况下的行为。
+         *                        它通常用于 故障注入（Fault Injection） 测试，以验证内核的内存分配路径是否具备正确的错误处理能力
+         */
 	if (should_fail_alloc_page(gfp_mask, order))
 		return false;
 
