@@ -506,7 +506,11 @@ struct zone {
 	/* Write-intensive fields used from the page allocator */
 	ZONE_PADDING(_pad1_)
 
-	/* free areas of different sizes */
+	/**
+	 *  free areas of different sizes 
+	 * 
+	 * #3.3.7　物理内存初始化
+	*/
 	struct free_area	free_area[MAX_ORDER];
 
 	/* zone flags, see below */

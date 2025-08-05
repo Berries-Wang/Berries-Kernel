@@ -4888,6 +4888,8 @@ __alloc_pages_nodemask(gfp_t gfp_mask, unsigned int order, int preferred_nid,
 
 	gfp_mask &= gfp_allowed_mask;
 	alloc_mask = gfp_mask;
+	
+	// 初始化分配器相关参数
 	if (!prepare_alloc_pages(gfp_mask, order, preferred_nid, nodemask, &ac, &alloc_mask, &alloc_flags))
 		return NULL;
 
@@ -4938,10 +4940,12 @@ out:
 }
 EXPORT_SYMBOL(__alloc_pages_nodemask);
 
-/*
+/**
  * Common helper functions. Never use with __GFP_HIGHMEM because the returned
  * address cannot represent highmem pages. Use alloc_pages and then kmap if
  * you need to access high mem.
+ * 
+ * @return 返回的是内核空间的虚拟地址?
  */
 unsigned long __get_free_pages(gfp_t gfp_mask, unsigned int order)
 {
@@ -4968,6 +4972,9 @@ static inline void free_the_page(struct page *page, unsigned int order)
 		__free_pages_ok(page, order);
 }
 
+/**
+ * 页面释放函数
+ */
 void __free_pages(struct page *page, unsigned int order)
 {
 	if (put_page_testzero(page))

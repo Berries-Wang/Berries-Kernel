@@ -122,7 +122,7 @@ extern pmd_t *mm_find_pmd(struct mm_struct *mm, unsigned long address);
  * in mm/page_alloc.c
  */
 
-/*
+/**
  * Structure for holding the mostly immutable allocation parameters passed
  * between functions involved in allocations, including the alloc_pages*
  * family of functions.
@@ -136,10 +136,10 @@ extern pmd_t *mm_find_pmd(struct mm_struct *mm, unsigned long address);
  * by a const pointer.
  */
 struct alloc_context {
-	struct zonelist *zonelist;
-	nodemask_t *nodemask;
-	struct zoneref *preferred_zoneref;
-	int migratetype;
+	struct zonelist *zonelist;                                      // zonelist指向每一个内存节点中对应的zonelist
+	nodemask_t *nodemask;                                           // nodemask表示内存节点的掩码
+	struct zoneref *preferred_zoneref;                              // preferred_zoneref表示首选zone的zoneref
+	int migratetype;                                                // migratetype表示迁移类型
 
 	/*
 	 * highest_zoneidx represents highest usable zone index of
@@ -151,8 +151,8 @@ struct alloc_context {
 	 * the target zone since higher zone than this index cannot be
 	 * usable for this allocation request.
 	 */
-	enum zone_type highest_zoneidx;
-	bool spread_dirty_pages;
+	enum zone_type highest_zoneidx;                              // high_zoneidx分配掩码计算zone的zoneidx，表示这个分配掩码允许内存分配的最高zone
+	bool spread_dirty_pages;                                     // spread_dirty_pages用于指定是否传播脏页。
 };
 
 /*
