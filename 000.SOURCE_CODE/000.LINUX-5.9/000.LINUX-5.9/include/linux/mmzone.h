@@ -643,28 +643,43 @@ enum {
 	MAX_ZONELISTS
 };
 
-/*
+/**
  * This struct contains information about a zone in a zonelist. It is stored
  * here to avoid dereferences into large structures and lookups of tables
+ * 该结构体（struct zoneref）存储了 zonelist 中某个 zone（内存区域）的相关信息。
+ * 将其直接存放在此的目的是：
+ *      避免解引用大型结构体（减少访问复杂数据结构的开销）
+ *      避免查表操作（节省查找表的性能损耗）
  */
 struct zoneref {
 	struct zone *zone;	/* Pointer to actual zone */
-	int zone_idx;		/* zone_idx(zoneref->zone) */
+	int zone_idx;		/* zone_idx(zoneref->zone) : 使用zone_idx()函数获取的编号 */
 };
 
-/*
+/**
+ * 内核使用zonelist数据结构来管理一个内存节点的zone。
+ * 
  * One allocation request operates on a zonelist. A zonelist
  * is a list of zones, the first one is the 'goal' of the
  * allocation, the other zones are fallback zones, in decreasing
  * priority.
+ * (一个分配请求作用于一个zonelist（区域列表）。zonelist是一组zone（内存区域）的集合，
+ * 其中第一个zone是分配的"目标"（goal），其余zone则是按优先级递减排列的备用（fallback）区域。)
  *
  * To speed the reading of the zonelist, the zonerefs contain the zone index
  * of the entry being read. Helper functions to access information given
  * a struct zoneref are
+ * (为了加速 zonelist 的读取，zoneref（区域引用）中包含了当前读取项的 zone index（区域索引）。
+ * 以下是用于访问 struct zoneref 所提供信息的辅助函数：)
  *
  * zonelist_zone()	- Return the struct zone * for an entry in _zonerefs
  * zonelist_zone_idx()	- Return the index of the zone for an entry
  * zonelist_node_idx()	- Return the index of the node for an entry
+ * 
+ * > [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#▲图4.2　zone类型、_zoneref[]数组和zone_idx之间的关系
+ * 假设系统中只有一个内存节点，有两个 zone，分别是 ZONE_DMA32 和 ZONE_NORMAL，那么zonelist中zone类型、_zoneref[ ]数组和zone_idx之间的关系如下。
+ *    ZONE_NORMAL:  _zonerefs[0]->zone_idx=1
+ *    ZONE_DMA32:   _zonerefs[1]->zone_idx=0
  */
 struct zonelist {
 	struct zoneref _zonerefs[MAX_ZONES_PER_ZONELIST + 1];
@@ -691,6 +706,8 @@ struct deferred_split {
  * Memory statistics and page replacement data structures are maintained on a
  * per-zone basis.
  * (内存统计信息和页面置换数据结构是基于每个内存区域（per-zone）维护的)
+ * 
+ * 在内存节点数据结构pglist_data中有两个zonelist：其中一个是ZONELIST_FALLBACK，指向本地的zone，即包含备选的zone；另外一个是ZONELIST_NOFALLBACK，用于NUMA系统，指向远端的内存节点的zone。
  */
 typedef struct pglist_data {
 	/*

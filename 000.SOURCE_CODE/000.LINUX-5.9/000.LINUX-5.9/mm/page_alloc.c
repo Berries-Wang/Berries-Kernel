@@ -3721,9 +3721,11 @@ static inline unsigned int current_alloc_flags(gfp_t gfp_mask,
 	return alloc_flags;
 }
 
-/*
+/**
  * get_page_from_freelist goes through the zonelist trying to allocate
  * a page.
+ * (get_page_from_freelist 会遍历 zonelist（内存区域列表），尝试分配一个内存页。)
+ * > 从伙伴系统的空闲页面链表中尝试分配物理页面
  */
 static struct page *
 get_page_from_freelist(gfp_t gfp_mask, unsigned int order, int alloc_flags,
@@ -3735,14 +3737,17 @@ get_page_from_freelist(gfp_t gfp_mask, unsigned int order, int alloc_flags,
 	bool no_fallback;
 
 retry:
-	/*
+	/**
 	 * Scan zonelist, looking for a zone with enough free.
 	 * See also __cpuset_node_allowed() comment in kernel/cpuset.c.
+	 * 
+	 * ALLOC_NOFRAGMENT: 表示需要避免内存碎片化。
 	 */
 	no_fallback = alloc_flags & ALLOC_NOFRAGMENT;
+	// preferred_zoneref表示zonelist中首选和推荐的zone，这个值是在finalise_ac()函数中通过first_zones_zonelist()宏计算出来的
 	z = ac->preferred_zoneref;
-	for_next_zone_zonelist_nodemask(zone, z, ac->zonelist,
-					ac->highest_zoneidx, ac->nodemask) {
+	// 从推荐的zone开始遍历所有的zone，这里使用for_next_zone_zonelist_nodemask()宏
+	for_next_zone_zonelist_nodemask(zone, z, ac->zonelist, ac->highest_zoneidx, ac->nodemask) {
 		struct page *page;
 		unsigned long mark;
 
@@ -3750,7 +3755,7 @@ retry:
 			(alloc_flags & ALLOC_CPUSET) &&
 			!__cpuset_zone_allowed(zone, gfp_mask))
 				continue;
-		/*
+		/**
 		 * When allocating a page cache page for writing, we
 		 * want to get it from a node that is within its dirty
 		 * limit, such that no single node holds more than its
@@ -3779,14 +3784,21 @@ retry:
 			}
 		}
 
+		/**
+		 * NUMA系统的一个特殊情况。当要分配内存的zone不在本地内存节点（即在远端节点）时，
+		 * 要考虑的不是内存碎片化，而是内存的本地性，因为访问本地内存节点要比访问远端内存节点要快很多
+		 * 
+		 * 怎么理解?
+		 */
 		if (no_fallback && nr_online_nodes > 1 &&
 		    zone != ac->preferred_zoneref->zone) {
 			int local_nid;
 
-			/*
+			/**
 			 * If moving to a remote node, retry but allow
 			 * fragmenting fallbacks. Locality is more important
 			 * than fragmentation avoidance.
+			 * (若需迁移至远端节点（remote node），则允许重试并接受碎片化的备用分配策略——此时数据局部性（locality）的优先级高于避免内存碎片)
 			 */
 			local_nid = zone_to_nid(ac->preferred_zoneref->zone);
 			if (zone_to_nid(zone) != local_nid) {
@@ -5757,11 +5769,22 @@ static void build_thisnode_zonelists(pg_data_t *pgdat)
 	zonerefs->zone_idx = 0;
 }
 
-/*
+/**
+ * 系统在初始化时调用build_zonelists()函数建立zonelist
+ * 
  * Build zonelists ordered by zone and nodes within zones.
  * This results in conserving DMA zone[s] until all Normal memory is
  * exhausted, but results in overflowing to remote node while memory
  * may still exist in local DMA zone.
+ * 
+ * 构建按 zone（内存区域） 和 节点内 zone 顺序排列的 zonelist。 ???
+ * 这种设计会导致：
+ *    优先保留 DMA 区域的内存，直到所有 Normal 内存 耗尽；
+ *    但可能引发内存溢出到远端节点，而本地 DMA 区域中仍有可用内存
+ * 
+ * 远端节点是什么意思?
+ *    在 Linux 内核内存管理上下文中，远端节点（remote node） 指的是非当前 CPU 所属的 NUMA（Non-Uniform Memory Access，非一致性内存访问）节点
+ *   查看:[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#▲图3.7　NUMA架构
  */
 
 static void build_zonelists(pg_data_t *pgdat)
