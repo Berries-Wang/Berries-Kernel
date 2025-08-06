@@ -925,7 +925,7 @@ buddy_merge_likely(unsigned long pfn, unsigned long buddy_pfn,
 	       page_is_buddy(higher_page, higher_buddy, order + 1);
 }
 
-/*
+/**
  * Freeing function for a buddy system allocator.
  *
  * The concept of a buddy system is to maintain direct-mapped table
@@ -937,6 +937,28 @@ buddy_merge_likely(unsigned long pfn, unsigned long buddy_pfn,
  * at the bottom level available, and propagating the changes upward
  * as necessary, plus some accounting needed to play nicely with other
  * parts of the VM system.
+ * 伙伴系统（Buddy System）的核心思想是**维护一个直接映射表（包含位图值）来管理不同“阶数”（order）的内存块**。其基本结构如下：  
+ * 
+ * 1. **底层映射表**：  
+ *    - 管理**最小可分配内存单元**（通常是页框，page），每个表项通过位图标记对应内存块的使用状态。  
+ * 
+ * 2. **上层映射表**：  
+ *    - 每一层描述的是**下一层两个连续内存块的组合**（即“伙伴”），因此得名。  
+ *    - 例如，第 *n* 阶的表项表示两个连续的 *n-1* 阶内存块是否可合并为一个更大的 *n* 阶块。  
+ * 
+ * 3. **操作流程**：  
+ *    - **释放内存时**：  
+ *      1. 在底层标记对应的页框为可用。  
+ *      2. **向上层递归检查**：如果两个相邻的伙伴块均空闲，则合并为一个更高阶的块，并更新上层表项。  
+ *    - **分配内存时**：  
+ *      1. 从满足需求的最高阶开始查找空闲块。  
+ *      2. 若没有合适块，则拆分更大的块，并更新表项。  
+ * 
+ * 4. **与虚拟内存（VM）系统的协作**：  
+ *    - 需要额外的**统计和管理机制**（如`zone`结构中的`free_area`链表），以确保与页面回收、缓存等子系统协同工作。  
+ * 
+ * 简而言之，伙伴系统通过**分层位图管理内存块的合并与拆分**，兼顾了分配效率（快速查找空闲块）和减少碎片（合并伙伴块）的能力。 
+ * 
  * At each level, we keep a list of pages, which are heads of continuous
  * free pages of length of (1 << order) and marked with PageBuddy.
  * Page's order is recorded in page_private(page) field.
@@ -945,14 +967,45 @@ buddy_merge_likely(unsigned long pfn, unsigned long buddy_pfn,
  * free, the remainder of the region must be split into blocks.
  * If a block is freed, and its buddy is also free, then this
  * triggers coalescing into a block of larger size.
- *
+ * 在伙伴系统的每一层级中，我们维护了一个**页面链表**，其中的每个节点都是长度为 `(1 << order)` 的连续空闲页块的**头页**，并通过 `PageBuddy` 标志位标记。页块的阶数（order）记录在 `page_private(page)` 字段中。  
+ * 
+ * ### **分配与释放的核心逻辑**  
+ * 1. **分配内存时**：  
+ *    - 如果申请的是一个**小块内存**（例如从高阶块中拆分）：  
+ *      - 当原空闲块被部分分配后，**剩余部分会被拆分成更小的块**，并加入对应阶数的空闲链表。  
+ *      - 例如：从 4 阶块（16 页）分配 1 页后，剩余的 15 页会被拆分为 2 个 3 阶块、1 个 2 阶块等（具体取决于伙伴系统的拆分策略）。  
+ * 
+ * 2. **释放内存时**：  
+ *    - 如果被释放的块**其伙伴块也是空闲的**（通过 `PageBuddy` 和 `page_private` 判断），则会**触发合并**，形成一个更高阶的连续空闲块。  
+ *    - 例如：两个相邻的 2 阶块（各 4 页）若均空闲，则合并为一个 3 阶块（8 页）。  
+ * 
+ * ### **关键机制**  
+ * - **`PageBuddy` 标志**：  
+ *   - 表示该页是一个**空闲块的头页**，其后的 `(1 << order)` 页均属于同一空闲块。  
+ * - **`page_private(page)` 字段**：  
+ *   - 存储该空闲块的阶数，用于快速判断是否可合并。  
+ * - **伙伴（Buddy）关系**：  
+ *   - 两个块互为伙伴的条件：  
+ *     - 物理地址连续。  
+ *     - 属于同一阶数。  
+ *     - 起始地址对齐到 `2^(order+1)` 的边界（例如 8 阶块的地址必须对齐到 `2^(8+1) = 512` 页）。  
+ * 
+ * ### **总结**  
+ * 伙伴系统通过**链表管理连续空闲块**，利用 `PageBuddy` 和 `page_private` 实现快速分配与释放。其核心是：  
+ * - **分配时拆分**：大块拆分成小块，满足请求。  
+ * - **释放时合并**：检查伙伴块是否空闲，递归合并以减少碎片。  
+ * 
+ * 这种设计在保证高效内存分配的同时，最大限度地减少了外部碎片（external fragmentation）。
+ * 
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#4.1.7　释放页面
  * -- nyc
+ * 
+ * @param pfn 
  */
 
-static inline void __free_one_page(struct page *page,
-		unsigned long pfn,
-		struct zone *zone, unsigned int order,
-		int migratetype, bool report)
+static inline void __free_one_page(struct page *page, unsigned long pfn,
+				   struct zone *zone, unsigned int order,
+				   int migratetype, bool report)
 {
 	struct capture_control *capc = task_capc(zone);
 	unsigned long buddy_pfn;
@@ -1463,6 +1516,10 @@ void __meminit reserve_bootmem_region(phys_addr_t start, phys_addr_t end)
 	}
 }
 
+/**
+ * 释放多个页面
+ * 
+ */
 static void __free_pages_ok(struct page *page, unsigned int order)
 {
 	unsigned long flags;
@@ -3355,18 +3412,38 @@ static struct page *rmqueue_pcplist(struct zone *preferred_zone,
 	return page;
 }
 
-/*
+/**
+ * 从伙伴系统中分配页面
+ *  若需要的内存块不能满足，那么可以从大内存块中切。
+ *      例如，应用程序想分配order为5的内存块，但是order为5的空闲链表中没有空闲内存，
+ *           而order为6的空闲链表中有，那么该函数就会把order为6的内存块拿出来，
+ *           然后将其中一部分分配出去，把剩余的一块加到order为5的空闲链表中。
+ * 
+ * > 这也是为什么在系统启动时，会尽可能把空闲页面分配到MAX_ORDER−1的链表中
+ * 
+ * 
  * Allocate a page from the given zone. Use pcplists for order-0 allocations.
+ * (从给定的zone中分配一个页面。对于order-0的分配，使用pcplists。?)
+ * 
+ * 
+ * @param preferred_zone 首选的zone
+ * @param zone 当前遍历的zone
+ * @param order 分配2^order个连续物理页
+ * @param gfp_flags 分配掩码
+ * @param alloc_flags 页面分配器使用的标志位
+ * @param migratetype 分配内存的迁移类型
+ * 
+ * @return 分配成功时，返回第一个内存页面的数据结构
  */
-static inline
-struct page *rmqueue(struct zone *preferred_zone,
-			struct zone *zone, unsigned int order,
-			gfp_t gfp_flags, unsigned int alloc_flags,
-			int migratetype)
+static inline struct page *rmqueue(struct zone *preferred_zone,
+				   struct zone *zone, unsigned int order,
+				   gfp_t gfp_flags, unsigned int alloc_flags,
+				   int migratetype)
 {
 	unsigned long flags;
 	struct page *page;
 
+	// 分配单个物理页面
 	if (likely(order == 0)) {
 		/*
 		 * MIGRATE_MOVABLE pcplist could have the pages on CMA area and
@@ -3386,7 +3463,9 @@ struct page *rmqueue(struct zone *preferred_zone,
 	 */
 	WARN_ON_ONCE((gfp_flags & __GFP_NOFAIL) && (order > 1));
 	spin_lock_irqsave(&zone->lock, flags);
-
+    /**
+	 * 
+	 */
 	do {
 		page = NULL;
 		/*
@@ -3396,13 +3475,17 @@ struct page *rmqueue(struct zone *preferred_zone,
 		 * request should skip it.
 		 */
 		if (order > 0 && alloc_flags & ALLOC_HARDER) {
-			page = __rmqueue_smallest(zone, order, MIGRATE_HIGHATOMIC);
-			if (page)
-				trace_mm_page_alloc_zone_locked(page, order, migratetype);
+			// 切内存，怎么切?
+			page = __rmqueue_smallest(zone, order,  MIGRATE_HIGHATOMIC);
+			if (page) {
+				trace_mm_page_alloc_zone_locked(page, order,	migratetype);
+			}
 		}
+		// 分配失败，重新分配，这次是怎么分配?
 		if (!page)
 			page = __rmqueue(zone, order, migratetype, alloc_flags);
 	} while (page && check_new_pages(page, order));
+
 	spin_unlock(&zone->lock);
 	if (!page)
 		goto failed;
@@ -3414,7 +3497,12 @@ struct page *rmqueue(struct zone *preferred_zone,
 	local_irq_restore(flags);
 
 out:
-	/* Separate test+clear to avoid unnecessary atomics */
+	/** Separate test+clear to avoid unnecessary atomics
+	 * 判断zone->flags是否设置了ZONE_BOOSTED_WATERMARK标志位。
+	 * 若该标志位置位，则将其清零，并且唤醒kswapd内核线程回收内存。
+	 * 当页面分配器触发向备份空闲链表借用内存时，说明系统有外碎片化倾向，
+	 * 因此设置ZONE_BOOSTED_WATERMARK标志位，这是Linux 5.0内核中新增的外碎片化优化补丁。
+	 */
 	if (test_bit(ZONE_BOOSTED_WATERMARK, &zone->flags)) {
 		clear_bit(ZONE_BOOSTED_WATERMARK, &zone->flags);
 		wakeup_kswapd(zone, 0, 0, zone_idx(zone));
@@ -3602,6 +3690,20 @@ bool zone_watermark_ok(struct zone *z, unsigned int order, unsigned long mark,
 					zone_page_state(z, NR_FREE_PAGES));
 }
 
+/**
+ * zone_watermark_fast()函数用于判断当前zone的空闲页面是否满足WMARK_LOW。
+ * 另外，还会根据order来判断是否有足够大的空闲内存块。若该函数返回true，
+ * 表示zone的页面高于指定的水位或者满足order分配需求
+ * 
+ * @param z 待检测的zone
+ * @param order 分配2^order个物理页面
+ * @param mark 表示要测试的水位 标准
+ * @param highest_zoneidx
+ * @param alloc_flags
+ * @param gfp_mask
+ * 
+ * @return 
+ */
 static inline bool zone_watermark_fast(struct zone *z, unsigned int order,
 				unsigned long mark, int highest_zoneidx,
 				unsigned int alloc_flags, gfp_t gfp_mask)
@@ -3726,6 +3828,8 @@ static inline unsigned int current_alloc_flags(gfp_t gfp_mask,
  * a page.
  * (get_page_from_freelist 会遍历 zonelist（内存区域列表），尝试分配一个内存页。)
  * > 从伙伴系统的空闲页面链表中尝试分配物理页面
+ * 
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#4.1.4　get_page_from_freelist()函数
  */
 static struct page *
 get_page_from_freelist(gfp_t gfp_mask, unsigned int order, int alloc_flags,
@@ -3807,7 +3911,12 @@ retry:
 			}
 		}
 
+		// wmark_pages()宏用来计算zone中某个水位的页面大小
 		mark = wmark_pages(zone, alloc_flags & ALLOC_WMARK_MASK);
+		/**
+		 * zone_watermark_fast()函数用于判断当前zone的空闲页面是否满足WMARK_LOW。
+		 * 另外，还会根据order来判断是否有足够大的空闲内存块。若该函数返回true，表示zone的页面高于指定的水位或者满足order分配需求
+		 */
 		if (!zone_watermark_fast(zone, order, mark,
 				       ac->highest_zoneidx, alloc_flags,
 				       gfp_mask)) {
@@ -3832,7 +3941,7 @@ retry:
 			    !zone_allows_reclaim(ac->preferred_zoneref->zone, zone))
 				continue;
 
-			ret = node_reclaim(zone->zone_pgdat, gfp_mask, order);
+			ret = node_reclaim(zone->zone_pgdat, gfp_mask, order); // 调用node_reclaim()函数尝试回收一部分内存
 			switch (ret) {
 			case NODE_RECLAIM_NOSCAN:
 				/* did not scan */
@@ -3851,6 +3960,7 @@ retry:
 		}
 
 try_this_zone:
+        // rmqueue()函数会从伙伴系统中分配内存。rmqueue()函数是伙伴系统的核心分配函数
 		page = rmqueue(ac->preferred_zoneref->zone, zone, order,
 				gfp_mask, alloc_flags, ac->migratetype);
 		if (page) {
@@ -3875,9 +3985,11 @@ try_this_zone:
 		}
 	}
 
-	/*
+	/**
+	 * 防止外碎片化
 	 * It's possible on a UMA machine to get through all zones that are
 	 * fragmented. If avoiding fragmentation, reset and try again.
+	 * (在UMA机器上，是有可能通过所有碎片化区域的。如果希望避免碎片化，可以重置并重新尝试。)
 	 */
 	if (no_fallback) {
 		alloc_flags &= ~ALLOC_NOFRAGMENT;
@@ -4982,6 +5094,9 @@ unsigned long get_zeroed_page(gfp_t gfp_mask)
 }
 EXPORT_SYMBOL(get_zeroed_page);
 
+/**
+ * 页面释放函数
+ */
 static inline void free_the_page(struct page *page, unsigned int order)
 {
 	if (order == 0)		/* Via pcp? */
@@ -4995,8 +5110,13 @@ static inline void free_the_page(struct page *page, unsigned int order)
  */
 void __free_pages(struct page *page, unsigned int order)
 {
-	if (put_page_testzero(page))
+	/**
+	 * put_page_testzero 是 Linux 内核中用于管理页引用计数的一个关键函数，
+	 * 通常用于检查页面的最后一次引用是否被释放
+	 */
+	if (put_page_testzero(page)) {
 		free_the_page(page, order);
+	}
 }
 EXPORT_SYMBOL(__free_pages);
 

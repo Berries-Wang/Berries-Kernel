@@ -155,22 +155,28 @@ struct alloc_context {
 	bool spread_dirty_pages;                                     // spread_dirty_pages用于指定是否传播脏页。
 };
 
-/*
+/**
+ * pfn：当前页块的起始页帧号（Page Frame Number）。
+ * 
  * Locate the struct page for both the matching buddy in our
  * pair (buddy1) and the combined O(n+1) page they form (page).
- *
+ * (定位这对伙伴关系中匹配的伙伴页（buddy1）以及它们合并后形成的更高阶（O(n+1)）页块（page）所对应的 struct page 结构)
+ * (根据给定的页帧号（PFN）和阶数（order），计算其伙伴块（buddy）的页帧号)
+ * 
  * 1) Any buddy B1 will have an order O twin B2 which satisfies
- * the following equation:
+ * the following equation: （任何伙伴块（Buddy）B1 都会有一个同阶（Order O）的伙伴块 B2，且两者满足以下关系式）
  *     B2 = B1 ^ (1 << O)
- * For example, if the starting buddy (buddy2) is #8 its order
+ * For example, if the starting buddy (buddy2) is #8 its order ((若起始伙伴块（buddy2）的编号为 #8，则其 阶数 1（Order 1）的伙伴块 是 #10))
  * 1 buddy is #10:
  *     B2 = 8 ^ (1 << 1) = 8 ^ 2 = 10
  *
  * 2) Any buddy B will have an order O+1 parent P which
- * satisfies the following equation:
+ * satisfies the following equation:(在伙伴系统中，任意阶数为 O 的伙伴块 B，其对应的更高阶（O+1）父块 P 均满足以下关系式：)
  *     P = B & ~(1 << O)
  *
- * Assumption: *_mem_map is contiguous at least up to MAX_ORDER
+ * Assumption: *_mem_map is contiguous at least up to MAX_ORDER (假设 _mem_map 至少在内核定义的 MAX_ORDER 范围内是物理连续的)
+ * 
+ * @return 返回伙伴块的起始页帧号（PFN），如果伙伴块存在。
  */
 static inline unsigned long
 __find_buddy_pfn(unsigned long page_pfn, unsigned int order)
