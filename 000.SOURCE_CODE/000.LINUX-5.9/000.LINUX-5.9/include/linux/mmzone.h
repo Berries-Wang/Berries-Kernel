@@ -631,12 +631,17 @@ static inline bool zone_intersects(struct zone *zone,
 /* Maximum number of zones on a zonelist */
 #define MAX_ZONES_PER_ZONELIST (MAX_NUMNODES * MAX_NR_ZONES)
 
+/**
+ * 
+ * 当CONFIG_NUMA被配置，三个值分别为 0 1 2 , 具体对应关系: ZONELIST_FALLBACK:0  ZONELIST_NOFALLBACK:1 MAX_ZONELISTS:2
+ */
 enum {
 	ZONELIST_FALLBACK,	/* zonelist with fallback */
 #ifdef CONFIG_NUMA
 	/*
 	 * The NUMA zonelists are doubled because we need zonelists that
 	 * restrict the allocations to a single node for __GFP_THISNODE.
+         * (在 NUMA 架构中，备用区域列表（zonelists）需要被设计为双份，这是因为我们必须为 __GFP_THISNODE 这种内存分配标志提供严格限定在单个节点内分配的专用区域列表)
 	 */
 	ZONELIST_NOFALLBACK,	/* zonelist without fallback (__GFP_THISNODE) */
 #endif
@@ -698,10 +703,14 @@ struct deferred_split {
 };
 #endif
 
-/*
+/**
+ *
+ * 通过注释，一个pglist_data就是对一张内存条的抽象表示
+ *
  * On NUMA machines, each NUMA node would have a pg_data_t to describe
  * it's memory layout. On UMA machines there is a single pglist_data which
  * describes the whole memory.
+ * (在 NUMA 架构的机器中，每个 NUMA 节点都对应一个 pg_data_t 结构体，用于描述该节点的内存布局；而在 UMA 架构的机器中，则通过唯一的 pglist_data 结构体描述整个系统的内存。)
  *
  * Memory statistics and page replacement data structures are maintained on a
  * per-zone basis.
@@ -714,6 +723,8 @@ typedef struct pglist_data {
 	 * node_zones contains just the zones for THIS node. Not all of the
 	 * zones may be populated, but it is the full list. It is referenced by
 	 * this node's node_zonelists as well as other node's node_zonelists.
+         * (node_zones 仅包含当前节点的内存管理区（zone）。尽管并非所有区都一定被实际填充，但它代表完整的区类型列表。
+         *  该结构既会被本节点的 node_zonelists 引用，也可能被其他节点的 node_zonelists 所引用。)
 	 */
 	struct zone node_zones[MAX_NR_ZONES];
 
@@ -721,6 +732,9 @@ typedef struct pglist_data {
 	 * node_zonelists contains references to all zones in all nodes.
 	 * Generally the first zones will be references to this node's
 	 * node_zones.
+         * (在内存节点数据结构pglist_data中有两个zonelist：其中一个是ZONELIST_FALLBACK，指向本地的zone，即包含备选的zone；
+         *   另外一个是ZONELIST_NOFALLBACK，用于NUMA系统，指向远端的内存节点的zone)
+         *    MAX_ZONELISTS: 就定义在当前文件，值为2，为啥是2？
 	 */
 	struct zonelist node_zonelists[MAX_ZONELISTS];
 
