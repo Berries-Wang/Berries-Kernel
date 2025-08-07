@@ -902,10 +902,12 @@ static inline void del_page_from_free_list(struct page *page, struct zone *zone,
  * that is happening, add the free page to the tail of the list
  * so it's less likely to be used soon and more likely to be merged
  * as a higher order page
+ * (如果这不是最大的可能页面，请检查次高顺序的伙伴页面是否空闲。如果空闲，则可能正在释放即将合并的页面。
+ * 如果发生这种情况，请将空闲页面添加到列表末尾，这样它不太可能很快被使用，更有可能被合并为更高顺序的页面。)
  */
-static inline bool
-buddy_merge_likely(unsigned long pfn, unsigned long buddy_pfn,
-		   struct page *page, unsigned int order)
+static inline bool buddy_merge_likely(unsigned long pfn,
+				      unsigned long buddy_pfn,
+				      struct page *page, unsigned int order)
 {
 	struct page *higher_page, *higher_buddy;
 	unsigned long combined_pfn;
