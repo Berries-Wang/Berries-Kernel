@@ -3197,8 +3197,10 @@ static void free_unref_page_commit(struct page *page, unsigned long pfn)
 	}
 }
 
-/*
+/**
  * Free a 0-order page
+ * 释放order为0的页面，即单个页面
+ * 
  */
 void free_unref_page(struct page *page)
 {

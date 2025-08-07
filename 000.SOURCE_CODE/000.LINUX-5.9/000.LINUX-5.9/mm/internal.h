@@ -156,6 +156,9 @@ struct alloc_context {
 };
 
 /**
+ * 什么是伙伴块?
+ *     物理内存中地址连续的页块，他们互称伙伴，并大小相等且为2的幂 
+ * 
  * pfn：当前页块的起始页帧号（Page Frame Number）。
  * 
  * Locate the struct page for both the matching buddy in our
@@ -172,7 +175,7 @@ struct alloc_context {
  *
  * 2) Any buddy B will have an order O+1 parent P which
  * satisfies the following equation:(在伙伴系统中，任意阶数为 O 的伙伴块 B，其对应的更高阶（O+1）父块 P 均满足以下关系式：)
- *     P = B & ~(1 << O)
+ *     P = B & ~(1 << O) // 是字母O，不是数字零
  *
  * Assumption: *_mem_map is contiguous at least up to MAX_ORDER (假设 _mem_map 至少在内核定义的 MAX_ORDER 范围内是物理连续的)
  * 
