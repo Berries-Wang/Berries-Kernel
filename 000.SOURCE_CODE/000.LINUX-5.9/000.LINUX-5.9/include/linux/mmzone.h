@@ -343,7 +343,7 @@ struct per_cpu_nodestat {
 #endif /* !__GENERATING_BOUNDS.H */
 
 enum zone_type {
-	/**
+/**
 	 * ZONE_DMA and ZONE_DMA32 are used when there are peripherals not able
 	 * to DMA to all of the addressable memory (ZONE_NORMAL).
 	 * On architectures where this area covers the whole 32 bit address
@@ -362,13 +362,13 @@ enum zone_type {
 	 *    rest of the lower 4G.
 	 *
 	 *  - arm only uses ZONE_DMA, the size, up to 4G, may vary depending on
-	 *    the specific device.
+	 *    the specific device. (ARM架构仅使用ZONE_DMA区域，其大小最高可达4GB，具体容量可能因设备而异。)
 	 *
 	 *  - arm64 has a fixed 1G ZONE_DMA and ZONE_DMA32 for the rest of the
-	 *    lower 4G.
+	 *    lower 4G. (ARM64架构固定使用1GB的ZONE_DMA内存区域，其余低4GB内存则划分给ZONE_DMA32区域。)
 	 *
 	 *  - powerpc only uses ZONE_DMA, the size, up to 2G, may vary
-	 *    depending on the specific device.
+	 *    depending on the specific device. (PowerPC架构仅使用ZONE_DMA区域，其大小最高可达2GB，实际容量可能因具体设备而异)
 	 *
 	 *  - s390 uses ZONE_DMA fixed to the lower 2G.
 	 *
@@ -382,20 +382,25 @@ enum zone_type {
 #ifdef CONFIG_ZONE_DMA32
 	ZONE_DMA32,
 #endif
-	/*
+	/**
 	 * Normal addressable memory is in ZONE_NORMAL. DMA operations can be
 	 * performed on pages in ZONE_NORMAL if the DMA devices support
 	 * transfers to all addressable memory.
+	 * (普通可寻址内存位于ZONE_NORMAL区域。如果DMA设备支持对所有可寻址内存进行传输，
+	 *  则可以对ZONE_NORMAL中的页面执行DMA操作。)
 	 */
 	ZONE_NORMAL,
 #ifdef CONFIG_HIGHMEM
-	/*
+	/**
 	 * A memory area that is only addressable by the kernel through
 	 * mapping portions into its own address space. This is for example
 	 * used by i386 to allow the kernel to address the memory beyond
 	 * 900MB. The kernel will set up special mappings (page
 	 * table entries on i386) for each page that the kernel needs to
 	 * access.
+	 * (一种只能通过内核映射到自身地址空间才能访问的内存区域。
+	 * 例如，i386架构就利用这种机制让内核能够访问超过900MB的内存空间。
+	 * 内核会为每个需要访问的页面建立特殊映射（在i386上通过页表项实现）)
 	 */
 	ZONE_HIGHMEM,
 #endif
@@ -509,7 +514,9 @@ struct zone {
 	/**
 	 *  free areas of different sizes 
 	 * 
-	 * #3.3.7　物理内存初始化
+	 * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图3.12　伙伴系统的空闲页块的管理
+	 * 
+	 * 看示意图就可以明白
 	*/
 	struct free_area	free_area[MAX_ORDER];
 
@@ -710,13 +717,15 @@ struct deferred_split {
  * On NUMA machines, each NUMA node would have a pg_data_t to describe
  * it's memory layout. On UMA machines there is a single pglist_data which
  * describes the whole memory.
- * (在 NUMA 架构的机器中，每个 NUMA 节点都对应一个 pg_data_t 结构体，用于描述该节点的内存布局；而在 UMA 架构的机器中，则通过唯一的 pglist_data 结构体描述整个系统的内存。)
+ * (在 NUMA 架构的机器中，每个 NUMA 节点都对应一个 pg_data_t 结构体，用于描述该节点的内存布局；
+ *    而在 UMA 架构的机器中，则通过唯一的 pglist_data 结构体描述整个系统的内存。)
  *
  * Memory statistics and page replacement data structures are maintained on a
  * per-zone basis.
  * (内存统计信息和页面置换数据结构是基于每个内存区域（per-zone）维护的)
  * 
- * 在内存节点数据结构pglist_data中有两个zonelist：其中一个是ZONELIST_FALLBACK，指向本地的zone，即包含备选的zone；另外一个是ZONELIST_NOFALLBACK，用于NUMA系统，指向远端的内存节点的zone。
+ * 在内存节点数据结构pglist_data中有两个zonelist：其中一个是ZONELIST_FALLBACK，指向本地的zone，即包含备选的zone；
+ *   另外一个是ZONELIST_NOFALLBACK，用于NUMA系统，指向远端的内存节点的zone。
  */
 typedef struct pglist_data {
 	/*
@@ -767,8 +776,7 @@ typedef struct pglist_data {
 	int node_id;
 	wait_queue_head_t kswapd_wait;
 	wait_queue_head_t pfmemalloc_wait;
-	struct task_struct *kswapd;	/* Protected by
-					   mem_hotplug_begin/end() */
+	struct task_struct *kswapd; 	/* Protected by  mem_hotplug_begin/end() */
 	int kswapd_order;
 	enum zone_type kswapd_highest_zoneidx;
 
