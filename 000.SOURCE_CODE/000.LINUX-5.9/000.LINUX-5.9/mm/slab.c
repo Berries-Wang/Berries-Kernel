@@ -179,6 +179,8 @@ typedef unsigned short freelist_idx_t;
  *
  * The limit is stored in the per-cpu structure to reduce the data cache
  * footprint.
+ * (该限制值存储在每CPU（per-cpu）结构中，以减少数据缓存（data cache）的占用空间)
+ * 
  *
  */
 struct array_cache {
@@ -186,10 +188,16 @@ struct array_cache {
 	unsigned int limit;
 	unsigned int batchcount;
 	unsigned int touched;
+        /**
+         * GCC 零长数组(变长数组、柔性数组)，entry[]数组用于存放多个对象。
+         * 
+         * 示意图: 图4.6　对象缓冲池的数据结构
+         */
 	void *entry[];	/*
 			 * Must have this definition in here for the proper
 			 * alignment of array_cache. Also simplifies accessing
-			 * the entries.
+			 * the entries.(此处必须保留此定义，以确保 array_cache 的正确对齐，同时简化对条目的访问)
+                         * 指向存储对象的变长数组，每个成员存放一个对象的指针。这个数组最初最多有limit个成员
 			 */
 };
 
@@ -588,13 +596,17 @@ static int transfer_objects(struct array_cache *to,
 	return nr;
 }
 
-/* &alien->lock must be held by alien callers. */
+/**
+  * &alien->lock must be held by alien callers.
+  * 
+  */
 static __always_inline void __free_one(struct array_cache *ac, void *objp)
 {
 	/* Avoid trivial double-free. */
 	if (IS_ENABLED(CONFIG_SLAB_FREELIST_HARDENED) &&
 	    WARN_ON_ONCE(ac->avail > 0 && ac->entry[ac->avail - 1] == objp))
 		return;
+        // 把对象释放到本地对象缓冲池ac中，释放过程就结束了
 	ac->entry[ac->avail++] = objp;
 }
 
@@ -1358,13 +1370,17 @@ slab_out_of_memory(struct kmem_cache *cachep, gfp_t gfpflags, int nodeid)
 #endif
 }
 
-/*
+/**
+ * slab分配器和伙伴系统的接口函数
+ * > slab分配器创建slab对象时会调用伙伴系统的分配物理页面接口函数去分配2cachep->gfporder个页面，调用的函数是kmem_getpages()。 
  * Interface to system's page allocator. No need to hold the
  * kmem_cache_node ->list_lock.
  *
  * If we requested dmaable memory, we will get it. Even if we
  * did not request dmaable memory, we might get it, but that
  * would be relatively rare and ignorable.
+ * (如果我们申请了DMA可用内存（dmaable memory），就一定会获得这种内存。即使没有特别申请DMA内存，系统仍可能分配这种内存，不过这种情况相对罕见且可以忽略不计)
+ * ??? 啥意思
  */
 static struct page *kmem_getpages(struct kmem_cache *cachep, gfp_t flags,
 								int nodeid)
@@ -1896,6 +1912,12 @@ static bool set_on_slab_cache(struct kmem_cache *cachep,
 }
 
 /**
+ *
+ * Linux内核提供了三种slab分配机制
+ *   1) slab机制: 这个文件的这个方法描述的是slab 
+ *   2) slub机制: 在大型系统中能提供比slab分配器更好的性能
+ *   3) slob机制: 适合微小嵌入式系统,in slob.c
+ * 
  * __kmem_cache_create - Create a cache.
  * @cachep: cache management descriptor
  * @flags: SLAB flags
@@ -1920,6 +1942,7 @@ static bool set_on_slab_cache(struct kmem_cache *cachep,
  */
 int __kmem_cache_create(struct kmem_cache *cachep, slab_flags_t flags)
 {
+        // BYTES_PER_WORD 系统的word长度对齐
 	size_t ralign = BYTES_PER_WORD;
 	gfp_t gfp;
 	int err;
@@ -2032,6 +2055,12 @@ int __kmem_cache_create(struct kmem_cache *cachep, slab_flags_t flags)
 	}
 #endif
 
+        /**
+         * slab 分配器布局模式
+         *   OBJFREELIST_SLAB  高效利用slab分配器中的内存： 使用slab分配器中最后一个slab对象的空间作为管理区
+         *   OFF_SLAB模式，slab分配器的管理数据不在slab分配器中，额外分配的内存用于管理
+         *   正常模式，传统的布局模式, 见 图4.10　正常模式下的slab分配器布局
+         */
 	if (set_objfreelist_slab_cache(cachep, size, flags)) {
 		flags |= CFLGS_OBJFREELIST_SLAB;
 		goto done;
@@ -2077,6 +2106,7 @@ done:
 			kmalloc_slab(cachep->freelist_size, 0u);
 	}
 
+        // 继续配置slab描述符?
 	err = setup_cpu_cache(cachep, gfp);
 	if (err) {
 		__kmem_cache_release(cachep);
@@ -3291,6 +3321,10 @@ __do_cache_alloc(struct kmem_cache *cachep, gfp_t flags)
 
 #endif /* CONFIG_NUMA */
 
+/**
+ * 分配slab缓存对象
+ *
+ */
 static __always_inline void *
 slab_alloc(struct kmem_cache *cachep, gfp_t flags, unsigned long caller)
 {
@@ -3304,8 +3338,13 @@ slab_alloc(struct kmem_cache *cachep, gfp_t flags, unsigned long caller)
 		return NULL;
 
 	cache_alloc_debugcheck_before(cachep, flags);
+        // 关闭本地中断
 	local_irq_save(save_flags);
+ 
+        // 获取slab对象
 	objp = __do_cache_alloc(cachep, flags);
+ 
+        // 打开本地中断
 	local_irq_restore(save_flags);
 	objp = cache_alloc_debugcheck_after(cachep, flags, objp, caller);
 	prefetchw(objp);
@@ -3430,6 +3469,11 @@ static __always_inline void __cache_free(struct kmem_cache *cachep, void *objp,
 	___cache_free(cachep, objp, caller);
 }
 
+/**
+ * 释放slab缓存对象
+ *
+ *
+ */
 void ___cache_free(struct kmem_cache *cachep, void *objp,
 		unsigned long caller)
 {
@@ -3764,6 +3808,7 @@ EXPORT_SYMBOL(kfree);
 
 /*
  * This initializes kmem_cache_node or resizes various caches for all nodes.
+ * 初始化所有节点的 kmem_cache_node 或调整各缓存大小
  */
 static int setup_kmem_cache_nodes(struct kmem_cache *cachep, gfp_t gfp)
 {
@@ -3805,6 +3850,7 @@ static int do_tune_cpucache(struct kmem_cache *cachep, int limit,
 	struct array_cache __percpu *cpu_cache, *prev;
 	int cpu;
 
+        // 分配Per-CPU类型的array_cache数据结构
 	cpu_cache = alloc_kmem_cache_cpus(cachep, limit, batchcount);
 	if (!cpu_cache)
 		return -ENOMEM;

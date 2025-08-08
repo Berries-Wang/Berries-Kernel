@@ -229,6 +229,9 @@ struct kmem_cache *find_mergeable(unsigned int size, unsigned int align,
 	return NULL;
 }
 
+/**
+ * 创建slab描述符
+ */
 static struct kmem_cache *create_cache(const char *name,
 		unsigned int object_size, unsigned int align,
 		slab_flags_t flags, unsigned int useroffset,
@@ -253,6 +256,9 @@ static struct kmem_cache *create_cache(const char *name,
 	s->useroffset = useroffset;
 	s->usersize = usersize;
 
+        /**
+         * 分配slab
+         */
 	err = __kmem_cache_create(s, flags);
 	if (err)
 		goto out_free_cache;
@@ -271,13 +277,14 @@ out_free_cache:
 
 /**
  * kmem_cache_create_usercopy - Create a cache with a region suitable
- * for copying to userspace
+ * for copying to userspace(创建一个适用于复制到用户空间的缓存区域)
+ * 
  * @name: A string which is used in /proc/slabinfo to identify this cache.
  * @size: The size of objects to be created in this cache.
  * @align: The required alignment for the objects.
  * @flags: SLAB flags
- * @useroffset: Usercopy region offset
- * @usersize: Usercopy region size
+ * @useroffset: Usercopy region offset usercopy区域的偏移量
+ * @usersize: Usercopy region size     usercopy区域的大小
  * @ctor: A constructor for the objects.
  *
  * Cannot be called within a interrupt, but can be interrupted.
@@ -310,7 +317,7 @@ kmem_cache_create_usercopy(const char *name,
 
 	get_online_cpus();
 	get_online_mems();
-
+        // 申请slab_mutex互斥量保护
 	mutex_lock(&slab_mutex);
 
 	err = kmem_cache_sanity_check(name, size);
@@ -347,7 +354,8 @@ kmem_cache_create_usercopy(const char *name,
 		err = -ENOMEM;
 		goto out_unlock;
 	}
-
+       
+        // 创建slab描述符
 	s = create_cache(cache_name, size,
 			 calculate_alignment(flags, align, size),
 			 flags, useroffset, usersize, ctor, NULL);
@@ -378,15 +386,18 @@ out_unlock:
 EXPORT_SYMBOL(kmem_cache_create_usercopy);
 
 /**
+ * 创建slab描述符
+ * 
  * kmem_cache_create - Create a cache.
  * @name: A string which is used in /proc/slabinfo to identify this cache.
- * @size: The size of objects to be created in this cache.
- * @align: The required alignment for the objects.
+ * @size: The size of objects to be created in this cache. 缓存对象大小
+ * @align: The required alignment for the objects. 缓存对象需要对齐的字节数
  * @flags: SLAB flags
  * @ctor: A constructor for the objects.
  *
  * Cannot be called within a interrupt, but can be interrupted.
  * The @ctor is run when new pages are allocated by the cache.
+ * (该函数不可在中断上下文中调用，但执行时可被中断。当缓存分配新页面时，会运行构造函数 @ctor)
  *
  * The flags are
  *

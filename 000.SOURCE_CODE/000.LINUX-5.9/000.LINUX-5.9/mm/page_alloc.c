@@ -1002,7 +1002,11 @@ static inline bool buddy_merge_likely(unsigned long pfn,
  * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#4.1.7　释放页面
  * -- nyc
  * 
- * @param pfn 
+ * @param pfn  页帧号，即 mem_map数组下标
+ *
+ * 
+ * 该函数不仅可以释放内存页面到伙伴系统，还可以处理空闲页面的合并操作。
+ *   合并: 释放内存块时，会检查相邻的内存块是否空闲，若空闲，则将其合并成一个大的内存块，放置到更高一级的空闲立案表中。如果还能继续合并临近的内存块，则继续合并，合并的结果放到更高级的空闲链表中。
  */
 
 static inline void __free_one_page(struct page *page, unsigned long pfn,
@@ -1028,6 +1032,7 @@ static inline void __free_one_page(struct page *page, unsigned long pfn,
 	VM_BUG_ON_PAGE(pfn & ((1 << order) - 1), page);
 	VM_BUG_ON_PAGE(bad_range(zone, page), page);
 
+// 持续合并       
 continue_merging:
 	while (order < max_order - 1) {
 		if (compaction_capture(capc, page, order, migratetype)) {
@@ -5100,6 +5105,9 @@ EXPORT_SYMBOL(get_zeroed_page);
 
 /**
  * 页面释放函数
+ *
+ *
+ * 
  */
 static inline void free_the_page(struct page *page, unsigned int order)
 {

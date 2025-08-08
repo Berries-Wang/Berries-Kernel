@@ -340,6 +340,8 @@ static __always_inline enum kmalloc_cache_type kmalloc_type(gfp_t flags)
 /*
  * Figure out which kmalloc slab an allocation of a certain size
  * belongs to.
+ * (确定特定大小的内存分配所属的 kmalloc slab（内存分配缓存块）) 
+ *    即 使用的是哪个slab缓冲区
  * 0 = zero alloc
  * 1 =  65 .. 96 bytes
  * 2 = 129 .. 192 bytes
@@ -536,6 +538,8 @@ static __always_inline void *kmalloc_large(size_t size, gfp_t flags)
  * %__GFP_RETRY_MAYFAIL
  *	Try really hard to succeed the allocation but fail
  *	eventually.
+ * 
+ * 核心机制: slab机制
  */
 static __always_inline void *kmalloc(size_t size, gfp_t flags)
 {
@@ -546,6 +550,7 @@ static __always_inline void *kmalloc(size_t size, gfp_t flags)
 		if (size > KMALLOC_MAX_CACHE_SIZE)
 			return kmalloc_large(size, flags);
 #ifndef CONFIG_SLOB
+                // kmalloc_index 可以用于寻找使用的是哪个slab缓冲区
 		index = kmalloc_index(size);
 
 		if (!index)
