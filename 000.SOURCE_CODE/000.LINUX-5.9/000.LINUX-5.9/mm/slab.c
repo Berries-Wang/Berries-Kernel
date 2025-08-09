@@ -169,7 +169,8 @@ typedef unsigned short freelist_idx_t;
 
 #define SLAB_OBJ_MAX_NUM ((1 << sizeof(freelist_idx_t) * BITS_PER_BYTE) - 1)
 
-/*
+/**对象缓冲池数据结构
+ * 
  * struct array_cache
  *
  * Purpose:
@@ -180,20 +181,26 @@ typedef unsigned short freelist_idx_t;
  * The limit is stored in the per-cpu structure to reduce the data cache
  * footprint.
  * (该限制值存储在每CPU（per-cpu）结构中，以减少数据缓存（data cache）的占用空间)
- * 
- *
  */
 struct array_cache {
+	// 对象缓冲池中可用的对象数目
 	unsigned int avail;
+	// 对象缓冲池可用对象数目的最大阈值
 	unsigned int limit;
+	/**
+	 * 迁移对象的数目，如从共享对象缓冲池或者其他slab中迁移空闲对象到该对象缓冲池的数量
+	 */
 	unsigned int batchcount;
+	/**
+	 * 表示这个对象缓冲池最近使用过
+	 */
 	unsigned int touched;
-        /**
+	/**
          * GCC 零长数组(变长数组、柔性数组)，entry[]数组用于存放多个对象。
          * 
-         * 示意图: 图4.6　对象缓冲池的数据结构
+         * 示意图: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图4.6　对象缓冲池的数据结构
          */
-	void *entry[];	/*
+	void *entry[]; /*
 			 * Must have this definition in here for the proper
 			 * alignment of array_cache. Also simplifies accessing
 			 * the entries.(此处必须保留此定义，以确保 array_cache 的正确对齐，同时简化对条目的访问)
