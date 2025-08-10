@@ -114,8 +114,16 @@ struct page {
 #endif
 				};
 			};
+			/**
+			 * slab_alloc 从该函数开始分析，slab.c
+			 * 页面对应的slab描述符，
+			 * 即 当前的page是被slab_cache所使用的
+			 */
 			struct kmem_cache *slab_cache; /* not slob */
-			/* Double-word boundary */
+			/**
+			 *  Double-word boundary 
+			 * slab的管理信息
+			*/
 			void *freelist;		/* first free object */
 			union {
 				void *s_mem;	/* slab: first object */

@@ -520,9 +520,10 @@ __alloc_pages(gfp_t gfp_mask, unsigned int order, int preferred_nid)
 	return __alloc_pages_nodemask(gfp_mask, order, preferred_nid, NULL);
 }
 
-/*
+/**
  * Allocate pages, preferring the node given as nid. The node must be valid and
  * online. For more general interface, see alloc_pages_node().
+ * (分配内存页(2^order个物理页)，优先选择给定的节点（nid）。该节点必须有效且在线。更通用的接口请参见 alloc_pages_node())
  */
 static inline struct page *
 __alloc_pages_node(int nid, gfp_t gfp_mask, unsigned int order)

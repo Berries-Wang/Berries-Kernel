@@ -36,6 +36,9 @@ enum slab_state slab_state;
  */
 LIST_HEAD(slab_caches);
 DEFINE_MUTEX(slab_mutex);
+/**
+ * 全局变量声明
+ */
 struct kmem_cache *kmem_cache;
 
 #ifdef CONFIG_HARDENED_USERCOPY

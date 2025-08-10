@@ -526,8 +526,15 @@ static inline void slab_post_alloc_hook(struct kmem_cache *s,
 }
 
 #ifndef CONFIG_SLOB
-/*
+
+/**
  * The slab lists for all objects.
+ * 
+ * slab lists 指的是内核中维护的不同 slab（内存块）的链表，
+ * 用于跟踪已分配或空闲的对象
+ * 
+ * 在 Linux 内核中，slab 分配器（如 SLAB、SLUB 或 SLOB）会为不同类型的对象（如任务结构、文件描述符等）维护各自的 slab 列表，
+ * 以提高内存分配和释放的效率
  */
 struct kmem_cache_node {
 	spinlock_t list_lock;

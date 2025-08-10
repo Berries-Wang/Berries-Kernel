@@ -5032,7 +5032,7 @@ __alloc_pages_nodemask(gfp_t gfp_mask, unsigned int order, int preferred_nid,
 	if (!prepare_alloc_pages(gfp_mask, order, preferred_nid, nodemask, &ac, &alloc_mask, &alloc_flags))
 		return NULL;
 
-        // finalise_ac 主要用于确定首选的zone
+	// finalise_ac 主要用于确定首选的zone
 	finalise_ac(gfp_mask, &ac);
 
 	/*
@@ -5043,8 +5043,8 @@ __alloc_pages_nodemask(gfp_t gfp_mask, unsigned int order, int preferred_nid,
 	alloc_flags |= alloc_flags_nofragment(ac.preferred_zoneref->zone, gfp_mask);
 
 	/* First allocation attempt
-         * get_page_from_freelist 尝试从伙伴系统的空闲列表中分配内存。
-         */
+     * get_page_from_freelist 尝试从伙伴系统的空闲列表中分配内存。
+     */
 	page = get_page_from_freelist(alloc_mask, order, alloc_flags, &ac);
 	if (likely(page))
 		goto out;
@@ -5063,7 +5063,7 @@ __alloc_pages_nodemask(gfp_t gfp_mask, unsigned int order, int preferred_nid,
 	 * &cpuset_current_mems_allowed to optimize the fast-path attempt.
 	 */
 	ac.nodemask = nodemask;
-        // 慢速分配路径
+	// 慢速分配路径
 	page = __alloc_pages_slowpath(alloc_mask, order, &ac);
 
 out:
