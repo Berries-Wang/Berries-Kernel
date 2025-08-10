@@ -343,7 +343,7 @@ struct per_cpu_nodestat {
 #endif /* !__GENERATING_BOUNDS.H */
 
 enum zone_type {
-	/*
+/**
 	 * ZONE_DMA and ZONE_DMA32 are used when there are peripherals not able
 	 * to DMA to all of the addressable memory (ZONE_NORMAL).
 	 * On architectures where this area covers the whole 32 bit address
@@ -352,6 +352,9 @@ enum zone_type {
 	 * DMA mask is assumed when ZONE_DMA32 is defined. Some 64-bit
 	 * platforms may need both zones as they support peripherals with
 	 * different DMA addressing limitations.
+	 * (ZONE_DMA（直接内存访问区域）和ZONE_DMA32用于存在无法对所有可寻址内存（ZONE_NORMAL常规区域）进行DMA操作的外设场景。
+	 * 在32位地址空间可覆盖全部寻址范围的体系架构中，会使用ZONE_DMA32区域；而寻址能力更小的设备则使用ZONE_DMA区域。
+	 * 这一区分至关重要——当定义ZONE_DMA32时，即默认设备具有32位DMA寻址能力。某些64位平台可能需要同时配置这两个区域，以支持具有不同DMA寻址限制的外设)
 	 *
 	 * Some examples:
 	 *
@@ -359,13 +362,13 @@ enum zone_type {
 	 *    rest of the lower 4G.
 	 *
 	 *  - arm only uses ZONE_DMA, the size, up to 4G, may vary depending on
-	 *    the specific device.
+	 *    the specific device. (ARM架构仅使用ZONE_DMA区域，其大小最高可达4GB，具体容量可能因设备而异。)
 	 *
 	 *  - arm64 has a fixed 1G ZONE_DMA and ZONE_DMA32 for the rest of the
-	 *    lower 4G.
+	 *    lower 4G. (ARM64架构固定使用1GB的ZONE_DMA内存区域，其余低4GB内存则划分给ZONE_DMA32区域。)
 	 *
 	 *  - powerpc only uses ZONE_DMA, the size, up to 2G, may vary
-	 *    depending on the specific device.
+	 *    depending on the specific device. (PowerPC架构仅使用ZONE_DMA区域，其大小最高可达2GB，实际容量可能因具体设备而异)
 	 *
 	 *  - s390 uses ZONE_DMA fixed to the lower 2G.
 	 *
@@ -379,20 +382,25 @@ enum zone_type {
 #ifdef CONFIG_ZONE_DMA32
 	ZONE_DMA32,
 #endif
-	/*
+	/**
 	 * Normal addressable memory is in ZONE_NORMAL. DMA operations can be
 	 * performed on pages in ZONE_NORMAL if the DMA devices support
 	 * transfers to all addressable memory.
+	 * (普通可寻址内存位于ZONE_NORMAL区域。如果DMA设备支持对所有可寻址内存进行传输，
+	 *  则可以对ZONE_NORMAL中的页面执行DMA操作。)
 	 */
 	ZONE_NORMAL,
 #ifdef CONFIG_HIGHMEM
-	/*
+	/**
 	 * A memory area that is only addressable by the kernel through
 	 * mapping portions into its own address space. This is for example
 	 * used by i386 to allow the kernel to address the memory beyond
 	 * 900MB. The kernel will set up special mappings (page
 	 * table entries on i386) for each page that the kernel needs to
 	 * access.
+	 * (一种只能通过内核映射到自身地址空间才能访问的内存区域。
+	 * 例如，i386架构就利用这种机制让内核能够访问超过900MB的内存空间。
+	 * 内核会为每个需要访问的页面建立特殊映射（在i386上通过页表项实现）)
 	 */
 	ZONE_HIGHMEM,
 #endif
@@ -503,7 +511,13 @@ struct zone {
 	/* Write-intensive fields used from the page allocator */
 	ZONE_PADDING(_pad1_)
 
-	/* free areas of different sizes */
+	/**
+	 *  free areas of different sizes 
+	 * 
+	 * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图3.12　伙伴系统的空闲页块的管理
+	 * 
+	 * 看示意图就可以明白
+	*/
 	struct free_area	free_area[MAX_ORDER];
 
 	/* zone flags, see below */
@@ -624,40 +638,60 @@ static inline bool zone_intersects(struct zone *zone,
 /* Maximum number of zones on a zonelist */
 #define MAX_ZONES_PER_ZONELIST (MAX_NUMNODES * MAX_NR_ZONES)
 
+/**
+ * 
+ * 当CONFIG_NUMA被配置，三个值分别为 0 1 2 , 具体对应关系: ZONELIST_FALLBACK:0  ZONELIST_NOFALLBACK:1 MAX_ZONELISTS:2
+ */
 enum {
 	ZONELIST_FALLBACK,	/* zonelist with fallback */
 #ifdef CONFIG_NUMA
 	/*
 	 * The NUMA zonelists are doubled because we need zonelists that
 	 * restrict the allocations to a single node for __GFP_THISNODE.
+         * (在 NUMA 架构中，备用区域列表（zonelists）需要被设计为双份，这是因为我们必须为 __GFP_THISNODE 这种内存分配标志提供严格限定在单个节点内分配的专用区域列表)
 	 */
 	ZONELIST_NOFALLBACK,	/* zonelist without fallback (__GFP_THISNODE) */
 #endif
 	MAX_ZONELISTS
 };
 
-/*
+/**
  * This struct contains information about a zone in a zonelist. It is stored
  * here to avoid dereferences into large structures and lookups of tables
+ * 该结构体（struct zoneref）存储了 zonelist 中某个 zone（内存区域）的相关信息。
+ * 将其直接存放在此的目的是：
+ *      避免解引用大型结构体（减少访问复杂数据结构的开销）
+ *      避免查表操作（节省查找表的性能损耗）
  */
 struct zoneref {
 	struct zone *zone;	/* Pointer to actual zone */
-	int zone_idx;		/* zone_idx(zoneref->zone) */
+	int zone_idx;		/* zone_idx(zoneref->zone) : 使用zone_idx()函数获取的编号 */
 };
 
-/*
+/**
+ * 内核使用zonelist数据结构来管理一个内存节点的zone。
+ * 
  * One allocation request operates on a zonelist. A zonelist
  * is a list of zones, the first one is the 'goal' of the
  * allocation, the other zones are fallback zones, in decreasing
  * priority.
+ * (一个分配请求作用于一个zonelist（区域列表）。zonelist是一组zone（内存区域）的集合，
+ * 其中第一个zone是分配的"目标"（goal），其余zone则是按优先级递减排列的备用（fallback）区域。)
  *
  * To speed the reading of the zonelist, the zonerefs contain the zone index
  * of the entry being read. Helper functions to access information given
  * a struct zoneref are
+ * (为了加速 zonelist 的读取，zoneref（区域引用）中包含了当前读取项的 zone index（区域索引）。
+ * 以下是用于访问 struct zoneref 所提供信息的辅助函数：)
  *
  * zonelist_zone()	- Return the struct zone * for an entry in _zonerefs
  * zonelist_zone_idx()	- Return the index of the zone for an entry
  * zonelist_node_idx()	- Return the index of the node for an entry
+ * 
+ * > [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#▲图4.2　zone类型、_zoneref[]数组和zone_idx之间的关系
+ * 假设系统中只有一个内存节点，有两个 zone，分别是 ZONE_DMA32 和 ZONE_NORMAL，那么zonelist中zone类型、_zoneref[ ]数组和zone_idx之间的关系如下。
+ *    ZONE_NORMAL:  _zonerefs[0]->zone_idx=1
+ *    ZONE_DMA32:   _zonerefs[1]->zone_idx=0
  */
 struct zonelist {
 	struct zoneref _zonerefs[MAX_ZONES_PER_ZONELIST + 1];
@@ -676,19 +710,30 @@ struct deferred_split {
 };
 #endif
 
-/*
+/**
+ *
+ * 通过注释，一个pglist_data就是对一张内存条的抽象表示
+ *
  * On NUMA machines, each NUMA node would have a pg_data_t to describe
  * it's memory layout. On UMA machines there is a single pglist_data which
  * describes the whole memory.
+ * (在 NUMA 架构的机器中，每个 NUMA 节点都对应一个 pg_data_t 结构体，用于描述该节点的内存布局；
+ *    而在 UMA 架构的机器中，则通过唯一的 pglist_data 结构体描述整个系统的内存。)
  *
  * Memory statistics and page replacement data structures are maintained on a
  * per-zone basis.
+ * (内存统计信息和页面置换数据结构是基于每个内存区域（per-zone）维护的)
+ * 
+ * 在内存节点数据结构pglist_data中有两个zonelist：其中一个是ZONELIST_FALLBACK，指向本地的zone，即包含备选的zone；
+ *   另外一个是ZONELIST_NOFALLBACK，用于NUMA系统，指向远端的内存节点的zone。
  */
 typedef struct pglist_data {
 	/*
 	 * node_zones contains just the zones for THIS node. Not all of the
 	 * zones may be populated, but it is the full list. It is referenced by
 	 * this node's node_zonelists as well as other node's node_zonelists.
+         * (node_zones 仅包含当前节点的内存管理区（zone）。尽管并非所有区都一定被实际填充，但它代表完整的区类型列表。
+         *  该结构既会被本节点的 node_zonelists 引用，也可能被其他节点的 node_zonelists 所引用。)
 	 */
 	struct zone node_zones[MAX_NR_ZONES];
 
@@ -696,6 +741,9 @@ typedef struct pglist_data {
 	 * node_zonelists contains references to all zones in all nodes.
 	 * Generally the first zones will be references to this node's
 	 * node_zones.
+         * (在内存节点数据结构pglist_data中有两个zonelist：其中一个是ZONELIST_FALLBACK，指向本地的zone，即包含备选的zone；
+         *   另外一个是ZONELIST_NOFALLBACK，用于NUMA系统，指向远端的内存节点的zone)
+         *    MAX_ZONELISTS: 就定义在当前文件，值为2，为啥是2？
 	 */
 	struct zonelist node_zonelists[MAX_ZONELISTS];
 
@@ -728,8 +776,7 @@ typedef struct pglist_data {
 	int node_id;
 	wait_queue_head_t kswapd_wait;
 	wait_queue_head_t pfmemalloc_wait;
-	struct task_struct *kswapd;	/* Protected by
-					   mem_hotplug_begin/end() */
+	struct task_struct *kswapd; 	/* Protected by  mem_hotplug_begin/end() */
 	int kswapd_order;
 	enum zone_type kswapd_highest_zoneidx;
 

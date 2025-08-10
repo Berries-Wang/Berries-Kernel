@@ -145,6 +145,11 @@ typedef u64 dma_addr_t;
 typedef u32 dma_addr_t;
 #endif
 
+/**
+ * 内存页面分配掩码： 分配掩码是描述页面分配方法的标志，它影响着页面分配的整个流程
+ * 
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#4.1.2　分配掩码
+ */
 typedef unsigned int __bitwise gfp_t;
 typedef unsigned int __bitwise slab_flags_t;
 typedef unsigned int __bitwise fmode_t;

@@ -25,6 +25,15 @@
 
 #endif /* CONFIG_DISCONTIGMEM */
 
+/**
+ * 物理页表的PFN是某个物理页面的全局唯一描述符struct page的序号，也是在mem_map中的下标。
+ * PFN就是它对应的某个struct page在mem_map中的数组下标。也是页表的全局唯一ID。并且在上层应用找物理地址的一种描述
+ *
+ *
+ * 学习一下[001.UNIX-DOCS/022.内存管理/003.Linux内核内存组织方式.md]
+ *
+ */
+
 /*
  * supports 3 memory models.
  */

@@ -684,7 +684,14 @@ static inline unsigned long p4d_page_vaddr(p4d_t p4d)
 
 #define pgd_ERROR(pgd)		__pgd_error(__FILE__, __LINE__, pgd_val(pgd))
 
+/**
+ * pgd_set_fixmap()函数就做这个固定映射的事情，
+ * 把PGD页表的物理页面映射到固定映射区域，返回PGD页表的虚拟地址
+ */
 #define pgd_set_fixmap(addr)	((pgd_t *)set_fixmap_offset(FIX_PGD, addr))
+/**
+ * pgd_clear_fixmap()函数用于取消固定区域的映射
+ */
 #define pgd_clear_fixmap()	clear_fixmap(FIX_PGD)
 
 static inline pte_t pte_modify(pte_t pte, pgprot_t newprot)

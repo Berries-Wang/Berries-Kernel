@@ -228,6 +228,9 @@ struct vm_area_struct;
 #define __GFP_BITS_MASK ((__force gfp_t)((1 << __GFP_BITS_SHIFT) - 1))
 
 /**
+ * 都什么意思？
+ * > [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#4.1.2　分配掩码
+ * 
  * DOC: Useful GFP flag combinations
  *
  * Useful GFP flag combinations
@@ -503,15 +506,24 @@ struct page *
 __alloc_pages_nodemask(gfp_t gfp_mask, unsigned int order, int preferred_nid,
 							nodemask_t *nodemask);
 
+
+/**
+ * 分配2^order个连续物理页面
+ * 
+ * @param perferred_nid preferred_nid（Preferred Node ID）通常用于 NUMA 架构，表示优先从哪个 NUMA 节点（Node）分配内存
+ * 
+ * @return 第一个物理页面的page数据结构
+ */
 static inline struct page *
 __alloc_pages(gfp_t gfp_mask, unsigned int order, int preferred_nid)
 {
 	return __alloc_pages_nodemask(gfp_mask, order, preferred_nid, NULL);
 }
 
-/*
+/**
  * Allocate pages, preferring the node given as nid. The node must be valid and
  * online. For more general interface, see alloc_pages_node().
+ * (分配内存页(2^order个物理页)，优先选择给定的节点（nid）。该节点必须有效且在线。更通用的接口请参见 alloc_pages_node())
  */
 static inline struct page *
 __alloc_pages_node(int nid, gfp_t gfp_mask, unsigned int order)

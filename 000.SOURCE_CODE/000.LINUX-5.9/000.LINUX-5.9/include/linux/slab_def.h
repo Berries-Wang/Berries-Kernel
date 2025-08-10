@@ -4,12 +4,13 @@
 
 #include <linux/reciprocal_div.h>
 
-/*
- * Definitions unique to the original Linux SLAB allocator.
+/**
+ * Definitions unique to the original Linux SLAB allocator.（最初Linux SLAB分配器特有的定义）
+ *
+ * slab 描述符
  */
-
 struct kmem_cache {
-	struct array_cache __percpu *cpu_cache;
+	struct array_cache __percpu *cpu_cache; // array_cache数据结构，每个CPU都有一个，表示本地对象缓冲池
 
 /* 1) Cache tunables. Protected by slab_mutex */
 	unsigned int batchcount;
@@ -30,19 +31,34 @@ struct kmem_cache {
 	/* force GFP flags, e.g. GFP_DMA */
 	gfp_t allocflags;
 
-	size_t colour;			/* cache colouring range */
-	unsigned int colour_off;	/* colour offset */
-	struct kmem_cache *freelist_cache;
+	size_t colour;			/* cache colouring range (一个slab分配器中有多少个不同的高速缓存行，用于着色) */
+	unsigned int colour_off;	/* colour offset (一个着色区的长度，和L1高速缓存行大小相同)*/
+	struct kmem_cache *freelist_cache; /*用于OFF_SLAB模式的slab分配器，使用额外的内存来保存slab管理区域 */
+	/**
+	 * 每个对象在freelist管理区中占用1字节，这里指freelist管理区的大小
+	 */
 	unsigned int freelist_size;
 
-	/* constructor func */
+	/**
+	 * constructor func
+	 * (什么的构造函数)
+	 *  */
 	void (*ctor)(void *obj);
 
 /* 4) cache creation/removal */
-	const char *name;
-	struct list_head list;
+	const char *name;   // slab描述符的名称
+	struct list_head list; // 链表节点，用于把slab描述符添加到全局链表slab_caches中
+	/**
+	 * 用于表示这个slab描述符的引用计数。当创建其他slab描述符并需要引用该描述符时会增加引用计数
+	 */
 	int refcount;
+	/**
+	 * 对象的实际大小
+	 */
 	int object_size;
+	/**
+	 * 对齐的长度
+	 */
 	int align;
 
 /* 5) statistics */
@@ -79,10 +95,18 @@ struct kmem_cache {
 #ifdef CONFIG_SLAB_FREELIST_RANDOM
 	unsigned int *random_seq;
 #endif
-
+    /**
+	 * Usercopy区域的偏移量
+	 */
 	unsigned int useroffset;	/* Usercopy region offset */
+	/**
+	 * Usercopy区域的大小
+	 */
 	unsigned int usersize;		/* Usercopy region size */
-
+    
+	/**
+	 * slab节点，在NUMA系统中每个节点有一个kmem_cache_node数据结构
+	 */
 	struct kmem_cache_node *node[MAX_NUMNODES];
 };
 

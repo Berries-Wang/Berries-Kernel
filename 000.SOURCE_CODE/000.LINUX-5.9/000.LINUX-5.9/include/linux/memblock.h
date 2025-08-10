@@ -72,17 +72,17 @@ struct memblock_type {
 };
 
 /**
- * struct memblock - memblock allocator metadata
+ * struct memblock - memblock allocator metadata（memblock 分配器元数据）
  * @bottom_up: is bottom up direction?
  * @current_limit: physical address of the current allocation limit
  * @memory: usable memory regions
  * @reserved: reserved memory regions
  */
 struct memblock {
-	bool bottom_up;  /* is bottom up direction? */
-	phys_addr_t current_limit;
-	struct memblock_type memory;
-	struct memblock_type reserved;
+	bool bottom_up;  /* is bottom up direction? 内存分配方向（自底向上或自顶向下） */
+	phys_addr_t current_limit;       /* 当前内存限制地址*/
+	struct memblock_type memory;     /* 管理可用物理内存的区域*/
+	struct memblock_type reserved;   /* 管理保留内存（如内核、initrd等）的区域*/
 };
 
 extern struct memblock memblock;

@@ -122,7 +122,7 @@ extern pmd_t *mm_find_pmd(struct mm_struct *mm, unsigned long address);
  * in mm/page_alloc.c
  */
 
-/*
+/**
  * Structure for holding the mostly immutable allocation parameters passed
  * between functions involved in allocations, including the alloc_pages*
  * family of functions.
@@ -136,10 +136,10 @@ extern pmd_t *mm_find_pmd(struct mm_struct *mm, unsigned long address);
  * by a const pointer.
  */
 struct alloc_context {
-	struct zonelist *zonelist;
-	nodemask_t *nodemask;
-	struct zoneref *preferred_zoneref;
-	int migratetype;
+	struct zonelist *zonelist;                                      // zonelist指向每一个内存节点中对应的zonelist
+	nodemask_t *nodemask;                                           // nodemask表示内存节点的掩码
+	struct zoneref *preferred_zoneref;                              // preferred_zoneref表示首选zone的zoneref
+	int migratetype;                                                // migratetype表示迁移类型
 
 	/*
 	 * highest_zoneidx represents highest usable zone index of
@@ -151,26 +151,35 @@ struct alloc_context {
 	 * the target zone since higher zone than this index cannot be
 	 * usable for this allocation request.
 	 */
-	enum zone_type highest_zoneidx;
-	bool spread_dirty_pages;
+	enum zone_type highest_zoneidx;                              // high_zoneidx分配掩码计算zone的zoneidx，表示这个分配掩码允许内存分配的最高zone
+	bool spread_dirty_pages;                                     // spread_dirty_pages用于指定是否传播脏页。
 };
 
-/*
+/**
+ * 什么是伙伴块?
+ *     物理内存中地址连续的页块，他们互称伙伴，并大小相等且为2的幂 
+ * 
+ * pfn：当前页块的起始页帧号（Page Frame Number）。
+ * 
  * Locate the struct page for both the matching buddy in our
  * pair (buddy1) and the combined O(n+1) page they form (page).
- *
+ * (定位这对伙伴关系中匹配的伙伴页（buddy1）以及它们合并后形成的更高阶（O(n+1)）页块（page）所对应的 struct page 结构)
+ * (根据给定的页帧号（PFN）和阶数（order），计算其伙伴块（buddy）的页帧号)
+ * 
  * 1) Any buddy B1 will have an order O twin B2 which satisfies
- * the following equation:
+ * the following equation: （任何伙伴块（Buddy）B1 都会有一个同阶（Order O）的伙伴块 B2，且两者满足以下关系式）
  *     B2 = B1 ^ (1 << O)
- * For example, if the starting buddy (buddy2) is #8 its order
+ * For example, if the starting buddy (buddy2) is #8 its order ((若起始伙伴块（buddy2）的编号为 #8，则其 阶数 1（Order 1）的伙伴块 是 #10))
  * 1 buddy is #10:
  *     B2 = 8 ^ (1 << 1) = 8 ^ 2 = 10
  *
  * 2) Any buddy B will have an order O+1 parent P which
- * satisfies the following equation:
- *     P = B & ~(1 << O)
+ * satisfies the following equation:(在伙伴系统中，任意阶数为 O 的伙伴块 B，其对应的更高阶（O+1）父块 P 均满足以下关系式：)
+ *     P = B & ~(1 << O) // 是字母O，不是数字零
  *
- * Assumption: *_mem_map is contiguous at least up to MAX_ORDER
+ * Assumption: *_mem_map is contiguous at least up to MAX_ORDER (假设 _mem_map 至少在内核定义的 MAX_ORDER 范围内是物理连续的)
+ * 
+ * @return 返回伙伴块的起始页帧号（PFN），如果伙伴块存在。
  */
 static inline unsigned long
 __find_buddy_pfn(unsigned long page_pfn, unsigned int order)

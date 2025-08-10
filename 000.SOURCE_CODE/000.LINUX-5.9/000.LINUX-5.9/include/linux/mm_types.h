@@ -114,8 +114,16 @@ struct page {
 #endif
 				};
 			};
+			/**
+			 * slab_alloc 从该函数开始分析，slab.c
+			 * 页面对应的slab描述符，
+			 * 即 当前的page是被slab_cache所使用的
+			 */
 			struct kmem_cache *slab_cache; /* not slob */
-			/* Double-word boundary */
+			/**
+			 *  Double-word boundary 
+			 * slab的管理信息
+			*/
 			void *freelist;		/* first free object */
 			union {
 				void *s_mem;	/* slab: first object */
@@ -296,20 +304,30 @@ struct vm_userfaultfd_ctx {
 struct vm_userfaultfd_ctx {};
 #endif /* CONFIG_USERFAULTFD */
 
-/*
+/**
  * This struct describes a virtual memory area. There is one of these
  * per VM-area/task. A VM area is any part of the process virtual memory
  * space that has a special rule for the page-fault handlers (ie a shared
  * library, the executable area etc).
+ * 
+ * VMA
+ * 
+ * 从进程的角度看 VMA：[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图4.20　从进程角度看VMA
  */
 struct vm_area_struct {
 	/* The first cache line has the info for VMA tree walking. */
-
+    /**
+	 * vm_start和vm_end：指定VMA在进程地址空间的起始地址和结束地址 ?
+	 * 这里的进程地址空间是什么? 看图就很容易理解了
+	 */ 
 	unsigned long vm_start;		/* Our start address within vm_mm. */
 	unsigned long vm_end;		/* The first byte after our end address
 					   within vm_mm. */
 
-	/* linked list of VM areas per task, sorted by address */
+	/**
+	 *  linked list of VM areas per task, sorted by address
+	 * vm_next和vm_prev：进程的VMA都连接成一个链表。
+	 */
 	struct vm_area_struct *vm_next, *vm_prev;
 
 	struct rb_node vm_rb;
@@ -324,7 +342,7 @@ struct vm_area_struct {
 
 	/* Second cache line starts here. */
 
-	struct mm_struct *vm_mm;	/* The address space we belong to. */
+	struct mm_struct *vm_mm;	/* The address space we belong to. (vm_mm：指向该VMA所属进程的mm_struct数据结构。)*/
 
 	/*
 	 * Access permissions of this VMA.
@@ -385,9 +403,15 @@ struct core_state {
 };
 
 struct kioctx_table;
+/**
+ * Linux内核需要管理每个进程所有的内存区域以及它们对应的页表映射，所以必须抽象出一个数据结构，这就是mm_struct数据结构
+ * 
+ * > [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图4.19　mm_struct数据结构
+ */
 struct mm_struct {
 	struct {
 		struct vm_area_struct *mmap;		/* list of VMAs */
+		// VMA红黑树的根节点
 		struct rb_root mm_rb;
 		u64 vmacache_seqnum;                   /* per-thread vmacache */
 #ifdef CONFIG_MMU
@@ -404,6 +428,9 @@ struct mm_struct {
 #endif
 		unsigned long task_size;	/* size of task vm space */
 		unsigned long highest_vm_end;	/* highest vma end address */
+		/**
+		 * pgd：指向进程的PGD（一级页表）
+		 */
 		pgd_t * pgd;
 
 #ifdef CONFIG_MEMBARRIER
@@ -424,6 +451,7 @@ struct mm_struct {
 		 * temporary reference holders), we also release a reference on
 		 * @mm_count (which may then free the &struct mm_struct if
 		 * @mm_count also drops to 0).
+		 * mm_users：记录正在使用该进程地址空间的进程数目，如果两个线程共享该地址空间，那么mm_users的值等于2。
 		 */
 		atomic_t mm_users;
 
@@ -433,6 +461,7 @@ struct mm_struct {
 		 *
 		 * Use mmgrab()/mmdrop() to modify. When this drops to 0, the
 		 * &struct mm_struct is freed.
+		 * mm_count：mm_struct结构体的主引用计数。
 		 */
 		atomic_t mm_count;
 
@@ -455,7 +484,10 @@ struct mm_struct {
 					     * counters
 					     */
 		struct rw_semaphore mmap_lock;
-
+        
+		/**
+		 * mmlist：所有的mm_struct数据结构都连接到一个双向链表中，该链表的头是init_mm内存描述符，它是init进程的地址空间。
+		 */
 		struct list_head mmlist; /* List of maybe swapped mm's.	These
 					  * are globally strung together off
 					  * init_mm.mmlist, and are protected
@@ -466,7 +498,7 @@ struct mm_struct {
 		unsigned long hiwater_rss; /* High-watermark of RSS usage */
 		unsigned long hiwater_vm;  /* High-water virtual memory usage */
 
-		unsigned long total_vm;	   /* Total pages mapped */
+		unsigned long total_vm;	   /* Total pages mapped : total_vm：已经使用的进程地址空间总和。*/
 		unsigned long locked_vm;   /* Pages that have PG_mlocked set */
 		atomic64_t    pinned_vm;   /* Refcount permanently increased */
 		unsigned long data_vm;	   /* VM_WRITE & ~VM_SHARED & ~VM_STACK */
@@ -475,7 +507,15 @@ struct mm_struct {
 		unsigned long def_flags;
 
 		spinlock_t arg_lock; /* protect the below fields */
+		/**
+		 * start_code, end_code：代码段的起始地址和结束地址。
+		 * start_data, end_data：数据段的起始地址和结束地址。
+		 */
 		unsigned long start_code, end_code, start_data, end_data;
+		/**
+		 * start_brk：堆空间的起始地址
+		 * brk：表示当前堆中的VMA的结束地址
+		 */
 		unsigned long start_brk, brk, start_stack;
 		unsigned long arg_start, arg_end, env_start, env_end;
 
@@ -489,7 +529,7 @@ struct mm_struct {
 
 		struct linux_binfmt *binfmt;
 
-		/* Architecture-specific MM context */
+		/** Architecture-specific MM context */
 		mm_context_t context;
 
 		unsigned long flags; /* Must use atomic bitops to access */

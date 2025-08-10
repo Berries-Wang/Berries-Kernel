@@ -1023,6 +1023,9 @@ int __init early_init_dt_scan_memory(unsigned long node, const char *uname,
 		pr_debug(" - %llx ,  %llx\n", (unsigned long long)base,
 		    (unsigned long long)size);
 
+		/**
+		 * 将内存块添加到memblock子系统中
+		 */
 		early_init_dt_add_memory_arch(base, size);
 
 		if (!hotpluggable)
@@ -1099,6 +1102,12 @@ int __init early_init_dt_scan_chosen(unsigned long node, const char *uname,
 #define MAX_MEMBLOCK_ADDR	((phys_addr_t)~0)
 #endif
 
+/**
+ * 将内存块添加到memblock子系统中
+ * 
+ * 在 ‘000.LINUX-5.9/include/linux/memblock.h’ 找一下memblock
+ * start_kernel()→setup_arch()→setup_machine_fdt()→ early_init_dt_scan_nodes()→early_init_dt_scan_memory()
+ */
 void __init __weak early_init_dt_add_memory_arch(u64 base, u64 size)
 {
 	const u64 phys_offset = MIN_MEMBLOCK_ADDR;
@@ -1138,6 +1147,7 @@ void __init __weak early_init_dt_add_memory_arch(u64 base, u64 size)
 		size -= phys_offset - base;
 		base = phys_offset;
 	}
+	// 执行添加行为
 	memblock_add(base, size);
 }
 

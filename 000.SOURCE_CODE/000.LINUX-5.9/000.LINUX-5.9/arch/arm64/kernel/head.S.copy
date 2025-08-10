@@ -9,6 +9,7 @@
  *		Will Deacon <will.deacon@arm.com>
  */
 
+/* [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#2.6.3　启动汇编代码 */
 #include <linux/linkage.h>
 #include <linux/init.h>
 #include <linux/irqchip/arm-gic-v3.h>
@@ -46,7 +47,7 @@
 #error TEXT_OFFSET must be less than 2MB
 #endif
 
-/*
+/**
  * Kernel startup entry point.
  * ---------------------------
  *
@@ -54,17 +55,26 @@
  *   MMU = off, D-cache = off, I-cache = on or off,
  *   x0 = physical address to the FDT blob.
  *
+ * 在关闭MMU情况下，处理器访问的地址都是物理地址。当MMU打开时，处理器访问的地址变成了虚拟地址
+ *
  * This code is mostly position independent so you call this at
  * __pa(PAGE_OFFSET + TEXT_OFFSET).
  *
  * Note that the callee-saved registers are used for storing variables
  * that are useful before the MMU is enabled. The allocations are described
  * in the entry routines.
+ *  _head: 是一个关键符号，通常作为内核启动代码的入口点
+ *  _head: 是一个汇编标签，标记内核映像的起始位置，通常是引导加载程序（如 GRUB、U-Boot）加载内核后跳转执行的第一条指令。
+ *        在 ARM、x86、RISC-V 等架构的 Linux 内核中，head.S 是体系结构相关的汇编代码，负责早期硬件初始化（如 CPU 模式设置、内存管理单元 MMU 初始化等）
+ *
+ *
+ *
  */
 	__HEAD
 _head:
 	/*
 	 * DO NOT MODIFY. Image header expected by Linux boot-loaders.
+	 * 请勿修改。Linux引导加载程序所需的映像头部。
 	 */
 #ifdef CONFIG_EFI
 	/*
@@ -275,6 +285,10 @@ SYM_CODE_END(preserve_boot_args)
  *   - identity mapping to enable the MMU (low address, TTBR0)
  *   - first few MB of the kernel linear mapping to jump to once the MMU has
  *     been enabled
+ * 创建虚拟地址和物理地址的恒等映射(identity mapping: 用于保证虚拟地址和物理地址在数值上是相同的)： 开启MMU -- 
+ *  创建两个映射
+ *
+ * 这里建立的恒等映射是小范围的，占用的空间通常是内核映像的大小，也就是几兆字节 # 2.6.4　创建恒等映射和内核映像映射
  */
 SYM_FUNC_START_LOCAL(__create_page_tables)
 	mov	x28, lr
@@ -380,6 +394,7 @@ SYM_FUNC_START_LOCAL(__create_page_tables)
 
 	/*
 	 * Map the kernel image (starting with PHYS_OFFSET).
+	 * 映射内核镜像-从PHYS_OFFSET开始
 	 */
 	adrp	x0, init_pg_dir
 	mov_q	x5, KIMAGE_VADDR + TEXT_OFFSET	// compile time __va(_text)
@@ -482,8 +497,9 @@ EXPORT_SYMBOL(kimage_vaddr)
 /*
  * end early head section, begin head code that is also used for
  * hotplug and needs to have the same protections as the text region
+ * 结束头部早期部分，开始头部代码，该代码也用于热插拔，并且需要具有与文本区域相同的保护措施
  */
-	.section ".idmap.text","awx"
+	.section ".idmap.text","awx"  /*表示后面的代码会链接到.idmap.text段中，awx表示该段是可分配、可写以及可执行的*/
 
 /*
  * If we're fortunate enough to boot at EL2, ensure that the world is

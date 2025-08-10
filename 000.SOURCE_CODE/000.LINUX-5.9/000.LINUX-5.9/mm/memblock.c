@@ -918,7 +918,7 @@ int __init_memblock memblock_mark_mirror(phys_addr_t base, phys_addr_t size)
 }
 
 /**
- * memblock_mark_nomap - Mark a memory region with flag MEMBLOCK_NOMAP.
+ * memblock_mark_nomap - Mark a memory region with flag MEMBLOCK_NOMAP.(给内存区域添加标志)
  * @base: the base phys addr of the region
  * @size: the size of the region
  *
@@ -930,11 +930,16 @@ int __init_memblock memblock_mark_nomap(phys_addr_t base, phys_addr_t size)
 }
 
 /**
- * memblock_clear_nomap - Clear flag MEMBLOCK_NOMAP for a specified region.
+ * memblock_clear_nomap - Clear flag MEMBLOCK_NOMAP for a specified region. (为指定内存区域清除 MEMBLOCK_NOMAP 标志)
  * @base: the base phys addr of the region
  * @size: the size of the region
  *
  * Return: 0 on success, -errno on failure.
+ *  该标志表示对应内存区域不应被映射到内核线性地址空间
+ *  清除此标志意味着该内存区域：
+ *     将被纳入正常内存管理范畴
+ *     可以被映射到内核地址空间
+ *     后续可能被 buddy 分配器等内存管理系统使用
  */
 int __init_memblock memblock_clear_nomap(phys_addr_t base, phys_addr_t size)
 {

@@ -31,8 +31,14 @@
 #include "slab.h"
 
 enum slab_state slab_state;
+/**
+ * slab_caches slab描述符全局链表
+ */
 LIST_HEAD(slab_caches);
 DEFINE_MUTEX(slab_mutex);
+/**
+ * 全局变量声明
+ */
 struct kmem_cache *kmem_cache;
 
 #ifdef CONFIG_HARDENED_USERCOPY
@@ -229,11 +235,13 @@ struct kmem_cache *find_mergeable(unsigned int size, unsigned int align,
 	return NULL;
 }
 
-static struct kmem_cache *create_cache(const char *name,
-		unsigned int object_size, unsigned int align,
-		slab_flags_t flags, unsigned int useroffset,
-		unsigned int usersize, void (*ctor)(void *),
-		struct kmem_cache *root_cache)
+/**
+ * 创建slab描述符
+ */
+static struct kmem_cache *
+create_cache(const char *name, unsigned int object_size, unsigned int align,
+	     slab_flags_t flags, unsigned int useroffset, unsigned int usersize,
+	     void (*ctor)(void *), struct kmem_cache *root_cache)
 {
 	struct kmem_cache *s;
 	int err;
@@ -242,6 +250,7 @@ static struct kmem_cache *create_cache(const char *name,
 		useroffset = usersize = 0;
 
 	err = -ENOMEM;
+	// 创建一个kmem_cache数据结构
 	s = kmem_cache_zalloc(kmem_cache, GFP_KERNEL);
 	if (!s)
 		goto out;
@@ -253,11 +262,15 @@ static struct kmem_cache *create_cache(const char *name,
 	s->useroffset = useroffset;
 	s->usersize = usersize;
 
+    /**
+     * 分配slab
+     */
 	err = __kmem_cache_create(s, flags);
 	if (err)
 		goto out_free_cache;
 
 	s->refcount = 1;
+	// 将新建的slab描述符添加到全局的slab_cach中
 	list_add(&s->list, &slab_caches);
 out:
 	if (err)
@@ -271,13 +284,14 @@ out_free_cache:
 
 /**
  * kmem_cache_create_usercopy - Create a cache with a region suitable
- * for copying to userspace
- * @name: A string which is used in /proc/slabinfo to identify this cache.
- * @size: The size of objects to be created in this cache.
- * @align: The required alignment for the objects.
- * @flags: SLAB flags
- * @useroffset: Usercopy region offset
- * @usersize: Usercopy region size
+ * for copying to userspace(创建一个适用于复制到用户空间的缓存区域)
+ * 
+ * @name: A string which is used in /proc/slabinfo to identify this cache. slab 对象名称，会出现在/proc/slabinfo中
+ * @size: The size of objects to be created in this cache. slab 对象大小,即 slab是为了分配这个对象而准备的 
+ * @align: The required alignment for the objects.  对齐要求
+ * @flags: SLAB flags                               slab分配器的分配掩码和标志位。
+ * @useroffset: Usercopy region offset usercopy区域的偏移量
+ * @usersize: Usercopy region size     usercopy区域的大小
  * @ctor: A constructor for the objects.
  *
  * Cannot be called within a interrupt, but can be interrupted.
@@ -298,11 +312,10 @@ out_free_cache:
  * Return: a pointer to the cache on success, NULL on failure.
  */
 struct kmem_cache *
-kmem_cache_create_usercopy(const char *name,
-		  unsigned int size, unsigned int align,
-		  slab_flags_t flags,
-		  unsigned int useroffset, unsigned int usersize,
-		  void (*ctor)(void *))
+kmem_cache_create_usercopy(const char *name, unsigned int size,
+			   unsigned int align, slab_flags_t flags,
+			   unsigned int useroffset, unsigned int usersize,
+			   void (*ctor)(void *))
 {
 	struct kmem_cache *s = NULL;
 	const char *cache_name;
@@ -310,7 +323,7 @@ kmem_cache_create_usercopy(const char *name,
 
 	get_online_cpus();
 	get_online_mems();
-
+	// 申请slab_mutex互斥量保护
 	mutex_lock(&slab_mutex);
 
 	err = kmem_cache_sanity_check(name, size);
@@ -337,10 +350,15 @@ kmem_cache_create_usercopy(const char *name,
 	    WARN_ON(size < usersize || size - usersize < useroffset))
 		usersize = useroffset = 0;
 
-	if (!usersize)
+	if (!usersize) {
+		// 从缓存中查找
 		s = __kmem_cache_alias(name, size, align, flags, ctor);
-	if (s)
+	}
+
+	if (s) {
+		// 缓存中有，那么就从缓存中查找了
 		goto out_unlock;
+	}
 
 	cache_name = kstrdup_const(name, GFP_KERNEL);
 	if (!cache_name) {
@@ -348,9 +366,10 @@ kmem_cache_create_usercopy(const char *name,
 		goto out_unlock;
 	}
 
+	// 创建slab描述符
 	s = create_cache(cache_name, size,
-			 calculate_alignment(flags, align, size),
-			 flags, useroffset, usersize, ctor, NULL);
+			 calculate_alignment(flags, align, size), flags,
+			 useroffset, usersize, ctor, NULL);
 	if (IS_ERR(s)) {
 		err = PTR_ERR(s);
 		kfree_const(cache_name);
@@ -378,15 +397,18 @@ out_unlock:
 EXPORT_SYMBOL(kmem_cache_create_usercopy);
 
 /**
+ * 创建slab描述符
+ * 
  * kmem_cache_create - Create a cache.
  * @name: A string which is used in /proc/slabinfo to identify this cache.
- * @size: The size of objects to be created in this cache.
- * @align: The required alignment for the objects.
+ * @size: The size of objects to be created in this cache. 缓存对象大小
+ * @align: The required alignment for the objects. 缓存对象需要对齐的字节数
  * @flags: SLAB flags
  * @ctor: A constructor for the objects.
  *
  * Cannot be called within a interrupt, but can be interrupted.
  * The @ctor is run when new pages are allocated by the cache.
+ * (该函数不可在中断上下文中调用，但执行时可被中断。当缓存分配新页面时，会运行构造函数 @ctor)
  *
  * The flags are
  *
@@ -402,12 +424,11 @@ EXPORT_SYMBOL(kmem_cache_create_usercopy);
  *
  * Return: a pointer to the cache on success, NULL on failure.
  */
-struct kmem_cache *
-kmem_cache_create(const char *name, unsigned int size, unsigned int align,
-		slab_flags_t flags, void (*ctor)(void *))
+struct kmem_cache *kmem_cache_create(const char *name, unsigned int size,
+				     unsigned int align, slab_flags_t flags,
+				     void (*ctor)(void *))
 {
-	return kmem_cache_create_usercopy(name, size, align, flags, 0, 0,
-					  ctor);
+	return kmem_cache_create_usercopy(name, size, align, flags, 0, 0, ctor);
 }
 EXPORT_SYMBOL(kmem_cache_create);
 
