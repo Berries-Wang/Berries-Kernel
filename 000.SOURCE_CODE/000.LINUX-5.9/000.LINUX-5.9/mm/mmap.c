@@ -2255,7 +2255,14 @@ get_unmapped_area(struct file *file, unsigned long addr, unsigned long len,
 
 EXPORT_SYMBOL(get_unmapped_area);
 
-/* Look up the first VMA which satisfies  addr < vm_end,  NULL if none. */
+/** 
+ * Look up the first VMA which satisfies  addr < vm_end,  NULL if none.
+ * 阅读: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图4.22　find_vma()查找VMA的过程
+ * 查找VMA，
+ *  1).addr在VMA空间范围内，即vma->vm_start≤addr < vma->vm_end。
+ *  2).距离addr最近并且VMA的结束地址大于addr的VMA。
+ * 
+ **/
 struct vm_area_struct *find_vma(struct mm_struct *mm, unsigned long addr)
 {
 	struct rb_node *rb_node;
