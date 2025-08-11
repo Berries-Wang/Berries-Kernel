@@ -58,6 +58,13 @@ static bool vmacache_valid(struct mm_struct *mm)
 	return true;
 }
 
+/**
+ * 从缓存中查找VMA
+ * 
+ * vmacache_find()是内核中最近出现的一个查找VMA的优化方法，
+ * 在task_struct结构中，有一个存放最近访问过的VMA的数组vmacache[VMACACHE_SIZE]，
+ * 其中可以存放4个最近使用的VMA，充分利用了局部性原理
+ */
 struct vm_area_struct *vmacache_find(struct mm_struct *mm, unsigned long addr)
 {
 	int idx = VMACACHE_HASH(addr);

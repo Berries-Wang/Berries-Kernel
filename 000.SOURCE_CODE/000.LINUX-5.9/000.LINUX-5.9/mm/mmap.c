@@ -2256,6 +2256,8 @@ get_unmapped_area(struct file *file, unsigned long addr, unsigned long len,
 EXPORT_SYMBOL(get_unmapped_area);
 
 /** 
+ * 根据虚拟地址查找vma
+ * 
  * Look up the first VMA which satisfies  addr < vm_end,  NULL if none.
  * 阅读: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图4.22　find_vma()查找VMA的过程
  * 查找VMA，
@@ -2270,8 +2272,9 @@ struct vm_area_struct *find_vma(struct mm_struct *mm, unsigned long addr)
 
 	/* Check the cache first. */
 	vma = vmacache_find(mm, addr);
-	if (likely(vma))
+	if (likely(vma)) {
 		return vma;
+	}
 
 	rb_node = mm->mm_rb.rb_node;
 
@@ -2282,15 +2285,20 @@ struct vm_area_struct *find_vma(struct mm_struct *mm, unsigned long addr)
 
 		if (tmp->vm_end > addr) {
 			vma = tmp;
-			if (tmp->vm_start <= addr)
+			if (tmp->vm_start <= addr) {
 				break;
+			}
 			rb_node = rb_node->rb_left;
-		} else
+		} else {
 			rb_node = rb_node->rb_right;
+		}
 	}
 
-	if (vma)
+	if (vma) {
+		// 更新缓存
 		vmacache_update(addr, vma);
+	}
+
 	return vma;
 }
 
