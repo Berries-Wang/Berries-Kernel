@@ -47,8 +47,9 @@ __mmap64 (void *addr, size_t len, int prot, int flags, int fd, off64_t offset)
 {
   MMAP_CHECK_PAGE_UNIT ();
 
-  if (offset & MMAP_OFF_MASK)
-    return (void *) INLINE_SYSCALL_ERROR_RETURN_VALUE (EINVAL);
+  if (offset & MMAP_OFF_MASK){
+      return (void *) INLINE_SYSCALL_ERROR_RETURN_VALUE (EINVAL);
+    }
 
   MMAP_PREPARE (addr, len, prot, flags, fd, offset);
 #ifdef __NR_mmap2

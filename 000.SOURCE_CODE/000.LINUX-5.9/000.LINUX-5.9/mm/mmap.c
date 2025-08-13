@@ -193,11 +193,34 @@ static int do_brk_flags(unsigned long addr, unsigned long request, unsigned long
  * 000.LINUX-5.9/include/linux/syscalls.h
  * 
  * 分析宏可以得知，最后被翻译为__do_sys_brk 以及一些函数原型
+ * 
+ * <pre>
+ *  asmlinkage long __arm64_sys_brk(const struct pt_regs *regs);
+ *  static long __se_sys_brk(unsigned long brk);
+ *  static inline long __do_sys_brk(unsigned long brk);
+ *  
+ *  asmlinkage long __arm64_sys_brk(const struct pt_regs *regs)
+ *  {
+ *      return __se_sys_brk(brk);
+ *  }
+ *  
+ *  static long __se_sys_brk(unsigned long brk)
+ *  {
+ *      long ret = __do_sys_brk(brk);
+ *      return ret;
+ *  }
+ *  
+ *  static inline long __do_sys_brk(unsigned long brk)
+ * </pre>
+ * 
+ * 则:
+ *  @param brk 是什么? 
  */
 SYSCALL_DEFINE1(brk, unsigned long, brk)
 {
 	unsigned long retval;
 	unsigned long newbrk, oldbrk, origbrk;
+	
 	struct mm_struct *mm = current->mm;
 	struct vm_area_struct *next;
 	unsigned long min_brk;
@@ -208,6 +231,7 @@ SYSCALL_DEFINE1(brk, unsigned long, brk)
 	if (mmap_write_lock_killable(mm))
 		return -EINTR;
 
+	// current->mm->brk: 当前堆中的VMA的结束地址
 	origbrk = mm->brk;
 
 #ifdef CONFIG_COMPAT_BRK
@@ -238,6 +262,7 @@ SYSCALL_DEFINE1(brk, unsigned long, brk)
 
 	newbrk = PAGE_ALIGN(brk);
 	oldbrk = PAGE_ALIGN(mm->brk);
+	// 不需要移动分配的边界地址
 	if (oldbrk == newbrk) {
 		mm->brk = brk;
 		goto success;
@@ -278,6 +303,8 @@ SYSCALL_DEFINE1(brk, unsigned long, brk)
 
 success:
     /**
+	 * newbrk > oldbrk: 虚拟地址有增长 
+	 * 
      * 当指定VM_LOCKED标志位时，表示需要马上为描述这块进程地址空间的VMA来分配物理页面并建立映射关系。
 	 * 通过 mm_populate 函数来完成
      */

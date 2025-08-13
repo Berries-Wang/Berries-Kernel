@@ -35,6 +35,9 @@
 
 __BEGIN_DECLS
 
+/**
+ * 使用extern关键字，那就可以在一个文件中引入在另一个文件中定义的变量或函数
+ */
 /* Allocate SIZE bytes of memory.  */
 extern void *malloc (size_t __size) __THROW __attribute_malloc__
      __attribute_alloc_size__ ((1)) __wur;

@@ -30,6 +30,7 @@
         "sstream": "c",
         "streambuf": "c",
         "err.h": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "stdio.h": "c"
     }
 }
