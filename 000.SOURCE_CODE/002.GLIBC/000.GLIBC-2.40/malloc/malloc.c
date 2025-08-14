@@ -2706,7 +2706,7 @@ sysmalloc (INTERNAL_SIZE_T nb, mstate av)
 
       if (size > 0)
 	{
-    // // 使用 brk 扩展堆???
+    // 使用 brk 扩展堆??? 是的，MORECORE就是定义在本文件中的宏，会触发brk系统调用
 	  brk = (char *) (MORECORE (size));
 	  if (brk != (char *) (MORECORE_FAILURE))
 	    madvise_thp (brk, size);

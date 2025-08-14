@@ -23,9 +23,13 @@ static bool __always_fail_morecore = false;
 void *
 __glibc_morecore (ptrdiff_t increment)
 {
-  if (__always_fail_morecore)
-    return NULL;
+  if (__always_fail_morecore) {
+      return NULL;
+  }
 
+  /** 
+   * 000.GLIBC-2.40/misc/sbrk.c
+  */
   void *result = (void *) __sbrk (increment);
   if (result == (void *) -1)
     return NULL;

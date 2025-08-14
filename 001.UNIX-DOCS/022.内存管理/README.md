@@ -7,8 +7,6 @@
 在大部分Linux操作系统中，内存设备的初始化一般在BIOS或BootLoader中完成，然后把DDR存储设备的大小传递给Linux内核，因此从Linux内核的角度来看，DDR存储设备其实就是一段物理内存空间 <sub>[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#3.3.2　内存管理之数据结构</sub>
 
 
-
-
 Linux内核为每个物理页面都分配了一个page数据结构，采用mem_map[]数组来存放这些page数据结构，并且它们和物理页面是一对一的映射关系<sub>[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图3.9　mem_map[]数组和物理页面的关系</sub>
 
 ###  pglist_data
@@ -35,3 +33,35 @@ pglist_data数据结构用来描述一个内存节点的所有资源
 
 ## Linux 在 AArch64 中的内存布局
 > [000.LINUX-5.9/Documentation/translations/zh_CN/arm64/memory.txt](../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/Documentation/translations/zh_CN/arm64/memory.txt)
+
+
+---
+
+## Linux 中，struct vm_area_struct  mm_struct page pgd 之间的关系
+> 结合上图虚拟地址来分析
+
+| **数据结构** | **描述**  | **所在头文件** |
+|-----------|-----------|-----------|
+| `struct vm_area_struct` | 描述进程的**虚拟内存区域（VMA）**，如代码段、堆、栈或文件映射。  | `linux/mm_types.h`         |
+| `struct mm_struct`      | 描述进程的**完整内存布局**，包含所有 VMA、页表、堆信息等。      | `linux/mm_types.h`         |
+| `struct page`           | 描述**物理内存页**的元数据（如归属、状态、引用计数）。           | `linux/mm_types.h`         |
+| `pgd` (Page Global Directory) | **页全局目录**，是进程页表的顶级结构，用于虚拟地址到物理地址的转换。 | `asm/pgtable.h`    |
+
+
+```txt
+// 暂时记录，待分析
+进程任务控制块 (task_struct)
+  |
+  |---> mm_struct (进程内存描述符)
+         |
+         |---> vm_area_struct (VMA 链表/红黑树)  —— 描述虚拟内存区域
+         |       |---> vm_start, vm_end (虚拟地址范围)
+         |       |---> vm_flags (权限: READ/WRITE/EXEC)
+         |       |---> vm_file (关联的文件，如文件映射)
+         |
+         |---> pgd (页全局目录)  —— 指向页表层级结构
+                 |
+                 |---> 页表遍历 (PGD → P4D → PUD → PMD → PTE)
+                         |
+                         |---> struct page (物理页帧)
+```

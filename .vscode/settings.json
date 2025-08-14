@@ -1,36 +1,3 @@
 {
-    "files.associations": {
-        "type_traits": "c",
-        "variant": "c",
-        "*.tbl": "c",
-        "qspinlock.h": "c",
-        "mutex": "c",
-        "shared_mutex": "c",
-        "array": "c",
-        "bitset": "c",
-        "initializer_list": "c",
-        "string_view": "c",
-        "utility": "c",
-        "random": "c",
-        "atomic": "c",
-        "workqueue_internal.h": "c",
-        "deque": "c",
-        "list": "c",
-        "string": "c",
-        "unordered_map": "c",
-        "vector": "c",
-        "functional": "c",
-        "thread": "c",
-        "tuple": "c",
-        "memory": "c",
-        "optional": "c",
-        "fstream": "c",
-        "istream": "c",
-        "ostream": "c",
-        "sstream": "c",
-        "streambuf": "c",
-        "err.h": "c",
-        "typeinfo": "c",
-        "stdio.h": "c"
-    }
+    "clang-format.executable": "/usr/bin/clang-format-18"
 }

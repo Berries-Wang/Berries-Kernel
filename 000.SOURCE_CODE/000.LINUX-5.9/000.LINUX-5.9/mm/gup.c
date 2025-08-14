@@ -1028,10 +1028,10 @@ static int check_vma_flags(struct vm_area_struct *vma, unsigned long gup_flags)
  * instead of __get_user_pages. __get_user_pages should be used only if
  * you need some special @gup_flags.
  */
-static long __get_user_pages(struct mm_struct *mm,
-		unsigned long start, unsigned long nr_pages,
-		unsigned int gup_flags, struct page **pages,
-		struct vm_area_struct **vmas, int *locked)
+static long __get_user_pages(struct mm_struct *mm, unsigned long start,
+			     unsigned long nr_pages, unsigned int gup_flags,
+			     struct page **pages, struct vm_area_struct **vmas,
+			     int *locked)
 {
 	long ret = 0, i = 0;
 	struct vm_area_struct *vma = NULL;
@@ -1454,6 +1454,11 @@ long populate_vma_page_range(struct vm_area_struct *vma,
  * mmap_lock must not be held.
  * (该功能用于实现 mlock() 系统调用以及 MAP_POPULATE/MAP_LOCKED 的 mmap 标志位。
  * 调用时必须满足：虚拟内存区域(VMA)已预先设置好所需的 vm_flags 标志，且不能持有 mmap_lock 锁。)
+ * 
+ * @param  start 起始虚拟地址(当前brk指针的值)
+ * @param len 需要填充的字节数
+ * @param ignore_errors 是否忽略错误
+ * 
  */
 int __mm_populate(unsigned long start, unsigned long len, int ignore_errors)
 {

@@ -214,7 +214,7 @@ static int do_brk_flags(unsigned long addr, unsigned long request, unsigned long
  * </pre>
  * 
  * 则:
- *  @param brk 是什么? 
+ *  @param brk 是什么? 将break指针(也称 brk 指针)调整为${brk}，来分配内存 -- 通过malloc函数分析而来
  */
 SYSCALL_DEFINE1(brk, unsigned long, brk)
 {
@@ -269,18 +269,23 @@ SYSCALL_DEFINE1(brk, unsigned long, brk)
 	}
 
 	/*
-	 * Always allow shrinking brk.
+	 * Always allow shrinking brk. (始终允许收缩 brk（堆内存）)
 	 * __do_munmap() may downgrade mmap_lock to read.
+	 * 
+	 * 这就是要缩小堆内存了
 	 */
 	if (brk <= mm->brk) {
 		int ret;
 
-		/*
+		/**
 		 * mm->brk must to be protected by write mmap_lock so update it
 		 * before downgrading mmap_lock. When __do_munmap() fails,
 		 * mm->brk will be restored from origbrk.
+		 * (mm->brk 必须通过写入 mmap_lock 来保护，因此在降级 mmap_lock 之前需先更新它。
+		 * 若 __do_munmap() 失败，mm->brk 将从 origbrk 恢复。)
 		 */
 		mm->brk = brk;
+		// 解除映射，即释放内存
 		ret = __do_munmap(mm, newbrk, oldbrk-newbrk, &uf, true);
 		if (ret < 0) {
 			mm->brk = origbrk;
@@ -291,7 +296,14 @@ SYSCALL_DEFINE1(brk, unsigned long, brk)
 		goto success;
 	}
 
-	/* Check against existing mmap mappings. */
+	/*-------- 下面就是要申请内存了 -------*/
+
+	/* Check against existing mmap mappings.(检查现有的 mmap 映射) */
+	/**
+	 * find_vma()以旧边界地址去查找的VMA，
+	 * 以确定当前用户进程中是否已经有一块VMA和start_addr重叠。
+	 * 如果找到一块包含start_addr的VMA，说明以旧边界地址开始的地址空间已经在使用，就不需要再寻找了
+	 */
 	next = find_vma(mm, oldbrk);
 	if (next && newbrk + PAGE_SIZE > vm_start_gap(next))
 		goto out;
@@ -316,6 +328,7 @@ success:
 	userfaultfd_unmap_complete(mm, &uf);
 	if (populate) {
 		/**
+		 * 000.LINUX-5.9/include/linux/mm.h
 		 * gup.c
 		 */
 		mm_populate(oldbrk, newbrk - oldbrk);
@@ -2839,9 +2852,13 @@ int split_vma(struct mm_struct *mm, struct vm_area_struct *vma,
 	return __split_vma(mm, vma, addr, new_below);
 }
 
-/* Munmap is split into 2 main parts -- this part which finds
+/**
+ * __do_munmap 是 Linux 内核中用于解除内存映射（Memory Unmapping）的核心函数，主要负责释放由 mmap 分配的虚拟内存区域（VMA）。它是 munmap 系统调用的底层实现，处理虚拟地址空间的释放、页表清理和 VMA 结构调整。
+ *  
+ * Munmap is split into 2 main parts -- this part which finds
  * what needs doing, and the areas themselves, which do the
  * work.  This now handles partial unmappings.
+ * (Munmap 被拆分为两个主要部分——当前部分负责确定需要执行的操作，而具体的内存区域（VMA）则负责执行实际的解除映射工作。现在该机制已支持部分解除映射（partial unmappings）。)
  * Jeremy Fitzhardinge <jeremy@goop.org>
  */
 int __do_munmap(struct mm_struct *mm, unsigned long start, size_t len,
