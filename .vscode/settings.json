@@ -1,3 +1,6 @@
 {
-    "clang-format.executable": "/usr/bin/clang-format-18"
+    "clang-format.executable": "/usr/bin/clang-format-18",
+    "files.associations": {
+        "*.tbl": "c"
+    }
 }

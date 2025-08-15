@@ -85,6 +85,8 @@ extern unsigned long empty_zero_page[PAGE_SIZE / sizeof(unsigned long)];
  * 
  * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#'表2.2　　访问页表项标志位的函数'
  * pte_present: 判断该页是否在内存中 
+ * 
+ * 在[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#2．follow_page_pte()函数中也描述了该宏的功能
  */
 #define pte_present(pte)	(!!(pte_val(pte) & (PTE_VALID | PTE_PROT_NONE)))
 #define pte_young(pte)		(!!(pte_val(pte) & PTE_AF))
@@ -469,6 +471,9 @@ struct file;
 extern pgprot_t phys_mem_access_prot(struct file *file, unsigned long pfn,
 				     unsigned long size, pgprot_t vma_prot);
 
+/**
+ * pmd_none() 是一个用于检查 页中间目录项 (PMD, Page Middle Directory) 是否为空（未映射）的宏或函数。它通常在处理页表时用于判断某个 PMD 表项是否有效
+ */
 #define pmd_none(pmd)		(!pmd_val(pmd))
 
 #define pmd_bad(pmd)		(!(pmd_val(pmd) & PMD_TABLE_BIT))

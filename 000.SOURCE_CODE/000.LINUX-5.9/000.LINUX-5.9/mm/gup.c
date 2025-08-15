@@ -339,6 +339,14 @@ void unpin_user_pages(struct page **pages, unsigned long npages)
 EXPORT_SYMBOL(unpin_user_pages);
 
 #ifdef CONFIG_MMU
+
+/**
+ * 用于处理页表相关的错误情况
+ * 功能:   
+ *   错误处理：当内核在页表遍历过程中遇到无效的页表项(PTE)时调用此函数。
+ *   生成错误信息：它会生成适当的错误信息，帮助诊断内存访问问题。
+ *   处理特殊情况：处理那些没有关联页表但仍然需要特殊处理的情况。
+ */
 static struct page *no_page_table(struct vm_area_struct *vma,
 		unsigned int flags)
 {
@@ -394,8 +402,9 @@ static inline bool can_follow_write_pte(pte_t pte, unsigned int flags)
  * 在follow_page_pte函数中，遍历PTE，并返回address对应的物理页面的page结构
  */
 static struct page *follow_page_pte(struct vm_area_struct *vma,
-		unsigned long address, pmd_t *pmd, unsigned int flags,
-		struct dev_pagemap **pgmap)
+				    unsigned long address, pmd_t *pmd,
+				    unsigned int flags,
+				    struct dev_pagemap **pgmap)
 {
 	struct mm_struct *mm = vma->vm_mm;
 	struct page *page;
@@ -405,14 +414,24 @@ static struct page *follow_page_pte(struct vm_area_struct *vma,
 
 	/* FOLL_GET and FOLL_PIN are mutually exclusive. */
 	if (WARN_ON_ONCE((flags & (FOLL_PIN | FOLL_GET)) ==
-			 (FOLL_PIN | FOLL_GET)))
+			 (FOLL_PIN | FOLL_GET))) {
 		return ERR_PTR(-EINVAL);
+	}
 retry:
-	if (unlikely(pmd_bad(*pmd)))
+	if (unlikely(pmd_bad(*pmd))) {
 		return no_page_table(vma, flags);
+	}
 
+	/**
+	 * pte_offset_map_lock()宏通过PMD和地址获取PTE，
+	 * 这里还获取了一个自旋锁，这个函数在返回时需要调用pte_unmap_unlock()来释放自旋锁
+	 * 
+	 * 分析这个宏，就能验证 虚拟地址到物理地址转换的流程了 (001.UNIX-DOCS/022.内存管理/000.arm64-内核中的页表.md)
+	 */
 	ptep = pte_offset_map_lock(mm, pmd, address, &ptl);
+
 	pte = *ptep;
+	// 如果pte无效: 不在内存中
 	if (!pte_present(pte)) {
 		swp_entry_t entry;
 		/*
@@ -438,6 +457,7 @@ retry:
 		return NULL;
 	}
 
+	// vm_normal_page函数返回普通映射页面的page数据结构
 	page = vm_normal_page(vma, address, pte);
 	if (!page && pte_devmap(pte) && (flags & (FOLL_GET | FOLL_PIN))) {
 		/*
@@ -556,26 +576,39 @@ static struct page *follow_pmd_mask(struct vm_area_struct *vma,
 	struct page *page;
 	struct mm_struct *mm = vma->vm_mm;
 
+	// 通过pmd_offset找到PMD页表项
 	pmd = pmd_offset(pudp, address);
-	/*
+	/**
 	 * The READ_ONCE() will stabilize the pmdval in a register or
 	 * on the stack so that it will stop changing under the code.
+	 * (在 Linux 内核中，READ_ONCE() 宏的作用是将 pmdval（页中间目录项的值）稳定地读取到寄存器或栈内存中，从而确保在后续代码执行过程中，该值不会意外改变。)
 	 */
 	pmdval = READ_ONCE(*pmd);
-	if (pmd_none(pmdval))
+
+	/**
+	 * 000.LINUX-5.9/arch/arm64/include/asm/pgtable.h
+	 * 000.LINUX-5.9/arch/arm64/include/asm/pgtable-types.h
+	 * 
+	 * 检测pmd页表项是否有效
+	 */
+	if (pmd_none(pmdval)) {
+		// 处理异常情况
 		return no_page_table(vma, flags);
+	}
+
 	if (pmd_huge(pmdval) && is_vm_hugetlb_page(vma)) {
 		page = follow_huge_pmd(mm, address, pmd, flags);
-		if (page)
+		if (page) {
 			return page;
+		}
 		return no_page_table(vma, flags);
 	}
 	if (is_hugepd(__hugepd(pmd_val(pmdval)))) {
-		page = follow_huge_pd(vma, address,
-				      __hugepd(pmd_val(pmdval)), flags,
-				      PMD_SHIFT);
-		if (page)
+		page = follow_huge_pd(vma, address, __hugepd(pmd_val(pmdval)),
+				      flags, PMD_SHIFT);
+		if (page) {
 			return page;
+		}
 		return no_page_table(vma, flags);
 	}
 retry:
@@ -1408,6 +1441,7 @@ long populate_vma_page_range(struct vm_area_struct *vma,
 		unsigned long start, unsigned long end, int *locked)
 {
 	struct mm_struct *mm = vma->vm_mm;
+	// 要分配页面的数量
 	unsigned long nr_pages = (end - start) / PAGE_SIZE;
 	int gup_flags;
 

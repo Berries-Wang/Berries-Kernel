@@ -2206,6 +2206,9 @@ static inline void pgtable_pte_page_dtor(struct page *page)
 	dec_zone_page_state(page, NR_PAGETABLE);
 }
 
+/**
+ * pte_offset_map 获取PTE
+ */
 #define pte_offset_map_lock(mm, pmd, address, ptlp)	\
 ({							\
 	spinlock_t *__ptl = pte_lockptr(mm, pmd);	\

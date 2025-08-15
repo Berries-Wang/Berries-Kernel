@@ -305,12 +305,20 @@ SYSCALL_DEFINE1(brk, unsigned long, brk)
 	 * 如果找到一块包含start_addr的VMA，说明以旧边界地址开始的地址空间已经在使用，就不需要再寻找了
 	 */
 	next = find_vma(mm, oldbrk);
-	if (next && newbrk + PAGE_SIZE > vm_start_gap(next))
+	if (next && newbrk + PAGE_SIZE > vm_start_gap(next)) {
 		goto out;
+	}
 
-	/* Ok, looks good - let it rip. */
-	if (do_brk_flags(oldbrk, newbrk-oldbrk, 0, &uf) < 0)
+	/**
+	 * 
+	 *  Ok, looks good - let it rip. 
+	 * 
+	 * 注意，do_brk_flags 这个函数,会
+	 * 1. 分配一个新的vma
+	 * */
+	if (do_brk_flags(oldbrk, newbrk - oldbrk, 0, &uf) < 0) {
 		goto out;
+	}
 	mm->brk = brk;
 
 success:
@@ -3115,7 +3123,7 @@ out:
 	return ret;
 }
 
-/*
+/**
  *  this is really a simplified "do_mmap".  it only handles
  *  anonymous maps.  eventually we may be able to do some
  *  brk-specific accounting here.
