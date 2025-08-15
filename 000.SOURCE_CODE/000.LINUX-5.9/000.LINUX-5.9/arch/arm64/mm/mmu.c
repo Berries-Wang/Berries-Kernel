@@ -375,6 +375,12 @@ static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
  * 创建页表映射
  * 
  * create_mapping_noalloc 看一下这个方法的注释 
+ *
+ * >>> 通过 'map_mem' 分析而来
+ * @param phys 待映射的内存空间的起始地址(物理地址)
+ * @param virt phys的虚拟地址
+ * @param size 内存空间大小
+ * @param prot PAGE_KERNEL
  */
 static void __create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys,
 				 unsigned long virt, phys_addr_t size,
@@ -785,6 +791,8 @@ void __init paging_init(void)
 {
 	/**
 	 * pgd_set_fixmap()函数做一个固定映射，把swapper_pg_dir页表重新映射到固定映射区域
+     * 
+     * 获取PGD页表基地址  []#2.1.6　案例分析：ARM64的页表映射过程
 	 */
 	pgd_t *pgdp = pgd_set_fixmap(__pa_symbol(swapper_pg_dir));
  
