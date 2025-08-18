@@ -631,6 +631,11 @@ static inline unsigned long pud_page_vaddr(pud_t pud)
 #define pud_ERROR(pud)		__pud_error(__FILE__, __LINE__, pud_val(pud))
 
 #define p4d_none(p4d)		(!p4d_val(p4d))
+/**
+ *
+ * 这里的2，指的是Bit[1]为1的场景吗 ,见[]#图2.4　L0～L2页表项描述符
+ * Bit[1] 表示类型，页表类型：当Bit[1]为1时，表示该描述符包含了指向下一级页表的基地址，是一个页表类型的页表项
+ */
 #define p4d_bad(p4d)		(!(p4d_val(p4d) & 2))
 #define p4d_present(p4d)	(p4d_val(p4d))
 

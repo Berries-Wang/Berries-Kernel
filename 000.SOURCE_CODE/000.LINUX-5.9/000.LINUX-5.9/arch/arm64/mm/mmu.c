@@ -102,7 +102,11 @@ static phys_addr_t __init early_pgtable_alloc(int shift)
 {
 	phys_addr_t phys;
 	void *ptr;
-
+        
+        /**
+         * include/linux/memblock.h: 
+         *
+         */
 	phys = memblock_phys_alloc(PAGE_SIZE, PAGE_SIZE);
 	if (!phys)
 		panic("Failed to allocate page table page\n");
@@ -311,6 +315,10 @@ static inline bool use_1G_block(unsigned long addr, unsigned long next,
 
 /**
  * 初始化PGD页表项内容和PUD
+ *
+ * 因为当前内核版本为5.9 , 支持4级页表，所以 pgd 就是 p4d ， 也可以通过代码看出来
+ *
+ * pgtable_alloc 函数指针,实际是 early_pgtable_alloc  （从 paging_init -> mem_map 分析而来）
  * 
  */
 static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
@@ -320,27 +328,46 @@ static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
 {
 	unsigned long next;
 	pud_t *pudp;
+        /**
+         * include/asm-generic/pgtable-nop4d.h
+         * 
+         * 因为(1) pgd 的页表项指向的是下一级页表的基地址
+         */
 	p4d_t *p4dp = p4d_offset(pgdp, addr);
 	p4d_t p4d = READ_ONCE(*p4dp);
 
-	// 通过pgd_none()判断当前PGD页表项的内容是否为空
+	/** 
+         * arch/arm64/include/asm/pgtable.h : 判断是否初始化过:
+         * p4d_none: true：未初始化过;false:已初始化
+         */
 	if (p4d_none(p4d)) { 
 		phys_addr_t pud_phys;
 		BUG_ON(!pgtable_alloc);
+                // 分配一个物理page出来 , 所以(1)这里分配的是一个PUD页表
 		pud_phys = pgtable_alloc(PUD_SHIFT);
+                // arch/arm64/include/asm/pgalloc.h : 填充P4D的页表项(条目)，执行PUD页表基地
 		__p4d_populate(p4dp, pud_phys, PUD_TYPE_TABLE);
+                // 重新读取更新后的p4d条目
 		p4d = READ_ONCE(*p4dp);
 	}
-	BUG_ON(p4d_bad(p4d));
+ 
+	BUG_ON(p4d_bad(p4d));// 检查条目合法性
 
-	// 通过pud_set_fixmap_offset ()来获取相应的PUD表项
+	// 将p4dp映射到fixmap，获取虚拟地址
 	pudp = pud_set_fixmap_offset(p4dp, addr);
 	do {
+                // 获取当前pudp条目
 		pud_t old_pud = READ_ONCE(*pudp);
-
+                
+                // include/linux/pgtable.h: 计算当前pud能够覆盖的内存的右边界
 		next = pud_addr_end(addr, end);
 
 		/**
+                 * 
+                 * 这个得结合页表描述符来分析了: 无效的页表项、块类型的页表项、页表类型的页表项 , 这个都是通过描述符的标志位来区分的
+                 * 内容在: []#2.1.3　页表项描述符
+                 * > 知道了这个，下面的流程就很好懂了
+                 * 
 		 * For 4K granule only, attempt to put down a 1GB block
 		 * (对于仅使用4K粒度的情况，尝试建立一个1GB的大块映射)
 		 * 
@@ -350,6 +377,12 @@ static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
 		 */
 		if (use_1G_block(addr, next, phys) &&
 		    (flags & NO_BLOCK_MAPPINGS) == 0) {
+                        /**
+                         * 得结合页表项描述符来分析: []#2.1.3　页表项描述符
+                         *
+                         * 设置页表描述符为大页： 设置了页表项描述符的位
+                         * 如，将 Bit[0] 设置为1（表示有效的描述符），Bit[1]为0表示是一个大的内存块(这个函数不用操作Bit[1])
+                         */
 			pud_set_huge(pudp, phys, prot);
 
 			/**
@@ -390,6 +423,12 @@ static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
  * @param virt phys的虚拟地址
  * @param size 内存空间大小
  * @param prot PAGE_KERNEL
+ *
+ * pgd_t 定义在 arch/arm64/include/asm/pgtable_types.h 
+ *  typedef struct { pteval_t pte; } pte_t;
+ *  typedef struct { pmdval_t pmd; } pmd_t;
+ *  typedef struct { pudval_t pud; } pud_t;
+ *  typedef struct { pgdval_t pgd; } pgd_t;
  */
 static void __create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys,
 				 unsigned long virt, phys_addr_t size,
@@ -412,6 +451,7 @@ static void __create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys,
 	end = PAGE_ALIGN(virt + size);
 
 	do {
+                // pgd_addr_end : include/linux/pgtable.h: 即 next表示这个pgd 页表项所能映射的区域的右边界
 		next = pgd_addr_end(addr, end);
 		alloc_init_pud(pgdp, addr, next, phys, prot, pgtable_alloc,
 			       flags);
@@ -780,6 +820,9 @@ static void __init map_kernel(pgd_t *pgdp)
 }
 
 /**
+ * 页表的创建是由操作系统来完成的，包括页表的创建和填充，但是处理器遍历页表是由处理器的MMU来完成的 in []#2.1.6　案例分析：ARM64的页表映射过程
+ *   MMU是硬件设备，所以硬件规定(约定?) swapper_pg_dir 是PGD页表项的基地址，这样好理解了
+ *
  * 在paging_init()函数中会对内核空间的多个内存段做重新映射 , 映射到页表
  * 
  * swapper_pg_dir : 内核页表的PGD页表基地址，是虚拟地址，因为在内核启动的汇编代码中会做一次简单的块映射

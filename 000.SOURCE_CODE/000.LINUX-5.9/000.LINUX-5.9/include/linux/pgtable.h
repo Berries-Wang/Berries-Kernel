@@ -653,6 +653,13 @@ static inline int arch_unmap_one(struct mm_struct *mm,
  * When walking page tables, get the address of the next boundary,
  * or the end address of the range if that comes earlier.  Although no
  * vma end wraps to 0, rounded up __boundary may wrap to 0 throughout.
+ * pgd_addr_end宏用于计算给定地址范围内下一个PGD条目的结束地址
+ * PGDIR_MASK: 用于对齐PGD边界的掩码
+ * 
+ *
+ * PUD_SIZE 这个得根据虚拟虚拟地址来分析，
+ * 因为PUD索引是由虚拟地址 Bit[38,30]表示，所以每一个PUD能够覆盖2^30位的物理地址范围
+ * ▲图2.7　4级分页模型在64位虚拟地址的划分
  */
 
 #define pgd_addr_end(addr, end)						\
