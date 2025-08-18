@@ -345,7 +345,7 @@ static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
 		BUG_ON(!pgtable_alloc);
                 // 分配一个物理page出来 , 所以(1)这里分配的是一个PUD页表
 		pud_phys = pgtable_alloc(PUD_SHIFT);
-                // arch/arm64/include/asm/pgalloc.h : 填充P4D的页表项(条目)，执行PUD页表基地
+                // arch/arm64/include/asm/pgalloc.h : 填充P4D的页表项(条目)，指向PUD页表基地
 		__p4d_populate(p4dp, pud_phys, PUD_TYPE_TABLE);
                 // 重新读取更新后的p4d条目
 		p4d = READ_ONCE(*p4dp);
@@ -355,6 +355,7 @@ static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
 
 	// 将p4dp映射到fixmap，获取虚拟地址
 	pudp = pud_set_fixmap_offset(p4dp, addr);
+        // 这个do-while循环就是遍历并填充pgd页表的每个页表项，获取下一个页表项的逻辑在while中
 	do {
                 // 获取当前pudp条目
 		pud_t old_pud = READ_ONCE(*pudp);
@@ -405,6 +406,7 @@ static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
 		/**
 		 * pudp++: 以PUD_SIZE为步长循环处理
 		 * >> pudp++ , 即指向下一个 pud_t 
+                 * 这里其实就是迭代处理每个pgd页表项--pgd页表的页表项就是指向pud页表的物理基地址 
 		 */
 	} while (pudp++, addr = next, addr != end);
 
