@@ -690,8 +690,9 @@ static inline unsigned long p4d_page_vaddr(p4d_t p4d)
 #define pgd_ERROR(pgd)		__pgd_error(__FILE__, __LINE__, pgd_val(pgd))
 
 /**
- * pgd_set_fixmap()函数就做这个固定映射的事情，
- * 把PGD页表的物理页面映射到固定映射区域，返回PGD页表的虚拟地址
+ * pgd_set_fixmap()函数就做这个固定映射的事情，把PGD页表的物理页面映射到固定映射区域，返回PGD页表的虚拟地址
+ * 
+ * 借助 `000.LINUX-5.9/arch/arm64/include/asm/fixmap.h` enum fixed_addresses  的注释更好理解
  */
 #define pgd_set_fixmap(addr)	((pgd_t *)set_fixmap_offset(FIX_PGD, addr))
 /**

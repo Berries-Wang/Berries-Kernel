@@ -243,8 +243,10 @@ static inline atomic_t *compound_pincount_ptr(struct page *page)
 	return &page[2].hpage_pinned_refcount;
 }
 
-/*
+/**
  * Used for sizing the vmemmap region on some architectures
+ * 
+ * order_base_2(n):内核提供的函数，计算不小于 n 的最小 2 的幂次的对数
  */
 #define STRUCT_PAGE_MAX_SHIFT	(order_base_2(sizeof(struct page)))
 

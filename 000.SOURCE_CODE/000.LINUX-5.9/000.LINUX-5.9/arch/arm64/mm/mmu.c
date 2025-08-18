@@ -46,6 +46,15 @@ u64 idmap_ptrs_per_pgd = PTRS_PER_PGD;
 u64 __section(".mmuoff.data.write") vabits_actual;
 EXPORT_SYMBOL(vabits_actual);
 
+/**
+ * kimage_voffset表示内核映像虚拟地址和物理地址之间的偏移量
+ * 来源于:  
+ * 1). __primary_switched函数 (2.6.6　__primary_switch函数分析) -- 在这个函数中赋值的
+ * 2). 这些内核符号表的链接地址在vmalloc区域，即从KIMAGE_VADDR + TEXT_OFFSET开始的虚拟地址，它和内核空间的线性映射区是不相同的
+ *     > 2.1.6　案例分析：ARM64的页表映射过程: 图2.11　kimage_voffset的含义 + 那kimage_voffset代表什么意思呢？如图2.11所示，当系统刚初始化时，内核映像通过块映射的方式映射到KIMAGE_VADDR + TEXT_OFFSET的虚拟地址上，因此kimage_voffset表示内核映像虚拟地址和物理地址之间的偏移量，这类似于线性映射之后的PAGE_OFFSET。
+ * 
+ * 000.LINUX-5.9/arch/arm64/kernel/head.S 会处理kimage_vaddr , kimage_offset 
+ */
 u64 kimage_voffset __ro_after_init;
 EXPORT_SYMBOL(kimage_voffset);
 
@@ -512,7 +521,7 @@ void __init mark_linear_text_alias_ro(void)
 }
 
 /**
- * map_mem(pgdp)：物理内存的线性映射。物理内存会全部线性映射到以PAGE_OFFSET开始的内核空间的虚拟地址，以加速内核访问内存。
+ * map_mem(pgdp)：物理内存的线性映射。物理内存会全部线性映射到以PAGE_OFFSET(即页面内偏移量)开始的内核空间的虚拟地址，以加速内核访问内存。
  * 
  * "加速访问"的含义:
  *   通过简单的偏移量实现，虚拟地址 = 物理地址 + 固定偏移（如PAGE_OFFSET）, 提供一种快速访问物理内存的方式，避免了频繁的页表操作
@@ -776,9 +785,7 @@ static void __init map_kernel(pgd_t *pgdp)
  * swapper_pg_dir : 内核页表的PGD页表基地址，是虚拟地址，因为在内核启动的汇编代码中会做一次简单的块映射
  * __pa_symbol: 把内核符号的虚拟地址转换为物理地址
  * __pa: 这时物理内存的线性映射还没建立好，因此不能直接使用__pa()宏
- * 
- * 
- * 1. 先做固定映射 -> 2.划分页面(PGD、PUD...) 是这个顺序吗?
+
  *
  * 看一下[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#3.3.4　物理内存映射
  *     内核映像映射了两次： 映射到内核空间的虚拟地址；线性映射? 怎么理解? 
@@ -795,23 +802,39 @@ void __init paging_init(void)
      * 获取PGD页表基地址  []#2.1.6　案例分析：ARM64的页表映射过程
 	 * 
      * swapper_pg_dir 就是页表基地址，虚拟地址 ， 使用 __pa_symbol 转为物理地址
+	 * > 全局变量swapper_pg_dir是内核页表的PGD页表基地址，可是这是虚拟地址，因为在内核启动的汇编代码中会做一次简单的块映射。
+	 * ---->> 索引可以使用__pa_symbol获取到物理地址
+	 * 
+	 * 内核里面有一个固定映射（fixed mapping）区域，它的范围是0xFFFF 7DFF FE7F 9000～0xFFFF 7DFF FEC0 0000，我们可以把PGD页表映射这个区域，然后才可以使用__pa()宏。
+	 * > #图2.9　ARM64在Linux 5.0内核的内存分布
+	 * 
+	 * pgd_set_fixmap()函数就做这个固定映射的事情，把PGD页表的物理页面映射到固定映射区域，返回PGD页表的虚拟地址。而pgd_clear_fixmap()函数用于取消固定区域的映射
 	 */
 	pgd_t *pgdp = pgd_set_fixmap(__pa_symbol(swapper_pg_dir));
  
 	/**
 	 * map_kernel(pgdp)：对内核映像文件的各个块重新映射。
 	 * 在head.S文件中，我们对内核映像文件做了块映射，现在需要使用页机制来重新映射。
+	 * 
+	 * > 保证内核在启用分页后能够正常执行 (在内核启动之初，并没有立马启用分页)
 	 */
 	map_kernel(pgdp);
 
 	/**
 	 * 线性映射区映射,具体看代码注释
+	 * 
+	 * 为内核进行内存映射，使内核能够通过虚拟地址访问整个物理内存?
 	 */
 	map_mem(pgdp);
 
+	/**
+	 * 取消映射，和 pgd_set_fixmap 对应
+	 */
 	pgd_clear_fixmap();
 
 	cpu_replace_ttbr1(lm_alias(swapper_pg_dir));
+
+	// 赋值整个内核的pgd
 	init_mm.pgd = swapper_pg_dir;
 
 	memblock_free(__pa_symbol(init_pg_dir),
@@ -1336,12 +1359,12 @@ void __init early_fixmap_init(void)
 	}
 }
 
-/*
+/**
  * Unusually, this is also called in IRQ context (ghes_iounmap_irq) so if we
  * ever need to use IPIs for TLB broadcasting, then we're in trouble here.
+ * (不寻常的是，该函数（ghes_iounmap_irq）也会在IRQ上下文中被调用。因此，如果我们将来需要使用IPI（处理器间中断）进行TLB广播，这里就会出问题。)
  */
-void __set_fixmap(enum fixed_addresses idx,
-			       phys_addr_t phys, pgprot_t flags)
+void __set_fixmap(enum fixed_addresses idx, phys_addr_t phys, pgprot_t flags)
 {
 	unsigned long addr = __fix_to_virt(idx);
 	pte_t *ptep;
@@ -1354,7 +1377,7 @@ void __set_fixmap(enum fixed_addresses idx,
 		set_pte(ptep, pfn_pte(phys >> PAGE_SHIFT, flags));
 	} else {
 		pte_clear(&init_mm, addr, ptep);
-		flush_tlb_kernel_range(addr, addr+PAGE_SIZE);
+		flush_tlb_kernel_range(addr, addr + PAGE_SIZE);
 	}
 }
 

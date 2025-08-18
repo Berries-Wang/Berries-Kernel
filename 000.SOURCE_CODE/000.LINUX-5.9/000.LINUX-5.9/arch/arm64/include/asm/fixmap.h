@@ -27,10 +27,15 @@
  * addresses. The point is to have a constant address at
  * compile time, but to set the physical address only
  * in the boot process.
+ * (在Linux内核中，我们在此定义所有编译阶段的"特殊"虚拟地址。关键在于在编译时保持虚拟地址的恒定不变，而实际物理地址则要到启动过程中才会被确定。)
  *
  * Each enum increment in these 'compile-time allocated'
  * memory buffers is page-sized. Use set_fixmap(idx,phys)
  * to associate physical memory with a fixmap index.
+ * (在这些“编译时分配”的内存缓冲区中，`"每一个枚举值的增量都对应一个页面的大小（page-sized）"`。开发者可以通过 set_fixmap(idx, phys) 函数将物理内存与特定的固定映射索引（fixmap index）关联起来。)
+ * 
+ * 每个索引表示一个固定映射的线性地址，这些地址是 4KB 对齐的，意味着每个地址都是页基地址？
+ * 
  */
 enum fixed_addresses {
 	FIX_HOLE,
@@ -40,7 +45,9 @@ enum fixed_addresses {
 	 * maximum supported size, and put it at the top of the fixmap region.
 	 * The additional space ensures that any FDT that does not exceed
 	 * MAX_FDT_SIZE can be mapped regardless of whether it crosses any
-	 * 2 MB alignment boundaries.
+	 * 2 MB alignment boundaries.(为设备树（FDT）预留一个比最大支持尺寸大 2MB 的虚拟地址窗口，
+	 * 并将其置于固定映射（fixmap）区域的顶部。这额外的空间确保了任何不超过 MAX_FDT_SIZE 的 FDT 都能被映射，
+	 * 无论其是否跨越任何 2MB 对齐边界。)
 	 *
 	 * Keep this at the top so it remains 2 MB aligned.
 	 */
