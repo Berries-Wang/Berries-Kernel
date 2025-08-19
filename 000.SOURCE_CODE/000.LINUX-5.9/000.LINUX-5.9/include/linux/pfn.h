@@ -18,6 +18,11 @@ typedef struct {
 #define PFN_ALIGN(x)	(((unsigned long)(x) + (PAGE_SIZE - 1)) & PAGE_MASK)
 #define PFN_UP(x)	(((x) + PAGE_SIZE-1) >> PAGE_SHIFT)
 #define PFN_DOWN(x)	((x) >> PAGE_SHIFT)
+/**
+ * 000.LINUX-5.9/include/asm-generic/page.h
+ * 
+ * #define PAGE_SHIFT	12
+ */
 #define PFN_PHYS(x)	((phys_addr_t)(x) << PAGE_SHIFT)
 #define PHYS_PFN(x)	((unsigned long)((x) >> PAGE_SHIFT))
 

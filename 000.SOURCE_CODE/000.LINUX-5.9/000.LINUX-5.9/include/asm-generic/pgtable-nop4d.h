@@ -40,7 +40,7 @@ static inline void pgd_clear(pgd_t *pgd)	{ }
  */
 static inline p4d_t *p4d_offset(pgd_t *pgd, unsigned long address)
 {
-        // P4D 和 PGD 相同: 由于 ARM64 默认使用 4 级页表，p4d_t 实际上就是 pgd_t，所以直接返回 pgd
+	// P4D 和 PGD 相同: 由于 ARM64 默认使用 4 级页表，p4d_t 实际上就是 pgd_t，所以直接返回 pgd
 	return (p4d_t *)pgd;
 }
 

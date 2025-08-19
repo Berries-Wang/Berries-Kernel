@@ -1,6 +1,14 @@
 {
     "clang-format.executable": "/usr/bin/clang-format-18",
     "files.associations": {
-        "*.tbl": "c"
+        "*.tbl": "c",
+        "array": "c",
+        "deque": "c",
+        "list": "c",
+        "string": "c",
+        "unordered_map": "c",
+        "vector": "c",
+        "initializer_list": "c",
+        "string_view": "c"
     }
 }

@@ -63,7 +63,11 @@ static inline unsigned long pud_index(unsigned long address)
 
 #ifndef pgd_index
 /* Must be a compile-time constant, so implement it as a macro */
-#define pgd_index(a)  (((a) >> PGDIR_SHIFT) & (PTRS_PER_PGD - 1))
+/**
+ * pgd_index 求L0的索引值
+ * pgd索引值在哪里? 查阅: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#▲图2.7　4级分页模型在64位虚拟地址的划分
+ */
+#define pgd_index(a)  (((a) >> PGDIR_SHIFT) & (PTRS_PER_PGD - 1)) 
 #endif
 
 #ifndef pte_offset_kernel
@@ -101,6 +105,12 @@ static inline pud_t *pud_offset(p4d_t *p4d, unsigned long address)
 #define pud_offset pud_offset
 #endif
 
+/**
+ * 从虚拟地址${address}计算pgd索引
+ * 
+ * @param pgd pgd页表基地址
+ * @param address 虚拟地址
+ */
 static inline pgd_t *pgd_offset_pgd(pgd_t *pgd, unsigned long address)
 {
 	return (pgd + pgd_index(address));
