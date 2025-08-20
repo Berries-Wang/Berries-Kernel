@@ -39,6 +39,12 @@
 #include <asm/tlbflush.h>
 #include <asm/traps.h>
 
+/**
+ * fn: 定义一个函数指针，用于修复异常状态的函数指针
+ * sig: 处理失败时Linux内核要发送的信号类型
+ * code: 处理失败时Linux内核要发送的信号编码
+ * name：这条异常状态的名称。
+ */
 struct fault_info {
 	int	(*fn)(unsigned long addr, unsigned int esr,
 		      struct pt_regs *regs);
@@ -227,6 +233,9 @@ static bool is_el1_instruction_abort(unsigned int esr)
 	return ESR_ELx_EC(esr) == ESR_ELx_EC_IABT_CUR;
 }
 
+/**
+ * is_el1_permission_fault()判断访问权限问题是否发生在EL1中(访问权限问题)
+ */
 static inline bool is_el1_permission_fault(unsigned long addr, unsigned int esr,
 					   struct pt_regs *regs)
 {
@@ -437,15 +446,29 @@ static bool is_el0_instruction_abort(unsigned int esr)
 	return ESR_ELx_EC(esr) == ESR_ELx_EC_IABT_LOW;
 }
 
-/*
+/**
  * Note: not valid for EL1 DC IVAC, but we never use that such that it
  * should fault. EL0 cannot issue DC IVAC (undef).
+ * 
+ * ESR_ELx_WNR表示ISS表中的WnR字段。若为1，表示写内存区域发生错误；若为0，表示读内存区域发生错误
  */
 static bool is_write_abort(unsigned int esr)
 {
+	/**
+	 * 当确定为写(ESR_ELx_WNR)导致的异常错误并且不是高速缓存(ESR_ELx_CM)导致的异常错误时，可以设置vm_flags为VM_WRITE标志位，并且设置mm_flags 的FAULT_FLAG_WRITE标志位。
+	 * 
+	 * ESR_ELx_WNR & ESR_ELx_CM 见[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#表4.14　数据异常的ISS表中重要的字段
+	 */
 	return (esr & ESR_ELx_WNR) && !(esr & ESR_ELx_CM);
 }
 
+/**
+ * 缺页异常修复
+ * 
+ * @param addr 异常发生时的虚拟地址，由FSR提供
+ * @param esr 异常发生时的异常状态，由ESR提供
+ * @param regs 异常发生时的pt_regs
+ */
 static int __kprobes do_page_fault(unsigned long addr, unsigned int esr,
 				   struct pt_regs *regs)
 {
@@ -458,24 +481,46 @@ static int __kprobes do_page_fault(unsigned long addr, unsigned int esr,
 	if (kprobe_page_fault(regs, esr))
 		return 0;
 
-	/*
+	/**
+	 * 结合 [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#4.7.2　do_page_fault()函数 来学习
+	 * 
 	 * If we're in an interrupt or have no user context, we must not take
 	 * the fault.
+	 * 
+	 * 检查内核是否正在执行关键路径上的代码
+	 * 
+	 * !mm : 即 如果异常发生在中断上下文或者内核进程中时,那么直接跳转到no_context标签处的__do_kernel_fault()函数来处理，
+	 * 而不用处理与进程地址空间相关的部分。这是为什么呢？这是因为当异常发生在中断上下文或者内核线程中时，
+	 * 说明发生异常时处理器在内核态执行，而且处理器正在使用内核空间的虚拟地址空间
 	 */
-	if (faulthandler_disabled() || !mm)
+	if (faulthandler_disabled() || !mm) {
 		goto no_context;
+	}
 
-	if (user_mode(regs))
+	/**
+	 * 若在用户模式发生异常，设置FAULT_FLAG_USER标志位
+	 */
+	if (user_mode(regs)) {
 		mm_flags |= FAULT_FLAG_USER;
+	}
 
+	/**
+	 * is_el0_instruction_abort()函数读取ESR的EC字段来判断异常是否为低异常等级的指令异常（ESR_ELx_EC_IABT_LOW）。
+	 * 若异常是EL0中的指令异常，说明这个进程地址空间是具有可执行权限的，因此把vm_flags设置为VM_EXEC
+	 */
 	if (is_el0_instruction_abort(esr)) {
 		vm_flags = VM_EXEC;
 		mm_flags |= FAULT_FLAG_INSTRUCTION;
 	} else if (is_write_abort(esr)) {
+		/**
+		 *  当确定为写(ESR_ELx_WNR)导致的异常错误并且不是高速缓存(ESR_ELx_CM)导致的异常错误时，
+		 * 可以设置vm_flags为VM_WRITE标志位，并且设置mm_flags 的FAULT_FLAG_WRITE标志位。
+		 */
 		vm_flags = VM_WRITE;
 		mm_flags |= FAULT_FLAG_WRITE;
 	}
 
+	// 特殊情况，见#4.7.2　do_page_fault()函数,暂记录
 	if (is_ttbr0_addr(addr) && is_el1_permission_fault(addr, esr, regs)) {
 		/* regs->orig_addr_limit may be 0 if we entered from EL0 */
 		if (regs->orig_addr_limit == KERNEL_DS)
@@ -490,6 +535,8 @@ static int __kprobes do_page_fault(unsigned long addr, unsigned int esr,
 			die_kernel_fault("access to user memory outside uaccess routines",
 					 addr, esr, regs);
 	}
+
+	// 上述判断完成之后，我们可以断定缺页异常没有发生在中断上下文、内核线程，以及一些特殊情况下
 
 	perf_sw_event(PERF_COUNT_SW_PAGE_FAULTS, 1, regs, addr);
 
@@ -641,6 +688,11 @@ static int do_sea(unsigned long addr, unsigned int esr, struct pt_regs *regs)
 	return 0;
 }
 
+/**
+ * Linux内核为软件快速查询和处理DFSC定义了一个表
+ *   DFSC是什么? 见:[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#表4.14　数据异常的ISS表中重要的字段
+ * 
+ */
 static const struct fault_info fault_info[] = {
 	{ do_bad,		SIGKILL, SI_KERNEL,	"ttbr address size fault"	},
 	{ do_bad,		SIGKILL, SI_KERNEL,	"level 1 address size fault"	},
@@ -708,6 +760,11 @@ static const struct fault_info fault_info[] = {
 	{ do_bad,		SIGKILL, SI_KERNEL,	"unknown 63"			},
 };
 
+/**
+ * @param addr 表示失效地址
+ * @param esr  ESR的值，是在el1_sync汇编函数读取esr_el1寄存器得到的, ESR 结构见: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#▲图4.32　ESR的结构
+ * @param regs regs是异常发生时寄存器的pt_regs指针。
+ */
 void do_mem_abort(unsigned long addr, unsigned int esr, struct pt_regs *regs)
 {
 	const struct fault_info *inf = esr_to_fault_info(esr);

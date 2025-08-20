@@ -224,7 +224,7 @@ static inline bool pagefault_disabled(void)
 	return current->pagefault_disabled != 0;
 }
 
-/*
+/**
  * The pagefault handler is in general disabled by pagefault_disable() or
  * when in irq context (via in_atomic()).
  *
@@ -233,6 +233,11 @@ static inline bool pagefault_disabled(void)
  * Please NEVER use preempt_disable() to disable the fault handler. With
  * !CONFIG_PREEMPT_COUNT, this is like a NOP. So the handler won't be disabled.
  * in_atomic() will report different values based on !CONFIG_PREEMPT_COUNT.
+ * 
+ * 是否关闭了缺页异常处理，进程描述符的pagefault_disabled成员用于关闭缺页异常处理
+ * in_atomic()函数检查当前是否在中断上下文中。
+ *    内核正在执行中断处理程序。
+ *    内核在禁用内核抢占的情况下执行临界区代码
  */
 #define faulthandler_disabled() (pagefault_disabled() || in_atomic())
 

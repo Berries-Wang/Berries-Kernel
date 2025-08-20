@@ -50,6 +50,11 @@
  * @param flags：用于设置内存映射的属性，如共享映射、私有映射等。
  * @param fd：表示这是一个文件映射，fd是打开的文件的句柄。
  * @param offset：在文件映射时，表示文件的偏移量。
+ * 
+ * mmap 函数功能详见: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#4.6　mmap
+ * 如： 
+ *    1). 读写文件
+ *    2). 进程间通信
  */
 void *
 __mmap64 (void *addr, size_t len, int prot, int flags, int fd, off64_t offset)

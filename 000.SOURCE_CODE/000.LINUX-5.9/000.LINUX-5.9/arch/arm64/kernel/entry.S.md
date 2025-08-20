@@ -603,6 +603,8 @@ SYM_CODE_END(el1_error_invalid)
  * EL1 mode handlers.
  * kernel_entry 的主要任务是在异常/中断发生时，保存用户态（或低异常级别）的上下文（寄存器状态）到内核栈（struct pt_regs），并切换到内核态的执行环境。
  * 它是异常处理的入口基础步骤。
+ *
+ * el1_sync_handler: 000.LINUX-5.9/arch/arm64/kernel/entry-common.c
  */
 	.align	6
 SYM_CODE_START_LOCAL_NOALIGN(el1_sync)
