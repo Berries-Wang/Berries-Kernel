@@ -65,6 +65,15 @@ struct mem_cgroup;
 #define _struct_page_alignment
 #endif
 
+/**
+ * 
+ * #5.1.1　page数据结构
+ * #5.2　RMAP   -- Reverse Mapping Map （反向映射）,确定页面是否被某个进程映射
+ * #5.3 页面回收 -- 页交换(swapping) 、页回收(page reclaim)
+ * #5.3.1　LRU链表 -- 页交换算法(Linux内核中采用的页交换算法主要是经典LRU链表算法和第二次机会（second chance）法)
+ * 
+ *
+ */
 struct page {
 	unsigned long flags;		/* Atomic flags, some possibly
 					 * updated asynchronously */
@@ -189,6 +198,7 @@ struct page {
 		 * If the page can be mapped to userspace, encodes the number
 		 * of times this page is referenced by a page table.
 		 */
+                // 表示这个页面被进程映射的个数，即已经映射了多少个用户PTE
 		atomic_t _mapcount;
 
 		/*
@@ -204,6 +214,7 @@ struct page {
 	};
 
 	/* Usage count. *DO NOT USE DIRECTLY*. See page_ref.h */
+        // 表示内核引用该页面的次数,用于跟踪页面使用情况: 不是被进程映射的个数
 	atomic_t _refcount;
 
 #ifdef CONFIG_MEMCG
