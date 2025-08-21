@@ -474,6 +474,9 @@ static __always_inline int PageMappingFlags(struct page *page)
 	return ((unsigned long)page->mapping & PAGE_MAPPING_FLAGS) != 0;
 }
 
+/**
+ * PageAnon宏来判断匿名页面
+ */
 static __always_inline int PageAnon(struct page *page)
 {
 	page = compound_head(page);
@@ -487,17 +490,24 @@ static __always_inline int __PageMovable(struct page *page)
 }
 
 #ifdef CONFIG_KSM
-/*
+/**
  * A KSM page is one of those write-protected "shared pages" or "merged pages"
  * which KSM maps into multiple mms, wherever identical anonymous page content
  * is found in VM_MERGEABLE vmas.  It's a PageAnon page, pointing not to any
  * anon_vma, but to that page's node of the stable tree.
+ * (一个KSM页是指那些被写保护的"共享页"或"合并页"，
+ * 当在标记为VM_MERGEABLE的虚拟内存区域（vmas）中发现相同的匿名页内容时，
+ * KSM会将这些页面映射到多个内存映射（mms）中。它是一种特殊的匿名页（PageAnon），
+ * 不指向任何匿名虚拟内存区域（anon_vma），而是指向稳定树中该页对应的节点。)
+ * 
+ * KSM，全称为 Kernel Same-page Merging（内核同页合并），是一种由内核实现的内存去重功能。
+ * 它的主要目标是通过合并内容完全相同的内存页来减少内存的重复占用，从而在虚拟机或某些特定应用场景下显著节省内存
  */
 static __always_inline int PageKsm(struct page *page)
 {
 	page = compound_head(page);
 	return ((unsigned long)page->mapping & PAGE_MAPPING_FLAGS) ==
-				PAGE_MAPPING_KSM;
+	       PAGE_MAPPING_KSM;
 }
 #else
 TESTPAGEFLAG_FALSE(Ksm)
