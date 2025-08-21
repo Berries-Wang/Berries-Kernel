@@ -673,6 +673,12 @@ struct anon_vma *page_anon_vma(struct page *page)
 	return __page_rmapping(page);
 }
 
+/**
+ * 返回page数据结构中mapping成员指向的地址空间，即address_space数据结构。
+ * address_space数据结构一般用于指向页面对应的存储介质，如文件、交换分区等。
+ * 
+ * 见[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#1．page_mapping()函数
+ */
 struct address_space *page_mapping(struct page *page)
 {
 	struct address_space *mapping;

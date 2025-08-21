@@ -67,12 +67,14 @@ struct mem_cgroup;
 
 /**
  * 
- * #5.1.1　page数据结构
- * #5.2　RMAP   -- Reverse Mapping Map （反向映射）,确定页面是否被某个进程映射
- * #5.3 页面回收 -- 页交换(swapping) 、页回收(page reclaim)
- * #5.3.1　LRU链表 -- 页交换算法(Linux内核中采用的页交换算法主要是经典LRU链表算法和第二次机会（second chance）法)
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.1.1　page数据结构
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.2　RMAP   -- Reverse Mapping Map （反向映射）,确定页面是否被某个进程映射
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.3 页面回收 -- 页交换(swapping) 、页回收(page reclaim)
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.3.1　LRU链表 -- 页交换算法(Linux内核中采用的页交换算法主要是经典LRU链表算法和第二次机会（second chance）法)
  * 
- *
+ * 
+ * 页面回收:
+ *   [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.3.3　触发页面回收
  */
 struct page {
 	unsigned long flags;		/* Atomic flags, some possibly
@@ -91,7 +93,11 @@ struct page {
 			 * by the page owner.
 			 */
 			struct list_head lru;
-			/* See page-flags.h for PAGE_MAPPING_FLAGS */
+			/** See page-flags.h for PAGE_MAPPING_FLAGS
+			 * 
+			 * mapping成员表示页面所指向的地址空间 , 见[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.1.5　mapping成员的妙用
+			 * 
+			 */
 			struct address_space *mapping;
 			pgoff_t index;		/* Our offset within mapping. */
 			/**
@@ -198,7 +204,13 @@ struct page {
 		 * If the page can be mapped to userspace, encodes the number
 		 * of times this page is referenced by a page table.
 		 */
-                // 表示这个页面被进程映射的个数，即已经映射了多少个用户PTE
+		/**
+		 * 表示这个页面被进程映射的个数，即已经映射了多少个用户PTE
+		 * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.1.3　_mapcount的应用
+		 *   若_mapcount等于−1，表示没有PTE映射到页面。
+         *   若_mapcount等于0，表示只有父进程映射到页面
+		 *   _mapcount大于0，表示除了父进程外还有其他进程映射到这个页面
+		 */
 		atomic_t _mapcount;
 
 		/*
@@ -214,7 +226,7 @@ struct page {
 	};
 
 	/* Usage count. *DO NOT USE DIRECTLY*. See page_ref.h */
-        // 表示内核引用该页面的次数,用于跟踪页面使用情况: 不是被进程映射的个数
+	// 表示内核引用该页面的次数,用于跟踪页面使用情况: 不是被进程映射的个数
 	atomic_t _refcount;
 
 #ifdef CONFIG_MEMCG
@@ -373,7 +385,11 @@ struct vm_area_struct {
 		unsigned long rb_subtree_last;
 	} shared;
 
-	/*
+	/**
+	 * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.2　RMAP
+	 * 
+	 * RMAP系统中有两个重要的数据结构：一个是anon_vma，简称AV；另一个是anon_vma_chain，简称AVC。
+	 * 
 	 * A file's MAP_PRIVATE vma can be in both i_mmap tree and anon_vma
 	 * list, after a COW of one of the file pages.	A MAP_SHARED vma
 	 * can only be in the i_mmap tree.  An anonymous MAP_PRIVATE, stack
