@@ -2768,13 +2768,18 @@ static vm_fault_t fault_dirty_shared_page(struct vm_fault *vmf)
 	return 0;
 }
 
-/*
+/**
+ *  用于复用缺页异常的物理页面
+ * 
  * Handle write page faults for pages that can be reused in the current vma
- *
+ * (处理当前虚拟内存区域（vma）中可重用页面的写页错误)
+ * 
  * This can happen either due to the mapping being with the VM_SHARED flag,
  * or due to us being the last reference standing to the page. In either
  * case, all we need to do here is to mark the page as writable and update
  * any related book-keeping.
+ * (这种情况可能由两种原因导致：一是映射设置了VM_SHARED标志，二是当前进程是页面的最后持有者。
+ * 无论哪种情况，我们只需将页面标记为可写状态并更新相关的元数据记录即可。)
  */
 static inline void wp_page_reuse(struct vm_fault *vmf)
 	__releases(vmf->ptl)
@@ -2790,17 +2795,25 @@ static inline void wp_page_reuse(struct vm_fault *vmf)
 	if (page)
 		page_cpupid_xchg_last(page, (1 << LAST_CPUPID_SHIFT) - 1);
 
+        // 刷新缺页异常页面的高速缓存
 	flush_cache_page(vma, vmf->address, pte_pfn(vmf->orig_pte));
 	entry = pte_mkyoung(vmf->orig_pte);
 	entry = maybe_mkwrite(pte_mkdirty(entry), vma);
-	if (ptep_set_access_flags(vma, vmf->address, vmf->pte, entry, 1))
-		update_mmu_cache(vma, vmf->address, vmf->pte);
+        // ptep_set_access_flags: 将新的PTE设置到实际页表中
+  	if (ptep_set_access_flags(vma, vmf->address, vmf->pte, entry, 1))
+        {
+           // 更新相应的高速缓存
+	   update_mmu_cache(vma, vmf->address, vmf->pte);
+        }
 	pte_unmap_unlock(vmf->pte, vmf->ptl);
 	count_vm_event(PGREUSE);
 }
 
 /*
+ * 用于处理写时复制的情况
+ *
  * Handle the case of a page which we actually need to copy to a new page.
+ * (处理需要将页面内容复制到新页面的情况)
  *
  * Called with mmap_lock locked and the old page referenced, but
  * without the ptl held.
@@ -2834,6 +2847,7 @@ static vm_fault_t wp_page_copy(struct vm_fault *vmf)
 		if (!new_page)
 			goto oom;
 	} else {
+                // 使用alloc_page_vma 分配一个页面
 		new_page = alloc_page_vma(GFP_HIGHUSER_MOVABLE, vma,
 				vmf->address);
 		if (!new_page)
