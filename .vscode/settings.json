@@ -9,6 +9,8 @@
         "unordered_map": "c",
         "vector": "c",
         "initializer_list": "c",
-        "string_view": "c"
+        "string_view": "c",
+        "build_bug.h": "c",
+        "stringify.h": "c"
     }
 }

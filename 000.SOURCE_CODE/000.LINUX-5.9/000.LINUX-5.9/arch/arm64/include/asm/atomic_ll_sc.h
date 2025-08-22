@@ -7,6 +7,10 @@
  * Copyright (C) 2012 ARM Ltd.
  */
 
+/**
+ * atomic_ll_sc.h: 使用 LL/SC (Load-Link / Store-Conditional) 指令对，在所有 ARMv6+ 架构的 CPU 上通用。
+ */
+
 #ifndef __ASM_ATOMIC_LL_SC_H
 #define __ASM_ATOMIC_LL_SC_H
 

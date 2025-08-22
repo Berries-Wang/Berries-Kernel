@@ -147,6 +147,11 @@ __CMPXCHG_DBL(_mb)
 
 #undef __CMPXCHG_DBL
 
+/**
+ * tag:'__cmpxchg##sfx'
+ * 
+ * __cmpxchg_case##sfx##_8 这个根据指令版本，在 atomic_lse.h / atomic_ll_sc.h 文件中
+ */
 #define __CMPXCHG_GEN(sfx)						\
 static __always_inline unsigned long __cmpxchg##sfx(volatile void *ptr,	\
 					   unsigned long old,		\
@@ -176,6 +181,9 @@ __CMPXCHG_GEN(_mb)
 
 #undef __CMPXCHG_GEN
 
+/**
+ * __cmpxchg##sfx 就在本文件中，tag:'__cmpxchg##sfx'
+ */
 #define __cmpxchg_wrapper(sfx, ptr, o, n)				\
 ({									\
 	__typeof__(*(ptr)) __ret;					\
@@ -185,18 +193,22 @@ __CMPXCHG_GEN(_mb)
 	__ret;								\
 })
 
+/**
+ * 比较并交换指令——cas指令 , 见[Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#1.1.3　比较并交换指令
+ * Linux内核中常见的比较并交换函数是cmpxchg(),见[Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#2．cmpxchg()函数
+ */
 /* cmpxchg */
 #define arch_cmpxchg_relaxed(...)	__cmpxchg_wrapper(    , __VA_ARGS__)
 #define arch_cmpxchg_acquire(...)	__cmpxchg_wrapper(_acq, __VA_ARGS__)
 #define arch_cmpxchg_release(...)	__cmpxchg_wrapper(_rel, __VA_ARGS__)
-#define arch_cmpxchg(...)		__cmpxchg_wrapper( _mb, __VA_ARGS__)
-#define arch_cmpxchg_local		arch_cmpxchg_relaxed
+#define arch_cmpxchg(...)		    __cmpxchg_wrapper( _mb, __VA_ARGS__)
+#define arch_cmpxchg_local		    arch_cmpxchg_relaxed
 
 /* cmpxchg64 */
 #define arch_cmpxchg64_relaxed		arch_cmpxchg_relaxed
 #define arch_cmpxchg64_acquire		arch_cmpxchg_acquire
 #define arch_cmpxchg64_release		arch_cmpxchg_release
-#define arch_cmpxchg64			arch_cmpxchg
+#define arch_cmpxchg64			    arch_cmpxchg
 #define arch_cmpxchg64_local		arch_cmpxchg_local
 
 /* cmpxchg_double */

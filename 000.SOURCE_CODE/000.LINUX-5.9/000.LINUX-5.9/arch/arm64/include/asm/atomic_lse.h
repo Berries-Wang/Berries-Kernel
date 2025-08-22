@@ -7,6 +7,11 @@
  * Copyright (C) 2012 ARM Ltd.
  */
 
+/**
+ * atomic_lse.h: 使用 LSE (Large System Extensions) 指令，这是 ARMv8.1-A 及以上架构引入的、专门为多核系统设计的原子指令扩展。
+ * 
+ * 
+ */
 #ifndef __ASM_ATOMIC_LSE_H
 #define __ASM_ATOMIC_LSE_H
 
@@ -337,6 +342,19 @@ static inline s64 __lse_atomic64_dec_if_positive(atomic64_t *v)
 	return (long)v;
 }
 
+/**
+ * 通过cas指令来处理的 ， 见[Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#2．cmpxchg()函数
+ * 
+ * w：表示位宽，支持8位、16位、32位以及64位。
+ * sfx：cas指令的位宽后缀，8位宽使用b后缀，16位宽使用h后缀。
+ * name：表示内存屏障类型，如“acq_”表示支持加载-获取内存屏障原语，“rel_”表示支持存储-释放内存屏障原语，“mb_”表示同时支持加载-获取和存储-释放内存屏障原语。
+ * sz：位宽大小。
+ * mb：组成cas指令的内存屏障后缀，“a”表示加载-获取内存屏障原语，“l”表示存储-释放内存屏障原语，“al”表示同时支持加载-获取和存储-释放内存屏障原语。
+ * cl：内嵌汇编的损坏部。
+ * 
+ * __CMPXCHG_CASE(x,  ,  mb_, 64, al, "memory") 宏展开后：
+ *                   static inline u64 __cmpxchg_case_mb_64(volatile void *ptr, u64 old, u64 new)
+ */
 #define __CMPXCHG_CASE(w, sfx, name, sz, mb, cl...)			\
 static __always_inline u##sz						\
 __lse__cmpxchg_case_##name##sz(volatile void *ptr,			\
@@ -361,6 +379,14 @@ __lse__cmpxchg_case_##name##sz(volatile void *ptr,			\
 	return x0;							\
 }
 
+// cas l b w 
+
+/**
+ * 得结合 [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#2.5　内存屏障
+ *   & [Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#表1.2　cmpxchg()函数的变体
+ * 
+ * cas 指令后面会跟随 内存屏障后缀 ， 附加内存屏障原语
+ */
 __CMPXCHG_CASE(w, b,     ,  8,   )
 __CMPXCHG_CASE(w, h,     , 16,   )
 __CMPXCHG_CASE(w,  ,     , 32,   )
