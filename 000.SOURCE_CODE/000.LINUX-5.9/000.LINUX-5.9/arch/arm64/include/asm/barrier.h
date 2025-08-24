@@ -14,10 +14,19 @@
 #define __nops(n)	".rept	" #n "\nnop\n.endr\n"
 #define nops(n)		asm volatile(__nops(n))
 
+/**
+ * SEV	Send Event	向整个系统广播一个“事件”信号，唤醒正在睡眠的 CPU 核心。
+ * WFE	Wait For Event	让当前 CPU 核心进入低功耗状态，等待一个“事件”信号的到来  (唤醒源: 事件 (来自 SEV) 或 中断)
+ * WFI	Wait For Interrupt	让当前 CPU 核心进入低功耗状态，等待一个“中断” 的发生。 (唤醒源: 中断 (IRQ, FIQ))
+ */
 #define sev()		asm volatile("sev" : : : "memory")
 #define wfe()		asm volatile("wfe" : : : "memory")
 #define wfi()		asm volatile("wfi" : : : "memory")
 
+/**
+ * isb dmb  dsb 是什么? 是内存屏障指令
+ * 参考:[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#2.5.1　内存屏障指令
+ */
 #define isb()		asm volatile("isb" : : : "memory")
 #define dmb(opt)	asm volatile("dmb " #opt : : : "memory")
 #define dsb(opt)	asm volatile("dsb " #opt : : : "memory")
@@ -41,6 +50,9 @@
 #define pmr_sync()	do {} while (0)
 #endif
 
+/**
+ * [Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#表1.3　Linux内核中的内存屏障接口函数
+ */
 #define mb()		dsb(sy)
 #define rmb()		dsb(ld)
 #define wmb()		dsb(st)

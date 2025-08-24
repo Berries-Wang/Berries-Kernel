@@ -68,7 +68,7 @@
 #include "mcs_spinlock.h"
 #define MAX_NODES	4
 
-/*
+/**
  * On 64-bit architectures, the mcs_spinlock structure will be 16 bytes in
  * size and four of them will fit nicely in one 64-byte cacheline. For
  * pvqspinlock, however, we need more space for extra data. To accommodate
@@ -77,6 +77,8 @@
  * to have more than 2 levels of slowpath nesting in actual use. We don't
  * want to penalize pvqspinlocks to optimize for a rare case in native
  * qspinlocks.
+ * (在64位体系结构上，mcs_spinlock结构体的大小为16字节，四个这样的结构体可以完美地放入一个64字节的高速缓存行中。
+ * 然而，对于pvqspinlock而言，我们需要更多空间来存储额外数据。为此，我们增加了两个长字（long words）进行填充，使其扩展到32字节。换句话说，在这种情况下，一个缓存行只能容纳两个pvqspinlock结构体。这是可以接受的，因为在真实使用场景中很少出现超过2级的慢路径嵌套。我们不应为了优化原生qspinlock中的罕见情况而牺牲pvqspinlock的性能。)
  */
 struct qnode {
 	struct mcs_spinlock mcs;
@@ -97,13 +99,15 @@ struct qnode {
 #define _Q_PENDING_LOOPS	1
 #endif
 
-/*
+/**
  * Per-CPU queue node structures; we can never have more than 4 nested
  * contexts: task, softirq, hardirq, nmi.
  *
  * Exactly fits one 64-byte cacheline on a 64-bit architecture.
  *
  * PV doubles the storage and uses the second cacheline for PV state.
+ * 
+ * 为每个CPU都定义了4个qnode，用于4个上下文，分别为task、softirq、hardirq和nmi
  */
 static DEFINE_PER_CPU_ALIGNED(struct qnode, qnodes[MAX_NODES]);
 
@@ -122,6 +126,9 @@ static inline __pure u32 encode_tail(int cpu, int idx)
 	return tail;
 }
 
+/**
+ * 解码自旋锁的各个位
+ */
 static inline __pure struct mcs_spinlock *decode_tail(u32 tail)
 {
 	int cpu = (tail >> _Q_TAIL_CPU_OFFSET) - 1;
@@ -130,6 +137,9 @@ static inline __pure struct mcs_spinlock *decode_tail(u32 tail)
 	return per_cpu_ptr(&qnodes[idx].mcs, cpu);
 }
 
+/**
+ * 其核心意思是 “获取”、“抢占”、“抓取”，通常带有 “快速”、“急切”、“独占” 的意味。
+ */
 static inline __pure
 struct mcs_spinlock *grab_mcs_node(struct mcs_spinlock *base, int idx)
 {
@@ -296,8 +306,18 @@ static __always_inline u32  __pv_wait_head_or_lock(struct qspinlock *lock,
  * @lock: Pointer to queued spinlock structure
  * @val: Current value of the queued spinlock 32-bit word
  *
+ * 三元组:
+ *  [Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#1.5　排队自旋锁
+ * 
+ * 这个方法得结合
+ *  [Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#表1.4　qspinlock中val字段的含义
+ * 来分析 
+ *
+ * 
  * (queue tail, pending bit, lock value)
  *
+ * uncontended： 无竞争
+ * 
  *              fast     :    slow                                  :    unlock
  *                       :                                          :
  * uncontended  (0,0,0) -:--> (0,0,1) ------------------------------:--> (*,*,0)
@@ -329,20 +349,25 @@ void queued_spin_lock_slowpath(struct qspinlock *lock, u32 val)
 	/*
 	 * Wait for in-progress pending->locked hand-overs with a bounded
 	 * number of spins so that we guarantee forward progress.
-	 *
+	 * (等待进行中的“pending->locked”所有权移交操作，并通过有限的自旋次数来确保系统的前向推进。)
+	 * 
 	 * 0,1,0 -> 0,0,1
+	 * 
+	 * 
 	 */
-	if (val == _Q_PENDING_VAL) {
-		int cnt = _Q_PENDING_LOOPS;
+	if (val == _Q_PENDING_VAL) { // pending 状态
+		int cnt = _Q_PENDING_LOOPS; // 进行有限次的自旋
 		val = atomic_cond_read_relaxed(&lock->val,
 					       (VAL != _Q_PENDING_VAL) || !cnt--);
 	}
 
 	/*
 	 * If we observe any contention; queue.
+	 * 还有竞争，入队
 	 */
-	if (val & ~_Q_LOCKED_MASK)
+	if (val & ~_Q_LOCKED_MASK) {
 		goto queue;
+	}
 
 	/*
 	 * trylock || pending
@@ -401,7 +426,7 @@ pv_queue:
 	idx = node->count++;
 	tail = encode_tail(smp_processor_id(), idx);
 
-	/*
+	/**
 	 * 4 nodes are allocated based on the assumption that there will
 	 * not be nested NMIs taking spinlocks. That may not be true in
 	 * some architectures even though the chance of needing more than
@@ -409,14 +434,24 @@ pv_queue:
 	 * we fall back to spinning on the lock directly without using
 	 * any MCS node. This is not the most elegant solution, but is
 	 * simple enough.
+	 * (分配4个节点的假设前提是不会有嵌套的NMI（不可屏蔽中断）来获取自旋锁。
+	 * 在某些体系结构上，这个假设可能不成立，但即便如此，需要超过4个节点的可能性仍然微乎其微。
+	 * 若确实发生这种情况，
+	 * 我们将回退到直接在锁上自旋，而不使用任何MCS节点。这不是最优雅的解决方案，但足够简单。)
+	 * 
+	 * 回退了，tail_idx 设置为0
 	 */
 	if (unlikely(idx >= MAX_NODES)) {
 		lockevent_inc(lock_no_node);
-		while (!queued_spin_trylock(lock))
+		while (!queued_spin_trylock(lock)) {
 			cpu_relax();
+		}
 		goto release;
 	}
 
+	/**
+	 * 获取qnodes[idx].mcs
+	 */
 	node = grab_mcs_node(node, idx);
 
 	/*
@@ -424,10 +459,11 @@ pv_queue:
 	 */
 	lockevent_cond_inc(lock_use_node2 + idx - 1, idx);
 
-	/*
+	/**
 	 * Ensure that we increment the head node->count before initialising
 	 * the actual node. If the compiler is kind enough to reorder these
 	 * stores, then an IRQ could overwrite our assignments.
+	 * (请确保在初始化实际节点之前递增头节点 node->count。如果编译器对这些存储操作进行了重排序，那么中断（IRQ）可能会覆盖我们的赋值操作。)
 	 */
 	barrier();
 
@@ -447,6 +483,7 @@ pv_queue:
 	 * Ensure that the initialisation of @node is complete before we
 	 * publish the updated tail via xchg_tail() and potentially link
 	 * @node into the waitqueue via WRITE_ONCE(prev->next, node) below.
+	 * (请确保在通过 xchg_tail() 发布更新后的尾指针以及后续可能通过 WRITE_ONCE(prev->next, node) 将 @node 链接到等待队列之前，已完成对 @node 的初始化。)
 	 */
 	smp_wmb();
 
@@ -456,6 +493,8 @@ pv_queue:
 	 * pending stuff.
 	 *
 	 * p,*,* -> n,*,*
+	 * 
+	 * 修改当前锁的val字段
 	 */
 	old = xchg_tail(lock, tail);
 	next = NULL;
@@ -465,9 +504,15 @@ pv_queue:
 	 * head of the waitqueue.
 	 */
 	if (old & _Q_TAIL_MASK) {
+		/**
+		 * 这里面有 tail_idx的用途
+		 */
 		prev = decode_tail(old);
 
-		/* Link @node into the waitqueue. */
+		/** 
+		 * Link @node into the waitqueue.
+		 * (加入等待队列)
+		 *  */
 		WRITE_ONCE(prev->next, node);
 
 		pv_wait_node(node, prev);
@@ -555,7 +600,7 @@ locked:
 
 release:
 	/*
-	 * release the node
+	 * release the node : 释放这个节点?
 	 */
 	__this_cpu_dec(qnodes[0].mcs.count);
 }

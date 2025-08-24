@@ -206,14 +206,16 @@ do {									\
 #endif
 
 /**
- * smp_cond_load_relaxed() - (Spin) wait for cond with no ordering guarantees
- * @ptr: pointer to the variable to wait on
- * @cond: boolean expression to wait for
+ * 自旋等待
+ * 
+ * smp_cond_load_relaxed() - (Spin) wait for cond with no ordering guarantees (（自旋）等待条件，但无顺序保证)
+ * @ptr: pointer to the variable to wait on 要加载的地址
+ * @cond: boolean expression to wait for    判断条件，如下代码，会一直判断，直到条件成立
  *
- * Equivalent to using READ_ONCE() on the condition variable.
+ * Equivalent to using READ_ONCE() on the condition variable. (相当于对条件变量使用 READ_ONCE())
  *
  * Due to C lacking lambda expressions we load the value of *ptr into a
- * pre-named variable @VAL to be used in @cond.
+ * pre-named variable @VAL to be used in @cond.(由于 C 语言缺乏 lambda 表达式，我们需要将 *ptr 的值加载到预定义的变量 @VAL 中，以便在 @cond 中使用。)
  */
 #ifndef smp_cond_load_relaxed
 #define smp_cond_load_relaxed(ptr, cond_expr) ({		\
@@ -230,12 +232,13 @@ do {									\
 #endif
 
 /**
- * smp_cond_load_acquire() - (Spin) wait for cond with ACQUIRE ordering
+ * smp_cond_load_acquire() - (Spin) wait for cond with ACQUIRE ordering (（自旋）等待具有 ACQUIRE 顺序语义的条件)
  * @ptr: pointer to the variable to wait on
  * @cond: boolean expression to wait for
  *
  * Equivalent to using smp_load_acquire() on the condition variable but employs
  * the control dependency of the wait to reduce the barrier on many platforms.
+ * (相当于对条件变量使用 smp_load_acquire()，但利用等待操作的控制依赖性来在多数平台上减少内存屏障开销。)
  */
 #ifndef smp_cond_load_acquire
 #define smp_cond_load_acquire(ptr, cond_expr) ({		\

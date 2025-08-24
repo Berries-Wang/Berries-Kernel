@@ -18,6 +18,14 @@
 struct mcs_spinlock {
 	struct mcs_spinlock *next;
 	int locked; /* 1 if lock acquired */
+	/**
+	 * ?什么功能?
+	 * count 字段的核心功能是：作为一个许可证（Ticket），
+	 * 用于在 MCS 锁的等待队列中对获取锁的顺序进行严格排序，并确保等待者能够被其前驱节点正确唤醒。???
+	 * 
+	 * [Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#表1.4　qspinlock中val字段的含义
+	 * 就是tail_idx域
+	 */
 	int count;  /* nesting count, see qspinlock.c */
 };
 

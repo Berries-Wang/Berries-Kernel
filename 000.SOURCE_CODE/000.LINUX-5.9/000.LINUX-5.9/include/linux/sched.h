@@ -2077,6 +2077,9 @@ static inline int spin_needbreak(spinlock_t *lock)
 #endif
 }
 
+/**
+ * need_resched: 000.LINUX-5.9/include/linux/thread_info.h
+ */
 static __always_inline bool need_resched(void)
 {
 	return unlikely(tif_need_resched());
