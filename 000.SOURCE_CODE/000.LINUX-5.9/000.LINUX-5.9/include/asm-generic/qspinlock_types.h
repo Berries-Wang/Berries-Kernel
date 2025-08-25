@@ -16,7 +16,10 @@
  * 1. [Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#1.5　排队自旋锁
  * 2. [Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#1.3　经典自旋锁
  * 
- * 具体的使用得根据具体的锁实现来分析
+ * 具体的使用得根据具体的锁实现来分析 , 例如:
+ * 1. 对于‘排队自旋锁’，存在Lock域
+ * 
+ * 都会将val拆分为多个域，不同的域具有不同的含义
  */
 typedef struct qspinlock {
 	union {

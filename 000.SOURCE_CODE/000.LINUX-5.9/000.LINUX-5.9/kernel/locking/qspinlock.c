@@ -108,6 +108,9 @@ struct qnode {
  * PV doubles the storage and uses the second cacheline for PV state.
  * 
  * 为每个CPU都定义了4个qnode，用于4个上下文，分别为task、softirq、hardirq和nmi
+ * 
+ * 在加锁的过程中，该Per-CPU变量‘qnodes’是控制锁在什么上自旋，但是实际加没加上锁，
+ * 还是由 struct qspinlock  来控制!!!
  */
 static DEFINE_PER_CPU_ALIGNED(struct qnode, qnodes[MAX_NODES]);
 
@@ -331,6 +334,12 @@ static __always_inline u32  __pv_wait_head_or_lock(struct qspinlock *lock,
  *                       :       v                               |  :
  * contended             :    (*,x,y) +--> (*,0,0) ---> (*,0,1) -'  :
  *   queue               :         ^--'                             :
+ * 
+ * 
+ * 
+ * 结合
+ *   [Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#图1.7　中速申请通道
+ * 来分析吧
  */
 void queued_spin_lock_slowpath(struct qspinlock *lock, u32 val)
 {
@@ -353,7 +362,7 @@ void queued_spin_lock_slowpath(struct qspinlock *lock, u32 val)
 	 * 
 	 * 0,1,0 -> 0,0,1
 	 * 
-	 * 
+	 * pending 为1 ， 说明是第一顺位继承人
 	 */
 	if (val == _Q_PENDING_VAL) { // pending 状态
 		int cnt = _Q_PENDING_LOOPS; // 进行有限次的自旋
@@ -423,6 +432,19 @@ queue:
 	lockevent_inc(lock_slowpath);
 pv_queue:
 	node = this_cpu_ptr(&qnodes[0].mcs);
+	/**
+	 * node->count++ , 都是qnodes[0].mcs
+	 * 
+	 * 当CPU0第一个到达，node->count++ ，node->count 为1
+	 * 当CPU1第二个到达，node->count++  ， node->count 为2
+	 * 依次类推，那么就可以控制自旋锁在哪个qnode上自旋了
+	 * 
+	 * 但是，会有这种情况吗，这种类型的变量是Per-CPU的,
+	 * 结合[Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#1.3.2　自旋锁的变体
+	 * `拥有自旋锁的临界区代码必须原子地执行，不能休眠和主动调度`
+	 * 应该是不可能，但是又有另一种说法:
+	 * `内核开发者针对最极端的中断嵌套场景所做的一种经过深思熟虑的设计决策。其核心原因是为了应对 NMI (Non-Maskable Interrupt, 不可屏蔽中断) 的嵌套问题`
+	 */
 	idx = node->count++;
 	tail = encode_tail(smp_processor_id(), idx);
 
@@ -475,6 +497,9 @@ pv_queue:
 	 * We touched a (possibly) cold cacheline in the per-cpu queue node;
 	 * attempt the trylock once more in the hope someone let go while we
 	 * weren't watching.
+	 * (我们触及了每CPU队列节点中一个（可能）冷的缓存行；趁我们没有注意时希望有人已经释放，再次尝试获取锁。)
+	 * 
+	 * 使用CAS方式进行加锁: 还是对struct qspinlock 上进行加锁
 	 */
 	if (queued_spin_trylock(lock))
 		goto release;
@@ -502,6 +527,9 @@ pv_queue:
 	/*
 	 * if there was a previous node; link it and wait until reaching the
 	 * head of the waitqueue.
+	 * (如果存在前驱节点，则将其链接到队列并等待，直到抵达等待队列的头部。)
+	 * 
+	 * 构建等待链表
 	 */
 	if (old & _Q_TAIL_MASK) {
 		/**

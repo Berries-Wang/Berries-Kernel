@@ -94,7 +94,7 @@ osq_wait_next(struct optimistic_spin_queue *lock,
  * 申请MCS锁
  * 
  * 疑问： MCS 锁只有一把吗?
- *   当然不是了
+ *   当然不是了,有 ${CPU_NUM}个
  * 
  * 嘿嘿？小伙子，有什么惊讶的地方吗？例如:
  * 1. 如果多个进程(进程切换&系统调用)调用osq_lock函数，
