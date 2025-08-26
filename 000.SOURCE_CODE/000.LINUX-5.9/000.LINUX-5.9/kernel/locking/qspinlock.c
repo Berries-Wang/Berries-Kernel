@@ -548,8 +548,8 @@ pv_queue:
 
 		/**
 		 *  这就是自旋操作了,
-                 * 当前继节点把锁传递给当前节点时，当前CPU会从睡眠状态唤醒，然后退出arch_mcs_spin_lock_contended()函数中的while循环 
-                 * 锁传递？有意思
+         * 当前继节点把锁传递给当前节点时，当前CPU会从睡眠状态唤醒，然后退出arch_mcs_spin_lock_contended()函数中的while循环 
+         * 锁传递？有意思
 		 */
 		arch_mcs_spin_lock_contended(&node->locked);
 
@@ -630,6 +630,10 @@ locked:
 	if (!next)
 		next = smp_cond_load_relaxed(&node->next, (VAL));
 
+
+	/**
+     * 将锁传递给下一个节点 , 那下一个节点拿到锁会怎么样呢?
+	 */
 	arch_mcs_spin_unlock_contended(&next->locked);
 	pv_kick_node(lock, next);
 
