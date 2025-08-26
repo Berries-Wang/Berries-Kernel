@@ -343,6 +343,7 @@ static __always_inline u32  __pv_wait_head_or_lock(struct qspinlock *lock,
  */
 void queued_spin_lock_slowpath(struct qspinlock *lock, u32 val)
 {
+        // 注意，这里是MCS锁
 	struct mcs_spinlock *prev, *next, *node;
 	u32 old, tail;
 	int idx;
@@ -364,15 +365,17 @@ void queued_spin_lock_slowpath(struct qspinlock *lock, u32 val)
 	 * 
 	 * pending 为1 ， 说明是第一顺位继承人
 	 */
-	if (val == _Q_PENDING_VAL) { // pending 状态
+	if (val == _Q_PENDING_VAL) { // pending 状态,表示是第一顺位继承人
 		int cnt = _Q_PENDING_LOOPS; // 进行有限次的自旋
-		val = atomic_cond_read_relaxed(&lock->val,
-					       (VAL != _Q_PENDING_VAL) || !cnt--);
+                // 自旋等待pending域释放
+		val = atomic_cond_read_relaxed(&lock->val,(VAL != _Q_PENDING_VAL) || !cnt--);
 	}
 
 	/*
 	 * If we observe any contention; queue.
 	 * 还有竞争，入队
+	 * 
+         * 被锁住 或者 还有CPU在等待，即三元组中可能其他两元还有值 
 	 */
 	if (val & ~_Q_LOCKED_MASK) {
 		goto queue;

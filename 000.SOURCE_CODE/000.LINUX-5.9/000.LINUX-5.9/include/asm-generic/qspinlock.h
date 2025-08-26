@@ -96,7 +96,7 @@ static __always_inline void queued_spin_lock(struct qspinlock *lock)
 	u32 val = 0;
 
 	/**
-	 * 先加乐观锁
+	 * 先加乐观锁 , 注意，这是给自旋锁 （后面的是MCS锁）， 获取到了MCS锁不代表可以获取自旋锁
 	 */
 	if (likely(atomic_try_cmpxchg_acquire(&lock->val, &val, _Q_LOCKED_VAL))) {
 		return;
