@@ -446,6 +446,7 @@ pv_queue:
 	 * `内核开发者针对最极端的中断嵌套场景所做的一种经过深思熟虑的设计决策。其核心原因是为了应对 NMI (Non-Maskable Interrupt, 不可屏蔽中断) 的嵌套问题`
 	 */
 	idx = node->count++;
+	// encode_tail 修改了 tail_cpu 、 tail_idx 域
 	tail = encode_tail(smp_processor_id(), idx);
 
 	/**
@@ -529,7 +530,7 @@ pv_queue:
 	 * head of the waitqueue.
 	 * (如果存在前驱节点，则将其链接到队列并等待，直到抵达等待队列的头部。)
 	 * 
-	 * 构建等待链表
+	 * 构建等待链表： 将node加入等待队列
 	 */
 	if (old & _Q_TAIL_MASK) {
 		/**
@@ -544,6 +545,10 @@ pv_queue:
 		WRITE_ONCE(prev->next, node);
 
 		pv_wait_node(node, prev);
+
+		/**
+		 * 
+		 */
 		arch_mcs_spin_lock_contended(&node->locked);
 
 		/*
