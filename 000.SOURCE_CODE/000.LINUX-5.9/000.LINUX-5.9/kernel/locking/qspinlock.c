@@ -467,9 +467,6 @@ pv_queue:
 	node = this_cpu_ptr(&qnodes[0].mcs);
 	/**
 	 * node->count++ , 都是qnodes[0].mcs
-	 * 
-	 * 当CPU0第一个到达，node->count++ ，node->count 为1
-	 * 当CPU1第二个到达，node->count++  ， node->count 为2
 	 * 依次类推，那么就可以控制自旋锁在哪个qnode上自旋了
 	 * 
 	 * 但是，会有这种情况吗，这种类型的变量是Per-CPU的,
@@ -563,7 +560,8 @@ pv_queue:
 	 * head of the waitqueue.
 	 * (如果存在前驱节点，则将其链接到队列并等待，直到抵达等待队列的头部。)
 	 * 
-	 * 构建等待链表： 将node加入等待队列
+	 * 构建等待链表： 将node加入等待队列 
+     *  1. 链表的头尾分别存在哪里?
 	 */
 	if (old & _Q_TAIL_MASK) {
 		/**
