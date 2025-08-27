@@ -103,7 +103,7 @@ osq_wait_next(struct optimistic_spin_queue *lock,
  * 2. 内核中，这种的锁只有一把吗?
  * 
  * 首先，对于1,不会构建元素同样的一个链表；
- *      对于2,嗯，可以这么理解，但是你得明白，这是个自旋锁，也不存在锁被货去了，然后切换到其他进程时又再次获取。
+ *      对于2,嗯，可以这么理解，但是你得明白，这是个自旋锁，也不存在锁被获取了，然后切换到其他进程时又再次获取。
  * 
  * 具体的解释参考: 
  *      [Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#1.3.2　自旋锁的变体

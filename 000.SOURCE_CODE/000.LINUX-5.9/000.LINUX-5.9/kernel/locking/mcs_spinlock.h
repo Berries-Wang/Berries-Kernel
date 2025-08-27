@@ -39,6 +39,8 @@ struct mcs_spinlock {
  * (使用 smp_cond_load_acquire() 能够提供所需的获取语义（acquire semantics），
  * 从而确保在锁被获取之后才执行后续操作。
  * 此外，某些架构（如 ARM64）更倾向于采用自旋等待（spin-waiting）而非纯粹的自旋（spinning），而 smp_cond_load_acquire() 正好能提供这种行为。)
+ * 
+ * arm64: arch/arm64/include/asm/barrier.h
  */
 #define arch_mcs_spin_lock_contended(l)					\
 do {									\

@@ -25,6 +25,9 @@
  * See Documentation/memory-barriers.txt for ACQUIRE/RELEASE definitions.
  */
 
+ /**
+  * arm64: arch/arm64/include/asm/barrier.h
+  */
 #define atomic_cond_read_acquire(v, c) smp_cond_load_acquire(&(v)->counter, (c))
 #define atomic_cond_read_relaxed(v, c) smp_cond_load_relaxed(&(v)->counter, (c))
 

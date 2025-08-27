@@ -120,6 +120,12 @@ do {									\
 	}								\
 } while (0)
 
+
+/**
+ * LDAR 是 ARM 架构中的一条重要指令，全称是 Load-Acquire Register。
+ * 这是一条内存加载指令，具有获取（acquire）语义 --- 即保证内存顺序
+ * 
+ */
 #define __smp_load_acquire(p)						\
 ({									\
 	union { __unqual_scalar_typeof(*p) __val; char __c[1]; } __u;	\
@@ -151,6 +157,18 @@ do {									\
 	(typeof(*p))__u.__val;						\
 })
 
+/**
+ * 
+ * smp_cond_load_acquire  smp_cond_load_relaxed 区别是 前者包含内存屏障，进制指令重排
+ * 
+ */
+
+
+/**
+ * 
+ * 
+ * __cmpwait_relaxed 这个就比较特殊了，告诉CPU以低功耗的模式等待指定位的值发生变化
+ */
 #define smp_cond_load_relaxed(ptr, cond_expr)				\
 ({									\
 	typeof(ptr) __PTR = (ptr);					\
@@ -164,6 +182,12 @@ do {									\
 	(typeof(*ptr))VAL;						\
 })
 
+/**
+ * 其实就是 ‘__smp_load_acquire’
+ * #define smp_load_acquire(p) __smp_load_acquire(p) 在 include/asm-generic/barrier.h
+ * 
+ * __cmpwait_relaxed 这个就比较特殊了，告诉CPU以低功耗的模式等待指定位的值发生变化
+ */
 #define smp_cond_load_acquire(ptr, cond_expr)				\
 ({									\
 	typeof(ptr) __PTR = (ptr);					\

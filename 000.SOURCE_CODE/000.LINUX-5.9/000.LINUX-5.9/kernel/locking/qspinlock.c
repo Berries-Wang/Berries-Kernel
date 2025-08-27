@@ -170,9 +170,11 @@ static __always_inline void clear_pending(struct qspinlock *lock)
  * *,1,0 -> *,0,1
  *
  * Lock stealing is not allowed if this function is used.
+ * (如果使用了此函数，则不允许锁窃取)
  */
 static __always_inline void clear_pending_set_locked(struct qspinlock *lock)
 {
+	// 直接操作内存就很爽，同一个内存地址，根据结构的不同配合上不同的解析方式，操作的结果就不一样
 	WRITE_ONCE(lock->locked_pending, _Q_LOCKED_VAL);
 }
 
@@ -305,6 +307,10 @@ static __always_inline u32  __pv_wait_head_or_lock(struct qspinlock *lock,
 #endif /* _GEN_PV_LOCK_SLOWPATH */
 
 /**
+ * 排队自旋锁（Queued Spinlock，Qspinlock）机制
+ * > [Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#1.5　排队自旋锁
+ * 
+ * 
  * queued_spin_lock_slowpath - acquire the queued spinlock
  * @lock: Pointer to queued spinlock structure
  * @val: Current value of the queued spinlock 32-bit word
@@ -343,18 +349,20 @@ static __always_inline u32  __pv_wait_head_or_lock(struct qspinlock *lock,
  */
 void queued_spin_lock_slowpath(struct qspinlock *lock, u32 val)
 {
-        // 注意，这里是MCS锁
+    // 注意，这里是MCS锁 , 不是自旋锁(qspinlock): 数据结构不一致
 	struct mcs_spinlock *prev, *next, *node;
 	u32 old, tail;
 	int idx;
 
 	BUILD_BUG_ON(CONFIG_NR_CPUS >= (1U << _Q_TAIL_CPU_BITS));
 
-	if (pv_enabled())
+	if (pv_enabled()) {
 		goto pv_queue;
+	}
 
-	if (virt_spin_lock(lock))
+	if (virt_spin_lock(lock)) {
 		return;
+	}
 
 	/*
 	 * Wait for in-progress pending->locked hand-overs with a bounded
@@ -367,39 +375,53 @@ void queued_spin_lock_slowpath(struct qspinlock *lock, u32 val)
 	 */
 	if (val == _Q_PENDING_VAL) { // pending 状态,表示是第一顺位继承人
 		int cnt = _Q_PENDING_LOOPS; // 进行有限次的自旋
-                // 自旋等待pending域释放
-		val = atomic_cond_read_relaxed(&lock->val,(VAL != _Q_PENDING_VAL) || !cnt--);
+		/**
+		 * 在自旋锁(非MCS锁)lock->val上自旋，直到 自旋次数用完 或者 (VAL != _Q_PENDING_VAL)
+		 * (VAL != _Q_PENDING_VAL) 可能:
+		 * 1) 在快速路径中被抢占了
+		 * 2) 其他
+		 */
+		val = atomic_cond_read_relaxed(&lock->val, (VAL != _Q_PENDING_VAL) || !cnt--);
 	}
 
 	/*
 	 * If we observe any contention; queue.
-	 * 还有竞争，入队
+	 * 还有竞争(因为之前还是'_Q_PENDING_VAL')，入队
 	 * 
-         * 被锁住 或者 还有CPU在等待，即三元组中可能其他两元还有值 
+     * 被锁住 或者 还有CPU在等待，即三元组中可能其他两元还有值 
+	 * ~_Q_LOCKED_MASK 即 '11111111 11111111 11111111 00000000'
+	 * 
 	 */
 	if (val & ~_Q_LOCKED_MASK) {
 		goto queue;
+	} else {
+		// val 就是 00000000 00000000 00000000 xxxxxxxx
 	}
 
 	/*
 	 * trylock || pending
 	 *
 	 * 0,0,* -> 0,1,* -> 0,0,1 pending, trylock
+	 * 
+	 * 将 lock->val 的pending位置位1,其他位不变；
+	 * 返回修改之前的lock->val
 	 */
 	val = queued_fetch_set_pending_acquire(lock);
 
-	/*
+	/**
 	 * If we observe contention, there is a concurrent locker.
-	 *
+	 * (如果我们观察到争用情况，说明存在并发加锁者。)
+	 * > 与之前相比，lock->val的一些位发生了变化，说明了还是有并发加锁
+	 * 
 	 * Undo and queue; our setting of PENDING might have made the
 	 * n,0,0 -> 0,0,0 transition fail and it will now be waiting
 	 * on @next to become !NULL.
 	 */
-	if (unlikely(val & ~_Q_LOCKED_MASK)) {
-
+	if (unlikely(val & ~_Q_LOCKED_MASK)) { 
 		/* Undo PENDING if we set it. */
-		if (!(val & _Q_PENDING_MASK))
-			clear_pending(lock);
+		if (!(val & _Q_PENDING_MASK)) {
+			clear_pending(lock); // 回滚 queued_fetch_set_pending_acquire 中的pending位的设置操作
+		}
 
 		goto queue;
 	}
@@ -414,26 +436,34 @@ void queued_spin_lock_slowpath(struct qspinlock *lock, u32 val)
 	 * sequentiality; this is because not all
 	 * clear_pending_set_locked() implementations imply full
 	 * barriers.
+	 * 这个等待循环必须采用加载获取（load-acquire）操作，
+	 * 以便与清空锁定位的存储释放（store-release）操作相匹配，并建立锁的顺序性；
+	 * 这是因为并非所有 clear_pending_set_locked() 的实现都包含完整内存屏障。
 	 */
-	if (val & _Q_LOCKED_MASK)
+	if (val & _Q_LOCKED_MASK) { // 如果lock->val是被锁住了
+		// 以低功耗模式等待 '!(VAL & _Q_LOCKED_MASK)' 条件成立，即 等待锁被释放
 		atomic_cond_read_acquire(&lock->val, !(VAL & _Q_LOCKED_MASK));
+	}
 
-	/*
+	/**
 	 * take ownership and clear the pending bit.
+	 * (获取所有权并清除挂起位)
 	 *
 	 * 0,1,0 -> 0,0,1
 	 */
-	clear_pending_set_locked(lock);
+	clear_pending_set_locked(lock); // 将pending域设置为0,locked域设置为1 , 即 加锁成功
 	lockevent_inc(lock_pending);
 	return;
 
-	/*
-	 * End of pending bit optimistic spinning and beginning of MCS
-	 * queuing.
+	/**
+	 * 以下就是慢速申请流程
+	 * 
+	 * End of pending bit optimistic spinning and beginning of MCS queuing.
 	 */
 queue:
 	lockevent_inc(lock_slowpath);
 pv_queue:
+    // 注意，这里的node的类型是 struct mcs_spinlock , 即 MCS锁 
 	node = this_cpu_ptr(&qnodes[0].mcs);
 	/**
 	 * node->count++ , 都是qnodes[0].mcs

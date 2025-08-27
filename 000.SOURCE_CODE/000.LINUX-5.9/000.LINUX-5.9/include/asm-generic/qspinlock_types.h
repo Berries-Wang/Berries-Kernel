@@ -12,6 +12,11 @@
 #include <linux/types.h>
 
 /**
+ * 为什么有那么多类型的自旋锁： 经典自旋锁、MCS锁、排队自旋锁?
+ * 
+ * 缓存行颠簸:在[Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]中搜索“高速缓存行颠簸现象”
+ * >>> 所以 [Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#1.5　排队自旋锁 就不在全局变量上自旋
+ * 
  * 使用场景: 
  * 1. [Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#1.5　排队自旋锁
  * 2. [Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#1.3　经典自旋锁
@@ -58,7 +63,11 @@ typedef struct qspinlock {
  */
 #define	__ARCH_SPIN_LOCK_UNLOCKED	{ { .val = ATOMIC_INIT(0) } }
 
-/*
+/**
+ * 如何将每一位都打出来:
+ * 003.TEST-SPACE/05a._Q_LOCKED_MASK.c
+ * 
+ * 需要结合 [Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#表1.4　qspinlock中val字段的含义 分析
  * Bitfields in the atomic value:
  *
  * When NR_CPUS < 16K

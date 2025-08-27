@@ -244,6 +244,12 @@ __CMPXCHG_GEN(_mb)
 	__ret;									\
 })
 
+/**
+ * 在低功耗状态下等待某个32位内存位置的值发生变化
+ * 
+ * 汇编怎么理解呢?
+ * 
+ */
 #define __CMPWAIT_CASE(w, sfx, sz)					\
 static inline void __cmpwait_case_##sz(volatile void *ptr,		\
 				       unsigned long val)		\
@@ -294,6 +300,11 @@ __CMPWAIT_GEN()
 
 #undef __CMPWAIT_GEN
 
+
+
+/**
+ * __cmpwait 就是 ‘__CMPWAIT_GEN()’ 宏的展开
+ */
 #define __cmpwait_relaxed(ptr, val) \
 	__cmpwait((ptr), (unsigned long)(val), sizeof(*(ptr)))
 
