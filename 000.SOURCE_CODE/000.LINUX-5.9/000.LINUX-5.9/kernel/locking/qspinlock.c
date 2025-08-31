@@ -346,6 +346,10 @@ static __always_inline u32  __pv_wait_head_or_lock(struct qspinlock *lock,
  * 结合
  *   [Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#图1.7　中速申请通道
  * 来分析吧
+ * 
+ * 
+ * 什么情况表示加锁成功?
+ *  1. 将locked域设置为1,其他位设置为0
  */
 void queued_spin_lock_slowpath(struct qspinlock *lock, u32 val)
 {
@@ -532,8 +536,9 @@ pv_queue:
 	 * 
 	 * 使用CAS方式进行加锁: 还是对struct qspinlock 上进行加锁
 	 */
-	if (queued_spin_trylock(lock))
+	if (queued_spin_trylock(lock)) {
 		goto release;
+	}
 
 	/*
 	 * Ensure that the initialisation of @node is complete before we
@@ -550,7 +555,8 @@ pv_queue:
 	 *
 	 * p,*,* -> n,*,*
 	 * 
-	 * 修改当前锁的val字段
+	 * 修改当前锁的val字段 : 这个tail中有什么? 只设置了CPU域 和 idx域
+	 * > 修改的是lock , 而不是mcs锁
 	 */
 	old = xchg_tail(lock, tail);
 	next = NULL;
@@ -561,7 +567,9 @@ pv_queue:
 	 * (如果存在前驱节点，则将其链接到队列并等待，直到抵达等待队列的头部。)
 	 * 
 	 * 构建等待链表： 将node加入等待队列 
-     *  1. 链表的头尾分别存在哪里?
+     *  1. 链表的头尾分别存在哪里? -- 就是正在持有锁的CPU，因为当持有锁的CPU释放锁的时候，会唤醒下一个等待节点
+	 * 
+	 * _Q_TAIL_MASK: 11111111 11111111 00000000 00000000 
 	 */
 	if (old & _Q_TAIL_MASK) {
 		/**
@@ -579,8 +587,11 @@ pv_queue:
 
 		/**
 		 *  这就是自旋操作了,
-         * 当前继节点把锁传递给当前节点时，当前CPU会从睡眠状态唤醒，然后退出arch_mcs_spin_lock_contended()函数中的while循环 
+         * 当前继节点把锁传递给当前节点时，当前CPU会从睡眠状态唤醒，
+		 * 然后退出arch_mcs_spin_lock_contended()函数中的while循环 
          * 锁传递？有意思
+		 * 
+		 * 注意，这是在mcs锁上自旋
 		 */
 		arch_mcs_spin_lock_contended(&node->locked);
 
@@ -591,8 +602,9 @@ pv_queue:
 		 * to reduce latency in the upcoming MCS unlock operation.
 		 */
 		next = READ_ONCE(node->next);
-		if (next)
+		if (next) {
 			prefetchw(next);
+		}
 	}
 
 	/*
@@ -616,14 +628,20 @@ pv_queue:
 	 * If PV isn't active, 0 will be returned instead.
 	 *
 	 */
-	if ((val = pv_wait_head_or_lock(lock, node)))
+	if ((val = pv_wait_head_or_lock(lock, node))) {
 		goto locked;
-
+	}
+  
+	/**
+	 * _Q_LOCKED_PENDING_MASK : 00000000 00000000 11111111 11111111
+	 * 
+	 * 即，自旋等待lock->val的pending locked位变为0
+	 */
 	val = atomic_cond_read_acquire(&lock->val, !(VAL & _Q_LOCKED_PENDING_MASK));
 
 locked:
 	/*
-	 * claim the lock:
+	 * claim the lock: (获取锁)
 	 *
 	 * n,0,0 -> 0,0,1 : lock, uncontended
 	 * *,*,0 -> *,*,1 : lock, contended
@@ -631,6 +649,8 @@ locked:
 	 * If the queue head is the only one in the queue (lock value == tail)
 	 * and nobody is pending, clear the tail code and grab the lock.
 	 * Otherwise, we only need to grab the lock.
+	 * (如果队列头是队列中的唯一成员（锁值等于尾值）且没有等待者，
+	 * 则清除尾部代码并获取锁。否则，我们只需要获取锁即可)
 	 */
 
 	/*
@@ -642,28 +662,40 @@ locked:
 	 * Note: at this point: (val & _Q_PENDING_MASK) == 0, because of the
 	 *       above wait condition, therefore any concurrent setting of
 	 *       PENDING will make the uncontended transition fail.
+	 * L-A-01: (此时：(val & _Q_PENDING_MASK) == 0（由于上述等待条件成立），
+	 * 因此任何并行的PENDING标志设置都会导致非竞争状态转换失败)
 	 */
 	if ((val & _Q_TAIL_MASK) == tail) {
-		if (atomic_try_cmpxchg_relaxed(&lock->val, &val, _Q_LOCKED_VAL))
-			goto release; /* No contention */
+		if (atomic_try_cmpxchg_relaxed(&lock->val, &val, _Q_LOCKED_VAL)) {
+			goto release; /* No contention(竞争) */
+		}
 	}
 
 	/*
 	 * Either somebody is queued behind us or _Q_PENDING_VAL got set
 	 * which will then detect the remaining tail and queue behind us
 	 * ensuring we'll see a @next.
+	 * (要么有CPU已经排在我们后方，要么设置了 _Q_PENDING_VAL 标志（该标志会检测剩余的尾部并在我们后方排队），这能确保我们最终能观测到 @next 指针)
+	 * 
+	 * 加锁!
 	 */
 	set_locked(lock);
 
 	/*
 	 * contended path; wait for next if not observed yet, release.
 	 */
-	if (!next)
+	if (!next) {
+		/**
+		 * 自旋等待，直到node->next 不为空 ， 那万一没有再获取锁的需要呢?
+		 * > 那就是没有竞争咯(队列中只有一个元素)，那么在上面就已经获取到锁，释放了，就不会再执行到这里了 -- L-A-01
+		 */
 		next = smp_cond_load_relaxed(&node->next, (VAL));
-
+	}
 
 	/**
      * 将锁传递给下一个节点 , 那下一个节点拿到锁会怎么样呢?
+	 * 
+	 * 将 next->locked 设置为1
 	 */
 	arch_mcs_spin_unlock_contended(&next->locked);
 	pv_kick_node(lock, next);
