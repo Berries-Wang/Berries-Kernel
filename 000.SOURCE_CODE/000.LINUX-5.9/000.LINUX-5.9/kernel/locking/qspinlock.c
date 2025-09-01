@@ -307,6 +307,20 @@ static __always_inline u32  __pv_wait_head_or_lock(struct qspinlock *lock,
 #endif /* _GEN_PV_LOCK_SLOWPATH */
 
 /**
+ * 从宏观来看，系统中有成千上万个自旋锁，但是每个CPU只有唯一的mcs_spinlock节点，那么这些自旋锁怎么和这个唯一的mcs_spinlock节点[4]映射呢？
+ *    [4]: 代码提前规划定义了4个mcs_spinlock节点，用于不同的上下文——进程上下文task、软中断上下文softirq、硬中断上下文hardirq和不可屏蔽中断上下文nmi。
+ * 从微观角度来看，同一时刻一个CPU只能持有一个自旋锁，其他CPU只是在自旋等待这个被持有的自旋锁，因此每个CPU上有一个mcs_spinlock节点就足够了
+ * 
+ * > 理解一下: 自旋锁是不允许重入的，
+ * [Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#1.3.2　自旋锁的变体
+ * 进入自旋锁之前已经显式地调用preempt_disable()函数关闭了抢占，因此内核不会主动发生抢占。
+ * 
+ * 
+ * 
+ * 在争抢锁的过程中，也是需要处理中断的!
+ * > [Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#1.5.5　案例分析：为什么这里pending域要清零
+ * 所以，下面的 'idx = node->count++;' 可能就是中断或其他异常处理程序
+ * 
  * 排队自旋锁（Queued Spinlock，Qspinlock）机制
  * > [Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#1.5　排队自旋锁
  * 
