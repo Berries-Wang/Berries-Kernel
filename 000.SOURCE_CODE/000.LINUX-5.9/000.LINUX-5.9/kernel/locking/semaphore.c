@@ -71,6 +71,7 @@ EXPORT_SYMBOL(down);
  * acquire the semaphore, calling this function will put the task to sleep.
  * If the sleep is interrupted by a signal, this function will return -EINTR.
  * If the semaphore is successfully acquired, this function returns 0.
+ * @return 0: sem->count--成功
  */
 int down_interruptible(struct semaphore *sem)
 {
@@ -196,13 +197,16 @@ struct semaphore_waiter {
 	bool up;
 };
 
-/*
+/**
  * Because this function is inlined, the 'state' parameter will be
  * constant, and thus optimised away by the compiler.  Likewise the
  * 'timeout' parameter for the cases without timeouts.
+ * (由于该函数是内联的，'state' 参数将保持恒定，因此会被编译器优化掉。
+ * 同样地，对于没有超时的情况，'timeout' 参数也会被优化处理。)
+ * 
+ * @param state 传入标识位，是否可以中断
  */
-static inline int __sched __down_common(struct semaphore *sem, long state,
-								long timeout)
+static inline int __sched __down_common(struct semaphore *sem, long state, long timeout)
 {
 	struct semaphore_waiter waiter;
 
@@ -211,16 +215,22 @@ static inline int __sched __down_common(struct semaphore *sem, long state,
 	waiter.up = false;
 
 	for (;;) {
-		if (signal_pending_state(state, current))
+		// 
+		if (signal_pending_state(state, current)) {
 			goto interrupted;
-		if (unlikely(timeout <= 0))
+		}
+		if (unlikely(timeout <= 0)) {
 			goto timed_out;
+		}
+		// 
 		__set_current_state(state);
 		raw_spin_unlock_irq(&sem->lock);
+		// 
 		timeout = schedule_timeout(timeout);
 		raw_spin_lock_irq(&sem->lock);
-		if (waiter.up)
+		if (waiter.up) {
 			return 0;
+		}
 	}
 
  timed_out:
