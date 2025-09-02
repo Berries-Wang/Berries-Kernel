@@ -6,3 +6,4 @@ export CROSS_COMPILE=aarch64-none-linux-gnu-
 export PATH=${PATH}:${TOOL_CHAIN_BIN}/bin
 
 make menuconfig
+make install
