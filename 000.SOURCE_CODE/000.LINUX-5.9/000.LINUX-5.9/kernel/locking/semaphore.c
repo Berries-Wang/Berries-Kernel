@@ -78,11 +78,13 @@ int down_interruptible(struct semaphore *sem)
 	unsigned long flags;
 	int result = 0;
 
+	// 关闭本地CPU中断 且 获取自旋锁(排队自旋锁)
 	raw_spin_lock_irqsave(&sem->lock, flags);
-	if (likely(sem->count > 0))
+	if (likely(sem->count > 0)) {
 		sem->count--;
-	else
+	} else {
 		result = __down_interruptible(sem);
+	}
 	raw_spin_unlock_irqrestore(&sem->lock, flags);
 
 	return result;
@@ -215,18 +217,32 @@ static inline int __sched __down_common(struct semaphore *sem, long state, long 
 	waiter.up = false;
 
 	for (;;) {
-		// 
+		// 当前进程是否有指定信号(中断)需要处理 (include/linux/sched/signal.h)
 		if (signal_pending_state(state, current)) {
 			goto interrupted;
 		}
 		if (unlikely(timeout <= 0)) {
 			goto timed_out;
 		}
-		// 
+		// 修改当前进程的state状态 (include/linux/sched.h)
 		__set_current_state(state);
 		raw_spin_unlock_irq(&sem->lock);
-		// 
+
+		/** 
+		 * 发起进程调度
+		 * 
+		 * 需要注意的是:
+		 * schedule_timeout()函数主动让出CPU时，先调用raw_spin_unlock_irq()函数释放了该锁，
+		 * 即调用schedule_timeout()函数时已经没有自旋锁了，可以让进程先睡眠，“醒来时”再补加一个锁
+		 * 
+		 * 为什么?
+		 * 自旋锁临界区中绝对不能睡眠
+		 * in [Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#1.3.2　自旋锁的变体 关键句 “拥有自旋锁的临界区代码必须原子地执行，不能休眠和主动调度”
+		 * in [Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#1.6.1　信号量简介   关键句 "这是自旋锁的一个临界区。前面提到，自旋锁临界区中绝对不能睡眠，难道这是例外？"
+		 * 
+		 */
 		timeout = schedule_timeout(timeout);
+
 		raw_spin_lock_irq(&sem->lock);
 		if (waiter.up) {
 			return 0;

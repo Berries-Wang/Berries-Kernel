@@ -13,6 +13,7 @@
         "build_bug.h": "c",
         "stringify.h": "c",
         "barrier.h": "c",
-        "mcs_spinlock.h": "c"
+        "mcs_spinlock.h": "c",
+        "mutex": "c"
     }
 }

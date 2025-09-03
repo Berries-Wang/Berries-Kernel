@@ -212,6 +212,7 @@ do_raw_spin_lock_flags(raw_spinlock_t *lock, unsigned long *flags) __acquires(lo
 
 static inline int do_raw_spin_trylock(raw_spinlock_t *lock)
 {
+	// include/asm-generic/qspinlock.h?
 	int ret = arch_spin_trylock(&(lock)->raw_lock);
 
 	if (ret)
@@ -288,6 +289,8 @@ static inline void do_raw_spin_unlock(raw_spinlock_t *lock) __releases(lock)
 /**
  * _raw_spin_lock_irqsave() 是一个底层自旋锁函数，用于在禁用本地中断的情况下获取自旋锁，
  * 确保临界区的原子性和安全性，尤其适用于中断上下文或要求严格时序的场景
+ * 
+ * _raw_spin_lock_irqsave: include/linux/spinlock_api_smp.h ?
  */
 #define raw_spin_lock_irqsave(lock, flags)		\
 	do {						\

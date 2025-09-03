@@ -76,8 +76,8 @@ struct task_group;
  */
 
 /* Used in tsk->state: */
-#define TASK_RUNNING			0x0000
-#define TASK_INTERRUPTIBLE		0x0001
+#define TASK_RUNNING			    0x0000
+#define TASK_INTERRUPTIBLE		    0x0001        // 可中断的睡眠状态
 #define TASK_UNINTERRUPTIBLE		0x0002
 #define __TASK_STOPPED			0x0004
 #define __TASK_TRACED			0x0008
