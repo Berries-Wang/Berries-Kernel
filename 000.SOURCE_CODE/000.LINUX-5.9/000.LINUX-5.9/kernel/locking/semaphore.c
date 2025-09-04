@@ -284,5 +284,6 @@ static noinline void __sched __up(struct semaphore *sem)
 						struct semaphore_waiter, list);
 	list_del(&waiter->list);
 	waiter->up = true;
+	// 唤醒等待的进程
 	wake_up_process(waiter->task);
 }

@@ -22,52 +22,85 @@
 
 struct ww_acquire_ctx;
 
-/*
- * Simple, straightforward mutexes with strict semantics:
+/**
+ * 互斥锁
+ * 
+ * Simple, straightforward mutexes with strict semantics:(简单直接、具有严格语义的互斥锁。)
  *
  * - only one task can hold the mutex at a time
  * - only the owner can unlock the mutex
  * - multiple unlocks are not permitted
- * - recursive locking is not permitted
+ * - recursive(递归) locking is not permitted
  * - a mutex object must be initialized via the API
  * - a mutex object must not be initialized via memset or copying
- * - task may not exit with mutex held
- * - memory areas where held locks reside must not be freed
- * - held mutexes must not be reinitialized
+ * - task may not exit with mutex held (任务不得持有互斥锁退出)
+ * - memory areas where held locks reside must not be freed (不得释放持有锁的内存区域)
+ * - held mutexes must not be reinitialized (不得重新初始化已持有的互斥锁)
  * - mutexes may not be used in hardware or software interrupt
- *   contexts such as tasklets and timers
+ *   contexts such as tasklets and timers (禁止在硬件或软件中断上下文中使用互斥锁，例如任务粒度和定时器)
  *
  * These semantics are fully enforced when DEBUG_MUTEXES is
  * enabled. Furthermore, besides enforcing the above rules, the mutex
  * debugging code also implements a number of additional features
  * that make lock debugging easier and faster:
- *
+ * (当启用DEBUG_MUTEXES（调试互斥锁）功能时，这些语义规则将得到全面强制执行。
+ * 此外，除了强制实施上述规则外，互斥锁调试代码还实现了若干附加功能，这些功能能够使锁调试工作更易于进行且更高效。)
+ *  启用 DEBUG_MUTEXES ， 就需要修改.config文件
+ * 
  * - uses symbolic names of mutexes, whenever they are printed in debug output
+ *   (在调试输出中需要显示互斥锁名称时，系统会使用其符号名称进行展示)
+ * 
  * - point-of-acquire tracking, symbolic lookup of function names
+ *   (获取点追踪功能，函数名称的符号化查询)
+ * 
  * - list of all locks held in the system, printout of them
- * - owner tracking
- * - detects self-recursing locks and prints out all relevant info
+ *   
+ * - owner tracking(所有者追踪)
+ * - detects self-recursing locks and prints out all relevant info 
+ *   (检测自递归锁并输出所有相关信息)
+ * 
  * - detects multi-task circular deadlocks and prints out all affected
  *   locks and tasks (and only those tasks)
+ *   (检测多任务循环死锁，并精确输出所有受影响的锁及任务（仅包含相关任务）)
  */
 struct mutex {
-	atomic_long_t		owner;
-	spinlock_t		wait_lock;
+	/**
+	 * 0表示锁没有未被持有，非零值则表示锁持有者的task_struct指针的值。另外，最低3位有特殊的含义
+	 */
+	atomic_long_t owner;
+	/**
+	 * 自旋锁，用于保护 wait_list睡眠等待队列
+	 * > 其实也是保证owner，只有获取到了wait_lock,才能去修改owner，也是一种保护
+	 * > > 见 void mutex_lock(struct mutex *lock) 方法实现
+	 */
+	spinlock_t wait_lock;
 #ifdef CONFIG_MUTEX_SPIN_ON_OWNER
+	/**
+     * 用于实现MCS锁机制
+     */
 	struct optimistic_spin_queue osq; /* Spinner MCS lock */
 #endif
-	struct list_head	wait_list;
+	/**
+    * 用于管理所有在互斥锁上睡眠的进程，没有获取到锁的进程会在此链上睡眠 
+    */
+	struct list_head wait_list;
 #ifdef CONFIG_DEBUG_MUTEXES
-	void			*magic;
+	void *magic;
 #endif
 #ifdef CONFIG_DEBUG_LOCK_ALLOC
-	struct lockdep_map	dep_map;
+	struct lockdep_map dep_map;
 #endif
 };
 
 struct ww_class;
 struct ww_acquire_ctx;
 
+/**
+ * ww_mutex（Wait/Wound Mutex，等待/创伤互斥锁），也称为 Wound-Wait 锁，是 Linux 内核中一种特殊的互斥锁，它用于实现对多个锁的原子获取，并内置了死锁避免/处理机制
+ * 即 当死锁发生的时候，ww_mutex能使其中一方(B)主动让出自己持有的锁，那么另一个任务(A)能够正常执行；当任务A执行完成后，任务B也可以获取锁继续执行
+ * 
+ * 这个机制是怎么实现的?
+ */
 struct ww_mutex {
 	struct mutex base;
 	struct ww_acquire_ctx *ctx;
@@ -105,6 +138,7 @@ static inline void mutex_destroy(struct mutex *lock) {}
 #endif
 
 /**
+ * 互斥锁初始化-方式2
  * mutex_init - initialize the mutex
  * @mutex: the mutex to be initialized
  *
@@ -136,6 +170,9 @@ do {									\
 		__DEBUG_MUTEX_INITIALIZER(lockname) \
 		__DEP_MAP_MUTEX_INITIALIZER(lockname) }
 
+/**
+ * 互斥锁初始化-方式1
+ */
 #define DEFINE_MUTEX(mutexname) \
 	struct mutex mutexname = __MUTEX_INITIALIZER(mutexname)
 
