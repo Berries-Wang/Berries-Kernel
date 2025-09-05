@@ -56,8 +56,11 @@ EXPORT_SYMBOL(__mutex_init);
  * at least L1_CACHE_BYTES, we have low bits to store extra state.
  *
  * Bit0 indicates a non-empty waiter list; unlock must issue a wakeup.
+ *   - 位0表示等待者列表非空；解锁时必须发出唤醒信号。
  * Bit1 indicates unlock needs to hand the lock to the top-waiter
+ *   - 位1表示解锁时需要将锁交给最高优先级的等待者。
  * Bit2 indicates handoff has been done and we're waiting for pickup.
+ *   - 位2表示锁的交接已完成，正在等待接收方获取锁。
  */
 #define MUTEX_FLAG_WAITERS	0x01
 #define MUTEX_FLAG_HANDOFF	0x02
@@ -987,8 +990,7 @@ __mutex_lock_common(struct mutex *lock, long state, unsigned int subclass,
 	/**
 	 * 先尝试加锁,失败后尝试乐观自旋
 	 */
-	if (__mutex_trylock(lock) ||
-	    mutex_optimistic_spin(lock, ww_ctx, use_ww_ctx, NULL)) {
+	if (__mutex_trylock(lock) || mutex_optimistic_spin(lock, ww_ctx, use_ww_ctx, NULL)) {
 		/* got the lock, yay! */
 		lock_acquired(&lock->dep_map, ip);
 		if (use_ww_ctx && ww_ctx) {
@@ -1069,9 +1071,13 @@ __mutex_lock_common(struct mutex *lock, long state, unsigned int subclass,
 				goto err;
 			}
 		}
-        /*在本方法的前面申请了lock->wait_lock锁，但是修改lock->owner失败，即加锁失败*/
+        /*在本方法的前面申请了lock->wait_lock锁，但是修改lock->owner失败(__mutex_trylock)，即加锁失败*/
 		spin_unlock(&lock->wait_lock);
+		
+		// 让出CPU (内部调用了schedule 、 preempt_disabled函数)
 		schedule_preempt_disabled();
+
+		// >>>进程重新获得调度运行<<<
 
 		/*
 		 * ww_mutex needs to always recheck its position since its waiter
@@ -1080,22 +1086,41 @@ __mutex_lock_common(struct mutex *lock, long state, unsigned int subclass,
 		if ((use_ww_ctx && ww_ctx) || !first) {
 			first = __mutex_waiter_is_first(lock, &waiter);
 			if (first) {
+				// 标记：当锁的持有者释放锁时，将锁的控制权传递给当前进程
 				__mutex_set_flag(lock, MUTEX_FLAG_HANDOFF);
 			}
 		}
 
 		set_current_state(state);
+		
 		/*
 		 * Here we order against unlock; we must either see it change
 		 * state back to RUNNING and fall through the next schedule(),
 		 * or we must see its unlock and acquire.
+		 * (此处我们针对解锁操作进行排序：必须观察到其状态恢复为RUNNING并顺利通过后续的schedule()调度，
+		 * 或者必须观察到其完成解锁并重新获取锁。)
 		 */
 		if (__mutex_trylock(lock) || (first && mutex_optimistic_spin(lock, ww_ctx, use_ww_ctx, &waiter))) {
 			break;
 		}
-
+        
+		// 重新获取自旋锁，是为了修改 lock->owner? (即为__mutex_trylock 执行做准备)
 		spin_lock(&lock->wait_lock);
 	}
+	/**
+	 * 这里为什么还要添加上一个自旋获取锁的操作呢?(上面的for循环break的条件就是锁获取成功,即 lock->owner设置成功)
+	 *  这里是个空操作(执行很快)，因为for退出时，当前进程(自旋锁应该是CPU的角度)已经获取到锁了
+	 * 
+	 * 看似冗余，其实 编译器优化和代码可读性/稳定性
+	 *   1.从编译器的视角看
+	 *      spin_lock 和 spin_unlock 是内联函数，通常包含内存屏障（barrier()）和阻止编译器重排序的指令
+	 *      这个额外的 spin_lock 作为一个强大的内存屏障，确保了在跳出循环后、执行清理代码前的所有内存操作都是严格有序的
+	 *   2.从代码维护的视角看
+	 *      for 循环内部的锁状态（锁被持有）是一个“临时状态”。
+	 *        在循环外部显式地调用 spin_lock 清晰地表明了接下来的代码段是一个新的临界区。
+	 *        这避免了未来的开发者误以为锁未被持有而错误地修改代码。它使锁的生命周期变得更加明确和健壮
+	 * 
+	 */
 	spin_lock(&lock->wait_lock);
 acquired:
 	__set_current_state(TASK_RUNNING);
@@ -1105,14 +1130,15 @@ acquired:
 		 * Wound-Wait; we stole the lock (!first_waiter), check the
 		 * waiters as anyone might want to wound us.
 		 */
-		if (!ww_ctx->is_wait_die &&
-		    !__mutex_waiter_is_first(lock, &waiter))
+		if (!ww_ctx->is_wait_die && !__mutex_waiter_is_first(lock, &waiter)) {
 			__ww_mutex_check_waiters(lock, ww_ctx);
+		}
 	}
-
+    // 操作lock->wait_list
 	mutex_remove_waiter(lock, &waiter, current);
-	if (likely(list_empty(&lock->wait_list)))
+	if (likely(list_empty(&lock->wait_list))) {
 		__mutex_clear_flag(lock, MUTEX_FLAGS);
+	}
 
 	debug_mutex_free_waiter(&waiter);
 
@@ -1125,6 +1151,7 @@ skip_wait:
 	}
     // 对lock->wait_lock解锁
 	spin_unlock(&lock->wait_lock);
+	// 打开内核抢占
 	preempt_enable();
 	return 0;
 
