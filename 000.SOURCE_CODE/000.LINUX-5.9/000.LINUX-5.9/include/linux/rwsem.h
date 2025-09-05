@@ -20,17 +20,27 @@
 #include <linux/osq_lock.h>
 #endif
 
-/*
+/**
  * For an uncontended rwsem, count and owner are the only fields a task
  * needs to touch when acquiring the rwsem. So they are put next to each
  * other to increase the chance that they will share the same cacheline.
- *
+ * (对于无竞争的读写信号量（rwsem），任务获取信号量时只需要访问count和owner这两个字段。
+ * 因此将它们相邻放置是为了增加它们共享同一缓存行的概率。)
+ * > arch/arm64/include/asm/cache.h:31:#define L1_CACHE_BYTES (1 << L1_CACHE_SHIFT)
+ * 缓存行大小 64字节 , 那就足够空间放下
+ * 
  * In a contended rwsem, the owner is likely the most frequently accessed
  * field in the structure as the optimistic waiter that holds the osq lock
  * will spin on owner. For an embedded rwsem, other hot fields in the
  * containing structure should be moved further away from the rwsem to
  * reduce the chance that they will share the same cacheline causing
  * cacheline bouncing problem.
+ * (在存在竞争的读写信号量（rwsem）中，owner字段很可能成为结构体中被访问最频繁的字段，
+ * 因为持有osq锁的乐观等待者会持续在owner字段上自旋。
+ * 对于嵌入式（embedded）读写信号量，所在结构体中的其他热点字段应当远离该读写信号量，
+ * 以降低它们共享同一缓存行的概率，从而避免缓存行颠簸问题)
+ * 
+ * 读写信号量
  */
 struct rw_semaphore {
 	atomic_long_t count;

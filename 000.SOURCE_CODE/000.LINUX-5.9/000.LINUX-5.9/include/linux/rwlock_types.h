@@ -1,14 +1,16 @@
 #ifndef __LINUX_RWLOCK_TYPES_H
 #define __LINUX_RWLOCK_TYPES_H
 
-/*
- * include/linux/rwlock_types.h - generic rwlock type definitions
- *				  and initializers
+/**
+ * 读写自旋锁
+ * 
+ * include/linux/rwlock_types.h - generic rwlock type definitions  and initializers
  *
  * portions Copyright 2005, Red Hat, Inc., Ingo Molnar
  * Released under the General Public License (GPL).
  */
 typedef struct {
+	// include/asm-generic/qrwlock_types.h
 	arch_rwlock_t raw_lock;
 #ifdef CONFIG_DEBUG_SPINLOCK
 	unsigned int magic, owner_cpu;
