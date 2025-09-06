@@ -119,7 +119,7 @@
  * On 64-bit architectures, the bit definitions of the count are:
  *
  * Bit  0    - writer locked bit
- * Bit  1    - waiters present bit
+ * Bit  1    - waiters present bit (等待者存在位)
  * Bit  2    - lock handoff bit
  * Bits 3-7  - reserved
  * Bits 8-62 - 55-bit reader count
@@ -392,8 +392,9 @@ enum writer_wait_state {
  */
 #define MAX_READERS_WAKEUP	0x100
 
-/*
+/**
  * handle the lock release when processes blocked on it that can now run
+ * (处理因锁释放而可以运行的被阻塞进程)
  * - if we come here from up_xxxx(), then the RWSEM_FLAG_WAITERS bit must
  *   have been set.
  * - there must be someone on the queue
@@ -402,7 +403,13 @@ enum writer_wait_state {
  *   to actually wakeup the blocked task(s) and drop the reference count,
  *   preferably when the wait_lock is released
  * - woken process blocks are discarded from the list after having task zeroed
+ *   (被唤醒的进程块在任务结构体清零后将从列表中移除)
  * - writers are only marked woken if downgrading is false
+ *   (仅在降级（downgrading）为false时，写入者才会被标记为已唤醒)
+ * 
+ * @param wake_q  唤醒队列?
+ * @param wake_type  唤醒类型
+ * 
  */
 static void rwsem_mark_wake(struct rw_semaphore *sem,
 			    enum rwsem_wake_type wake_type,
@@ -420,14 +427,18 @@ static void rwsem_mark_wake(struct rw_semaphore *sem,
 	 */
 	waiter = rwsem_first_waiter(sem);
 
-	if (waiter->type == RWSEM_WAITING_FOR_WRITE) {
+	if (waiter->type == RWSEM_WAITING_FOR_WRITE) { // 等待队列中第一个等待进程若是等待写锁
 		if (wake_type == RWSEM_WAKE_ANY) {
-			/*
+			/**
 			 * Mark writer at the front of the queue for wakeup.
 			 * Until the task is actually later awoken later by
 			 * the caller, other writers are able to steal it.
 			 * Readers, on the other hand, will block as they
 			 * will notice the queued writer.
+			 * 将队列前端的写入者标记为待唤醒状态。在该任务被调用方实际唤醒之前，其他写入者可能会抢占该唤醒机会。
+			 * 而读取者则会保持阻塞，因为它们会检测到队列中已有写入者存在。
+			 * 
+			 * 将waiter->task添加到唤醒队列 wake_q 中
 			 */
 			wake_q_add(wake_q, waiter->task);
 			lockevent_inc(rwsem_wake_writer);
@@ -436,42 +447,55 @@ static void rwsem_mark_wake(struct rw_semaphore *sem,
 		return;
 	}
 
-	/*
-	 * No reader wakeup if there are too many of them already.
-	 */
-	if (unlikely(atomic_long_read(&sem->count) < 0))
-		return;
+	// 那等待队列中的第一个进程是等待读锁的
 
-	/*
+	/**
+	 * No reader wakeup if there are too many of them already.
+	 * (如果已经有太多读者，则不再唤醒其他读者。)
+	 * > 读失败位为1？(read fail bit)
+	 */
+	if (unlikely(atomic_long_read(&sem->count) < 0)) {
+		return;
+	}
+
+	/**
 	 * Writers might steal the lock before we grant it to the next reader.
 	 * We prefer to do the first reader grant before counting readers
 	 * so we can bail out early if a writer stole the lock.
+	 * (写者可能会在我们将锁授予下一位读者之前窃取该锁。我们倾向于在统计读者数量之前先完成首次读者的授权，
+	 * 这样如果写者窃取了锁，我们就可以提前退出。)
 	 */
-	if (wake_type != RWSEM_WAKE_READ_OWNED) {
+	if (wake_type != RWSEM_WAKE_READ_OWNED) { // 不是唤醒持有这个读锁的进程,那就是唤醒其他的进程
 		struct task_struct *owner;
 
 		adjustment = RWSEM_READER_BIAS;
+		// 加, 在该函数执行前,已获取sem->wait_lock自旋锁
 		oldcount = atomic_long_fetch_add(adjustment, &sem->count);
-		if (unlikely(oldcount & RWSEM_WRITER_MASK)) {
-			/*
+		if (unlikely(oldcount & RWSEM_WRITER_MASK)) { // 若当前是写锁,窃取?
+			/**
 			 * When we've been waiting "too" long (for writers
 			 * to give up the lock), request a HANDOFF to
 			 * force the issue.
+			 * (当我们等待时间“过长”（等待写者释放锁时），请求进行 HANDOFF（交接）以强制解决问题。)
 			 */
 			if (!(oldcount & RWSEM_FLAG_HANDOFF) &&
 			    time_after(jiffies, waiter->timeout)) {
 				adjustment -= RWSEM_FLAG_HANDOFF;
 				lockevent_inc(rwsem_rlock_handoff);
 			}
-
+            
+			// 减，即重置?不是重置
 			atomic_long_add(-adjustment, &sem->count);
 			return;
 		}
-		/*
+		// 执行到此处，就说明当前锁是读锁
+		/**
 		 * Set it to reader-owned to give spinners an early
 		 * indication that readers now have the lock.
 		 * The reader nonspinnable bit seen at slowpath entry of
 		 * the reader is copied over.
+		 * (将其设置为读者所有状态，以便让自旋等待者能尽早获知读者现已获得锁。
+		 * 在读取器慢路径入口处检测到的读者不可自旋位也被一并复制。)
 		 */
 		owner = waiter->task;
 		if (waiter->last_rowner & RWSEM_RD_NONSPINNABLE) {
@@ -481,28 +505,39 @@ static void rwsem_mark_wake(struct rw_semaphore *sem,
 		__rwsem_set_reader_owned(sem, owner);
 	}
 
-	/*
+	/**
 	 * Grant up to MAX_READERS_WAKEUP read locks to all the readers in the
 	 * queue. We know that the woken will be at least 1 as we accounted
 	 * for above. Note we increment the 'active part' of the count by the
 	 * number of readers before waking any processes up.
+	 * (向队列中的所有读取器授予最多 MAX_READERS_WAKEUP 个读锁。正如前文所述，
+	 * 我们知道被唤醒的读取器数量至少为 1。
+	 * 请注意，在唤醒任何进程之前，我们会按读取器数量增加计数器的"活动部分"。)
 	 *
 	 * This is an adaptation of the phase-fair R/W locks where at the
 	 * reader phase (first waiter is a reader), all readers are eligible
 	 * to acquire the lock at the same time irrespective of their order
 	 * in the queue. The writers acquire the lock according to their
 	 * order in the queue.
+	 * (这是对相位公平读写锁的一种改进：在读者相位（第一个等待者是读者）时，
+	 * 所有读者无论其在队列中的顺序如何，
+	 * 都有资格同时获取锁；而写者则根据其在队列中的顺序依次获取锁。)
 	 *
 	 * We have to do wakeup in 2 passes to prevent the possibility that
 	 * the reader count may be decremented before it is incremented. It
 	 * is because the to-be-woken waiter may not have slept yet. So it
 	 * may see waiter->task got cleared, finish its critical section and
 	 * do an unlock before the reader count increment.
+	 * (我们必须分’两‘轮进行唤醒操作，以防止读者计数在增加之前就被减少的可能性。
+	 * 这是因为待唤醒的等待者可能尚未进入睡眠状态，
+	 * 因此它可能会发现 waiter->task 已被清空，于是完成其临界区操作并在读者计数增加之前执行解锁操作。)
 	 *
 	 * 1) Collect the read-waiters in a separate list, count them and
 	 *    fully increment the reader count in rwsem.
+	 *    (将读等待者单独收集到一个列表中，统计其数量，并完整地将读者计数增加到读写信号量（rwsem）中)
 	 * 2) For each waiters in the new list, clear waiter->task and
 	 *    put them into wake_q to be woken up later.
+	 *    (对于新列表中的每个等待者，清空 waiter->task 字段并将其放入 wake_q 中以待后续唤醒)
 	 */
 	INIT_LIST_HEAD(&wlist);
 	list_for_each_entry_safe(waiter, tmp, &sem->wait_list, list) {
@@ -562,9 +597,12 @@ static void rwsem_mark_wake(struct rw_semaphore *sem,
  * This function must be called with the sem->wait_lock held to prevent
  * race conditions between checking the rwsem wait list and setting the
  * sem->count accordingly.
+ * (必须持有 sem->wait_lock 锁来调用此函数，
+ * 以防止检查读写信号量等待队列和相应设置 sem->count 值之间发生竞态条件。)
  *
  * If wstate is WRITER_HANDOFF, it will make sure that either the handoff
  * bit is set or the lock is acquired with handoff bit cleared.
+ * (如果 wstate 为 WRITER_HANDOFF，该操作将确保要么设置移交位，要么在清除移交位的情况下获取锁。)
  */
 static inline bool rwsem_try_write_lock(struct rw_semaphore *sem,
 					enum writer_wait_state wstate)
@@ -1204,14 +1242,18 @@ rwsem_down_write_slowpath(struct rw_semaphore *sem, int state)
 		 *     waiters that were queued ahead of us.
 		 *     (如果没有活跃的写入者但存在一些读取者，则该锁必然处于读取所有权状态；因此我们会尝试唤醒所有排在我们之前的读取锁等待者。)
 		 */
-		if (count & RWSEM_WRITER_MASK) {
+		if (count & RWSEM_WRITER_MASK) { // 若已加写锁
 			goto wait;
 		}
 
+		/**
+		 * 将需要唤醒的任务添加到 wake_q 队列中 
+		 */
 		rwsem_mark_wake(sem, (count & RWSEM_READER_MASK)
 					? RWSEM_WAKE_READERS
 					: RWSEM_WAKE_ANY, &wake_q);
 
+		// 待唤醒的队列不为空
 		if (!wake_q_empty(&wake_q)) {
 			/*
 			 * We want to minimize wait_lock hold time especially
@@ -1222,7 +1264,8 @@ rwsem_down_write_slowpath(struct rw_semaphore *sem, int state)
 			wake_q_init(&wake_q);	/* Used again, reinit */
 			raw_spin_lock_irq(&sem->wait_lock);
 		}
-	} else {
+	} else { // 如果是等待队列中的第一个进程
+		// 按位或操作
 		atomic_long_or(RWSEM_FLAG_WAITERS, &sem->count);
 	}
 
@@ -1230,6 +1273,7 @@ wait:
 	/* wait until we successfully acquire the lock */
 	set_current_state(state);
 	for (;;) {
+
 		if (rwsem_try_write_lock(sem, wstate)) {
 			/* rwsem_try_write_lock() implies ACQUIRE on success */
 			break;
@@ -1237,13 +1281,16 @@ wait:
 
 		raw_spin_unlock_irq(&sem->wait_lock);
 
-		/*
+		/**
 		 * After setting the handoff bit and failing to acquire
 		 * the lock, attempt to spin on owner to accelerate lock
 		 * transfer. If the previous owner is a on-cpu writer and it
 		 * has just released the lock, OWNER_NULL will be returned.
 		 * In this case, we attempt to acquire the lock again
 		 * without sleeping.
+		 * (设置移交位且未能获取锁后，尝试在所有者上进行自旋以加速锁转移。
+		 * 如果前一所有者是在线CPU上的写者且刚刚释放了锁，将返回OWNER_NULL。
+		 * 此种情况下，我们会尝试再次获取锁而无需进入睡眠)
 		 */
 		if (wstate == WRITER_HANDOFF &&
 		    rwsem_spin_on_owner(sem, RWSEM_NONSPINNABLE) == OWNER_NULL)
@@ -1251,8 +1298,9 @@ wait:
 
 		/* Block until there are no active lockers. */
 		for (;;) {
-			if (signal_pending_state(state, current))
+			if (signal_pending_state(state, current)) {
 				goto out_nolock;
+			}
 
 			schedule();
 			lockevent_inc(rwsem_sleep_writer);
