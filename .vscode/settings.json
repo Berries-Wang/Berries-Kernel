@@ -16,6 +16,8 @@
         "mcs_spinlock.h": "c",
         "mutex": "c",
         "cache.h": "c",
-        "byteorder.h": "c"
+        "byteorder.h": "c",
+        "atomic": "c",
+        "006.print_bits.h": "c"
     }
 }

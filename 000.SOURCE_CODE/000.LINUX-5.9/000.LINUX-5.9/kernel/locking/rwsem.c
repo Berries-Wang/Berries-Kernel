@@ -270,11 +270,15 @@ static inline void rwsem_set_nonspinnable(struct rw_semaphore *sem)
 					  owner | RWSEM_NONSPINNABLE));
 }
 
+/**
+ * 读写信号量尝试加读锁
+ */
 static inline bool rwsem_read_trylock(struct rw_semaphore *sem)
 {
 	long cnt = atomic_long_add_return_acquire(RWSEM_READER_BIAS, &sem->count);
-	if (WARN_ON_ONCE(cnt < 0))
+	if (WARN_ON_ONCE(cnt < 0)) {
 		rwsem_set_nonspinnable(sem);
+	}
 	return !(cnt & RWSEM_READ_FAILED_MASK);
 }
 
@@ -343,6 +347,9 @@ void __init_rwsem(struct rw_semaphore *sem, const char *name,
 }
 EXPORT_SYMBOL(__init_rwsem);
 
+/**
+ * 读写锁等待类型
+ */
 enum rwsem_waiter_type {
 	RWSEM_WAITING_FOR_WRITE,
 	RWSEM_WAITING_FOR_READ
@@ -570,22 +577,26 @@ static inline bool rwsem_try_write_lock(struct rw_semaphore *sem,
 	do {
 		bool has_handoff = !!(count & RWSEM_FLAG_HANDOFF);
 
-		if (has_handoff && wstate == WRITER_NOT_FIRST)
+		if (has_handoff && wstate == WRITER_NOT_FIRST) {
 			return false;
+		}
 
 		new = count;
 
 		if (count & RWSEM_LOCK_MASK) {
-			if (has_handoff || (wstate != WRITER_HANDOFF))
+			if (has_handoff || (wstate != WRITER_HANDOFF)) {
 				return false;
+			}
 
 			new |= RWSEM_FLAG_HANDOFF;
 		} else {
 			new |= RWSEM_WRITER_LOCKED;
+			// 将 'lock handoff bit' 置为0
 			new &= ~RWSEM_FLAG_HANDOFF;
 
-			if (list_is_singular(&sem->wait_list))
+			if (list_is_singular(&sem->wait_list)) {
 				new &= ~RWSEM_FLAG_WAITERS;
+			}
 		}
 	} while (!atomic_long_try_cmpxchg_acquire(&sem->count, &count, new));
 
@@ -593,8 +604,9 @@ static inline bool rwsem_try_write_lock(struct rw_semaphore *sem,
 	 * We have either acquired the lock with handoff bit cleared or
 	 * set the handoff bit.
 	 */
-	if (new & RWSEM_FLAG_HANDOFF)
+	if (new & RWSEM_FLAG_HANDOFF) {
 		return false;
+	}
 
 	rwsem_set_owner(sem);
 	return true;
@@ -1129,8 +1141,9 @@ static inline void rwsem_disable_reader_optspin(struct rw_semaphore *sem,
 	}
 }
 
-/*
+/**
  * Wait until we successfully acquire the write lock
+ * (等待，直到获取写锁)
  */
 static struct rw_semaphore *
 rwsem_down_write_slowpath(struct rw_semaphore *sem, int state)
@@ -1149,10 +1162,13 @@ rwsem_down_write_slowpath(struct rw_semaphore *sem, int state)
 		return sem;
 	}
 
-	/*
+	/**
+	 * 获取写锁时，告诉其他想获取锁的进程不要自旋?
+	 * 
 	 * Disable reader optimistic spinning for this rwsem after
 	 * acquiring the write lock when the setting of the nonspinnable
 	 * bits are observed.
+	 * (在获取写入锁后，若观察到不可旋转位的设置，则禁用此rwsem的读取器乐观旋转功能。)
 	 */
 	disable_rspin = atomic_long_read(&sem->owner) & RWSEM_NONSPINNABLE;
 
@@ -1164,27 +1180,33 @@ rwsem_down_write_slowpath(struct rw_semaphore *sem, int state)
 	waiter.type = RWSEM_WAITING_FOR_WRITE;
 	waiter.timeout = jiffies + RWSEM_WAIT_TIMEOUT;
 
+	// 获取自旋锁(一系列操作: 保存当前中断状态并禁用中断，禁止内核抢占，再去获取自旋锁)
 	raw_spin_lock_irq(&sem->wait_lock);
 
 	/* account for this before adding a new element to the list */
 	wstate = list_empty(&sem->wait_list) ? WRITER_FIRST : WRITER_NOT_FIRST;
-
+    
+	// 将waiter添加到sem->wait_list中
 	list_add_tail(&waiter.list, &sem->wait_list);
 
 	/* we're now waiting on the lock */
-	if (wstate == WRITER_NOT_FIRST) {
+	if (wstate == WRITER_NOT_FIRST) { // 如果不是睡眠链表中的第一个进程
 		count = atomic_long_read(&sem->count);
 
-		/*
+		/**
 		 * If there were already threads queued before us and:
+		 *   (如果在我们之前已有线程排队，那么)
 		 *  1) there are no no active locks, wake the front
 		 *     queued process(es) as the handoff bit might be set.
+		 *   (如果没有活跃的锁，则唤醒队列前端的进程，因为可能设置了移交标志位。)
 		 *  2) there are no active writers and some readers, the lock
 		 *     must be read owned; so we try to wake any read lock
 		 *     waiters that were queued ahead of us.
+		 *     (如果没有活跃的写入者但存在一些读取者，则该锁必然处于读取所有权状态；因此我们会尝试唤醒所有排在我们之前的读取锁等待者。)
 		 */
-		if (count & RWSEM_WRITER_MASK)
+		if (count & RWSEM_WRITER_MASK) {
 			goto wait;
+		}
 
 		rwsem_mark_wake(sem, (count & RWSEM_READER_MASK)
 					? RWSEM_WAKE_READERS
@@ -1333,7 +1355,7 @@ static struct rw_semaphore *rwsem_downgrade_wake(struct rw_semaphore *sem)
 }
 
 /*
- * lock for reading
+ * lock for reading (申请读锁)
  */
 static inline void __down_read(struct rw_semaphore *sem)
 {
@@ -1378,17 +1400,18 @@ static inline int __down_read_trylock(struct rw_semaphore *sem)
 }
 
 /*
- * lock for writing
+ * lock for writing 申请写锁
  */
 static inline void __down_write(struct rw_semaphore *sem)
 {
 	long tmp = RWSEM_UNLOCKED_VALUE;
 
 	if (unlikely(!atomic_long_try_cmpxchg_acquire(&sem->count, &tmp,
-						      RWSEM_WRITER_LOCKED)))
+						      RWSEM_WRITER_LOCKED))) {
 		rwsem_down_write_slowpath(sem, TASK_UNINTERRUPTIBLE);
-	else
+	} else {
 		rwsem_set_owner(sem);
+	}
 }
 
 static inline int __down_write_killable(struct rw_semaphore *sem)
@@ -1490,7 +1513,7 @@ void __sched down_read(struct rw_semaphore *sem)
 {
 	might_sleep();
 	rwsem_acquire_read(&sem->dep_map, 0, 0, _RET_IP_);
-
+    
 	LOCK_CONTENDED(sem, __down_read_trylock, __down_read);
 }
 EXPORT_SYMBOL(down_read);
@@ -1523,7 +1546,7 @@ int down_read_trylock(struct rw_semaphore *sem)
 EXPORT_SYMBOL(down_read_trylock);
 
 /*
- * lock for writing
+ * lock for writing(申请写锁)
  */
 void __sched down_write(struct rw_semaphore *sem)
 {

@@ -48,12 +48,17 @@ struct rw_semaphore {
 	 * Write owner or one of the read owners as well flags regarding
 	 * the current state of the rwsem. Can be used as a speculative
 	 * check to see if the write owner is running on the cpu.
+	 * (写出所有者或其中一位读取所有者以及关于rwsem当前状态的标志。可用作推测性检查，以判断写入所有者是否正在该CPU上运行。)
+	 * 
+	 * 当写者成功获取锁时，owner指向锁持有者的task_struct数据结构
 	 */
 	atomic_long_t owner;
 #ifdef CONFIG_RWSEM_SPIN_ON_OWNER
 	struct optimistic_spin_queue osq; /* spinner MCS lock */
 #endif
+    // 自旋锁，对 count 进行原子性操作和保护
 	raw_spinlock_t wait_lock;
+	// 用于管理所有在该信号量上睡眠的进程，没有获取到锁的进程会睡眠在这个链表上
 	struct list_head wait_list;
 #ifdef CONFIG_DEBUG_RWSEMS
 	void *magic;
@@ -63,7 +68,10 @@ struct rw_semaphore {
 #endif
 };
 
-/* In all implementations count != 0 means locked */
+/** 
+ * In all implementations count != 0 means locked
+ * (在所有实现中，count！=0 表示已经被锁住了)
+ *  */
 static inline int rwsem_is_locked(struct rw_semaphore *sem)
 {
 	return atomic_long_read(&sem->count) != 0;
@@ -130,7 +138,7 @@ static inline int rwsem_is_contended(struct rw_semaphore *sem)
 }
 
 /*
- * lock for reading
+ * lock for reading (申请读锁)
  */
 extern void down_read(struct rw_semaphore *sem);
 extern int __must_check down_read_killable(struct rw_semaphore *sem);
@@ -141,7 +149,7 @@ extern int __must_check down_read_killable(struct rw_semaphore *sem);
 extern int down_read_trylock(struct rw_semaphore *sem);
 
 /*
- * lock for writing
+ * lock for writing (申请写锁)
  */
 extern void down_write(struct rw_semaphore *sem);
 extern int __must_check down_write_killable(struct rw_semaphore *sem);
@@ -152,12 +160,12 @@ extern int __must_check down_write_killable(struct rw_semaphore *sem);
 extern int down_write_trylock(struct rw_semaphore *sem);
 
 /*
- * release a read lock
+ * release a read lock (释放一个读锁)
  */
 extern void up_read(struct rw_semaphore *sem);
 
 /*
- * release a write lock
+ * release a write lock (释放一个写锁)
  */
 extern void up_write(struct rw_semaphore *sem);
 

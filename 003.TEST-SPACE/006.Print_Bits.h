@@ -33,3 +33,38 @@ void print_bits(int num)
     }
     printf("\n");
 }
+
+void print_bits_long(long num)
+{
+    // 计算long类型的位数 
+    int total_bits = sizeof(long) * CHAR_BIT;
+    printf("一共 %d 位\n",total_bits);
+
+    // 创建一个掩码，初始时最高位为1，其余为0
+    unsigned long mask = 1L << (total_bits - 1);
+
+    printf("二进制表示: ");
+
+    for (int i = 0; i < total_bits; i++)
+    {
+        // 检查当前位是否为1
+        if (num & mask)
+        {
+            printf("1");
+        }
+        else
+        {
+            printf("0");
+        }
+
+        // 每8位加一个空格，便于阅读
+        if ((i + 1) % 8 == 0)
+        {
+            printf(" ");
+        }
+
+        // 右移掩码
+        mask >>= 1;
+    }
+    printf("\n");
+}
