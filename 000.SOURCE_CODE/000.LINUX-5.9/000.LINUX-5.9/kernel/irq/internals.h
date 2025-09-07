@@ -40,15 +40,15 @@ enum {
 /*
  * Bit masks for desc->core_internal_state__do_not_mess_with_it
  *
- * IRQS_AUTODETECT		- autodetection in progress
- * IRQS_SPURIOUS_DISABLED	- was disabled due to spurious interrupt
+ * IRQS_AUTODETECT		- autodetection in progress  表示某个irq_desc处于自动侦测状态。
+ * IRQS_SPURIOUS_DISABLED	- was disabled due to spurious interrupt 表示某个irq_desc被视为“伪中断”并被禁用。
  *				  detection
- * IRQS_POLL_INPROGRESS		- polling in progress
- * IRQS_ONESHOT			- irq is not unmasked in primary handler
- * IRQS_REPLAY			- irq is replayed
- * IRQS_WAITING			- irq is waiting
- * IRQS_PENDING			- irq is pending and replayed later
- * IRQS_SUSPENDED		- irq is suspended
+ * IRQS_POLL_INPROGRESS		- polling in progress  表示某个irq_desc正轮询调用action。
+ * IRQS_ONESHOT			- irq is not unmasked in primary handler 表示只执行一次。
+ * IRQS_REPLAY			- irq is replayed  重新发一次中断。
+ * IRQS_WAITING			- irq is waiting 表示某个irq_desc处于等待状态
+ * IRQS_PENDING			- irq is pending and replayed later 表示该中断被挂起
+ * IRQS_SUSPENDED		- irq is suspended   表示该中断被暂停。
  * IRQS_NMI			- irq line is used to deliver NMIs
  */
 enum {

@@ -148,7 +148,7 @@ alternative_cb_end
 .L__asm_ssbd_skip\@:
 #endif
 	.endm
-
+    // kernel_entry宏用来保存中断上下文
 	.macro	kernel_entry, el, regsize = 64
 	.if	\regsize == 32
 	mov	w0, w0				// zero upper 32 bits of x0
@@ -244,6 +244,7 @@ alternative_else_nop_endif
 	*/
 	.endm   /*在 ARM64 汇编中，.endm 是一个宏结束指令（macro end），用于标记一个汇编宏（macro）定义的结束。它必须与 .macro 指令配对使用，表示宏定义的终止。*/
 
+    //  kernel_exit宏是用来恢复中断上下文的
 	.macro	kernel_exit, el
 	.if	\el != 0
 	disable_daif

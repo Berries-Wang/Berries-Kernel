@@ -92,7 +92,7 @@ enum {
 typedef irqreturn_t (*irq_handler_t)(int, void *);
 
 /**
- * struct irqaction - per interrupt action descriptor
+ * struct irqaction - per interrupt action descriptor (每个中断irqaction的描述符)
  * @handler:	interrupt handler function
  * @name:	name of the device
  * @dev_id:	cookie to identify the device
@@ -108,18 +108,18 @@ typedef irqreturn_t (*irq_handler_t)(int, void *);
  * @dir:	pointer to the proc/irq/NN/name entry
  */
 struct irqaction {
-	irq_handler_t		handler;
-	void			*dev_id;
-	void __percpu		*percpu_dev_id;
-	struct irqaction	*next;
-	irq_handler_t		thread_fn;
-	struct task_struct	*thread;
+	irq_handler_t		handler;                // 主处理程序的指针
+	void			    *dev_id;                // 传递给中断处理程序的参数
+	void __percpu		*percpu_dev_id;         // 
+	struct irqaction	*next;                  // 指向下一个中断irqaction的描述符
+	irq_handler_t		thread_fn;              // 中断线程处理程序的函数指针
+	struct task_struct	*thread;                // 中断线程的task_struct数据结构
 	struct irqaction	*secondary;
-	unsigned int		irq;
-	unsigned int		flags;
+	unsigned int		irq;                    // 软件中断号
+	unsigned int		flags;                  // 注册中断时用的中断标志位，以IRQF_开头
 	unsigned long		thread_flags;
 	unsigned long		thread_mask;
-	const char		*name;
+	const char		    *name;                  // 注册中断的名称。
 	struct proc_dir_entry	*dir;
 } ____cacheline_internodealigned_in_smp;
 
@@ -129,19 +129,41 @@ extern irqreturn_t no_action(int cpl, void *dev_id);
  * If a (PCI) device interrupt is not connected we set dev->irq to
  * IRQ_NOTCONNECTED. This causes request_irq() to fail with -ENOTCONN, so we
  * can distingiush that case from other error returns.
+ * (如果（PCI）设备中断未连接，我们将 dev->irq 设置为 IRQ_NOTCONNECTED。
+ * 这将导致 request_irq() 失败并返回 -ENOTCONN 错误码，
+ * 从而我们可以将此情况与其他错误返回值区分开来。)
  *
  * 0x80000000 is guaranteed to be outside the available range of interrupts
  * and easy to distinguish from other possible incorrect values.
+ * (0x80000000 这个值可确保位于可用中断范围之外，并且能轻松与其他可能的错误值区分开来)
  */
 #define IRQ_NOTCONNECTED	(1U << 31)
 
+/**
+ * 为什么会有这个? 先有 request_irq ， 再有request_threaded_irq
+ * > [Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#第2章　中断管理
+ * 
+ * 线程化的中断注册函数
+ * 
+ * 中断线程化是实时Linux项目开发的一个新特性，目的是降低中断处理对系统实时延迟的影响
+ * 
+ * 中断线程化的目的是把中断处理中一些繁重的任务作为内核线程来运行，
+ * 实时进程可以比中断线程有更高的优先级。这样高优先级的实时进程可以得到优先处理，实时进程的延迟粒度小得多。
+ * 当然，并不是所有的中断都可以线程化，如时钟中断。
+ * 
+ * @param thread_fn 中断线程化的处理程序。如果thread_fn不为NULL，那么会创建一个内核线程。primary handler和thread_fn不能同时为NULL
+ * @param handler：指主处理程序，有点类似于旧版本接口函数request_irq()的中断处理程序。
+ *                 中断发生时会优先执行主处理程序。如果主处理程序为NULL且thread_fn不为NULL，
+ *                 那么会执行系统默认的主处理程序——irq_default_primary_handler()函数。
+ */
 extern int __must_check
 request_threaded_irq(unsigned int irq, irq_handler_t handler,
 		     irq_handler_t thread_fn,
 		     unsigned long flags, const char *name, void *dev);
 
 /**
- * request_irq - Add a handler for an interrupt line
+ * request_irq - Add a handler for an interrupt line 
+ *              (注册中断处理程序)
  * @irq:	The interrupt line to allocate
  * @handler:	Function to be called when the IRQ occurs.
  *		Primary handler for threaded interrupts
