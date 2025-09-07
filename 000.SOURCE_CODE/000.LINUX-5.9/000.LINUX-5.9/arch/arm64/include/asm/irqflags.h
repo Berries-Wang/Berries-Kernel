@@ -62,8 +62,15 @@ static inline void arch_local_irq_disable(void)
 		: "memory");
 }
 
-/*
+/**
+ * 
+ * 汇编代码怎么读？
+ *  > [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#1.5　GCC内联汇编
+ * 
  * Save the current interrupt enable state.
+ * 
+ * 内存破坏标记：
+ *    "memory"：告诉编译器内存可能被修改，防止优化。
  */
 static inline unsigned long arch_local_save_flags(void)
 {

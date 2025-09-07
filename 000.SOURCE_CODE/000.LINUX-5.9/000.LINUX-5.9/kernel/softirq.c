@@ -52,6 +52,9 @@ DEFINE_PER_CPU_ALIGNED(irq_cpustat_t, irq_stat);
 EXPORT_PER_CPU_SYMBOL(irq_stat);
 #endif
 
+/**
+ * 每个软中断类型对应一个描述符，其中软中断的索引号就是该数组的索引
+ */
 static struct softirq_action softirq_vec[NR_SOFTIRQS] __cacheline_aligned_in_smp;
 
 DEFINE_PER_CPU(struct task_struct *, ksoftirqd);
@@ -498,6 +501,14 @@ struct tasklet_head {
 	struct tasklet_struct **tail;
 };
 
+/**
+ * 每个CPU维护两个tasklet链表，
+ *     一个用于普通优先级的tasklet_vec，
+ *     另一个用于高优先级的tasklet_hi_vec，它们都是Per-CPU变量
+ * 
+ * tasklet_vec使用软中断中的TASKLET_SOFTIRQ类型，它的优先级是6；
+ * 而tasklet_hi_vec使用软中断中的HI_SOFTIRQ，优先级是0，是所有软中断中优先级最高的
+ */
 static DEFINE_PER_CPU(struct tasklet_head, tasklet_vec);
 static DEFINE_PER_CPU(struct tasklet_head, tasklet_hi_vec);
 

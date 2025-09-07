@@ -14,12 +14,18 @@
 
 struct worker_pool;
 
-/*
+/**
+ * 工作线程，即 处理 'struct work_struct ' 工作项
+ * 
  * The poor guys doing the actual heavy lifting.  All on-duty workers are
  * either serving the manager role, on idle list or on busy hash.  For
  * details on the locking annotation (L, I, X...), refer to workqueue.c.
+ * (这些辛苦干活的实际劳动力（The poor guys doing the actual heavy lifting）。
+ * 所有在岗工作线程（workers）要么担任管理者角色（manager role），
+ * 要么位于空闲列表（idle list）或忙碌哈希表（busy hash）中。关于锁注解（L, I, X...）的详细信息，请参阅workqueue.c。)
  *
  * Only to be used in workqueue and async.
+ * (仅限在工作队列（workqueue）和异步处理（async）中使用)
  */
 struct worker {
 	/* on idle list while idle, on busy hash table while busy */

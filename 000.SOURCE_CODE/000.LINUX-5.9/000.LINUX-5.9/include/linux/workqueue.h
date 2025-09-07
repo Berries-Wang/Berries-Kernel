@@ -99,10 +99,17 @@ enum {
 	WORKER_DESC_LEN		= 24,
 };
 
+/**
+ * 工作项
+ */
 struct work_struct {
-	atomic_long_t data;
-	struct list_head entry;
-	work_func_t func;
+	/**
+	 * 低位部分是work的标志位，剩余的位通常用于存放上一次运行的worker_pool的ID或pool_workqueue的指针，
+	 * 存放的内容由WORK_STRUCT_PWQ标志位来决定
+	 */
+	atomic_long_t data;            
+	struct list_head entry;       // 用于将工作项挂载到其他链表上
+	work_func_t func;            // 工作项的处理函数
 #ifdef CONFIG_LOCKDEP
 	struct lockdep_map lockdep_map;
 #endif
