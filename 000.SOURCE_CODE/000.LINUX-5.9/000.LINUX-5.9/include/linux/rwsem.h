@@ -51,6 +51,8 @@ struct rw_semaphore {
 	 * (写出所有者或其中一位读取所有者以及关于rwsem当前状态的标志。可用作推测性检查，以判断写入所有者是否正在该CPU上运行。)
 	 * 
 	 * 当写者成功获取锁时，owner指向锁持有者的task_struct数据结构
+	 * 
+	 * 最后三位是有特殊意义的: RWSEM_READER_OWNED RWSEM_RD_NONSPINNABLE RWSEM_WR_NONSPINNABLE
 	 */
 	atomic_long_t owner;
 #ifdef CONFIG_RWSEM_SPIN_ON_OWNER

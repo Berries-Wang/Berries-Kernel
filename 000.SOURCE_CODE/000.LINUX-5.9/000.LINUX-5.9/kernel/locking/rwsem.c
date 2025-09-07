@@ -30,7 +30,7 @@
 
 #include "lock_events.h"
 
-/*
+/**
  * The least significant 3 bits of the owner value has the following
  * meanings when set.
  *  - Bit 0: RWSEM_READER_OWNED - The rwsem is owned by readers
@@ -53,6 +53,9 @@
  * On unlock, the owner field will largely be left untouched. So
  * for a free or reader-owned rwsem, the owner value may contain
  * information about the last reader that acquires the rwsem.
+ * (当读取者获取rwsem时，会将其task_struct指针与RWSEM_READER_OWNED位一同设置到owner字段中。
+ * 在解锁时，owner字段将基本保持原状。因此对于空闲状态或由读取者持有的rwsem，
+ * 其owner值可能包含最近一个成功获取该rwsem的读取者信息。)
  *
  * That information may be helpful in debugging cases where the system
  * seems to hang on a reader owned rwsem especially if only one reader
@@ -276,6 +279,10 @@ static inline void rwsem_set_nonspinnable(struct rw_semaphore *sem)
 static inline bool rwsem_read_trylock(struct rw_semaphore *sem)
 {
 	long cnt = atomic_long_add_return_acquire(RWSEM_READER_BIAS, &sem->count);
+	/**
+	 * <0? 何意?
+	 * 在本文件中搜索 "No reader wakeup if there are too many of them already."
+	 */
 	if (WARN_ON_ONCE(cnt < 0)) {
 		rwsem_set_nonspinnable(sem);
 	}
@@ -1036,7 +1043,7 @@ rwsem_spin_on_owner(struct rw_semaphore *sem, unsigned long nonspinnable)
 #endif
 
 /*
- * Wait for the read lock to be granted
+ * Wait for the read lock to be granted(获取)
  */
 static struct rw_semaphore __sched *
 rwsem_down_read_slowpath(struct rw_semaphore *sem, int state)
@@ -1046,19 +1053,25 @@ rwsem_down_read_slowpath(struct rw_semaphore *sem, int state)
 	DEFINE_WAKE_Q(wake_q);
 	bool wake = false;
 
-	/*
+	/**
 	 * Save the current read-owner of rwsem, if available, and the
 	 * reader nonspinnable bit.
+	 * (保存当前rwsem的读取所有者（如果可用）以及读取者不可旋转位。)
 	 */
 	waiter.last_rowner = atomic_long_read(&sem->owner);
-	if (!(waiter.last_rowner & RWSEM_READER_OWNED))
+	if (!(waiter.last_rowner & RWSEM_READER_OWNED)) { // 不是读锁，那就不要自旋
 		waiter.last_rowner &= RWSEM_RD_NONSPINNABLE;
+	}
 
-	if (!rwsem_can_spin_on_owner(sem, RWSEM_RD_NONSPINNABLE))
+	if (!rwsem_can_spin_on_owner(sem, RWSEM_RD_NONSPINNABLE)) {
 		goto queue;
+	}
 
-	/*
+	/**
 	 * Undo read bias from down_read() and do optimistic spinning.
+	 * (撤销来自 down_read() 的读取偏向并执行乐观自旋)
+	 * 
+	 * 因为在 ‘rwsem_read_trylock’ 中加了一个 'RWSEM_READER_BIAS'?
 	 */
 	atomic_long_add(-RWSEM_READER_BIAS, &sem->count);
 	adjustment = 0;
@@ -1070,9 +1083,9 @@ rwsem_down_read_slowpath(struct rw_semaphore *sem, int state)
 		 */
 		if ((atomic_long_read(&sem->count) & RWSEM_FLAG_WAITERS)) {
 			raw_spin_lock_irq(&sem->wait_lock);
-			if (!list_empty(&sem->wait_list))
-				rwsem_mark_wake(sem, RWSEM_WAKE_READ_OWNED,
-						&wake_q);
+			if (!list_empty(&sem->wait_list)) {
+				rwsem_mark_wake(sem, RWSEM_WAKE_READ_OWNED, &wake_q);
+			}
 			raw_spin_unlock_irq(&sem->wait_lock);
 			wake_up_q(&wake_q);
 		}
