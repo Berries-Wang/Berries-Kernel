@@ -108,7 +108,7 @@ enum {
 	WQ_NAME_LEN		= 24,
 };
 
-/*
+/**
  * Structure fields follow one of the following exclusion rules.
  *
  * I: Modifiable by initialization/destruction paths and read-only for
@@ -143,22 +143,24 @@ enum {
  */
 
 /* struct worker is defined in workqueue_internal.h */
-
+/**
+ * 工作线程池
+ */
 struct worker_pool {
-	raw_spinlock_t		lock;		/* the pool lock */
-	int			cpu;		/* I: the associated cpu */
-	int			node;		/* I: the associated node ID */
-	int			id;		/* I: pool ID */
+	raw_spinlock_t		lock;		/* the pool lock  用于保护工作线程池的自旋锁*/
+	int			cpu;		/* I: the associated cpu  对于BOUND类型的工作队列，cpu表示绑定的CPU ID；对于UNBOUND类型的工作线程池，该值为−1*/
+	int			node;		/* I: the associated node ID  对于UNBOUND类型的工作队列，node表示该工作线程池所属内存节点的ID*/
+	int			id;		/* I: pool ID  该工作线程池的ID*/
 	unsigned int		flags;		/* X: flags */
 
 	unsigned long		watchdog_ts;	/* L: watchdog timestamp */
 
-	struct list_head	worklist;	/* L: list of pending works */
+	struct list_head	worklist;	/* L: list of pending works  处于pending状态的work会挂入该链表中*/
 
-	int			nr_workers;	/* L: total number of workers */
-	int			nr_idle;	/* L: currently idle workers */
+	int			nr_workers;	/* L: total number of workers  工作线程的数量*/
+	int			nr_idle;	/* L: currently idle workers  处于idle状态的工作线程的数量*/
 
-	struct list_head	idle_list;	/* X: list of idle workers */
+	struct list_head	idle_list;	/* X: list of idle workers  处于idle状态的工作线程会挂入该链表中*/
 	struct timer_list	idle_timer;	/* L: worker idle timeout */
 	struct timer_list	mayday_timer;	/* L: SOS timer for workers */
 
@@ -167,34 +169,43 @@ struct worker_pool {
 						/* L: hash of busy workers */
 
 	struct worker		*manager;	/* L: purely informational */
-	struct list_head	workers;	/* A: attached workers */
+	struct list_head	workers;	/* A: attached workers  该工作线程池管理的工作线程会挂入该链表中*/
 	struct completion	*detach_completion; /* all workers detached */
 
 	struct ida		worker_ida;	/* worker IDs for task name */
 
-	struct workqueue_attrs	*attrs;		/* I: worker attributes */
+	struct workqueue_attrs	*attrs;		/* I: worker attributes  工作线程的属性*/
 	struct hlist_node	hash_node;	/* PL: unbound_pool_hash node */
 	int			refcnt;		/* PL: refcnt for unbound pools */
 
-	/*
+	/**
 	 * The current concurrency level.  As it's likely to be accessed
 	 * from other CPUs during try_to_wake_up(), put it in a separate
 	 * cacheline.
+	 * 
+	 * 计数值，用于管理worker的创建和销毁，表示正在运行中的worker数量。在进程调度器中唤醒进程（使用try_to_wake_up()）时，
+	 * 其他CPU可能会同时访问该成员，该成员频繁在多核之间读写，
+	 * 因此让该成员独占一个缓冲行，避免多核CPU在读写该成员时引发其他临近的成员“颠簸”现象，这也是所谓的“缓存行伪共享”的问题
 	 */
 	atomic_t		nr_running ____cacheline_aligned_in_smp;
 
-	/*
+	/**
 	 * Destruction of pool is RCU protected to allow dereferences
 	 * from get_work_pool().
+	 * (池的销毁受RCU保护，以便允许从get_work_pool()进行解引用)
+	 * RCU锁
 	 */
 	struct rcu_head		rcu;
 } ____cacheline_aligned_in_smp;
 
-/*
+/**
  * The per-pool workqueue.  While queued, the lower WORK_STRUCT_FLAG_BITS
  * of work_struct->data are used for flags and the remaining high bits
  * point to the pwq; thus, pwqs need to be aligned at two's power of the
  * number of flag bits.
+ * 
+ * 连接工作队列和工作线程池的枢纽
+ * 
  */
 struct pool_workqueue {
 	struct worker_pool	*pool;		/* I: the associated pool */
@@ -231,13 +242,14 @@ struct wq_flusher {
 
 struct wq_device;
 
-/*
+/**
  * The externally visible workqueue.  It relays the issued work items to
  * the appropriate worker_pool through its pool_workqueues.
+ * (外部可见的工作队列（workqueue）。它通过其池工作队列（pool_workqueues）将提交的工作项传递到相应的工作线程池（worker_pool）。)
  */
 struct workqueue_struct {
-	struct list_head	pwqs;		/* WR: all pwqs of this wq */
-	struct list_head	list;		/* PR: list of all workqueues */
+	struct list_head	pwqs;		/* WR: all pwqs of this wq  所有的pool-workqueue数据结构都挂入链表中*/
+	struct list_head	list;		/* PR: list of all workqueues  链表节点。系统定义一个全局的链表工作队列，所有的工作队列挂入该链表*/
 
 	struct mutex		mutex;		/* protects this wq */
 	int			work_color;	/* WQ: current work color */
@@ -247,14 +259,14 @@ struct workqueue_struct {
 	struct list_head	flusher_queue;	/* WQ: flush waiters */
 	struct list_head	flusher_overflow; /* WQ: flush overflow list */
 
-	struct list_head	maydays;	/* MD: pwqs requesting rescue */
-	struct worker		*rescuer;	/* MD: rescue worker */
+	struct list_head	maydays;	/* MD: pwqs requesting rescue  所有rescuer状态下的pool-workqueue数据结构挂入该链表*/
+	struct worker		*rescuer;	/* MD: rescue worker  rescuer工作线程。内存紧张时创建新的工作线程可能会失败，如果创建工作队列时设置了WQ_MEM_RECLAIM标志位，那么rescuer工作线程会接管这种情况*/
 
 	int			nr_drainers;	/* WQ: drain in progress */
 	int			saved_max_active; /* WQ: saved pwq max_active */
 
-	struct workqueue_attrs	*unbound_attrs;	/* PW: only for unbound wqs */
-	struct pool_workqueue	*dfl_pwq;	/* PW: only for unbound wqs */
+	struct workqueue_attrs	*unbound_attrs;	/* PW: only for unbound wqs  UNBOUND类型的属性*/
+	struct pool_workqueue	*dfl_pwq;	/* PW: only for unbound wqs  指向UNBOUND类型的pool_workqueue*/
 
 #ifdef CONFIG_SYSFS
 	struct wq_device	*wq_dev;	/* I: for sysfs interface */
@@ -264,7 +276,7 @@ struct workqueue_struct {
 	struct lock_class_key	key;
 	struct lockdep_map	lockdep_map;
 #endif
-	char			name[WQ_NAME_LEN]; /* I: workqueue name */
+	char			name[WQ_NAME_LEN]; /* I: workqueue name  该工作队列的名字*/
 
 	/*
 	 * Destruction of workqueue_struct is RCU protected to allow walking
@@ -274,8 +286,11 @@ struct workqueue_struct {
 	struct rcu_head		rcu;
 
 	/* hot fields used during command issue, aligned to cacheline */
+	/**
+	 * 标志位经常被不同CPU访问，因此要和缓存行对齐。标志位包括WQ_UNBOUND、WQ_HIGHPRI、WQ_FREEZABLE等
+	 */
 	unsigned int		flags ____cacheline_aligned; /* WQ: WQ_* flags */
-	struct pool_workqueue __percpu *cpu_pwqs; /* I: per-cpu pwqs */
+	struct pool_workqueue __percpu *cpu_pwqs; /* I: per-cpu pwqs  指向Per-CPU类型的pool_workqueue*/
 	struct pool_workqueue __rcu *numa_pwq_tbl[]; /* PWR: unbound pwqs indexed by node */
 };
 
@@ -325,8 +340,12 @@ static bool wq_debug_force_rr_cpu = false;
 #endif
 module_param_named(debug_force_rr_cpu, wq_debug_force_rr_cpu, bool, 0644);
 
-/* the per-cpu worker pools */
-static DEFINE_PER_CPU_SHARED_ALIGNED(struct worker_pool [NR_STD_WORKER_POOLS], cpu_worker_pools);
+/** the per-cpu worker pools 
+ * 
+ * 工作线程池是Per-CPU类型的概念，每个CPU都有工作线程池。准确地说，每个CPU有两个工作线程池，一个用于普通优先级的工作线程，另一个用于高优先级的工作线程。
+ * 
+*/
+static DEFINE_PER_CPU_SHARED_ALIGNED(struct worker_pool[NR_STD_WORKER_POOLS], cpu_worker_pools);
 
 static DEFINE_IDR(worker_pool_idr);	/* PR: idr of all pools */
 
@@ -5902,7 +5921,7 @@ static void __init wq_numa_init(void)
 }
 
 /**
- * workqueue_init_early - early init for workqueue subsystem
+ * workqueue_init_early - early init for workqueue subsystem(工作队列子系统初始化)
  *
  * This is the first half of two-staged workqueue subsystem initialization
  * and invoked as soon as the bare basics - memory allocation, cpumasks and
@@ -5910,6 +5929,11 @@ static void __init wq_numa_init(void)
  * and allows early boot code to create workqueues and queue/cancel work
  * items.  Actual work item execution starts only after kthreads can be
  * created and scheduled right before early initcalls.
+ * (这是工作队列子系统两阶段初始化的前半部分，在内存分配、cpumask和idr等基础功能就绪后立即调用。
+ * 此阶段会建立所有数据结构与系统工作队列，使早期启动代码能够创建工作队列并执行工作项的入队/取消操作。
+ * 实际的工作项执行需等到早期initcall之前、内核线程可被创建和调度时才会启动)
+ * 
+ * 该函数执行完成，工作项并不能理解执行
  */
 void __init workqueue_init_early(void)
 {
