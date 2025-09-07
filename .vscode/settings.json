@@ -18,6 +18,7 @@
         "cache.h": "c",
         "byteorder.h": "c",
         "atomic": "c",
-        "006.print_bits.h": "c"
+        "006.print_bits.h": "c",
+        "compiler.h": "c"
     }
 }
