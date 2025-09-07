@@ -118,7 +118,7 @@
 # define DEBUG_RWSEMS_WARN_ON(c, sem)
 #endif
 
-/*
+/**
  * On 64-bit architectures, the bit definitions of the count are:
  *
  * Bit  0    - writer locked bit
@@ -126,7 +126,7 @@
  * Bit  2    - lock handoff bit
  * Bits 3-7  - reserved
  * Bits 8-62 - 55-bit reader count
- * Bit  63   - read fail bit
+ * Bit  63   - read fail bit  (溢出？，有可能：atomic_long_fetch_add用来获取读锁)
  *
  * On 32-bit architectures, the bit definitions of the count are:
  *
@@ -141,8 +141,11 @@
  * be set. This guard bit is still checked anyway in the down_read() fastpath
  * just in case we need to use up more of the reader bits for other purpose
  * in the future.
+ * (最高有效位（读取失败位）被设置的可能性极小。但在 down_read() 快路径中仍会检查该保护位，
+ * 以备将来需要将更多读者位用于其他用途。)
  *
  * atomic_long_fetch_add() is used to obtain reader lock, whereas
+ *      (atomic_long_fetch_add() 用于获取读锁，而)
  * atomic_long_cmpxchg() will be used to obtain writer lock.
  *
  * There are three places where the lock handoff bit may be set or cleared.
