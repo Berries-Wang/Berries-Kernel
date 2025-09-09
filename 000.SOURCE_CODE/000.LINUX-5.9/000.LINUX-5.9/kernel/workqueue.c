@@ -5945,7 +5945,7 @@ void __init workqueue_init_early(void)
 
 	BUG_ON(!alloc_cpumask_var(&wq_unbound_cpumask, GFP_KERNEL));
 	cpumask_copy(wq_unbound_cpumask, housekeeping_cpumask(hk_flags));
-
+    // 注意! 创建pool_workqueue的slab缓存对象
 	pwq_cache = KMEM_CACHE(pool_workqueue, SLAB_PANIC);
 
 	/* initialize CPU pools */
@@ -5953,6 +5953,7 @@ void __init workqueue_init_early(void)
 		struct worker_pool *pool;
 
 		i = 0;
+		// 为每个CPU都创建两个工作线程池
 		for_each_cpu_worker_pool(pool, cpu) {
 			BUG_ON(init_worker_pool(pool));
 			pool->cpu = cpu;
