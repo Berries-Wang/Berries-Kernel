@@ -145,6 +145,9 @@ enum {
 /* struct worker is defined in workqueue_internal.h */
 /**
  * 工作线程池
+ * 
+ * 工作线程池是系统共享的，因此工作队列需要查找到一个合适的工作线程池，
+ * 然后从工作线程池中分派一个合适的工作线程，pool_workqueue数据结构在其中起到桥梁作用
  */
 struct worker_pool {
 	raw_spinlock_t		lock;		/* the pool lock  用于保护工作线程池的自旋锁*/
@@ -205,6 +208,7 @@ struct worker_pool {
  * number of flag bits.
  * 
  * 连接工作队列和工作线程池的枢纽
+ * > 这不就有点像JDK中的线程池吗，管理工作线程和任务
  * 
  */
 struct pool_workqueue {

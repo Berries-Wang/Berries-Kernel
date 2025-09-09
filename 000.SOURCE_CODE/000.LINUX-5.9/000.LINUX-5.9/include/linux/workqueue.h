@@ -253,6 +253,9 @@ static inline unsigned int work_static(struct work_struct *work) { return 0; }
 	} while (0)
 #endif
 
+/**
+ * 初始化一个work
+ */
 #define INIT_WORK(_work, _func)						\
 	__INIT_WORK((_work), (_func), 0)
 
@@ -348,7 +351,7 @@ enum {
 	WQ_POWER_EFFICIENT	= 1 << 7,
 
 	__WQ_DRAINING		= 1 << 16, /* internal: workqueue is draining */
-	__WQ_ORDERED		= 1 << 17, /* internal: workqueue is ordered */
+	__WQ_ORDERED		= 1 << 17, /* internal: workqueue is ordered (串行执行)*/
 	__WQ_LEGACY		= 1 << 18, /* internal: create*_workqueue() */
 	__WQ_ORDERED_EXPLICIT	= 1 << 19, /* internal: alloc_ordered_workqueue() */
 
@@ -401,7 +404,7 @@ extern struct workqueue_struct *system_freezable_power_efficient_wq;
  * alloc_workqueue - allocate a workqueue
  * @fmt: printf format for the name of the workqueue
  * @flags: WQ_* flags
- * @max_active: max in-flight work items, 0 for default
+ * @max_active: max in-flight work items, 0 for default (每个CPU最多可以把多少个work挂入一个工作队列)
  * remaining args: args for @fmt
  *
  * Allocate a workqueue with the specified parameters.  For detailed
@@ -427,6 +430,8 @@ struct workqueue_struct *alloc_workqueue(const char *fmt,
  *
  * RETURNS:
  * Pointer to the allocated workqueue on success, %NULL on failure.
+ * 
+ * WQ_UNBOUND：work会加入UNBOUND工作队列中，UNBOUND工作队列的工作线程没有绑定到具体的CPU上
  */
 #define alloc_ordered_workqueue(fmt, flags, args...)			\
 	alloc_workqueue(fmt, WQ_UNBOUND | __WQ_ORDERED |		\
@@ -434,9 +439,12 @@ struct workqueue_struct *alloc_workqueue(const char *fmt,
 
 #define create_workqueue(name)						\
 	alloc_workqueue("%s", __WQ_LEGACY | WQ_MEM_RECLAIM, 1, (name))
+
 #define create_freezable_workqueue(name)				\
 	alloc_workqueue("%s", __WQ_LEGACY | WQ_FREEZABLE | WQ_UNBOUND |	\
 			WQ_MEM_RECLAIM, 1, (name))
+
+
 #define create_singlethread_workqueue(name)				\
 	alloc_ordered_workqueue("%s", __WQ_LEGACY | WQ_MEM_RECLAIM, name)
 
@@ -486,7 +494,7 @@ extern void show_workqueue_state(void);
 extern void wq_worker_comm(char *buf, size_t size, struct task_struct *task);
 
 /**
- * queue_work - queue work on a workqueue
+ * queue_work - queue work on a workqueue (将初始化好的work添加到指定的工作队列中)
  * @wq: workqueue to use
  * @work: work to queue
  *
@@ -557,7 +565,7 @@ static inline bool schedule_work_on(int cpu, struct work_struct *work)
 }
 
 /**
- * schedule_work - put work task in global workqueue
+ * schedule_work - put work task in global workqueue (将初始化好的work挂入系统默认的工作队列中)
  * @work: job to be done
  *
  * Returns %false if @work was already on the kernel-global workqueue and
