@@ -5922,6 +5922,7 @@ static void __init wq_numa_init(void)
 
 /**
  * workqueue_init_early - early init for workqueue subsystem(工作队列子系统初始化)
+ * > workqueue_init 创建工作线程
  *
  * This is the first half of two-staged workqueue subsystem initialization
  * and invoked as soon as the bare basics - memory allocation, cpumasks and
@@ -5953,7 +5954,7 @@ void __init workqueue_init_early(void)
 		struct worker_pool *pool;
 
 		i = 0;
-		// 为每个CPU都创建两个工作线程池
+		// 为每个CPU都创建两个工作线程池 , for_each_cpu_worker_pool 是遍历两个工作线程池的宏
 		for_each_cpu_worker_pool(pool, cpu) {
 			BUG_ON(init_worker_pool(pool));
 			pool->cpu = cpu;
@@ -5972,18 +5973,24 @@ void __init workqueue_init_early(void)
 	for (i = 0; i < NR_STD_WORKER_POOLS; i++) {
 		struct workqueue_attrs *attrs;
 
+		// unbound属性
 		BUG_ON(!(attrs = alloc_workqueue_attrs()));
 		attrs->nice = std_nice[i];
 		unbound_std_wq_attrs[i] = attrs;
 
-		/*
+		/**
+		 * ordered属性,ordered类型的工作队列表示同一个时刻只能有一个work在运行
+		 * 
 		 * An ordered wq should have only one pwq as ordering is
 		 * guaranteed by max_active which is enforced by pwqs.
 		 * Turn off NUMA so that dfl_pwq is used for all nodes.
+		 * (一个有序的工作队列（wq）应该只有一个池工作队列（pwq），因为排序是由max_active保证的，
+		 * 而该参数由pwq强制执行。关闭NUMA功能，以便所有节点都使用默认池工作队列（dfl_pwq）)
 		 */
 		BUG_ON(!(attrs = alloc_workqueue_attrs()));
 		attrs->nice = std_nice[i];
 		attrs->no_numa = true;
+		// ordered ordered类型的工作队列属性?
 		ordered_wq_attrs[i] = attrs;
 	}
 
@@ -6006,13 +6013,16 @@ void __init workqueue_init_early(void)
 }
 
 /**
- * workqueue_init - bring workqueue subsystem fully online
+ * workqueue_init - bring workqueue subsystem fully online( 使工作队列子系统完全上线)
  *
  * This is the latter half of two-staged workqueue subsystem initialization
  * and invoked as soon as kthreads can be created and scheduled.
  * Workqueues have been created and work items queued on them, but there
  * are no kworkers executing the work items yet.  Populate the worker pools
  * with the initial workers and enable future kworker creations.
+ * (这是工作队列子系统两阶段初始化的后半部分，只要内核线程(kthread)能够被创建和调度就会立即调用。
+ * 此时工作队列已创建完毕，工作项也已加入队列，但尚未有工作者线程(kworker)执行这些工作项。
+ * 我们需要用初始工作者线程填充工作者池，并启用后续工作者线程的创建功能。)
  */
 void __init workqueue_init(void)
 {
@@ -6026,8 +6036,12 @@ void __init workqueue_init(void)
 	 * archs such as power and arm64.  As per-cpu pools created
 	 * previously could be missing node hint and unbound pools NUMA
 	 * affinity, fix them up.
+	 * (在workqueue_init_early()阶段初始化NUMA会更简单，但对于某些架构（如power和arm64），
+	 * CPU与节点的映射关系可能无法在早期获取。
+	 * 由于先前创建的每CPU池可能缺少节点提示，且未绑定池缺乏NUMA亲和性，现在需要对它们进行修复。)
 	 *
 	 * Also, while iterating workqueues, create rescuers if requested.
+	 * (此外，在遍历工作队列时，如果收到请求则创建救援线程)
 	 */
 	wq_numa_init();
 
