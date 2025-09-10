@@ -53,6 +53,16 @@
 
 #include "workqueue_internal.h"
 
+
+/**
+ * workqueue_struct 、pool_workqueue、worker_pool 三者之间是什么关系呢?
+ * [Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#▲图2.9　工作队列、工作线程池和pool_workqueue之间的关系
+ * 1. 对于BOUND类型的工作队列，每个CPU只有两个工作线程池，每个工作线程池可以和多个工作队列对应，每个工作队列也只能对应这几个工作线程池
+ *    > 注意，是BOUND类型
+ * 
+ * 
+ */
+
 enum {
 	/*
 	 * worker_pool flags
@@ -5955,11 +5965,13 @@ void __init workqueue_init_early(void)
 
 	/* initialize CPU pools */
 	for_each_possible_cpu(cpu) {
+		// 这只是个变量名，具体的赋值在 'for_each_cpu_worker_pool' 宏内
 		struct worker_pool *pool;
 
 		i = 0;
 		// 为每个CPU都创建两个工作线程池 , for_each_cpu_worker_pool 是遍历两个工作线程池的宏
 		for_each_cpu_worker_pool(pool, cpu) {
+			// 初始化worker_poll
 			BUG_ON(init_worker_pool(pool));
 			pool->cpu = cpu;
 			cpumask_copy(pool->attrs->cpumask, cpumask_of(cpu));
