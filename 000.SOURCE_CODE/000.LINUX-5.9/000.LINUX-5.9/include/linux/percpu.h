@@ -139,6 +139,10 @@ extern phys_addr_t per_cpu_ptr_to_phys(void *addr);
 #define alloc_percpu_gfp(type, gfp)					\
 	(typeof(type) __percpu *)__alloc_percpu_gfp(sizeof(type),	\
 						__alignof__(type), gfp)
+
+/**
+ * 多次 alloc_percpu() 调用返回的句柄，对同一个CPU	也指向不同的内存	每次调用都创建了一个全新的、独立的每CPU数据集
+ */
 #define alloc_percpu(type)						\
 	(typeof(type) __percpu *)__alloc_percpu(sizeof(type),		\
 						__alignof__(type))

@@ -36,6 +36,9 @@ struct worker {
 
 	struct work_struct	*current_work;	/* L: work being processed  当前正在处理的工作*/
 	work_func_t		current_func;	/* L: current_work's fn  当前正在执行的work回调函数*/
+	/**
+	 * 可能下一段时间就属于其他的pool_workqueue了?
+	 */
 	struct pool_workqueue	*current_pwq; /* L: current_work's pwq 当前work所属的pool_workqueue*/
 	struct list_head	scheduled;	/* L: scheduled works  所有被调度并正准备执行的work都挂入该链表中*/
 

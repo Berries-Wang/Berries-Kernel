@@ -502,6 +502,7 @@ extern void wq_worker_comm(char *buf, size_t size, struct task_struct *task);
  *
  * We queue the work to the CPU on which it was submitted, but if the CPU dies
  * it can be processed by another CPU.
+ * (我们将工作提交到其所在的CPU队列中，但如果该CPU出现故障，可以由另一个CPU处理。)
  *
  * Memory-ordering properties:  If it returns %true, guarantees that all stores
  * preceding the call to queue_work() in the program order will be visible from
