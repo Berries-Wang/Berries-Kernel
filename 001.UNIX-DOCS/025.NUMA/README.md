@@ -58,6 +58,8 @@ Vulnerabilities:
 ## NUMA 和物理CPU 内存节点的关系
 ![NUMA](./999.IMGS/Screenshot%202025-09-12%20at%2008-03-39%20一个%20---%20NUMA.png)
 
+![NUMS](./999.IMGS/Screenshot_2025-09-12NUMA.png)
+
 
 ## 参考资料
 - [https://learn.arm.com/learning-paths/servers-and-cloud-computing/tune-network-workloads-on-bare-metal/4_local-numa/](https://learn.arm.com/learning-paths/servers-and-cloud-computing/tune-network-workloads-on-bare-metal/4_local-numa/)
