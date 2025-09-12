@@ -1,7 +1,7 @@
 # NUMA
 
 
-## R5-5700G 16G*2
+## R7-5700G 16G*2
 ```shell
 wei@Berries:~/OPEN_SOURCE/Berries-Chat$ lscpu 
 Architecture:             x86_64
