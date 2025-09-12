@@ -304,6 +304,11 @@ struct workqueue_struct {
 	 * 标志位经常被不同CPU访问，因此要和缓存行对齐。标志位包括WQ_UNBOUND、WQ_HIGHPRI、WQ_FREEZABLE等
 	 */
 	unsigned int		flags ____cacheline_aligned; /* WQ: WQ_* flags */
+	/**
+	 * cpu_pwqs numa_pwq_tbl 区别是啥?
+	 * 同时优化两种不同的需求：1） CPU 本地性（性能） 和 2） NUMA 节点本地性（性能与正确性） ???
+	 * 
+	 */
 	struct pool_workqueue __percpu *cpu_pwqs; /* I: per-cpu pwqs  指向Per-CPU类型的pool_workqueue*/
 	struct pool_workqueue __rcu *numa_pwq_tbl[]; /* PWR: unbound pwqs indexed by node */
 };
@@ -604,6 +609,7 @@ static struct pool_workqueue *unbound_pwq_by_node(struct workqueue_struct *wq,
 	if (unlikely(node == NUMA_NO_NODE))
 		return wq->dfl_pwq;
 
+	// 这个wq->numa_pwq_tbl 就是在workqueue_init中为该work_queue创建的pool_workqueue
 	return rcu_dereference_raw(wq->numa_pwq_tbl[node]);
 }
 
@@ -1549,12 +1555,13 @@ out:
 
 /**
  * queue_work_on - queue work on specific cpu
- * @cpu: CPU number to execute work on
+ * 
+ * @cpu: CPU number to execute work on (执行工作的CPU编号)
  * @wq: workqueue to use
  * @work: work to queue
  *
  * We queue the work to a specific CPU, the caller must ensure it
- * can't go away.
+ * can't go away.(我们将工作队列分配给特定的CPU，调用者必须确保该CPU不会失效。)
  *
  * Return: %false if @work was already on a queue, %true otherwise.
  */
@@ -5940,10 +5947,11 @@ static void __init wq_numa_init(void)
 	wq_update_unbound_numa_attrs_buf = alloc_workqueue_attrs();
 	BUG_ON(!wq_update_unbound_numa_attrs_buf);
 
-	/*
+	/**
 	 * We want masks of possible CPUs of each node which isn't readily
 	 * available.  Build one from cpu_to_node() which should have been
 	 * fully initialized by now.
+	 * (我们需要每个节点可能CPU的掩码，但这并非现成可用。现在应该通过已经完成初始化的cpu_to_node()来构建一个。)
 	 */
 	tbl = kcalloc(nr_node_ids, sizeof(tbl[0]), GFP_KERNEL);
 	BUG_ON(!tbl);
