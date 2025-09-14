@@ -861,7 +861,7 @@ static struct worker *first_idle_worker(struct worker_pool *pool)
 }
 
 /**
- * wake_up_worker - wake up an idle worker
+ * wake_up_worker - wake up an idle worker(唤醒空闲的工作线程)
  * @pool: worker pool to wake worker from
  *
  * Wake up the first idle worker of @pool.
@@ -2284,15 +2284,19 @@ __acquires(&pool->lock)
 	if (unlikely(cpu_intensive))
 		worker_set_flags(worker, WORKER_CPU_INTENSIVE);
 
-	/*
+	/**
 	 * Wake up another worker if necessary.  The condition is always
 	 * false for normal per-cpu workers since nr_running would always
 	 * be >= 1 at this point.  This is used to chain execution of the
 	 * pending work items for WORKER_NOT_RUNNING workers such as the
 	 * UNBOUND and CPU_INTENSIVE ones.
+	 * (如有必要则唤醒其他工作线程。对于常规的每CPU工作线程而言，
+	 * 该条件始终不成立——因为此时nr_running的数值总会≥1。
+	 * 此机制主要用于串联执行处于WORKER_NOT_RUNNING状态（例如解绑型及CPU密集型工作线程）的待处理工作项)
 	 */
-	if (need_more_worker(pool))
+	if (need_more_worker(pool)) {
 		wake_up_worker(pool);
+	}
 
 	/*
 	 * Record the last pool and clear PENDING which should be the last
@@ -2306,7 +2310,7 @@ __acquires(&pool->lock)
 
 	lock_map_acquire(&pwq->wq->lockdep_map);
 	lock_map_acquire(&lockdep_map);
-	/*
+	/**
 	 * Strictly speaking we should mark the invariant state without holding
 	 * any locks, that is, before these two lock_map_acquire()'s.
 	 *
@@ -2414,6 +2418,9 @@ static void set_pf_worker(bool val)
  * work items regardless of their specific target workqueue.  The only
  * exception is work items which belong to workqueues with a rescuer which
  * will be explained in rescuer_thread().
+ * (工作线程函数。所有工作线程都属于一个worker_pool——可能是每CPU工作池或动态解绑的工作池。
+ * 这些工作线程处理所有工作项，无论其特定的目标工作队列是什么。
+ * 唯一的例外是属于带有救援器（rescuer）的工作队列的工作项，这将在rescuer_thread()中详细说明。)
  *
  * Return: 0
  */
@@ -2466,6 +2473,7 @@ recheck:
 	 */
 	worker_clr_flags(worker, WORKER_PREP | WORKER_REBOUND);
 
+	// 处理工作
 	do {
 		struct work_struct *work =
 			list_first_entry(&pool->worklist,
