@@ -1,5 +1,9 @@
 # NUMA
+## 传统SMP架构
+![Screenshot-SMP.png](./999.IMGS/Screenshot-SMP.png)
+多个CPU对于内存属于同一层级，所有的CPU都通过总线访问内存(Intel)，ARM是通过‘Exclusive accesses’ ，单都是需要进行加锁操作， 随着CPU的处理速度越来越快，这种方式会成为系统瓶颈。NUMA架构能更好地解决这个问题，提升系统性能.
 
+- X86_64: 目前的x86/x64的多核/多处理器系统是SMP结构，共享主存，内存是共享设备，多个处理器/核心要访问内存，首先要获得内存总线的控制权，任何时刻只有一个处理器/核心能获得内存总线的控制权，所以单就内存来说，不会出现多个处理器/核心同时访问一个内存地址的情况。但是每个处理器/核心可能有自己的cache（非共享的），所以，如果某个内存地址的数据在多个处理器/核心的cache中都存在的话，是可能出现并发读的情况，对于读写，或者写写的并发操作，处理器实现的cache一致性协议可以保证物理上不会出现真正的并发操作。
 
 ## R7-5700G 16G*2
 ```shell
@@ -58,7 +62,6 @@ Vulnerabilities:
 ## NUMA 和物理CPU 内存节点的关系
 ![NUMA](./999.IMGS/Screenshot%202025-09-12%20at%2008-03-39%20一个%20---%20NUMA.png)
 
-![NUMS](./999.IMGS/Screenshot_2025-09-12NUMA.png)
 
 
 ## 参考资料
@@ -66,3 +69,4 @@ Vulnerabilities:
 - [https://www.boost.org/doc/libs/1_89_0/libs/fiber/doc/html/fiber/numa.html](https://www.boost.org/doc/libs/1_89_0/libs/fiber/doc/html/fiber/numa.html)
 - [https://support.huaweicloud.com/usermanual-cce/cce_10_0425.html](https://support.huaweicloud.com/usermanual-cce/cce_10_0425.html)
 - [https://docs.redhat.com/zh-cn/documentation/openshift_container_platform/4.11/html/scalability_and_performance/cnf-numa-aware-scheduling](https://docs.redhat.com/zh-cn/documentation/openshift_container_platform/4.11/html/scalability_and_performance/cnf-numa-aware-scheduling)
+- [Berries-Kernel-NOTE/03.LINUX_NOTES/008.NUMA]
