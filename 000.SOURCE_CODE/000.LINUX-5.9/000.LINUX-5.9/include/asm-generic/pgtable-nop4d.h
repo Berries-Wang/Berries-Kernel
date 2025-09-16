@@ -33,8 +33,14 @@ static inline void pgd_clear(pgd_t *pgd)	{ }
  */
 #define set_pgd(pgdptr, pgdval)	set_p4d((p4d_t *)(pgdptr), (p4d_t) { pgdval })
 
+/**
+ * ARM64 在 Linux 5.12 之后引入了 5 级页表（LVA, Linear Virtual Address）支持，但默认情况下仍使用 4 级页表（PGD → PUD → PMD → PTE）
+ * 
+ *
+ */
 static inline p4d_t *p4d_offset(pgd_t *pgd, unsigned long address)
 {
+	// P4D 和 PGD 相同: 由于 ARM64 默认使用 4 级页表，p4d_t 实际上就是 pgd_t，所以直接返回 pgd
 	return (p4d_t *)pgd;
 }
 

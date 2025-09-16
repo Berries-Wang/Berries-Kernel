@@ -20,27 +20,44 @@
  */
 #define PCI_IO_SIZE		SZ_16M
 
-/*
- * VMEMMAP_SIZE - allows the whole linear region to be covered by
- *                a struct page array
- *
+/**
+ * VMEMMAP_SIZE - allows the whole linear region to be covered by a struct page array
+ *                 - (使得整个线性地址区域都能被一个 struct page 数组覆盖)
  * If we are configured with a 52-bit kernel VA then our VMEMMAP_SIZE
  * needs to cover the memory region from the beginning of the 52-bit
  * PAGE_OFFSET all the way to PAGE_END for 48-bit. This allows us to
  * keep a constant PAGE_OFFSET and "fallback" to using the higher end
  * of the VMEMMAP where 52-bit support is not available in hardware.
+ * 若内核配置为使用52位虚拟地址（VA），则我们的 VMEMMAP_SIZE 必须覆盖从52位 PAGE_OFFSET 起始直至48位 PAGE_END 的整个内存区域。这种设计使我们能够：
+ *   保持恒定的 PAGE_OFFSET 值 在硬件不支持52位地址时，自动"回退"到使用 VMEMMAP 区域的高端地址空间
+ * 
+ * 
+ * (_PAGE_END(VA_BITS_MIN) - PAGE_OFFSET) = (0xFFFF800000000000 - 0xFFFF000000000000) 
+ *  = 内核可管理的物理内存范围(线性映射区域的总大小（字节）)
+ * 
+ * >> (PAGE_SHIFT - STRUCT_PAGE_MAX_SHIFT)) = (2^12 / 2^6) = 2^(12-6) ， 因为进行移位操作，所以直接(12-6)
+ * = 表示一个物理页面可以存储多少个struct page
+ * 
+ * > 6哪来的?当sizeof(struct page) = 64时
+ * 
+ * VMEMMAP_SIZE 那这个就表示在 0xFFFF800000000000 - 0xFFFF000000000000 范围内，page的数量咯
+ * 结合上面的注释，这个其实就是 mem_map[]的长度吗?即 有多少个页面
  */
 #define VMEMMAP_SIZE ((_PAGE_END(VA_BITS_MIN) - PAGE_OFFSET) \
 			>> (PAGE_SHIFT - STRUCT_PAGE_MAX_SHIFT))
 
-/*
- * PAGE_OFFSET - the virtual address of the start of the linear map, at the
- *               start of the TTBR1 address space.
+/**
+ * PAGE_OFFSET - the virtual address of the start of the linear map, at the start of the TTBR1 address space.
+ *                (线性映射起始位置的虚拟地址，位于 TTBR1 地址空间的开始处。)
  * PAGE_END - the end of the linear map, where all other kernel mappings begin.
  * KIMAGE_VADDR - the virtual address of the start of the kernel image.
  * VA_BITS - the maximum number of bits for virtual addresses.
  */
 #define VA_BITS			(CONFIG_ARM64_VA_BITS)
+/**
+ * PAGE_OFFSET: 
+ *    以48位虚拟地址为例，_PAGE_OFFSET(48) = -(1 << 48) = -2^48 = 0xFFFF000000000000 即内核地址空间的起始点
+ */
 #define _PAGE_OFFSET(va)	(-(UL(1) << (va)))
 #define PAGE_OFFSET		(_PAGE_OFFSET(VA_BITS))
 #define KIMAGE_VADDR		(MODULES_END)
@@ -50,6 +67,14 @@
 #define MODULES_END		(MODULES_VADDR + MODULES_VSIZE)
 #define MODULES_VADDR		(BPF_JIT_REGION_END)
 #define MODULES_VSIZE		(SZ_128M)
+/**
+ * 是不是很奇怪，大小怎么能当做一个起始地址呢?
+ * 
+ * 换个角度, 这个减数究竟是谁呢 是 “0xFFFF800000000000” 即  _PAGE_END(VA_BITS_MIN) ， 你瞅瞅，VMEMMAP_SIZE是怎么算出来的
+ * 以及 ， 结合图来分析:  [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图2.9　ARM64在Linux 5.0内核的内存分布
+ * 
+ * 示意图: 001.UNIX-DOCS/022.内存管理/999.IMGS/wechat_2025-08-16_120801_349.png
+ */
 #define VMEMMAP_START		(-VMEMMAP_SIZE - SZ_2M)
 #define VMEMMAP_END		(VMEMMAP_START + VMEMMAP_SIZE)
 #define PCI_IO_END		(VMEMMAP_START - SZ_2M)
@@ -62,6 +87,11 @@
 #define VA_BITS_MIN		(VA_BITS)
 #endif
 
+/**
+ * 宏 _PAGE_END(va) 用于计算内核虚拟地址空间的结束地址，其值为 -(1 << (va - 1))，表示在 va 位虚拟地址配置下，内核地址空间的最高有效边界。
+ * 
+ * _PAGE_END(48) = -(1 << 47) = -2^47 = 0xFFFF800000000000
+ */
 #define _PAGE_END(va)		(-(UL(1) << ((va) - 1)))
 
 #define KERNEL_START		_text
@@ -242,6 +272,12 @@ static inline const void *__tag_set(const void *addr, u8 tag)
 #define __is_lm_address(addr)	(!(((u64)addr) & BIT(vabits_actual - 1)))
 
 #define __lm_to_phys(addr)	(((addr) + physvirt_offset))
+
+/**
+ * __kimg_to_phys 执行从内核映像虚拟地址（Kernel Image Virtual Address）到物理地址的转换。
+ * 这种转换在内核初始化的早期阶段非常有用，因为在页表完全建立之前，
+ * 虚拟地址和物理地址之间的映射是固定的线性关系。
+ */
 #define __kimg_to_phys(addr)	((addr) - kimage_voffset)
 
 #define __virt_to_phys_nodebug(x) ({					\

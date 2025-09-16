@@ -197,6 +197,7 @@ do {						\
 			trace_hardirqs_off();		\
 	} while (0)
 
+// 保存当前中断状态并禁用本地 CPU 的中断
 #define local_irq_save(flags)				\
 	do {						\
 		raw_local_irq_save(flags);		\
@@ -222,7 +223,10 @@ do {						\
 
 #define local_irq_enable()	do { raw_local_irq_enable(); } while (0)
 #define local_irq_disable()	do { raw_local_irq_disable(); } while (0)
+
+// 保存当前中断状态并禁用本地 CPU 的中断
 #define local_irq_save(flags)	do { raw_local_irq_save(flags); } while (0)
+
 #define local_irq_restore(flags) do { raw_local_irq_restore(flags); } while (0)
 #define safe_halt()		do { raw_safe_halt(); } while (0)
 

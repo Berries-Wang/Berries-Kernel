@@ -42,13 +42,28 @@
 # define MMAP_PREPARE(addr, len, prot, flags, fd, offset)
 #endif
 
+/**
+ * @param addr
+ * 用于指定映射到进程地址空间的起始地址，为了提高应用程序的可移植性，一般设置为NULL，让内核来分配一个合适的地址。
+ * @param len 表示映射到进程地址空间的大小
+ * @param prot：用于设置内存映射区域的读写属性等。
+ * @param flags：用于设置内存映射的属性，如共享映射、私有映射等。
+ * @param fd：表示这是一个文件映射，fd是打开的文件的句柄。
+ * @param offset：在文件映射时，表示文件的偏移量。
+ * 
+ * mmap 函数功能详见: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#4.6　mmap
+ * 如： 
+ *    1). 读写文件
+ *    2). 进程间通信
+ */
 void *
 __mmap64 (void *addr, size_t len, int prot, int flags, int fd, off64_t offset)
 {
   MMAP_CHECK_PAGE_UNIT ();
 
-  if (offset & MMAP_OFF_MASK)
-    return (void *) INLINE_SYSCALL_ERROR_RETURN_VALUE (EINVAL);
+  if (offset & MMAP_OFF_MASK){
+      return (void *) INLINE_SYSCALL_ERROR_RETURN_VALUE (EINVAL);
+    }
 
   MMAP_PREPARE (addr, len, prot, flags, fd, offset);
 #ifdef __NR_mmap2

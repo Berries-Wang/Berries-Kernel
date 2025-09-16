@@ -339,6 +339,14 @@ void unpin_user_pages(struct page **pages, unsigned long npages)
 EXPORT_SYMBOL(unpin_user_pages);
 
 #ifdef CONFIG_MMU
+
+/**
+ * 用于处理页表相关的错误情况
+ * 功能:   
+ *   错误处理：当内核在页表遍历过程中遇到无效的页表项(PTE)时调用此函数。
+ *   生成错误信息：它会生成适当的错误信息，帮助诊断内存访问问题。
+ *   处理特殊情况：处理那些没有关联页表但仍然需要特殊处理的情况。
+ */
 static struct page *no_page_table(struct vm_area_struct *vma,
 		unsigned int flags)
 {
@@ -390,9 +398,15 @@ static inline bool can_follow_write_pte(pte_t pte, unsigned int flags)
 		((flags & FOLL_FORCE) && (flags & FOLL_COW) && pte_dirty(pte));
 }
 
+/**
+ * 在follow_page_pte函数中，遍历PTE，并返回address对应的物理页面的page结构
+ * 
+ * @param pmd pmd页表的页表项，即下一级页表(PTE)的物理基地址
+ */
 static struct page *follow_page_pte(struct vm_area_struct *vma,
-		unsigned long address, pmd_t *pmd, unsigned int flags,
-		struct dev_pagemap **pgmap)
+				    unsigned long address, pmd_t *pmd,
+				    unsigned int flags,
+				    struct dev_pagemap **pgmap)
 {
 	struct mm_struct *mm = vma->vm_mm;
 	struct page *page;
@@ -402,14 +416,24 @@ static struct page *follow_page_pte(struct vm_area_struct *vma,
 
 	/* FOLL_GET and FOLL_PIN are mutually exclusive. */
 	if (WARN_ON_ONCE((flags & (FOLL_PIN | FOLL_GET)) ==
-			 (FOLL_PIN | FOLL_GET)))
+			 (FOLL_PIN | FOLL_GET))) {
 		return ERR_PTR(-EINVAL);
+	}
 retry:
-	if (unlikely(pmd_bad(*pmd)))
+	if (unlikely(pmd_bad(*pmd))) {
 		return no_page_table(vma, flags);
+	}
 
+	/**
+	 * pte_offset_map_lock()宏通过PMD和地址获取PTE，
+	 * 这里还获取了一个自旋锁，这个函数在返回时需要调用pte_unmap_unlock()来释放自旋锁
+	 * 
+	 * 分析这个宏，就能验证 虚拟地址到物理地址转换的流程了 (001.UNIX-DOCS/022.内存管理/000.arm64-内核中的页表.md)
+	 */
 	ptep = pte_offset_map_lock(mm, pmd, address, &ptl);
+
 	pte = *ptep;
+	// 如果pte无效: 不在内存中
 	if (!pte_present(pte)) {
 		swp_entry_t entry;
 		/*
@@ -435,6 +459,7 @@ retry:
 		return NULL;
 	}
 
+	// vm_normal_page函数返回普通映射页面的page数据结构
 	page = vm_normal_page(vma, address, pte);
 	if (!page && pte_devmap(pte) && (flags & (FOLL_GET | FOLL_PIN))) {
 		/*
@@ -540,6 +565,10 @@ no_page:
 	return no_page_table(vma, flags);
 }
 
+/**
+ * 首先通过pmd_offset()找到PMD页表项，然后调用follow_page_pte遍历PTE。
+ * @param pudp pud页表的页表项，存储的是pmd页表的物理基地址
+ */
 static struct page *follow_pmd_mask(struct vm_area_struct *vma,
 				    unsigned long address, pud_t *pudp,
 				    unsigned int flags,
@@ -550,26 +579,39 @@ static struct page *follow_pmd_mask(struct vm_area_struct *vma,
 	struct page *page;
 	struct mm_struct *mm = vma->vm_mm;
 
+	// 通过pmd_offset找到PMD页表项,存储的下一级页表(PTE)的物理基地址
 	pmd = pmd_offset(pudp, address);
-	/*
+	/**
 	 * The READ_ONCE() will stabilize the pmdval in a register or
 	 * on the stack so that it will stop changing under the code.
+	 * (在 Linux 内核中，READ_ONCE() 宏的作用是将 pmdval（页中间目录项的值）稳定地读取到寄存器或栈内存中，从而确保在后续代码执行过程中，该值不会意外改变。)
 	 */
 	pmdval = READ_ONCE(*pmd);
-	if (pmd_none(pmdval))
+
+	/**
+	 * 000.LINUX-5.9/arch/arm64/include/asm/pgtable.h
+	 * 000.LINUX-5.9/arch/arm64/include/asm/pgtable-types.h
+	 * 
+	 * 检测pmd页表项是否有效
+	 */
+	if (pmd_none(pmdval)) {
+		// 处理异常情况
 		return no_page_table(vma, flags);
+	}
+
 	if (pmd_huge(pmdval) && is_vm_hugetlb_page(vma)) {
 		page = follow_huge_pmd(mm, address, pmd, flags);
-		if (page)
+		if (page) {
 			return page;
+		}
 		return no_page_table(vma, flags);
 	}
 	if (is_hugepd(__hugepd(pmd_val(pmdval)))) {
-		page = follow_huge_pd(vma, address,
-				      __hugepd(pmd_val(pmdval)), flags,
-				      PMD_SHIFT);
-		if (page)
+		page = follow_huge_pd(vma, address, __hugepd(pmd_val(pmdval)),
+				      flags, PMD_SHIFT);
+		if (page) {
 			return page;
+		}
 		return no_page_table(vma, flags);
 	}
 retry:
@@ -664,7 +706,7 @@ static struct page *follow_pud_mask(struct vm_area_struct *vma,
 	spinlock_t *ptl;
 	struct page *page;
 	struct mm_struct *mm = vma->vm_mm;
-
+    // 获取pud页表项，即下一级页表(PMD)的基地址
 	pud = pud_offset(p4dp, address);
 	if (pud_none(*pud))
 		return no_page_table(vma, flags);
@@ -689,9 +731,13 @@ static struct page *follow_pud_mask(struct vm_area_struct *vma,
 		if (page)
 			return page;
 	}
-	if (unlikely(pud_bad(*pud)))
+	if (unlikely(pud_bad(*pud))) {
 		return no_page_table(vma, flags);
+	}
 
+	/**
+	* 通过pud_offset()找到PUD页表项，然后调用follow_pmd_mask()遍历PMD
+	*/
 	return follow_pmd_mask(vma, address, pud, flags, ctx);
 }
 
@@ -723,11 +769,11 @@ static struct page *follow_p4d_mask(struct vm_area_struct *vma,
 
 /**
  * follow_page_mask - look up a page descriptor from a user-virtual address
- * @vma: vm_area_struct mapping @address
- * @address: virtual address to look up
- * @flags: flags modifying lookup behaviour
+ * @vma: vm_area_struct mapping @address 参数address所属的VMA。
+ * @address: virtual address to look up 虚拟地址，用于查找页表的虚拟地址
+ * @flags: flags modifying lookup behaviour 内部使用的标志位。
  * @ctx: contains dev_pagemap for %ZONE_DEVICE memory pinning and a
- *       pointer to output page_mask
+ *       pointer to output page_mask follow_page_context数据结构，主要用于处理ZONE_DEVICE映射的情况。
  *
  * @flags can have FOLL_ flags set, defined in <linux/mm.h>
  *
@@ -750,13 +796,16 @@ static struct page *follow_page_mask(struct vm_area_struct *vma,
 
 	ctx->page_mask = 0;
 
-	/* make this handle hugepd */
+	/** make this handle hugepd 
+	 * 处理巨页情况
+	*/
 	page = follow_huge_addr(mm, address, flags & FOLL_WRITE);
 	if (!IS_ERR(page)) {
 		WARN_ON_ONCE(flags & (FOLL_GET | FOLL_PIN));
 		return page;
 	}
 
+	// 找到当前进程的pgd页表项,即 一级页表
 	pgd = pgd_offset(mm, address);
 
 	if (pgd_none(*pgd) || unlikely(pgd_bad(*pgd)))
@@ -776,7 +825,7 @@ static struct page *follow_page_mask(struct vm_area_struct *vma,
 			return page;
 		return no_page_table(vma, flags);
 	}
-
+    //  调用follow_p4d_mask()函数遍历P4D
 	return follow_p4d_mask(vma, address, pgd, flags, ctx);
 }
 
@@ -845,13 +894,18 @@ unmap:
 	return ret;
 }
 
-/*
+/**
  * mmap_lock must be held on entry.  If @locked != NULL and *@flags
  * does not include FOLL_NOWAIT, the mmap_lock may be released.  If it
  * is, *@locked will be set to 0 and -EBUSY returned.
+ * (调用时必须持有 mmap_lock 锁。如果参数 @locked 非空且 @flags 未包含 FOLL_NOWAIT 标志，
+ * 则 mmap_lock 可能会被释放。
+ * 若锁被释放，@locked 将被置为 0 并返回 -EBUSY 错误码。)
+ * 
+ * 见: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图4.29　get_user_pages()函数的实现过程
  */
-static int faultin_page(struct vm_area_struct *vma,
-		unsigned long address, unsigned int *flags, int *locked)
+static int faultin_page(struct vm_area_struct *vma, unsigned long address,
+			unsigned int *flags, int *locked)
 {
 	unsigned int fault_flags = 0;
 	vm_fault_t ret;
@@ -874,7 +928,10 @@ static int faultin_page(struct vm_area_struct *vma,
 		 */
 		fault_flags |= FAULT_FLAG_TRIED;
 	}
-
+    
+	/**
+	 * handle_mm_fault: 缺页异常处理的核心函数
+	 */
 	ret = handle_mm_fault(vma, address, fault_flags, NULL);
 	if (ret & VM_FAULT_ERROR) {
 		int err = vm_fault_to_errno(ret, *flags);
@@ -952,16 +1009,18 @@ static int check_vma_flags(struct vm_area_struct *vma, unsigned long gup_flags)
 }
 
 /**
+ * 见: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图4.29　get_user_pages()函数的实现过程
+ * 
  * __get_user_pages() - pin user pages in memory
- * @mm:		mm_struct of target mm
- * @start:	starting user address
- * @nr_pages:	number of pages from start to pin
- * @gup_flags:	flags modifying pin behaviour
+ * @mm:		mm_struct of target mm 目标进程的内存描述符。
+ * @start:	starting user address 用户进程的虚拟起始地址。
+ * @nr_pages:	number of pages from start to pin  需要锁定的页面数量
+ * @gup_flags:	flags modifying pin behaviour  内部使用的锁定属性
  * @pages:	array that receives pointers to the pages pinned.
  *		Should be at least nr_pages long. Or NULL, if caller
- *		only intends to ensure the pages are faulted in.
+ *		only intends to ensure the pages are faulted in. 锁定页面的指针，它是一个page指针数组
  * @vmas:	array of pointers to vmas corresponding to each page.
- *		Or NULL if the caller does not require them.
+ *		Or NULL if the caller does not require them. 映射每一个物理页面的VMA，它是一个VMA的指针数组。
  * @locked:     whether we're still with the mmap_lock held
  *
  * Returns either number of pages pinned (which may be less than the
@@ -983,6 +1042,8 @@ static int check_vma_flags(struct vm_area_struct *vma, unsigned long gup_flags)
  * each struct page that each user address corresponds to at a given
  * instant. That is, it takes the page that would be accessed if a user
  * thread accesses the given user virtual address at that instant.
+ * (__get_user_pages 函数会遍历进程的页表，并在特定时刻对每个用户地址对应的 struct page 结构体进行引用计数。
+ * 这意味着：当用户线程在该瞬时时刻访问给定的用户虚拟地址时，该函数会精确捕获到即将被访问的物理页面。)
  *
  * This does not guarantee that the page exists in the user mappings when
  * __get_user_pages returns, and there may even be a completely different
@@ -992,6 +1053,11 @@ static int check_vma_flags(struct vm_area_struct *vma, unsigned long gup_flags)
  * contains data that was valid *at some point in time*. Typically, an IO
  * or similar operation cannot guarantee anything stronger anyway because
  * locks can't be held over the syscall boundary.
+ * (这并不保证当 __get_user_pages 返回时该页面仍存在于用户映射中，
+ * 甚至在某些情况下该地址可能已映射至完全不同的页面
+ * （例如，若内存映射的页面缓存已被失效处理并随后重新触发缺页异常）。
+ * 但该机制确实能确保页面不会被完全释放。大多数调用方仅需确保页面包含的数据在某个时间点是有效的。
+ * 通常，输入/输出或类似操作本身也无法提供更强的保证，因为在跨越系统调用边界时无法持续持有锁)
  *
  * If @gup_flags & FOLL_WRITE == 0, the page must not be written to. If
  * the page is written to, set_page_dirty (or set_page_dirty_lock, as
@@ -1011,10 +1077,10 @@ static int check_vma_flags(struct vm_area_struct *vma, unsigned long gup_flags)
  * instead of __get_user_pages. __get_user_pages should be used only if
  * you need some special @gup_flags.
  */
-static long __get_user_pages(struct mm_struct *mm,
-		unsigned long start, unsigned long nr_pages,
-		unsigned int gup_flags, struct page **pages,
-		struct vm_area_struct **vmas, int *locked)
+static long __get_user_pages(struct mm_struct *mm, unsigned long start,
+			     unsigned long nr_pages, unsigned int gup_flags,
+			     struct page **pages, struct vm_area_struct **vmas,
+			     int *locked)
 {
 	long ret = 0, i = 0;
 	struct vm_area_struct *vma = NULL;
@@ -1059,8 +1125,8 @@ static long __get_user_pages(struct mm_struct *mm,
 			}
 			if (is_vm_hugetlb_page(vma)) {
 				i = follow_hugetlb_page(mm, vma, pages, vmas,
-						&start, &nr_pages, i,
-						gup_flags, locked);
+							&start, &nr_pages, i,
+							gup_flags, locked);
 				if (locked && *locked == 0) {
 					/*
 					 * We've got a VM_FAULT_RETRY
@@ -1084,7 +1150,7 @@ retry:
 			goto out;
 		}
 		cond_resched();
-
+        // follow_page_mask 函数主要用于遍历页表并返回物理页面的page数据结构
 		page = follow_page_mask(vma, start, foll_flags, &ctx);
 		if (!page) {
 			ret = faultin_page(vma, start, &foll_flags, locked);
@@ -1366,6 +1432,8 @@ retry:
 }
 
 /**
+ * 调用populate_vma_page_range()函数来人为制造缺页异常并完成地址映射。
+ * 
  * populate_vma_page_range() -  populate a range of pages in the vma.
  * @vma:   target vma
  * @start: start address
@@ -1385,10 +1453,11 @@ retry:
  * If @locked is non-NULL, it must held for read only and may be
  * released.  If it's released, *@locked will be set to 0.
  */
-long populate_vma_page_range(struct vm_area_struct *vma,
-		unsigned long start, unsigned long end, int *locked)
+long populate_vma_page_range(struct vm_area_struct *vma, unsigned long start,
+			     unsigned long end, int *locked)
 {
 	struct mm_struct *mm = vma->vm_mm;
+	// 要分配页面的数量
 	unsigned long nr_pages = (end - start) / PAGE_SIZE;
 	int gup_flags;
 
@@ -1419,17 +1488,27 @@ long populate_vma_page_range(struct vm_area_struct *vma,
 	/*
 	 * We made sure addr is within a VMA, so the following will
 	 * not result in a stack expansion that recurses back here.
+	 * 
+	 * 调用__get_user_pages()来为进程地址空间分配物理内存并且建立映射关系。
 	 */
 	return __get_user_pages(mm, start, nr_pages, gup_flags,
 				NULL, NULL, locked);
 }
 
-/*
+/**
  * __mm_populate - populate and/or mlock pages within a range of address space.
+ * (在地址空间范围内填充（populate）和/或锁定（mlock）内存页。)
  *
  * This is used to implement mlock() and the MAP_POPULATE / MAP_LOCKED mmap
  * flags. VMAs must be already marked with the desired vm_flags, and
  * mmap_lock must not be held.
+ * (该功能用于实现 mlock() 系统调用以及 MAP_POPULATE/MAP_LOCKED 的 mmap 标志位。
+ * 调用时必须满足：虚拟内存区域(VMA)已预先设置好所需的 vm_flags 标志，且不能持有 mmap_lock 锁。)
+ * 
+ * @param  start 起始虚拟地址(当前brk指针的值)
+ * @param len 需要填充的字节数
+ * @param ignore_errors 是否忽略错误
+ * 
  */
 int __mm_populate(unsigned long start, unsigned long len, int ignore_errors)
 {
@@ -1450,10 +1529,12 @@ int __mm_populate(unsigned long start, unsigned long len, int ignore_errors)
 			locked = 1;
 			mmap_read_lock(mm);
 			vma = find_vma(mm, nstart);
-		} else if (nstart >= vma->vm_end)
+		} else if (nstart >= vma->vm_end) {
 			vma = vma->vm_next;
-		if (!vma || vma->vm_start >= end)
+		}
+		if (!vma || vma->vm_start >= end) {
 			break;
+		}
 		/*
 		 * Set [nstart; nend) to intersection of desired address
 		 * range with the first VMA. Also, skip undesirable VMA types.
@@ -1463,10 +1544,11 @@ int __mm_populate(unsigned long start, unsigned long len, int ignore_errors)
 			continue;
 		if (nstart < vma->vm_start)
 			nstart = vma->vm_start;
-		/*
+		/**
 		 * Now fault in a range of pages. populate_vma_page_range()
 		 * double checks the vma flags, so that it won't mlock pages
 		 * if the vma was already munlocked.
+		 * 调用populate_vma_page_range()函数来人为制造缺页异常并完成地址映射。
 		 */
 		ret = populate_vma_page_range(vma, nstart, nend, &locked);
 		if (ret < 0) {

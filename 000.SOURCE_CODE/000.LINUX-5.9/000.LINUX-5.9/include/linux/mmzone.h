@@ -272,6 +272,9 @@ enum lruvec_flags {
 					 */
 };
 
+/**
+ * 见[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.3.1　LRU链表
+ */
 struct lruvec {
 	struct list_head		lists[NR_LRU_LISTS];
 	/*
@@ -820,7 +823,9 @@ typedef struct pglist_data {
 
 	/* Fields commonly accessed by the page reclaim scanner */
 
-	/*
+	/**
+	 * 见[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.3.1　LRU链表
+	 * 
 	 * NOTE: THIS IS UNUSED IF MEMCG IS ENABLED.
 	 *
 	 * Use mem_cgroup_lruvec() to look up lruvecs.

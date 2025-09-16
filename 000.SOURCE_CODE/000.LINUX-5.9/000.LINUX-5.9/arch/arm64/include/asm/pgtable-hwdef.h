@@ -117,6 +117,12 @@
  * 
  */
 #define PGDIR_SHIFT		ARM64_HW_PGTABLE_LEVEL_SHIFT(4 - CONFIG_PGTABLE_LEVELS)
+/**
+ * 通过带入计算，当为4级页表的时候,页面大小为4K时：
+ * PGDIR_SHIFT : 39
+ * PGDIR_SIZE = 1UL << 39 = 512GB
+ *
+ */
 #define PGDIR_SIZE		(_AC(1, UL) << PGDIR_SHIFT)
 #define PGDIR_MASK		(~(PGDIR_SIZE-1))
 #define PTRS_PER_PGD		(1 << (VA_BITS - PGDIR_SHIFT))
@@ -189,8 +195,11 @@
 #define PMD_ATTRINDX(t)		(_AT(pmdval_t, (t)) << 2)
 #define PMD_ATTRINDX_MASK	(_AT(pmdval_t, 7) << 2)
 
-/*
+/**
  * Level 3 descriptor (PTE).
+ * 
+ * 
+ * 这些，就得结合 [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图2.5　L3页表项描述符 即 每个页表项的每一位的含义了
  */
 #define PTE_VALID		(_AT(pteval_t, 1) << 0)
 #define PTE_TYPE_MASK		(_AT(pteval_t, 3) << 0)

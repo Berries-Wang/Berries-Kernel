@@ -167,6 +167,12 @@
 )
 
 
+/**
+ * __builtin_return_address(0)： 这是GCC和Clang等编译器提供的一个内置函数。
+ * 参数 0 表示获取当前函数的返回地址。
+ * 参数 1，则表示获取当前函数的调用者的返回地址（即上上一层）
+ * 依此类推。
+ */
 #define _RET_IP_		(unsigned long)__builtin_return_address(0)
 #define _THIS_IP_  ({ __label__ __here; __here: (unsigned long)&&__here; })
 

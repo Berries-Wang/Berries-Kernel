@@ -101,13 +101,22 @@ static inline int __raw_spin_trylock(raw_spinlock_t *lock)
  */
 #if !defined(CONFIG_GENERIC_LOCKBREAK) || defined(CONFIG_DEBUG_LOCK_ALLOC)
 
+/**
+ *  _raw_spin_lock_irqsave() 是一个底层自旋锁函数，用于在禁用本地中断的情况下获取自旋锁，
+ * 确保临界区的原子性和安全性，尤其适用于中断上下文或要求严格时序的场景
+ */
 static inline unsigned long __raw_spin_lock_irqsave(raw_spinlock_t *lock)
 {
 	unsigned long flags;
 
+	// 保存当前中断状态并禁用本地 CPU 的中断
 	local_irq_save(flags);
+	// 禁止内核抢占
 	preempt_disable();
+
+	// arm64中，这其实是一个空的
 	spin_acquire(&lock->dep_map, 0, 0, _RET_IP_);
+
 	/*
 	 * On lockdep we dont want the hand-coded irq-enable of
 	 * do_raw_spin_lock_flags() code, because lockdep assumes
@@ -123,6 +132,7 @@ static inline unsigned long __raw_spin_lock_irqsave(raw_spinlock_t *lock)
 
 static inline void __raw_spin_lock_irq(raw_spinlock_t *lock)
 {
+	// 关闭本地CPU中断
 	local_irq_disable();
 	preempt_disable();
 	spin_acquire(&lock->dep_map, 0, 0, _RET_IP_);
@@ -137,11 +147,14 @@ static inline void __raw_spin_lock_bh(raw_spinlock_t *lock)
 }
 
 
-static inline void  __raw_spin_lock(raw_spinlock_t *lock)
+/**
+ * 自旋锁实现
+ */
+static inline void __raw_spin_lock(raw_spinlock_t *lock)
 {
 	// 关闭内核抢占
 	preempt_disable();
-	
+
 	/**
 	 * 操作的是run_queue的锁的属性: 
 	 * arm64: include/linux/lockdep.h:488:  #define spin_acquire(l, s, t, i)      lock_acquire_exclusive(l, s, t, NULL, i)
@@ -149,8 +162,8 @@ static inline void  __raw_spin_lock(raw_spinlock_t *lock)
 	 * arm64中，这行代码没有了
 	 */
 	spin_acquire(&lock->dep_map, 0, 0, _RET_IP_);
-    
-	// do_raw_spin_lock: 000.LINUX-5.9/include/linux/spinlock.h
+
+	// 直接调用do_raw_spin_lock: 000.LINUX-5.9/include/linux/spinlock.h
 	LOCK_CONTENDED(lock, do_raw_spin_trylock, do_raw_spin_lock);
 }
 

@@ -63,7 +63,11 @@ static inline unsigned long pud_index(unsigned long address)
 
 #ifndef pgd_index
 /* Must be a compile-time constant, so implement it as a macro */
-#define pgd_index(a)  (((a) >> PGDIR_SHIFT) & (PTRS_PER_PGD - 1))
+/**
+ * pgd_index 求L0的索引值
+ * pgd索引值在哪里? 查阅: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#▲图2.7　4级分页模型在64位虚拟地址的划分
+ */
+#define pgd_index(a)  (((a) >> PGDIR_SHIFT) & (PTRS_PER_PGD - 1)) 
 #endif
 
 #ifndef pte_offset_kernel
@@ -101,6 +105,12 @@ static inline pud_t *pud_offset(p4d_t *p4d, unsigned long address)
 #define pud_offset pud_offset
 #endif
 
+/**
+ * 从虚拟地址${address}计算pgd索引
+ * 
+ * @param pgd pgd页表基地址
+ * @param address 虚拟地址
+ */
 static inline pgd_t *pgd_offset_pgd(pgd_t *pgd, unsigned long address)
 {
 	return (pgd + pgd_index(address));
@@ -653,6 +663,13 @@ static inline int arch_unmap_one(struct mm_struct *mm,
  * When walking page tables, get the address of the next boundary,
  * or the end address of the range if that comes earlier.  Although no
  * vma end wraps to 0, rounded up __boundary may wrap to 0 throughout.
+ * pgd_addr_end宏用于计算给定地址范围内下一个PGD条目的结束地址
+ * PGDIR_MASK: 用于对齐PGD边界的掩码
+ * 
+ *
+ * PUD_SIZE 这个得根据虚拟虚拟地址来分析，
+ * 因为PUD索引是由虚拟地址 Bit[38,30]表示，所以每一个PUD能够覆盖2^30位的物理地址范围
+ * ▲图2.7　4级分页模型在64位虚拟地址的划分
  */
 
 #define pgd_addr_end(addr, end)						\

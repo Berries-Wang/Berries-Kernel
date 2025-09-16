@@ -423,6 +423,9 @@ void free_pgtables(struct mmu_gather *tlb, struct vm_area_struct *vma,
 	}
 }
 
+/**
+ * 创建pte，并设置到PMD级的页表项中
+ */
 int __pte_alloc(struct mm_struct *mm, pmd_t *pmd)
 {
 	spinlock_t *ptl;
@@ -2765,13 +2768,18 @@ static vm_fault_t fault_dirty_shared_page(struct vm_fault *vmf)
 	return 0;
 }
 
-/*
+/**
+ *  用于复用缺页异常的物理页面
+ * 
  * Handle write page faults for pages that can be reused in the current vma
- *
+ * (处理当前虚拟内存区域（vma）中可重用页面的写页错误)
+ * 
  * This can happen either due to the mapping being with the VM_SHARED flag,
  * or due to us being the last reference standing to the page. In either
  * case, all we need to do here is to mark the page as writable and update
  * any related book-keeping.
+ * (这种情况可能由两种原因导致：一是映射设置了VM_SHARED标志，二是当前进程是页面的最后持有者。
+ * 无论哪种情况，我们只需将页面标记为可写状态并更新相关的元数据记录即可。)
  */
 static inline void wp_page_reuse(struct vm_fault *vmf)
 	__releases(vmf->ptl)
@@ -2787,17 +2795,25 @@ static inline void wp_page_reuse(struct vm_fault *vmf)
 	if (page)
 		page_cpupid_xchg_last(page, (1 << LAST_CPUPID_SHIFT) - 1);
 
+        // 刷新缺页异常页面的高速缓存
 	flush_cache_page(vma, vmf->address, pte_pfn(vmf->orig_pte));
 	entry = pte_mkyoung(vmf->orig_pte);
 	entry = maybe_mkwrite(pte_mkdirty(entry), vma);
-	if (ptep_set_access_flags(vma, vmf->address, vmf->pte, entry, 1))
-		update_mmu_cache(vma, vmf->address, vmf->pte);
+        // ptep_set_access_flags: 将新的PTE设置到实际页表中
+  	if (ptep_set_access_flags(vma, vmf->address, vmf->pte, entry, 1))
+        {
+           // 更新相应的高速缓存
+	   update_mmu_cache(vma, vmf->address, vmf->pte);
+        }
 	pte_unmap_unlock(vmf->pte, vmf->ptl);
 	count_vm_event(PGREUSE);
 }
 
 /*
+ * 用于处理写时复制的情况
+ *
  * Handle the case of a page which we actually need to copy to a new page.
+ * (处理需要将页面内容复制到新页面的情况)
  *
  * Called with mmap_lock locked and the old page referenced, but
  * without the ptl held.
@@ -2831,6 +2847,7 @@ static vm_fault_t wp_page_copy(struct vm_fault *vmf)
 		if (!new_page)
 			goto oom;
 	} else {
+                // 使用alloc_page_vma 分配一个页面
 		new_page = alloc_page_vma(GFP_HIGHUSER_MOVABLE, vma,
 				vmf->address);
 		if (!new_page)
@@ -3049,7 +3066,12 @@ static vm_fault_t wp_page_shared(struct vm_fault *vmf)
 	return ret;
 }
 
-/*
+/**
+ * 参考资料: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#4.7.7　写时复制
+ * 
+ * 当用户试图修改(就是写嘛)只有只读属性的页面时，CPU触发异常，在do_wp_page()函数里尝试修复这些页面，
+ * 通常做法是新分配一个页面并且复制旧页面内容到新的页面中，这个新分配的页面具有可写的属性。
+ * 
  * This routine handles present pages, when users try to write
  * to a shared page. It is done by copying the page to a new address
  * and decrementing the shared-page counter for the old page.
@@ -3067,8 +3089,7 @@ static vm_fault_t wp_page_shared(struct vm_fault *vmf)
  * but allow concurrent faults), with pte both mapped and locked.
  * We return with mmap_lock still held, but pte unmapped and unlocked.
  */
-static vm_fault_t do_wp_page(struct vm_fault *vmf)
-	__releases(vmf->ptl)
+static vm_fault_t do_wp_page(struct vm_fault *vmf) __releases(vmf->ptl)
 {
 	struct vm_area_struct *vma = vmf->vma;
 
@@ -3077,6 +3098,10 @@ static vm_fault_t do_wp_page(struct vm_fault *vmf)
 		return handle_userfault(vmf, VM_UFFD_WP);
 	}
 
+	/**
+	 * vm_normal_page 查找地址vmf->address对应页面的page数据结构，
+	 * 返回普通映射页面，如果返回为NULL，说明就是一个特殊页面
+	 */
 	vmf->page = vm_normal_page(vma, vmf->address, vmf->orig_pte);
 	if (!vmf->page) {
 		/*
@@ -3086,17 +3111,22 @@ static vm_fault_t do_wp_page(struct vm_fault *vmf)
 		 * We should not cow pages in a shared writeable mapping.
 		 * Just mark the pages writable and/or call ops->pfn_mkwrite.
 		 */
-		if ((vma->vm_flags & (VM_WRITE|VM_SHARED)) ==
-				     (VM_WRITE|VM_SHARED))
+		if ((vma->vm_flags & (VM_WRITE | VM_SHARED)) ==
+		    (VM_WRITE | VM_SHARED)) {
 			return wp_pfn_shared(vmf);
+		}
 
 		pte_unmap_unlock(vmf->pte, vmf->ptl);
+		// 处理写时复制的情况
 		return wp_page_copy(vmf);
 	}
-
+    // 执行到此处，说明page就是一个普通映射页面
+	
 	/*
 	 * Take out anonymous pages first, anonymous shared vmas are
 	 * not dirty accountable.
+	 * 
+	 * PageAnon()宏用于判断是否匿名页面
 	 */
 	if (PageAnon(vmf->page)) {
 		struct page *page = vmf->page;
@@ -3459,10 +3489,21 @@ out_release:
 	return ret;
 }
 
-/*
+/**
+ * 见: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图4.35　do_anonymous_page()函数的流程
+ * 
  * We enter with non-exclusive mmap_lock (to exclude vma changes,
  * but allow concurrent faults), and pte mapped but not yet locked.
  * We return with mmap_lock still held, but pte unmapped and unlocked.
+ * 
+ * 匿名页处理： 在Linux内核中没有关联到文件(磁盘文件)映射的页面称为匿名页面（anonymous page）
+ * > 那还挺重要的！ 像malloc 分配的， 存储堆栈的内存也都没有文件映射，那就都是匿名页
+ * 
+ * 匿名页就是用来存放程序“自己产生的”临时数据的内存页。因为它没有对应的磁盘文件作为靠山，
+ * 所以内核需要一套复杂的机制（交换空间）来确保在内存不足时，
+ * 这些宝贵的数据不会丢失，而是被临时写到磁盘上，等需要时再读回来
+ * —————— deepseek
+ * 
  */
 static vm_fault_t do_anonymous_page(struct vm_fault *vmf)
 {
@@ -3471,7 +3512,9 @@ static vm_fault_t do_anonymous_page(struct vm_fault *vmf)
 	vm_fault_t ret = 0;
 	pte_t entry;
 
-	/* File mapping without ->vm_ops ? */
+	/** File mapping without ->vm_ops ?
+	 * 防止共享的VMA进入到匿名页的缺页中断里
+	 */
 	if (vma->vm_flags & VM_SHARED)
 		return VM_FAULT_SIGBUS;
 
@@ -3482,19 +3525,41 @@ static vm_fault_t do_anonymous_page(struct vm_fault *vmf)
 	 *
 	 * pte_alloc_map() is safe to use under mmap_write_lock(mm) or when
 	 * parallel threads are excluded by other means.
+	 * 
+	 * 这里使用pte_offset_map()可能不安全，可能其他的内核线程（如khugepaged内核线程）会创建一个巨大的pmd页表项，
+	 * 因为我们当前只持有读者类型的mmap_sem信号量
 	 *
 	 * Here we only have mmap_read_lock(mm).
+	 * 
+	 * pte_alloc : 创建pte，并复制到pmd页表项中
+	 * 
+	 * 像if(xx) (xx为int类型时), 只有xx==0时，才是false，否则都是true(不论正负数)
 	 */
-	if (pte_alloc(vma->vm_mm, vmf->pmd))
+	if (pte_alloc(vma->vm_mm, vmf->pmd)) {
 		return VM_FAULT_OOM;
+	}
 
 	/* See the comment in pte_alloc_one_map() */
-	if (unlikely(pmd_trans_unstable(vmf->pmd)))
+	if (unlikely(pmd_trans_unstable(vmf->pmd))) {
 		return 0;
+	}
 
-	/* Use the zero-page for reads */
+	/**
+	 *  Use the zero-page for reads   处理可读的情况
+	 * !(vmf->flags & FAULT_FLAG_WRITE) 表示没有写权限
+	 * 
+	 * my_zero_pfn()获取系统零页的帧号
+	 * pte_mkspecial()宏用来设置PTE中的PTE_SPECIAL位，表示这是特殊映射页面
+	 * 
+	 * 
+	 * 这个系统零页面，比较特别? you see ,在只读的时候，并没有实际分配物理页面,
+	 * 当程序需要写入这个页面时就会触发一个缺页异常，于是缺页异常变成了写时复制的缺页异常
+	 * 
+	 * 系统零页详细介绍: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#4.7.5　系统零页
+	 * 
+	 * */
 	if (!(vmf->flags & FAULT_FLAG_WRITE) &&
-			!mm_forbids_zeropage(vma->vm_mm)) {
+	    !mm_forbids_zeropage(vma->vm_mm)) {
 		entry = pte_mkspecial(pfn_pte(my_zero_pfn(vmf->address),
 						vma->vm_page_prot));
 		vmf->pte = pte_offset_map_lock(vma->vm_mm, vmf->pmd,
@@ -3514,12 +3579,21 @@ static vm_fault_t do_anonymous_page(struct vm_fault *vmf)
 		goto setpte;
 	}
 
-	/* Allocate our own private page. */
-	if (unlikely(anon_vma_prepare(vma)))
+	/** 从这以下，setpte之前，处理可写的情况了
+	 * Allocate our own private page. 
+	 * */
+	if (unlikely(anon_vma_prepare(vma))) {
 		goto oom;
+	}
+
+	/**
+	 * 分配一个可移动的匿名页: 通过伙伴系统
+	 * 000.LINUX-5.9/include/linux/highmem.h
+	 */
 	page = alloc_zeroed_user_highpage_movable(vma, vmf->address);
-	if (!page)
+	if (!page) {
 		goto oom;
+	}
 
 	if (mem_cgroup_charge(page, vma->vm_mm, GFP_KERNEL))
 		goto oom_free_page;
@@ -3559,6 +3633,7 @@ static vm_fault_t do_anonymous_page(struct vm_fault *vmf)
 	page_add_new_anon_rmap(page, vma, vmf->address, false);
 	lru_cache_add_inactive_or_unevictable(page, vma);
 setpte:
+    // 设置到硬件页表中
 	set_pte_at(vma->vm_mm, vmf->address, vmf->pte, entry);
 
 	/* No need to invalidate - it was non-present before */
@@ -3575,10 +3650,13 @@ oom:
 	return VM_FAULT_OOM;
 }
 
-/*
+/**
  * The mmap_lock must have been held on entry, and may have been
  * released depending on flags and vma->vm_ops->fault() return value.
  * See filemap_fault() and __lock_page_retry().
+ * 
+ * 文件映射缺页中断
+ * 
  */
 static vm_fault_t __do_fault(struct vm_fault *vmf)
 {
@@ -3984,6 +4062,9 @@ out:
 	return ret;
 }
 
+/**
+ * 处理读内存导致的缺页中断
+ */
 static vm_fault_t do_read_fault(struct vm_fault *vmf)
 {
 	struct vm_area_struct *vma = vmf->vma;
@@ -4011,6 +4092,9 @@ static vm_fault_t do_read_fault(struct vm_fault *vmf)
 	return ret;
 }
 
+/**
+ * 处理写内存导致的缺页异常
+ */
 static vm_fault_t do_cow_fault(struct vm_fault *vmf)
 {
 	struct vm_area_struct *vma = vmf->vma;
@@ -4049,6 +4133,9 @@ uncharge_out:
 	return ret;
 }
 
+/**
+ * 处理共享文件映射中发生写缺页异常的情况
+ */
 static vm_fault_t do_shared_fault(struct vm_fault *vmf)
 {
 	struct vm_area_struct *vma = vmf->vma;
@@ -4345,6 +4432,8 @@ static vm_fault_t handle_pte_fault(struct vm_fault *vmf)
 		 * pmd from under us anymore at this point because we hold the
 		 * mmap_lock read mode and khugepaged takes it in write mode.
 		 * So now it's safe to run pte_offset_map().
+		 * 
+		 * 根据pmd页表项和虚拟地址计算出pte
 		 */
 		vmf->pte = pte_offset_map(vmf->pmd, vmf->address);
 		vmf->orig_pte = *vmf->pte;
@@ -4364,18 +4453,32 @@ static vm_fault_t handle_pte_fault(struct vm_fault *vmf)
 		}
 	}
 
+	/**
+	 * 若PTE为空，有两种可能:
+	 *    一是页表项还没建立
+	 *    二是页表项的内容被清空了，即调用了ptep_get_and_clear()函数
+	 */
 	if (!vmf->pte) {
-		if (vma_is_anonymous(vmf->vma))
+		// 判断是否是匿名映射
+		if (vma_is_anonymous(vmf->vma)) {
 			return do_anonymous_page(vmf);
-		else
+		} else { // 不是匿名映射，那就是文件映射 ,为啥?
 			return do_fault(vmf);
+		}
 	}
 
-	if (!pte_present(vmf->orig_pte))
+	// PTE 已经存在，但是页面不在内存中,PTE还没有映射物理页面，是真正的缺页
+	if (!pte_present(vmf->orig_pte)) {
+		// 从交换分区中换回页面
 		return do_swap_page(vmf);
+	}
 
-	if (pte_protnone(vmf->orig_pte) && vma_is_accessible(vmf->vma))
+	/**
+	 * 调用pte_protnone()说明页面被设置为NUMA调度的页面
+	 */
+	if (pte_protnone(vmf->orig_pte) && vma_is_accessible(vmf->vma)) {
 		return do_numa_page(vmf);
+	}
 
 	vmf->ptl = pte_lockptr(vmf->vma->vm_mm, vmf->pmd);
 	spin_lock(vmf->ptl);
@@ -4385,10 +4488,20 @@ static vm_fault_t handle_pte_fault(struct vm_fault *vmf)
 		goto unlock;
 	}
 	if (vmf->flags & FAULT_FLAG_WRITE) {
-		if (!pte_write(entry))
+		/**
+		 * 如果处理器因为写内存而触发缺页异常，并且PTE是只读属性，就会触发一个写时复制的缺页中断，
+		 * 调用do_wp_page()函数。如父、子进程之间共享的内存，当其中一方需要写入新内容时，
+		 * 就会触发写时复制。
+		 * 
+		 * > 父子进程之间，不是线程之间!
+		 */
+		if (!pte_write(entry)) {
 			return do_wp_page(vmf);
+		}
+		// 如果当前PTE的属性是可写的，那么通过pte_mkdirty()函数来设置PTE_DIRTY位
 		entry = pte_mkdirty(entry);
 	}
+	// pte_mkyoung()对于ARM64架构会设置PTE_AF位。
 	entry = pte_mkyoung(entry);
 	if (ptep_set_access_flags(vmf->vma, vmf->address, vmf->pte, entry,
 				vmf->flags & FAULT_FLAG_WRITE)) {
@@ -4572,6 +4685,11 @@ static inline void mm_account_fault(struct pt_regs *regs,
  *
  * The mmap_lock may have been released depending on flags and our
  * return value.  See filemap_fault() and __lock_page_or_retry().
+ * 
+ * @param vma      发生缺页异常的地址空间
+ * @param address  发生缺页异常的虚拟地址,这个地址是以页面大小对齐的
+ * @param flags    内存相关的标志位
+ * @param regs 
  */
 vm_fault_t handle_mm_fault(struct vm_area_struct *vma, unsigned long address,
 			   unsigned int flags, struct pt_regs *regs)

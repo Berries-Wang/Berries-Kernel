@@ -3,6 +3,7 @@
 
 #ifndef _ISOMAC
 /* Now define the internal interfaces.  */
+
 extern void *__mmap (void *__addr, size_t __len, int __prot,
 		     int __flags, int __fd, __off_t __offset);
 libc_hidden_proto (__mmap)

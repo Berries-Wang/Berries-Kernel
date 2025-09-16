@@ -46,6 +46,15 @@ u64 idmap_ptrs_per_pgd = PTRS_PER_PGD;
 u64 __section(".mmuoff.data.write") vabits_actual;
 EXPORT_SYMBOL(vabits_actual);
 
+/**
+ * kimage_voffset表示内核映像虚拟地址和物理地址之间的偏移量
+ * 来源于:  
+ * 1). __primary_switched函数 (2.6.6　__primary_switch函数分析) -- 在这个函数中赋值的
+ * 2). 这些内核符号表的链接地址在vmalloc区域，即从KIMAGE_VADDR + TEXT_OFFSET开始的虚拟地址，它和内核空间的线性映射区是不相同的
+ *     > 2.1.6　案例分析：ARM64的页表映射过程: 图2.11　kimage_voffset的含义 + 那kimage_voffset代表什么意思呢？如图2.11所示，当系统刚初始化时，内核映像通过块映射的方式映射到KIMAGE_VADDR + TEXT_OFFSET的虚拟地址上，因此kimage_voffset表示内核映像虚拟地址和物理地址之间的偏移量，这类似于线性映射之后的PAGE_OFFSET。
+ * 
+ * 000.LINUX-5.9/arch/arm64/kernel/head.S 会处理kimage_vaddr , kimage_offset 
+ */
 u64 kimage_voffset __ro_after_init;
 EXPORT_SYMBOL(kimage_voffset);
 
@@ -62,6 +71,15 @@ static pud_t bm_pud[PTRS_PER_PUD] __page_aligned_bss __maybe_unused;
 
 static DEFINE_SPINLOCK(swapper_pgdir_lock);
 
+/**
+ * set_swapper_pgd 函数的作用是安全地更新内核的 swapper_pg_dir（内核初始页全局目录）中的某个 PGD 条目
+ * 
+ * @param pgdp页表项
+ * ＠param pgd 物理地址
+ * 
+ * 
+ * 也不只是填充pgd页表项，pud页表项也是如此操作!!!
+ */
 void set_swapper_pgd(pgd_t *pgdp, pgd_t pgd)
 {
 	pgd_t *fixmap_pgdp;
@@ -93,7 +111,11 @@ static phys_addr_t __init early_pgtable_alloc(int shift)
 {
 	phys_addr_t phys;
 	void *ptr;
-
+        
+        /**
+         * include/linux/memblock.h: 
+         *
+         */
 	phys = memblock_phys_alloc(PAGE_SIZE, PAGE_SIZE);
 	if (!phys)
 		panic("Failed to allocate page table page\n");
@@ -140,6 +162,8 @@ static bool pgattr_change_is_safe(u64 old, u64 new)
 }
 
 /**
+ * 初始化PTE条目(一个个页表，存储的是页帧)，即 填充PTE页表
+ * 
  * init_pte()函数最终调用set_pte()来设置PTE内容到物理页表中
  */
 static void init_pte(pmd_t *pmdp, unsigned long addr, unsigned long end,
@@ -151,6 +175,9 @@ static void init_pte(pmd_t *pmdp, unsigned long addr, unsigned long end,
 	do {
 		pte_t old_pte = READ_ONCE(*ptep);
 
+		/**
+		 *  填充pmd页表项${pmdp} , 类似于创建PT页表
+		 */
 		set_pte(ptep, pfn_pte(__phys_to_pfn(phys), prot));
 
 		/*
@@ -160,17 +187,30 @@ static void init_pte(pmd_t *pmdp, unsigned long addr, unsigned long end,
 		BUG_ON(!pgattr_change_is_safe(pte_val(old_pte),
 					      READ_ONCE(pte_val(*ptep))));
 
+		// 处理下一个页面
 		phys += PAGE_SIZE;
+
+		/**
+		 * petp++ 处理下一个PTE页表的页表项
+		 */
 	} while (ptep++, addr += PAGE_SIZE, addr != end);
 
 	pte_clear_fixmap();
 }
 
+/**
+ * @param pmdp pmd页表项
+ * @param addr 开始地址(虚拟地址)
+ * @param end  pmd页表项能覆盖的内存的右边界
+ * @param phys 需要映射的内存的物理地址
+ * @param 函数指针
+ * 
+ * cont: Contiguous , 连续的页面
+ */
 static void alloc_init_cont_pte(pmd_t *pmdp, unsigned long addr,
 				unsigned long end, phys_addr_t phys,
 				pgprot_t prot,
-				phys_addr_t (*pgtable_alloc)(int),
-				int flags)
+				phys_addr_t (*pgtable_alloc)(int), int flags)
 {
 	unsigned long next;
 	pmd_t pmd = READ_ONCE(*pmdp);
@@ -179,7 +219,13 @@ static void alloc_init_cont_pte(pmd_t *pmdp, unsigned long addr,
 	if (pmd_none(pmd)) {
 		phys_addr_t pte_phys;
 		BUG_ON(!pgtable_alloc);
+		/**
+		 * 分配一个空的内存页，用作pte页表
+		 */
 		pte_phys = pgtable_alloc(PAGE_SHIFT);
+		/**
+		 * 设置页表项pmdp，即页表项pmdp存储的下一级页表的物理基地址
+		 */
 		__pmd_populate(pmdp, pte_phys, PMD_TYPE_TABLE);
 		pmd = READ_ONCE(*pmdp);
 	}
@@ -187,16 +233,22 @@ static void alloc_init_cont_pte(pmd_t *pmdp, unsigned long addr,
 
 	do {
 		pgprot_t __prot = prot;
-
+		/**
+		 * 为什么不直接处理一个个的page呢?
+		 */
 		next = pte_cont_addr_end(addr, end);
 
 		/* use a contiguous mapping if the range is suitably aligned */
 		if ((((addr | next | phys) & ~CONT_PTE_MASK) == 0) &&
-		    (flags & NO_CONT_MAPPINGS) == 0)
+		    (flags & NO_CONT_MAPPINGS) == 0) {
+			/**
+			 * 不直接调用 init_pte 是为了添加连续的标识吗?
+			 */
 			__prot = __pgprot(pgprot_val(prot) | PTE_CONT);
+		}
 
 		/**
-		 * 调用init_pte()来设置PTE
+		 * 调用init_pte()来设置PTE: 一个页面一个页面地配置
 		 */
 		init_pte(pmdp, addr, next, phys, __prot);
 
@@ -205,8 +257,7 @@ static void alloc_init_cont_pte(pmd_t *pmdp, unsigned long addr,
 }
 
 /**
- * 
- * 
+ * 处理pmd页表，如下，逐个处理pmd页表项
  * 
  */
 static void init_pmd(pud_t *pudp, unsigned long addr, unsigned long end,
@@ -220,20 +271,34 @@ static void init_pmd(pud_t *pudp, unsigned long addr, unsigned long end,
 	do {
 		pmd_t old_pmd = READ_ONCE(*pmdp);
 
+		/**
+		 * 以addr为起始，单个pmd页表项能覆盖的内存的右边界
+		 */
 		next = pmd_addr_end(addr, end);
 
-		/* try section mapping first */
+		/**
+		 *  try section mapping first 
+		 * 
+		 * 如果虚拟区间的开始地址addr、结束地址next和物理地址phys都与SECTION_SIZE大小（2MB）对齐，
+		 * 那么直接设置PMD页表项，不需要映射下一级页表。下一级页表等到需要用时再映射也来得及。
+		*/
 		if (((addr | next | phys) & ~SECTION_MASK) == 0 &&
 		    (flags & NO_BLOCK_MAPPINGS) == 0) {
+			/**
+			 * 直接设置为大页
+			 */
 			pmd_set_huge(pmdp, phys, prot);
 
 			/*
 			 * After the PMD entry has been populated once, we
 			 * only allow updates to the permission attributes.
 			 */
-			BUG_ON(!pgattr_change_is_safe(pmd_val(old_pmd),
-						      READ_ONCE(pmd_val(*pmdp))));
+			BUG_ON(!pgattr_change_is_safe(
+				pmd_val(old_pmd), READ_ONCE(pmd_val(*pmdp))));
 		} else {
+			/**
+			 * 如果映射的内存不是和SECTION_SIZE大小对齐的，那么需要通过alloc_init_cont_pte()函数来映射下一级PTE
+			 */
 			alloc_init_cont_pte(pmdp, addr, next, phys, prot,
 					    pgtable_alloc, flags);
 
@@ -248,6 +313,11 @@ static void init_pmd(pud_t *pudp, unsigned long addr, unsigned long end,
 
 /**
  * alloc_init_cont_pmd ()函数用于配置PMD页表
+ * 
+ * @param pudp pud页表的页表项
+ * 
+ * 函数名中的cont是什么? 是 Contiguous 即连续的 ， 通过这个函数中转是为了生成大的内存块
+ * 》 ARM64 支持 连续页表条目（Contiguous PTEs/PMDs） 的硬件特性，允许将多个相邻的 PMD 条目合并，映射一块更大的连续物理内存（如 64MB），从而减少 TLB 压力和页表遍历开销。
  */
 static void alloc_init_cont_pmd(pud_t *pudp, unsigned long addr,
 				unsigned long end, phys_addr_t phys,
@@ -261,19 +331,33 @@ static void alloc_init_cont_pmd(pud_t *pudp, unsigned long addr,
 	 * Check for initial section mappings in the pgd/pud.
 	 */
 	BUG_ON(pud_sect(pud));
-	// 判断PUD页表项的内容是否为空。如果为空，表示PUD指向的PMD不存在，需要动态分配PMD页表，然后通过__pud_populate()来设置PUD页表项
+	/**
+	 * 判断PUD页表项的内容是否为空。如果为空，表示PUD指向的PMD不存在，
+	 * 需要动态分配PMD页表，然后通过__pud_populate()来设置PUD页表项
+	 */
 	if (pud_none(pud)) {
 		phys_addr_t pmd_phys;
 		BUG_ON(!pgtable_alloc);
+		// 分配一个4K大小的页表，返回物理基址(48位有效地址的情况下)
 		pmd_phys = pgtable_alloc(PMD_SHIFT);
+		/**
+		 * 填充页表项pudp ，即页表项${pudp}存储的物理地址(下一级页表的基地址)是 pmd_phys 
+		 * 
+		 * 那么,页表项pud的Bit[47,12] == ${pmd_phys} (页面大小为4KB时)
+		 * > debug
+		 */
 		__pud_populate(pudp, pmd_phys, PUD_TYPE_TABLE);
 		pud = READ_ONCE(*pudp);
 	}
 	BUG_ON(pud_bad(pud));
 
+	// 初始化pmd页表
 	do {
 		pgprot_t __prot = prot;
-
+        
+		/**
+		 * 以16MB为步长来创建PMD页表?为什么要进行这一步
+		 */
 		next = pmd_cont_addr_end(addr, end);
 
 		/* use a contiguous mapping if the range is suitably aligned */
@@ -281,7 +365,11 @@ static void alloc_init_cont_pmd(pud_t *pudp, unsigned long addr,
 		    (flags & NO_CONT_MAPPINGS) == 0)
 			__prot = __pgprot(pgprot_val(prot) | PTE_CONT);
 
-		/**调用init_pmd()函数来初始化PT与设置PMD页表项 */
+		/**
+		 * 填充pmd页表
+		 * 
+		 * 调用init_pmd()函数来初始化PT与设置PMD页表项
+		*/
 		init_pmd(pudp, addr, next, phys, __prot, pgtable_alloc, flags);
 
 		phys += next - addr;
@@ -302,36 +390,60 @@ static inline bool use_1G_block(unsigned long addr, unsigned long next,
 
 /**
  * 初始化PGD页表项内容和PUD
+ *
+ * 因为当前内核版本为5.9 , 支持4级页表，所以 pgd 就是 p4d ， 也可以通过代码看出来
+ *
+ * pgtable_alloc 函数指针,实际是 early_pgtable_alloc  （从 paging_init -> mem_map 分析而来）
  * 
  */
 static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
 			   phys_addr_t phys, pgprot_t prot,
-			   phys_addr_t (*pgtable_alloc)(int),
-			   int flags)
+			   phys_addr_t (*pgtable_alloc)(int), int flags)
 {
 	unsigned long next;
 	pud_t *pudp;
+	/**
+     * include/asm-generic/pgtable-nop4d.h
+     * 
+     * 因为(1) pgd 的页表项指向的是下一级页表的基地址
+     */
 	p4d_t *p4dp = p4d_offset(pgdp, addr);
 	p4d_t p4d = READ_ONCE(*p4dp);
 
-	// 通过pgd_none()判断当前PGD页表项的内容是否为空
-	if (p4d_none(p4d)) { 
+	/** 
+     * arch/arm64/include/asm/pgtable.h : 判断是否初始化过:
+     * p4d_none: true：未初始化过;false:已初始化
+     */
+	if (p4d_none(p4d)) {
 		phys_addr_t pud_phys;
 		BUG_ON(!pgtable_alloc);
+		// 分配一个物理page出来 , 所以(1)这里分配的是一个PUD页表
 		pud_phys = pgtable_alloc(PUD_SHIFT);
+		// arch/arm64/include/asm/pgalloc.h : 填充P4D的页表项(条目)，指向PUD页表基地
 		__p4d_populate(p4dp, pud_phys, PUD_TYPE_TABLE);
+		// 重新读取更新后的p4d条目
 		p4d = READ_ONCE(*p4dp);
 	}
-	BUG_ON(p4d_bad(p4d));
 
-	// 通过pud_set_fixmap_offset ()来获取相应的PUD表项
+	BUG_ON(p4d_bad(p4d)); // 检查条目合法性
+
+	// 将p4dp映射到fixmap，获取虚拟地址
 	pudp = pud_set_fixmap_offset(p4dp, addr);
+
+	// 这个do-while循环就是遍历并填充pgd页表的每个页表项，获取下一个页表项的逻辑在while中
 	do {
+		// 获取当前pudp条目
 		pud_t old_pud = READ_ONCE(*pudp);
 
+		// include/linux/pgtable.h: 计算当前pud能够覆盖的内存的右边界
 		next = pud_addr_end(addr, end);
 
 		/**
+         * 
+         * 这个得结合页表描述符来分析了: 无效的页表项、块类型的页表项、页表类型的页表项 , 这个都是通过描述符的标志位来区分的
+         * 内容在: []#2.1.3　页表项描述符
+         * > 知道了这个，下面的流程就很好懂了
+         * 
 		 * For 4K granule only, attempt to put down a 1GB block
 		 * (对于仅使用4K粒度的情况，尝试建立一个1GB的大块映射)
 		 * 
@@ -341,6 +453,12 @@ static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
 		 */
 		if (use_1G_block(addr, next, phys) &&
 		    (flags & NO_BLOCK_MAPPINGS) == 0) {
+			/**
+             * 得结合页表项描述符来分析: []#2.1.3　页表项描述符
+             *
+             * 设置页表描述符为大页： 设置了页表项描述符的位
+             * 如，将 Bit[0] 设置为1（表示有效的描述符），Bit[1]为0表示是一个大的内存块(这个函数不用操作Bit[1])
+             */
 			pud_set_huge(pudp, phys, prot);
 
 			/**
@@ -348,10 +466,10 @@ static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
 			 * only allow updates to the permission attributes.
 			 * (在填充（配置）PUD（Page Upper Directory，页上级目录）表项后，我们仅允许对其权限属性进行更新。)
 			 */
-			BUG_ON(!pgattr_change_is_safe(pud_val(old_pud),
-						      READ_ONCE(pud_val(*pudp))));
+			BUG_ON(!pgattr_change_is_safe(
+				pud_val(old_pud), READ_ONCE(pud_val(*pudp))));
 		} else {
-			// 用于配置PMD页表
+			// 用于配置PMD页表 (为pud页表里的页表项${pudp}创建pmd页表)
 			alloc_init_cont_pmd(pudp, addr, next, phys, prot,
 					    pgtable_alloc, flags);
 
@@ -363,26 +481,39 @@ static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
 		/**
 		 * pudp++: 以PUD_SIZE为步长循环处理
 		 * >> pudp++ , 即指向下一个 pud_t 
+         * 这里其实就是迭代处理每个pgd页表项——pgd页表的页表项就是指向pud页表的物理基地址 
 		 */
 	} while (pudp++, addr = next, addr != end);
 
 	pud_clear_fixmap();
 }
 
-
 /**
  * 
  * 创建页表映射
  * 
  * create_mapping_noalloc 看一下这个方法的注释 
+ *
+ * >>> 通过 'map_mem' 分析而来
+ * @param pgdir pgd页表的基址
+ * @param phys 待映射的内存空间的起始地址(物理地址)
+ * @param virt phys的虚拟地址
+ * @param size 内存空间大小
+ * @param prot PAGE_KERNEL
+ *
+ * pgd_t 定义在 arch/arm64/include/asm/pgtable_types.h 
+ *  typedef struct { pteval_t pte; } pte_t;
+ *  typedef struct { pmdval_t pmd; } pmd_t;
+ *  typedef struct { pudval_t pud; } pud_t;
+ *  typedef struct { pgdval_t pgd; } pgd_t;
  */
 static void __create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys,
 				 unsigned long virt, phys_addr_t size,
 				 pgprot_t prot,
-				 phys_addr_t (*pgtable_alloc)(int),
-				 int flags)
+				 phys_addr_t (*pgtable_alloc)(int), int flags)
 {
 	unsigned long addr, end, next;
+	// 计算pgd页表项: 从虚拟地址virt中提取PGD索引
 	pgd_t *pgdp = pgd_offset_pgd(pgdir, virt);
 
 	/*
@@ -397,7 +528,9 @@ static void __create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys,
 	end = PAGE_ALIGN(virt + size);
 
 	do {
+		// pgd_addr_end : include/linux/pgtable.h: 即 next表示这个pgd 页表项所能映射的区域的右边界
 		next = pgd_addr_end(addr, end);
+		// 为pgd页表里的页表项${pgdp}创建pud页表
 		alloc_init_pud(pgdp, addr, next, phys, prot, pgtable_alloc,
 			       flags);
 		phys += next - addr;
@@ -506,7 +639,7 @@ void __init mark_linear_text_alias_ro(void)
 }
 
 /**
- * map_mem(pgdp)：物理内存的线性映射。物理内存会全部线性映射到以PAGE_OFFSET开始的内核空间的虚拟地址，以加速内核访问内存。
+ * map_mem(pgdp)：物理内存的线性映射。物理内存会全部线性映射到以PAGE_OFFSET(即页面内偏移量)开始的内核空间的虚拟地址，以加速内核访问内存。
  * 
  * "加速访问"的含义:
  *   通过简单的偏移量实现，虚拟地址 = 物理地址 + 固定偏移（如PAGE_OFFSET）, 提供一种快速访问物理内存的方式，避免了频繁的页表操作
@@ -765,14 +898,15 @@ static void __init map_kernel(pgd_t *pgdp)
 }
 
 /**
+ * 页表的创建是由操作系统来完成的，包括页表的创建和填充，但是处理器遍历页表是由处理器的MMU来完成的 in []#2.1.6　案例分析：ARM64的页表映射过程
+ *   MMU是硬件设备，所以硬件规定(约定?) swapper_pg_dir 是PGD页表项的基地址，这样好理解了
+ *
  * 在paging_init()函数中会对内核空间的多个内存段做重新映射 , 映射到页表
  * 
  * swapper_pg_dir : 内核页表的PGD页表基地址，是虚拟地址，因为在内核启动的汇编代码中会做一次简单的块映射
  * __pa_symbol: 把内核符号的虚拟地址转换为物理地址
  * __pa: 这时物理内存的线性映射还没建立好，因此不能直接使用__pa()宏
- * 
- * 
- * 1. 先做固定映射 -> 2.划分页面(PGD、PUD...) 是这个顺序吗?
+
  *
  * 看一下[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#3.3.4　物理内存映射
  *     内核映像映射了两次： 映射到内核空间的虚拟地址；线性映射? 怎么理解? 
@@ -785,23 +919,43 @@ void __init paging_init(void)
 {
 	/**
 	 * pgd_set_fixmap()函数做一个固定映射，把swapper_pg_dir页表重新映射到固定映射区域
+     * 
+     * 获取PGD页表基地址  []#2.1.6　案例分析：ARM64的页表映射过程
+	 * 
+     * swapper_pg_dir 就是页表基地址，虚拟地址 ， 使用 __pa_symbol 转为物理地址
+	 * > 全局变量swapper_pg_dir是内核页表的PGD页表基地址，可是这是虚拟地址，因为在内核启动的汇编代码中会做一次简单的块映射。
+	 * ---->> 索引可以使用__pa_symbol获取到物理地址
+	 * 
+	 * 内核里面有一个固定映射（fixed mapping）区域，它的范围是0xFFFF 7DFF FE7F 9000～0xFFFF 7DFF FEC0 0000，我们可以把PGD页表映射这个区域，然后才可以使用__pa()宏。
+	 * > #图2.9　ARM64在Linux 5.0内核的内存分布
+	 * 
+	 * pgd_set_fixmap()函数就做这个固定映射的事情，把PGD页表的物理页面映射到固定映射区域，返回PGD页表的虚拟地址。而pgd_clear_fixmap()函数用于取消固定区域的映射
 	 */
 	pgd_t *pgdp = pgd_set_fixmap(__pa_symbol(swapper_pg_dir));
  
 	/**
 	 * map_kernel(pgdp)：对内核映像文件的各个块重新映射。
 	 * 在head.S文件中，我们对内核映像文件做了块映射，现在需要使用页机制来重新映射。
+	 * 
+	 * > 保证内核在启用分页后能够正常执行 (在内核启动之初，并没有立马启用分页)
 	 */
 	map_kernel(pgdp);
 
 	/**
 	 * 线性映射区映射,具体看代码注释
+	 * 
+	 * 为内核进行内存映射，使内核能够通过虚拟地址访问整个物理内存?
 	 */
 	map_mem(pgdp);
 
+	/**
+	 * 取消映射，和 pgd_set_fixmap 对应
+	 */
 	pgd_clear_fixmap();
 
 	cpu_replace_ttbr1(lm_alias(swapper_pg_dir));
+
+	// 赋值整个内核的pgd
 	init_mm.pgd = swapper_pg_dir;
 
 	memblock_free(__pa_symbol(init_pg_dir),
@@ -1326,12 +1480,12 @@ void __init early_fixmap_init(void)
 	}
 }
 
-/*
+/**
  * Unusually, this is also called in IRQ context (ghes_iounmap_irq) so if we
  * ever need to use IPIs for TLB broadcasting, then we're in trouble here.
+ * (不寻常的是，该函数（ghes_iounmap_irq）也会在IRQ上下文中被调用。因此，如果我们将来需要使用IPI（处理器间中断）进行TLB广播，这里就会出问题。)
  */
-void __set_fixmap(enum fixed_addresses idx,
-			       phys_addr_t phys, pgprot_t flags)
+void __set_fixmap(enum fixed_addresses idx, phys_addr_t phys, pgprot_t flags)
 {
 	unsigned long addr = __fix_to_virt(idx);
 	pte_t *ptep;
@@ -1344,7 +1498,7 @@ void __set_fixmap(enum fixed_addresses idx,
 		set_pte(ptep, pfn_pte(phys >> PAGE_SHIFT, flags));
 	} else {
 		pte_clear(&init_mm, addr, ptep);
-		flush_tlb_kernel_range(addr, addr+PAGE_SIZE);
+		flush_tlb_kernel_range(addr, addr + PAGE_SIZE);
 	}
 }
 

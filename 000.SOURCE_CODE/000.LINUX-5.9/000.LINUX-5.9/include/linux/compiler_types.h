@@ -17,6 +17,9 @@ static inline void __chk_io_ptr(const volatile void __iomem *ptr) { }
 # define __must_hold(x)	__attribute__((context(x,1,1)))
 # define __acquires(x)	__attribute__((context(x,0,1)))
 # define __releases(x)	__attribute__((context(x,1,0)))
+/**
+ * # define __acquire(x)	__context__(x,1) : 要增加变量x的计数，增加量为1
+ */
 # define __acquire(x)	__context__(x,1)
 # define __release(x)	__context__(x,-1)
 # define __cond_lock(x,c)	((c) ? ({ __acquire(x); 1; }) : 0)

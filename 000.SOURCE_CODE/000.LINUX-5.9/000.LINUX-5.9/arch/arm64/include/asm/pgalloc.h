@@ -20,8 +20,14 @@
 
 #if CONFIG_PGTABLE_LEVELS > 2
 
+/**
+ * 
+ * @param pmdp pud页表的页表项(虚拟地址)
+ * @param pmdp pmd页表的物理基地址
+ */
 static inline void __pud_populate(pud_t *pudp, phys_addr_t pmdp, pudval_t prot)
 {
+	// 按照页表分级分析，这里是将物理地址设置到pudp这个页表项上就行
 	set_pud(pudp, __pud(__phys_to_pud_val(pmdp) | prot));
 }
 

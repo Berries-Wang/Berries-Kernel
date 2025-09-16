@@ -187,10 +187,40 @@ static struct vm_area_struct *remove_vma(struct vm_area_struct *vma)
 
 static int do_brk_flags(unsigned long addr, unsigned long request, unsigned long flags,
 		struct list_head *uf);
+/**
+ * malloc 底层会调用该函数分配内存
+ * 
+ * 000.LINUX-5.9/include/linux/syscalls.h
+ * 
+ * 分析宏可以得知，最后被翻译为__do_sys_brk 以及一些函数原型
+ * 
+ * <pre>
+ *  asmlinkage long __arm64_sys_brk(const struct pt_regs *regs);
+ *  static long __se_sys_brk(unsigned long brk);
+ *  static inline long __do_sys_brk(unsigned long brk);
+ *  
+ *  asmlinkage long __arm64_sys_brk(const struct pt_regs *regs)
+ *  {
+ *      return __se_sys_brk(brk);
+ *  }
+ *  
+ *  static long __se_sys_brk(unsigned long brk)
+ *  {
+ *      long ret = __do_sys_brk(brk);
+ *      return ret;
+ *  }
+ *  
+ *  static inline long __do_sys_brk(unsigned long brk)
+ * </pre>
+ * 
+ * 则:
+ *  @param brk 是什么? 将break指针(也称 brk 指针)调整为${brk}，来分配内存 -- 通过malloc函数分析而来
+ */
 SYSCALL_DEFINE1(brk, unsigned long, brk)
 {
 	unsigned long retval;
 	unsigned long newbrk, oldbrk, origbrk;
+	
 	struct mm_struct *mm = current->mm;
 	struct vm_area_struct *next;
 	unsigned long min_brk;
@@ -201,6 +231,7 @@ SYSCALL_DEFINE1(brk, unsigned long, brk)
 	if (mmap_write_lock_killable(mm))
 		return -EINTR;
 
+	// current->mm->brk: 当前堆中的VMA的结束地址
 	origbrk = mm->brk;
 
 #ifdef CONFIG_COMPAT_BRK
@@ -231,24 +262,30 @@ SYSCALL_DEFINE1(brk, unsigned long, brk)
 
 	newbrk = PAGE_ALIGN(brk);
 	oldbrk = PAGE_ALIGN(mm->brk);
+	// 不需要移动分配的边界地址
 	if (oldbrk == newbrk) {
 		mm->brk = brk;
 		goto success;
 	}
 
 	/*
-	 * Always allow shrinking brk.
+	 * Always allow shrinking brk. (始终允许收缩 brk（堆内存）)
 	 * __do_munmap() may downgrade mmap_lock to read.
+	 * 
+	 * 这就是要缩小堆内存了
 	 */
 	if (brk <= mm->brk) {
 		int ret;
 
-		/*
+		/**
 		 * mm->brk must to be protected by write mmap_lock so update it
 		 * before downgrading mmap_lock. When __do_munmap() fails,
 		 * mm->brk will be restored from origbrk.
+		 * (mm->brk 必须通过写入 mmap_lock 来保护，因此在降级 mmap_lock 之前需先更新它。
+		 * 若 __do_munmap() 失败，mm->brk 将从 origbrk 恢复。)
 		 */
 		mm->brk = brk;
+		// 解除映射，即释放内存
 		ret = __do_munmap(mm, newbrk, oldbrk-newbrk, &uf, true);
 		if (ret < 0) {
 			mm->brk = origbrk;
@@ -259,25 +296,51 @@ SYSCALL_DEFINE1(brk, unsigned long, brk)
 		goto success;
 	}
 
-	/* Check against existing mmap mappings. */
-	next = find_vma(mm, oldbrk);
-	if (next && newbrk + PAGE_SIZE > vm_start_gap(next))
-		goto out;
+	/*-------- 下面就是要申请内存了 -------*/
 
-	/* Ok, looks good - let it rip. */
-	if (do_brk_flags(oldbrk, newbrk-oldbrk, 0, &uf) < 0)
+	/* Check against existing mmap mappings.(检查现有的 mmap 映射) */
+	/**
+	 * find_vma()以旧边界地址去查找的VMA，
+	 * 以确定当前用户进程中是否已经有一块VMA和start_addr重叠。
+	 * 如果找到一块包含start_addr的VMA，说明以旧边界地址开始的地址空间已经在使用，就不需要再寻找了
+	 */
+	next = find_vma(mm, oldbrk);
+	if (next && newbrk + PAGE_SIZE > vm_start_gap(next)) {
 		goto out;
+	}
+
+	/**
+	 * 
+	 *  Ok, looks good - let it rip. 
+	 * 
+	 * 注意，do_brk_flags 这个函数,会
+	 * 1. 分配一个新的vma
+	 * */
+	if (do_brk_flags(oldbrk, newbrk - oldbrk, 0, &uf) < 0) {
+		goto out;
+	}
 	mm->brk = brk;
 
 success:
+    /**
+	 * newbrk > oldbrk: 虚拟地址有增长 
+	 * 
+     * 当指定VM_LOCKED标志位时，表示需要马上为描述这块进程地址空间的VMA来分配物理页面并建立映射关系。
+	 * 通过 mm_populate 函数来完成
+     */
 	populate = newbrk > oldbrk && (mm->def_flags & VM_LOCKED) != 0;
 	if (downgraded)
 		mmap_read_unlock(mm);
 	else
 		mmap_write_unlock(mm);
 	userfaultfd_unmap_complete(mm, &uf);
-	if (populate)
+	if (populate) {
+		/**
+		 * 000.LINUX-5.9/include/linux/mm.h
+		 * gup.c
+		 */
 		mm_populate(oldbrk, newbrk - oldbrk);
+	}
 	return brk;
 
 out:
@@ -526,9 +589,12 @@ anon_vma_interval_tree_post_update_vma(struct vm_area_struct *vma)
 		anon_vma_interval_tree_insert(avc, &avc->anon_vma->rb_root);
 }
 
+/**
+ * 为新VMA查找合适的插入位置
+ */
 static int find_vma_links(struct mm_struct *mm, unsigned long addr,
-		unsigned long end, struct vm_area_struct **pprev,
-		struct rb_node ***rb_link, struct rb_node **rb_parent)
+			  unsigned long end, struct vm_area_struct **pprev,
+			  struct rb_node ***rb_link, struct rb_node **rb_parent)
 {
 	struct rb_node **__rb_link, *__rb_parent, *rb_prev;
 
@@ -640,6 +706,9 @@ __vma_link(struct mm_struct *mm, struct vm_area_struct *vma,
 	__vma_link_rb(mm, vma, rb_link, rb_parent);
 }
 
+/**
+ * 将节点添加到红黑树和链表
+ */
 static void vma_link(struct mm_struct *mm, struct vm_area_struct *vma,
 			struct vm_area_struct *prev, struct rb_node **rb_link,
 			struct rb_node *rb_parent)
@@ -651,7 +720,10 @@ static void vma_link(struct mm_struct *mm, struct vm_area_struct *vma,
 		i_mmap_lock_write(mapping);
 	}
 
+	// __vma_link()函数调用__vma_link_list()，把VMA添加到mm->mmap链表中
 	__vma_link(mm, vma, prev, rb_link, rb_parent);
+
+	// _vma_link_file()把VMA添加到文件的基数树（radix tree）上
 	__vma_link_file(vma);
 
 	if (mapping)
@@ -1070,10 +1142,15 @@ can_vma_merge_after(struct vm_area_struct *vma, unsigned long vm_flags,
 	return 0;
 }
 
-/*
+/**
+ * vma_merge函数实现将一个新的VMA和附近的VMA合并的功能。
+ * 工作原理示意图: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图4.25　vma_merge()函数的实现方式
+ * 
  * Given a mapping request (addr,end,vm_flags,file,pgoff), figure out
  * whether that can be merged with its predecessor or its successor.
  * Or both (it neatly fills a hole).
+ * (给定一个内存映射请求（addr, end, vm_flags, file, pgoff），
+ * 判断该请求是否可以与其前驱（predecessor）或后继（successor）合并，或者两者皆可（即恰好填补了一个空隙）。以下是分析要点：)
  *
  * In most cases - when called for mmap, brk or mremap - [addr,end) is
  * certain not to be mapped by the time vma_merge is called; but when
@@ -1081,10 +1158,15 @@ can_vma_merge_after(struct vm_area_struct *vma, unsigned long vm_flags,
  * an offset within prev, or at the start of next), and the flags of
  * this area are about to be changed to vm_flags - and the no-change
  * case has already been eliminated.
+ * (在大多数情况下（例如调用 mmap、brk 或 mremap 时），当调用 vma_merge 时，
+ * 内存区间 [addr, end) 肯定尚未被映射；但在调用 mprotect 时，
+ * 该区间必定已经被映射（可能在 prev 的某个偏移处，或者从 next 的起始处开始），
+ * 并且该区域的标志（vm_flags）即将被修改为新的值——此时无变化的场景（即新旧 vm_flags 相同）已经被排除。)
  *
  * The following mprotect cases have to be considered, where AAAA is
  * the area passed down from mprotect_fixup, never extending beyond one
  * vma, PPPPPP is the prev vma specified, and NNNNNN the next vma after:
+ * (需要考虑以下mprotect的情况：其中AAAA是从mprotect_fixup传下来的区域，始终不会超出单个vma的范围，PPPPPP是指定的前一个vma，NNNNNN是之后的下一个vma。)
  *
  *     AAAA             AAAA                   AAAA
  *    PPPPPPNNNNNN    PPPPPPNNNNNN       PPPPPPNNNNNN
@@ -1112,13 +1194,16 @@ can_vma_merge_after(struct vm_area_struct *vma, unsigned long vm_flags,
  * or other rmap walkers (if working on addresses beyond the "end"
  * parameter) may establish ptes with the wrong permissions of NNNN
  * instead of the right permissions of XXXX.
+ * (对于情况8而言，关键在于确保与区域AAAA重叠的vma NNNN永远不会扩展到XXXX之上。相反，必须将XXXX扩展到AAAA区域内，
+ * 并移除NNNN。通过这种方式，在所有vma_merge成功的情况下，当vma_adjust释放rmap_locks时，合并后的vma属性将立即对整个合并范围生效。
+ * 某些属性（如vm_page_prot/vm_flags）可能会被rmap_walks访问，这些属性必须在rmap_locks释放后立即对整个合并范围保持正确。
+ * 否则，如果移除XXXX并让NNNN扩展到XXXX的范围，remove_migration_ptes或其他rmap遍历器（若在"end"参数之外的地址上操作）可能会建立具有NNNN错误权限而非XXXX正确权限的页表项(PTEs)。)
  */
-struct vm_area_struct *vma_merge(struct mm_struct *mm,
-			struct vm_area_struct *prev, unsigned long addr,
-			unsigned long end, unsigned long vm_flags,
-			struct anon_vma *anon_vma, struct file *file,
-			pgoff_t pgoff, struct mempolicy *policy,
-			struct vm_userfaultfd_ctx vm_userfaultfd_ctx)
+struct vm_area_struct *
+vma_merge(struct mm_struct *mm, struct vm_area_struct *prev, unsigned long addr,
+	  unsigned long end, unsigned long vm_flags, struct anon_vma *anon_vma,
+	  struct file *file, pgoff_t pgoff, struct mempolicy *policy,
+	  struct vm_userfaultfd_ctx vm_userfaultfd_ctx)
 {
 	pgoff_t pglen = (end - addr) >> PAGE_SHIFT;
 	struct vm_area_struct *area, *next;
@@ -2255,7 +2340,16 @@ get_unmapped_area(struct file *file, unsigned long addr, unsigned long len,
 
 EXPORT_SYMBOL(get_unmapped_area);
 
-/* Look up the first VMA which satisfies  addr < vm_end,  NULL if none. */
+/** 
+ * 根据虚拟地址查找vma
+ * 
+ * Look up the first VMA which satisfies  addr < vm_end,  NULL if none.
+ * 阅读: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图4.22　find_vma()查找VMA的过程
+ * 查找VMA，
+ *  1).addr在VMA空间范围内，即vma->vm_start≤addr < vma->vm_end。
+ *  2).距离addr最近并且VMA的结束地址大于addr的VMA。
+ * 
+ **/
 struct vm_area_struct *find_vma(struct mm_struct *mm, unsigned long addr)
 {
 	struct rb_node *rb_node;
@@ -2263,8 +2357,9 @@ struct vm_area_struct *find_vma(struct mm_struct *mm, unsigned long addr)
 
 	/* Check the cache first. */
 	vma = vmacache_find(mm, addr);
-	if (likely(vma))
+	if (likely(vma)) {
 		return vma;
+	}
 
 	rb_node = mm->mm_rb.rb_node;
 
@@ -2275,15 +2370,20 @@ struct vm_area_struct *find_vma(struct mm_struct *mm, unsigned long addr)
 
 		if (tmp->vm_end > addr) {
 			vma = tmp;
-			if (tmp->vm_start <= addr)
+			if (tmp->vm_start <= addr) {
 				break;
+			}
 			rb_node = rb_node->rb_left;
-		} else
+		} else {
 			rb_node = rb_node->rb_right;
+		}
 	}
 
-	if (vma)
+	if (vma) {
+		// 更新缓存
 		vmacache_update(addr, vma);
+	}
+
 	return vma;
 }
 
@@ -2760,9 +2860,13 @@ int split_vma(struct mm_struct *mm, struct vm_area_struct *vma,
 	return __split_vma(mm, vma, addr, new_below);
 }
 
-/* Munmap is split into 2 main parts -- this part which finds
+/**
+ * __do_munmap 是 Linux 内核中用于解除内存映射（Memory Unmapping）的核心函数，主要负责释放由 mmap 分配的虚拟内存区域（VMA）。它是 munmap 系统调用的底层实现，处理虚拟地址空间的释放、页表清理和 VMA 结构调整。
+ *  
+ * Munmap is split into 2 main parts -- this part which finds
  * what needs doing, and the areas themselves, which do the
  * work.  This now handles partial unmappings.
+ * (Munmap 被拆分为两个主要部分——当前部分负责确定需要执行的操作，而具体的内存区域（VMA）则负责执行实际的解除映射工作。现在该机制已支持部分解除映射（partial unmappings）。)
  * Jeremy Fitzhardinge <jeremy@goop.org>
  */
 int __do_munmap(struct mm_struct *mm, unsigned long start, size_t len,
@@ -3019,7 +3123,7 @@ out:
 	return ret;
 }
 
-/*
+/**
  *  this is really a simplified "do_mmap".  it only handles
  *  anonymous maps.  eventually we may be able to do some
  *  brk-specific accounting here.
@@ -3201,9 +3305,15 @@ void exit_mmap(struct mm_struct *mm)
 	vm_unacct_memory(nr_accounted);
 }
 
-/* Insert vm structure into process list sorted by address
+/** 
+ * 插入VMA
+ * 
+ * Insert vm structure into process list sorted by address
  * and into the inode's i_mmap tree.  If vm_file is non-NULL
  * then i_mmap_rwsem is taken here.
+ * 
+ * @param mm 进程的内存描述符
+ * 
  */
 int insert_vm_struct(struct mm_struct *mm, struct vm_area_struct *vma)
 {

@@ -97,6 +97,9 @@ static inline int test_ti_thread_flag(struct thread_info *ti, int flag)
 #define test_thread_flag(flag) \
 	test_ti_thread_flag(current_thread_info(), flag)
 
+/**
+ * TIF_NEED_RESCHED 是 Linux 内核调度器中的一个极其重要的线程信息标志（Thread Information Flag）。它的名字就完美地解释了它的作用：需要重新调度
+ */
 #define tif_need_resched() test_thread_flag(TIF_NEED_RESCHED)
 
 #ifndef CONFIG_HAVE_ARCH_WITHIN_STACK_FRAMES

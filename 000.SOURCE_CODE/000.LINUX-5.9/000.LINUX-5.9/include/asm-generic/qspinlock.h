@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0-or-later */
 /*
- * Queued spinlock
+ * Queued spinlock  排队自旋锁
  *
  * (C) Copyright 2013-2015 Hewlett-Packard Development Company, L.P.
  * (C) Copyright 2015 Hewlett-Packard Enterprise Development LP
@@ -72,6 +72,9 @@ extern void queued_spin_lock_slowpath(struct qspinlock *lock, u32 val);
 
 #ifndef queued_spin_lock
 /**
+ * 
+ * 内核5.x+是排队自旋锁，参考:[Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#1.3　经典自旋锁
+ * 
  * queued_spin_lock - acquire a queued spinlock (获取排队自旋锁)
  * @lock: Pointer to queued spinlock structure
  * 
@@ -88,17 +91,18 @@ extern void queued_spin_lock_slowpath(struct qspinlock *lock, u32 val);
  * #8  __raw_spin_lock (lock=0xffff800011e2abd8 <logbuf_lock>) at ./include/linux/spinlock_api_smp.h:154
  *
  */
-static __always_inline  void queued_spin_lock(struct qspinlock *lock)
+static __always_inline void queued_spin_lock(struct qspinlock *lock)
 {
 	u32 val = 0;
-    
-	/**
-	 * 先加乐观锁
-	 */
-	if (likely(atomic_try_cmpxchg_acquire(&lock->val, &val, _Q_LOCKED_VAL)))
-		return;
 
-	// 没有获取到锁，进入队列等待获取锁
+	/**
+	 * 先加乐观锁 , 注意，这是给自旋锁 （后面的是MCS锁）， 获取到了MCS锁不代表可以获取自旋锁
+	 */
+	if (likely(atomic_try_cmpxchg_acquire(&lock->val, &val, _Q_LOCKED_VAL))) {
+		return;
+	}
+
+	// 没有获取到锁，进入队列等待获取锁 (CPU0已获取锁，CPU1尝试获取锁): qspinlock.c 
 	queued_spin_lock_slowpath(lock, val);
 }
 #endif

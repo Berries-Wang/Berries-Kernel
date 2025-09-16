@@ -229,6 +229,9 @@ static inline void start_thread(struct pt_regs *regs, unsigned long pc,
 	regs->sp = sp;
 }
 
+/**
+ * is_ttbr0_addr()判断异常地址是否发生在用户空间。小于TASK_SIZE的地址是用户空间的地址
+ */
 static inline bool is_ttbr0_addr(unsigned long addr)
 {
 	/* entry assembly clears tags for TTBR0 addrs */

@@ -20,17 +20,27 @@
 #include <linux/osq_lock.h>
 #endif
 
-/*
+/**
  * For an uncontended rwsem, count and owner are the only fields a task
  * needs to touch when acquiring the rwsem. So they are put next to each
  * other to increase the chance that they will share the same cacheline.
- *
+ * (对于无竞争的读写信号量（rwsem），任务获取信号量时只需要访问count和owner这两个字段。
+ * 因此将它们相邻放置是为了增加它们共享同一缓存行的概率。)
+ * > arch/arm64/include/asm/cache.h:31:#define L1_CACHE_BYTES (1 << L1_CACHE_SHIFT)
+ * 缓存行大小 64字节 , 那就足够空间放下
+ * 
  * In a contended rwsem, the owner is likely the most frequently accessed
  * field in the structure as the optimistic waiter that holds the osq lock
  * will spin on owner. For an embedded rwsem, other hot fields in the
  * containing structure should be moved further away from the rwsem to
  * reduce the chance that they will share the same cacheline causing
  * cacheline bouncing problem.
+ * (在存在竞争的读写信号量（rwsem）中，owner字段很可能成为结构体中被访问最频繁的字段，
+ * 因为持有osq锁的乐观等待者会持续在owner字段上自旋。
+ * 对于嵌入式（embedded）读写信号量，所在结构体中的其他热点字段应当远离该读写信号量，
+ * 以降低它们共享同一缓存行的概率，从而避免缓存行颠簸问题)
+ * 
+ * 读写信号量
  */
 struct rw_semaphore {
 	atomic_long_t count;
@@ -38,12 +48,19 @@ struct rw_semaphore {
 	 * Write owner or one of the read owners as well flags regarding
 	 * the current state of the rwsem. Can be used as a speculative
 	 * check to see if the write owner is running on the cpu.
+	 * (写出所有者或其中一位读取所有者以及关于rwsem当前状态的标志。可用作推测性检查，以判断写入所有者是否正在该CPU上运行。)
+	 * 
+	 * 当写者成功获取锁时，owner指向锁持有者的task_struct数据结构
+	 * 
+	 * 最后三位是有特殊意义的: RWSEM_READER_OWNED RWSEM_RD_NONSPINNABLE RWSEM_WR_NONSPINNABLE
 	 */
 	atomic_long_t owner;
 #ifdef CONFIG_RWSEM_SPIN_ON_OWNER
 	struct optimistic_spin_queue osq; /* spinner MCS lock */
 #endif
+    // 自旋锁，对 count 进行原子性操作和保护
 	raw_spinlock_t wait_lock;
+	// 用于管理所有在该信号量上睡眠的进程，没有获取到锁的进程会睡眠在这个链表上
 	struct list_head wait_list;
 #ifdef CONFIG_DEBUG_RWSEMS
 	void *magic;
@@ -53,7 +70,10 @@ struct rw_semaphore {
 #endif
 };
 
-/* In all implementations count != 0 means locked */
+/** 
+ * In all implementations count != 0 means locked
+ * (在所有实现中，count！=0 表示已经被锁住了)
+ *  */
 static inline int rwsem_is_locked(struct rw_semaphore *sem)
 {
 	return atomic_long_read(&sem->count) != 0;
@@ -120,7 +140,7 @@ static inline int rwsem_is_contended(struct rw_semaphore *sem)
 }
 
 /*
- * lock for reading
+ * lock for reading (申请读锁)
  */
 extern void down_read(struct rw_semaphore *sem);
 extern int __must_check down_read_killable(struct rw_semaphore *sem);
@@ -131,7 +151,7 @@ extern int __must_check down_read_killable(struct rw_semaphore *sem);
 extern int down_read_trylock(struct rw_semaphore *sem);
 
 /*
- * lock for writing
+ * lock for writing (申请写锁)
  */
 extern void down_write(struct rw_semaphore *sem);
 extern int __must_check down_write_killable(struct rw_semaphore *sem);
@@ -142,12 +162,12 @@ extern int __must_check down_write_killable(struct rw_semaphore *sem);
 extern int down_write_trylock(struct rw_semaphore *sem);
 
 /*
- * release a read lock
+ * release a read lock (释放一个读锁)
  */
 extern void up_read(struct rw_semaphore *sem);
 
 /*
- * release a write lock
+ * release a write lock (释放一个写锁)
  */
 extern void up_write(struct rw_semaphore *sem);
 

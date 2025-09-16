@@ -14,6 +14,11 @@ static __always_inline void __local_bh_disable_ip(unsigned long ip, unsigned int
 }
 #endif
 
+/**
+ * local_bh_disable()函数和local_bh_enable()函数是内核中提供的关闭软中断的锁机制，
+ * 它们组成的临界区禁止本地CPU在中断返回前执行软中断，
+ * 这个临界区简称BH临界区（bottom half critical region）
+ */
 static inline void local_bh_disable(void)
 {
 	__local_bh_disable_ip(_THIS_IP_, SOFTIRQ_DISABLE_OFFSET);

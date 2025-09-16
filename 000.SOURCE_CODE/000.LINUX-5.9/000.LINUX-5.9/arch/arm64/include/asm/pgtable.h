@@ -85,6 +85,8 @@ extern unsigned long empty_zero_page[PAGE_SIZE / sizeof(unsigned long)];
  * 
  * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#'表2.2　　访问页表项标志位的函数'
  * pte_present: 判断该页是否在内存中 
+ * 
+ * 在[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#2．follow_page_pte()函数中也描述了该宏的功能
  */
 #define pte_present(pte)	(!!(pte_val(pte) & (PTE_VALID | PTE_PROT_NONE)))
 #define pte_young(pte)		(!!(pte_val(pte) & PTE_AF))
@@ -469,6 +471,9 @@ struct file;
 extern pgprot_t phys_mem_access_prot(struct file *file, unsigned long pfn,
 				     unsigned long size, pgprot_t vma_prot);
 
+/**
+ * pmd_none() 是一个用于检查 页中间目录项 (PMD, Page Middle Directory) 是否为空（未映射）的宏或函数。它通常在处理页表时用于判断某个 PMD 表项是否有效
+ */
 #define pmd_none(pmd)		(!pmd_val(pmd))
 
 #define pmd_bad(pmd)		(!(pmd_val(pmd) & PMD_TABLE_BIT))
@@ -626,6 +631,11 @@ static inline unsigned long pud_page_vaddr(pud_t pud)
 #define pud_ERROR(pud)		__pud_error(__FILE__, __LINE__, pud_val(pud))
 
 #define p4d_none(p4d)		(!p4d_val(p4d))
+/**
+ *
+ * 这里的2，指的是Bit[1]为1的场景吗 ,见[]#图2.4　L0～L2页表项描述符
+ * Bit[1] 表示类型，页表类型：当Bit[1]为1时，表示该描述符包含了指向下一级页表的基地址，是一个页表类型的页表项
+ */
 #define p4d_bad(p4d)		(!(p4d_val(p4d) & 2))
 #define p4d_present(p4d)	(p4d_val(p4d))
 
@@ -685,8 +695,9 @@ static inline unsigned long p4d_page_vaddr(p4d_t p4d)
 #define pgd_ERROR(pgd)		__pgd_error(__FILE__, __LINE__, pgd_val(pgd))
 
 /**
- * pgd_set_fixmap()函数就做这个固定映射的事情，
- * 把PGD页表的物理页面映射到固定映射区域，返回PGD页表的虚拟地址
+ * pgd_set_fixmap()函数就做这个固定映射的事情，把PGD页表的物理页面映射到固定映射区域，返回PGD页表的虚拟地址
+ * 
+ * 借助 `000.LINUX-5.9/arch/arm64/include/asm/fixmap.h` enum fixed_addresses  的注释更好理解
  */
 #define pgd_set_fixmap(addr)	((pgd_t *)set_fixmap_offset(FIX_PGD, addr))
 /**

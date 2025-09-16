@@ -2,7 +2,9 @@
 #ifndef __LINUX_SPINLOCK_H
 #define __LINUX_SPINLOCK_H
 
-/*
+/**
+ * 对照:[Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#1.3　经典自旋锁 学习
+ *
  * include/linux/spinlock.h - generic spinlock/rwlock declarations
  *
  * here's the role of the various spinlock/rwlock related include files:
@@ -210,6 +212,7 @@ do_raw_spin_lock_flags(raw_spinlock_t *lock, unsigned long *flags) __acquires(lo
 
 static inline int do_raw_spin_trylock(raw_spinlock_t *lock)
 {
+	// include/asm-generic/qspinlock.h?
 	int ret = arch_spin_trylock(&(lock)->raw_lock);
 
 	if (ret)
@@ -234,6 +237,9 @@ static inline void do_raw_spin_unlock(raw_spinlock_t *lock) __releases(lock)
  */
 #define raw_spin_trylock(lock)	__cond_lock(lock, _raw_spin_trylock(lock))
 
+/**
+ * _raw_spin_lock 实现在 [000.LINUX-5.9/include/linux/spinlock_api_smp.h]
+ */
 #define raw_spin_lock(lock)	_raw_spin_lock(lock)
 
 #ifdef CONFIG_DEBUG_LOCK_ALLOC
@@ -283,6 +289,8 @@ static inline void do_raw_spin_unlock(raw_spinlock_t *lock) __releases(lock)
 /**
  * _raw_spin_lock_irqsave() 是一个底层自旋锁函数，用于在禁用本地中断的情况下获取自旋锁，
  * 确保临界区的原子性和安全性，尤其适用于中断上下文或要求严格时序的场景
+ * 
+ * _raw_spin_lock_irqsave: include/linux/spinlock_api_smp.h ?
  */
 #define raw_spin_lock_irqsave(lock, flags)		\
 	do {						\
@@ -365,6 +373,10 @@ do {						\
 
 #endif
 
+/**
+ * 自旋锁原型
+ * 
+ */
 static __always_inline void spin_lock(spinlock_t *lock)
 {
 	raw_spin_lock(&lock->rlock);

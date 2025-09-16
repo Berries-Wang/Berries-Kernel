@@ -76,6 +76,15 @@ asmlinkage void notrace el1_sync_handler(struct pt_regs *regs)
 	 * 获取异常原因: `Exception-handling-examples` (006.REFS/learn_the_architecture_-_aarch64_exception_model_102412_0103_02_en.pdf)
 	 * 
 	 * Types of privilege: ESR_ELx (Exception Syndrome Register)
+	 * 
+	 * ESR_ELx_EC_DABT_CUR 啥意思? [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#4.7.1　ARM64缺页异常的底层处理流程
+	 *    ESR_ELx_EC_DABT_CUR：发生在EL1的数据异常。
+     *    ESR_ELx_EC_IABT_CUR：发生在EL1的指令异常。
+     *    ESR_ELx_EC_SYS64：在AArch64状态下，执行MSR、MRS或者系统指令产生的异常。
+     *    ESR_ELx_EC_SP_ALIGN：SP对齐时发生的异常。
+     *    ESR_ELx_EC_PC_ALIGN：PC指针对齐时发生的异常。
+     *    ESR_ELx_EC_UNKNOWN：发生在EL1的未知异常。
+     *    ESR_ELx_EC_BREAKPT_CUR：调试时发生的异常。
 	 */
 	unsigned long esr = read_sysreg(esr_el1);
 

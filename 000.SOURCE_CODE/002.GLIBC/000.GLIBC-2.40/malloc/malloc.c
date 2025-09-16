@@ -2705,12 +2705,13 @@ sysmalloc (INTERNAL_SIZE_T nb, mstate av)
        */
 
       if (size > 0)
-        {
-          brk = (char *) (MORECORE (size));
+	{
+    // 使用 brk 扩展堆??? 是的，MORECORE就是定义在本文件中的宏，会触发brk系统调用
+	  brk = (char *) (MORECORE (size));
 	  if (brk != (char *) (MORECORE_FAILURE))
 	    madvise_thp (brk, size);
-          LIBC_PROBE (memory_sbrk_more, 2, brk, size);
-        }
+	  LIBC_PROBE (memory_sbrk_more, 2, brk, size);
+	}
 
       if (brk == (char *) (MORECORE_FAILURE))
         {
@@ -6015,6 +6016,7 @@ weak_alias (__malloc_info, malloc_info)
 
 strong_alias (__libc_calloc, __calloc) weak_alias (__libc_calloc, calloc)
 strong_alias (__libc_free, __free) strong_alias (__libc_free, free)
+// malloc 别名定义
 strong_alias (__libc_malloc, __malloc) strong_alias (__libc_malloc, malloc)
 strong_alias (__libc_memalign, __memalign)
 weak_alias (__libc_memalign, memalign)

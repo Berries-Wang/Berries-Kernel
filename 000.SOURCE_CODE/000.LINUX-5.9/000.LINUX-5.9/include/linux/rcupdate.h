@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: GPL-2.0+ */
-/*
+/**
  * Read-Copy Update mechanism for mutual exclusion
  *
  * Copyright IBM Corporation, 2001
@@ -15,6 +15,14 @@
  * For detailed explanation of Read-Copy Update mechanism see -
  *		http://lse.sourceforge.net/locking/rcupdate.html
  *
+ * 
+ * RCU : Read-Copy-Update
+ * 先阅读:[Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#1.10　RCU
+ * 
+ * RCU机制的原理可以概括为RCU记录了所有指向共享数据的指针的使用者，
+ * 当要修改共享数据时，首先创建一个副本，在副本中修改。所有读者线程离开读者临界区之后，指针指向修改后的副本，并且删除旧数据。
+ *
+ * rcu_read_lock()/ rcu_read_unlock()：组成一个RCU读者临界区。
  */
 
 #ifndef __LINUX_RCUPDATE_H
@@ -35,9 +43,16 @@
 #define ulong2long(a)		(*(long *)(&(a)))
 
 /* Exported common interfaces */
+
+/**
+ * call_rcu()：注册一个回调函数，当所有现存的读访问完成后，调用这个回调函数销毁旧数据。
+ */
 void call_rcu(struct rcu_head *head, rcu_callback_t func);
 void rcu_barrier_tasks(void);
 void rcu_barrier_tasks_rude(void);
+/**
+ * synchronize_rcu()：同步等待所有现存的读访问完成。
+ */
 void synchronize_rcu(void);
 
 #ifdef CONFIG_PREEMPT_RCU
@@ -403,6 +418,9 @@ static inline void rcu_preempt_sleep_check(void) { }
  * macros, this execute-arguments-only-once property is important, so
  * please be careful when making changes to rcu_assign_pointer() and the
  * other macros that it invokes.
+ * 
+ * rcu_assign_pointer()：通常用于写者线程。在写者线程完成新数据的修改后，
+ * 调用该接口可以让被 RCU 保护的指针指向新创建的数据，用 RCU 的术语是发布了更新后的数据。
  */
 #define rcu_assign_pointer(p, v)					      \
 do {									      \
@@ -540,6 +558,8 @@ do {									      \
 	__rcu_dereference_protected((p), (c), __rcu)
 
 /**
+ * [Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#1.10　RCU
+ * 
  * rcu_dereference() - fetch RCU-protected pointer for dereferencing
  * @p: The pointer to read, prior to dereferencing
  *
@@ -547,6 +567,8 @@ do {									      \
  * 在 Linux 内核中，rcu_dereference_check() 是一个用于 安全访问 RCU（Read-Copy-Update）保护数据 的宏，
  * 它结合了 RCU 解引用 和 运行时检查 的功能，确保在访问共享数据时既满足 RCU 的同步规则，
  * 又符合额外的条件（如锁状态、上下文约束等）
+ * 
+ * rcu_dereference()：用于获取被RCU保护的指针，读者线程要访问RCU保护的共享数据，需要使用该函数创建一个新指针，并且指向被RCU保护的指针
  */
 #define rcu_dereference(p) rcu_dereference_check(p, 0)
 
@@ -589,7 +611,7 @@ do {									      \
 #define rcu_pointer_handoff(p) (p)
 
 /**
- * rcu_read_lock() - mark the beginning of an RCU read-side critical section
+ * rcu_read_lock() - mark the beginning of an RCU read-side critical section (标记一个RCU读取侧临界区的开始)
  *
  * When synchronize_rcu() is invoked on one CPU while other CPUs
  * are within RCU read-side critical sections, then the
@@ -598,6 +620,10 @@ do {									      \
  * on one CPU while other CPUs are within RCU read-side critical
  * sections, invocation of the corresponding RCU callback is deferred
  * until after the all the other CPUs exit their critical sections.
+ * (当某个CPU上调用synchronize_rcu()时，若其他CPU正处于RCU读取侧临界区内，
+ * 则可确保synchronize_rcu()会一直阻塞，直到所有其他CPU都退出其临界区。
+ * 类似地，如果在某个CPU上调用call_rcu()时其他CPU正处于RCU读取侧临界区内，
+ * 则相应RCU回调函数的执行将推迟到所有其他CPU退出其临界区之后。)
  *
  * Note, however, that RCU callbacks are permitted to run concurrently
  * with new RCU read-side critical sections.  One way that this can happen
@@ -610,16 +636,27 @@ do {									      \
  * therefore might be referencing something that the corresponding RCU
  * callback would free up) has completed before the corresponding
  * RCU callback is invoked.
+ * (但请注意，RCU回调函数允许与新的RCU读取侧临界区并发执行。可能的发生场景如下事件序列所示：
+ * （1）CPU 0进入RCU读取侧临界区；
+ * （2）CPU 1调用call_rcu()注册RCU回调函数；
+ * （3）CPU 0退出RCU读取侧临界区；
+ * （4）CPU 2进入新的RCU读取侧临界区；
+ * （5）RCU回调函数开始执行。
+ * 这种并发是合法的，因为与call_rcu()并发执行的RCU读取侧临界区（可能正在访问对应RCU回调函数将要释放的资源）已在回调函数执行前完成。)
  *
  * RCU read-side critical sections may be nested.  Any deferred actions
  * will be deferred until the outermost RCU read-side critical section
  * completes.
+ * (RCU读取侧临界区可以嵌套。任何延迟执行的操作都将被推迟到最外层的RCU读取侧临界区完成后才会执行。)
  *
  * You can avoid reading and understanding the next paragraph by
  * following this rule: don't put anything in an rcu_read_lock() RCU
  * read-side critical section that would block in a !PREEMPTION kernel.
  * But if you want the full story, read on!
- *
+ * (您可以遵循以下规则来避免阅读和理解下一段内容：
+ * 不要在rcu_read_lock()的RCU读取侧临界区内放置任何会在!PREEMPTION（非抢占）内核中导致阻塞的代码。但若想了解完整原因，请继续阅读！)
+ * >>> RCU 中不允许阻塞!!!
+ * 
  * In non-preemptible RCU implementations (pure TREE_RCU and TINY_RCU),
  * it is illegal to block while in an RCU read-side critical section.
  * In preemptible RCU implementations (PREEMPT_RCU) in CONFIG_PREEMPTION
@@ -628,10 +665,25 @@ do {									      \
  * implementations in real-time (with -rt patchset) kernel builds, RCU
  * read-side critical sections may be preempted and they may also block, but
  * only when acquiring spinlocks that are subject to priority inheritance.
+ * (在不可抢占的RCU实现（纯TREE_RCU和TINY_RCU）中，在RCU读取侧临界区内阻塞是非法的。
+ * 在CONFIG_PREEMPTION内核构建的可抢占RCU实现（PREEMPT_RCU）中，RCU读取侧临界区可以被抢占，但显式阻塞仍然是非法的。
+ * 最后，在实时内核（搭载-rt补丁集）构建的可抢占RCU实现中，RCU读取侧临界区既可以被抢占也可以阻塞，但仅限于获取支持优先级继承的自旋锁时。)
  */
 static __always_inline void rcu_read_lock(void)
 {
+	// 禁止内核抢占
 	__rcu_read_lock();
+	/**
+	 * RCU 是什么?
+	 *  告诉静态分析工具：从这里开始"持有"RCU锁 ， 本身并不执行实际的锁操作
+	 * > include/linux/compiler_types.h
+	 * 
+	 * 它的主要作用是告诉编译器：“从这里开始，我们进入了由 RCU 机制保护的读端临界区（read-side critical section）”
+	 * 
+	 * __acquire() 及其对应的 __release() 这些注解，主要用于内核的锁机制验证。它们能帮助 Sparse 这类静态代码分析工具理解代码的锁状态，从而检测潜在的锁相关bug
+	 * 
+	 * __acquire(RCU) 本身不直接执行任何上锁或解锁操作（RCU 读侧临界区的实际保护是通过 preempt_disable() 和 preempt_enable() 实现的），但它为分析工具提供了关键信息
+	 */
 	__acquire(RCU);
 	rcu_lock_acquire(&rcu_lock_map);
 	RCU_LOCKDEP_WARN(!rcu_is_watching(),
@@ -650,6 +702,7 @@ static __always_inline void rcu_read_lock(void)
 
 /**
  * rcu_read_unlock() - marks the end of an RCU read-side critical section.
+ *                     (标记一个RCU读取侧临界区的结束。)
  *
  * In most situations, rcu_read_unlock() is immune from deadlock.
  * However, in kernels built with CONFIG_RCU_BOOST, rcu_read_unlock()
@@ -658,6 +711,10 @@ static __always_inline void rcu_read_lock(void)
  * priority-inheritance spinlocks.  This means that deadlock could result
  * if the caller of rcu_read_unlock() already holds one of these locks or
  * any lock that is ever acquired while holding them.
+ * (在大多数情况下，rcu_read_unlock() 不会发生死锁。然而，在使用 CONFIG_RCU_BOOST 构建的内核中，
+ * rcu_read_unlock() 需要负责解除优先级提升（deboosting），这个操作通过 rt_mutex_unlock() 实现。
+ * 不幸的是，该函数会获取调度器的运行队列锁和优先级继承自旋锁。这意味着如果 rcu_read_unlock() 的调用者已经持有上述锁之一，
+ * 或持有任何在获取这些锁期间可能被获取的锁，就可能导致死锁)
  *
  * That said, RCU readers are never priority boosted unless they were
  * preempted.  Therefore, one way to avoid deadlock is to make sure
@@ -666,6 +723,9 @@ static __always_inline void rcu_read_lock(void)
  * rt_mutex_unlock()'s locks held.  Such preemption can be avoided in
  * a number of ways, for example, by invoking preempt_disable() before
  * critical section's outermost rcu_read_lock().
+ * (需要说明的是，除非被抢占，否则RCU读取者永远不会被优先级提升。因此，避免死锁的一种方法是：
+ * 确保在任何RCU读取侧临界区内都不会发生抢占——尤其是当该临界区的最外层rcu_read_unlock()是在持有rt_mutex_unlock()相关锁的情况下被调用时。
+ * 可通过多种方式避免此类抢占，例如在临界区的最外层rcu_read_lock()之前调用preempt_disable()。)
  *
  * Given that the set of locks acquired by rt_mutex_unlock() might change
  * at any time, a somewhat more future-proofed approach is to make sure
@@ -673,11 +733,15 @@ static __always_inline void rcu_read_lock(void)
  * section whose outermost rcu_read_unlock() is called with irqs disabled.
  * This approach relies on the fact that rt_mutex_unlock() currently only
  * acquires irq-disabled locks.
+ * (考虑到 rt_mutex_unlock() 所获取的锁集合可能随时变化，一种更具前瞻性的方法是：
+ * 确保在任何RCU读取侧临界区内都不会发生抢占——尤其是当该临界区的最外层 rcu_read_unlock() 是在禁用中断（irqs disabled）的情况下被调用时。
+ * 这种方法基于当前事实：rt_mutex_unlock() 目前仅获取那些会禁用中断的锁。)
  *
  * The second of these two approaches is best in most situations,
  * however, the first approach can also be useful, at least to those
  * developers willing to keep abreast of the set of locks acquired by
  * rt_mutex_unlock().
+ * (在这两种方法中，第二种适用于大多数场景。但第一种方法同样具有实用价值——至少对那些愿意持续关注 rt_mutex_unlock() 所获取锁集合变化的开发者而言是如此。)
  *
  * See rcu_read_lock() for more information.
  */

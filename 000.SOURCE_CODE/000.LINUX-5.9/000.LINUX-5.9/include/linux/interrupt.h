@@ -92,7 +92,7 @@ enum {
 typedef irqreturn_t (*irq_handler_t)(int, void *);
 
 /**
- * struct irqaction - per interrupt action descriptor
+ * struct irqaction - per interrupt action descriptor (每个中断irqaction的描述符)
  * @handler:	interrupt handler function
  * @name:	name of the device
  * @dev_id:	cookie to identify the device
@@ -108,18 +108,18 @@ typedef irqreturn_t (*irq_handler_t)(int, void *);
  * @dir:	pointer to the proc/irq/NN/name entry
  */
 struct irqaction {
-	irq_handler_t		handler;
-	void			*dev_id;
-	void __percpu		*percpu_dev_id;
-	struct irqaction	*next;
-	irq_handler_t		thread_fn;
-	struct task_struct	*thread;
+	irq_handler_t		handler;                // 主处理程序的指针
+	void			    *dev_id;                // 传递给中断处理程序的参数
+	void __percpu		*percpu_dev_id;         // 
+	struct irqaction	*next;                  // 指向下一个中断irqaction的描述符
+	irq_handler_t		thread_fn;              // 中断线程处理程序的函数指针
+	struct task_struct	*thread;                // 中断线程的task_struct数据结构
 	struct irqaction	*secondary;
-	unsigned int		irq;
-	unsigned int		flags;
+	unsigned int		irq;                    // 软件中断号
+	unsigned int		flags;                  // 注册中断时用的中断标志位，以IRQF_开头
 	unsigned long		thread_flags;
 	unsigned long		thread_mask;
-	const char		*name;
+	const char		    *name;                  // 注册中断的名称。
 	struct proc_dir_entry	*dir;
 } ____cacheline_internodealigned_in_smp;
 
@@ -129,19 +129,41 @@ extern irqreturn_t no_action(int cpl, void *dev_id);
  * If a (PCI) device interrupt is not connected we set dev->irq to
  * IRQ_NOTCONNECTED. This causes request_irq() to fail with -ENOTCONN, so we
  * can distingiush that case from other error returns.
+ * (如果（PCI）设备中断未连接，我们将 dev->irq 设置为 IRQ_NOTCONNECTED。
+ * 这将导致 request_irq() 失败并返回 -ENOTCONN 错误码，
+ * 从而我们可以将此情况与其他错误返回值区分开来。)
  *
  * 0x80000000 is guaranteed to be outside the available range of interrupts
  * and easy to distinguish from other possible incorrect values.
+ * (0x80000000 这个值可确保位于可用中断范围之外，并且能轻松与其他可能的错误值区分开来)
  */
 #define IRQ_NOTCONNECTED	(1U << 31)
 
+/**
+ * 为什么会有这个? 先有 request_irq ， 再有request_threaded_irq
+ * > [Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#第2章　中断管理
+ * 
+ * 线程化的中断注册函数
+ * 
+ * 中断线程化是实时Linux项目开发的一个新特性，目的是降低中断处理对系统实时延迟的影响
+ * 
+ * 中断线程化的目的是把中断处理中一些繁重的任务作为内核线程来运行，
+ * 实时进程可以比中断线程有更高的优先级。这样高优先级的实时进程可以得到优先处理，实时进程的延迟粒度小得多。
+ * 当然，并不是所有的中断都可以线程化，如时钟中断。
+ * 
+ * @param thread_fn 中断线程化的处理程序。如果thread_fn不为NULL，那么会创建一个内核线程。primary handler和thread_fn不能同时为NULL
+ * @param handler：指主处理程序，有点类似于旧版本接口函数request_irq()的中断处理程序。
+ *                 中断发生时会优先执行主处理程序。如果主处理程序为NULL且thread_fn不为NULL，
+ *                 那么会执行系统默认的主处理程序——irq_default_primary_handler()函数。
+ */
 extern int __must_check
 request_threaded_irq(unsigned int irq, irq_handler_t handler,
 		     irq_handler_t thread_fn,
 		     unsigned long flags, const char *name, void *dev);
 
 /**
- * request_irq - Add a handler for an interrupt line
+ * request_irq - Add a handler for an interrupt line 
+ *              (注册中断处理程序)
  * @irq:	The interrupt line to allocate
  * @handler:	Function to be called when the IRQ occurs.
  *		Primary handler for threaded interrupts
@@ -548,13 +570,15 @@ enum
  */
 extern const char * const softirq_to_name[NR_SOFTIRQS];
 
-/* softirq mask and active fields moved to irq_cpustat_t in
+/** softirq mask and active fields moved to irq_cpustat_t in
  * asm/hardirq.h to get better cache usage.  KAO
  */
 
-struct softirq_action
-{
-	void	(*action)(struct softirq_action *);
+ /**
+  * 软中断的数据结构
+  */
+struct softirq_action {
+	void (*action)(struct softirq_action *);
 };
 
 asmlinkage void do_softirq(void);
@@ -569,11 +593,21 @@ static inline void do_softirq_own_stack(void)
 }
 #endif
 
+/**
+ * open_softirq()函数可以注册一个软中断，其中参数nr是软中断的序号
+ */
 extern void open_softirq(int nr, void (*action)(struct softirq_action *));
 extern void softirq_init(void);
 extern void __raise_softirq_irqoff(unsigned int nr);
 
+/**
+ * 触发软中断，与 raise_softirq 的区别在于是否主动关闭本地中断
+ */
 extern void raise_softirq_irqoff(unsigned int nr);
+/**
+ * raise_softirq 函数是主动触发一个软中断的接口函数
+ *    > 会关闭本地中断
+ */
 extern void raise_softirq(unsigned int nr);
 
 DECLARE_PER_CPU(struct task_struct *, ksoftirqd);
@@ -583,40 +617,58 @@ static inline struct task_struct *this_cpu_ksoftirqd(void)
 	return this_cpu_read(ksoftirqd);
 }
 
-/* Tasklets --- multithreaded analogue of BHs.
-
-   This API is deprecated. Please consider using threaded IRQs instead:
-   https://lore.kernel.org/lkml/20200716081538.2sivhkj4hcyrusem@linutronix.de
-
-   Main feature differing them of generic softirqs: tasklet
-   is running only on one CPU simultaneously.
-
-   Main feature differing them of BHs: different tasklets
-   may be run simultaneously on different CPUs.
-
-   Properties:
-   * If tasklet_schedule() is called, then tasklet is guaranteed
-     to be executed on some cpu at least once after this.
-   * If the tasklet is already scheduled, but its execution is still not
-     started, it will be executed only once.
-   * If this tasklet is already running on another CPU (or schedule is called
-     from tasklet itself), it is rescheduled for later.
-   * Tasklet is strictly serialized wrt itself, but not
-     wrt another tasklets. If client needs some intertask synchronization,
-     he makes it with spinlocks.
+/** Tasklets --- multithreaded analogue of BHs.(多线程模拟的BHs。)
+ * tasklet是利用软中断实现的一种下半部机制，本质上是软中断的一个变体，运行在软中断上下文中
+ *
+ *  This API is deprecated. Please consider using threaded IRQs instead:
+ *  https://lore.kernel.org/lkml/20200716081538.2sivhkj4hcyrusem@linutronix.de
+ *
+ *  Main feature differing them of generic softirqs: tasklet
+ *  is running only on one CPU simultaneously.
+ * (与通用软中断（generic softirqs）的主要区别在于：任务束（tasklet）同时只能在单个CPU上运行。)
+ *
+ *  Main feature differing them of BHs: different tasklets
+ *  may be run simultaneously on different CPUs.
+ * (与BHs（底半部）的主要区别在于：不同的任务束（tasklets）可以在不同的CPU上同时运行。)
+ *
+ *  Properties:
+ *  * If tasklet_schedule() is called, then tasklet is guaranteed
+ *    to be executed on some cpu at least once after this.
+ *    (如果调用了 tasklet_schedule()，则保证该任务束（tasklet）在此之后至少会在某个 CPU 上执行一次。)
+ * 
+ *  * If the tasklet is already scheduled, but its execution is still not
+ *    started, it will be executed only once.
+ *   (如果该任务束已被调度但尚未开始执行，则它只会被执行一次。)
+ * 
+ *  * If this tasklet is already running on another CPU (or schedule is called
+ *    from tasklet itself), it is rescheduled for later.
+ *    (如果该任务束正在另一个 CPU 上运行（或从其自身内部调用调度），则它会被重新调度以稍后执行)
+ * 
+ *  * Tasklet is strictly serialized wrt itself, but not
+ *    wrt another tasklets. If client needs some intertask synchronization,
+ *    he makes it with spinlocks.
+ *   (任务束严格与自身串行化（即同一任务束实例不并行），但不与其他任务束串行化。
+ * 若需要任务间同步，客户端需自行使用自旋锁（spinlocks）实现)
+ * 
+ * 
+ * tasklet 在什么时候执行呢?
+ * 
+ * tasklet是基于软中断机制的，因此tasklet_schedule()函数后不会立刻执行，
+ * 要等到软中断被执行时才有机会执行tasklet，
+ * tasklet挂入哪个CPU的tasklet_vec链表，就由哪个CPU的软中断来执行
+ * 
  */
-
 struct tasklet_struct
 {
-	struct tasklet_struct *next;
-	unsigned long state;
-	atomic_t count;
-	bool use_callback;
+	struct tasklet_struct *next;         // 多个tasklet组成一个链表
+	unsigned long state;                 // TASKLET_STATE_SCHED表示tasklet已经被调度，正准备运行。TASKLET_STATE_RUN表示tasklet正在运行中
+	atomic_t count;                      // 若为0，表示tasklet处于激活状态；若不为0，表示该tasklet被禁止，不允许执行。
+	bool use_callback;                   // 
 	union {
-		void (*func)(unsigned long data);
-		void (*callback)(struct tasklet_struct *t);
+		void (*func)(unsigned long data); // tasklet处理程序，类似于软中断中的action函数指针。
+		void (*callback)(struct tasklet_struct *t); // 
 	};
-	unsigned long data;
+	unsigned long data;                             // 传递参数给tasklet处理函数。
 };
 
 #define DECLARE_TASKLET(name, _callback)		\

@@ -9,6 +9,12 @@
  * Released under the General Public License (GPL).
  */
 
+
+/**
+ * 自旋锁
+ * 
+ * 对照:[Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#1.3　经典自旋锁 学习
+ */
 #if defined(CONFIG_SMP)
 # include <asm/spinlock_types.h>
 #else

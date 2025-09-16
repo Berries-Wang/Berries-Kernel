@@ -539,7 +539,7 @@ static bool __wake_q_add(struct wake_q_head *head, struct task_struct *task)
 }
 
 /**
- * wake_q_add() - queue a wakeup for 'later' waking.
+ * wake_q_add() - queue a wakeup for 'later' waking.(讲唤醒操作添加到队列稍后执行)
  * @head: the wake_q_head to add @task to
  * @task: the task to queue for 'later' wakeup
  *
@@ -552,12 +552,14 @@ static bool __wake_q_add(struct wake_q_head *head, struct task_struct *task)
  */
 void wake_q_add(struct wake_q_head *head, struct task_struct *task)
 {
-	if (__wake_q_add(head, task))
+	if (__wake_q_add(head, task)) {
+		// 添加一下计数
 		get_task_struct(task);
+	}
 }
 
 /**
- * wake_q_add_safe() - safely queue a wakeup for 'later' waking.
+ * wake_q_add_safe() - safely queue a wakeup for 'later' waking. (安全地将唤醒操作加入队列以供“稍后”执行)
  * @head: the wake_q_head to add @task to
  * @task: the task to queue for 'later' wakeup
  *
@@ -592,11 +594,15 @@ void wake_up_q(struct wake_q_head *head)
 		node = node->next;
 		task->wake_q.next = NULL;
 
-		/*
+		/**
 		 * wake_up_process() executes a full barrier, which pairs with
 		 * the queueing in wake_q_add() so as not to miss wakeups.
+		 * (wake_up_process() 执行完整的内存屏障，这与 wake_q_add() 中的入队操作形成配对，
+		 * 从而确保不会遗漏唤醒操作)
 		 */
 		wake_up_process(task);
+
+		// 维护计数器的值
 		put_task_struct(task);
 	}
 }
