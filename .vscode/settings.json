@@ -20,6 +20,7 @@
         "atomic": "c",
         "006.print_bits.h": "c",
         "compiler.h": "c",
-        "atomic_ll_sc.h": "c"
+        "atomic_ll_sc.h": "c",
+        "stdarg.h": "c"
     }
 }
