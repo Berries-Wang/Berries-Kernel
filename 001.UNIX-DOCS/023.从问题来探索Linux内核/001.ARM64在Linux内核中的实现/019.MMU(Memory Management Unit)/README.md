@@ -129,6 +129,106 @@ If concatenated translation tables are used, then software is required to do all
 - Program VTCR_EL2 or VSTCR_EL2 with the initial lookup level.（向 VTCR_EL2 或 VSTTCR_EL2 寄存器写入初始查找级别（Initial Lookup Level））-- 级别，即页表的级别数量
 - 这段话怎么理解?[001.UNIX-DOCS/023.从问题来探索Linux内核/001.ARM64在Linux内核中的实现/019.MMU(Memory Management Unit)/002.解释说明/000.级联转换表工作流程.md](./002.解释说明/000.级联转换表工作流程.md)
 
+
+## D8.2.3 Translation table base address register
+For a translation stage, the translation table base address register, TTBR_ELx, holds the translation table base address of the initial lookup.（TTBR_ELx基地址寄存器保存的是首次查找的翻译表的基地址）
+
+For a translation stage that supports two VA ranges, two translation table base address registers are required.
+- 这个指的是 
+   + 0x0000 0000 0000 0000～0x0000 FFFF FFFF FFFF    (用户空间)
+   + 0xFFFF 0000 0000 0000～0xFFFF FFFF FFFF FFFF    (内核空间)
+- 这两段吗? 是的，这段话怎么理解:
+- ARM架构为了高效、安全地同时管理内核空间和用户空间，将虚拟地址空间划分为两个范围。为了实现每个范围都能有独立的映射规则（即独立的页表），硬件上提供了两个基地址寄存器（TTBR0和TTBR1）来分别指向这两个页表。MMU根据虚拟地址的最高位自动选择使用哪个寄存器，从而实现了内核与用户进程的隔离，以及进程间的快速切换。
+
+Software can use TCR_ELx.TnSZ to configure the translation stage IA size to be smaller than the supported size.(软件可以使用 TCR_ELx.TnSZ 来将转换阶段的输入地址大小配置为小于所支持的大小)
+- 怎么理解? 
+  + 虽然 ARM 处理器硬件能够处理很长的虚拟地址（比如 48 位），但操作系统软件可以通过配置 TCR_ELx 寄存器中的 T0SZ/T1SZ 字段，来告诉 MMU：“我当前使用的虚拟地址空间没用到全部位数，只用了其中的一部分（比如 39 位或 42 位）” ?
+-  ARMv8-A  中支持的最大虚拟地址位宽是多少?
+
+If EL2 is disabled or not implemented, then for the stage 1 EL1&0 regime, all of the following apply:(如果 EL2 被禁用或未实现，那么对于阶段 1 的 EL1&0 转换体系（translation regime），以下所有描述均适用：)
+- The translation table base address held in the TTBR_ELx register is a PA.
+- The translation table base address returned by a Table descriptor is a PA.
+
+If EL2 is enabled, then for all address translation stages other than stage 1 in EL1&0, all of the following apply:
+- The translation table base address held in the TTBR_ELx register is a PA.
+- The translation table base address returned by a Table descriptor is a PA.
+
+
+If EL2 is enabled, then for stage 1 address translations in EL1&0, all of the following apply:(如果 EL2 被启用，那么对于 EL1&0 中的阶段 1 地址转换，以下所有描述均适用): 参考: [EL2 is enabled](./002.解释说明/001.EL2%20is%20enabled.md)
+- The stage 1 translation table base address held in the TTBR_ELx register is an IPA.(存储在 TTBR_ELx 寄存器中的阶段 1 转换表基地址是一个 IPA)
+- The stage 1 translation table base address returned by a Table descriptor is an IPA.(由页表描述符返回的阶段 1 转换表基地址也是一个 IPA)
+- Accesses to stage 1 translation tables are subject to a stage 2 translation.(对阶段 1 转换表的访问需要经过阶段 2 转换)
+- EL2 是和虚拟化相关的内容了,相关术语：
+    + IPA： 中间物理地址。这是 Guest OS（虚拟机）认为自己使用的“物理地址”。然而，它并非真正的硬件物理地址。
+    + 阶段 1 转换： 由 Guest OS 的 MMU 和页表管理的转换，负责将 Guest OS 内的虚拟地址 转换为 IPA。
+    + 阶段 2 转换： 由 Hypervisor（在 EL2）管理的转换，负责将 Guest OS 产生的 IPA 转换为真正的物理地址。
+    + TTBR_ELx 寄存器： Guest OS 内核认为的页表基地址寄存器。
+    + 页表描述符： 页表中的一个条目，指向下一级页表或物理页帧。
+
+For an address translation stage, the translation table base address in TTBR_ELx is defined for the supported OA size of that stage.(对于一个地址转换阶段，TTBR_ELx 中的转换表基地址是针对该阶段所支持的输出地址大小定义的。)
+- 怎么理解? CPU 设计时规定，当你设置 TTBR_ELx 寄存器来指向一个页表时，你必须确保这个页表的格式和预期能够产生的物理地址范围，与当前转换阶段所配置的物理地址位宽 相匹配
+- 如果 MMU 被配置为支持 40 位的物理地址空间（即 OA Size = 40 位），那么存储在 TTBR_ELx 中的页表基地址，以及整个页表的结构，都必须是为生成 40 位物理地址而设计的。你不能在此配置下使用一个只能输出 32 位物理地址的页表结构。
+
+For the VMSAv8-64 translation system, the number of {I}PA bits held in TTBR_ELx is determined by the granule size and OA address size. The bits used for each granule size when using the maximum OA address size of 48 bits or 52 bits are shown in the following table. Software might be required to set one or more of the low-order base address bits to zero to align the table to the table size （对于 VMSAv8-64 转换系统，TTBR_ELx 寄存器中存储的 {中间}物理地址（IPA） 的位数由颗粒大小 和输出地址大小 共同决定。下表（Table D8-10 {I}PA bits held in TTBR_ELx，具体看手册）展示了在使用最大为 48 位或 52 位的输出地址时，每种颗粒大小所使用的地址位。软件可能需要将一个或多个低序位的基本地址位设置为零，以使页表与页表大小对齐。）
+- VMSAv8-64 转换系统： 这是 ARMv8-A 架构中用于 64 位虚拟地址空间的虚拟内存系统架构。
+- {I}PA： 这里的 {I}PA 表示 IPA 或 PA。
+   + 在非虚拟化环境（EL2 禁用）下，它就是 PA。
+   + 在虚拟化环境（EL2 启用）下，对于 EL1&0 的阶段 1 转换，它就是 IPA。
+- TTBR_ELx 中存储的 {I}PA： 指的是 TTBR_ELx 寄存器中存储的页表基地址本身所代表的地址值。这个地址是一个 {I}PA。
+- 颗粒大小： 指页表映射的内存页大小，通常为 4KB、16KB 或 64KB。它决定了页表的结构和层级。
+- 输出地址大小： 指该转换阶段输出的地址位宽，即 {I}PA 的位宽（如 48 位）。
+- 低序位的基本地址位设置为零： 这意味着页表在内存中的起始地址必须是页表本身大小的整数倍。例如，一个占用 4KB 内存的页表，其基地址必须是 4KB 的倍数（即地址的低 12 位必须为 0）。这是一种对齐要求。
+
+If an address translation stage uses an OA size smaller than the maximum, then the upper bits of the translation table base address in TTBR_ELx corresponding to the upper bits of OA size are required to be set by software to zero.（部分高位要设置为0： 如果一个地址转换阶段使用的输出地址大小小于最大值，那么软件必须将 TTBR_ELx 中转换表基地址的、对应于输出地址大小上限的高位部分设置为零）
+
+If TCR_ELx.TnSZ specifies an IA size that is smaller than the maximum size resolved at the initial lookup level, then more low-order TTBR_ELx bits are used to hold the translation table base address.(如果 TCR_ELx.TnSZ 指定的输入地址大小小于在初始查找级别所解析的最大大小，那么将使用更多的 TTBR_ELx 低序位来存储转换表基地址。)
+
+If an address translation stage uses an OA size smaller than the maximum and if the bits above the configured OA size of the translation table base address in TTBR_ELx are not set to zero, then an Address size fault is generated and reports all of the following:（如果某个地址转换阶段使用的输出地址大小小于最大值（上述的 “更高位”不为 0 ），并且 TTBR_ELx 中转换表基地址的高于已配置 OA 大小的位未被设置为零，则将生成一个地址大小错误，并报告以下所有信息：）
+- A translation level 0 lookup as generating the fault, regardless of whether or not the translation stage starts with a level 0 lookup.（将错误报告为由转换等级 0 查找所产生，而无论该转换阶段是否实际从等级 0 查找开始。）
+- The translation stage that generated the fault.（报告生成该错误的转换阶段。）
+- 这是一个硬件错误检查机制
+  ```txt
+    触发条件（错误何时发生）：
+     软件配置了较小的物理地址空间（例如，OA Size = 40位）。
+     但是，软件在设置 TTBR_ELx 寄存器时，写入了超出这个已配置范围的基地址。例如，基地址的第 41 位或更高位不为 0（比如地址是 0x1_0000_8000，而有效的 40 位地址范围是 0x0_0000_0000 到 0x0_FFFF_FFFF）。
+
+    硬件响应（发生什么）：
+      MMU 在开始进行地址转换之前，会先检查 TTBR_ELx 中的值是否符合 TCR_ELx 中配置的 OA 大小规则。
+      一旦发现不符合（即高位非零），MMU 会立即中止本次地址转换，并产生一个同步异常——即地址大小错误。
+  ```
+
+Direct writes to TTBR0_ELx and TTBR1_ELx occur in program order relative to one another, without the need for explicit synchronization. For any one translation, all indirect reads of TTBR0_ELx and TTBR1_ELx that are made as part of the translation observe only one point in that order of direct writes.(对 TTBR0_ELx 和 TTBR1_ELx 的直接写入操作会按照程序顺序相对于彼此执行，无需显式的同步操作。对于任何一次地址转换，作为转换一部分而间接读取 TTBR0_ELx 和 TTBR1_ELx 时，所观察到的都只是那个直接写入顺序中的一个一致的状态点。)
+- ARM 架构为保证内存管理单元行为确定性而提供的内存排序保证
+  ```txt
+     这段话描述了 ARM 架构为保证内存管理单元行为确定性而提供的**内存排序保证**，主要涉及两个方面：
+       **1. 写入顺序（软件视角）：**
+       *   **"直接写入...按照程序顺序"**：这意味着，如果软件代码中先写 `TTBR1_EL1`，紧接着再写 `TTBR0_EL1`，那么硬件保证 `TTBR1_EL1` 的写入一定在 `TTBR0_EL1` 的写入之前对系统可见。
+       *   **"无需显式的同步操作"**：程序员在连续写入这两个寄存器后，不需要插入 `DSB` 这样的内存屏障指令来确保写入顺序。硬件已经为此提供了内在的保证。这简化了操作系统在进行进程切换（更新 TTBR0）或修改内核映射（更新 TTBR1）时的操作。
+       
+       **2. 读取一致性（硬件/MMU 视角）：**
+       *   **"对于任何一次地址转换"**：这是指 MMU 为处理**一条单独的指令**所执行的一次完整的地址翻译过程。
+       *   **"间接读取"**：指 MMU 在翻译一个虚拟地址时，需要自动读取 `TTBR0_ELx` 或 `TTBR1_ELx` 以获取页表基地址。这个读取操作是由硬件自动完成的，而非软件的 `LDR` 指令。
+       *   **"观察到一个一致的状态点"**：这是最核心的保证。它意味着，在翻译**一个**虚拟地址的过程中，无论这个地址是落在 TTBR0 的范围还是 TTBR1 的范围，MMU 看到的这两个寄存器的值，必定是来自**同一次软件写入序列**中的某个瞬间状态。
+  ```
+
+Consistent with the general requirements for direct writes to System registers, direct writes to TTBR_ELx are not required to be observed by indirect reads until completion of a Context synchronization event.（根据对系统寄存器直接写入的通用要求，对 TTBR_ELx 的直接写入，在上下文同步事件完成之前，不要求被间接读取操作所观察到）
+```txt
+关键术语解释：
+    直接写入： 由软件执行的、明确的写入 TTBR_ELx 寄存器的指令（例如 MSR TTBR0_EL1, Xn）。
+    间接读取： 指内存管理单元在进行地址转换时，自动读取 TTBR_ELx 寄存器以获取页表基地址的行为。这不是一条软件指令，而是硬件行为。
+    上下文同步事件： 这是一类特殊的指令或事件，它们能强制让之前所有未完成的系统寄存器配置对后续所有操作可见。最典型的例子是 ISB 指令。
+
+    这意味着，当软件执行一条写入 TTBR_ELx 的指令后，这个新值可能不会立即被正在进行的或新发起的地址转换操作所使用。MMU 可能在一段时间内仍然使用旧的寄存器值。
+
+    为什么会这样？
+      这是为了提升处理器性能。允许硬件延迟应用新的系统寄存器设置，可以避免流水线频繁停顿，使得执行和内存访问单元能够更流畅地工作。
+
+    软件需要做什么？（重要实践）
+      因此，在进行了可能影响后续指令执行的关键系统寄存器（尤其是像 TTBR_ELx 这种改变地址空间的寄存器）配置之后，软件必须主动插入一个上下文同步事件（通常是 ISB 指令），来确保修改能够被后续的指令准确地看到。
+
+```
+
+
 ## Q&A
 ### 如何禁用和启用MMU
 
