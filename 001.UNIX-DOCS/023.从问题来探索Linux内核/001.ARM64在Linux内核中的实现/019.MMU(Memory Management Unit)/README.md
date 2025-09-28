@@ -228,6 +228,89 @@ Consistent with the general requirements for direct writes to System registers, 
 
 ```
 
+---
+
+## D8.2.4 Selection between TTBR0_ELx and TTBR1_ELx when two VA ranges are supported
+If a stage 1 translation regime supports two VA ranges, then the translation regime TTBR_ELx registers point to all of the following address ranges:（如果阶段1转换机制支持两个VA范围，那么该转换机制的TTBR_ELx寄存器将指向以下所有地址范围：）
+- For the lower VA range that begins at address 0x0000000000000000, TTBR0_ELx points to the translation table for the initial lookup level.
+- For the upper VA range that ends at address 0xFFFFFFFFFFFFFFFF, TTBR1_ELx points to the translation table for the initial lookup level
+
+If a stage 1 translation regime supports two VA ranges, then the TCR_ELx.{T0SZ, T1SZ} fields configure all of the following address range sizes:
+- The lower VA range is 0x0000000000000000 to (2^(64-T0SZ) - 1).
+- The upper VA range is (2^64 - 2^(64-T1SZ) ) to 0xFFFFFFFFFFFFFFFF.
+
+If a stage 1 translation regime supports two VA ranges, when an accessed address is not in the lower VA range or the upper VA range, a stage 1 level 0 Translation fault is generated.(若阶段一的翻译机制支持两段虚拟地址，当访问地址既不在低地址范围，也不在高地址范围，那么会产生一个阶段一的级别0的翻译错误)
+
+The following figure illustrates<sup>阐明；举例说明（illustrate 的三单形式）</sup> the two address ranges translated by the tables the TTBR_ELx registers point to.
+
+![Screenshot from 2025-09-27 08-56-40.png](../999.IMGS/Screenshot%20from%202025-09-27%2008-56-40.png)
+- 结合[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure]#▲图2.9　ARM64在Linux 5.0内核的内存分布 学习，简直一样
+  + ![Screenshot from 2025-09-27 09-00-40.png](../999.IMGS/Screenshot%20from%202025-09-27%2009-00-40.png)
+
+If a stage 1 translation regime supports two VA ranges, then all of the following are used to select the TTBR_ELx:(如何选择 TTBR_ELx寄存器)
+- If VA bit[55] is zero, then TTBR0_ELx is selected.
+- If VA bit[55] is one, then TTBR1_ELx is selected.
+- 为什么是 bit[55] , 有些资料里面就是bit[63]<sub>[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure]: 当虚拟地址第63位（简称VA[63]）为1时选择TTBR1；当VA[63]为0时选择TTBR0。</sub> ， 为什么呢?
+   + 难道就因为下面这句话? "VMSAv9-128 translation system" ， 因为目前支持48位(T0SZ=16)的虚拟地址!!!
+     ```
+       个人理解! 使用VA[55] VA[63] 是等价的
+     ```
+
+For the VMSAv9-128 translation system, if a stage 1 translation regime supports two VA ranges, then the maximum supported VA width is 55 bits, and the smallest permitted value of the TnSZ field is 9.（对于VMSAv9-128转换系统，如果阶段1转换机制支持两个VA范围，那么支持的最大VA宽度为55位，且TnSZ字段允许的最小值为9。）
+
+### D8.2.4.1 Preventing EL0 access to halves of the address map<sub>禁止EL0（异常级别0，通常指用户态）访问部分地址映射空间</sub>
+All statements in this section require implementation of FEAT_E0PD.
+
+The TCR_ELx.{E0PD0, E0PD1} fields can be used to prevent EL0 access to the addresses translated by the corresponding TTBR0_ELx or TTBR1_ELx.
+
+When the TCR_ELx.{E0PD0, E0PD1} fields prevent EL0 access to an address translated by TTBR0_ELx or TTBR1_ELx, then a level 0 Translation fault is generated.（当TCR_ELx的{E0PD0, E0PD1}字段阻止EL0访问由TTBR0_ELx或TTBR1_ELx转换的地址时，将产生0级转换错误。）
+
+When the TCR_ELx.{E0PD0, E0PD1} fields generate a level 0 Translation fault, then all of the following apply:
+- The time needed to take the fault should be the same whether or not the address accessed is present in a TLB, to mitigate attacks that use fault timing.（无论访问的地址是否存在于TLB中，触发故障所需的时间都应相同，以防范利用故障时序发起的攻击）
+- The fault generated does not affect any micro-architectural state of the PE in a manner that is different if the address accessed is present in a TLB or not, to prevent this information being used to determine the presence of the address in a TLB.（为确保无法通过此类信息判断某地址是否存在于TLB中，所生成的故障对处理单元微架构状态的影响，不会因访问地址是否存在于TLB中而产生差异。）
+
+## D8.2.5 Translation table and translation table lookup properties
+Translation table and translation table lookup properties include the table size, table alignment, table endianness, and memory attributes.（翻译表和翻译表查找属性包括表大小、表对齐方式、表字节序以及内存属性。）
+
+### D8.2.5.1 Translation table size
+The descriptor size in a translation table entry is one of the following:
+- For the VMSAv8-64 translation system, an eight-byte, or 64-bit, object.
+- For the VMSAv9-128 translation system, a 16-byte, or 128-bit, object.（对于VMSAv9-128转换系统而言，其操作对象为16字节（即128位）的数据单元）
+
+If n is the number of bits resolved by a lookup level, then the number of translation table entries required at that lookup level is 2^n .
+```txt
+  就是说用虚拟地址的那些地址位来作为索引，那么条目数量就是2^n个
+```
+
+The size of a translation table in bytes is determined by multiplying the number of entries by the descriptor size.(翻译表的大小（以字节为单位）由条目数量乘以描述符大小所决定。)
+
+The maximum number of translation table entries is determined by the translation granule size, which is defined by one of the following:（翻译表条目的最大数量由转换粒度大小决定，该大小由以下之一定义：）
+- For a stage 1 translation that supports one VA range, TCR_ELx.TG0.
+- For a stage 1 translation that can support two VA ranges, all of the following:
+  + For the lower VA range, TCR_ELx.TG0.
+  + For the upper VA range, TCR_ELx.TG1.
+- For a stage 2 translation in the Non-secure EL1&0 translation regime, VTCR_EL2.TG0.
+- For a stage 2 translation in the Secure EL1&0 translation regime, one of the following:
+  + If the stage 2 IA is a Non-secure IPA, then VTCR_EL2.TG0.
+  + If the stage 2 IA is a Secure IPA, then VSTCR_EL2.TG0.
+- For a stage 2 translation in the Realm EL1&0 translation regime, VTCR_EL2.TG0.
+
+### D8.2.5.2 Translation table alignment
+A translation table is required to be aligned to one of the following
+- For the VMSAv8-64 translation system, if the translation table has fewer than eight entries and an OA size greater than 48 bits is used, then the table is aligned to 64 bytes.（对于VMSAv8-64转换系统，若翻译表的条目数少于八条且采用大于48位的OA（输出地址）宽度，则该表需按64字节对齐。）
+- Otherwise, the translation table is aligned to the size of that translation table.(否则，该翻译表需按其自身的大小进行对齐)
+
+Only when all of the following are true is it possible to have fewer than 8 translation table entries:
+- The translation table is at the initial lookup level.
+- Concatenated translation tables are not used.
+
+If concatenated translation tables are used, then the concatenated translation tables are required to be aligned to the overall size of the memory occupied by the concatenated translation tables.（若采用级联翻译表，则级联翻译表需按其整体所占内存空间的大小进行对齐）
+```txt
+   需要在代码中求证!!!
+```
+
+## 后续内容看文档吧，内容太多了，有需要再继续查看
+
 
 ## Q&A
 ### 如何禁用和启用MMU
