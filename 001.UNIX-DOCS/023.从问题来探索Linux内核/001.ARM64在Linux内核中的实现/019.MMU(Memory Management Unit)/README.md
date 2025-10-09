@@ -311,6 +311,34 @@ If concatenated translation tables are used, then the concatenated translation t
    需要在代码中求证!!!
 ```
 
+---
+
+## D8.2.8 VMSAv8-64 translation using the 4KB granule <sub>4K粒度的页表翻译</sub>
+All statements in this section and subsections require a translation stage use the VMSAv8-64 translation system.（此部分及所有子部分中的语句均需使用VMSAv8-64地址转换系统进行转换处理。）
+
+Address translations that use the 4KB granule have a 4KB page size. Depending on the settings and supported features, up to 40 address bits are resolved using up to 5 lookup levels.（使用4KB粒度的地址转换具有4KB页面大小。根据配置与支持的功能特性，最多可通过5级查表解析40位地址位。）
+
+Throughout this section, if an address translation stage is not specified, then references to the Effective value of TCR_ELx.DS also apply to VTCR_EL2.DS.(在本节中，若未明确指定地址转换阶段，则所有提及TCR_ELx.DS有效值的情况同样适用于VTCR_EL2.DS)
+
+For the 4KB translation granule, the maximum VA and PA supported by a translation regime is one of the following:(对于4KB转换粒度，转换机制所支持的最大VA与PA为以下之一：)
+- If the Effective value of TCR_ELx.DS is 0, then the maximum VA and PA supported is 48 bits.
+- If the Effective value of TCR_ELx.DS is 1, then the maximum VA and PA supported is 52 bits.
+
+For the 4KB translation granule, if the Effective value of TCR_ELx.DS is 0, then OA[51:48] are treated as 0b0000. ???
+
+For each lookup level supported by the 4KB translation granule, the following table describes the translation table properties at that level.（对于4KB转换粒度所支持的每一级查表，下表描述了该级转换表的属性特征）
+
+> 详细内容（翻译过程、寄存器操作）请看原文档
+
+### 寄存器描述
+##### TCR_ELx.TnSZ
+  - T 代表 Translation Table。
+  - n 通常为 0 或 1，代表两个独立的地址转换区域（例如，在ARMv8中，TCR_EL1.T0SZ控制用户地址空间，TCR_EL1.T1SZ控制内核地址空间）。
+  - SZ 代表 Size。
+  - TnSZ 的值定义了输入地址空间的大小。它指定了不被用于查表的地址位数量，从而间接决定了虚拟地址空间的大小。
+  - 计算公式通常是：VA_Size = 64 - TnSZ。例如，如果 TCR_EL1.T0SZ 设置为 25，那么对应的用户空间虚拟地址大小就是 64 - 25 = 39 位，也就是 512GB 的地址空间。
+
+
 ## 后续内容看文档吧，内容太多了，有需要再继续查看
 
 
