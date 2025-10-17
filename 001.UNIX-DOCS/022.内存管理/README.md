@@ -2,6 +2,8 @@
 - 学习:[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#2.1　ARM64内存管理
 - 学习: 000.LINUX-5.9/Documentation/translations/zh_CN/arm64/memory.txt (Linux 在 AArch64 中的内存布局)
 
+## 使能分页机制
+在没有使能分页机制的系统中，处理器直接寻址物理地址，把物理地址发送到内存控制器中；而在使能了分页机制的系统中，处理器直接寻址虚拟地址，这个地址不会直接发给内存控制器，而是先发送给MMU的硬件单元。MMU负责虚拟地址到物理地址的转换和翻译工作。
 
 ## 内存管理数据结构
 在大部分Linux操作系统中，内存设备的初始化一般在BIOS或BootLoader中完成，然后把DDR存储设备的大小传递给Linux内核，因此从Linux内核的角度来看，DDR存储设备其实就是一段物理内存空间 <sub>[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#3.3.2　内存管理之数据结构</sub>
