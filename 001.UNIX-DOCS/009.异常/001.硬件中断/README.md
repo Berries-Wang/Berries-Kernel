@@ -1,6 +1,9 @@
 # 中断管理
 > 先阅读:[Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#第2章　中断管理
 
+在ARM64架构里，中断属于异常的一种。中断是外部设备通知处理器的一种方式，它会打断处理器正在执行的指令流
+
+
 Linux内核支持众多的处理器架构，因此从系统角度来看，Linux内核的中断管理可以分成如下4层。
 - 硬件层，如CPU和中断控制器的连接。
 - 处理器架构管理层，如CPU中断异常处理。
