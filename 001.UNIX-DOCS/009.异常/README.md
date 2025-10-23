@@ -1,6 +1,9 @@
 # 异常
 学习: [奔跑吧Linux内核（第2版）卷1：基础架构#1.7　ARM64异常处理](006.BOOKs/Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub) <sub>另一个仓库</sub>
 
+## AArch64状态的异常等级
+![20251023114446.jpg](../999.IMGS/20251023114446.jpg)
+
 ## 异常分类
 - 中断
 - 中止
