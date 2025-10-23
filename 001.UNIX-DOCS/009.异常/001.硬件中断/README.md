@@ -1,5 +1,5 @@
 # 中断管理
-> 先阅读:[Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#第2章　中断管理
+> 先阅读:[Run Linux Kernel (2nd Edition) Volume 2: Debugging and Case Analysis.epub]#第2章　中断管理  &  [006.BOOKs/Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub#1.7.1　异常类型]
 
 在ARM64架构里，中断属于异常的一种。中断是外部设备通知处理器的一种方式，它会打断处理器正在执行的指令流
 
@@ -9,6 +9,11 @@ Linux内核支持众多的处理器架构，因此从系统角度来看，Linux�
 - 处理器架构管理层，如CPU中断异常处理。
 - 中断控制器管理层，如IRQ号的映射。
 - Linux内核通用中断处理器层，如中断注册和中断处理。
+
+## 图1.32　中断模型
+[006.BOOKs/Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub#1.7.1　异常类型]
+- ![wechat_2025-10-23_074007_638.png](../../999.IMGS/wechat_2025-10-23_074007_638.png)
+
 
 
 ## 中断处理程序
