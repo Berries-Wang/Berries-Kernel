@@ -32,6 +32,6 @@ ARMv8架构中提供了3种软件产生的异常。这些异常通常是指软�
 
 ---
 
-## 异常发生后的处理
+## 异常发生后的处理<sub>因为处理器硬件不同，异常处理方式不同，因此这里需要结合具体的CPU来分析: arm64</sub>
 当一个异常发生时，CPU内核能感知异常发生，而且会对应生成一个目标异常等级（target exception level）。CPU会自动做如下一些事:
 > 参考: [ARM Architecture Reference Manual, ARMv8, for ARMv8-A architecture profile]

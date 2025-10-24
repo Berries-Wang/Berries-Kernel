@@ -1,4 +1,11 @@
 # NUMA
+先学习[001.UNIX-DOCS/025.NUMA/README.md(另一个Git仓库)](Berries-Kernel:001.UNIX-DOCS/025.NUMA/README.md) & [006.BOOKs/RISC-V Architecture Programming and Practice.pdf#11.2 高速缓存的访问延时](../../006.BOOKs/RISC-V%20Architecture%20Programming%20and%20Practice.pdf) & [奔跑吧Linux内核（第2版）卷1：基础架构#1.1.17　NUMA](../006.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) 再看以下内容
+
+![20251016102238.jpg](./999.VIDEOS/20251016102238.jpg)
+
+请注意，NUMA中的Node是什么意思? Node =  一个物理CPU + 属于他的物理内存插槽<sub>(含义为DDR内存)</sub> ， 例如，购买的 ’华硕STRIX B550-A GAMING 吹雪‘(一个CPU插槽(Socket)+四个物理内存插槽<sub>(含义为DDR内存)</sub>) ， 那么这一个物理内存插槽<sub>(含义为DDR内存)</sub>和所有的4个内存插槽构成一个Node。有些主板支持多Socket，那么每个Socket和属于他的内存插槽<sub>(含义为DDR内存)</sub>构成一个Node，即，这个多Socket主板则存在多个Node。
+- <img src="./999.VIDEOS/810a19d8bc3eb135de0466b7d514c2c3fc1f4492.webp" width="50%"/>
+
 ## 传统SMP架构
 ![Screenshot-SMP.png](./999.IMGS/Screenshot-SMP.png)
 多个CPU对于内存属于同一层级，所有的CPU都通过总线访问内存(Intel)，ARM是通过‘Exclusive accesses’ ，单都是需要进行加锁操作， 随着CPU的处理速度越来越快，这种方式会成为系统瓶颈。NUMA架构能更好地解决这个问题，提升系统性能.
@@ -62,11 +69,3 @@ Vulnerabilities:
 ## NUMA 和物理CPU 内存节点的关系
 ![NUMA](./999.IMGS/Screenshot%202025-09-12%20at%2008-03-39%20一个%20---%20NUMA.png)
 
-
-
-## 参考资料
-- [https://learn.arm.com/learning-paths/servers-and-cloud-computing/tune-network-workloads-on-bare-metal/4_local-numa/](https://learn.arm.com/learning-paths/servers-and-cloud-computing/tune-network-workloads-on-bare-metal/4_local-numa/)
-- [https://www.boost.org/doc/libs/1_89_0/libs/fiber/doc/html/fiber/numa.html](https://www.boost.org/doc/libs/1_89_0/libs/fiber/doc/html/fiber/numa.html)
-- [https://support.huaweicloud.com/usermanual-cce/cce_10_0425.html](https://support.huaweicloud.com/usermanual-cce/cce_10_0425.html)
-- [https://docs.redhat.com/zh-cn/documentation/openshift_container_platform/4.11/html/scalability_and_performance/cnf-numa-aware-scheduling](https://docs.redhat.com/zh-cn/documentation/openshift_container_platform/4.11/html/scalability_and_performance/cnf-numa-aware-scheduling)
-- [Berries-Kernel-NOTE/03.LINUX_NOTES/008.NUMA]
