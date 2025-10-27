@@ -54,6 +54,15 @@ A Generic Interrupt Controller (GIC) takes interrupts from peripherals, prioriti
 
 > 如何路由的，详细参考文档，或需要时再研究透彻，目前目标研究内核，GIC知道大概就行了
 
+
+### Running priority and preemption（优先级被切分为priority group & subpriority, 关于抢占，对比STM32 NVIC学习）
+> 总结就是: priorityGroup 决定是否能被抢占，subPriority来决定处理的顺序(正在执行的中断(A)不会被后续产生的同等priorityGroup的中断(B)所抢占，即使B的subPriority的优先级更高) 
+
+The Binary Point registers split the priority into two fields, group priority and sub-priority, as you can see here: <sup>From: [Learn the architecture - Generic Interrupt Controller v3 and v4#Running priority and preemption](../../006.REFS/learn_the_architecture_-_generic_interrupt_controller_v3_and_v4__overview_198123_0302_03_en.pdf)</sup>
+
+![wechat_2025-10-27_072045_500.png](../999.IMGS/wechat_2025-10-27_072045_500.png)
+
+
 ## Interrupt state machine (中断信号状态变化)
 包含异常处理流程的注意事项:1)怎么才是表示本次异常处理结束;
 
@@ -71,6 +80,7 @@ A Generic Interrupt Controller (GIC) takes interrupts from peripherals, prioriti
 The life cycle of an interrupt depends on whether it is configured to be level-sensitive or edge-triggered:
 - For level-sensitive interrupts, a rising edge on the interrupt input causes the interrupt to become pending, and the interrupt is held asserted until the peripheral de-asserts the interrupt signal.<sub>对于电平敏感中断，中断输入信号的上升沿将触发中断进入挂起状态，且该中断信号会持续保持有效，直至外设撤销中断信号。</sub>
 - For edge-sensitive interrupts, a rising edge on the interrupt input causes the interrupt to become pending, but the interrupt is not held asserted.<sub>对于边沿触发中断，中断输入信号的上升沿会触发中断进入挂起状态，但该中断信号不会持续保持有效。</sub>
+
 
 ---
 
