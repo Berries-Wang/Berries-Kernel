@@ -86,8 +86,24 @@ The life cycle of an interrupt depends on whether it is configured to be level-s
 
 ## 异常发生后的处理<sub>因为处理器硬件不同，异常处理方式不同，因此这里需要结合具体的CPU来分析: arm64</sub>
 当一个异常发生时，CPU内核能感知异常发生，而且会对应生成一个目标异常等级（target exception level）。CPU会自动做如下一些事:
-> 参考: [ARM Architecture Reference Manual, ARMv8, for ARMv8-A architecture profile]
+> 参考: [ARM Architecture Reference Manual, ARMv8, for ARMv8-A architecture profile] & [奔跑吧Linux内核（第2版）卷1：基础架构#1.7.3　异常发生后的处理](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) & [Learn the architecture - AArch64 Exception Model#5. Handling exceptions](../../006.REFS/learn_the_architecture_-_aarch64_exception_model_102412_0103_02_en.pdf)
 
+- 把PSTATE寄存器的值保存到对应目标异常等级的SPSR_ELx寄存器中。
+- 把返回地址保存在对应目标异常等级的ELR中。
+- 把PSTATE寄存器里的DAIF域都设置为1，相当于把调试异常、系统错误、IRQ以及FIQ都关闭了。PSTATE寄存器是ARM v8里新增的寄存器。
+- 对于同步异常，要分析异常的原因，并把具体原因写入ESR_ELx寄存器。
+- 设置SP，指向对应目标异常等级里的栈，自动切换SP到SP_ELx寄存器中。
+- 从异常发生现场的异常等级切换到对应目标异常等级，然后跳转到异常向量表里执行。
+
+上述是ARMv8处理器检测到异常发生后自动做的事情。操作系统需要做的事情是从中断向量表开始，根据异常发生的类型，跳转到合适的异常向量表。异常向量表的每个项会保存一个异常处理的跳转函数，然后跳转到恰当的异常处理函数并处理异常。
+
+当操作系统的异常处理完成后，执行一条ret指令即可从异常返回。这条指令会自动完成如下工作。
+- 从ELR_ELx寄存器中恢复PC指针。
+- 从SPSR_ELx寄存器恢复处理器的状态。
+
+当中断发生时，CPU会把PSTATE寄存器的值保存到对应目标异常等级的SPSR_ELx寄存器中，并且把PSTATE寄存器里的DAIF域都设置为1，这相当于把本地CPU的中断关闭了。
+
+当中断处理完成后，操作系统调用eret指令返回中断现场，那么会把SPSR_ELx寄存器恢复到PSTATE寄存器中，这就相当于把中断打开了
 
 ---
 
