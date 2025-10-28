@@ -2,6 +2,11 @@
 - 学习:[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#2.1　ARM64内存管理
 - 学习: 000.LINUX-5.9/Documentation/translations/zh_CN/arm64/memory.txt (Linux 在 AArch64 中的内存布局)
 
+## ARM64内存管理
+![wechat_2025-10-28_073540_557.png](../003.高速缓存/IMGS/wechat_2025-10-28_073540_557.png)
+> 学习:[奔跑吧Linux内核（第2版）卷1：基础架构#2.1　ARM64内存管理](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub)
+- MMU 提供进程空间（虚拟地址空间） 到 物理地址空间的映射
+
 ## 使能分页机制
 在没有使能分页机制的系统中，处理器直接寻址物理地址，把物理地址发送到内存控制器中；而在使能了分页机制的系统中，处理器直接寻址虚拟地址，这个地址不会直接发给内存控制器，而是先发送给MMU的硬件单元。MMU负责虚拟地址到物理地址的转换和翻译工作。
 
