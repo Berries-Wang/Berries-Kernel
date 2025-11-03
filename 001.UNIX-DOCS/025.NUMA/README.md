@@ -10,6 +10,7 @@
      - ![20251103100323.jpg](./999.IMGS/20251103100323.jpg)
      - 参考手册：[User Manual: 对该图(该主板)有详细介绍](./999.IMGS/server_manual_e_mz73lm2_e_v3.0.pdf)
   + [https://www.gigabyte.cn/Enterprise/Server-Motherboard/MZ73-LM2-rev-3x](https://www.gigabyte.cn/Enterprise/Server-Motherboard/MZ73-LM2-rev-3x)
+       - ![0aa08cb3-6ba2-4100-9082-4f2103a8d9f8.png](./999.IMGS/0aa08cb3-6ba2-4100-9082-4f2103a8d9f8.png)
 
 ## 传统SMP架构
 ![Screenshot-SMP.png](./999.IMGS/Screenshot-SMP.png)
