@@ -8,6 +8,7 @@
   + MZ73-LM2
   + 结构框图 (Node = Socket + 所属于他的内存插槽 , 不同Node之间访问方式)
      - ![20251103100323.jpg](./999.IMGS/20251103100323.jpg)
+     - 参考手册：[User Manual: 对该图(该主板)有详细介绍](./999.IMGS/server_manual_e_mz73lm2_e_v3.0.pdf)
   + [https://www.gigabyte.cn/Enterprise/Server-Motherboard/MZ73-LM2-rev-3x](https://www.gigabyte.cn/Enterprise/Server-Motherboard/MZ73-LM2-rev-3x)
 
 ## 传统SMP架构
