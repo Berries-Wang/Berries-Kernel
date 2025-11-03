@@ -7,9 +7,8 @@
 - ![wechat_2025-11-03_080211_874.png](./999.IMGS/wechat_2025-11-03_080211_874.png)
   + MZ73-LM2
   + 结构框图 (Node = Socket + 所属于他的内存插槽 , 不同Node之间访问方式)
-     - ![MZ73-LM2_BlockDiagram.webp](./999.IMGS/MZ73-LM2_BlockDiagram.webp)
+     - ![20251103100323.jpg](./999.IMGS/20251103100323.jpg)
   + [https://www.gigabyte.cn/Enterprise/Server-Motherboard/MZ73-LM2-rev-3x](https://www.gigabyte.cn/Enterprise/Server-Motherboard/MZ73-LM2-rev-3x)
-     - ![42458b22-d6b6-4a57-90de-f2344cd7fe59.png](./999.IMGS/42458b22-d6b6-4a57-90de-f2344cd7fe59.png)
 
 ## 传统SMP架构
 ![Screenshot-SMP.png](./999.IMGS/Screenshot-SMP.png)
