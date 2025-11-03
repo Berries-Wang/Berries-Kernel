@@ -4,7 +4,9 @@
 ![20251016102238.jpg](./999.VIDEOS/20251016102238.jpg)
 
 请注意，NUMA中的Node是什么意思? Node =  一个物理CPU + 属于他的物理内存插槽<sub>(含义为DDR内存)</sub> ， 例如，购买的 ’华硕STRIX B550-A GAMING 吹雪‘(一个CPU插槽(Socket)+四个物理内存插槽<sub>(含义为DDR内存)</sub>) ， 那么这一个物理内存插槽<sub>(含义为DDR内存)</sub>和所有的4个内存插槽构成一个Node。有些主板支持多Socket，那么每个Socket和属于他的内存插槽<sub>(含义为DDR内存)</sub>构成一个Node，即，这个多Socket主板则存在多个Node。
-- <img src="./999.VIDEOS/810a19d8bc3eb135de0466b7d514c2c3fc1f4492.webp" width="50%"/>
+- ![wechat_2025-11-03_080211_874.png](./999.IMGS/wechat_2025-11-03_080211_874.png)
+  + MZ73-LM2
+  + [https://www.gigabyte.cn/Enterprise/Server-Motherboard/MZ73-LM2-rev-3x](https://www.gigabyte.cn/Enterprise/Server-Motherboard/MZ73-LM2-rev-3x)
 
 ## 传统SMP架构
 ![Screenshot-SMP.png](./999.IMGS/Screenshot-SMP.png)
