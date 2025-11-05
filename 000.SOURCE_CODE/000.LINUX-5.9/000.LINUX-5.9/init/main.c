@@ -834,7 +834,7 @@ void __init __weak arch_call_rest_init(void)
 }
 
 /**
- * Linux 内核启动函数
+ * Linux 内核启动函数 , 得先学习`arch/arm64/kernel/head.S` , 该函数调用是从这个文件开始的
  */
 asmlinkage __visible void __init __no_sanitize_address start_kernel(void)
 {
