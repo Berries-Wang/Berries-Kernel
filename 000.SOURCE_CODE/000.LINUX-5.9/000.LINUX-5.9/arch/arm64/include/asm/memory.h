@@ -58,6 +58,10 @@
  * PAGE_OFFSET: 
  *    以48位虚拟地址为例，_PAGE_OFFSET(48) = -(1 << 48) = -2^48 = 0xFFFF000000000000 即内核地址空间的起始点
  * 
+ * 宏展开: 怎么展开？见 000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/000.Kernel_Build.sh
+ * 
+ * KIMAGE_VADDR: '(((((((-((((1UL))) << ((((48))) - 1))))) + (0x08000000))) + (0x08000000)))'
+ * PHYS_OFFSET: '({ ((void)(sizeof(( long)(memstart_addr & 1)))); memstart_addr; })'
  */
 #define _PAGE_OFFSET(va)	(-(UL(1) << (va)))
 #define PAGE_OFFSET		(_PAGE_OFFSET(VA_BITS))
