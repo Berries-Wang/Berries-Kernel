@@ -21,6 +21,7 @@
         "006.print_bits.h": "c",
         "compiler.h": "c",
         "atomic_ll_sc.h": "c",
-        "stdarg.h": "c"
+        "stdarg.h": "c",
+        "kasan-checks.h": "c"
     }
 }

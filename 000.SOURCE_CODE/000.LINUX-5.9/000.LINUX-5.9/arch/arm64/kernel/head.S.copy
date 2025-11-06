@@ -80,6 +80,8 @@ _head:
 	/*
 	 * This add instruction has no meaningful effect except that
 	 * its opcode forms the magic "MZ" signature required by UEFI.
+	 *
+	 * x13 = x18 + #0x16
 	 */
 	add	x13, x18, #0x16
 	b	primary_entry

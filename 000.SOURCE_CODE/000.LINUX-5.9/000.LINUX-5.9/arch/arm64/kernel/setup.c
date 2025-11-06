@@ -329,7 +329,10 @@ void __init __no_sanitize_address setup_arch(char **cmdline_p)
 	     pr_warn(FW_BUG "Kernel image misaligned at boot, please fix your bootloader!");
 
 	arm64_memblock_init();
-
+    
+	/**
+	 * 内存操作
+	 */
 	paging_init();
 
 	acpi_table_upgrade();
