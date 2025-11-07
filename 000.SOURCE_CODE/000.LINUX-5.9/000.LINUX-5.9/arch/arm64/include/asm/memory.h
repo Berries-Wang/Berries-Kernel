@@ -61,6 +61,9 @@
  * 宏展开: 怎么展开？见 000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/000.Kernel_Build.sh
  * 
  * KIMAGE_VADDR: '(((((((-((((1UL))) << ((((48))) - 1))))) + (0x08000000))) + (0x08000000)))'
+ * > 003.TEST-SPACE/009.KIMAGE_VADDR.c
+ * > 0XFFFF800010000000 ， 还是要和书中示意图中的值区分开,这是虚拟地址
+ * > 这个值还和 ‘KASAN’ 是否开启有关！
  * PHYS_OFFSET: '({ ((void)(sizeof(( long)(memstart_addr & 1)))); memstart_addr; })'
  */
 #define _PAGE_OFFSET(va)	(-(UL(1) << (va)))
@@ -102,10 +105,12 @@
 #define KERNEL_START		_text
 #define KERNEL_END		_end
 
-/*
+/**
  * Generic and tag-based KASAN require 1/8th and 1/16th of the kernel virtual
  * address space for the shadow region respectively. They can bloat the stack
  * significantly, so double the (minimum) stack size when they are in use.
+ * (通用KASAN和基于标签的KASAN分别需要占用内核虚拟地址空间的1/8和1/16作为影子内存区域。
+ * 这两种模式都会显著增加堆栈体积，因此当启用它们时，需要将（最小）堆栈大小扩大一倍。)
  */
 #ifdef CONFIG_KASAN
 #define KASAN_SHADOW_OFFSET	_AC(CONFIG_KASAN_SHADOW_OFFSET, UL)
@@ -205,7 +210,7 @@ extern s64			memstart_addr;
 /* PHYS_OFFSET - the physical address of the start of memory. */
 #define PHYS_OFFSET		({ VM_BUG_ON(memstart_addr & 1); memstart_addr; })
 
-/* the virtual base of the kernel image (minus TEXT_OFFSET) */
+/* the virtual base of the kernel image (minus TEXT_OFFSET (在arch/arm64/Makefile中)) */
 extern u64			kimage_vaddr;
 
 /* the offset between the kernel virtual and physical mappings */
