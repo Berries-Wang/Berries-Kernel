@@ -22,6 +22,7 @@
         "compiler.h": "c",
         "atomic_ll_sc.h": "c",
         "stdarg.h": "c",
-        "kasan-checks.h": "c"
+        "kasan-checks.h": "c",
+        "printk.h": "c"
     }
 }

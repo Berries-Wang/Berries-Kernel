@@ -829,8 +829,9 @@ static bool arm64_early_this_cpu_has_bti(void)
 						    ID_AA64PFR1_BT_SHIFT);
 }
 
-/*
+/**
  * Create fine-grained mappings for the kernel.
+ * (为内核创建精细的映射)
  */
 static void __init map_kernel(pgd_t *pgdp)
 {
@@ -917,6 +918,10 @@ static void __init map_kernel(pgd_t *pgdp)
  */
 void __init paging_init(void)
 {
+	// 输出 swapper_pg_dir 的值(虚拟&物理地址) kimage_voffset
+	printk("swapper_pg_dir is 0x%lx , pa: ox%lx \n", (swapper_pg_dir),(__pa_symbol(swapper_pg_dir)));
+	printk("kimage_voffset is 0x%lx \n", (kimage_voffset));
+
 	/**
 	 * pgd_set_fixmap()函数做一个固定映射，把swapper_pg_dir页表重新映射到固定映射区域
      * 

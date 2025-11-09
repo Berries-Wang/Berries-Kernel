@@ -329,10 +329,8 @@ void __init __no_sanitize_address setup_arch(char **cmdline_p)
 	     pr_warn(FW_BUG "Kernel image misaligned at boot, please fix your bootloader!");
 
 	arm64_memblock_init();
-    
-	/**
-	 * 内存操作
-	 */
+
+	/*内存操作 */
 	paging_init();
 
 	acpi_table_upgrade();
@@ -413,12 +411,17 @@ static void dump_kernel_offset(void)
 	const unsigned long offset = kaslr_offset();
 
 	if (IS_ENABLED(CONFIG_RANDOMIZE_BASE) && offset > 0) {
-		pr_emerg("Kernel Offset: 0x%lx from 0x%lx\n",
-			 offset, KIMAGE_VADDR);
+		pr_emerg("Kernel Offset: 0x%lx from 0x%lx\n", offset, KIMAGE_VADDR);
 		pr_emerg("PHYS_OFFSET: 0x%llx\n", PHYS_OFFSET);
 	} else {
 		pr_emerg("Kernel Offset: disabled\n");
 	}
+
+	pr_emerg("VMEMMAP_SIZE: 0x%lx\n", VMEMMAP_SIZE);
+	pr_emerg("VMEMMAP_END: 0x%lx\n", VMEMMAP_END);
+	pr_emerg("MODULES_VADDR: 0x%lx\n", MODULES_VADDR);
+	pr_emerg("MODULES_END: 0x%lx\n", MODULES_END);
+	pr_emerg("VMEMMAP_START: 0x%lx\n", VMEMMAP_START);
 }
 
 static int arm64_panic_block_dump(struct notifier_block *self,

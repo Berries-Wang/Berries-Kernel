@@ -121,8 +121,8 @@ pe_header:
 SYM_CODE_START(primary_entry)
 	bl	preserve_boot_args
 	bl	el2_setup			// Drop to EL1, w0=cpu_boot_mode
-	adrp	x23, __PHYS_OFFSET
-	and	x23, x23, MIN_KIMG_ALIGN - 1	// KASLR offset, defaults to 0
+	adrp	x23, __PHYS_OFFSET          // 获取物理基址：将物理内存的起始地址加载到 x23 寄存器
+	and	x23, x23, MIN_KIMG_ALIGN - 1	// KASLR offset, defaults to 0 | KASLR 支持：在内核地址空间布局随机化（KASLR）中用于计算实际加载地址
 	bl	set_cpu_boot_mode_flag
 	bl	__create_page_tables
 	/*
@@ -486,7 +486,7 @@ SYM_FUNC_START_LOCAL(__primary_switched)
 	add	sp, sp, #16
 	mov	x29, #0
 	mov	x30, #0
-	b	start_kernel
+	b	start_kernel                            // 启动内核
 SYM_FUNC_END(__primary_switched)
 
 	.pushsection ".rodata", "a"
@@ -979,7 +979,7 @@ SYM_FUNC_END(__relocate_kernel)
 
 SYM_FUNC_START_LOCAL(__primary_switch)
 #ifdef CONFIG_RANDOMIZE_BASE
-	mov	x19, x0				// preserve new SCTLR_EL1 value
+	mov	x19, x0				     // preserve new SCTLR_EL1 value
 	mrs	x20, sctlr_el1			// preserve old SCTLR_EL1 value
 #endif
 
