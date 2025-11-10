@@ -84,18 +84,18 @@ _head:
 	 * x13 = x18 + #0x16
 	 */
 	add	x13, x18, #0x16
-	b	primary_entry
+	b	primary_entry       
 #else
 	b	primary_entry			// branch to kernel start, magic
-	.long	0				// reserved
+	.long	0				    // reserved  # 定义一个32位变量，初始值为0
 #endif
-	le64sym	_kernel_offset_le		// Image load offset from start of RAM, little-endian
+	le64sym	_kernel_offset_le		// Image load offset from start of RAM, little-endian； le64sym _kernel_offset_le 告诉汇编器和链接器这里需要存储符号 _kernel_offset_le 的64位地址值，在目标文件中创建一个重定位记录， 链接时链接器会用实际的符号地址填充这个位置，或者就定义在文件的前面(arch/arm64/kernel/image.h)
 	le64sym	_kernel_size_le			// Effective size of kernel image, little-endian
 	le64sym	_kernel_flags_le		// Informative flags, little-endian
+	.quad	0				// reserved  ; 分配8字节，全部填0 ;  .quad symbol     /* 分配8字节，存储symbol的地址 */
 	.quad	0				// reserved
 	.quad	0				// reserved
-	.quad	0				// reserved
-	.ascii	ARM64_IMAGE_MAGIC		// Magic number
+	.ascii	ARM64_IMAGE_MAGIC		// Magic number   .ascii： 汇编器指令，用于定义 ASCII 字符串
 #ifdef CONFIG_EFI
 	.long	pe_header - _head		// Offset to the PE header.
 
@@ -119,9 +119,9 @@ pe_header:
 	 *  x24        __primary_switch() .. relocate_kernel()  current RELR displacement
 	 */
 SYM_CODE_START(primary_entry)
-	bl	preserve_boot_args
-	bl	el2_setup			// Drop to EL1, w0=cpu_boot_mode
-	adrp	x23, __PHYS_OFFSET          // 获取物理基址：将物理内存的起始地址加载到 x23 寄存器
+	bl	preserve_boot_args      // bl function_name: 跳转到函数，同时保存返回地址(保存到 LR 寄存器 , 使用ret指令返回)
+	bl	el2_setup			    // Drop to EL1, w0=cpu_boot_mode
+	adrp	x23, __PHYS_OFFSET          // 获取物理基址：将物理内存的起始地址加载到 x23 寄存器;  adrp(Address of Page):计算一个标签或符号所在页的基地址
 	and	x23, x23, MIN_KIMG_ALIGN - 1	// KASLR offset, defaults to 0 | KASLR 支持：在内核地址空间布局随机化（KASLR）中用于计算实际加载地址
 	bl	set_cpu_boot_mode_flag
 	bl	__create_page_tables
@@ -435,10 +435,10 @@ SYM_FUNC_END(__create_page_tables)
  *   x0 = __PHYS_OFFSET
  */
 SYM_FUNC_START_LOCAL(__primary_switched)
-	adrp	x4, init_thread_union
+	adrp	x4, init_thread_union   // 将 init_thread_union 所在页的基地址加载到 x4 ， adrp:Address of Page , 计算一个符号(变量或函数名)所在 4KB 内存页的基地址，并将其加载到目标寄存器中
 	add	sp, x4, #THREAD_SIZE
-	adr_l	x5, init_task
-	msr	sp_el0, x5			// Save thread_info
+	adr_l	x5, init_task   // adr_l 并不是 ARM64 指令集架构中一个原始的、官方的指令。它实际上是一个 GNU 汇编器的宏,将一个标签（通常是一个在内存中的变量或函数的地址）加载到一个寄存器中
+	msr	sp_el0, x5			// Save thread_info ， msr:Move to System Register  , 将通用寄存器的值写入到系统寄存器
 
 #ifdef CONFIG_ARM64_PTR_AUTH
 	__ptrauth_keys_init_cpu	x5, x6, x7, x8
@@ -979,8 +979,8 @@ SYM_FUNC_END(__relocate_kernel)
 
 SYM_FUNC_START_LOCAL(__primary_switch)
 #ifdef CONFIG_RANDOMIZE_BASE
-	mov	x19, x0				     // preserve new SCTLR_EL1 value
-	mrs	x20, sctlr_el1			// preserve old SCTLR_EL1 value
+	mov	x19, x0				     // preserve new SCTLR_EL1 value mov: move,在寄存器之间或立即数到寄存器之间传输数据
+	mrs	x20, sctlr_el1			// preserve old SCTLR_EL1 value    msr:Move from System Register , 从系统寄存器读取值到通用寄存器
 #endif
 
 	adrp	x1, init_pg_dir
@@ -991,18 +991,18 @@ SYM_FUNC_START_LOCAL(__primary_switch)
 #endif
 	bl	__relocate_kernel
 #ifdef CONFIG_RANDOMIZE_BASE
-	ldr	x8, =__primary_switched
+	ldr	x8, =__primary_switched  // ldr: Load Register , 从内存加载数据到寄存器
 	adrp	x0, __PHYS_OFFSET
-	blr	x8
+	blr	x8      // blr: Branch with Link to Register, 跳转到寄存器指定的地址，同时保存返回地址.
 
 	/*
 	 * If we return here, we have a KASLR displacement in x23 which we need
 	 * to take into account by discarding the current kernel mapping and
 	 * creating a new one.
 	 */
-	pre_disable_mmu_workaround
-	msr	sctlr_el1, x20			// disable the MMU
-	isb
+	pre_disable_mmu_workaround   // 宏，arch/arm64/include/asm/assembler.h?
+	msr	sctlr_el1, x20			// disable the MMU   ， msr: Move to System Register , 将通用寄存器的值写入系统寄存器
+	isb                         //  Instruction Synchronization Barrier，指令同步屏障
 	bl	__create_page_tables		// recreate kernel mapping
 
 	tlbi	vmalle1				// Remove any stale TLB entries
