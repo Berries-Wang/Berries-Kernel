@@ -105,7 +105,7 @@ SECTIONS
 		*(.eh_frame)
 	}
 
-	. = KIMAGE_VADDR + TEXT_OFFSET; /*起始链接地址*/
+	. = KIMAGE_VADDR + TEXT_OFFSET; /*起始链接地址  0XFFFF800010000000 + TEXT_OFFSET := 0x0*/
 
     /*.head.text: 代码段*/
 	.head.text : {
