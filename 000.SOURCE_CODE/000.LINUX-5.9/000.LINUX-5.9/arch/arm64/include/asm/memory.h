@@ -65,7 +65,8 @@
  * 
  * KIMAGE_VADDR: '(((((((-((((1UL))) << ((((48))) - 1))))) + (0x08000000))) + (0x08000000)))'
  * > 003.TEST-SPACE/009.KIMAGE_VADDR.c
- * > 0XFFFF800010000000 ， 还是要和书中示意图中的值区分开,这是虚拟地址
+ * > 0XFFFF800010000000 ， 还是要和书中示意图中的值区分开,这是虚拟地址`
+ * >>> 就是这个值，验证: arm-gnu-toolchain-14.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-objdump -S  vmlinux   > /home/wei/OPEN_SOURCE/Berries-Kernel/009.IGNORE/vmlinux.objdump.log
  * > 这个值还和 ‘KASAN’ 是否开启有关！
  * PHYS_OFFSET: '({ ((void)(sizeof(( long)(memstart_addr & 1)))); memstart_addr; })'
  */
