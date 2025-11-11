@@ -459,7 +459,7 @@ SYM_FUNC_START_LOCAL(__primary_switched)
 
 	ldr_l	x4, kimage_vaddr		// Save the offset between
 	sub	x4, x4, x0			// the kernel virtual and
-	str_l	x4, kimage_voffset, x5		// physical mappings
+	str_l	x4, kimage_voffset, x5		// physical mappings  str_l是一个宏,
 
 	// Clear BSS
 	adr_l	x0, __bss_start

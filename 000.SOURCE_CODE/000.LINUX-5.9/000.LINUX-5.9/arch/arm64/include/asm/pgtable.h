@@ -500,7 +500,13 @@ static inline bool pud_table(pud_t pud) { return true; }
 
 extern pgd_t init_pg_dir[PTRS_PER_PGD];
 extern pgd_t init_pg_end[];
+/**
+ * 
+ */
 extern pgd_t swapper_pg_dir[PTRS_PER_PGD];
+/**
+ * idmap_pg_dir是恒等映射的页表,怎么理解?
+ */
 extern pgd_t idmap_pg_dir[PTRS_PER_PGD];
 extern pgd_t idmap_pg_end[];
 extern pgd_t tramp_pg_dir[PTRS_PER_PGD];

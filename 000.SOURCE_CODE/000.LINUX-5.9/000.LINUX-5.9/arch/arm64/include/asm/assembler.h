@@ -207,11 +207,14 @@ lr	.req	x30		// link register
 	.endif
 	.endm
 
-	/*
+	/**
 	 * @src: source register (32 or 64 bit wide)
 	 * @sym: name of the symbol
 	 * @tmp: mandatory 64-bit scratch register to calculate the address
-	 *       while <src> needs to be preserved.
+	 *       while <src> needs to be preserved.（必须使用64位临时寄存器来计算地址，同时需保留<src>的值。）
+	 * 
+	 * adrp	\tmp, \sym                     // 
+	 * str	\src, [\tmp, :lo12:\sym]      // 
 	 */
 	.macro	str_l, src, sym, tmp
 	adrp	\tmp, \sym

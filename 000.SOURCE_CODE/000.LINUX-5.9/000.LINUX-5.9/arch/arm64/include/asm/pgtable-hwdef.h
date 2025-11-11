@@ -7,7 +7,7 @@
 
 #include <asm/memory.h>
 
-/*
+/**
  * Number of page-table levels required to address 'va_bits' wide
  * address, without section mapping. We resolve the top (va_bits - PAGE_SHIFT)
  * bits with (PAGE_SHIFT - 3) bits at each page table level. Hence:
@@ -20,6 +20,11 @@
  * due to build issues. So we open code DIV_ROUND_UP here:
  *
  *	((((va_bits) - PAGE_SHIFT) + (PAGE_SHIFT - 3) - 1) / (PAGE_SHIFT - 3))
+ * 
+ * 4K
+ *     (((va_bits) - 4) / (PAGE_SHIFT - 3))
+ *      = (((48) - 4) / (12 - 3))
+ *      = 44 / 9 = 4
  *
  * which gets simplified as :
  */

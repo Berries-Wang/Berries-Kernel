@@ -139,7 +139,7 @@ SECTIONS
 	/*RO_DATA： 只读数据段*/
 	RO_DATA(PAGE_SIZE)
 
-	idmap_pg_dir = .;
+	idmap_pg_dir = .;  /*idmap_pg_dir是恒等映射的页表,怎么理解?*/
 	. += IDMAP_DIR_SIZE;
 	idmap_pg_end = .;
 
