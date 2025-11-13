@@ -177,11 +177,14 @@ lr	.req	x30		// link register
 	orr	\rd, \lbits, \hbits, lsl #32
 	.endm
 
-/*
+/**
  * Pseudo-ops for PC-relative adr/ldr/str <reg>, <symbol> where
  * <symbol> is within the range +/- 4 GB of the PC.
  */
-	/*
+	/**
+	 * adr_l	x1, __boot_cpu_mode
+	 *  adrp	x1, __boot_cpu_mode            -> 获取__boot_cpu_mode所在页的基地址 
+	 *  add	    x1, x1, :lo12:__boot_cpu_mode  -> 整条指令的意思就是:将x1(页基地址)加上__boot_cpu_mode的低12位偏移,得到__boot_cpu_mode的完整地址,并将结果存回x1
 	 * @dst: destination register (64 bit wide)
 	 * @sym: name of the symbol
 	 */
@@ -213,8 +216,9 @@ lr	.req	x30		// link register
 	 * @tmp: mandatory 64-bit scratch register to calculate the address
 	 *       while <src> needs to be preserved.（必须使用64位临时寄存器来计算地址，同时需保留<src>的值。）
 	 * 
-	 * adrp	\tmp, \sym                     // 
-	 * str	\src, [\tmp, :lo12:\sym]      // 
+	 * str_l	x4, kimage_voffset, x5
+	 * adrp    x5, kimage_voffset    // 获取 kimage_voffset 的页基地址
+     * str     x4, [x5, #:lo12:kimage_voffset]  // 存储 x4 到 kimage_voffset
 	 */
 	.macro	str_l, src, sym, tmp
 	adrp	\tmp, \sym

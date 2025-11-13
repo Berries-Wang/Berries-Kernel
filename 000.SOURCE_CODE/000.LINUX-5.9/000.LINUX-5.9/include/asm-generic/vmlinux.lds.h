@@ -636,6 +636,9 @@
 		__softirqentry_text_end = .;
 
 /* Section used for early init (in .S files) */
+/**
+ * KEEP 告诉链接器："即使这个段看起来没有被引用，也要强制保留它"
+ */
 #define HEAD_TEXT  KEEP(*(.head.text))
 
 #define HEAD_TEXT_SECTION							\

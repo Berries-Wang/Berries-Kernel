@@ -51,14 +51,18 @@
 #include <asm/sysreg.h>
 #include <asm/cpufeature.h>
 
-/*
+/**
  * __boot_cpu_mode records what mode CPUs were booted in.
  * A correctly-implemented bootloader must start all CPUs in the same mode:
  * In this case, both 32bit halves of __boot_cpu_mode will contain the
  * same value (either 0 if booted in EL1, BOOT_CPU_MODE_EL2 if booted in EL2).
- *
+ * (__boot_cpu_mode 用于记录 CPU 的启动模式。
+ * 一个正确实现的引导加载程序必须确保所有 CPU 以相同模式启动：
+ * 此时 __boot_cpu_mode 的两个 32 位半字将包含相同值（若在 EL1 模式启动则为 0，若在 EL2 模式启动则为 BOOT_CPU_MODE_EL2)
+ * 
  * Should the bootloader fail to do this, the two values will be different.
  * This allows the kernel to flag an error when the secondaries have come up.
+ * (若引导加载程序未能满足此要求，两个半字的值将出现差异。这使得内核能够在次级 CPU 启动时检测到该错误)
  */
 extern u32 __boot_cpu_mode[2];
 

@@ -110,7 +110,7 @@ SECTIONS
     /*.head.text: 代码段*/
 	.head.text : {
 		_text = .;
-		HEAD_TEXT
+		HEAD_TEXT // HEAD_TEXT 是个宏,定义在include/asm-generic/vmlinux.lds.h: #define HEAD_TEXT  KEEP(*(.head.text)),KEEP 告诉链接器："即使这个段看起来没有被引用，也要强制保留它"
 	}
 	.text : {			/* Real text segment		*/    /*.text : 代码段*/
 		_stext = .;		/* Text and read-only data	*/
@@ -136,7 +136,7 @@ SECTIONS
 	_etext = .;			/* End of text section */
 
 	/* everything from this point to __init_begin will be marked RO NX */
-	/*RO_DATA： 只读数据段*/
+	/*RO_DATA: 只读数据段*/
 	RO_DATA(PAGE_SIZE)
 
 	idmap_pg_dir = .;  /*idmap_pg_dir是恒等映射的页表,怎么理解?*/
@@ -246,7 +246,7 @@ SECTIONS
 
 	. = ALIGN(PAGE_SIZE);
 	init_pg_dir = .;
-	. += INIT_DIR_SIZE;
+	. += INIT_DIR_SIZE;  /*INIT_DIR_SIZE: arch/arm64/include/asm/kernel-pgtable.h*/
 	init_pg_end = .;
 
 	. = ALIGN(SEGMENT_ALIGN);

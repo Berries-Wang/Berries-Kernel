@@ -23,6 +23,7 @@
         "atomic_ll_sc.h": "c",
         "stdarg.h": "c",
         "kasan-checks.h": "c",
-        "printk.h": "c"
+        "printk.h": "c",
+        "sstream": "c"
     }
 }
