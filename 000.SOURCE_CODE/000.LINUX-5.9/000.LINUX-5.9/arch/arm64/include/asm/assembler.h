@@ -544,10 +544,12 @@ USER(\label, ic	ivau, \tmp2)			// invalidate I line PoU
 
 /*
  * Arrange a physical address in a TTBR register, taking care of 52-bit
- * addresses.
+ * addresses.(将物理地址配置到 TTBR 寄存器中，并妥善处理 52 位地址)
  *
  * 	phys:	physical address, preserved
  * 	ttbr:	returns the TTBR value
+ *  
+ * mov x1, x0    // 将x0的值移动到x1
  */
 	.macro	phys_to_ttbr, ttbr, phys
 #ifdef CONFIG_ARM64_PA_BITS_52

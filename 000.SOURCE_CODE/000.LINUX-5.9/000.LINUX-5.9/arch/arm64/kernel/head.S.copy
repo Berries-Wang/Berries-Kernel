@@ -136,7 +136,7 @@ SYM_CODE_START(primary_entry)
 	 * On return, the CPU will be ready for the MMU to be turned on and
 	 * the TCR will have been set.
 	 */
-	bl	__cpu_setup			// initialise processor
+	bl	__cpu_setup			// initialise processor 在 arch/arm64/ mm/proc.S 
 	b	__primary_switch
 SYM_CODE_END(primary_entry)
 
@@ -297,6 +297,8 @@ SYM_CODE_END(preserve_boot_args)
  *  # 示意图: 图2.17 create_page_tables函数创建的两个映射
  *
  *  当建立了恒等映射之后，虚拟地址和物理地址在数值上是相同的
+ *     > 得看看文件 000.LINUX-5.9/.tmp_System.map  标签:__idmap_text_start , 结束地址:__idmap_text_end,则可以分析哪些函数会在恒等映射中
+ *
  *
  * 打开MMU的注意事项:
  * 1). 在关闭MMU情况下,处理器访问的地址都是物理地址。当MMU打开时,处理器访问的地址变成了虚拟地址。
@@ -317,7 +319,7 @@ SYM_FUNC_START_LOCAL(__create_page_tables)
 	 */
 	adrp	x0, init_pg_dir
 	adrp	x1, init_pg_end
-	sub	x1, x1, x0
+	sub	x1, x1, x0                 // x1 = x1-x0
 	bl	__inval_dcache_area       // 清空高速缓存
 
 	/*
@@ -406,7 +408,21 @@ SYM_FUNC_START_LOCAL(__create_page_tables)
 	ldr_l	x4, idmap_ptrs_per_pgd
 	mov	x5, x3				// __pa(__idmap_text_start)
 	adr_l	x6, __idmap_text_end		// __pa(__idmap_text_end)
-
+    
+	/**
+	 * x0   idmap_pg_dir
+	 * x1   init_pg_end - init_pg_dir
+	 * x3   __idmap_text_start  映射的虚拟地址的起始地址 ,__idmap_text_start是什么?得查询 vmlinux.lds.S
+	 * x6
+	 * x7
+	 * x3   __idmap_text_start: 映射的物理地址的起始地址
+	 * x4
+	 * x10
+	 * x11
+	 * x12
+	 * x13
+	 * x14
+	 */
 	map_memory x0, x1, x3, x6, x7, x3, x4, x10, x11, x12, x13, x14   // 建立映射页表
 
 	/*
@@ -814,12 +830,14 @@ SYM_FUNC_END(__secondary_too_slow)
  *  - Corrupts tmp1, tmp2
  *  - Writes 'status' to __early_cpu_boot_status and makes sure
  *    it is committed to memory.
+ *  
+ * 注释也说了,将status值写入到__early_cpu_boot_status (就定义在这个文件)
  */
 
 	.macro	update_early_cpu_boot_status status, tmp1, tmp2
 	mov	\tmp2, #\status
 	adr_l	\tmp1, __early_cpu_boot_status
-	str	\tmp2, [\tmp1]
+	str	\tmp2, [\tmp1]     // str w0 , [x1] 将w0的值存储到x1的地址上
 	dmb	sy
 	dc	ivac, \tmp1			// Invalidate potentially stale cache line
 	.endm
@@ -830,6 +848,8 @@ SYM_FUNC_END(__secondary_too_slow)
  *  x0  = SCTLR_EL1 value for turning on the MMU.
  *  x1  = TTBR1_EL1 value
  *
+ *  idmap_pg_dir -> ttbr0_el1
+ *
  * Returns to the caller via x30/lr. This requires the caller to be covered
  * by the .idmap.text section.
  *
@@ -838,18 +858,18 @@ SYM_FUNC_END(__secondary_too_slow)
  */
 SYM_FUNC_START(__enable_mmu)
 	mrs	x2, ID_AA64MMFR0_EL1        // ID_AA64MMFR0_EL1: 根据手册Page: D24-7939 , 架构指令标识: 判断处理器是否支持 ARMv8-A AArch64 执行状态 。支持，能访问该寄存器;否则会报错
-	ubfx	x2, x2, #ID_AA64MMFR0_TGRAN_SHIFT, 4     // ubfx : 无符号位域提取指令，ubfx x1, x0, #20, #16 // 从寄存器x0存储的值的位20开始提取16位，存储到寄存器x1 ,这一行得查手册了?  ID_AA64MMFR0_TGRAN_SHIFT 定义在'arch/arm64/include/asm/sysreg.h',若页面是4K,则ID_AA64MMFR0_TGRAN_SHIFT的值为28,那么这行代码就是提取x2的[31,28]再存储到x2,x2的[31,28]存储的值用来判断是否MMU支持4K的翻译粒度
+	ubfx	x2, x2, #ID_AA64MMFR0_TGRAN_SHIFT, 4     // ubfx : 无符号位域提取指令,ubfx x1, x0, #20, #16 // 从寄存器x0存储的值的位20开始提取16位,存储到寄存器x1 ,这一行得查手册了?  ID_AA64MMFR0_TGRAN_SHIFT 定义在'arch/arm64/include/asm/sysreg.h',若页面是4K,则ID_AA64MMFR0_TGRAN_SHIFT的值为28,那么这行代码就是提取x2的[31,28]再存储到x2,x2的[31,28]存储的值用来判断是否MMU支持4K的翻译粒度
 	cmp	x2, #ID_AA64MMFR0_TGRAN_SUPPORTED            // 判断是否支持内核指定的翻译粒度 --- ID_AA64MMFR0_TGRAN_SUPPORTED 定义在arch/arm64/include/asm/sysreg.h,为什么是0x0,还是得查看手册:<Arm® Architecture Reference Manual for A-profile architecture>
 	b.ne	__no_granule_support
-	update_early_cpu_boot_status 0, x2, x3           // 
+	update_early_cpu_boot_status 0, x2, x3           // 将status值写入到__early_cpu_boot_status
 	adrp	x2, idmap_pg_dir
-	phys_to_ttbr x1, x1
+	phys_to_ttbr x1, x1                         // 将物理地址转为TTBR格式(在宏中做的处理),在调用__enable_mmu前,会对x1进行赋值, phys_to_ttbr 宏,定义在arch/arm64/include/asm/assembler.h 
 	phys_to_ttbr x2, x2
-	msr	ttbr0_el1, x2			// load TTBR0
+	msr	ttbr0_el1, x2			// load TTBR0;msr 将通用寄存器的值写入系统寄存器: msr sctlr_el1, x1   ; 将x1的值写入SCTLR_EL1(系统控制寄存器)
 	offset_ttbr1 x1, x3
 	msr	ttbr1_el1, x1			// load TTBR1
 	isb
-	msr	sctlr_el1, x0
+	msr	sctlr_el1, x0           //开启MMU,在启动过程中(__cpu_setup:SCTLR_EL1_SET),x0的值被修改了(开启MMU,即,将x0的值的bit[0]置为1);  注: M, bit [0] MMU enable for EL1&0 stage 1 address translation. 查询手册(具体功能得看手册的字段描述),sctlr_el1 为系统控制寄存器,控制系统(包括内存系统),EL0 EL1级别
 	isb
 	/*
 	 * Invalidate the local I-cache so that any instructions fetched
@@ -1005,7 +1025,7 @@ SYM_FUNC_START_LOCAL(__primary_switch)
 #endif
 
 	adrp	x1, init_pg_dir
-	bl	__enable_mmu
+	bl	__enable_mmu      /*打开MMU: idmap_pg_dir -> ttbr0_el1 , init_pg_dir -> ttbr1_el1 ,开启MMU后,访问的地址就是虚拟地址了*/
 #ifdef CONFIG_RELOCATABLE
 #ifdef CONFIG_RELR
 	mov	x24, #0				// no RELR displacement yet
