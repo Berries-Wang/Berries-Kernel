@@ -837,11 +837,11 @@ SYM_FUNC_END(__secondary_too_slow)
  * If it isn't, park the CPU
  */
 SYM_FUNC_START(__enable_mmu)
-	mrs	x2, ID_AA64MMFR0_EL1
-	ubfx	x2, x2, #ID_AA64MMFR0_TGRAN_SHIFT, 4
-	cmp	x2, #ID_AA64MMFR0_TGRAN_SUPPORTED
+	mrs	x2, ID_AA64MMFR0_EL1        // ID_AA64MMFR0_EL1: 根据手册Page: D24-7939 , 架构指令标识: 判断处理器是否支持 ARMv8-A AArch64 执行状态 。支持，能访问该寄存器;否则会报错
+	ubfx	x2, x2, #ID_AA64MMFR0_TGRAN_SHIFT, 4     // ubfx : 无符号位域提取指令，ubfx x1, x0, #20, #16 // 从寄存器x0存储的值的位20开始提取16位，存储到寄存器x1 ,这一行得查手册了?  ID_AA64MMFR0_TGRAN_SHIFT 定义在'arch/arm64/include/asm/sysreg.h',若页面是4K,则ID_AA64MMFR0_TGRAN_SHIFT的值为28,那么这行代码就是提取x2的[31,28]再存储到x2,x2的[31,28]存储的值用来判断是否MMU支持4K的翻译粒度
+	cmp	x2, #ID_AA64MMFR0_TGRAN_SUPPORTED            // 判断是否支持内核指定的翻译粒度 --- ID_AA64MMFR0_TGRAN_SUPPORTED 定义在arch/arm64/include/asm/sysreg.h,为什么是0x0,还是得查看手册:<Arm® Architecture Reference Manual for A-profile architecture>
 	b.ne	__no_granule_support
-	update_early_cpu_boot_status 0, x2, x3
+	update_early_cpu_boot_status 0, x2, x3           // 
 	adrp	x2, idmap_pg_dir
 	phys_to_ttbr x1, x1
 	phys_to_ttbr x2, x2
