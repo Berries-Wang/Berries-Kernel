@@ -401,7 +401,7 @@ SYM_FUNC_END(idmap_kpti_install_ng_mappings)
  *	Initialise the processor for turning the MMU on.
  *
  * Output:
- *	Return in x0 the value of the SCTLR_EL1 register.
+ *	Return in x0 the value of the SCTLR_EL1(系统控制寄存器,得查询手册了) register.
  */
 	.pushsection ".idmap.text", "awx"
 SYM_FUNC_START(__cpu_setup)

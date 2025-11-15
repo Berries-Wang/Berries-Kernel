@@ -217,7 +217,7 @@ SECTIONS
    /*数据段从_sdata标记开始,到_edata标记结束*/
 	_data = .;
 	_sdata = .;
-	RW_DATA(L1_CACHE_BYTES, PAGE_SIZE, THREAD_ALIGN)
+	RW_DATA(L1_CACHE_BYTES, PAGE_SIZE, THREAD_ALIGN)  // 这里会初始化init_task的数据
 
 	/*
 	 * Data written with the MMU off but read with the MMU on requires

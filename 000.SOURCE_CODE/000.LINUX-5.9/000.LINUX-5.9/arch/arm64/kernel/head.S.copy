@@ -124,17 +124,15 @@ pe_header:
 	 *  x24        __primary_switch() .. relocate_kernel()  current RELR displacement
 	 */
 SYM_CODE_START(primary_entry)
-	bl	preserve_boot_args       // 保存启动参数到boot_args[]数组
-	bl	el2_setup			     // Drop to EL1, w0=cpu_boot_mode , 把模式切换到el1以运行Linux内核
+	bl	preserve_boot_args              // 保存启动参数到boot_args[]数组
+	bl	el2_setup			            // Drop to EL1, w0=cpu_boot_mode , 把模式切换到el1以运行Linux内核
 	adrp	x23, __PHYS_OFFSET          // 获取物理基址：将物理内存的起始地址加载到 x23 寄存器;  adrp(Address of Page):计算一个标签或符号所在页的基地址
 	and	x23, x23, MIN_KIMG_ALIGN - 1	// KASLR offset, defaults to 0 | KASLR 支持：在内核地址空间布局随机化(KASLR)中用于计算实际加载地址
 	bl	set_cpu_boot_mode_flag          // 读取CPU的启动异常级别并保存
-	bl	__create_page_tables           // 创建恒等映射页表以及内核映像映射页表
-	/*
-	 * The following calls CPU setup code, see arch/arm64/mm/proc.S for
-	 * details.
-	 * On return, the CPU will be ready for the MMU to be turned on and
-	 * the TCR will have been set.
+	bl	__create_page_tables            // 创建恒等映射页表以及内核映像映射页表
+	/**
+	 * The following calls CPU setup code, see arch/arm64/mm/proc.S for details.
+	 * On return, the CPU will be ready for the MMU to be turned on and the TCR will have been set.
 	 */
 	bl	__cpu_setup			// initialise processor 在 arch/arm64/ mm/proc.S 
 	b	__primary_switch
@@ -182,12 +180,14 @@ SYM_CODE_END(preserve_boot_args)
 	.endm
 
 /*
- * Macro to populate page table entries, these entries can be pointers to the next level
+ * Macro to populate page table entries, 
+ * these entries can be pointers to the next level
  * or last level entries pointing to physical memory.
- *
- *	tbl:	page table address
+ * (用于填充页表项的宏，这些页表项可以是指向下一级页表的指针，也可以是指向物理内存的末级页表项)
+ *     ----> 这就是按照MMU的翻译方式来组织了
+ *	tbl:	page table address       页表的起始地址
  *	rtbl:	pointer to page table or physical memory
- *	index:	start index to write
+ *	index:	start index to write  // 这就有意思了,compute_indices中算出来的其实索引
  *	eindex:	end index to write - [index, eindex] written to
  *	flags:	flags for pagetable entry to or in
  *	inc:	increment to rtbl between each entry
@@ -196,18 +196,22 @@ SYM_CODE_END(preserve_boot_args)
  * Preserves:	tbl, eindex, flags, inc
  * Corrupts:	index, tmp1
  * Returns:	rtbl
+ *
+ * orr : 按位或指令 , ORR  x3, x1, x2 => x3 = x1 | x2; 
+ *
+ * lsl: 逻辑左移:LSL  x1, x0, #1  => x1 = x0 << #1;
  */
 	.macro populate_entries, tbl, rtbl, index, eindex, flags, inc, tmp1
-.Lpe\@:	phys_to_pte \tmp1, \rtbl
-	orr	\tmp1, \tmp1, \flags	// tmp1 = table entry
-	str	\tmp1, [\tbl, \index, lsl #3]
-	add	\rtbl, \rtbl, \inc	// rtbl = pa next level
-	add	\index, \index, #1
-	cmp	\index, \eindex
+.Lpe\@:	phys_to_pte \tmp1, \rtbl          // .Lpe\@: 跳转标签;  rtbl -> tmp1
+	orr	\tmp1, \tmp1, \flags	          // tmp1 = table entry  tmp1 = tmp1 | flags
+	str	\tmp1, [\tbl, \index, lsl #3]     // 将页表项放到页表中;  等价于 *(uint64_t*)((char*)tbl + (index * 8)) = tmp1;  或 tbl[index] = tmp1;(tbl类型为uint64_t*)
+	add	\rtbl, \rtbl, \inc	              // rtbl = pa next level
+	add	\index, \index, #1                // 处理下一个页表; 这里就比较有意思了(涉及到·虚拟地址·->·物理地址·的翻译流程): 因为每个页表项都是定位到一个页表,然后再根据地址低12位来获取页表内部的偏移量,最终获得变量的物理地址,因此,这里只需要按照页表的维度去处理即可;
+	cmp	\index, \eindex                   // 页表项是否创建完成
 	b.ls	.Lpe\@
 	.endm
 
-/*
+/**
  * Compute indices of table entries from virtual address range. If multiple entries
  * were needed in the previous page table level then the next page table level is assumed
  * to be composed of multiple pages. (This effectively scales the end index).
@@ -224,26 +228,29 @@ SYM_CODE_END(preserve_boot_args)
  *
  * Preserves:	vstart, vend, shift, ptrs
  * Returns:	istart, iend, count
+ *
+ * ptrs 为2的整数次幂, & (ptrs -1) = %(ptrs) , 即搞笑的取余操作
  */
 	.macro compute_indices, vstart, vend, shift, ptrs, istart, iend, count
-	lsr	\iend, \vend, \shift
+	lsr	\iend, \vend, \shift  // lsr:Logical Shift Right , lsr x0, x1, #5  // x0 = x1 >> 5
 	mov	\istart, \ptrs
 	sub	\istart, \istart, #1
 	and	\iend, \iend, \istart	// iend = (vend >> shift) & (ptrs - 1)
 	mov	\istart, \ptrs
 	mul	\istart, \istart, \count
-	add	\iend, \iend, \istart	// iend += (count - 1) * ptrs
+	add	\iend, \iend, \istart	// iend += (count - 1) * ptrs 错误,iend += (prts * count)
 					// our entries span multiple tables
 
 	lsr	\istart, \vstart, \shift
 	mov	\count, \ptrs
 	sub	\count, \count, #1
-	and	\istart, \istart, \count
+	and	\istart, \istart, \count  // istart = (vstart >> shift) & (ptrs-1) , 计算vstart对应的页表索引
 
-	sub	\count, \iend, \istart
+	sub	\count, \iend, \istart        // sub x0, x1, x2  -> x0 = x1 - x2  
 	.endm
 
-/*
+/**
+ **
  * Map memory for specified virtual address range. Each level of page table needed supports
  * multiple entries. If a level requires n entries the next page table level is assumed to be
  * formed from n pages.
@@ -259,15 +266,20 @@ SYM_CODE_END(preserve_boot_args)
  * Temporaries:	istart, iend, tmp, count, sv - these need to be different registers
  * Preserves:	vstart, vend, flags
  * Corrupts:	tbl, rtbl, istart, iend, tmp, count, sv
+ *
+ * PGDIR_SHIFT  39
+ * PUD_SHIFT    30
+ * PTRS_PER_PUD 1<<9
+ *
  */
 	.macro map_memory, tbl, rtbl, vstart, vend, flags, phys, pgds, istart, iend, tmp, count, sv
-	add \rtbl, \tbl, #PAGE_SIZE
-	mov \sv, \rtbl
-	mov \count, #0
-	compute_indices \vstart, \vend, #PGDIR_SHIFT, \pgds, \istart, \iend, \count
+	add \rtbl, \tbl, #PAGE_SIZE  // rtbl = tbl +#PAGE_SIZE ,  add x0, x1, x2  // x0 = x1 + x2
+	mov \sv, \rtbl               // sv = rtbl , sv 是个临时寄存器
+	mov \count, #0               // count = 0  , 寄存器赋值
+	compute_indices \vstart, \vend, #PGDIR_SHIFT, \pgds, \istart, \iend, \count   // PGDIR_SHIFT = 39(4K页时)
 	populate_entries \tbl, \rtbl, \istart, \iend, #PMD_TYPE_TABLE, #PAGE_SIZE, \tmp
-	mov \tbl, \sv
-	mov \sv, \rtbl
+	mov \tbl, \sv     // tbl = sv , 此时 tbl 是相对于调用map_memory传入的tbl+#PAGE_SIZE 
+	mov \sv, \rtbl    // sv = rtbl
 
 #if SWAPPER_PGTABLE_LEVELS > 3
 	compute_indices \vstart, \vend, #PUD_SHIFT, #PTRS_PER_PUD, \istart, \iend, \count
@@ -325,7 +337,7 @@ SYM_FUNC_START_LOCAL(__create_page_tables)
 	/*
 	 * Clear the init page tables.
 	 */
-	adrp	x0, init_pg_dir
+	adrp	x0, init_pg_dir        // 将 init_pg_dir 基地址赋值给x0
 	adrp	x1, init_pg_end
 	sub	x1, x1, x0
 1:	stp	xzr, xzr, [x0], #16   // 将两个零寄存器(xzr)的值(即0)存储到以 x0 为地址的内存中，然后将地址指针 x0 自动向后移动16个字节; 等价于: `[x0] = 0;[x0+8] = 0;x0 = x0 + 16;`
@@ -394,29 +406,30 @@ SYM_FUNC_START_LOCAL(__create_page_tables)
 #error "Mismatch between VA_BITS and page size/number of translation levels"
 #endif
 
-	mov	x4, EXTRA_PTRS
+	mov	x4, EXTRA_PTRS   // mov 数据移动指令, mov x1, x0  => x0->x1
 	create_table_entry x0, x3, EXTRA_SHIFT, x4, x5, x6
 #else
 	/*
 	 * If VA_BITS == 48, we don't have to configure an additional
 	 * translation level, but the top-level table has more entries.
+	 * VA_BITS == 48, PHYS_MASK_SHIFT - PGDIR_SHIFT = 48 - 39 = 9
 	 */
 	mov	x4, #1 << (PHYS_MASK_SHIFT - PGDIR_SHIFT)
-	str_l	x4, idmap_ptrs_per_pgd, x5
+	str_l	x4, idmap_ptrs_per_pgd, x5 // idmap_ptrs_per_pgd  = 1 << 9 , 将寄存器x4的值赋值给变量 idmap_ptrs_per_pgd 
 #endif
 1:
-	ldr_l	x4, idmap_ptrs_per_pgd
-	mov	x5, x3				// __pa(__idmap_text_start)
+	ldr_l	x4, idmap_ptrs_per_pgd   // 将变量idmap_ptrs_per_pgd的值赋值到x4
+	mov	x5, x3				// __pa(__idmap_text_start)  x3还是 __idmap_text_start 的物理地址
 	adr_l	x6, __idmap_text_end		// __pa(__idmap_text_end)
     
 	/**
 	 * x0   idmap_pg_dir
 	 * x1   init_pg_end - init_pg_dir
 	 * x3   __idmap_text_start  映射的虚拟地址的起始地址 ,__idmap_text_start是什么?得查询 vmlinux.lds.S
-	 * x6
-	 * x7
+	 * x6   __idmap_text_end
+	 * x7   SWAPPER_MM_MMUFLAGS 属性
 	 * x3   __idmap_text_start: 映射的物理地址的起始地址
-	 * x4
+	 * x4   idmap_ptrs_per_pgd  = 1 << 9  , 这是因为每个条目是8字节,那么每个4K页可以有4K/8Byte=512
 	 * x10
 	 * x11
 	 * x12
@@ -460,16 +473,22 @@ SYM_FUNC_START_LOCAL(__create_page_tables)
 	ret	x28
 SYM_FUNC_END(__create_page_tables)
 
-/*
+/**
  * The following fragment of code is executed with the MMU enabled.
  *
  *   x0 = __PHYS_OFFSET
+ * init_thread_union  : vmlinux.lds.S.copy -> RW_DATA(L1_CACHE_BYTES, PAGE_SIZE, THREAD_ALIGN) 
+ *
+ * sp 是什么?看手册 或 https://developer.arm.com/documentation/111179/2025-09_ASL1/AArch64-Registers/SP-EL0--Stack-Pointer--EL0-?lang=en
+ *
+ * init_task 为啥赋值到el0, 不应该是el1吗?
+ * > 006.REFS/learn_the_architecture_-_aarch64_exception_model_102412_0103_02_en.pdf
  */
 SYM_FUNC_START_LOCAL(__primary_switched)
 	adrp	x4, init_thread_union   // 将 init_thread_union 所在页的基地址加载到 x4 , adrp:Address of Page , 计算一个符号(变量或函数名)所在 4KB 内存页的基地址,并将其加载到目标寄存器中
-	add	sp, x4, #THREAD_SIZE
-	adr_l	x5, init_task   // adr_l 并不是 ARM64 指令集架构中一个原始的、官方的指令.它实际上是一个 GNU 汇编器的宏,将一个标签(通常是一个在内存中的变量或函数的地址)加载到一个寄存器中
-	msr	sp_el0, x5			// Save thread_info , msr:Move to System Register  , 将通用寄存器的值写入到系统寄存器
+	add	sp, x4, #THREAD_SIZE        // sp 寄存器是啥? Stack Pointer , 这里应该是 SP_ELx , 这里会根据异常级别自动选择对应的 SP_ELx
+	adr_l	x5, init_task           // init_task不是函数,是'task_struct init_task'
+	msr	sp_el0, x5			        // sp_el0? 为啥是el0? 因目前运行在内核态(EL1),EL0空闲 Save thread_info , msr:Move to System Register  , 将通用寄存器的值写入到系统寄存器
 
 #ifdef CONFIG_ARM64_PTR_AUTH
 	__ptrauth_keys_init_cpu	x5, x6, x7, x8
