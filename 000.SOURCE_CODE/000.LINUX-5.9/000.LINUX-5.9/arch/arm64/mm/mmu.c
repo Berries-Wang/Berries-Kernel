@@ -829,8 +829,9 @@ static bool arm64_early_this_cpu_has_bti(void)
 						    ID_AA64PFR1_BT_SHIFT);
 }
 
-/*
+/**
  * Create fine-grained mappings for the kernel.
+ * (为内核创建精细的映射)
  */
 static void __init map_kernel(pgd_t *pgdp)
 {
@@ -917,13 +918,19 @@ static void __init map_kernel(pgd_t *pgdp)
  */
 void __init paging_init(void)
 {
+	// 输出 swapper_pg_dir 的值(虚拟&物理地址) kimage_voffset
+	printk("swapper_pg_dir is 0x%lx , pa: ox%lx \n", (swapper_pg_dir),(__pa_symbol(swapper_pg_dir)));
+	printk("kimage_voffset is 0x%lx \n", (kimage_voffset));
+
 	/**
 	 * pgd_set_fixmap()函数做一个固定映射，把swapper_pg_dir页表重新映射到固定映射区域
+	 * > 这个映射的原理是什么
      * 
      * 获取PGD页表基地址  []#2.1.6　案例分析：ARM64的页表映射过程
 	 * 
      * swapper_pg_dir 就是页表基地址，虚拟地址 ， 使用 __pa_symbol 转为物理地址
 	 * > 全局变量swapper_pg_dir是内核页表的PGD页表基地址，可是这是虚拟地址，因为在内核启动的汇编代码中会做一次简单的块映射。
+	 * ____>在链接文件: 000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/kernel/vmlinux.lds.S 
 	 * ---->> 索引可以使用__pa_symbol获取到物理地址
 	 * 
 	 * 内核里面有一个固定映射（fixed mapping）区域，它的范围是0xFFFF 7DFF FE7F 9000～0xFFFF 7DFF FEC0 0000，我们可以把PGD页表映射这个区域，然后才可以使用__pa()宏。

@@ -128,8 +128,8 @@ alternative_else_nop_endif
 	ret
 SYM_FUNC_END(__clean_dcache_area_pou)
 
-/*
- *	__inval_dcache_area(kaddr, size)
+/**
+ *	__inval_dcache_area(kaddr, size) <==> __inval_dcache_area(x0, x1)
  *
  * 	Ensure that any D-cache lines for the interval [kaddr, kaddr+size)
  * 	are invalidated. Any partial lines at the ends of the interval are

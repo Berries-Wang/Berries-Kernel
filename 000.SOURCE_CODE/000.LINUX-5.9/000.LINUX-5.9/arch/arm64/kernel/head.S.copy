@@ -9,7 +9,7 @@
  *		Will Deacon <will.deacon@arm.com>
  */
 
-/* [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#2.6.3　启动汇编代码 */
+/* [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#2.6.3 启动汇编代码 */
 #include <linux/linkage.h>
 #include <linux/init.h>
 #include <linux/irqchip/arm-gic-v3.h>
@@ -48,52 +48,59 @@
 #endif
 
 /**
- * Kernel startup entry point.
+ * Kernel startup entry point.(内核启动入口)
  * ---------------------------
  *
- * The requirements are:
+ * The requirements are:(内核启动入口的要求)
  *   MMU = off, D-cache = off, I-cache = on or off,
- *   x0 = physical address to the FDT blob.
+ *   x0 = physical address to the FDT blob.  (x0存储的是设备树在内存中的物理地址)
  *
- * 在关闭MMU情况下，处理器访问的地址都是物理地址。当MMU打开时，处理器访问的地址变成了虚拟地址
+ * FDT(Flattened Device Trees),扁平设备树,是一种描述硬件配置的数据结构,用于在引导过程中将硬件信息传递给操作系统内核.
+ *                             它通常用于嵌入式系统,特别是那些基于PowerPC、ARM、MIPS等架构的系统.FDT的目的是将硬件的描述从内核代码中分离出来,
+ *                             使得同一个内核镜像可以支持不同的硬件平台,只需加载对应的设备树即可
+ *
+ * 参考: 007.BOOKs/Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub # 2.6.3 启动汇编代码
+ * 在关闭MMU情况下,处理器访问的地址都是物理地址.当MMU打开时,处理器访问的地址变成了虚拟地址
  *
  * This code is mostly position independent so you call this at
- * __pa(PAGE_OFFSET + TEXT_OFFSET).
+ * __pa(PAGE_OFFSET + TEXT_OFFSET). (这段代码基本上是位置无关的,因此你可以在启用MMU后调用它)???
  *
  * Note that the callee-saved registers are used for storing variables
  * that are useful before the MMU is enabled. The allocations are described
  * in the entry routines.
- *  _head: 是一个关键符号，通常作为内核启动代码的入口点
- *  _head: 是一个汇编标签，标记内核映像的起始位置，通常是引导加载程序（如 GRUB、U-Boot）加载内核后跳转执行的第一条指令。
- *        在 ARM、x86、RISC-V 等架构的 Linux 内核中，head.S 是体系结构相关的汇编代码，负责早期硬件初始化（如 CPU 模式设置、内存管理单元 MMU 初始化等）
+ *  _head: 是一个关键符号,通常作为内核启动代码的入口点
+ *  _head: 是一个汇编标签,标记内核映像的起始位置,通常是引导加载程序(如 GRUB、U-Boot)加载内核后跳转执行的第一条指令.
+ *        在 ARM、x86、RISC-V 等架构的 Linux 内核中,head.S 是体系结构相关的汇编代码,负责早期硬件初始化(如 CPU 模式设置、内存管理单元 MMU 初始化等)
  *
  *
  *
  */
 	__HEAD
-_head:
+_head: // 通过aarch64-none-linux-gnu-objdump -S head.o 发现, "section .head.text" 就是这里
 	/*
 	 * DO NOT MODIFY. Image header expected by Linux boot-loaders.
-	 * 请勿修改。Linux引导加载程序所需的映像头部。
+	 * 请勿修改.Linux引导加载程序所需的映像头部.
 	 */
 #ifdef CONFIG_EFI
 	/*
 	 * This add instruction has no meaningful effect except that
 	 * its opcode forms the magic "MZ" signature required by UEFI.
+	 *
+	 * x13 = x18 + #0x16
 	 */
 	add	x13, x18, #0x16
-	b	primary_entry
+	b	primary_entry       
 #else
 	b	primary_entry			// branch to kernel start, magic
-	.long	0				// reserved
+	.long	0				    // reserved  # 定义一个32位变量,初始值为0
 #endif
-	le64sym	_kernel_offset_le		// Image load offset from start of RAM, little-endian
+	le64sym	_kernel_offset_le		// Image load offset from start of RAM, little-endian； le64sym _kernel_offset_le 告诉汇编器和链接器这里需要存储符号 _kernel_offset_le 的64位地址值,在目标文件中创建一个重定位记录, 链接时链接器会用实际的符号地址填充这个位置,或者就定义在文件的前面(arch/arm64/kernel/image.h)
 	le64sym	_kernel_size_le			// Effective size of kernel image, little-endian
 	le64sym	_kernel_flags_le		// Informative flags, little-endian
+	.quad	0				// reserved  ; 分配8字节,全部填0 ;  .quad symbol     /* 分配8字节,存储symbol的地址 */
 	.quad	0				// reserved
 	.quad	0				// reserved
-	.quad	0				// reserved
-	.ascii	ARM64_IMAGE_MAGIC		// Magic number
+	.ascii	ARM64_IMAGE_MAGIC		// Magic number   .ascii: 汇编器指令,用于定义 ASCII 字符串
 #ifdef CONFIG_EFI
 	.long	pe_header - _head		// Offset to the PE header.
 
@@ -117,37 +124,36 @@ pe_header:
 	 *  x24        __primary_switch() .. relocate_kernel()  current RELR displacement
 	 */
 SYM_CODE_START(primary_entry)
-	bl	preserve_boot_args
-	bl	el2_setup			// Drop to EL1, w0=cpu_boot_mode
-	adrp	x23, __PHYS_OFFSET
-	and	x23, x23, MIN_KIMG_ALIGN - 1	// KASLR offset, defaults to 0
-	bl	set_cpu_boot_mode_flag
-	bl	__create_page_tables
-	/*
-	 * The following calls CPU setup code, see arch/arm64/mm/proc.S for
-	 * details.
-	 * On return, the CPU will be ready for the MMU to be turned on and
-	 * the TCR will have been set.
+	bl	preserve_boot_args              // 保存启动参数到boot_args[]数组
+	bl	el2_setup			            // Drop to EL1, w0=cpu_boot_mode , 把模式切换到el1以运行Linux内核
+	adrp	x23, __PHYS_OFFSET          // 获取物理基址：将物理内存的起始地址加载到 x23 寄存器;  adrp(Address of Page):计算一个标签或符号所在页的基地址
+	and	x23, x23, MIN_KIMG_ALIGN - 1	// KASLR offset, defaults to 0 | KASLR 支持：在内核地址空间布局随机化(KASLR)中用于计算实际加载地址
+	bl	set_cpu_boot_mode_flag          // 读取CPU的启动异常级别并保存
+	bl	__create_page_tables            // 创建恒等映射页表以及内核映像映射页表
+	/**
+	 * The following calls CPU setup code, see arch/arm64/mm/proc.S for details.
+	 * On return, the CPU will be ready for the MMU to be turned on and the TCR will have been set.
 	 */
-	bl	__cpu_setup			// initialise processor
+	bl	__cpu_setup			// initialise processor 在 arch/arm64/ mm/proc.S 
 	b	__primary_switch
 SYM_CODE_END(primary_entry)
 
 /*
  * Preserve the arguments passed by the bootloader in x0 .. x3
+ * 分别是什么参数? 传递方式?--通过寄存器传参
  */
 SYM_CODE_START_LOCAL(preserve_boot_args)
-	mov	x21, x0				// x21=FDT
+	mov	x21, x0				         // x21=FDT
 
-	adr_l	x0, boot_args			// record the contents of
-	stp	x21, x1, [x0]			// x0 .. x3 at kernel entry
+	adr_l	x0, boot_args			//(将boot_args地址保存到x0) record the contents of,adrl是个宏,定义在 assembler.h
+	stp	x21, x1, [x0]			    // x0 .. x3 at kernel entry , stp:同时存储两个寄存器到内存,将x21,x1拷贝到x0,x0+8 (64位 STP: 地址必须 8 字节对齐)
 	stp	x2, x3, [x0, #16]
 
-	dmb	sy				// needed before dc ivac with
+	dmb	sy				// needed before dc ivac with dmb指令与sy参数表示在全系统高速缓存范围内做一次内存屏障,保证刚才的stp指令运行顺序正确,也就是保证在后面__inval_dcache_area函数在运行dc ivac指令前完成stp指令
 						// MMU off
 
-	mov	x1, #0x20			// 4 x 8 bytes
-	b	__inval_dcache_area		// tail call
+	mov	x1, #0x20			// 4 x 8 bytes , 32字节, x0j就是boot_args的地址,x1就是boot_flags的长度
+	b	__inval_dcache_area		// tail call  在arch/arm64/mm/cache.S , _inval_dcache_area函数来使boot_args[]数组对应的高速缓存失效并清除这些缓存
 SYM_CODE_END(preserve_boot_args)
 
 /*
@@ -174,12 +180,14 @@ SYM_CODE_END(preserve_boot_args)
 	.endm
 
 /*
- * Macro to populate page table entries, these entries can be pointers to the next level
+ * Macro to populate page table entries, 
+ * these entries can be pointers to the next level
  * or last level entries pointing to physical memory.
- *
- *	tbl:	page table address
+ * (用于填充页表项的宏，这些页表项可以是指向下一级页表的指针，也可以是指向物理内存的末级页表项)
+ *     ----> 这就是按照MMU的翻译方式来组织了
+ *	tbl:	page table address       页表的起始地址
  *	rtbl:	pointer to page table or physical memory
- *	index:	start index to write
+ *	index:	start index to write  // 这就有意思了,compute_indices中算出来的其实索引
  *	eindex:	end index to write - [index, eindex] written to
  *	flags:	flags for pagetable entry to or in
  *	inc:	increment to rtbl between each entry
@@ -188,18 +196,22 @@ SYM_CODE_END(preserve_boot_args)
  * Preserves:	tbl, eindex, flags, inc
  * Corrupts:	index, tmp1
  * Returns:	rtbl
+ *
+ * orr : 按位或指令 , ORR  x3, x1, x2 => x3 = x1 | x2; 
+ *
+ * lsl: 逻辑左移:LSL  x1, x0, #1  => x1 = x0 << #1;
  */
 	.macro populate_entries, tbl, rtbl, index, eindex, flags, inc, tmp1
-.Lpe\@:	phys_to_pte \tmp1, \rtbl
-	orr	\tmp1, \tmp1, \flags	// tmp1 = table entry
-	str	\tmp1, [\tbl, \index, lsl #3]
-	add	\rtbl, \rtbl, \inc	// rtbl = pa next level
-	add	\index, \index, #1
-	cmp	\index, \eindex
+.Lpe\@:	phys_to_pte \tmp1, \rtbl          // .Lpe\@: 跳转标签;  rtbl -> tmp1
+	orr	\tmp1, \tmp1, \flags	          // tmp1 = table entry  tmp1 = tmp1 | flags
+	str	\tmp1, [\tbl, \index, lsl #3]     // 将页表项放到页表中;  等价于 *(uint64_t*)((char*)tbl + (index * 8)) = tmp1;  或 tbl[index] = tmp1;(tbl类型为uint64_t*)
+	add	\rtbl, \rtbl, \inc	              // rtbl = pa next level
+	add	\index, \index, #1                // 处理下一个页表; 这里就比较有意思了(涉及到·虚拟地址·->·物理地址·的翻译流程): 因为每个页表项都是定位到一个页表,然后再根据地址低12位来获取页表内部的偏移量,最终获得变量的物理地址,因此,这里只需要按照页表的维度去处理即可;
+	cmp	\index, \eindex                   // 页表项是否创建完成
 	b.ls	.Lpe\@
 	.endm
 
-/*
+/**
  * Compute indices of table entries from virtual address range. If multiple entries
  * were needed in the previous page table level then the next page table level is assumed
  * to be composed of multiple pages. (This effectively scales the end index).
@@ -216,50 +228,60 @@ SYM_CODE_END(preserve_boot_args)
  *
  * Preserves:	vstart, vend, shift, ptrs
  * Returns:	istart, iend, count
+ *
+ * ptrs 为2的整数次幂, & (ptrs -1) = %(ptrs) , 即搞笑的取余操作
  */
 	.macro compute_indices, vstart, vend, shift, ptrs, istart, iend, count
-	lsr	\iend, \vend, \shift
+	lsr	\iend, \vend, \shift  // lsr:Logical Shift Right , lsr x0, x1, #5  // x0 = x1 >> 5
 	mov	\istart, \ptrs
 	sub	\istart, \istart, #1
 	and	\iend, \iend, \istart	// iend = (vend >> shift) & (ptrs - 1)
 	mov	\istart, \ptrs
 	mul	\istart, \istart, \count
-	add	\iend, \iend, \istart	// iend += (count - 1) * ptrs
+	add	\iend, \iend, \istart	// iend += (count - 1) * ptrs 错误,iend += (prts * count)
 					// our entries span multiple tables
 
 	lsr	\istart, \vstart, \shift
 	mov	\count, \ptrs
 	sub	\count, \count, #1
-	and	\istart, \istart, \count
+	and	\istart, \istart, \count  // istart = (vstart >> shift) & (ptrs-1) , 计算vstart对应的页表索引
 
-	sub	\count, \iend, \istart
+	sub	\count, \iend, \istart        // sub x0, x1, x2  -> x0 = x1 - x2  
 	.endm
 
-/*
+/**
+ **
  * Map memory for specified virtual address range. Each level of page table needed supports
  * multiple entries. If a level requires n entries the next page table level is assumed to be
  * formed from n pages.
  *
- *	tbl:	location of page table
- *	rtbl:	address to be used for first level page table entry (typically tbl + PAGE_SIZE)
- *	vstart:	start address to map
- *	vend:	end address to map - we map [vstart, vend]
- *	flags:	flags to use to map last level entries
- *	phys:	physical address corresponding to vstart - physical memory is contiguous
+ * 将 虚拟地址vstart 映射到 物理地址phys 上
+ *
+ *	tbl:	location of page table  `页表的起始地址`
+ *	rtbl:	address to be used for first level page table entry (typically tbl + PAGE_SIZE),下一级页表的起始地址
+ *	vstart:	start address to map    `要映射的虚拟地址的起始地址`
+ *	vend:	end address to map - we map [vstart, vend] 要映射的虚拟地址的结束地址
+ *	flags:	flags to use to map last level entries  ,最后一级页表的一些属性
+ *	phys:	physical address corresponding to vstart - physical memory is contiguous(连续的) ,`映射对应的物理地址`
  *	pgds:	the number of pgd entries
  *
  * Temporaries:	istart, iend, tmp, count, sv - these need to be different registers
  * Preserves:	vstart, vend, flags
  * Corrupts:	tbl, rtbl, istart, iend, tmp, count, sv
+ *
+ * PGDIR_SHIFT  39
+ * PUD_SHIFT    30
+ * PTRS_PER_PUD 1<<9
+ *
  */
 	.macro map_memory, tbl, rtbl, vstart, vend, flags, phys, pgds, istart, iend, tmp, count, sv
-	add \rtbl, \tbl, #PAGE_SIZE
-	mov \sv, \rtbl
-	mov \count, #0
-	compute_indices \vstart, \vend, #PGDIR_SHIFT, \pgds, \istart, \iend, \count
+	add \rtbl, \tbl, #PAGE_SIZE  // rtbl = tbl +#PAGE_SIZE ,  add x0, x1, x2  // x0 = x1 + x2
+	mov \sv, \rtbl               // sv = rtbl , sv 是个临时寄存器
+	mov \count, #0               // count = 0  , 寄存器赋值
+	compute_indices \vstart, \vend, #PGDIR_SHIFT, \pgds, \istart, \iend, \count   // PGDIR_SHIFT = 39(4K页时)
 	populate_entries \tbl, \rtbl, \istart, \iend, #PMD_TYPE_TABLE, #PAGE_SIZE, \tmp
-	mov \tbl, \sv
-	mov \sv, \rtbl
+	mov \tbl, \sv     // tbl = sv , 此时 tbl 是相对于调用map_memory传入的tbl+#PAGE_SIZE 
+	mov \sv, \rtbl    // sv = rtbl
 
 #if SWAPPER_PGTABLE_LEVELS > 3
 	compute_indices \vstart, \vend, #PUD_SHIFT, #PTRS_PER_PUD, \istart, \iend, \count
@@ -279,48 +301,59 @@ SYM_CODE_END(preserve_boot_args)
 	populate_entries \tbl, \count, \istart, \iend, \flags, #SWAPPER_BLOCK_SIZE, \tmp
 	.endm
 
-/*
+/**
  * Setup the initial page tables. We only setup the barest amount which is
  * required to get the kernel running. The following sections are required:
- *   - identity mapping to enable the MMU (low address, TTBR0)
- *   - first few MB of the kernel linear mapping to jump to once the MMU has
- *     been enabled
- * 创建虚拟地址和物理地址的恒等映射(identity mapping: 用于保证虚拟地址和物理地址在数值上是相同的)： 开启MMU -- 
- *  创建两个映射
+ * (设置初始页表.我们仅设置内核运行所需的最基本部分.以下部分是必需的)
+ *   - identity mapping to enable the MMU (low address, TTBR0) -- identity mapping: 用于保证虚拟地址和物理地址在数值上是相同的
+ *   - first few MB of the kernel linear mapping to jump to once the MMU has been enabled (一旦MMU启用后跳转所需的内核线性映射的前几MB空间)
+ *  # 2.6.4 创建恒等映射和内核映像映射
+ *  # 示意图: 图2.17 create_page_tables函数创建的两个映射
  *
- * 这里建立的恒等映射是小范围的，占用的空间通常是内核映像的大小，也就是几兆字节 # 2.6.4　创建恒等映射和内核映像映射
+ *  当建立了恒等映射之后，虚拟地址和物理地址在数值上是相同的
+ *     > 得看看文件 000.LINUX-5.9/.tmp_System.map  标签:__idmap_text_start , 结束地址:__idmap_text_end,则可以分析哪些函数会在恒等映射中
+ *
+ *
+ * 打开MMU的注意事项:
+ * 1). 在关闭MMU情况下,处理器访问的地址都是物理地址。当MMU打开时,处理器访问的地址变成了虚拟地址。
+ * 2). 现代处理器大多是多级流水线架构,处理器会提前预取多条指令到流水线中。当打开MMU时,处理器已经提前预取了多条指令,并且这些指令是以物理地址来进行预取的。打开MMU的指令运行完之后,处理器的MMU功能生效,于是之前提前预取的指令会以虚拟地址来访问,到MMU中查找对应的物理地址。因此,这是为了保证处理器在开启MMU前后可以连续取指令。
+ * 如何规避: 我们在打开MMU时,首先创建一个虚拟地址和物理地址相等的映射——恒等映射(identity mapping),这样就可以巧妙地解决上述问题。注意,这里建立的恒等映射是小范围的,占用的空间通常是内核映像的大小,也就是几兆字节
  */
 SYM_FUNC_START_LOCAL(__create_page_tables)
-	mov	x28, lr
+	mov	x28, lr              // 将LR的值放到x28
 
-	/*
+	/**
 	 * Invalidate the init page tables to avoid potential dirty cache lines
 	 * being evicted. Other page tables are allocated in rodata as part of
 	 * the kernel image, and thus are clean to the PoC per the boot
 	 * protocol.
+	 * (对初始化页表进行无效化操作,以避免可能存在脏缓存行被换出的情况.
+	 *  其他页表作为内核镜像的一部分分配在只读数据段中,根据启动协议的规定,
+	 *  这些页表在一致性节点处始终处于干净状态)
 	 */
 	adrp	x0, init_pg_dir
 	adrp	x1, init_pg_end
-	sub	x1, x1, x0
-	bl	__inval_dcache_area
+	sub	x1, x1, x0                 // x1 = x1-x0
+	bl	__inval_dcache_area       // 清空高速缓存
 
 	/*
 	 * Clear the init page tables.
 	 */
-	adrp	x0, init_pg_dir
+	adrp	x0, init_pg_dir        // 将 init_pg_dir 基地址赋值给x0
 	adrp	x1, init_pg_end
 	sub	x1, x1, x0
-1:	stp	xzr, xzr, [x0], #16
+1:	stp	xzr, xzr, [x0], #16   // 将两个零寄存器(xzr)的值(即0)存储到以 x0 为地址的内存中，然后将地址指针 x0 自动向后移动16个字节; 等价于: `[x0] = 0;[x0+8] = 0;x0 = x0 + 16;`
 	stp	xzr, xzr, [x0], #16
 	stp	xzr, xzr, [x0], #16
 	stp	xzr, xzr, [x0], #16
 	subs	x1, x1, #64
 	b.ne	1b
 
-	mov	x7, SWAPPER_MM_MMUFLAGS
+	mov	x7, SWAPPER_MM_MMUFLAGS        // SWAPPER_MM_MMUFLAGS: 段映射的属性,定义在 arch/arm64/include/asm/kernel-pgtable.h
 
 	/*
-	 * Create the identity mapping.
+	 * Create the identity mapping. (创建恒等映射,原理如何)
+	 * idmap_pg_dir: id,即 identity mapping
 	 */
 	adrp	x0, idmap_pg_dir
 	adrp	x3, __idmap_text_start		// __pa(__idmap_text_start)
@@ -375,22 +408,42 @@ SYM_FUNC_START_LOCAL(__create_page_tables)
 #error "Mismatch between VA_BITS and page size/number of translation levels"
 #endif
 
-	mov	x4, EXTRA_PTRS
+	mov	x4, EXTRA_PTRS   // mov 数据移动指令, mov x1, x0  => x0->x1
 	create_table_entry x0, x3, EXTRA_SHIFT, x4, x5, x6
 #else
 	/*
 	 * If VA_BITS == 48, we don't have to configure an additional
 	 * translation level, but the top-level table has more entries.
+	 * VA_BITS == 48, PHYS_MASK_SHIFT - PGDIR_SHIFT = 48 - 39 = 9
+	 * 
+	 * MOV  x0, x1 => x0 = x1
 	 */
 	mov	x4, #1 << (PHYS_MASK_SHIFT - PGDIR_SHIFT)
-	str_l	x4, idmap_ptrs_per_pgd, x5
+	str_l	x4, idmap_ptrs_per_pgd, x5 // idmap_ptrs_per_pgd  = 1 << 9 , 将寄存器x4的值赋值给变量 idmap_ptrs_per_pgd 
 #endif
 1:
-	ldr_l	x4, idmap_ptrs_per_pgd
-	mov	x5, x3				// __pa(__idmap_text_start)
+	ldr_l	x4, idmap_ptrs_per_pgd   // 将变量idmap_ptrs_per_pgd的值赋值到x4
+	mov	x5, x3				// __pa(__idmap_text_start)  x3还是 __idmap_text_start 的物理地址
 	adr_l	x6, __idmap_text_end		// __pa(__idmap_text_end)
-
-	map_memory x0, x1, x3, x6, x7, x3, x4, x10, x11, x12, x13, x14
+    
+	/**
+	 * 
+	 * 学习: [奔跑吧Linux内核（第2版）卷1·基础架构]#2.6.3 启动汇编代码
+	 *  创建页表1: 恒等映射页表
+	 * > 阅读 map_memory 宏的注释和原理, 得出: 将 .idmap.text段的虚拟地址(__idmap_text_start)映射到了相同的物理地址(__idmap_text_start)上
+	 * 
+	 * x0   idmap_pg_dir              
+	 * x1   init_pg_end - init_pg_dir
+	 * x3   __idmap_text_start  映射的虚拟地址的起始地址 ,__idmap_text_start是什么?得查询 vmlinux.lds.S
+	 * x6   __idmap_text_end
+	 * x7   SWAPPER_MM_MMUFLAGS 属性
+	 * x3   __idmap_text_start: 映射的物理地址的起始地址
+	 * x4   idmap_ptrs_per_pgd  = 1 << 9  , 这是因为每个条目是8字节,那么每个4K页可以有4K/8Byte=512
+     *
+	 * 其他寄存器都是临时寄存器
+	 * 
+	 */
+	map_memory x0, x1, x3, x6, x7, x3, x4, x10, x11, x12, x13, x14   // 建立映射页表
 
 	/*
 	 * Map the kernel image (starting with PHYS_OFFSET).
@@ -404,7 +457,12 @@ SYM_FUNC_START_LOCAL(__create_page_tables)
 	adrp	x3, _text			// runtime __pa(_text)
 	sub	x6, x6, x3			// _end - _text
 	add	x6, x6, x5			// runtime __va(_end)
-
+    
+	/**
+	 * 创建页表2: 内核映像页表
+	 *
+	 * 那么,这里就是将虚拟地址(KIMAGE_VADDR + TEXT_OFFSET)映射到物理地址(_text)上
+	 */
 	map_memory x0, x1, x5, x6, x7, x3, x4, x10, x11, x12, x13, x14
 
 	/*
@@ -427,16 +485,23 @@ SYM_FUNC_START_LOCAL(__create_page_tables)
 	ret	x28
 SYM_FUNC_END(__create_page_tables)
 
-/*
+/**
  * The following fragment of code is executed with the MMU enabled.
  *
  *   x0 = __PHYS_OFFSET
+ * init_thread_union  : vmlinux.lds.S.copy -> RW_DATA(L1_CACHE_BYTES, PAGE_SIZE, THREAD_ALIGN) 
+ * init_thread_union: 该数据结构中包含了系统第一个进程(init进程)的内核栈
+ *
+ * sp 是什么?看手册 或 https://developer.arm.com/documentation/111179/2025-09_ASL1/AArch64-Registers/SP-EL0--Stack-Pointer--EL0-?lang=en
+ *
+ * init_task 为啥赋值到el0, 不应该是el1吗?
+ * > 006.REFS/learn_the_architecture_-_aarch64_exception_model_102412_0103_02_en.pdf
  */
 SYM_FUNC_START_LOCAL(__primary_switched)
-	adrp	x4, init_thread_union
-	add	sp, x4, #THREAD_SIZE
-	adr_l	x5, init_task
-	msr	sp_el0, x5			// Save thread_info
+	adrp	x4, init_thread_union   // 将 init_thread_union 所在页的基地址加载到 x4 , adrp:Address of Page , 计算一个符号(变量或函数名)所在 4KB 内存页的基地址,并将其加载到目标寄存器中
+	add	sp, x4, #THREAD_SIZE        // sp 寄存器是啥? Stack Pointer , 这里应该是 SP_ELx , 这里会根据异常级别自动选择对应的 SP_ELx
+	adr_l	x5, init_task           // init_task不是函数,是'task_struct init_task'
+	msr	sp_el0, x5			        // sp_el0? 为啥是el0? 因目前运行在内核态(EL1),EL0空闲 Save thread_info , msr:Move to System Register  , 将通用寄存器的值写入到系统寄存器
 
 #ifdef CONFIG_ARM64_PTR_AUTH
 	__ptrauth_keys_init_cpu	x5, x6, x7, x8
@@ -455,9 +520,9 @@ SYM_FUNC_START_LOCAL(__primary_switched)
 
 	str_l	x21, __fdt_pointer, x5		// Save FDT pointer
 
-	ldr_l	x4, kimage_vaddr		// Save the offset between
-	sub	x4, x4, x0			// the kernel virtual and
-	str_l	x4, kimage_voffset, x5		// physical mappings
+	ldr_l	x4, kimage_vaddr		// Save the offset between , 将kimage_vaddr的值拷贝到x4
+	sub	x4, x4, x0			        // x4 = x4-x0 = kimage_vaddr - __PHYS_OFFSET       the kernel virtual and   (x0: )  ; 此时 x0的值是__PHYS_OFFSET所在页表的基地址
+	str_l	x4, kimage_voffset, x5		// physical mappings  str_l是一个宏,
 
 	// Clear BSS
 	adr_l	x0, __bss_start
@@ -484,42 +549,44 @@ SYM_FUNC_START_LOCAL(__primary_switched)
 	add	sp, sp, #16
 	mov	x29, #0
 	mov	x30, #0
-	b	start_kernel
+	b	start_kernel                            // 启动内核
 SYM_FUNC_END(__primary_switched)
 
 	.pushsection ".rodata", "a"
-SYM_DATA_START(kimage_vaddr)
-	.quad		_text - TEXT_OFFSET
-SYM_DATA_END(kimage_vaddr)
+SYM_DATA_START(kimage_vaddr)               //  开始定义数据符号 kimage_vaddr
+	.quad		_text - TEXT_OFFSET        //  存储一个64位值: _text - TEXT_OFFSET
+SYM_DATA_END(kimage_vaddr)                //   结束定义
 EXPORT_SYMBOL(kimage_vaddr)
 	.popsection
 
 /*
  * end early head section, begin head code that is also used for
  * hotplug and needs to have the same protections as the text region
- * 结束头部早期部分，开始头部代码，该代码也用于热插拔，并且需要具有与文本区域相同的保护措施
+ * 结束头部早期部分,开始头部代码,该代码也用于热插拔,并且需要具有与文本区域相同的保护措施
  */
-	.section ".idmap.text","awx"  /*表示后面的代码会链接到.idmap.text段中，awx表示该段是可分配、可写以及可执行的*/
+	.section ".idmap.text","awx"  /*表示后面的代码会链接到.idmap.text段中,awx表示该段是可分配、可写以及可执行的*/
 
-/*
+/**
  * If we're fortunate enough to boot at EL2, ensure that the world is
  * sane before dropping to EL1.
+ * (如果我们幸运地在 EL2 级别启动,在降级到 EL1 之前请确保系统环境处于正常状态)
  *
  * Returns either BOOT_CPU_MODE_EL1 or BOOT_CPU_MODE_EL2 in w0 if
  * booted in EL1 or EL2 respectively.
+ * (根据启动时的异常级别,函数将在 w0 寄存器中返回 BOOT_CPU_MODE_EL1(如果在 EL1 启动)或 BOOT_CPU_MODE_EL2(如果在 EL2 启动))
  */
 SYM_FUNC_START(el2_setup)
-	msr	SPsel, #1			// We want to use SP_EL{1,2}
-	mrs	x0, CurrentEL
-	cmp	x0, #CurrentEL_EL2
+	msr	SPsel, #1			 // We want to use SP_EL{1,2} ,选择使用当前异常级别的专用栈指针(SP_ELx),而不是共享的用户栈指针(SP_EL0);SPsel: Stack Pointer Select - 栈指针选择器寄存器
+	mrs	x0, CurrentEL        // CurrentEL作为一个特殊寄存器,用来获取PSTATE寄存器中EL域的值,该EL域保存了当前的异常等级.
+	cmp	x0, #CurrentEL_EL2  //  X0寄存器存放了当前异常等级,判断其是否为EL2:从PSTATE寄存器中获取当前异常等级.
 	b.eq	1f
-	mov_q	x0, (SCTLR_EL1_RES1 | ENDIAN_SET_EL1)
-	msr	sctlr_el1, x0
-	mov	w0, #BOOT_CPU_MODE_EL1		// This cpu booted in EL1
-	isb
-	ret
+	mov_q	x0, (SCTLR_EL1_RES1 | ENDIAN_SET_EL1)  // 若处理器运行到此处,说明当前异常等级为EL1.接下来要配置系统控制寄存器SCTLR_EL1
+	msr	sctlr_el1, x0                              // 配置SCTLR_EL1,设置大/小端模式,其中EE域用来控制EL1处于大端还是小端模式,E0E域用来控制EL0处于大端还是小端模式
+	mov	w0, #BOOT_CPU_MODE_EL1		// This cpu booted in EL1 , 将立即数移动到w0寄存器中
+	isb                            // 内存屏障指令,确保该指令前面所有的指令都运行完成
+	ret                            // 使用ret返回
 
-1:	mov_q	x0, (SCTLR_EL2_RES1 | ENDIAN_SET_EL2)
+1:	mov_q	x0, (SCTLR_EL2_RES1 | ENDIAN_SET_EL2)  
 	msr	sctlr_el2, x0
 
 #ifdef CONFIG_ARM64_VHE
@@ -671,18 +738,22 @@ SYM_INNER_LABEL(install_el2_stub, SYM_L_LOCAL)
 	eret
 SYM_FUNC_END(el2_setup)
 
-/*
+/**
+ * __boot_cpu_mode 是在本文件中定义的: extern u32 __boot_cpu_mode[2];
+ * 
  * Sets the __boot_cpu_mode flag depending on the CPU boot mode passed
  * in w0. See arch/arm64/include/asm/virt.h for more info.
+ *
+ * 如果是在EL2级别启动的,异常级别放到__boot_cpu_mode[0]中,否则,放到__boot_cpu_mode[1]中
  */
 SYM_FUNC_START_LOCAL(set_cpu_boot_mode_flag)
-	adr_l	x1, __boot_cpu_mode
+	adr_l	x1, __boot_cpu_mode       // __boot_cpu_mode变量地址加载到x1寄存器中
 	cmp	w0, #BOOT_CPU_MODE_EL2
-	b.ne	1f
-	add	x1, x1, #4
-1:	str	w0, [x1]			// This CPU has booted in EL1
+	b.ne	1f                       // b.ne 不相等时跳转
+	add	x1, x1, #4                   // x1 = __boot_cpu_mode[1],执行到此处的前提是 w0, #BOOT_CPU_MODE_EL2 相等
+1:	str	w0, [x1]			// This CPU has booted in EL1   把 w0 里的值,保存到 x1 指向的内存里;方括号 [ ] 的含义是“间接寻址”或“解引用”,没有[]就是拷贝到寄存器
 	dmb	sy
-	dc	ivac, x1			// Invalidate potentially stale cache line
+	dc	ivac, x1			// Invalidate potentially stale cache line  ; dc ivac, x1 指令的功能是:使虚拟地址在x1寄存器中的那个内存地址对应的缓存行在所有缓存层次中无效;dc:data clean;ivac: Invalidate by Virtual Address to Point of Coherency
 	ret
 SYM_FUNC_END(set_cpu_boot_mode_flag)
 
@@ -791,12 +862,14 @@ SYM_FUNC_END(__secondary_too_slow)
  *  - Corrupts tmp1, tmp2
  *  - Writes 'status' to __early_cpu_boot_status and makes sure
  *    it is committed to memory.
+ *  
+ * 注释也说了,将status值写入到__early_cpu_boot_status (就定义在这个文件)
  */
 
 	.macro	update_early_cpu_boot_status status, tmp1, tmp2
 	mov	\tmp2, #\status
 	adr_l	\tmp1, __early_cpu_boot_status
-	str	\tmp2, [\tmp1]
+	str	\tmp2, [\tmp1]     // str w0 , [x1] 将w0的值存储到x1的地址上
 	dmb	sy
 	dc	ivac, \tmp1			// Invalidate potentially stale cache line
 	.endm
@@ -807,6 +880,8 @@ SYM_FUNC_END(__secondary_too_slow)
  *  x0  = SCTLR_EL1 value for turning on the MMU.
  *  x1  = TTBR1_EL1 value
  *
+ *  idmap_pg_dir -> ttbr0_el1
+ *
  * Returns to the caller via x30/lr. This requires the caller to be covered
  * by the .idmap.text section.
  *
@@ -814,19 +889,19 @@ SYM_FUNC_END(__secondary_too_slow)
  * If it isn't, park the CPU
  */
 SYM_FUNC_START(__enable_mmu)
-	mrs	x2, ID_AA64MMFR0_EL1
-	ubfx	x2, x2, #ID_AA64MMFR0_TGRAN_SHIFT, 4
-	cmp	x2, #ID_AA64MMFR0_TGRAN_SUPPORTED
+	mrs	x2, ID_AA64MMFR0_EL1        // ID_AA64MMFR0_EL1: 根据手册Page: D24-7939 , 架构指令标识: 判断处理器是否支持 ARMv8-A AArch64 执行状态 。支持，能访问该寄存器;否则会报错
+	ubfx	x2, x2, #ID_AA64MMFR0_TGRAN_SHIFT, 4     // ubfx : 无符号位域提取指令,ubfx x1, x0, #20, #16 // 从寄存器x0存储的值的位20开始提取16位,存储到寄存器x1 ,这一行得查手册了?  ID_AA64MMFR0_TGRAN_SHIFT 定义在'arch/arm64/include/asm/sysreg.h',若页面是4K,则ID_AA64MMFR0_TGRAN_SHIFT的值为28,那么这行代码就是提取x2的[31,28]再存储到x2,x2的[31,28]存储的值用来判断是否MMU支持4K的翻译粒度
+	cmp	x2, #ID_AA64MMFR0_TGRAN_SUPPORTED            // 判断是否支持内核指定的翻译粒度 --- ID_AA64MMFR0_TGRAN_SUPPORTED 定义在arch/arm64/include/asm/sysreg.h,为什么是0x0,还是得查看手册:<Arm® Architecture Reference Manual for A-profile architecture>
 	b.ne	__no_granule_support
-	update_early_cpu_boot_status 0, x2, x3
+	update_early_cpu_boot_status 0, x2, x3           // 将status值写入到__early_cpu_boot_status
 	adrp	x2, idmap_pg_dir
-	phys_to_ttbr x1, x1
+	phys_to_ttbr x1, x1                         // 将物理地址转为TTBR格式(在宏中做的处理),在调用__enable_mmu前,会对x1进行赋值, phys_to_ttbr 宏,定义在arch/arm64/include/asm/assembler.h 
 	phys_to_ttbr x2, x2
-	msr	ttbr0_el1, x2			// load TTBR0
+	msr	ttbr0_el1, x2			// load TTBR0;msr 将通用寄存器的值写入系统寄存器: msr sctlr_el1, x1   ; 将x1的值写入SCTLR_EL1(系统控制寄存器)
 	offset_ttbr1 x1, x3
 	msr	ttbr1_el1, x1			// load TTBR1
 	isb
-	msr	sctlr_el1, x0
+	msr	sctlr_el1, x0           //开启MMU,在启动过程中(__cpu_setup:SCTLR_EL1_SET),x0的值被修改了(开启MMU,即,将x0的值的bit[0]置为1);  注: M, bit [0] MMU enable for EL1&0 stage 1 address translation. 查询手册(具体功能得看手册的字段描述),sctlr_el1 为系统控制寄存器,控制系统(包括内存系统),EL0 EL1级别
 	isb
 	/*
 	 * Invalidate the local I-cache so that any instructions fetched
@@ -975,32 +1050,38 @@ SYM_FUNC_START_LOCAL(__relocate_kernel)
 SYM_FUNC_END(__relocate_kernel)
 #endif
 
+
+/**
+* __PHYS_OFFSET 就是内核的起始地址:_text
+* = KERNEL_START(_text in arch/arm64/include/asm/memory.h) + TEXT_OFFSET(0x0 in arch/arm64/Makefile)
+*
+*/
 SYM_FUNC_START_LOCAL(__primary_switch)
 #ifdef CONFIG_RANDOMIZE_BASE
-	mov	x19, x0				// preserve new SCTLR_EL1 value
-	mrs	x20, sctlr_el1			// preserve old SCTLR_EL1 value
+	mov	x19, x0				     // preserve new SCTLR_EL1 value mov: move,在寄存器之间或立即数到寄存器之间传输数据
+	mrs	x20, sctlr_el1			// preserve old SCTLR_EL1 value    msr:Move from System Register , 从系统寄存器读取值到通用寄存器
 #endif
 
 	adrp	x1, init_pg_dir
-	bl	__enable_mmu
+	bl	__enable_mmu      /*打开MMU: idmap_pg_dir -> ttbr0_el1 , init_pg_dir -> ttbr1_el1 ,开启MMU后,访问的地址就是虚拟地址了*/
 #ifdef CONFIG_RELOCATABLE
 #ifdef CONFIG_RELR
 	mov	x24, #0				// no RELR displacement yet
 #endif
 	bl	__relocate_kernel
 #ifdef CONFIG_RANDOMIZE_BASE
-	ldr	x8, =__primary_switched
+	ldr	x8, =__primary_switched    // ldr: Load Register , 从内存加载数据到寄存器
 	adrp	x0, __PHYS_OFFSET
-	blr	x8
+	blr	x8      // blr: Branch with Link to Register, 跳转到寄存器指定的地址,同时保存返回地址.
 
 	/*
 	 * If we return here, we have a KASLR displacement in x23 which we need
 	 * to take into account by discarding the current kernel mapping and
 	 * creating a new one.
 	 */
-	pre_disable_mmu_workaround
-	msr	sctlr_el1, x20			// disable the MMU
-	isb
+	pre_disable_mmu_workaround   // 宏,arch/arm64/include/asm/assembler.h?
+	msr	sctlr_el1, x20			// disable the MMU   , msr: Move to System Register , 将通用寄存器的值写入系统寄存器
+	isb                         //  Instruction Synchronization Barrier,指令同步屏障
 	bl	__create_page_tables		// recreate kernel mapping
 
 	tlbi	vmalle1				// Remove any stale TLB entries

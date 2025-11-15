@@ -11,11 +11,14 @@
 #include <asm/pgtable-hwdef.h>
 #include <asm/sparsemem.h>
 
-/*
+/**
  * The linear mapping and the start of memory are both 2M aligned (per
  * the arm64 booting.txt requirements). Hence we can use section mapping
  * with 4K (section size = 2M) but not with 16K (section size = 32M) or
  * 64K (section size = 512M).
+ * (线性映射与内存起始地址均为2M对齐（符合arm64 booting.txt要求）。
+ * 因此，我们可以使用4K页大小的段映射（段大小=2M），
+ * 但无法使用16K页大小（段大小=32M）或64K页大小（段大小=512M）的段映射。)
  */
 #ifdef CONFIG_ARM64_4K_PAGES
 #define ARM64_SWAPPER_USES_SECTION_MAPS 1
@@ -87,6 +90,9 @@
 			+ EARLY_PUDS((vstart), (vend))	/* each PUD needs a next level page table */	\
 			+ EARLY_PMDS((vstart), (vend)))	/* each PMD needs a next level page table */
 #define INIT_DIR_SIZE (PAGE_SIZE * EARLY_PAGES(KIMAGE_VADDR + TEXT_OFFSET, _end))
+/**
+ * 4K页: IDMAP_DIR_SIZE = 4 * 4096 , 即 4个4K页
+ */
 #define IDMAP_DIR_SIZE		(IDMAP_PGTABLE_LEVELS * PAGE_SIZE)
 
 #ifdef CONFIG_ARM64_SW_TTBR0_PAN
@@ -115,7 +121,7 @@
 #define SWAPPER_PTE_FLAGS	(PTE_TYPE_PAGE | PTE_AF | PTE_SHARED)
 #define SWAPPER_PMD_FLAGS	(PMD_TYPE_SECT | PMD_SECT_AF | PMD_SECT_S)
 
-#if ARM64_SWAPPER_USES_SECTION_MAPS
+#if ARM64_SWAPPER_USES_SECTION_MAPS  // arm64 4K页是这个
 #define SWAPPER_MM_MMUFLAGS	(PMD_ATTRINDX(MT_NORMAL) | SWAPPER_PMD_FLAGS)
 #else
 #define SWAPPER_MM_MMUFLAGS	(PTE_ATTRINDX(MT_NORMAL) | SWAPPER_PTE_FLAGS)

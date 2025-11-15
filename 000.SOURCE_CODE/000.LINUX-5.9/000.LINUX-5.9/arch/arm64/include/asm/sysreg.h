@@ -558,7 +558,10 @@
 #define ENDIAN_SET_EL2		0
 #endif
 
-/* SCTLR_EL1 specific flags. */
+/** 
+ * SCTLR_EL1 specific flags. 
+ * > 得查询手册<Arm® Architecture Reference Manual for A-profile architecture>:"D24.2.167 SCTLR_EL1, System Control Register (EL1)
+ * */
 #define SCTLR_EL1_BT1		(BIT(36))
 #define SCTLR_EL1_BT0		(BIT(35))
 #define SCTLR_EL1_UCI		(BIT(26))

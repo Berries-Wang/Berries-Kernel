@@ -177,11 +177,14 @@ lr	.req	x30		// link register
 	orr	\rd, \lbits, \hbits, lsl #32
 	.endm
 
-/*
+/**
  * Pseudo-ops for PC-relative adr/ldr/str <reg>, <symbol> where
  * <symbol> is within the range +/- 4 GB of the PC.
  */
-	/*
+	/**
+	 * adr_l	x1, __boot_cpu_mode
+	 *  adrp	x1, __boot_cpu_mode            -> 获取__boot_cpu_mode所在页的基地址 
+	 *  add	    x1, x1, :lo12:__boot_cpu_mode  -> 整条指令的意思就是:将x1(页基地址)加上__boot_cpu_mode的低12位偏移,得到__boot_cpu_mode的完整地址,并将结果存回x1
 	 * @dst: destination register (64 bit wide)
 	 * @sym: name of the symbol
 	 */
@@ -196,6 +199,15 @@ lr	.req	x30		// link register
 	 * @tmp: optional 64-bit scratch register to be used if <dst> is a
 	 *       32-bit wide register, in which case it cannot be used to hold
 	 *       the address
+	 * ldr: LDR 是 从内存加载数据到寄存器 的指令。
+	 * 
+	 * 
+	 * ldr	\dst, [\dst, :lo12:\sym]
+	 *    [\dst, :lo12:\sym] : [] 表示解引用，即取值; \dst表示基地址; ':lo12:\sym' 表示符号的低12位偏移量
+	 * ldr	\dst, [\dst, :lo12:\sym] 完整的意思就是 将内存中(以dst为基地址,偏移量为sym低12位处)的值读取出来,赋值到dst;
+	 *    -> dst = *(dst + sym&(1<<12))
+	 * 
+	 * 想想虚拟内存到物理内存是怎么翻译的!!!
 	 */
 	.macro	ldr_l, dst, sym, tmp=
 	.ifb	\tmp
@@ -207,11 +219,15 @@ lr	.req	x30		// link register
 	.endif
 	.endm
 
-	/*
+	/**
 	 * @src: source register (32 or 64 bit wide)
 	 * @sym: name of the symbol
 	 * @tmp: mandatory 64-bit scratch register to calculate the address
-	 *       while <src> needs to be preserved.
+	 *       while <src> needs to be preserved.（必须使用64位临时寄存器来计算地址，同时需保留<src>的值。）
+	 * 
+	 * str_l	x4, kimage_voffset, x5
+	 * adrp    x5, kimage_voffset    // 获取 kimage_voffset 的页基地址
+     * str     x4, [x5, #:lo12:kimage_voffset]  // 存储 x4 到 kimage_voffset
 	 */
 	.macro	str_l, src, sym, tmp
 	adrp	\tmp, \sym
@@ -537,10 +553,12 @@ USER(\label, ic	ivau, \tmp2)			// invalidate I line PoU
 
 /*
  * Arrange a physical address in a TTBR register, taking care of 52-bit
- * addresses.
+ * addresses.(将物理地址配置到 TTBR 寄存器中，并妥善处理 52 位地址)
  *
  * 	phys:	physical address, preserved
  * 	ttbr:	returns the TTBR value
+ *  
+ * mov x1, x0    // 将x0的值移动到x1
  */
 	.macro	phys_to_ttbr, ttbr, phys
 #ifdef CONFIG_ARM64_PA_BITS_52

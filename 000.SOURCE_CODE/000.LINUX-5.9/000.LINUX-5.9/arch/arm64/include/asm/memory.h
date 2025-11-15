@@ -55,8 +55,20 @@
  */
 #define VA_BITS			(CONFIG_ARM64_VA_BITS)
 /**
+ * 
+ * arm64
+ * 
  * PAGE_OFFSET: 
  *    以48位虚拟地址为例，_PAGE_OFFSET(48) = -(1 << 48) = -2^48 = 0xFFFF000000000000 即内核地址空间的起始点
+ * 
+ * 宏展开: 怎么展开？见 000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/000.Kernel_Build.sh
+ * 
+ * KIMAGE_VADDR: '(((((((-((((1UL))) << ((((48))) - 1))))) + (0x08000000))) + (0x08000000)))'
+ * > 003.TEST-SPACE/009.KIMAGE_VADDR.c
+ * > 0XFFFF800010000000 ， 还是要和书中示意图中的值区分开,这是虚拟地址`
+ * >>> 就是这个值，验证: arm-gnu-toolchain-14.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-objdump -S  vmlinux   > /home/wei/OPEN_SOURCE/Berries-Kernel/009.IGNORE/vmlinux.objdump.log
+ * > 这个值还和 ‘KASAN’ 是否开启有关！
+ * PHYS_OFFSET: '({ ((void)(sizeof(( long)(memstart_addr & 1)))); memstart_addr; })'
  */
 #define _PAGE_OFFSET(va)	(-(UL(1) << (va)))
 #define PAGE_OFFSET		(_PAGE_OFFSET(VA_BITS))
@@ -72,7 +84,7 @@
  * 
  * 换个角度, 这个减数究竟是谁呢 是 “0xFFFF800000000000” 即  _PAGE_END(VA_BITS_MIN) ， 你瞅瞅，VMEMMAP_SIZE是怎么算出来的
  * 以及 ， 结合图来分析:  [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图2.9　ARM64在Linux 5.0内核的内存分布
- * 
+ * > 切记，此书是基于5.0的内核的，而本内核版本是5.9的，有些出入。例如 KIMAGE_VADDR ，PAGE_OFFSET（书中: '0xFFFF800000000000' , 实际 '0xFFFF000000000000'） 
  * 示意图: 001.UNIX-DOCS/022.内存管理/999.IMGS/wechat_2025-08-16_120801_349.png
  */
 #define VMEMMAP_START		(-VMEMMAP_SIZE - SZ_2M)
@@ -97,10 +109,12 @@
 #define KERNEL_START		_text
 #define KERNEL_END		_end
 
-/*
+/**
  * Generic and tag-based KASAN require 1/8th and 1/16th of the kernel virtual
  * address space for the shadow region respectively. They can bloat the stack
  * significantly, so double the (minimum) stack size when they are in use.
+ * (通用KASAN和基于标签的KASAN分别需要占用内核虚拟地址空间的1/8和1/16作为影子内存区域。
+ * 这两种模式都会显著增加堆栈体积，因此当启用它们时，需要将（最小）堆栈大小扩大一倍。)
  */
 #ifdef CONFIG_KASAN
 #define KASAN_SHADOW_OFFSET	_AC(CONFIG_KASAN_SHADOW_OFFSET, UL)
@@ -200,7 +214,7 @@ extern s64			memstart_addr;
 /* PHYS_OFFSET - the physical address of the start of memory. */
 #define PHYS_OFFSET		({ VM_BUG_ON(memstart_addr & 1); memstart_addr; })
 
-/* the virtual base of the kernel image (minus TEXT_OFFSET) */
+/* the virtual base of the kernel image (minus TEXT_OFFSET (在arch/arm64/Makefile中)) */
 extern u64			kimage_vaddr;
 
 /* the offset between the kernel virtual and physical mappings */
@@ -277,6 +291,10 @@ static inline const void *__tag_set(const void *addr, u8 tag)
  * __kimg_to_phys 执行从内核映像虚拟地址（Kernel Image Virtual Address）到物理地址的转换。
  * 这种转换在内核初始化的早期阶段非常有用，因为在页表完全建立之前，
  * 虚拟地址和物理地址之间的映射是固定的线性关系。
+ * 
+ * kimage_voffset 是什么?
+ * 当系统刚初始化时，内核映像通过块映射的方式映射到KIMAGE_VADDR + TEXT_OFFSET的虚拟地址上,因此
+ * kimage_voffset表示内核映像虚拟地址和物理地址之间的偏移量：“图2.11　kimage_voffset的含义”
  */
 #define __kimg_to_phys(addr)	((addr) - kimage_voffset)
 

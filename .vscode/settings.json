@@ -1,5 +1,5 @@
 {
-    "clang-format.executable": "/usr/bin/clang-format-18",
+    "clang-format.executable": "/usr/bin/clang-format",
     "files.associations": {
         "*.tbl": "c",
         "array": "c",
@@ -21,6 +21,9 @@
         "006.print_bits.h": "c",
         "compiler.h": "c",
         "atomic_ll_sc.h": "c",
-        "stdarg.h": "c"
+        "stdarg.h": "c",
+        "kasan-checks.h": "c",
+        "printk.h": "c",
+        "sstream": "c"
     }
 }
