@@ -924,6 +924,7 @@ void __init paging_init(void)
 
 	/**
 	 * pgd_set_fixmap()函数做一个固定映射，把swapper_pg_dir页表重新映射到固定映射区域
+	 * > 这个映射的原理是什么
      * 
      * 获取PGD页表基地址  []#2.1.6　案例分析：ARM64的页表映射过程
 	 * 

@@ -12,6 +12,9 @@
 |kimage_vaddr|内核镜像的虚拟地址|_text - TEXT_OFFSET|通过 vmlinux.lds.S发现,_text 与 (KIMAGE_VADDR + TEXT_OFFSET) 相等|
 |KIMAGE_VADDR|内核镜像的虚拟地址|#define KIMAGE_VADDR		(MODULES_END)<sup>宏展开后,值: 0xFFFF800010000000</sup>|arch/arm64/include/asm/memory.h|
 |kimage_voffset|内核映像虚拟地址和物理地址之间的偏移量|kimage_vaddr - __PHYS_OFFSET <sup>从head.S 的 __primary_switched 分析得了</sup>|arch/arm64/kernel/head.S|
+|swapper_pg_dir|内核页表的PGD页表基地址||arch/arm64/kernel/vmlinux.lds.S|
+
+---
 
 分析[arch/arm64/kernel/head.S](./head.S.copy)之后，在看如下的图，就很清晰了:
 - ![wechat_2025-11-15_164110_629.png](../../../../../../001.UNIX-DOCS/999.IMGS/wechat_2025-11-15_164110_629.png)
