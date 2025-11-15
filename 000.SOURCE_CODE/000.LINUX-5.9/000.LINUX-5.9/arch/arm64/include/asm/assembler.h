@@ -199,6 +199,15 @@ lr	.req	x30		// link register
 	 * @tmp: optional 64-bit scratch register to be used if <dst> is a
 	 *       32-bit wide register, in which case it cannot be used to hold
 	 *       the address
+	 * ldr: LDR 是 从内存加载数据到寄存器 的指令。
+	 * 
+	 * 
+	 * ldr	\dst, [\dst, :lo12:\sym]
+	 *    [\dst, :lo12:\sym] : [] 表示解引用，即取值; \dst表示基地址; ':lo12:\sym' 表示符号的低12位偏移量
+	 * ldr	\dst, [\dst, :lo12:\sym] 完整的意思就是 将内存中(以dst为基地址,偏移量为sym低12位处)的值读取出来,赋值到dst;
+	 *    -> dst = *(dst + sym&(1<<12))
+	 * 
+	 * 想想虚拟内存到物理内存是怎么翻译的!!!
 	 */
 	.macro	ldr_l, dst, sym, tmp=
 	.ifb	\tmp

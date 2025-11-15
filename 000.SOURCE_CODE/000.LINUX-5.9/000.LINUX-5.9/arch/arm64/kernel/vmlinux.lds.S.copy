@@ -241,11 +241,11 @@ SECTIONS
 	__pecoff_data_rawsize = ABSOLUTE(. - __initdata_begin);
 	_edata = .;
 
-    /*宏,详见:000.LINUX-5.9/include/asm-generic/vmlinux.lds.h , 未初始化数据段，见BSS_SECTION()宏。该段从__bss_start标记开始，到__bss_stop标记结束*/
+    /*宏,详见:000.LINUX-5.9/include/asm-generic/vmlinux.lds.h , 未初始化数据段,见BSS_SECTION()宏。该段从__bss_start标记开始，到__bss_stop标记结束*/
 	BSS_SECTION(0, 0, 0)
 
 	. = ALIGN(PAGE_SIZE);
-	init_pg_dir = .;   // PGD页表,临时性的?
+	init_pg_dir = .;   // 内核页表基地址
 	. += INIT_DIR_SIZE;  /*INIT_DIR_SIZE: arch/arm64/include/asm/kernel-pgtable.h*/
 	init_pg_end = .;
 
