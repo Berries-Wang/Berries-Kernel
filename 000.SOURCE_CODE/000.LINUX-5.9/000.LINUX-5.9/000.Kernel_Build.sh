@@ -9,7 +9,7 @@ make clean
 
 make ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu-  defconfig
 make ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu-  menuconfig
-make ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu-  -j8
+make ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu-  KCFLAGS="-save-temps" -j8
 
 # 在Makefile文件中添加 KBUILD_CFLAGS += -save-temps ， 就可以将 .i (宏展开文件) .S 文件保存 ， 
 # 注意，.h 不会生成。
@@ -17,3 +17,7 @@ make ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu-  -j8
 #
 # 或者 make ARCH=arm64 CROSS_COMPILE=aarch64-none-linux-gnu- KCFLAGS="-save-temps" -j8
 #
+#
+#
+# 通过 // 通过aarch64-none-linux-gnu-objdump -S head.o 就可以查看宏展开内容 
+# , 或者直接查看*.i文件,这就是预编译后的文件

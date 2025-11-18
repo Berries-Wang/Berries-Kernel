@@ -300,6 +300,9 @@ void __init __no_sanitize_address setup_arch(char **cmdline_p)
 	early_fixmap_init();
 	early_ioremap_init();
 
+	/**
+	 * 内含DTS(设备树)解析
+	 */
 	setup_machine_fdt(__fdt_pointer);
 
 	/*
