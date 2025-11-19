@@ -1491,9 +1491,18 @@ void __init early_fixmap_init(void)
  * Unusually, this is also called in IRQ context (ghes_iounmap_irq) so if we
  * ever need to use IPIs for TLB broadcasting, then we're in trouble here.
  * (不寻常的是，该函数（ghes_iounmap_irq）也会在IRQ上下文中被调用。因此，如果我们将来需要使用IPI（处理器间中断）进行TLB广播，这里就会出问题。)
+ * 
+ * 
+ * 
+ * 
  */
 void __set_fixmap(enum fixed_addresses idx, phys_addr_t phys, pgprot_t flags)
 {
+	/**
+	 * #define __fix_to_virt(x)	(FIXADDR_TOP - ((x) << PAGE_SHIFT))
+	 * FIXADDR_TOP: 
+	 * 有一个固定映射区域: fixed区域
+	 */
 	unsigned long addr = __fix_to_virt(idx);
 	pte_t *ptep;
 

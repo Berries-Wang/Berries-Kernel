@@ -80,12 +80,30 @@
 #define MODULES_VADDR		(BPF_JIT_REGION_END)
 #define MODULES_VSIZE		(SZ_128M)
 /**
- * 是不是很奇怪，大小怎么能当做一个起始地址呢?
+ * 是不是很奇怪，大小怎么能当做一个起始地址呢? 看如下分析:
  * 
- * 换个角度, 这个减数究竟是谁呢 是 “0xFFFF800000000000” 即  _PAGE_END(VA_BITS_MIN) ， 你瞅瞅，VMEMMAP_SIZE是怎么算出来的
- * 以及 ， 结合图来分析:  [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图2.9　ARM64在Linux 5.0内核的内存分布
- * > 切记，此书是基于5.0的内核的，而本内核版本是5.9的，有些出入。例如 KIMAGE_VADDR ，PAGE_OFFSET（书中: '0xFFFF800000000000' , 实际 '0xFFFF000000000000'） 
+ * 结合图来分析:  [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图2.9　ARM64在Linux 5.0内核的内存分布
+ * > 切记，此书是基于5.0的内核的，而本内核版本是5.9的，有些出入。例如 KIMAGE_VADDR ，PAGE_OFFSET（书中: '0xFFFF800000000000' , 实际 '0xFFFF000000000000'）[正确]
  * 示意图: 001.UNIX-DOCS/022.内存管理/999.IMGS/wechat_2025-08-16_120801_349.png
+ * 
+ * <pre>
+ * 在64位系统中,任何负数-X被转为unsigned long 时，等价于 2^(64) - X , 且在Linux内核中，在 Linux 内核中，虚拟地址是用 unsigned long 表示的
+ * 
+ * 所以，在此处, (-VMEMMAP_SIZE) 转为地址后为 (2^(64) - (VMEMMAP_SIZE)) + 1
+ * 
+ * try it: 003.TEST-SPACE/010.Calc_BuMa.c
+ * #include <stdio.h>
+ * #include <inttypes.h>
+ * 
+ * int main(int argc, char **argv)
+ * {
+ *     unsigned long addr = -5;
+ *     printf("Address: %" PRIXPTR "\n", addr);   // 小写，适合指针/地址
+ *     return 0;
+ * }
+ * 输出: Address: FFFFFFFFFFFFFFFB (F-B=4)
+ * </pre>
+ * 
  */
 #define VMEMMAP_START		(-VMEMMAP_SIZE - SZ_2M)
 #define VMEMMAP_END		(VMEMMAP_START + VMEMMAP_SIZE)
