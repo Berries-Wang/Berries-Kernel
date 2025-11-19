@@ -87,7 +87,7 @@
  * 示意图: 001.UNIX-DOCS/022.内存管理/999.IMGS/wechat_2025-08-16_120801_349.png
  * 
  * <pre>
- * 在64位系统中,任何负数-X被转为unsigned long 时，等价于 2^(64) - X , 且在Linux内核中，在 Linux 内核中，虚拟地址是用 unsigned long 表示的
+ * 在64位系统中,任何负数-X被转为unsigned long 时，等价于 2^(64) - X + 1, 且在Linux内核中，在 Linux 内核中，虚拟地址是用 unsigned long 表示的
  * 
  * 所以，在此处, (-VMEMMAP_SIZE) 转为地址后为 (2^(64) - (VMEMMAP_SIZE)) + 1
  * 
@@ -98,7 +98,7 @@
  * int main(int argc, char **argv)
  * {
  *     unsigned long addr = -5;
- *     printf("Address: %" PRIXPTR "\n", addr);   // 小写，适合指针/地址
+ *     printf("Address: %" PRIXPTR "\n", addr);   // 大写，适合指针/地址
  *     return 0;
  * }
  * 输出: Address: FFFFFFFFFFFFFFFB (F-B=4)
