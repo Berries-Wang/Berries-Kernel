@@ -28,18 +28,32 @@
 #define USER_PGTABLES_CEILING	0UL
 #endif
 
-/*
+/**
+ * 结合 ‘图2.7　4级分页模型在64位虚拟地址的划分’ 看一下 [奔跑吧Linux内核（第二版）卷一·基础架构]
+ * 根据MMU的解析方式,得出
+ *    address >> PAGE_SHIFT: 去掉页面内的偏移量,即 去掉页面内的详细地址
+ *    (address >> PAGE_SHIFT) & (PTRS_PER_PTE - 1): 计算得到 PT 索引区域的值
+ * > 即，这行代码('(address >> PAGE_SHIFT) & (PTRS_PER_PTE - 1)') 或者说这个函数的功能就是
+ *       计算虚拟地址 addr 所对应的page table的条目(entry) 
+ * 
  * A page table page can be thought of an array like this: pXd_t[PTRS_PER_PxD]
+ * (页表页可以看作是一个类似这样的数组：pXd_t[PTRS_PER_PxD])
  *
  * The pXx_index() functions return the index of the entry in the page
  * table page which would control the given virtual address
+ * (pXx_index() 函数的作用是返回页表页中控制指定虚拟地址的条目索引)
  *
  * As these functions may be used by the same code for different levels of
  * the page table folding, they are always available, regardless of
  * CONFIG_PGTABLE_LEVELS value. For the folded levels they simply return 0
  * because in such cases PTRS_PER_PxD equals 1.
+ * (由于这些函数可能被同一段代码用于不同层级的页表折叠，因此无论CONFIG_PGTABLE_LEVELS配置值如何，
+ * 这些函数始终可用。对于被折叠的层级，它们直接返回0，因为在这种情况下PTRS_PER_PxD等于1)
+ * 
+ * arm64:
+ *  PTRS_PER_PTE: arch/arm64/include/asm/pgtable-hwdef.h
+ *                 定义: #define PTRS_PER_PTE		(1 << (PAGE_SHIFT - 3))
  */
-
 static inline unsigned long pte_index(unsigned long address)
 {
 	return (address >> PAGE_SHIFT) & (PTRS_PER_PTE - 1);

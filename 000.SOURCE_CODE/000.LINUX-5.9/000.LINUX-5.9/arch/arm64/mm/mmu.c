@@ -65,6 +65,10 @@ EXPORT_SYMBOL(kimage_voffset);
 unsigned long empty_zero_page[PAGE_SIZE / sizeof(unsigned long)] __page_aligned_bss;
 EXPORT_SYMBOL(empty_zero_page);
 
+/**
+ * bm_pte 是Linux内核在ARM64平台上为“固定映射”区域准备的一个临时、
+ * 可重用的页表条目（Page Table Entry, PTE）
+ */
 static pte_t bm_pte[PTRS_PER_PTE] __page_aligned_bss;
 static pmd_t bm_pmd[PTRS_PER_PMD] __page_aligned_bss __maybe_unused;
 static pud_t bm_pud[PTRS_PER_PUD] __page_aligned_bss __maybe_unused;
@@ -75,7 +79,7 @@ static DEFINE_SPINLOCK(swapper_pgdir_lock);
  * set_swapper_pgd 函数的作用是安全地更新内核的 swapper_pg_dir（内核初始页全局目录）中的某个 PGD 条目
  * 
  * @param pgdp页表项
- * ＠param pgd 物理地址
+ * @param pgd 物理地址
  * 
  * 
  * 也不只是填充pgd页表项，pud页表项也是如此操作!!!
@@ -937,6 +941,10 @@ void __init paging_init(void)
 	 * > #图2.9　ARM64在Linux 5.0内核的内存分布
 	 * 
 	 * pgd_set_fixmap()函数就做这个固定映射的事情，把PGD页表的物理页面映射到固定映射区域，返回PGD页表的虚拟地址。而pgd_clear_fixmap()函数用于取消固定区域的映射
+	 * 
+	 * 通过分析: 001.UNIX-DOCS/029.内核启动/000.pgd_set_fixmap原理.md, 得出这行代码的功能:
+	 *    1. 在固定映射区域完成页表基地址(PGD) 虚拟地址到物理地址的映射
+	 *    2. 返回PGD在固定映射区域中的完整的虚拟地址
 	 */
 	pgd_t *pgdp = pgd_set_fixmap(__pa_symbol(swapper_pg_dir));
  
@@ -1423,6 +1431,10 @@ static inline pmd_t * fixmap_pmd(unsigned long addr)
 	return pmd_offset_kimg(pudp, addr);
 }
 
+/**
+ * A page table page can be thought of an array like this: pXd_t[PTRS_PER_PxD]
+ * (页表页可以看作是一个类似这样的数组：pXd_t[PTRS_PER_PxD]) --- pte_index 函数的注释
+ */
 static inline pte_t * fixmap_pte(unsigned long addr)
 {
 	return &bm_pte[pte_index(addr)];
@@ -1492,8 +1504,7 @@ void __init early_fixmap_init(void)
  * ever need to use IPIs for TLB broadcasting, then we're in trouble here.
  * (不寻常的是，该函数（ghes_iounmap_irq）也会在IRQ上下文中被调用。因此，如果我们将来需要使用IPI（处理器间中断）进行TLB广播，这里就会出问题。)
  * 
- * 
- * 
+ * 构建固定映射中的页表:计算虚拟地址对应的页表条目，将物理地址存储到对应页表条目上
  * 
  */
 void __set_fixmap(enum fixed_addresses idx, phys_addr_t phys, pgprot_t flags)
@@ -1501,16 +1512,26 @@ void __set_fixmap(enum fixed_addresses idx, phys_addr_t phys, pgprot_t flags)
 	/**
 	 * #define __fix_to_virt(x)	(FIXADDR_TOP - ((x) << PAGE_SHIFT))
 	 * FIXADDR_TOP: 
-	 * 有一个固定映射区域: fixed区域
+	 * 有一个固定映射区域: fixed区域 
+	 * 
+	 * 从固定映射区域找到一个地址(虚拟地址)
 	 */
 	unsigned long addr = __fix_to_virt(idx);
 	pte_t *ptep;
 
 	BUG_ON(idx <= FIX_HOLE || idx >= __end_of_fixed_addresses);
 
+	/**
+	 * 计算虚拟地址addr所对应的page table条目(在固定映射区域的),此时标准内存分配机制暂无法使用
+	 */
 	ptep = fixmap_pte(addr);
 
 	if (pgprot_val(flags)) {
+		/**
+		 *  将PTE页表项写入页表
+		 * 
+		 *  pfn_pte: 结合pfn_pte宏和这里的(phys >> PAGE_SHIFT) , 最终的结果： 去除物理地址的低12位，存入到ptep中
+		 */
 		set_pte(ptep, pfn_pte(phys >> PAGE_SHIFT, flags));
 	} else {
 		pte_clear(&init_mm, addr, ptep);
