@@ -36,6 +36,7 @@
 #include <asm/ptdump.h>
 #include <asm/tlbflush.h>
 #include <asm/pgalloc.h>
+#include <inttypes.h>
 
 #define NO_BLOCK_MAPPINGS	BIT(0)
 #define NO_CONT_MAPPINGS	BIT(1)
@@ -902,6 +903,19 @@ static void __init map_kernel(pgd_t *pgdp)
 	kasan_copy_shadow(pgdp);
 }
 
+void do_printk_head_symbol()
+{
+	// 输出 swapper_pg_dir 的值(虚拟&物理地址) kimage_voffset
+	printk("swapper_pg_dir is 0x%lx , pa: ox%lx \n", (swapper_pg_dir),(__pa_symbol(swapper_pg_dir)));
+	printk("kimage_voffset is 0x%lx \n", (kimage_voffset));
+	printk("kimage_voffset is 0x" PRIXPTR "\n", (kimage_voffset));
+	printk("_text is 0x" PRIXPTR "\n", (_text));
+	printk("KERNEL_START is 0x" PRIXPTR "\n", (KERNEL_START));
+	printk("kimage_vaddr is 0x" PRIXPTR "\n", (kimage_vaddr));
+	printk("KIMAGE_VADDR is 0x" PRIXPTR "\n", (KIMAGE_VADDR));
+	printk("swapper_pg_dir is 0x" PRIXPTR "\n", (swapper_pg_dir));
+}
+
 /**
  * 页表的创建是由操作系统来完成的，包括页表的创建和填充，但是处理器遍历页表是由处理器的MMU来完成的 in []#2.1.6　案例分析：ARM64的页表映射过程
  *   MMU是硬件设备，所以硬件规定(约定?) swapper_pg_dir 是PGD页表项的基地址，这样好理解了
@@ -922,9 +936,8 @@ static void __init map_kernel(pgd_t *pgdp)
  */
 void __init paging_init(void)
 {
-	// 输出 swapper_pg_dir 的值(虚拟&物理地址) kimage_voffset
-	printk("swapper_pg_dir is 0x%lx , pa: ox%lx \n", (swapper_pg_dir),(__pa_symbol(swapper_pg_dir)));
-	printk("kimage_voffset is 0x%lx \n", (kimage_voffset));
+
+	do_printk_head_symbol();
 
 	/**
 	 * pgd_set_fixmap()函数做一个固定映射，把swapper_pg_dir页表重新映射到固定映射区域
