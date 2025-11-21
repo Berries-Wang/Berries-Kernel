@@ -313,6 +313,7 @@ static inline const void *__tag_set(const void *addr, u8 tag)
  * kimage_voffset 是什么?
  * 当系统刚初始化时，内核映像通过块映射的方式映射到KIMAGE_VADDR + TEXT_OFFSET的虚拟地址上,因此
  * kimage_voffset表示内核映像虚拟地址和物理地址之间的偏移量：“图2.11　kimage_voffset的含义”
+ * > 阅读: 000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/kernel/head.symbol.md
  */
 #define __kimg_to_phys(addr)	((addr) - kimage_voffset)
 

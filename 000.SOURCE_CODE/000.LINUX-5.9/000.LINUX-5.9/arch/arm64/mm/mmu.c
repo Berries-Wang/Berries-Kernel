@@ -36,7 +36,6 @@
 #include <asm/ptdump.h>
 #include <asm/tlbflush.h>
 #include <asm/pgalloc.h>
-#include <inttypes.h>
 
 #define NO_BLOCK_MAPPINGS	BIT(0)
 #define NO_CONT_MAPPINGS	BIT(1)
@@ -495,14 +494,14 @@ static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
 
 /**
  * 
- * 创建页表映射
+ * 创建页表映射: 将物理地址phys映射到以pgd为页表基址的虚拟地址virt上
  * 
  * create_mapping_noalloc 看一下这个方法的注释 
  *
  * >>> 通过 'map_mem' 分析而来
  * @param pgdir pgd页表的基址
  * @param phys 待映射的内存空间的起始地址(物理地址)
- * @param virt phys的虚拟地址
+ * @param virt phys对应的虚拟地址
  * @param size 内存空间大小
  * @param prot PAGE_KERNEL
  *
@@ -653,6 +652,7 @@ void __init mark_linear_text_alias_ro(void)
  */
 static void __init map_mem(pgd_t *pgdp)
 {
+	// 获取内核起始物理地址
 	phys_addr_t kernel_start = __pa_symbol(_text);
 	/**
 	 * 0000.LINUX-5.9/arch/arm64/kernel/vmlinux.lds.S 中的__init_begin?
@@ -745,11 +745,26 @@ void mark_rodata_ro(void)
 	debug_checkwx();
 }
 
+/**
+ * 映射内核段: 将物理地址映射到以pgdp为基地址的虚拟地址空间上.
+ * 
+ * 
+ * @param pgdp
+ * @param va_start
+ * @param va_end
+ * @param vma
+ * @param flags
+ * @param vm_flags
+ * 
+ */
 static void __init map_kernel_segment(pgd_t *pgdp, void *va_start, void *va_end,
 				      pgprot_t prot, struct vm_struct *vma,
 				      int flags, unsigned long vm_flags)
 {
-	// __pa_symbol()宏和__pa()宏的作用都是把内核虚拟地址转换为物理地址
+	/**
+	 * 了解完kimage_voffset就知道，__pa_symbol()宏和__pa()宏的作用都是把内核虚拟地址转换为物理地址
+	 * > 000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/kernel/head.symbol.md
+	 */
 	phys_addr_t pa_start = __pa_symbol(va_start);
 	unsigned long size = va_end - va_start;
 
@@ -858,9 +873,14 @@ static void __init map_kernel(pgd_t *pgdp)
 	if (arm64_early_this_cpu_has_bti())
 		text_prot = __pgprot_modify(text_prot, PTE_GP, PTE_GP);
 
-	/*
+	/**
+	 * 
+	 * 完成各个物理地址到以pgdp为页表基址的虚拟地址空间上
+	 * 
 	 * Only rodata will be remapped with different permissions later on,
 	 * all other segments are allowed to use contiguous mappings.
+	 * 
+	 * map_kernel_segment 就定义在本文件
 	 */
 	map_kernel_segment(pgdp, _text, _etext, text_prot, &vmlinux_text, 0,
 			   VM_NO_GUARD);
@@ -903,18 +923,6 @@ static void __init map_kernel(pgd_t *pgdp)
 	kasan_copy_shadow(pgdp);
 }
 
-void do_printk_head_symbol()
-{
-	// 输出 swapper_pg_dir 的值(虚拟&物理地址) kimage_voffset
-	printk("swapper_pg_dir is 0x%lx , pa: ox%lx \n", (swapper_pg_dir),(__pa_symbol(swapper_pg_dir)));
-	printk("kimage_voffset is 0x%lx \n", (kimage_voffset));
-	printk("kimage_voffset is 0x" PRIXPTR "\n", (kimage_voffset));
-	printk("_text is 0x" PRIXPTR "\n", (_text));
-	printk("KERNEL_START is 0x" PRIXPTR "\n", (KERNEL_START));
-	printk("kimage_vaddr is 0x" PRIXPTR "\n", (kimage_vaddr));
-	printk("KIMAGE_VADDR is 0x" PRIXPTR "\n", (KIMAGE_VADDR));
-	printk("swapper_pg_dir is 0x" PRIXPTR "\n", (swapper_pg_dir));
-}
 
 /**
  * 页表的创建是由操作系统来完成的，包括页表的创建和填充，但是处理器遍历页表是由处理器的MMU来完成的 in []#2.1.6　案例分析：ARM64的页表映射过程
@@ -936,8 +944,32 @@ void do_printk_head_symbol()
  */
 void __init paging_init(void)
 {
-
-	do_printk_head_symbol();
+	{
+		// 输出 swapper_pg_dir 的值(虚拟&物理地址) kimage_voffset
+		printk("swapper_pg_dir is 0x%lx , pa: ox%lx \n", (swapper_pg_dir), (__pa_symbol(swapper_pg_dir)));
+		printk("kimage_voffset is 0x%lx \n", (kimage_voffset));
+		printk("_text is 0x%lx \n", (_text));
+		printk("KERNEL_START is 0x%lx \n", (KERNEL_START));
+		printk("kimage_vaddr is 0x%lx \n", (kimage_vaddr));
+		printk("KIMAGE_VADDR is 0x%lx \n", (KIMAGE_VADDR));
+		/**
+		 * 
+		 * 
+         * wei@Berries:~/OPEN_SOURCE/Berries-Kernel/000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9$ sudo qemu-system-aarch64 -M virt -cpu cortex-a57 -smp 4 -m 1024M -kernel arch/arm64/boot/Image -append "rdinit=/linuxrc console=ttyAMA0 loglevel=8"  -nographic
+         * [    0.000000] Booting Linux on physical CPU 0x0000000000 [0x411fd070]
+         * [    0.000000] Linux version 5.9.0 (wei@Berries) (aarch64-none-linux-gnu-gcc (Arm GNU Toolchain 14.3.Rel1 (Build arm-14.174)) 14.3.1 20250623, GNU ld (Arm GNU Toolchain 14.3.Rel1 (Build arm-14.174)) 2.44.0.20250616) #8 SMP PREEMPT Fri Nov 21 07:44:17 CST 2025
+         * [    0.000000] Machine model: linux,dummy-virt
+         * [    0.000000] efi: UEFI not found.
+         * [    0.000000] cma: Reserved 32 MiB at 0x000000007e000000
+         * [    0.000000] swapper_pg_dir is 0xffffa2213433e000 , pa: ox4173e000 
+         * [    0.000000] kimage_voffset is 0xffffa220f2c00000 
+         * [    0.000000] _text is 0xffffa22132e00000 
+         * [    0.000000] KERNEL_START is 0xffffa22132e00000 
+         * [    0.000000] kimage_vaddr is 0xffffa22132e00000 
+         * [    0.000000] KIMAGE_VADDR is 0xffff800010000000 
+         * [    0.000000] NUMA: No NUMA configuration found
+		 */
+	}
 
 	/**
 	 * pgd_set_fixmap()函数做一个固定映射，把swapper_pg_dir页表重新映射到固定映射区域
@@ -960,9 +992,13 @@ void __init paging_init(void)
 	 *    2. 返回PGD在固定映射区域中的完整的虚拟地址
 	 */
 	pgd_t *pgdp = pgd_set_fixmap(__pa_symbol(swapper_pg_dir));
- 
+
 	/**
-	 * map_kernel(pgdp)：对内核映像文件的各个块重新映射。
+	 * pgdp 是固定映射区域的, 为什么要有这个固定映射区域呢?
+	 */
+
+	/**
+	 * map_kernel(pgdp)：对内核映像文件的各个块重新映射: 映射到以pgdp为基地址的虚拟地址上
 	 * 在head.S文件中，我们对内核映像文件做了块映射，现在需要使用页机制来重新映射。
 	 * 
 	 * > 保证内核在启用分页后能够正常执行 (在内核启动之初，并没有立马启用分页)
@@ -983,7 +1019,12 @@ void __init paging_init(void)
 
 	cpu_replace_ttbr1(lm_alias(swapper_pg_dir));
 
-	// 赋值整个内核的pgd
+	/**
+	 * 赋值整个内核的pgd
+	 * 
+	 * 为什么直接映射就行?
+	 *   
+	 */
 	init_mm.pgd = swapper_pg_dir;
 
 	memblock_free(__pa_symbol(init_pg_dir),
