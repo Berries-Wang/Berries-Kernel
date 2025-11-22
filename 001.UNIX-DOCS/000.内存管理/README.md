@@ -81,3 +81,8 @@ pglist_data数据结构用来描述一个内存节点的所有资源
                          |
                          |---> struct page (物理页帧)
 ```
+
+---
+
+## Linux内核启动内存管理变化
+memblock -> 伙伴系统

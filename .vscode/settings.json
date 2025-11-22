@@ -26,6 +26,11 @@
         "printk.h": "c",
         "sstream": "c",
         "tlbflush.h": "c",
-        "tlb.h": "c"
+        "tlb.h": "c",
+        "bitset": "c",
+        "utility": "c",
+        "ratio": "c",
+        "random": "c",
+        "climits": "c"
     }
 }

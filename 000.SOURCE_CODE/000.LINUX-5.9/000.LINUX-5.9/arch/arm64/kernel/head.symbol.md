@@ -2,6 +2,8 @@
 |符号名称|含义|值|定义|
 |-|-|-|-|
 |_text|内核镜像起始地址(虚拟地址)||arch/arm64/kernel/vmlinux.lds.S|
+|_start|内核镜像开始地址(虚拟地址)||arch/arm64/kernel/vmlinux.lds.S|
+|_end|内核镜像结束地址(虚拟地址)||arch/arm64/kernel/vmlinux.lds.S|
 |__PHYS_OFFSET|物理内存的起始地址<sup>这个说法不对！！！adrp	x0, __PHYS_OFFSET 指令执行后，x0中存储的才是物理内存的起始地址，阅读:[000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/kernel/head.S.copy](../../../../../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/kernel/head.S.copy) kimage_voffset计算规则 即可理解</sup>|#define __PHYS_OFFSET	(KERNEL_START - TEXT_OFFSET)|arch/arm64/kernel/head.S|
 |KERNEL_START||#define KERNEL_START		_text|arch/arm64/include/asm/memory.h|
 |TEXT_OFFSET||TEXT_OFFSET := 0x0|arch/arm64/Makefile|
@@ -13,6 +15,7 @@
 |KIMAGE_VADDR|内核镜像的虚拟地址|#define KIMAGE_VADDR		(MODULES_END)<sup>宏展开后,值: 0xFFFF800010000000</sup>|arch/arm64/include/asm/memory.h|
 |kimage_voffset|内核映像虚拟地址和物理地址之间的偏移量|kimage_vaddr - __PHYS_OFFSET <sup>从head.S 的 __primary_switched 分析得了</sup>|arch/arm64/kernel/head.S|
 |swapper_pg_dir|内核页表的PGD页表基地址(虚拟地址)||arch/arm64/kernel/vmlinux.lds.S|
+|VMEMMAP_START||||
 
 ### 计算 kimage_voffset 
 <pre>

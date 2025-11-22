@@ -111,15 +111,17 @@ pgprot_t phys_mem_access_prot(struct file *file, unsigned long pfn,
 }
 EXPORT_SYMBOL(phys_mem_access_prot);
 
+/**
+ * 
+ */
 static phys_addr_t __init early_pgtable_alloc(int shift)
 {
 	phys_addr_t phys;
 	void *ptr;
-        
-        /**
-         * include/linux/memblock.h: 
-         *
-         */
+
+	/**
+     * include/linux/memblock.h 
+     */
 	phys = memblock_phys_alloc(PAGE_SIZE, PAGE_SIZE);
 	if (!phys)
 		panic("Failed to allocate page table page\n");
@@ -323,7 +325,7 @@ static void init_pmd(pud_t *pudp, unsigned long addr, unsigned long end,
  * 函数名中的cont是什么? 是 Contiguous 即连续的 ， 通过这个函数中转是为了生成大的内存块
  * 》 ARM64 支持 连续页表条目（Contiguous PTEs/PMDs） 的硬件特性，允许将多个相邻的 PMD 条目合并，映射一块更大的连续物理内存（如 64MB），从而减少 TLB 压力和页表遍历开销。
  */
-static void alloc_init_cont_pmd(pud_t *pudp, unsigned long addr,
+__attribute__((optimize("O0"))) static void alloc_init_cont_pmd(pud_t *pudp, unsigned long addr,
 				unsigned long end, phys_addr_t phys,
 				pgprot_t prot,
 				phys_addr_t (*pgtable_alloc)(int), int flags)
@@ -400,7 +402,7 @@ static inline bool use_1G_block(unsigned long addr, unsigned long next,
  * pgtable_alloc 函数指针,实际是 early_pgtable_alloc  （从 paging_init -> mem_map 分析而来）
  * 
  */
-static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
+__attribute__((optimize("O0"))) static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
 			   phys_addr_t phys, pgprot_t prot,
 			   phys_addr_t (*pgtable_alloc)(int), int flags)
 {
@@ -511,13 +513,23 @@ static void alloc_init_pud(pgd_t *pgdp, unsigned long addr, unsigned long end,
  *  typedef struct { pudval_t pud; } pud_t;
  *  typedef struct { pgdval_t pgd; } pgd_t;
  */
-static void __create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys,
+__attribute__((optimize("O0")))  static void __create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys,
 				 unsigned long virt, phys_addr_t size,
 				 pgprot_t prot,
 				 phys_addr_t (*pgtable_alloc)(int), int flags)
 {
 	unsigned long addr, end, next;
-	// 计算pgd页表项: 从虚拟地址virt中提取PGD索引
+	/**
+	 * 计算pgd页表项: 从虚拟地址virt中提取PGD索引,
+	 * 即 以pgdir为pgd基地址，获取entry,即 pgd页表中的索引项目
+	 * |---------|
+	 * | entry3  |
+	 * |---------|
+	 * | entry2  | -> 这就可能是 pgdp 
+	 * |---------|
+	 * | entry1  |
+	 * |---------| pgdir
+	 */
 	pgd_t *pgdp = pgd_offset_pgd(pgdir, virt);
 
 	/*
@@ -535,8 +547,7 @@ static void __create_pgd_mapping(pgd_t *pgdir, phys_addr_t phys,
 		// pgd_addr_end : include/linux/pgtable.h: 即 next表示这个pgd 页表项所能映射的区域的右边界
 		next = pgd_addr_end(addr, end);
 		// 为pgd页表里的页表项${pgdp}创建pud页表
-		alloc_init_pud(pgdp, addr, next, phys, prot, pgtable_alloc,
-			       flags);
+		alloc_init_pud(pgdp, addr, next, phys, prot, pgtable_alloc,flags);
 		phys += next - addr;
 		/*指针运算: pgdp++,指向下一个pgd_t区域，即以sizeof(pgd_t)(即:PGDIR_SIZE),遍历内存区域*/
 	} while (pgdp++, addr = next, addr != end);
@@ -584,7 +595,7 @@ static phys_addr_t pgd_pgtable_alloc(int shift)
 static void __init create_mapping_noalloc(phys_addr_t phys, unsigned long virt,
 				  phys_addr_t size, pgprot_t prot)
 {
-        // 内核的虚拟地址空间从VMALLOC_START开始，低于这个地址就不对了
+	// 内核的虚拟地址空间从VMALLOC_START开始，低于这个地址就不对了
 	if ((virt >= PAGE_END) && (virt < VMALLOC_START)) {
 		pr_warn("BUG: not creating mapping for %pa at 0x%016lx - outside kernel range\n",
 			&phys, virt);
@@ -757,13 +768,14 @@ void mark_rodata_ro(void)
  * @param vm_flags
  * 
  */
-static void __init map_kernel_segment(pgd_t *pgdp, void *va_start, void *va_end,
+__attribute__((optimize("O0"))) static void __init map_kernel_segment(pgd_t *pgdp, void *va_start, void *va_end,
 				      pgprot_t prot, struct vm_struct *vma,
 				      int flags, unsigned long vm_flags)
 {
 	/**
 	 * 了解完kimage_voffset就知道，__pa_symbol()宏和__pa()宏的作用都是把内核虚拟地址转换为物理地址
 	 * > 000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/kernel/head.symbol.md
+	 * // 与 kimage_voffset 进行操作，即 va_start - kimage_voffset
 	 */
 	phys_addr_t pa_start = __pa_symbol(va_start);
 	unsigned long size = va_end - va_start;
@@ -781,7 +793,7 @@ static void __init map_kernel_segment(pgd_t *pgdp, void *va_start, void *va_end,
 	vma->phys_addr	= pa_start;
 	vma->size	= size;
 	vma->flags	= VM_MAP | vm_flags;
-	vma->caller	= __builtin_return_address(0);
+	vma->caller	= __builtin_return_address(0); 
 
 	vm_area_add_early(vma);
 }
@@ -853,7 +865,7 @@ static bool arm64_early_this_cpu_has_bti(void)
  * Create fine-grained mappings for the kernel.
  * (为内核创建精细的映射)
  */
-static void __init map_kernel(pgd_t *pgdp)
+__attribute__((optimize("O0")))  static void __init map_kernel(pgd_t *pgdp)
 {
 	static struct vm_struct vmlinux_text, vmlinux_rodata, vmlinux_inittext,
 				vmlinux_initdata, vmlinux_data;
@@ -948,10 +960,30 @@ void __init paging_init(void)
 		// 输出 swapper_pg_dir 的值(虚拟&物理地址) kimage_voffset
 		printk("swapper_pg_dir is 0x%lx , pa: ox%lx \n", (swapper_pg_dir), (__pa_symbol(swapper_pg_dir)));
 		printk("kimage_voffset is 0x%lx \n", (kimage_voffset));
+		
 		printk("_text is 0x%lx \n", (_text));
-		printk("KERNEL_START is 0x%lx \n", (KERNEL_START));
+		
 		printk("kimage_vaddr is 0x%lx \n", (kimage_vaddr));
 		printk("KIMAGE_VADDR is 0x%lx \n", (KIMAGE_VADDR));
+
+		printk("FIXADDR_TOP is 0x%lx \n",  (FIXADDR_TOP));
+
+		printk("VMEMMAP_START is 0x%lx \n", (VMEMMAP_START));
+		printk("VMEMMAP_END is 0x%lx \n",   (VMEMMAP_END));
+
+		printk("PCI_IO_START is 0x%lx \n",  (PCI_IO_START));
+		printk("PCI_IO_END is 0x%lx \n",    (PCI_IO_END));
+
+		printk("KERNEL_START is 0x%lx \n",  (KERNEL_START));
+		printk("KERNEL_END is 0x%lx \n",    (KERNEL_END));
+
+		printk("PAGE_OFFSET is 0x%lx \n",   (PAGE_OFFSET));
+
+		printk("MODULES_VADDR is 0x%lx \n",  (MODULES_VADDR));
+		printk("MODULES_END is 0x%lx \n",    (MODULES_END));
+
+		printk("init_pg_dir is 0x%lx \n",    (init_pg_dir));
+		printk("init_pg_end is 0x%lx \n",    (init_pg_end));
 		/**
 		 * 
 		 * 
@@ -1027,6 +1059,9 @@ void __init paging_init(void)
 	 */
 	init_mm.pgd = swapper_pg_dir;
 
+	/**
+	 * ?
+	 */
 	memblock_free(__pa_symbol(init_pg_dir),
 		      __pa_symbol(init_pg_end) - __pa_symbol(init_pg_dir));
 
@@ -1593,8 +1628,12 @@ void __set_fixmap(enum fixed_addresses idx, phys_addr_t phys, pgprot_t flags)
 	}
 }
 
-void *__init fixmap_remap_fdt(phys_addr_t dt_phys, int *size, pgprot_t prot)
+/**
+ * 
+ */
+__attribute__((optimize("O2"))) void *__init fixmap_remap_fdt(phys_addr_t dt_phys, int *size, pgprot_t prot)
 {
+	// 也是操作固定映射区域?
 	const u64 dt_virt_base = __fix_to_virt(FIX_FDT);
 	int offset;
 	void *dt_virt;

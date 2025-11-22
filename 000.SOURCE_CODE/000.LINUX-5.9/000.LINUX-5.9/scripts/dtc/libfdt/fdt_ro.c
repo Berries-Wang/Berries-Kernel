@@ -295,7 +295,7 @@ int fdt_path_offset(const void *fdt, const char *path)
 	return fdt_path_offset_namelen(fdt, path, strlen(path));
 }
 
-const char *fdt_get_name(const void *fdt, int nodeoffset, int *len)
+__attribute__((optimize("O0"))) const char *fdt_get_name(const void *fdt, int nodeoffset, int *len)
 {
 	const struct fdt_node_header *nh = fdt_offset_ptr_(fdt, nodeoffset);
 	const char *nameptr;

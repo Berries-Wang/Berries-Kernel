@@ -80,6 +80,10 @@ static inline unsigned long pud_index(unsigned long address)
 /**
  * pgd_index 求L0的索引值
  * pgd索引值在哪里? 查阅: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#▲图2.7　4级分页模型在64位虚拟地址的划分
+ * 
+ * 
+ * PGDIR_SHIFT 4级页表，则为39
+ * PTRS_PER_PGD = 1<<(48-39)
  */
 #define pgd_index(a)  (((a) >> PGDIR_SHIFT) & (PTRS_PER_PGD - 1)) 
 #endif

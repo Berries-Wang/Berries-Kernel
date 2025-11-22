@@ -102,12 +102,18 @@ unsigned long min_low_pfn;
 unsigned long max_pfn;
 unsigned long long max_possible_pfn;
 
+/**
+ * INIT_MEMBLOCK_REGIONS: 128
+ */
 static struct memblock_region memblock_memory_init_regions[INIT_MEMBLOCK_REGIONS] __initdata_memblock;
 static struct memblock_region memblock_reserved_init_regions[INIT_MEMBLOCK_RESERVED_REGIONS] __initdata_memblock;
 #ifdef CONFIG_HAVE_MEMBLOCK_PHYS_MAP
 static struct memblock_region memblock_physmem_init_regions[INIT_PHYSMEM_REGIONS];
 #endif
 
+/**
+ * 
+ */
 struct memblock memblock __initdata_memblock = {
 	.memory.regions		= memblock_memory_init_regions,
 	.memory.cnt		= 1,	/* empty dummy entry */
@@ -245,6 +251,8 @@ __memblock_find_range_top_down(phys_addr_t start, phys_addr_t end,
 }
 
 /**
+ * 从memblock中获取申请一块内存
+ * 
  * memblock_find_in_range_node - find free area in given range and node
  * @size: size of free area to find
  * @align: alignment of free area to find
@@ -266,6 +274,9 @@ __memblock_find_range_top_down(phys_addr_t start, phys_addr_t end,
  *
  * Return:
  * Found address on success, 0 on failure.
+ * 
+ * 当函数被标记为 __init_memblock 时，编译器会将该函数编译到专门的 .init.text 节区中。
+ * 当变量被标记为 __initdata_memblock 时，编译器会将其放置到 .init.data 节区中。
  */
 static phys_addr_t __init_memblock memblock_find_in_range_node(phys_addr_t size,
 					phys_addr_t align, phys_addr_t start,
@@ -282,6 +293,7 @@ static phys_addr_t __init_memblock memblock_find_in_range_node(phys_addr_t size,
 	/* avoid allocating the first page */
 	start = max_t(phys_addr_t, start, PAGE_SIZE);
 	end = max(start, end);
+	// 获取内核映像的结束地址的物理地址
 	kernel_end = __pa_symbol(_end);
 
 	/*
@@ -544,7 +556,7 @@ static void __init_memblock memblock_merge_regions(struct memblock_type *type)
  * Insert new memblock region [@base, @base + @size) into @type at @idx.
  * @type must already have extra room to accommodate the new region.
  */
-static void __init_memblock memblock_insert_region(struct memblock_type *type,
+__attribute__((optimize("O0"))) static void __init_memblock memblock_insert_region(struct memblock_type *type,
 						   int idx, phys_addr_t base,
 						   phys_addr_t size,
 						   int nid,
@@ -578,7 +590,7 @@ static void __init_memblock memblock_insert_region(struct memblock_type *type,
  * Return:
  * 0 on success, -errno on failure.
  */
-static int __init_memblock memblock_add_range(struct memblock_type *type,
+__attribute__((optimize("O0"))) static int __init_memblock memblock_add_range(struct memblock_type *type,
 				phys_addr_t base, phys_addr_t size,
 				int nid, enum memblock_flags flags)
 {
@@ -676,7 +688,7 @@ repeat:
  * Return:
  * 0 on success, -errno on failure.
  */
-int __init_memblock memblock_add_node(phys_addr_t base, phys_addr_t size,
+__attribute__((optimize("O0"))) int __init_memblock memblock_add_node(phys_addr_t base, phys_addr_t size,
 				       int nid)
 {
 	return memblock_add_range(&memblock.memory, base, size, nid, 0);
@@ -693,7 +705,7 @@ int __init_memblock memblock_add_node(phys_addr_t base, phys_addr_t size,
  * Return:
  * 0 on success, -errno on failure.
  */
-int __init_memblock memblock_add(phys_addr_t base, phys_addr_t size)
+__attribute__((optimize("O0"))) int __init_memblock memblock_add(phys_addr_t base, phys_addr_t size)
 {
 	phys_addr_t end = base + size - 1;
 
@@ -704,7 +716,7 @@ int __init_memblock memblock_add(phys_addr_t base, phys_addr_t size)
 }
 
 /**
- * memblock_isolate_range - isolate given range into disjoint memblocks
+ * memblock_isolate_range - isolate given range into disjoint memblocks(将给定范围隔离为不连续的内存块)
  * @type: memblock type to isolate range for
  * @base: base of range to isolate
  * @size: size of range to isolate
@@ -715,14 +727,18 @@ int __init_memblock memblock_add(phys_addr_t base, phys_addr_t size)
  * [@base, @base + @size).  Crossing regions are split at the boundaries,
  * which may create at most two more regions.  The index of the first
  * region inside the range is returned in *@start_rgn and end in *@end_rgn.
+ * (遍历 @type 类型的内存区域，并确保所有区域不会跨越由 [@base, @base + @size) 定义的边界。
+ * 跨越边界的区域将在边界处被分割，此操作最多可能再创建两个新区域。
+ * 范围内第一个区域的索引将通过 *@start_rgn 返回，最后一个区域的索引通过 *@end_rgn 返回。)
  *
  * Return:
  * 0 on success, -errno on failure.
  */
-static int __init_memblock memblock_isolate_range(struct memblock_type *type,
+__attribute__((optimize("O0"))) static int __init_memblock memblock_isolate_range(struct memblock_type *type,
 					phys_addr_t base, phys_addr_t size,
 					int *start_rgn, int *end_rgn)
 {
+	// 重新定义一下size,防止溢出
 	phys_addr_t end = base + memblock_cap_size(base, &size);
 	int idx;
 	struct memblock_region *rgn;
@@ -732,11 +748,18 @@ static int __init_memblock memblock_isolate_range(struct memblock_type *type,
 	if (!size)
 		return 0;
 
-	/* we'll create at most two more regions */
+	/** 
+	 * we'll create at most two more regions
+	 * > memblock 就定义在本文件: struct memblock memblock __initdata_memblock = {...
+	 *  */
 	while (type->cnt + 2 > type->max)
 		if (memblock_double_array(type, base, size) < 0)
 			return -ENOMEM;
 
+	/**
+	 * 遍历 type->regions
+	 * 
+	 */
 	for_each_memblock_type(idx, type, rgn) {
 		phys_addr_t rbase = rgn->base;
 		phys_addr_t rend = rbase + rgn->size;
@@ -794,6 +817,9 @@ static int __init_memblock memblock_remove_range(struct memblock_type *type,
 	return 0;
 }
 
+/**
+ * 从 memblock的可用内存区域(memblock.memory)中移出指定范围的物理内存
+ */
 int __init_memblock memblock_remove(phys_addr_t base, phys_addr_t size)
 {
 	phys_addr_t end = base + size - 1;
@@ -811,6 +837,7 @@ int __init_memblock memblock_remove(phys_addr_t base, phys_addr_t size)
  *
  * Free boot memory block previously allocated by memblock_alloc_xx() API.
  * The freeing memory will not be released to the buddy allocator.
+ * > 释放由 memblock_alloc_xx() 分配的内存, 不会释放到伙伴系统
  */
 int __init_memblock memblock_free(phys_addr_t base, phys_addr_t size)
 {
@@ -823,7 +850,7 @@ int __init_memblock memblock_free(phys_addr_t base, phys_addr_t size)
 	return memblock_remove_range(&memblock.reserved, base, size);
 }
 
-int __init_memblock memblock_reserve(phys_addr_t base, phys_addr_t size)
+__attribute__((optimize("O0"))) int __init_memblock memblock_reserve(phys_addr_t base, phys_addr_t size)
 {
 	phys_addr_t end = base + size - 1;
 
@@ -1376,8 +1403,7 @@ phys_addr_t __init memblock_alloc_range_nid(phys_addr_t size,
 	}
 
 again:
-	found = memblock_find_in_range_node(size, align, start, end, nid,
-					    flags);
+	found = memblock_find_in_range_node(size, align, start, end, nid, flags);
 	if (found && !memblock_reserve(found, size))
 		goto done;
 
@@ -1725,6 +1751,9 @@ void __init memblock_enforce_memory_limit(phys_addr_t limit)
 			      PHYS_ADDR_MAX);
 }
 
+/**
+ * 
+ */
 void __init memblock_cap_memory_range(phys_addr_t base, phys_addr_t size)
 {
 	int start_rgn, end_rgn;
@@ -1947,7 +1976,7 @@ static int __init early_memblock(char *p)
 }
 early_param("memblock", early_memblock);
 
-static void __init __free_pages_memory(unsigned long start, unsigned long end)
+__attribute__((optimize("O0"))) static void __init __free_pages_memory(unsigned long start, unsigned long end)
 {
 	int order;
 
@@ -1963,7 +1992,7 @@ static void __init __free_pages_memory(unsigned long start, unsigned long end)
 	}
 }
 
-static unsigned long __init __free_memory_core(phys_addr_t start,
+__attribute__((optimize("O0"))) static unsigned long __init __free_memory_core(phys_addr_t start,
 				 phys_addr_t end)
 {
 	unsigned long start_pfn = PFN_UP(start);
@@ -1978,7 +2007,7 @@ static unsigned long __init __free_memory_core(phys_addr_t start,
 	return end_pfn - start_pfn;
 }
 
-static unsigned long __init free_low_memory_core_early(void)
+__attribute__((optimize("O0"))) static unsigned long __init free_low_memory_core_early(void)
 {
 	unsigned long count = 0;
 	phys_addr_t start, end;
@@ -2003,7 +2032,7 @@ static unsigned long __init free_low_memory_core_early(void)
 
 static int reset_managed_pages_done __initdata;
 
-void reset_node_managed_pages(pg_data_t *pgdat)
+__attribute__((optimize("O0"))) void reset_node_managed_pages(pg_data_t *pgdat)
 {
 	struct zone *z;
 
@@ -2011,7 +2040,7 @@ void reset_node_managed_pages(pg_data_t *pgdat)
 		atomic_long_set(&z->managed_pages, 0);
 }
 
-void __init reset_all_zones_managed_pages(void)
+__attribute__((optimize("O0"))) void __init reset_all_zones_managed_pages(void)
 {
 	struct pglist_data *pgdat;
 
@@ -2029,7 +2058,7 @@ void __init reset_all_zones_managed_pages(void)
  *
  * Return: the number of pages actually released.
  */
-unsigned long __init memblock_free_all(void)
+__attribute__((optimize("O0"))) unsigned long __init memblock_free_all(void)
 {
 	unsigned long pages;
 
