@@ -783,6 +783,9 @@ __attribute__((optimize("O0"))) static void __init map_kernel_segment(pgd_t *pgd
 	BUG_ON(!PAGE_ALIGNED(pa_start));
 	BUG_ON(!PAGE_ALIGNED(size));
 
+	/**
+	 * 映射关键完成之后, 似乎 memblock.memory.regions 内的值不会变
+	 */
 	__create_pgd_mapping(pgdp, pa_start, (unsigned long)va_start, size, prot,
 			     early_pgtable_alloc, flags);
 
@@ -987,19 +990,23 @@ void __init paging_init(void)
 		/**
 		 * 
 		 * 
-         * wei@Berries:~/OPEN_SOURCE/Berries-Kernel/000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9$ sudo qemu-system-aarch64 -M virt -cpu cortex-a57 -smp 4 -m 1024M -kernel arch/arm64/boot/Image -append "rdinit=/linuxrc console=ttyAMA0 loglevel=8"  -nographic
-         * [    0.000000] Booting Linux on physical CPU 0x0000000000 [0x411fd070]
-         * [    0.000000] Linux version 5.9.0 (wei@Berries) (aarch64-none-linux-gnu-gcc (Arm GNU Toolchain 14.3.Rel1 (Build arm-14.174)) 14.3.1 20250623, GNU ld (Arm GNU Toolchain 14.3.Rel1 (Build arm-14.174)) 2.44.0.20250616) #8 SMP PREEMPT Fri Nov 21 07:44:17 CST 2025
-         * [    0.000000] Machine model: linux,dummy-virt
-         * [    0.000000] efi: UEFI not found.
-         * [    0.000000] cma: Reserved 32 MiB at 0x000000007e000000
-         * [    0.000000] swapper_pg_dir is 0xffffa2213433e000 , pa: ox4173e000 
-         * [    0.000000] kimage_voffset is 0xffffa220f2c00000 
-         * [    0.000000] _text is 0xffffa22132e00000 
-         * [    0.000000] KERNEL_START is 0xffffa22132e00000 
-         * [    0.000000] kimage_vaddr is 0xffffa22132e00000 
-         * [    0.000000] KIMAGE_VADDR is 0xffff800010000000 
-         * [    0.000000] NUMA: No NUMA configuration found
+         *  [    0.000000] swapper_pg_dir is 0xffffaa192114f000 , pa: ox4174f000 
+         *  [    0.000000] kimage_voffset is 0xffffaa18dfa00000 
+         *  [    0.000000] _text is 0xffffaa191fc00000 
+         *  [    0.000000] kimage_vaddr is 0xffffaa191fc00000 
+         *  [    0.000000] KIMAGE_VADDR is 0xffff800010000000 
+         *  [    0.000000] FIXADDR_TOP is 0xfffffdfffea00000 
+         *  [    0.000000] VMEMMAP_START is 0xfffffdffffe00000 
+         *  [    0.000000] VMEMMAP_END is 0xffffffffffe00000 
+         *  [    0.000000] PCI_IO_START is 0xfffffdfffec00000 
+         *  [    0.000000] PCI_IO_END is 0xfffffdffffc00000 
+         *  [    0.000000] KERNEL_START is 0xffffaa191fc00000 
+         *  [    0.000000] KERNEL_END is 0xffffaa1921ac0000 
+         *  [    0.000000] PAGE_OFFSET is 0xffff000000000000 
+         *  [    0.000000] MODULES_VADDR is 0xffff800008000000 
+         *  [    0.000000] MODULES_END is 0xffff800010000000 
+         *  [    0.000000] init_pg_dir is 0xffffaa1921ab4000 
+         *  [    0.000000] init_pg_end is 0xffffaa1921ab9000 
 		 */
 	}
 
@@ -1055,6 +1062,8 @@ void __init paging_init(void)
 	 * 赋值整个内核的pgd
 	 * 
 	 * 为什么直接映射就行?
+	 * > 因为前面已经建立好映射了,虽然,是先映射到 fixed map(固定映射区域)，但这只是为了能使用 '__pa_symbol'
+	 * >> 而且,构建页表时，构建的页表最终是在物理空间的,虚拟空间映射只是当时的一种访问方式。
 	 *   
 	 */
 	init_mm.pgd = swapper_pg_dir;

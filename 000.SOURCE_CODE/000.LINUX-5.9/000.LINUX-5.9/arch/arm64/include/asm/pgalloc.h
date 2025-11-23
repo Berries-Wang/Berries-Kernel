@@ -44,8 +44,19 @@ static inline void __pud_populate(pud_t *pudp, phys_addr_t pmdp, pudval_t prot)
 
 #if CONFIG_PGTABLE_LEVELS > 3
 
+/**
+ * 填充页表项
+ * 
+ * @param p4dp pgd页表项，虚拟地址
+ * @param pudp pud页表基地址,物理地址
+ * @param prot 页表项属性
+ * 
+ */
 static inline void __p4d_populate(p4d_t *p4dp, phys_addr_t pudp, p4dval_t prot)
 {
+	/**
+	 * __p4d(__phys_to_p4d_val(pudp) | prot) 转为页表项
+	 */
 	set_p4d(p4dp, __p4d(__phys_to_p4d_val(pudp) | prot));
 }
 

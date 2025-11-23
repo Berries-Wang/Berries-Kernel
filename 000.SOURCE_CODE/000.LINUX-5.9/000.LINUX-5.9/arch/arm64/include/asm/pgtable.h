@@ -649,9 +649,14 @@ static inline unsigned long pud_page_vaddr(pud_t pud)
 #define p4d_bad(p4d)		(!(p4d_val(p4d) & 2))
 #define p4d_present(p4d)	(p4d_val(p4d))
 
+/**
+ * @param p4dp  pgd页表项，虚拟地址
+ * @param p4d   页表项的值, 通过PUD物理地址编码而来
+ */
 static inline void set_p4d(p4d_t *p4dp, p4d_t p4d)
 {
 	if (in_swapper_pgdir(p4dp)) {
+		// 最终还是向物理地址上写,虚拟地址只是访问渠道
 		set_swapper_pgd((pgd_t *)p4dp, __pgd(p4d_val(p4d)));
 		return;
 	}
