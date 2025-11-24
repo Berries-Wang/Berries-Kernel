@@ -1,5 +1,5 @@
 # NUMA
-先学习[001.UNIX-DOCS/025.NUMA/README.md(另一个Git仓库)](Berries-Kernel:001.UNIX-DOCS/025.NUMA/README.md) & [006.BOOKs/RISC-V Architecture Programming and Practice.pdf#11.2 高速缓存的访问延时](../../006.BOOKs/RISC-V%20Architecture%20Programming%20and%20Practice.pdf) & [奔跑吧Linux内核（第2版）卷1：基础架构#1.1.17　NUMA](../006.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) 再看以下内容
+先学习[001.UNIX-DOCS/025.NUMA/README.md(另一个Git仓库)](Berries-Kernel:001.UNIX-DOCS/025.NUMA/README.md) & [006.BOOKs/RISC-V Architecture Programming and Practice.pdf#11.2 高速缓存的访问延时](../../007.BOOKs/RISC-V%20Architecture%20Programming%20and%20Practice/) & [奔跑吧Linux内核（第2版）卷1：基础架构#1.1.17　NUMA](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) & [3.3.1　内存架构之UMA和NUMA](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) & [1.1.17　NUMA#图1.24　NUMA系统](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub)再看以下内容
 
 ![20251016102238.jpg](./999.VIDEOS/20251016102238.jpg)
 
