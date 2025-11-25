@@ -305,6 +305,8 @@ static inline const void *__tag_set(const void *addr, u8 tag)
  * 
  * 为什么能通过最高位来判断呢?
  *   -> 线性映射区 ，最高位为1
+ * 
+ * __is_lm_address()宏用于判断虚拟地址是否为线性映射的虚拟地址
  */
 #define __is_lm_address(addr)	(!(((u64)addr) & BIT(vabits_actual - 1)))
 

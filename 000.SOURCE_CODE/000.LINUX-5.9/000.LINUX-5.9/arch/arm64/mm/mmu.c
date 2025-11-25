@@ -37,6 +37,17 @@
 #include <asm/tlbflush.h>
 #include <asm/pgalloc.h>
 
+/**
+ * 这个与内核映射的粒度有关，内核映射的粒度:
+ * 内核在建立页表时，并不总是将虚拟内存一页一页（通常是4KB）地映射到物理内存。为了提高效率（减少页表项数量，加快翻译后备缓冲器查找速度），它可以使用更大的块进行映射。
+ *
+ * 页映射： 最基本的映射单位，在ARM64上通常是4KB。对应的页表项指向一个4KB的物理页帧。
+ * 块映射： 在ARM64中，这通常指2MB或1GB的映射。一个页表项可以直接指向一个2MB或1GB的连续物理内存区域，而无需为其中的每一个4KB页面创建下级页表
+ *
+ * 
+ * NO_CONT_MAPPINGS: 禁止内核使用连续页表映射
+ * NO_BLOCK_MAPPINGS: 强制内核只使用最小的页映射（如4KB），而禁止使用更大的块映射（如2MB或1GB）
+ */
 #define NO_BLOCK_MAPPINGS	BIT(0)
 #define NO_CONT_MAPPINGS	BIT(1)
 
@@ -657,23 +668,40 @@ void __init mark_linear_text_alias_ro(void)
  * map_mem(pgdp)：物理内存的线性映射。物理内存会全部线性映射到以PAGE_OFFSET(即页面内偏移量)开始的内核空间的虚拟地址，以加速内核访问内存。
  * 
  * "加速访问"的含义:
- *   通过简单的偏移量实现，虚拟地址 = 物理地址 + 固定偏移（如PAGE_OFFSET）, 提供一种快速访问物理内存的方式，避免了频繁的页表操作
+ *   通过简单的偏移量实现(这个只在线性访问时有效)，虚拟地址 = 物理地址 + 固定偏移（如PAGE_OFFSET）, 提供一种快速访问物理内存的方式，避免了频繁的页表操作
  * 
  * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]2．map_mem()函数
+ * 
+ * 分多段映射,是因为不同段需要设置不同的属性,避免相互影响
+ * 
+ * # 在这个流程中,会内核映像的地址空间设置为只读
+ * smp_cpus_done -> mark_linear_text_alias_ro
  */
 static void __init map_mem(pgd_t *pgdp)
 {
 	// 获取内核起始物理地址
 	phys_addr_t kernel_start = __pa_symbol(_text);
 	/**
-	 * 0000.LINUX-5.9/arch/arm64/kernel/vmlinux.lds.S 中的__init_begin?
+	 * 0000.LINUX-5.9/arch/arm64/kernel/vmlinux.lds.S 中的__init_begin,是的
+	 * 即: 内核映像的右边界
+	 * 看图: '图3.11　映射物理内存到线性映射区'
 	 */
 	phys_addr_t kernel_end = __pa_symbol(__init_begin);
 	struct memblock_region *reg;
 	int flags = 0;
 
-	if (rodata_full || debug_pagealloc_enabled())
+	/**
+	 * pageattr.c -> bool rodata_full __ro_after_init = IS_ENABLED(CONFIG_RODATA_FULL_DEFAULT_ENABLED);
+	 * rodata_full 默认为true?
+	 */
+	if (rodata_full || debug_pagealloc_enabled()) {
+		/**
+		 * 禁止内核使用连续页表映射 && 强制内核只能使用最小的页映射(4KB)
+		 * ? 为什么这么做
+		 * 在创建页表项的时候，会根据条件，启用连续页表项属性(PTE)
+		 */
 		flags = NO_BLOCK_MAPPINGS | NO_CONT_MAPPINGS;
+	}
 
 	/**
 	 * Take care not to create a writable alias for the
@@ -694,6 +722,8 @@ static void __init map_mem(pgd_t *pgdp)
 	 * 
 	 * for_each_memblock 定义在: 000.LINUX-5.9/include/linux/memblock.h
 	 * 这里传入的是 memory , 所以遍历的是所有可用的物理内存 (另一种是保留内存)
+	 * 
+	 * 这里的 memblock 在前面会移除一部分内存，如 内核映像所占内存空间
 	*/
 	for_each_memblock(memory, reg) {
 		phys_addr_t start = reg->base;
@@ -717,8 +747,12 @@ static void __init map_mem(pgd_t *pgdp)
 	 * but protects it from inadvertent modification or execution.
 	 * Note that contiguous mappings cannot be remapped in this way,
 	 * so we should avoid them here.
-	 * (现在将 [_text, __init_begin) 区间的线性别名映射为不可执行，并在后续的 mark_linear_text_alias_ro() 函数中移除写权限（该函数将在替代修补完成后调用）。
-	 * 这样既能让休眠等子系统访问该区域内容，又能防止意外修改或执行。需要注意的是，连续映射无法以这种方式重新映射，因此我们在此应避免使用连续映射)
+	 * (现在将 [_text, __init_begin) 区间的线性别名映射为不可执行，
+	 * 并在后续的 mark_linear_text_alias_ro() 函数中移除写权限（该函数将在替代修补完成后调用）。
+	 * 这样既能让休眠等子系统访问该区域内容，又能防止意外修改或执行。
+	 * 需要注意的是，连续映射无法以这种方式重新映射，因此我们在此应避免使用连续映射)
+	 * 
+	 * [_text, __init_begin) (如 图3.10　内核映像到内核空间虚拟地址的映射关系 , 这个地址范围是内核映像所占内存空间)
 	 */
 	__map_memblock(pgdp, kernel_start, kernel_end,
 		       PAGE_KERNEL, NO_CONT_MAPPINGS);
@@ -1033,8 +1067,20 @@ void __init paging_init(void)
 	pgd_t *pgdp = pgd_set_fixmap(__pa_symbol(swapper_pg_dir));
 
 	/**
-	 * pgdp 是固定映射区域的, 为什么要有这个固定映射区域呢?
+	 * pgdp 是固定映射区域的, 为什么要有这个固定映射区域呢? 
+	 *  ---> 为的是能够进行线性映射 , 即 __pa_symbol(x) 能够使用,
+	 * ------> 即: 能够通过 VA(虚拟地址) - Offset(偏移量) = PA(得到物理地址)
 	 */
+
+	 /**
+	  * 这里的映射是什么意思呢?
+	  * ---> 意思就是将物理内存映射到虚拟内存,这又是什么含义呢?
+	  * -----> 即: 后续访问虚拟内存时,能够通过虚拟内存访问(通过MMU 或者 线性映射)到对应的物理内存上,毕竟，数据最终还是存储在物理内存空间上。
+	  *
+	  * 访问方式:
+	  *      线性映射: 通过 __pa(x) 或 __pa_symbol(x)
+	  *      MMU: 通过页表转换进行访问
+	  */
 
 	/**
 	 * map_kernel(pgdp)：对内核映像文件的各个块重新映射: 映射到以pgdp为基地址的虚拟地址上

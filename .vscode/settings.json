@@ -31,6 +31,7 @@
         "utility": "c",
         "ratio": "c",
         "random": "c",
-        "climits": "c"
+        "climits": "c",
+        "fixmap.h": "c"
     }
 }

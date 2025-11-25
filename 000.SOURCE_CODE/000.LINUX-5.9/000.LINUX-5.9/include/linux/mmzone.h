@@ -714,8 +714,7 @@ struct deferred_split {
 #endif
 
 /**
- *
- * 通过注释，一个pglist_data就是对一张内存条的抽象表示
+ * 得了解 NUMA SMP架构了
  *
  * On NUMA machines, each NUMA node would have a pg_data_t to describe
  * it's memory layout. On UMA machines there is a single pglist_data which
