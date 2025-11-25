@@ -994,33 +994,36 @@ __attribute__((optimize("O0")))  static void __init map_kernel(pgd_t *pgdp)
 void __init paging_init(void)
 {
 	{
+		/**
+		 * 这个得参考： Documentation/arm64/memory.rst 来分析
+		 */
 		// 输出 swapper_pg_dir 的值(虚拟&物理地址) kimage_voffset
 		printk("swapper_pg_dir is 0x%lx , pa: ox%lx \n", (swapper_pg_dir), (__pa_symbol(swapper_pg_dir)));
 		printk("kimage_voffset is 0x%lx \n", (kimage_voffset));
 		
-		printk("_text is 0x%lx \n", (_text));
+		printk("_text          is 0x%lx \n", (_text));
 		
-		printk("kimage_vaddr is 0x%lx \n", (kimage_vaddr));
-		printk("KIMAGE_VADDR is 0x%lx \n", (KIMAGE_VADDR));
+		printk("kimage_vaddr   is 0x%lx \n", (kimage_vaddr));
+		printk("KIMAGE_VADDR   is 0x%lx \n", (KIMAGE_VADDR)   );
 
-		printk("FIXADDR_TOP is 0x%lx \n",  (FIXADDR_TOP));
+		printk("FIXADDR_TOP    is 0x%lx \n",  (FIXADDR_TOP))    ;
 
-		printk("VMEMMAP_START is 0x%lx \n", (VMEMMAP_START));
-		printk("VMEMMAP_END is 0x%lx \n",   (VMEMMAP_END));
+		printk("VMEMMAP_START  is 0x%lx \n", (VMEMMAP_START));
+		printk("VMEMMAP_END    is 0x%lx \n",   (VMEMMAP_END));
 
-		printk("PCI_IO_START is 0x%lx \n",  (PCI_IO_START));
-		printk("PCI_IO_END is 0x%lx \n",    (PCI_IO_END));
+		printk("PCI_IO_START   is 0x%lx \n",  (PCI_IO_START));
+		printk("PCI_IO_END     is 0x%lx \n",    (PCI_IO_END));
 
-		printk("KERNEL_START is 0x%lx \n",  (KERNEL_START));
-		printk("KERNEL_END is 0x%lx \n",    (KERNEL_END));
+		printk("KERNEL_START   is 0x%lx \n",  (KERNEL_START));
+		printk("KERNEL_END     is 0x%lx \n",    (KERNEL_END));
 
-		printk("PAGE_OFFSET is 0x%lx \n",   (PAGE_OFFSET));
+		printk("PAGE_OFFSET    is 0x%lx \n",   (PAGE_OFFSET));
 
-		printk("MODULES_VADDR is 0x%lx \n",  (MODULES_VADDR));
-		printk("MODULES_END is 0x%lx \n",    (MODULES_END));
+		printk("MODULES_VADDR  is 0x%lx \n",  (MODULES_VADDR));
+		printk("MODULES_END    is 0x%lx \n",    (MODULES_END));
 
-		printk("init_pg_dir is 0x%lx \n",    (init_pg_dir));
-		printk("init_pg_end is 0x%lx \n",    (init_pg_end));
+		printk("init_pg_dir    is 0x%lx \n",    (init_pg_dir));
+		printk("init_pg_end    is 0x%lx \n",    (init_pg_end));
 		/**
 		 * 
 		 * 

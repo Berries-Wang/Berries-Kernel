@@ -83,7 +83,8 @@
  * 是不是很奇怪，大小怎么能当做一个起始地址呢? 看如下分析:
  * 
  * 结合图来分析:  [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图2.9　ARM64在Linux 5.0内核的内存分布
- * > 切记，此书是基于5.0的内核的，而本内核版本是5.9的，有些出入。例如 KIMAGE_VADDR ，PAGE_OFFSET（书中: '0xFFFF800000000000' , 实际 '0xFFFF000000000000'）[正确]
+ * > 切记，此书是基于5.0的内核的，而本内核版本是5.9的，有些出入[经过考究的]。例如 KIMAGE_VADDR ，PAGE_OFFSET（书中: '0xFFFF800000000000' , 实际 '0xFFFF000000000000'）[正确]
+ * >>> 阅读：[000.LINUX-5.9/Documentation/arm64/memory.rst] 文件就知道了。所以，注意甄别
  * 示意图: 001.UNIX-DOCS/022.内存管理/999.IMGS/wechat_2025-08-16_120801_349.png
  * 
  * <pre>
@@ -307,6 +308,8 @@ static inline const void *__tag_set(const void *addr, u8 tag)
  *   -> 线性映射区 ，最高位为1
  * 
  * __is_lm_address()宏用于判断虚拟地址是否为线性映射的虚拟地址
+ * vabits_actual = 48,
+ * 
  */
 #define __is_lm_address(addr)	(!(((u64)addr) & BIT(vabits_actual - 1)))
 

@@ -32,6 +32,9 @@
         "ratio": "c",
         "random": "c",
         "climits": "c",
-        "fixmap.h": "c"
+        "fixmap.h": "c",
+        "chrono": "c",
+        "asm_mem_layout_wei.h": "c",
+        "memory.h": "c"
     }
 }

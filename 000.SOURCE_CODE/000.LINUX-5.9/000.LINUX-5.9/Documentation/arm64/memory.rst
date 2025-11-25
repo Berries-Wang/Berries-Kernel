@@ -25,13 +25,23 @@ mappings while the user pgd contains only user (non-global) mappings.
 The swapper_pg_dir address is written to TTBR1 and never written to
 TTBR0.
 
+# kernel logical memory map -- 操作系统内核地址空间中的线性映射区
+“内核逻辑内存映射”特指内核空间中的一部分，这部分虚拟地址与物理内存之间存在一个固定偏移的、线性的映射关系，
+即 线性映射区域 ,即 用于实现虚拟地址到物理地址的转换:逻辑地址 = 物理地址 + 偏移
+
+## 它的工作方式通常是这样的：
+   有一个简单的公式：虚拟地址 = 物理地址 + 固定偏移量
+
+### 注意，这与 [007.BOOKs/Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub] 中
+    描述的内存布局很不一样!!!,注意!!! 注意!!!
+
 
 AArch64 Linux memory layout with 4KB pages + 4 levels (48-bit)::
 
   Start			End			Size		Use
   -----------------------------------------------------------------------
   0000000000000000	0000ffffffffffff	 256TB		user
-  ffff000000000000	ffff7fffffffffff	 128TB		kernel logical memory map
+  ffff000000000000	ffff7fffffffffff	 128TB		kernel logical memory map # 内核逻辑内存映射 == 操作系统内核地址空间中的线性映射区
   ffff800000000000	ffff9fffffffffff	  32TB		kasan shadow region
   ffffa00000000000	ffffa00007ffffff	 128MB		bpf jit region
   ffffa00008000000	ffffa0000fffffff	 128MB		modules
