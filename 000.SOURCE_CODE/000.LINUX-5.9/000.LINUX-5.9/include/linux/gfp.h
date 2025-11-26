@@ -46,7 +46,9 @@ struct vm_area_struct;
 #endif
 /* If the above are modified, __GFP_BITS_SHIFT may need updating */
 
-/*
+/**
+ * 参考: #4.1.2　分配掩码 
+ *
  * Physical address zone modifiers (see linux/mmzone.h - low four bits)
  *
  * Do not put any conditional on these. If necessary modify the definitions
@@ -199,6 +201,9 @@ struct vm_area_struct;
 #define __GFP_FS	((__force gfp_t)___GFP_FS)
 #define __GFP_DIRECT_RECLAIM	((__force gfp_t)___GFP_DIRECT_RECLAIM) /* Caller can reclaim */
 #define __GFP_KSWAPD_RECLAIM	((__force gfp_t)___GFP_KSWAPD_RECLAIM) /* kswapd can wake */
+/**
+ * 用于允许或者禁止直接页面回收和kswapd内核线程
+ */
 #define __GFP_RECLAIM ((__force gfp_t)(___GFP_DIRECT_RECLAIM|___GFP_KSWAPD_RECLAIM))
 #define __GFP_RETRY_MAYFAIL	((__force gfp_t)___GFP_RETRY_MAYFAIL)
 #define __GFP_NOFAIL	((__force gfp_t)___GFP_NOFAIL)
@@ -233,7 +238,7 @@ struct vm_area_struct;
  * 
  * DOC: Useful GFP flag combinations
  *
- * Useful GFP flag combinations
+ * Useful GFP flag combinations（有用的 GFP 标志组合）
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * Useful GFP flag combinations that are commonly used. It is recommended

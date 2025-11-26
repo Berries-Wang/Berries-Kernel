@@ -38,6 +38,13 @@
  */
 #define PAGE_ALLOC_COSTLY_ORDER 3
 
+/**
+ * free_area数据结构中包含了MIGRATE_TYPES个链表，
+ * 这里相当于zone中根据order的大小有0到（MAX_ORDER−1）个free_area，
+ * 每个free_area根据MIGRATE_TYPES类型有几个相应的链表
+ * 
+ * > 图3.12　伙伴系统的空闲页块的管理
+ */
 enum migratetype {
 	MIGRATE_UNMOVABLE,
 	MIGRATE_MOVABLE,
@@ -417,6 +424,9 @@ enum zone_type {
 
 #ifndef __GENERATING_BOUNDS_H
 
+/**
+ * 1. 要求以L1高速缓存对齐
+ */
 struct zone {
 	/* Read-mostly fields */
 
@@ -520,6 +530,7 @@ struct zone {
 	 * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图3.12　伙伴系统的空闲页块的管理
 	 * 
 	 * 看示意图就可以明白
+	 * 伙伴系统的核心数据结构，管理空闲页块（page block）链表的数组
 	*/
 	struct free_area	free_area[MAX_ORDER];
 
@@ -672,7 +683,8 @@ struct zoneref {
 };
 
 /**
- * 内核使用zonelist数据结构来管理一个内存节点的zone。
+ * 内核使用zonelist数据结构来管理一个内存节点(这个节点的意思是: NUMA中的Node)的zone。
+ * >>> 一个 struct zone 对应于一个 NUMA 节点上的一段特定物理地址范围
  * 
  * One allocation request operates on a zonelist. A zonelist
  * is a list of zones, the first one is the 'goal' of the
@@ -721,7 +733,8 @@ struct deferred_split {
  * describes the whole memory.
  * (在 NUMA 架构的机器中，每个 NUMA 节点都对应一个 pg_data_t 结构体，用于描述该节点的内存布局；
  *    而在 UMA 架构的机器中，则通过唯一的 pglist_data 结构体描述整个系统的内存。)
- *
+ * >>> Linux 内核中用于管理单个 Node 上所有物理内存的核心结构体,包含该 Node 的统计信息、它所包含的 Zone 列表等
+ * 
  * Memory statistics and page replacement data structures are maintained on a
  * per-zone basis.
  * (内存统计信息和页面置换数据结构是基于每个内存区域（per-zone）维护的)
