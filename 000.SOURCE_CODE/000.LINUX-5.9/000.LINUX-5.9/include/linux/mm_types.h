@@ -439,8 +439,12 @@ struct kioctx_table;
  */
 struct mm_struct {
 	struct {
-		struct vm_area_struct *mmap;		/* list of VMAs  VMA 链表*/
-		// VMA红黑树的根节点
+		struct vm_area_struct *mmap;		/* list of VMAs  VMA 链表: 管理 vm_area_struct 的数据结构之一*/
+		/**
+		 * 管理 vm_area_struct 的数据结构之二
+		 * 
+		 * 所以，通过 mmap 或 mm_rb 都可以遍历和查找所有的VMA
+		 */
 		struct rb_root mm_rb;
 		u64 vmacache_seqnum;                   /* per-thread vmacache */
 #ifdef CONFIG_MMU
@@ -459,6 +463,9 @@ struct mm_struct {
 		unsigned long highest_vm_end;	/* highest vma end address */
 		/**
 		 * pgd：指向进程的PGD（一级页表）
+		 * 
+		 * 当CPU第一次访问虚拟地址空间时会触发缺页异常。
+		 * 在缺页异常处理中，分配物理页面，利用分配的物理页面来创建页表项并且填充页表，完成虚拟地址到物理地址的映射关系的建立。
 		 */
 		pgd_t * pgd;
 

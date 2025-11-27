@@ -1,5 +1,5 @@
 # 进程地址空间
-> [#4.4　虚拟内存管理之进程地址空间](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub)
+> [#4.4　虚拟内存管理之进程地址空间](../../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub)
 
 进程地址空间（process address space）是指进程可寻址的虚拟地址空间
 
@@ -20,3 +20,12 @@
 ### 关键数据结构-- struct mm_struct
 结合上述表格，内存区域是这样的: 
 ![图4.19　mm_struct数据结构](./999.REFS/wechat_2025-11-26_075113_730.png)
+
+### struct mm_struct 中有多个 struct vm_area_struct <sup>一段一段的，会合并： ‘4.4.7　合并VMA’</sup>
+![wechat_2025-11-28_073439_825.png](./999.REFS/wechat_2025-11-28_073439_825.png)
+|关键项名称|备注1|备注2|备注3|
+|-|-|-|-|
+|VMA通过哪些数据结构和物理页面建立映射关系|通过mm_struct中的pgd?通过缺页异常去申请页表|有可能||
+
+### 用户态地址空间划分<sub>含有堆&栈地址增长方向</sub>
+![wechat_2025-11-28_074213_465.png](./999.REFS/wechat_2025-11-28_074213_465.png)

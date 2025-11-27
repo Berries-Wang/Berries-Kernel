@@ -106,6 +106,14 @@ static inline pgprot_t arch_filter_pgprot(pgprot_t prot)
 }
 #endif
 
+/**
+ * VMA属性的标志位可以任意组合，但是最终要落实到硬件机制上，即页表项的属性中。
+ * VMA属性到页表属性的转换如图4.21所示。 vm_area_struct数据结构中有两个成员和属性相关：
+ *   一个是vm_flags成员，用于描述VMA的属性；
+ *   另外一个是vm_page_prot成员，用于将VMA属性标志位转换成与处理器相关的页表项的属性，它和具体架构相关
+ * 
+ * 把vm_flags标志位转化成具体的页表项的硬件标志位
+ */
 pgprot_t vm_get_page_prot(unsigned long vm_flags)
 {
 	pgprot_t ret = __pgprot(pgprot_val(protection_map[vm_flags &
