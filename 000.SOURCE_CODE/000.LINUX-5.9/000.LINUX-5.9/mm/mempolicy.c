@@ -2243,6 +2243,9 @@ out:
 EXPORT_SYMBOL(alloc_pages_vma);
 
 /**
+ * 
+ * 分配物理页面
+ * 
  * 	alloc_pages_current - Allocate pages.
  *
  *	@gfp:

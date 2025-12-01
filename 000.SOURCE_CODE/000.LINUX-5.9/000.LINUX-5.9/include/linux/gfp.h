@@ -556,8 +556,10 @@ static inline struct page *alloc_pages_node(int nid, gfp_t gfp_mask,
 #ifdef CONFIG_NUMA
 extern struct page *alloc_pages_current(gfp_t gfp_mask, unsigned order);
 
-static inline struct page *
-alloc_pages(gfp_t gfp_mask, unsigned int order)
+/**
+ * 分配物理页面 , 分配2^order个物理页面
+ */
+static inline struct page *alloc_pages(gfp_t gfp_mask, unsigned int order)
 {
 	return alloc_pages_current(gfp_mask, order);
 }
