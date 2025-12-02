@@ -531,6 +531,8 @@ struct zone {
 	 * 
 	 * 看示意图就可以明白
 	 * 伙伴系统的核心数据结构，管理空闲页块（page block）链表的数组
+	 * 
+	 * MAX_ORDER = 11 , 2^10 * 4K = 4MB , 所以，最大内存块为8MB
 	*/
 	struct free_area	free_area[MAX_ORDER];
 
