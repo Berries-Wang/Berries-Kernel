@@ -156,8 +156,7 @@ struct alloc_context {
 };
 
 /**
- * 什么是伙伴块?
- *     物理内存中地址连续的页块，他们互称伙伴，并大小相等且为2的幂 
+ * 什么是伙伴? [001.UNIX-DOCS/000.内存管理/005.内存分配/000.伙伴系统/README.md]
  * 
  * pfn：当前页块的起始页帧号（Page Frame Number）。
  * 
@@ -171,7 +170,7 @@ struct alloc_context {
  *     B2 = B1 ^ (1 << O)
  * For example, if the starting buddy (buddy2) is #8 its order ((若起始伙伴块（buddy2）的编号为 #8，则其 阶数 1（Order 1）的伙伴块 是 #10))
  * 1 buddy is #10:
- *     B2 = 8 ^ (1 << 1) = 8 ^ 2 = 10
+ *     B2 = 8 ^ (1 << 1) = 8 ^ 2 = 10  # ^ 是取反,不是幂运算
  *
  * 2) Any buddy B will have an order O+1 parent P which
  * satisfies the following equation:(在伙伴系统中，任意阶数为 O 的伙伴块 B，其对应的更高阶（O+1）父块 P 均满足以下关系式：)
@@ -179,7 +178,7 @@ struct alloc_context {
  *
  * Assumption: *_mem_map is contiguous at least up to MAX_ORDER (假设 _mem_map 至少在内核定义的 MAX_ORDER 范围内是物理连续的)
  * 
- * @return 返回伙伴块的起始页帧号（PFN），如果伙伴块存在。
+ * @return 返回伙伴块的起始页帧号（PFN），如果伙伴块存在(该页块在当前 order 下的“伙伴”页块的起始 PFN)
  */
 static inline unsigned long
 __find_buddy_pfn(unsigned long page_pfn, unsigned int order)
@@ -255,9 +254,10 @@ struct compact_control {
 	bool alloc_contig;		/* alloc_contig_range allocation */
 };
 
-/*
+/**
  * Used in direct compaction when a page should be taken from the freelists
  * immediately when one is created during the free path.
+ * (当在自由路径中创建页面时，需要立即从自由列表中取出页面时，用于直接压缩。)
  */
 struct capture_control {
 	struct compact_control *cc;

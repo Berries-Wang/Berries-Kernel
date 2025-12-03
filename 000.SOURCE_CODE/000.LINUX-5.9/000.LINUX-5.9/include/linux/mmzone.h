@@ -44,11 +44,21 @@
  * 每个free_area根据MIGRATE_TYPES类型有几个相应的链表
  * 
  * > 图3.12　伙伴系统的空闲页块的管理
+ * 
+ * |        枚举值           |             描述                        |      主要用途和特点|
+ * |MIGRATE_UNMOVABLE       | 不可移动的页                              |包含不能在内存中移动的页，例如内核栈、struct page 结构、某些设备驱动程序使用的页。如果移动它们，系统可能会崩溃|
+ * |MIGRATE_MOVABLE         | 可移动的页                                |包含可以安全地在内存中移动的页。主要是用户空间进程使用的页，例如匿名页（anonymous pages）和文件页（file pages）。这些页可以通过内核的页面迁移机制转移到其他位置|
+ * |MIGRATE_RECLAIMABLE     |可回收的页                                 |包含在系统内存不足时可以被回收（释放）的页，但它们不可移动。例如，页缓存（page cache）中用于只读文件映射的页。回收比移动更容易实现。|
+ * |MIGRATE_PCPTYPES        |管理页类型(MIGRATE_MOVABLE...)的内部组织结构 |需要被缓存到 每 CPU 页列表 (PCP) 中的迁移类型数量,PCP 目的： 避免在每次小分配时都去争抢全局的空闲列表锁，从而提高性能|
+ * |MIGRATE_HIGHATOMIC      |管理页类型(MIGRATE_MOVABLE...)的内部组织结构 |当内核需要进行 GFP_ATOMIC 分配，并且它是一个高优先级的原子分配时（通常是 __GFP_HIGH 标志被设置），内核会尝试从所有适用的迁移类型列表中分配|
+ * |MIGRATE_CMA             |连续内存分配                               |专用于为需要大块连续物理内存的设备（如图形处理器、DMA 缓冲区）预留和分配页。这通常是驱动程序为了满足硬件要求而使用的特殊类型|
+ * |MIGRATE_ISOLATE         |隔离的页                                   |特殊类型。 不用于常规分配，而是用于内存热插拔或内存下线（Memory Offlining）。用于临时隔离一个内存块，确保所有活动页被迁移走或释放，以便安全地移除或下线该内存|
+ * |MIGRATE_TYPES           |枚举值的总数                                |枚举值的总数|
  */
 enum migratetype {
-	MIGRATE_UNMOVABLE,
-	MIGRATE_MOVABLE,
-	MIGRATE_RECLAIMABLE,
+	MIGRATE_UNMOVABLE,   
+	MIGRATE_MOVABLE,      
+	MIGRATE_RECLAIMABLE,   
 	MIGRATE_PCPTYPES,	/* the number of types on the pcp lists */
 	MIGRATE_HIGHATOMIC = MIGRATE_PCPTYPES,
 #ifdef CONFIG_CMA
@@ -100,6 +110,11 @@ extern int page_group_by_mobility_disabled;
 #define get_pageblock_migratetype(page)					\
 	get_pfnblock_flags_mask(page, page_to_pfn(page), MIGRATETYPE_MASK)
 
+/** 
+ * 这就得结合图来分析了:
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图3.12　伙伴系统的空闲页块的管理
+ * > 1. 每一阶，都是有多个链表的，而不是一个
+*/
 struct free_area {
 	struct list_head	free_list[MIGRATE_TYPES];
 	unsigned long		nr_free;
@@ -581,7 +596,11 @@ struct zone {
 	bool			contiguous;
 
 	ZONE_PADDING(_pad3_)
-	/* Zone statistics */
+	/** 
+	 * Zone statistics 
+	 * zone里有一个关于物理页面统计数据的数组vm_stat[ ]，这个数组里存放了该zone中各种页面的统计数据，包括空闲页面数量NR_FREE_PAGES、不活跃的匿名页面数量NR_ZONE_INACTIVE_ANON等。zone_page_state()函数用于获取zone中空闲页面的数量
+	 * 
+	*/
 	atomic_long_t		vm_stat[NR_VM_ZONE_STAT_ITEMS];
 	atomic_long_t		vm_numa_stat[NR_VM_NUMA_STAT_ITEMS];
 } ____cacheline_internodealigned_in_smp;

@@ -769,9 +769,11 @@ static inline void set_page_order(struct page *page, unsigned int order)
 	__SetPageBuddy(page);
 }
 
-/*
- * This function checks whether a page is free && is the buddy
- * we can coalesce a page and its buddy if
+/**
+ * This function checks whether a page is free && is the buddy 
+ * (这个函数的目的是检查一个页是否同时满足两个条件: 空闲的;是伙伴)
+ * 
+ * we can coalesce(合并) a page and its buddy if
  * (a) the buddy is not in a hole (check before calling!) &&
  * (b) the buddy is in the buddy system &&
  * (c) a page and its buddy have the same order &&
@@ -783,20 +785,28 @@ static inline void set_page_order(struct page *page, unsigned int order)
  * For recording page's order, we use page_private(page).
  */
 static inline bool page_is_buddy(struct page *page, struct page *buddy,
-							unsigned int order)
+				 unsigned int order)
 {
-	if (!page_is_guard(buddy) && !PageBuddy(buddy))
+	/**
+	 * PageBuddy: 校验页面属性: page_type
+	 * page_is_guard: 000.LINUX-5.9/include/linux/mm.h , 调试属性? YES , 最终同 PageBuddy
+	 */
+	if (!page_is_guard(buddy) && !PageBuddy(buddy)) {
 		return false;
+	}
 
-	if (page_order(buddy) != order)
+	// 是不是同阶
+	if (page_order(buddy) != order) {
 		return false;
+	}
 
 	/*
 	 * zone check is done late to avoid uselessly calculating
 	 * zone/node ids for pages that could never merge.
 	 */
-	if (page_zone_id(page) != page_zone_id(buddy))
+	if (page_zone_id(page) != page_zone_id(buddy)) {
 		return false;
+	}
 
 	VM_BUG_ON_PAGE(page_count(buddy) != 0, buddy);
 
@@ -814,26 +824,35 @@ static inline struct capture_control *task_capc(struct zone *zone)
 		capc->cc->zone == zone ? capc : NULL;
 }
 
-static inline bool
-compaction_capture(struct capture_control *capc, struct page *page,
-		   int order, int migratetype)
+/**
+ * 什么含义?
+ */
+static inline bool compaction_capture(struct capture_control *capc,
+				      struct page *page, int order,
+				      int migratetype)
 {
-	if (!capc || order != capc->cc->order)
+	if (!capc || order != capc->cc->order) {
 		return false;
+	}
 
-	/* Do not accidentally pollute CMA or isolated regions*/
-	if (is_migrate_cma(migratetype) ||
-	    is_migrate_isolate(migratetype))
+	/* Do not accidentally pollute CMA or isolated regions (不意外污染CMA或隔离区域)*/
+	if (is_migrate_cma(migratetype) || is_migrate_isolate(migratetype)) {
 		return false;
+	}
 
-	/*
+	/**
 	 * Do not let lower order allocations polluate a movable pageblock.
 	 * This might let an unmovable request use a reclaimable pageblock
 	 * and vice-versa but no more than normal fallback logic which can
 	 * have trouble finding a high-order free page.
+	 * (请勿让低阶分配污染可移动页块。
+     *  虽然这可能会允许不可移动的请求使用可回收页块，反之亦然，但其程度不会超过常规的回退逻辑——后者本身在寻找高阶空闲页时就可能遇到困难)
+     *
+	 * 什么含义? -> 要优先保护高阶的、纯净的页块（尤其是 MOVABLE 类型）不被破坏
 	 */
-	if (order < pageblock_order && migratetype == MIGRATE_MOVABLE)
+	if (order < pageblock_order && migratetype == MIGRATE_MOVABLE) {
 		return false;
+	}
 
 	capc->page = page;
 	return true;
@@ -928,6 +947,9 @@ static inline bool buddy_merge_likely(unsigned long pfn,
 }
 
 /**
+ * [001.UNIX-DOCS/000.内存管理/005.内存分配/000.伙伴系统/README.md]
+ * 
+ * 
  * Freeing function for a buddy system allocator.
  *
  * The concept of a buddy system is to maintain direct-mapped table
@@ -939,28 +961,21 @@ static inline bool buddy_merge_likely(unsigned long pfn,
  * at the bottom level available, and propagating the changes upward
  * as necessary, plus some accounting needed to play nicely with other
  * parts of the VM system.
- * 伙伴系统（Buddy System）的核心思想是**维护一个直接映射表（包含位图值）来管理不同“阶数”（order）的内存块**。其基本结构如下：  
+ * ## 伙伴系统概念（Buddy System Concept）
  * 
- * 1. **底层映射表**：  
- *    - 管理**最小可分配内存单元**（通常是页框，page），每个表项通过位图标记对应内存块的使用状态。  
+ * **伙伴系统**的概念是为各种“阶”（orders）的内存块维护一个**直接映射表**（其中包含位值）。
  * 
- * 2. **上层映射表**：  
- *    - 每一层描述的是**下一层两个连续内存块的组合**（即“伙伴”），因此得名。  
- *    - 例如，第 *n* 阶的表项表示两个连续的 *n-1* 阶内存块是否可合并为一个更大的 *n* 阶块。  
+ * * **最底层**的表包含**最小可分配内存单元**（这里指**页**）的映射。
+ * * **其上**的每一层描述了来自下一层的**一对单元**，因此被称为“**伙伴**”（buddies）。
  * 
- * 3. **操作流程**：  
- *    - **释放内存时**：  
- *      1. 在底层标记对应的页框为可用。  
- *      2. **向上层递归检查**：如果两个相邻的伙伴块均空闲，则合并为一个更高阶的块，并更新上层表项。  
- *    - **分配内存时**：  
- *      1. 从满足需求的最高阶开始查找空闲块。  
- *      2. 若没有合适块，则拆分更大的块，并更新表项。  
+ * 在高层次上，所有的操作只是：
  * 
- * 4. **与虚拟内存（VM）系统的协作**：  
- *    - 需要额外的**统计和管理机制**（如`zone`结构中的`free_area`链表），以确保与页面回收、缓存等子系统协同工作。  
+ * 1.  将**最底层**表中的对应条目标记为**可用**。
+ * 2.  根据需要将变化**向上层传播**。
+ * 3.  进行一些必要的**记账**（accounting）工作，以确保与虚拟机（VM）系统的其他部分良好协作。
  * 
- * 简而言之，伙伴系统通过**分层位图管理内存块的合并与拆分**，兼顾了分配效率（快速查找空闲块）和减少碎片（合并伙伴块）的能力。 
- * 
+ *   
+ *
  * At each level, we keep a list of pages, which are heads of continuous
  * free pages of length of (1 << order) and marked with PageBuddy.
  * Page's order is recorded in page_private(page) field.
@@ -969,55 +984,45 @@ static inline bool buddy_merge_likely(unsigned long pfn,
  * free, the remainder of the region must be split into blocks.
  * If a block is freed, and its buddy is also free, then this
  * triggers coalescing into a block of larger size.
- * 在伙伴系统的每一层级中，我们维护了一个**页面链表**，其中的每个节点都是长度为 `(1 << order)` 的连续空闲页块的**头页**，并通过 `PageBuddy` 标志位标记。页块的阶数（order）记录在 `page_private(page)` 字段中。  
+ * ## 伙伴系统细节
  * 
- * ### **分配与释放的核心逻辑**  
- * 1. **分配内存时**：  
- *    - 如果申请的是一个**小块内存**（例如从高阶块中拆分）：  
- *      - 当原空闲块被部分分配后，**剩余部分会被拆分成更小的块**，并加入对应阶数的空闲链表。  
- *      - 例如：从 4 阶块（16 页）分配 1 页后，剩余的 15 页会被拆分为 2 个 3 阶块、1 个 2 阶块等（具体取决于伙伴系统的拆分策略）。  
+ * 在**每个层级（level）**，我们都维护着一个**页链表**。这些页是**连续空闲页块**的头部，其长度为 $2^{\text{阶}}$ ($\text{1} \ll \text{order}$)，并且被标记为 `PageBuddy`。
  * 
- * 2. **释放内存时**：  
- *    - 如果被释放的块**其伙伴块也是空闲的**（通过 `PageBuddy` 和 `page_private` 判断），则会**触发合并**，形成一个更高阶的连续空闲块。  
- *    - 例如：两个相邻的 2 阶块（各 4 页）若均空闲，则合并为一个 3 阶块（8 页）。  
+ * 页的**阶（order）**被记录在 `page_private(page)` 字段中。
  * 
- * ### **关键机制**  
- * - **`PageBuddy` 标志**：  
- *   - 表示该页是一个**空闲块的头页**，其后的 `(1 << order)` 页均属于同一空闲块。  
- * - **`page_private(page)` 字段**：  
- *   - 存储该空闲块的阶数，用于快速判断是否可合并。  
- * - **伙伴（Buddy）关系**：  
- *   - 两个块互为伙伴的条件：  
- *     - 物理地址连续。  
- *     - 属于同一阶数。  
- *     - 起始地址对齐到 `2^(order+1)` 的边界（例如 8 阶块的地址必须对齐到 `2^(8+1) = 512` 页）。  
+ * 这样，当我们分配或释放一个块时，我们就可以推断出其**伙伴（buddy）**的状态。
  * 
- * ### **总结**  
- * 伙伴系统通过**链表管理连续空闲块**，利用 `PageBuddy` 和 `page_private` 实现快速分配与释放。其核心是：  
- * - **分配时拆分**：大块拆分成小块，满足请求。  
- * - **释放时合并**：检查伙伴块是否空闲，递归合并以减少碎片。  
+ * * **分配时：** 如果我们分配一个较小的块，并且这个块及其伙伴原本都处于空闲状态，那么剩余的区域**必须被分裂**成更小的块。
+ * * **释放时：** 如果一个块被释放，而它的**伙伴也空闲**，那么这将**触发合并（coalescing）**，形成一个更大尺寸的块。
  * 
- * 这种设计在保证高效内存分配的同时，最大限度地减少了外部碎片（external fragmentation）。
+ * 
  * 
  * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#4.1.7　释放页面
  * -- nyc
  * 
  * @param pfn  页帧号，即 mem_map数组下标
+ * 
  *
  * 
  * 该函数不仅可以释放内存页面到伙伴系统，还可以处理空闲页面的合并操作。
  *   合并: 释放内存块时，会检查相邻的内存块是否空闲，若空闲，则将其合并成一个大的内存块，放置到更高一级的空闲立案表中。如果还能继续合并临近的内存块，则继续合并，合并的结果放到更高级的空闲链表中。
  */
-
 static inline void __free_one_page(struct page *page, unsigned long pfn,
 				   struct zone *zone, unsigned int order,
 				   int migratetype, bool report)
 {
 	struct capture_control *capc = task_capc(zone);
+	// 记录伙伴页帧号
 	unsigned long buddy_pfn;
+
+	// 记录合并后的页的页帧号
 	unsigned long combined_pfn;
+
 	unsigned int max_order;
+
+	// 用来寻找伙伴页
 	struct page *buddy;
+
 	bool to_tail;
 
 	max_order = min_t(unsigned int, MAX_ORDER, pageblock_order + 1);
@@ -1026,37 +1031,55 @@ static inline void __free_one_page(struct page *page, unsigned long pfn,
 	VM_BUG_ON_PAGE(page->flags & PAGE_FLAGS_CHECK_AT_PREP, page);
 
 	VM_BUG_ON(migratetype == -1);
-	if (likely(!is_migrate_isolate(migratetype)))
+	if (likely(!is_migrate_isolate(migratetype))) {
 		__mod_zone_freepage_state(zone, 1 << order, migratetype);
+	}
 
 	VM_BUG_ON_PAGE(pfn & ((1 << order) - 1), page);
 	VM_BUG_ON_PAGE(bad_range(zone, page), page);
 
-// 持续合并       
+/**
+ * 持续合并
+ * 
+ */
 continue_merging:
 	while (order < max_order - 1) {
 		if (compaction_capture(capc, page, order, migratetype)) {
+			// 更新统计信息即可? 哪些情况呢?
 			__mod_zone_freepage_state(zone, -(1 << order),
-								migratetype);
+						  migratetype);
 			return;
 		}
+		// 找到当前页块在order下的伙伴页块的起始PFN
 		buddy_pfn = __find_buddy_pfn(pfn, order);
+		// 计算伙伴页块的page数据结构
 		buddy = page + (buddy_pfn - pfn);
 
-		if (!pfn_valid_within(buddy_pfn))
+		if (!pfn_valid_within(buddy_pfn)) {
 			goto done_merging;
-		if (!page_is_buddy(page, buddy, order))
+		}
+		if (!page_is_buddy(page, buddy, order)) {
 			goto done_merging;
-		/*
+		}
+		/**
 		 * Our buddy is free or it is CONFIG_DEBUG_PAGEALLOC guard page,
 		 * merge with it and move up one order.
+		 * 
+		 * page_is_guard: 000.LINUX-5.9/include/linux/mm.h
 		 */
-		if (page_is_guard(buddy))
+		if (page_is_guard(buddy)) {
 			clear_page_guard(zone, buddy, order, migratetype);
-		else
+		} else {
+			// 从空闲链表中移除
 			del_page_from_free_list(buddy, zone, order);
+		}
+		// 计算合并后的页块的起始页帧号? 查资料：YES，得调试
 		combined_pfn = buddy_pfn & pfn;
+
+		// 计算合并后页块的其实地址? 查资料：YES，得调试
 		page = page + (combined_pfn - pfn);
+		
+		 
 		pfn = combined_pfn;
 		order++;
 	}
@@ -1088,19 +1111,22 @@ continue_merging:
 done_merging:
 	set_page_order(page, order);
 
-	if (is_shuffle_order(order))
+	if (is_shuffle_order(order)) {
 		to_tail = shuffle_pick_tail();
-	else
+	} else {
 		to_tail = buddy_merge_likely(pfn, buddy_pfn, page, order);
+	}
 
-	if (to_tail)
+	if (to_tail) {
 		add_to_free_list_tail(page, zone, order, migratetype);
-	else
+	} else {
 		add_to_free_list(page, zone, order, migratetype);
+	}
 
 	/* Notify page reporting subsystem of freed page */
-	if (report)
+	if (report) {
 		page_reporting_notify_free(order);
+	}
 }
 
 /*
