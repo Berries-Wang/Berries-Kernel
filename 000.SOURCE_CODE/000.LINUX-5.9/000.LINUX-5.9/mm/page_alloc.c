@@ -4976,10 +4976,11 @@ static inline bool prepare_alloc_pages(gfp_t gfp_mask, unsigned int order,
 		struct alloc_context *ac, gfp_t *alloc_mask,
 		unsigned int *alloc_flags)
 {
+	// 选择从zone的哪个区域分配? 待调试
 	ac->highest_zoneidx = gfp_zone(gfp_mask);
 	ac->zonelist = node_zonelist(preferred_nid, gfp_mask);
 	ac->nodemask = nodemask;
-        // 根据掩码计算内存的迁移类型
+	// 根据掩码计算内存的迁移类型
 	ac->migratetype = gfp_migratetype(gfp_mask);
 
 	if (cpusets_enabled()) {
@@ -4998,14 +4999,15 @@ static inline bool prepare_alloc_pages(gfp_t gfp_mask, unsigned int order,
 	fs_reclaim_release(gfp_mask);
 
 	might_sleep_if(gfp_mask & __GFP_DIRECT_RECLAIM);
-        /**
-         *
-         * should_fail_alloc_page ： 故障注入判断函数 ， 
-         * should_fail_alloc_page 是 Linux 内核中的一个调试函数，用于模拟内存分配失败，以测试内核在内存不足（OOM, Out-of-Memory）情况下的行为。
-         *                        它通常用于 故障注入（Fault Injection） 测试，以验证内核的内存分配路径是否具备正确的错误处理能力
-         */
-	if (should_fail_alloc_page(gfp_mask, order))
+	/*
+     *
+     * should_fail_alloc_page ： 故障注入判断函数 ， 
+     * should_fail_alloc_page 是 Linux 内核中的一个调试函数，用于模拟内存分配失败，以测试内核在内存不足（OOM, Out-of-Memory）情况下的行为。
+     *                        它通常用于 故障注入（Fault Injection） 测试，以验证内核的内存分配路径是否具备正确的错误处理能力
+     */
+	if (should_fail_alloc_page(gfp_mask, order)) {
 		return false;
+	}
 
 	*alloc_flags = current_alloc_flags(gfp_mask, *alloc_flags);
 
@@ -5027,9 +5029,11 @@ static inline void finalise_ac(gfp_t gfp_mask, struct alloc_context *ac)
 					ac->highest_zoneidx, ac->nodemask);
 }
 
-/*
+/**
  * This is the 'heart' of the zoned buddy allocator.
  * (这是分区伙伴分配器（zoned buddy allocator）的「核心」部分)
+ * 
+ * @param preferred_nid 首选内存节点
  */
 struct page *
 __alloc_pages_nodemask(gfp_t gfp_mask, unsigned int order, int preferred_nid,
@@ -5043,8 +5047,8 @@ __alloc_pages_nodemask(gfp_t gfp_mask, unsigned int order, int preferred_nid,
 	/*
 	 * There are several places where we assume that the order value is sane
 	 * so bail out early if the request is out of bound.
-         * 当前有多处代码假设 order 值在合法范围内，因此若请求越界应提前终止处理。
-         * 伙伴系统能分配的最大内存块大小为 2^(MAX_ORDER - 1) 个页面。
+     * 当前有多处代码假设 order 值在合法范围内，因此若请求越界应提前终止处理。
+     * 伙伴系统能分配的最大内存块大小为 2^(MAX_ORDER - 1) 个页面。
 	 */
 	if (unlikely(order >= MAX_ORDER)) {
 		WARN_ON_ONCE(!(gfp_mask & __GFP_NOWARN));
@@ -5054,9 +5058,13 @@ __alloc_pages_nodemask(gfp_t gfp_mask, unsigned int order, int preferred_nid,
 	gfp_mask &= gfp_allowed_mask;
 	alloc_mask = gfp_mask;
 	
-	// 初始化分配器相关参数
-	if (!prepare_alloc_pages(gfp_mask, order, preferred_nid, nodemask, &ac, &alloc_mask, &alloc_flags))
+	/**
+	 * 初始化分配器相关参数
+	 */
+	if (!prepare_alloc_pages(gfp_mask, order, preferred_nid, nodemask, &ac,
+				 &alloc_mask, &alloc_flags)) {
 		return NULL;
+	}
 
 	// finalise_ac 主要用于确定首选的zone
 	finalise_ac(gfp_mask, &ac);
@@ -5935,7 +5943,7 @@ static void build_thisnode_zonelists(pg_data_t *pgdat)
  * exhausted, but results in overflowing to remote node while memory
  * may still exist in local DMA zone.
  * 
- * 构建按 zone（内存区域） 和 节点内 zone 顺序排列的 zonelist。 ???
+ * 构建按 zone（内存区域） 和 节点内 zone 顺序排列的 zonelist
  * 这种设计会导致：
  *    优先保留 DMA 区域的内存，直到所有 Normal 内存 耗尽；
  *    但可能引发内存溢出到远端节点，而本地 DMA 区域中仍有可用内存

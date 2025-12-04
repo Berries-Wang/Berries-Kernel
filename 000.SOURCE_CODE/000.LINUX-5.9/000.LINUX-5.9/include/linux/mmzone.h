@@ -678,14 +678,14 @@ static inline bool zone_intersects(struct zone *zone,
  * 当CONFIG_NUMA被配置，三个值分别为 0 1 2 , 具体对应关系: ZONELIST_FALLBACK:0  ZONELIST_NOFALLBACK:1 MAX_ZONELISTS:2
  */
 enum {
-	ZONELIST_FALLBACK,	/* zonelist with fallback */
+	ZONELIST_FALLBACK, /* zonelist with fallback */
 #ifdef CONFIG_NUMA
 	/*
 	 * The NUMA zonelists are doubled because we need zonelists that
 	 * restrict the allocations to a single node for __GFP_THISNODE.
          * (在 NUMA 架构中，备用区域列表（zonelists）需要被设计为双份，这是因为我们必须为 __GFP_THISNODE 这种内存分配标志提供严格限定在单个节点内分配的专用区域列表)
 	 */
-	ZONELIST_NOFALLBACK,	/* zonelist without fallback (__GFP_THISNODE) */
+	ZONELIST_NOFALLBACK, /* zonelist without fallback (__GFP_THISNODE) */
 #endif
 	MAX_ZONELISTS
 };
@@ -768,18 +768,21 @@ typedef struct pglist_data {
 	 * node_zones contains just the zones for THIS node. Not all of the
 	 * zones may be populated, but it is the full list. It is referenced by
 	 * this node's node_zonelists as well as other node's node_zonelists.
-         * (node_zones 仅包含当前节点的内存管理区（zone）。尽管并非所有区都一定被实际填充，但它代表完整的区类型列表。
-         *  该结构既会被本节点的 node_zonelists 引用，也可能被其他节点的 node_zonelists 所引用。)
+     * (node_zones 仅包含当前节点的内存管理区（zone）。尽管并非所有区都一定被实际填充，但它代表完整的区类型列表。
+     *  该结构既会被本节点的 node_zonelists 引用，也可能被其他节点的 node_zonelists 所引用。)
 	 */
 	struct zone node_zones[MAX_NR_ZONES];
 
 	/*
 	 * node_zonelists contains references to all zones in all nodes.
 	 * Generally the first zones will be references to this node's
-	 * node_zones.
-         * (在内存节点数据结构pglist_data中有两个zonelist：其中一个是ZONELIST_FALLBACK，指向本地的zone，即包含备选的zone；
-         *   另外一个是ZONELIST_NOFALLBACK，用于NUMA系统，指向远端的内存节点的zone)
-         *    MAX_ZONELISTS: 就定义在当前文件，值为2，为啥是2？
+	 * node_zones.(node_zonelists包含对所有节点中所有内存区域的引用。通常，首个区域将指向本节点的node_zones)
+     * 
+	 * (在内存节点数据结构pglist_data中有两个zonelist： -> '007.BOOKs/Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub'
+	 *   其中一个是ZONELIST_FALLBACK，指向本地的zone，即包含备选的zone；
+     *   另外一个是ZONELIST_NOFALLBACK，用于NUMA系统，指向远端的内存节点的zone)
+	 * 
+	 * > 得参考: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]图4.2　zone类型、_zoneref[]数组和zone_idx之间的关系
 	 */
 	struct zonelist node_zonelists[MAX_ZONELISTS];
 
@@ -940,8 +943,22 @@ int local_memory_node(int node_id);
 static inline int local_memory_node(int node_id) { return node_id; };
 #endif
 
-/*
+/**
  * zone_idx() returns 0 for the ZONE_DMA zone, 1 for the ZONE_NORMAL zone, etc.
+ * 
+ * // 调用方式
+ * static inline int is_highmem(struct zone *zone)
+ * {
+ *   #ifdef CONFIG_HIGHMEM
+ *   	return is_highmem_idx(zone_idx(zone));
+ *   #else
+ *   	return 0;
+ *   #endif
+ * }
+ * 
+ * 这个减操作是啥意思? 哦,懂了
+ * - zone 是数组中的元素, 数组元素地址 - 数组首地址 = 等于索引
+ *    --> 前提: 在 C 语言中，两个同类型指针相减，结果是它们之间相隔的元素个数（而不是字节数）。这里就是 zone 指针与数组首地址之间相隔的 struct zone 元素个数
  */
 #define zone_idx(zone)		((zone) - (zone)->zone_pgdat->node_zones)
 

@@ -27,33 +27,38 @@ struct mm_struct;
  * For VMA related allocations the VMA policy is preferred, otherwise
  * the process policy is used. Interrupts ignore the memory policy
  * of the current process.
+ * (内存策略可与进程关联，也可与虚拟内存区域（VMA）关联。针对VMA相关的内存分配操作时，
+ * 将优先采用VMA策略；否则将使用进程策略。中断处理会忽略当前进程的内存策略。)
  *
- * Locking policy for interleave:
+ * Locking policy for interleave:(交错策略的锁定机制：)
  * In process context there is no locking because only the process accesses
  * its own state. All vma manipulation is somewhat protected by a down_read on
  * mmap_lock.
+ * (在进程上下文中无需加锁，因为只有进程自身能访问其内部状态。所有虚拟内存区域（VMA）操作均通过对mmap_lock的读锁定提供一定程度的保护)
  *
- * Freeing policy:
+ * Freeing policy:(内存策略对象的释放机制)
  * Mempolicy objects are reference counted.  A mempolicy will be freed when
  * mpol_put() decrements the reference count to zero.
+ * (内存策略对象采用引用计数管理。当mpol_put()函数将引用计数递减至零时，内存策略对象将被释放)
  *
- * Duplicating policy objects:
+ * Duplicating policy objects:(内存策略对象的复制机制：)
  * mpol_dup() allocates a new mempolicy and copies the specified mempolicy
  * to the new storage.  The reference count of the new object is initialized
  * to 1, representing the caller of mpol_dup().
+ * (mpol_dup()函数会分配新的内存策略对象，并将指定策略复制到新存储空间。新对象的引用计数被初始化为1，代表调用mpol_dup()的持有者。)
  */
 struct mempolicy {
 	atomic_t refcnt;
-	unsigned short mode; 	/* See MPOL_* above */
-	unsigned short flags;	/* See set_mempolicy() MPOL_F_* above */
+	unsigned short mode; /* See MPOL_* above */
+	unsigned short flags; /* See set_mempolicy() MPOL_F_* above */
 	union {
-		short 		 preferred_node; /* preferred */
-		nodemask_t	 nodes;		/* interleave/bind */
+		short preferred_node; /* preferred */
+		nodemask_t nodes; /* interleave/bind */
 		/* undefined for default */
 	} v;
 	union {
-		nodemask_t cpuset_mems_allowed;	/* relative to these nodes */
-		nodemask_t user_nodemask;	/* nodemask passed by user */
+		nodemask_t cpuset_mems_allowed; /* relative to these nodes */
+		nodemask_t user_nodemask; /* nodemask passed by user */
 	} w;
 };
 

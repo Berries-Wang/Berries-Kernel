@@ -35,6 +35,9 @@
             
             // ....
       } ____cacheline_internodealigned_in_smp;
+
+    // 000.LINUX-5.9/mm/page_alloc.c : zonelists构建函数
+    static void build_zonelists(pg_data_t *pgdat);
 ```
 
 ###### 使用链表数组管理空闲块
