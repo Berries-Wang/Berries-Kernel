@@ -464,11 +464,14 @@ static inline enum zone_type gfp_zone(gfp_t flags)
 	return z;
 }
 
-/*
+/**
  * There is only one page-allocator function, and two main namespaces to
  * it. The alloc_page*() variants return 'struct page *' and as such
  * can allocate highmem pages, the *get*page*() variants return
  * virtual kernel addresses to the allocated page(s).
+ * 页面分配器仅有一个核心函数，但提供两类主要接口。
+ * alloc_page*()系列函数返回struct page *类型，因此能够分配高端内存页面；
+ * 而*get*page*()系列函数则返回已分配页面的虚拟内核地址。
  */
 
 static inline int gfp_zonelist(gfp_t flags)
@@ -485,12 +488,17 @@ static inline int gfp_zonelist(gfp_t flags)
  * This zone list contains a maximum of MAXNODES*MAX_NR_ZONES zones.
  * There are two zonelists per node, one for all zones with memory and
  * one containing just zones from the node the zonelist belongs to.
+ * (我们从当前节点和gfp_mask获取区域列表。该区域列表最多包含MAXNODES*MAX_NR_ZONES个区域。
+ * 每个节点有两个区域列表：一个包含所有具有内存的区域，另一个仅包含该节点所属区域的区域列表) ?
  *
  * For the normal case of non-DISCONTIGMEM systems the NODE_DATA() gets
  * optimized to &contig_page_data at compile-time.
+ * (在非间断内存（非DISCONTIGMEM）系统的常规情况下，
+ * NODE_DATA()会在编译时被优化为&contig_page_data) ?
  */
 static inline struct zonelist *node_zonelist(int nid, gfp_t flags)
 {
+	// 选择zonelist , 选择本地内存还是远端内存
 	return NODE_DATA(nid)->node_zonelists + gfp_zonelist(flags);
 }
 

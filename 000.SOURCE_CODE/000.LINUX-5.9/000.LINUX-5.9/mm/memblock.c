@@ -90,6 +90,10 @@
  * Unless an architecture enables %CONFIG_ARCH_KEEP_MEMBLOCK, the
  * memblock data structures (except "physmem") will be discarded after the
  * system initialization completes.
+ * 
+ * pglist_data数据结构用来描述一个内存节点的所有资源。
+ * 在UMA架构中，只有一个内存节点，即系统有一个全局的变量contig_page_data来描述这个内存节点。
+ * 在NUMA架构中，整个系统的内存由一个pglist_data *的指针数组node_data[ ]来管理，在系统初始化时通过枚举BIOS固件（ACPI）来完成。
  */
 
 #ifndef CONFIG_NEED_MULTIPLE_NODES

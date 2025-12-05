@@ -367,6 +367,14 @@ struct per_cpu_nodestat {
 
 #endif /* !__GENERATING_BOUNDS.H */
 
+/**
+ * [007.BOOKs/Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#3.3.2　内存管理之数据结构
+ * 在Linux操作系统中常见的内存管理区可以分为以下几种:
+ *      ZONE_DMA     ：  用于ISA设备的DMA操作，范围是0～16MB，只适用于Intel x86架构，ARM架构没有这个内存管理区。
+ *      ZONE_DMA32   ：  用于最低4GB的内存访问的设备，如只支持32位的DMA设备。
+ *      ZONE_NORMAL  ：  4GB以后的物理内存，用于线性映射物理内存。若系统内存小于4GB，则没有这个内存管理区。
+ *      ZONE_HIGHMEM ：  用于管理高端内存，这些高端内存是不能线性映射到内核地址空间的。注意，在64位Linux操作系统中没有这个内存管理区
+ */
 enum zone_type {
 /**
 	 * ZONE_DMA and ZONE_DMA32 are used when there are peripherals not able
@@ -411,8 +419,7 @@ enum zone_type {
 	 * Normal addressable memory is in ZONE_NORMAL. DMA operations can be
 	 * performed on pages in ZONE_NORMAL if the DMA devices support
 	 * transfers to all addressable memory.
-	 * (普通可寻址内存位于ZONE_NORMAL区域。如果DMA设备支持对所有可寻址内存进行传输，
-	 *  则可以对ZONE_NORMAL中的页面执行DMA操作。)
+	 * (普通可寻址内存位于ZONE_NORMAL区域。如果DMA设备支持对所有可寻址内存进行传输，则可以对ZONE_NORMAL中的页面执行DMA操作。)
 	 */
 	ZONE_NORMAL,
 #ifdef CONFIG_HIGHMEM
@@ -675,7 +682,12 @@ static inline bool zone_intersects(struct zone *zone,
 
 /**
  * 
- * 当CONFIG_NUMA被配置，三个值分别为 0 1 2 , 具体对应关系: ZONELIST_FALLBACK:0  ZONELIST_NOFALLBACK:1 MAX_ZONELISTS:2
+ * 参考:[007.BOOKs/Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#2．prepare_alloc_pages()函数
+ * 
+ * 当CONFIG_NUMA被配置，三个值分别为 0 1 2 , 具体对应关系: 
+ *     ZONELIST_FALLBACK:0    -- 本地内存
+ *     ZONELIST_NOFALLBACK:1  -- 远端内存
+ *     MAX_ZONELISTS:2    -- 元素个数
  */
 enum {
 	ZONELIST_FALLBACK, /* zonelist with fallback */
@@ -782,7 +794,10 @@ typedef struct pglist_data {
 	 *   其中一个是ZONELIST_FALLBACK，指向本地的zone，即包含备选的zone；
      *   另外一个是ZONELIST_NOFALLBACK，用于NUMA系统，指向远端的内存节点的zone)
 	 * 
-	 * > 得参考: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]图4.2　zone类型、_zoneref[]数组和zone_idx之间的关系
+	 * > 得参考: 
+	 *    [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]图4.2　zone类型、_zoneref[]数组和zone_idx之间的关系
+	 *    [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#2．prepare_alloc_pages()函数
+	 * 
 	 */
 	struct zonelist node_zonelists[MAX_ZONELISTS];
 
@@ -956,9 +971,15 @@ static inline int local_memory_node(int node_id) { return node_id; };
  *   #endif
  * }
  * 
- * 这个减操作是啥意思? 哦,懂了
+ * 这个减操作是啥意思? 哦,懂了  
  * - zone 是数组中的元素, 数组元素地址 - 数组首地址 = 等于索引
  *    --> 前提: 在 C 语言中，两个同类型指针相减，结果是它们之间相隔的元素个数（而不是字节数）。这里就是 zone 指针与数组首地址之间相隔的 struct zone 元素个数
+ * 
+ *  参考：
+ *  - 《C和指针》：P107 #6.13 指针运算   -- 指针减法，仅允许两个指针都指向同一个数组中的元素
+ *  - 《C Primer Plus (第6版) 中文版》： P253 #10.5 指针操作
+ * 
+ * 
  */
 #define zone_idx(zone)		((zone) - (zone)->zone_pgdat->node_zones)
 

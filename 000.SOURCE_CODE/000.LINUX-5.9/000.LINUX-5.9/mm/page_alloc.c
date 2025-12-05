@@ -3811,6 +3811,10 @@ static bool zone_allows_reclaim(struct zone *local_zone, struct zone *zone)
  * are worse than fragmentation. If the next zone is ZONE_DMA then it is
  * probably too small. It only makes sense to spread allocations to avoid
  * fragmentation between the Normal and DMA32 zones.
+ * (关于将ZONE_DMA32作为避免内存碎片化的合适区域这一限制，需要细致考量。
+ * 若首选区域为HIGHMEM，则过早使用较低区域可能导致比内存碎片更严重的低内存压力问题。
+ * 若下一可用区域是ZONE_DMA，则其容量可能过小。
+ * 因此，仅在Normal与DMA32区域之间分散内存分配以规避碎片化才具有实际意义)
  */
 static inline unsigned int
 alloc_flags_nofragment(struct zone *zone, gfp_t gfp_mask)
@@ -4969,17 +4973,22 @@ got_pg:
 
 /**
  *
- * 
+ * 初始化页面分配参数
  */
 static inline bool prepare_alloc_pages(gfp_t gfp_mask, unsigned int order,
-		int preferred_nid, nodemask_t *nodemask,
-		struct alloc_context *ac, gfp_t *alloc_mask,
-		unsigned int *alloc_flags)
+				       int preferred_nid, nodemask_t *nodemask,
+				       struct alloc_context *ac,
+				       gfp_t *alloc_mask,
+				       unsigned int *alloc_flags)
 {
 	// 选择从zone的哪个区域分配? 待调试
 	ac->highest_zoneidx = gfp_zone(gfp_mask);
+
+	// 选择本地内存还是远端内存?
 	ac->zonelist = node_zonelist(preferred_nid, gfp_mask);
+
 	ac->nodemask = nodemask;
+
 	// 根据掩码计算内存的迁移类型
 	ac->migratetype = gfp_migratetype(gfp_mask);
 
@@ -4989,10 +4998,11 @@ static inline bool prepare_alloc_pages(gfp_t gfp_mask, unsigned int order,
 		 * When we are in the interrupt context, it is irrelevant
 		 * to the current task context. It means that any node ok.
 		 */
-		if (!in_interrupt() && !ac->nodemask)
+		if (!in_interrupt() && !ac->nodemask) {
 			ac->nodemask = &cpuset_current_mems_allowed;
-		else
+		} else {
 			*alloc_flags |= ALLOC_CPUSET;
+		}
 	}
 
 	fs_reclaim_acquire(gfp_mask);
@@ -5014,7 +5024,11 @@ static inline bool prepare_alloc_pages(gfp_t gfp_mask, unsigned int order,
 	return true;
 }
 
-/* Determine whether to spread dirty pages and what the first usable zone */
+/** 
+ * Determine whether to spread dirty pages and what the first usable zone 
+ * (确定是否分散脏页以及首个可用区域)
+ * -> 分散脏页： “分散脏页”指的是将脏页（dirty pages） 的写回操作分散到多个存储设备或存储区域上，以平衡I/O负载、避免热点，并提升系统整体性能??
+ * */
 static inline void finalise_ac(gfp_t gfp_mask, struct alloc_context *ac)
 {
 	/* Dirty zone balancing only done in the fast path */
@@ -5025,8 +5039,8 @@ static inline void finalise_ac(gfp_t gfp_mask, struct alloc_context *ac)
 	 * also used as the starting point for the zonelist iterator. It
 	 * may get reset for allocations that ignore memory policies.
 	 */
-	ac->preferred_zoneref = first_zones_zonelist(ac->zonelist,
-					ac->highest_zoneidx, ac->nodemask);
+	ac->preferred_zoneref = first_zones_zonelist(
+		ac->zonelist, ac->highest_zoneidx, ac->nodemask);
 }
 
 /**
@@ -5072,7 +5086,8 @@ __alloc_pages_nodemask(gfp_t gfp_mask, unsigned int order, int preferred_nid,
 	/*
 	 * Forbid the first pass from falling back to types that fragment
 	 * memory until all local zones are considered.
-         * alloc_flags_nofragment 为内存碎片化做了一个优化:
+	 * (禁止内存分配的第一轮回退过程选择可能导致内存碎片化的类型，直至所有本地内存区域均被考量完毕???)
+     * alloc_flags_nofragment 为内存碎片化做了一个优化:
 	 */
 	alloc_flags |= alloc_flags_nofragment(ac.preferred_zoneref->zone, gfp_mask);
 
