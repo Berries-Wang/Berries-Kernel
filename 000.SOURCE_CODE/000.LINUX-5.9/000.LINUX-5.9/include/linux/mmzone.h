@@ -374,6 +374,12 @@ struct per_cpu_nodestat {
  *      ZONE_DMA32   ：  用于最低4GB的内存访问的设备，如只支持32位的DMA设备。
  *      ZONE_NORMAL  ：  4GB以后的物理内存，用于线性映射物理内存。若系统内存小于4GB，则没有这个内存管理区。
  *      ZONE_HIGHMEM ：  用于管理高端内存，这些高端内存是不能线性映射到内核地址空间的。注意，在64位Linux操作系统中没有这个内存管理区
+ * - https://docs.kernel.org/translations/zh_CN/mm/physical_memory.html
+ * - https://docs.kernel.org/mm/physical_memory.html
+ * 
+ * 实际上存在硬件制约：一些页框由于自身的物理地址的原因不能被一些任务所使用，例如
+*       ISA总线的DMA控制器只能对ram的前16M寻址
+*       在一些具有大容量ram的32位计算机中，CPU不能直接访问所有的物理存储器，因为线性地址空间不够
  */
 enum zone_type {
 /**
@@ -774,6 +780,22 @@ struct deferred_split {
  * 
  * 在内存节点数据结构pglist_data中有两个zonelist：其中一个是ZONELIST_FALLBACK，指向本地的zone，即包含备选的zone；
  *   另外一个是ZONELIST_NOFALLBACK，用于NUMA系统，指向远端的内存节点的zone。
+ * -------------------------------------------------------------------------
+ *   struct pglist_data
+ *     |-- node_zones     ： struct zone node_zones[MAX_NR_ZONES];
+ *     |
+ *     |-- node_zonelists ： struct zonelist node_zonelists[MAX_ZONELISTS]; 本地内存/远端内存
+ *     
+ *   struct zonelist node_zonelists[MAX_ZONELISTS]; 
+ *     |
+ *     |-- struct zoneref _zonerefs[MAX_ZONES_PER_ZONELIST + 1]; // 这里就是按照zone_type(就在此文件中)划分了,参考: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]图4.2　zone类型、_zoneref[]数组和zone_idx之间的关系
+ *     
+ *     
+ *   struct zoneref
+ *     |
+ *     |-- struct zone *zone;
+ *     |-- int zone_idx;	
+ * ---------------------------------------------------------------------------
  */
 typedef struct pglist_data {
 	/*
