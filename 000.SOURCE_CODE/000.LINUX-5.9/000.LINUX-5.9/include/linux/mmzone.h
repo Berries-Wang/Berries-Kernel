@@ -479,6 +479,17 @@ struct zone {
 	int node;
 #endif
 	struct pglist_data	*zone_pgdat;
+	/**
+	 * pagesets：表示每个CPU内存分配器中每个CPU缓存的页面信息。
+	 * 
+	 * /proc/zoneinfo
+	 * 
+	 * [007.BOOKs/Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#4.1.6　rmqueue()函数
+	 * per_cpu_pages是一个Per-CPU变量，即每个CPU都有一个本地的per_cpu_pages变量。
+	 * 这个per_cpu_pages数据结构里有一个单页面的链表，里面暂时存放了一小部分单个的物理页面。
+	 * 当系统需要单个物理页面时，就从本地CPU的Per-CPU变量的链表中直接获取物理页面即可，
+	 * 这不仅效率非常高，而且能减少对zone中相关锁的操作。每一个zone里面有一个这样的Per-CPU变量
+	 */
 	struct per_cpu_pageset __percpu *pageset;
 
 #ifndef CONFIG_SPARSEMEM
@@ -489,7 +500,10 @@ struct zone {
 	unsigned long		*pageblock_flags;
 #endif /* CONFIG_SPARSEMEM */
 
-	/* zone_start_pfn == zone_start_paddr >> PAGE_SHIFT */
+	/** 
+	 * zone_start_pfn == zone_start_paddr >> PAGE_SHIFT 
+	 * 
+	 * */
 	unsigned long		zone_start_pfn;
 
 	/*
@@ -705,7 +719,7 @@ enum {
 	 */
 	ZONELIST_NOFALLBACK, /* zonelist without fallback (__GFP_THISNODE) */
 #endif
-	MAX_ZONELISTS
+	MAX_ZONELISTS /*C语言技巧:动态枚举个数*/
 };
 
 /**
@@ -748,7 +762,7 @@ struct zoneref {
  *    ZONE_DMA32:   _zonerefs[1]->zone_idx=0
  */
 struct zonelist {
-	struct zoneref _zonerefs[MAX_ZONES_PER_ZONELIST + 1];
+	struct zoneref _zonerefs[MAX_ZONES_PER_ZONELIST + 1];  // 按照 zone_type(include/linux/mmzone.h)组织
 };
 
 #ifndef CONFIG_DISCONTIGMEM

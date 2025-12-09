@@ -146,10 +146,13 @@ struct alloc_context {
 	 * the allocation request. Due to the nature of the zone,
 	 * memory on lower zone than the highest_zoneidx will be
 	 * protected by lowmem_reserve[highest_zoneidx].
+	 * (highest_zoneidx 代表分配请求的最高可用区域索引。基于内存区域的分层特性，
+	 * 低于 highest_zoneidx 的区域中的内存将受到 lowmem_reserve[highest_zoneidx] 的保护) ?
 	 *
 	 * highest_zoneidx is also used by reclaim/compaction to limit
 	 * the target zone since higher zone than this index cannot be
 	 * usable for this allocation request.
+	 * (在回收/压缩过程中，highest_zoneidx 也用于限制目标区域，因为比该索引更高的区域无法用于此次分配请求)
 	 */
 	enum zone_type highest_zoneidx;                              // high_zoneidx分配掩码计算zone的zoneidx，表示这个分配掩码允许内存分配的最高zone
 	bool spread_dirty_pages;                                     // spread_dirty_pages用于指定是否传播脏页。
@@ -570,16 +573,16 @@ unsigned int reclaim_clean_pages_from_list(struct zone *zone,
 #define ALLOC_OOM		ALLOC_NO_WATERMARKS
 #endif
 
-#define ALLOC_HARDER		 0x10 /* try to alloc harder */
-#define ALLOC_HIGH		 0x20 /* __GFP_HIGH set */
-#define ALLOC_CPUSET		 0x40 /* check for correct cpuset */
-#define ALLOC_CMA		 0x80 /* allow allocations from CMA areas */
+#define ALLOC_HARDER		 0x10     /* try to alloc harder */
+#define ALLOC_HIGH		     0x20     /* __GFP_HIGH set */
+#define ALLOC_CPUSET		 0x40     /* check for correct cpuset */
+#define ALLOC_CMA		     0x80     /* allow allocations from CMA areas */
 #ifdef CONFIG_ZONE_DMA32
-#define ALLOC_NOFRAGMENT	0x100 /* avoid mixing pageblock types */
+#define ALLOC_NOFRAGMENT	 0x100    /* avoid mixing pageblock types(避免混合页块类型)  ; fragment:碎片*/
 #else
-#define ALLOC_NOFRAGMENT	  0x0
+#define ALLOC_NOFRAGMENT	 0x0
 #endif
-#define ALLOC_KSWAPD		0x800 /* allow waking of kswapd, __GFP_KSWAPD_RECLAIM set */
+#define ALLOC_KSWAPD		 0x800     /* allow waking of kswapd, __GFP_KSWAPD_RECLAIM set */
 
 enum ttu_flags;
 struct tlbflush_unmap_batch;

@@ -3402,17 +3402,16 @@ static inline void zone_statistics(struct zone *preferred_zone, struct zone *z)
 
 /* Remove page from the per-cpu list, caller must protect the list */
 static struct page *__rmqueue_pcplist(struct zone *zone, int migratetype,
-			unsigned int alloc_flags,
-			struct per_cpu_pages *pcp,
-			struct list_head *list)
+				      unsigned int alloc_flags,
+				      struct per_cpu_pages *pcp,
+				      struct list_head *list)
 {
 	struct page *page;
 
 	do {
 		if (list_empty(list)) {
-			pcp->count += rmqueue_bulk(zone, 0,
-					pcp->batch, list,
-					migratetype, alloc_flags);
+			pcp->count += rmqueue_bulk(zone, 0, pcp->batch, list,
+						   migratetype, alloc_flags);
 			if (unlikely(list_empty(list)))
 				return NULL;
 		}
@@ -3887,17 +3886,26 @@ retry:
 	 * ALLOC_NOFRAGMENT: 表示需要避免内存碎片化。
 	 */
 	no_fallback = alloc_flags & ALLOC_NOFRAGMENT;
-	// preferred_zoneref表示zonelist中首选和推荐的zone，这个值是在finalise_ac()函数中通过first_zones_zonelist()宏计算出来的
+	
+	/**
+	 * preferred_zoneref表示zonelist中首选和推荐的zone，这个值是在finalise_ac()函数中通过first_zones_zonelist()宏计算出来的
+	 * 
+	 * zone_type中的某个
+	 */
 	z = ac->preferred_zoneref;
-	// 从推荐的zone开始遍历所有的zone，这里使用for_next_zone_zonelist_nodemask()宏
+	
+	/**
+	 * 从推荐的zone开始遍历所有的zone，这里使用for_next_zone_zonelist_nodemask()宏
+	 * 
+	 * 按zone_type遍历?
+	 */
 	for_next_zone_zonelist_nodemask(zone, z, ac->zonelist, ac->highest_zoneidx, ac->nodemask) {
 		struct page *page;
 		unsigned long mark;
 
-		if (cpusets_enabled() &&
-			(alloc_flags & ALLOC_CPUSET) &&
-			!__cpuset_zone_allowed(zone, gfp_mask))
-				continue;
+		if (cpusets_enabled() && (alloc_flags & ALLOC_CPUSET) &&
+		    !__cpuset_zone_allowed(zone, gfp_mask))
+			continue;
 		/**
 		 * When allocating a page cache page for writing, we
 		 * want to get it from a node that is within its dirty
@@ -4981,7 +4989,7 @@ static inline bool prepare_alloc_pages(gfp_t gfp_mask, unsigned int order,
 				       gfp_t *alloc_mask,
 				       unsigned int *alloc_flags)
 {
-	// 选择从zone的哪个区域分配? 待调试
+	// 选择从zone的哪个区域分配? 待调试!!!
 	ac->highest_zoneidx = gfp_zone(gfp_mask);
 
 	// 选择本地内存还是远端内存?
@@ -5035,9 +5043,13 @@ static inline void finalise_ac(gfp_t gfp_mask, struct alloc_context *ac)
 	ac->spread_dirty_pages = (gfp_mask & __GFP_WRITE);
 
 	/*
-	 * The preferred zone is used for statistics but crucially it is
+	 * The preferred zone is used for statistics but crucially(关键的) it is
 	 * also used as the starting point for the zonelist iterator. It
 	 * may get reset for allocations that ignore memory policies.
+	 * (首选区域（preferred zone）用于统计目的，但关键在于，
+	 * 它同时也作为区域列表迭代器（zonelist iterator）的起始点。
+	 * 对于忽略内存策略的分配请求，该区域可能会被重置)
+	 * 
 	 */
 	ac->preferred_zoneref = first_zones_zonelist(
 		ac->zonelist, ac->highest_zoneidx, ac->nodemask);
@@ -5080,7 +5092,7 @@ __alloc_pages_nodemask(gfp_t gfp_mask, unsigned int order, int preferred_nid,
 		return NULL;
 	}
 
-	// finalise_ac 主要用于确定首选的zone
+	// finalise_ac 主要用于确定首选的zone,和prepare_alloc_pages选择zonelist不一样
 	finalise_ac(gfp_mask, &ac);
 
 	/*
@@ -5095,8 +5107,13 @@ __alloc_pages_nodemask(gfp_t gfp_mask, unsigned int order, int preferred_nid,
      * get_page_from_freelist 尝试从伙伴系统的空闲列表中分配内存。
      */
 	page = get_page_from_freelist(alloc_mask, order, alloc_flags, &ac);
-	if (likely(page))
+	/**
+	 * # define likely(x)	__builtin_expect(!!(x), 1) 分支预测
+	 *   --> 000.LINUX-5.9/include/linux/compiler.h
+	 */
+	if (likely(page)) {
 		goto out;
+	}
 
 	/*
 	 * Apply scoped allocation constraints. This is mainly about GFP_NOFS

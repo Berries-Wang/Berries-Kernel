@@ -64,29 +64,37 @@ struct vm_area_struct;
 /**
  * DOC: Page mobility and placement hints
  *
- * Page mobility and placement hints
+ * Page mobility and placement hints (页面可迁移性与放置提示)
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * These flags provide hints about how mobile the page is. Pages with similar
  * mobility are placed within the same pageblocks to minimise problems due
  * to external fragmentation.
+ * (这些标志提供了关于页面移动性的提示。具有相似移动性的页面会被放置在相同的页面块中，以尽量减少外部碎片导致的问题)
  *
  * %__GFP_MOVABLE (also a zone modifier) indicates that the page can be
  * moved by page migration during memory compaction or can be reclaimed.
+ * (__GFP_MOVABLE（同样是一个区域修饰符）表示该页面可以在内存规整期间通过页迁移被移动，或者可以被回收)
  *
  * %__GFP_RECLAIMABLE is used for slab allocations that specify
  * SLAB_RECLAIM_ACCOUNT and whose pages can be freed via shrinkers.
+ * (__GFP_RECLAIMABLE 用于指定了 SLAB_RECLAIM_ACCOUNT 且其页面可通过收缩器释放的 slab 分配)
  *
  * %__GFP_WRITE indicates the caller intends to dirty the page. Where possible,
  * these pages will be spread between local zones to avoid all the dirty
  * pages being in one zone (fair zone allocation policy).
+ * (这表明调用者打算弄脏该页。在可能的情况下，这些页面将被分散到不同的本地内存区域，
+ * 以防止所有脏页集中在单一区域（即公平区域分配策略）)
  *
  * %__GFP_HARDWALL enforces the cpuset memory allocation policy.
+ * (强制执行cpuset内存分配策略)
  *
  * %__GFP_THISNODE forces the allocation to be satisfied from the requested
  * node with no fallbacks or placement policy enforcements.
+ * (强制要求分配必须由指定节点完成，既不启用备用方案，也不执行任何放置策略)
  *
  * %__GFP_ACCOUNT causes the allocation to be accounted to kmemcg.
+ * (使得该分配由kmemcg进行记账)
  */
 #define __GFP_RECLAIMABLE ((__force gfp_t)___GFP_RECLAIMABLE)
 #define __GFP_WRITE	((__force gfp_t)___GFP_WRITE)
@@ -472,8 +480,9 @@ static inline enum zone_type gfp_zone(gfp_t flags)
  * 页面分配器仅有一个核心函数，但提供两类主要接口。
  * alloc_page*()系列函数返回struct page *类型，因此能够分配高端内存页面；
  * 而*get*page*()系列函数则返回已分配页面的虚拟内核地址。
+ * 
+ * 优先从本地内存分配
  */
-
 static inline int gfp_zonelist(gfp_t flags)
 {
 #ifdef CONFIG_NUMA
