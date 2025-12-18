@@ -116,8 +116,9 @@ static struct kmem_cache *sn_cache;
    policied. */
 enum zone_type policy_zone = 0;
 
-/*
+/**
  * run-time system-wide default policy => local allocation
+ * (运行时全系统默认策略 => 本地分配)
  */
 static struct mempolicy default_policy = {
 	.refcnt = ATOMIC_INIT(1), /* never free it */
@@ -2261,6 +2262,8 @@ EXPORT_SYMBOL(alloc_pages_vma);
  *	Allocate a page from the kernel page pool.  When not in
  *	interrupt context and apply the current process NUMA policy.
  *	Returns NULL when no page can be allocated.
+ * (从内核页池中分配一个物理页。该操作不在中断上下文中执行，
+ * 并应用当前进程的 NUMA 策略。若无法分配到页面，则返回 NULL。)
  */
 struct page *alloc_pages_current(gfp_t gfp, unsigned order)
 {
@@ -2268,8 +2271,9 @@ struct page *alloc_pages_current(gfp_t gfp, unsigned order)
 	struct mempolicy *pol = &default_policy;
 	struct page *page;
 
-	if (!in_interrupt() && !(gfp & __GFP_THISNODE)){
-		pol = get_task_policy(current);}
+	if (!in_interrupt() && !(gfp & __GFP_THISNODE)) {
+		pol = get_task_policy(current);
+	}
 
 	/*
 	 * No reference counting needed for current->mempolicy

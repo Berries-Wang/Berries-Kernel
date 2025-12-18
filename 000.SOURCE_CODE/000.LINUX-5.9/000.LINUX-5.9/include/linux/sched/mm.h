@@ -171,8 +171,25 @@ static inline bool in_vfork(struct task_struct *tsk)
 	return ret;
 }
 
-/*
+/**
+ * 根据当前进程的上下文状态，动态地“修饰”或“过滤”内存分配标志（GFP flags）。
+ *   该函数检查当前进程（current）的标志位，如果进程正处于“禁止 I/O”或“禁止文件系统操作”的特定作用域内，它会自动从传入的 flags 中剔除 __GFP_IO 或 __GFP_FS。
+ *  ---> 解决死锁问题
+ * 
+ * <pre>
+ * PF_MEMALLOC_NOIO 逻辑: 如果进程设置了“禁止 I/O”标志，代码会执行 flags &= ~(__GFP_IO | __GFP_FS)。
+ *     含义：如果不能做 I/O，那么自然也就不能做文件系统操作（因为 FS 依赖 I/O）。所以它同时关闭这两个权限。
+ * 
+ * PF_MEMALLOC_NOFS 逻辑: 如果只设置了“禁止文件系统”标志，则仅执行 flags &= ~__GFP_FS。
+ *     含义：允许进行磁盘 I/O，但不允许进入文件系统层（防止递归调用导致文件系统锁死锁）。
+ * 
+ * > 来自 gemini
+ * 场景举例： 想象一个文件系统正在写入数据到磁盘，此时它已经持有了一个文件系统的锁。如果此时它需要分配内存，而内存恰好不足，内核可能会尝试通过“回收（Reclaim）”来释放内存。
+ *    如果没有这个函数：回收过程可能会再次调用文件系统代码来清理缓存，这会导致它再次尝试获取同一个锁。结果：系统死锁。
+ *    有了这个函数：文件系统在开始操作前会标记自己处于 NOFS 状态。此时，即便深层嵌套的函数请求了 GFP_KERNEL（包含 FS 权限），current_gfp_context 也会自动把 FS 权限关掉，从而避开死锁路径。
+ * </pre>
  * Applies per-task gfp context to the given allocation flags.
+ * (将特定于任务（Per-task）的 GFP 上下文应用于给定的分配标志)
  * PF_MEMALLOC_NOIO implies GFP_NOIO
  * PF_MEMALLOC_NOFS implies GFP_NOFS
  */

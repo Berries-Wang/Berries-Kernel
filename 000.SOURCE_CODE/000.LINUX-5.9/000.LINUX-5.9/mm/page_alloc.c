@@ -5115,11 +5115,13 @@ __alloc_pages_nodemask(gfp_t gfp_mask, unsigned int order, int preferred_nid,
 		goto out;
 	}
 
-	/*
+	/**
 	 * Apply scoped allocation constraints. This is mainly about GFP_NOFS
 	 * resp. GFP_NOIO which has to be inherited for all allocation requests
 	 * from a particular context which has been marked by
 	 * memalloc_no{fs,io}_{save,restore}.
+	 * (应用作用域分配约束。这主要涉及 GFP_NOFS 或 GFP_NOIO 标志，这些标志必须被特定上下文中的所有分配请求继承。
+	 * 该上下文通常由 memalloc_no{fs,io}_{save,restore} 函数对进行标记。)
 	 */
 	alloc_mask = current_gfp_context(gfp_mask);
 	ac.spread_dirty_pages = false;
