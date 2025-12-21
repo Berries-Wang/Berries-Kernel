@@ -3483,10 +3483,8 @@ static inline struct page *rmqueue(struct zone *preferred_zone,
 		 * MIGRATE_MOVABLE pcplist could have the pages on CMA area and
 		 * we need to skip it when CMA area isn't allowed.
 		 */
-		if (!IS_ENABLED(CONFIG_CMA) || alloc_flags & ALLOC_CMA ||
-				migratetype != MIGRATE_MOVABLE) {
-			page = rmqueue_pcplist(preferred_zone, zone, gfp_flags,
-					migratetype, alloc_flags);
+		if (!IS_ENABLED(CONFIG_CMA) || alloc_flags & ALLOC_CMA || migratetype != MIGRATE_MOVABLE) {
+			page = rmqueue_pcplist(preferred_zone, zone, gfp_flags, migratetype, alloc_flags);
 			goto out;
 		}
 	}
@@ -3868,10 +3866,13 @@ static inline unsigned int current_alloc_flags(gfp_t gfp_mask,
  * > 从伙伴系统的空闲页面链表中尝试分配物理页面
  * 
  * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#4.1.4　get_page_from_freelist()函数
+ * -> [get_page_from_freelist()函数的主要作用是从伙伴系统的空闲页面链表中尝试分配物理页]
+ * 
+ * # 先了解一下数据结构: [001.UNIX-DOCS/000.内存管理/005.内存分配/006.内核内存管理数据结构.md]
  */
-static struct page *
-get_page_from_freelist(gfp_t gfp_mask, unsigned int order, int alloc_flags,
-						const struct alloc_context *ac)
+static struct page *get_page_from_freelist(gfp_t gfp_mask, unsigned int order,
+					   int alloc_flags,
+					   const struct alloc_context *ac)
 {
 	struct zoneref *z;
 	struct zone *zone;
@@ -3915,7 +3916,14 @@ retry:
 		 * lowmem reserves and high watermark so that kswapd
 		 * should be able to balance it without having to
 		 * write pages from its LRU list.
+		 * (在分配用于写入的页面缓存页（Page Cache Page）时，
+		 * 我们希望从一个处于其脏页限制（Dirty Limit）之内的节点获取内存，
+		 * 从而确保没有任何一个单一节点持有的脏页比例超过全局允许的份额。
+		 * 该脏页限制考虑了节点的低端内存预留（Lowmem Reserves）和高水位线（High Watermark），
+		 * 以便 kswapd 进程能够平衡节点内存，而无需从其 LRU（最近最少使用）列表中强制写回页面。)
 		 *
+		 * ===> 都不是很理解!!!
+		 * 
 		 * XXX: For now, allow allocations to potentially
 		 * exceed the per-node dirty limit in the slowpath
 		 * (spread_dirty_pages unset) before going into reclaim,
@@ -3924,6 +3932,9 @@ retry:
 		 * global limit.  The proper fix for these situations
 		 * will require awareness of nodes in the
 		 * dirty-throttling and the flusher threads.
+		 * (目前，在进入内存回收（Reclaim）之前，允许慢速路径（Slowpath，即 spread_dirty_pages 未设置时）中的分配操作潜在地超过单节点脏页限制。
+		 * 这在 NUMA 配置中至关重要，因为有时所有允许使用的节点加在一起，其容量也不足以达到全局脏页限制。
+		 * 要彻底解决这类情况，需要使脏页节流（Dirty-throttling）机制和**刷新线程（Flusher threads）**能够感知到节点（Node）的存在。)
 		 */
 		if (ac->spread_dirty_pages) {
 			if (last_pgdat_dirty_limit == zone->zone_pgdat)
@@ -3988,7 +3999,7 @@ retry:
 			    !zone_allows_reclaim(ac->preferred_zoneref->zone, zone))
 				continue;
 
-			ret = node_reclaim(zone->zone_pgdat, gfp_mask, order); // 调用node_reclaim()函数尝试回收一部分内存
+			ret = node_reclaim(zone->zone_pgdat, gfp_mask, order); // 调用node_reclaim()函数尝试回收一部分内存,跳转到哪个函数?
 			switch (ret) {
 			case NODE_RECLAIM_NOSCAN:
 				/* did not scan */
