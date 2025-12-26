@@ -120,6 +120,11 @@ struct free_area {
 	unsigned long		nr_free;
 };
 
+/**
+ * 这里还是得根据 staruct zone {struct free_area free_area[MAX_ORDER]}
+ * 即 [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图3.12　伙伴系统的空闲页块的管理 来理解
+ * 
+ */
 static inline struct page *get_page_from_free_area(struct free_area *area,
 					    int migratetype)
 {

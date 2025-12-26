@@ -200,8 +200,18 @@ static inline int get_pcppage_migratetype(struct page *page)
 	return page->index;
 }
 
+/**
+ * 将 page->index 复用为迁移类型,
+ * 
+ * 当 CPU 释放一个页面到 PCP 缓存时，
+ * 内核必须知道这个页是“可移动”还是“不可移动”的。
+ * 这样，当另一个进程请求特定类型的内存时，
+ * 内核可以直接从 PCP 中弹出正确的页面，
+ * 而无需去全局的伙伴系统（Buddy System）里寻找
+ */
 static inline void set_pcppage_migratetype(struct page *page, int migratetype)
 {
+	//在页面处于 PCP 链表时，index 记录迁移类型
 	page->index = migratetype;
 }
 
@@ -2188,8 +2198,24 @@ void __init init_cma_reserved_pageblock(struct page *page)
  * by considering the behavior of a buddy system containing a single
  * large block of memory acted on by a series of small allocations.
  * This behavior is a critical factor in sglist merging's success.
+ * (此处的细分顺序对 I/O 子系统至关重要。请不要在没有充分理由和回归测试的情况下更改此顺序。
+ * 具体而言，随着大内存块被拆分，小内存块被交付的顺序取决于它们在该函数中被拆分的顺序。
+ * 根据经验测试，这是影响页面交付给 I/O 子系统顺序的首要因素，
+ * 这一点也可以通过观察伙伴系统在仅含一个大块内存并进行一系列小块分配时的行为得到证实。
+ * 这种行为是散集列表（sglist）合并成功与否的关键因素。)
  *
  * -- nyc
+ * 
+ * 从 struct page *__rmqueue_smallest(struct zone *zone, unsigned int order,
+ *						int migratetype)分析过来
+ * 
+ * 对内存页进行切分: 拆分大块内存
+ * 
+ * @param zone 内存区域，正在从该区域分配内存页
+ * @param page 刚申请到的内存页
+ * @param low  期望的内存页大小,这是幂，即实际内存页大小为 2^low
+ * @param high 当前申请到的 page 的大小，大小为 2^high
+ * @param migratetype 迁移类型
  */
 static inline void expand(struct zone *zone, struct page *page,
 	int low, int high, int migratetype)
@@ -2336,6 +2362,7 @@ static void prep_new_page(struct page *page, unsigned int order, gfp_t gfp_flags
 /*
  * Go through the free lists for the given migratetype and remove
  * the smallest available page from the freelists
+ * (遍历给定迁移类型（migratetype）的空闲链表（free lists），并从这些空闲链表中移除(这里的移除就是分配了)可用的最小页面)
  */
 static __always_inline
 struct page *__rmqueue_smallest(struct zone *zone, unsigned int order,
@@ -2345,14 +2372,27 @@ struct page *__rmqueue_smallest(struct zone *zone, unsigned int order,
 	struct free_area *area;
 	struct page *page;
 
-	/* Find a page of the appropriate size in the preferred list */
+	/** 
+	 * Find a page of the appropriate size in the preferred list 
+	 * (在首选列表中找到适当大小的页面 )
+	 * */
 	for (current_order = order; current_order < MAX_ORDER; ++current_order) {
+		/**
+		 * 查看一下free_area的数据结构,则这里的含义就是:
+		 *   优先选择“合适”大小的
+		 */
 		area = &(zone->free_area[current_order]);
 		page = get_page_from_free_area(area, migratetype);
-		if (!page)
+		if (!page) {
 			continue;
+		}
 		del_page_from_free_list(page, zone, current_order);
+		/**
+		 * 该函数就在本文件中!!!
+		 * 拆分大块内存
+		 */
 		expand(zone, page, order, current_order, migratetype);
+		// 类似于缓存一个属性
 		set_pcppage_migratetype(page, migratetype);
 		return page;
 	}
@@ -2891,7 +2931,7 @@ __rmqueue(struct zone *zone, unsigned int order, int migratetype,
 	}
 #endif
 retry:
-	page = __rmqueue_smallest(zone, order, migratetype);
+	page = __rmqueue_smallest(zone, order, migratetype); // 最小优先,取这个名字还是有道理的--点进去看代码注释
 	if (unlikely(!page)) {
 		if (alloc_flags & ALLOC_CMA)
 			page = __rmqueue_cma_fallback(zone, order);
@@ -3513,9 +3553,10 @@ static inline struct page *rmqueue(struct zone *preferred_zone,
 				trace_mm_page_alloc_zone_locked(page, order,	migratetype);
 			}
 		}
-		// 分配失败，重新分配，这次是怎么分配?
-		if (!page)
+		// 分配失败，重新分配，这次是怎么分配? 当然是点进去看代码注释了
+		if (!page) {
 			page = __rmqueue(zone, order, migratetype, alloc_flags);
+		}
 	} while (page && check_new_pages(page, order));
 
 	spin_unlock(&zone->lock);

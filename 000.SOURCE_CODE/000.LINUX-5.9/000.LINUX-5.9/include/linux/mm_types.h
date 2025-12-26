@@ -99,6 +99,14 @@ struct page {
 			 * 
 			 */
 			struct address_space *mapping;
+			/**
+			 * 看代码:
+			 * static inline void set_pcppage_migratetype(struct page *page, int migratetype)
+             *  {
+             *  	page->index = migratetype;
+             *  }
+			 * 存储的是 migratetype 
+			 */
 			pgoff_t index;		/* Our offset within mapping. */
 			/**
 			 * @private: Mapping-private opaque data.
