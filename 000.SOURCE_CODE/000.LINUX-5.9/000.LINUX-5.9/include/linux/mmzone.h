@@ -869,6 +869,12 @@ typedef struct pglist_data {
 	unsigned long node_spanned_pages; /* total size of physical page
 					     range, including holes */
 	int node_id;
+	/**
+	 * wait_queue_head_t 是内核中的一种基础同步机制。你可以把它想象成一个名单列表，上面挂着正在等待某个特定事件发生的进程
+	 * 本质: 等待队列(Wait Queue)
+	 * 
+	 * 对于 kswapd_wait，名单上通常只有一个常客：该 NUMA 节点对应的 kswapd 线程。
+	 */
 	wait_queue_head_t kswapd_wait;
 	wait_queue_head_t pfmemalloc_wait;
 	struct task_struct *kswapd; 	/* Protected by  mem_hotplug_begin/end() */

@@ -582,7 +582,7 @@ unsigned int reclaim_clean_pages_from_list(struct zone *zone,
 #else
 #define ALLOC_NOFRAGMENT	 0x0
 #endif
-#define ALLOC_KSWAPD		 0x800     /* allow waking of kswapd, __GFP_KSWAPD_RECLAIM set */
+#define ALLOC_KSWAPD		 0x800     /* allow waking of kswapd, __GFP_KSWAPD_RECLAIM set :在尝试分配内存时，如果发现空间不足，请允许唤醒 kswapd 线程去后台回收内存。 */
 
 enum ttu_flags;
 struct tlbflush_unmap_batch;

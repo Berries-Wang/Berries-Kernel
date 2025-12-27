@@ -4553,12 +4553,13 @@ static void wake_all_kswapds(unsigned int order, gfp_t gfp_mask,
 	}
 }
 
-static inline unsigned int
-gfp_to_alloc_flags(gfp_t gfp_mask)
+static inline unsigned int gfp_to_alloc_flags(gfp_t gfp_mask)
 {
 	unsigned int alloc_flags = ALLOC_WMARK_MIN | ALLOC_CPUSET;
 
-	/*
+	/**
+	 * KSWAD? 参考 :[001.UNIX-DOCS/000.内存管理/017.关键词记录/000.kswapd是什么.md]
+	 * 
 	 * __GFP_HIGH is assumed to be the same as ALLOC_HIGH
 	 * and __GFP_KSWAPD_RECLAIM is assumed to be the same as ALLOC_KSWAPD
 	 * to save two branches.
@@ -4566,11 +4567,17 @@ gfp_to_alloc_flags(gfp_t gfp_mask)
 	BUILD_BUG_ON(__GFP_HIGH != (__force gfp_t) ALLOC_HIGH);
 	BUILD_BUG_ON(__GFP_KSWAPD_RECLAIM != (__force gfp_t) ALLOC_KSWAPD);
 
-	/*
+	/**
 	 * The caller may dip into page reserves a bit more if the caller
 	 * cannot run direct reclaim, or if the caller has realtime scheduling
 	 * policy or is asking for __GFP_HIGH memory.  GFP_ATOMIC requests will
 	 * set both ALLOC_HARDER (__GFP_ATOMIC) and ALLOC_HIGH (__GFP_HIGH).
+	 * (“如果调用者无法执行‘直接回收’（Direct Reclaim），或者调用者拥有实时调度策略，亦或是请求标有 __GFP_HIGH 掩码的内存，那么该调用者可以更深入地使用页面预留（Page Reserves）。此外，GFP_ATOMIC 类型的请求会同时设置 ALLOC_HARDER (对应 __GFP_ATOMIC) 和 ALLOC_HIGH (对应 __GFP_HIGH) 标志。”)
+	 * 
+	 *  - Page Reserves（页面预留）： 内核会刻意留出一部分内存（通常在 min 水位线以下），不给普通进程使用，专门留给紧急情况。
+     *  - Direct Reclaim（直接回收）： 当内存不足时，普通进程必须“停下手头的工作”，自己去清理和释放一些内存页。但有些任务（如中断处理）不能停下来等，所以它们无法执行“直接回收”。
+     *  - GFP_ATOMIC： 这是一种内存分配标志，通常用于中断上下文或原子操作。因为这些场景不能睡眠等待，所以内核会给予它们更高的权限去动用那些“预留内存”。
+     *  - ALLOC_HARDER / ALLOC_HIGH： 这是内核内部的权限标志，相当于给这个内存申请开通了“绿色通道”，降低了分配失败的门槛。
 	 */
 	alloc_flags |= (__force int)
 		(gfp_mask & (__GFP_HIGH | __GFP_KSWAPD_RECLAIM));
@@ -4587,8 +4594,9 @@ gfp_to_alloc_flags(gfp_t gfp_mask)
 		 * comment for __cpuset_node_allowed().
 		 */
 		alloc_flags &= ~ALLOC_CPUSET;
-	} else if (unlikely(rt_task(current)) && !in_interrupt())
+	} else if (unlikely(rt_task(current)) && !in_interrupt()) {
 		alloc_flags |= ALLOC_HARDER;
+	}
 
 	alloc_flags = current_alloc_flags(gfp_mask, alloc_flags);
 
@@ -4801,10 +4809,14 @@ retry_cpuset:
 	compact_priority = DEF_COMPACT_PRIORITY;
 	cpuset_mems_cookie = read_mems_allowed_begin();
 
-	/*
+	/**
 	 * The fast path uses conservative alloc_flags to succeed only until
 	 * kswapd needs to be woken up, and to avoid the cost of setting up
 	 * alloc_flags precisely. So we do that now.
+	 * (快速路径使用保守的alloc_flags，直到需要唤醒kswapd时才成功，并避免精确设置alloc_flags的开销。我们现在就这么做。)
+	 * 
+	 * kswapd: Kernel Swap Daemon（内核交换守护进程）
+	 * >> 参考:[001.UNIX-DOCS/000.内存管理/017.关键词记录/000.kswapd是什么.md]
 	 */
 	alloc_flags = gfp_to_alloc_flags(gfp_mask);
 
@@ -4816,37 +4828,50 @@ retry_cpuset:
 	 */
 	ac->preferred_zoneref = first_zones_zonelist(ac->zonelist,
 					ac->highest_zoneidx, ac->nodemask);
-	if (!ac->preferred_zoneref->zone)
+	if (!ac->preferred_zoneref->zone) {
 		goto nopage;
+	}
 
-	if (alloc_flags & ALLOC_KSWAPD)
+	// 唤醒kswapd进程
+	if (alloc_flags & ALLOC_KSWAPD) {
 		wake_all_kswapds(order, gfp_mask, ac);
+	}
 
 	/*
 	 * The adjusted alloc_flags might result in immediate success, so try
 	 * that first
 	 */
 	page = get_page_from_freelist(gfp_mask, order, alloc_flags, ac);
-	if (page)
+	if (page) {
 		goto got_pg;
+	}
 
-	/*
+	/**
 	 * For costly allocations, try direct compaction first, as it's likely
 	 * that we have enough base pages and don't need to reclaim. For non-
 	 * movable high-order allocations, do that as well, as compaction will
 	 * try prevent permanent fragmentation by migrating from blocks of the
 	 * same migratetype.
+	 * (对于代价较高的分配（Costly allocations），应首先尝试‘直接规整’（Direct Compaction），因为此时很可能拥有足够的底层基础页，而无需进行内存回收。
+	 * 对于不可移动的高阶分配，也应采取此操作，因为规整机制会尝试通过在相同迁移类型（Migratetype）的内存块之间进行迁移，来防止产生永久性的碎片)
+	 * 
 	 * Don't try this for allocations that are allowed to ignore
 	 * watermarks, as the ALLOC_NO_WATERMARKS attempt didn't yet happen.
+	 * (但不要对允许忽略水位线的分配请求尝试此操作，因为这类请求尚未进行 ALLOC_NO_WATERMARKS 路径的尝试)
+	 * 
+	 * 高阶内存分配（High-order allocations）**时，如何权衡“内存规整（Compaction）”与“内存回收（Reclaim）”的优先级
+	 * 
+	 * 1. Costly Allocations（代价较高的分配）
+     *    在内核中，costly 通常指 Order > 3 的分配（即一次申请超过 2^3=8 个连续页，共 32KB）。
+     *    策略逻辑： 回收内存（把数据刷到磁盘）的代价非常大。既然只是因为不连续导致分配失败，那么先“挪挪位子”（规整）比“扔掉数据”（回收）要划算得多 -- 能整理，就不要回收
 	 */
-	if (can_direct_reclaim &&
-			(costly_order ||
-			   (order > 0 && ac->migratetype != MIGRATE_MOVABLE))
-			&& !gfp_pfmemalloc_allowed(gfp_mask)) {
+	if (can_direct_reclaim 
+		&& (costly_order ||(order > 0 && ac->migratetype != MIGRATE_MOVABLE)) 
+		&& !gfp_pfmemalloc_allowed(gfp_mask)) {
 		page = __alloc_pages_direct_compact(gfp_mask, order,
-						alloc_flags, ac,
-						INIT_COMPACT_PRIORITY,
-						&compact_result);
+						    alloc_flags, ac,
+						    INIT_COMPACT_PRIORITY,
+						    &compact_result);
 		if (page)
 			goto got_pg;
 
@@ -4861,25 +4886,27 @@ retry_cpuset:
 			 * or is prohibited because it recently failed at this
 			 * order, fail immediately unless the allocator has
 			 * requested compaction and reclaim retry.
+			 * (如果要分配完整的页面块（Pageblock），且由于所有区域（Zones）均低于低水位线（Low watermarks）导致规整（Compaction）失败，或者由于该阶数（Order）最近刚发生过规整失败而被禁止尝试：除非分配器明确要求重试规整与回收，否则应立即判定分配失败。)
 			 *
 			 * Reclaim is
 			 *  - potentially very expensive because zones are far
 			 *    below their low watermarks or this is part of very
-			 *    bursty high order allocations,
+			 *    bursty high order allocations,(由于内存分区（Zones）远低于其低水位线（Low Watermarks），或者这属于高阶内存分配（High Order Allocations）引发的剧烈突发，操作开销可能会变得非常昂贵)
 			 *  - not guaranteed to help because isolate_freepages()
 			 *    may not iterate over freed pages as part of its
-			 *    linear scan, and
+			 *    linear scan, and(这并不保证有效，因为 isolate_freepages() 在进行线性扫描时，可能不会遍历到那些刚刚被释放的页面)
 			 *  - unlikely to make entire pageblocks free on its
-			 *    own.
+			 *    own.(仅凭其自身（的操作），不太可能使整个内存页块（Pageblocks）完全释放。)
 			 */
 			if (compact_result == COMPACT_SKIPPED ||
 			    compact_result == COMPACT_DEFERRED)
 				goto nopage;
 
-			/*
+			/**
 			 * Looks like reclaim/compaction is worth trying, but
 			 * sync compaction could be very expensive, so keep
 			 * using async compaction.
+			 * (看来内存回收与碎片整理（reclaim/compaction）值得一试，但同步碎片整理（sync compaction）的开销可能非常昂贵，因此应继续使用异步碎片整理（async compaction)
 			 */
 			compact_priority = INIT_COMPACT_PRIORITY;
 		}

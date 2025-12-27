@@ -211,6 +211,9 @@ struct vm_area_struct;
 #define __GFP_KSWAPD_RECLAIM	((__force gfp_t)___GFP_KSWAPD_RECLAIM) /* kswapd can wake */
 /**
  * 用于允许或者禁止直接页面回收和kswapd内核线程
+ * 
+ * 	 * kswapd: Kernel Swap Daemon（内核交换守护进程）
+ *	 * >> 参考:[001.UNIX-DOCS/000.内存管理/017.关键词记录/000.kswapd是什么.md]
  */
 #define __GFP_RECLAIM ((__force gfp_t)(___GFP_DIRECT_RECLAIM|___GFP_KSWAPD_RECLAIM))
 #define __GFP_RETRY_MAYFAIL	((__force gfp_t)___GFP_RETRY_MAYFAIL)

@@ -824,6 +824,8 @@ struct task_struct {
 
 	/**
 	 * prio 保存着进程的动态优先级，是调度类考虑的优先级，有些情况下需要暂时提高进程优先级，例如实时互斥量等
+	 * 可用于判断：
+	 *    - 是否是实时进程: [static inline int rt_task(struct task_struct *p);] -- 000.LINUX-5.9/include/linux/sched/rt.h
 	 */
 	int				prio;
 	/**
@@ -1267,7 +1269,11 @@ struct task_struct {
 	int				cpuset_slab_spread_rotor;
 #endif
 #ifdef CONFIG_CGROUPS
-	/* Control Group info protected by css_set_lock: */
+	/** 
+	 * CGroups 相关
+	 * Control Group info protected by css_set_lock:
+	 * 
+	 *  */
 	struct css_set __rcu		*cgroups;
 	/* cg_list protected by css_set_lock and tsk->alloc_lock: */
 	struct list_head		cg_list;
