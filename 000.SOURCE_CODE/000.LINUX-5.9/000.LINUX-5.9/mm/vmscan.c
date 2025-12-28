@@ -3934,12 +3934,18 @@ kswapd_try_sleep:
 	return 0;
 }
 
-/*
+/**
  * A zone is low on free memory or too fragmented for high-order memory.  If
  * kswapd should reclaim (direct reclaim is deferred), wake it up for the zone's
  * pgdat.  It will wake up kcompactd after reclaiming memory.  If kswapd reclaim
  * has failed or is not needed, still wake up kcompactd if only compaction is
  * needed.
+ * (“当一个内存区域（Zone）的空闲内存过低，或者由于碎片化严重而无法满足高阶（High-order）内存分配时：
+ * 如果此时应当由 kswapd 进行回收（即‘直接回收’被推迟执行），则唤醒该区域所属节点（pgdat）的 kswapd 进程。
+ * kswapd 在回收内存后会唤醒 kcompactd。如果 kswapd 的回收尝试失败了，
+ * 或者根本不需要回收，但只要碎片化问题依然存在，仍需唤醒 kcompactd。”)
+ * 
+ * - Deferred direct reclaim（推迟直接回收）： 直接回收会阻塞当前进程，导致性能骤降。内核更倾向于唤醒后台进程（kswapd）去异步处理，让当前进程尽量不要自己动手。
  */
 void wakeup_kswapd(struct zone *zone, gfp_t gfp_flags, int order,
 		   enum zone_type highest_zoneidx)
@@ -3965,24 +3971,39 @@ void wakeup_kswapd(struct zone *zone, gfp_t gfp_flags, int order,
 	if (!waitqueue_active(&pgdat->kswapd_wait))
 		return;
 
-	/* Hopeless node, leave it to direct reclaim if possible */
+	/** 
+	 * Hopeless node, leave it to direct reclaim if possible 
+	 * (该节点已无计可施（无可救药），如果可能的话，将其交给‘直接回收’（Direct Reclaim）来处理)
+	 * */
 	if (pgdat->kswapd_failures >= MAX_RECLAIM_RETRIES ||
 	    (pgdat_balanced(pgdat, order, highest_zoneidx) &&
 	     !pgdat_watermark_boosted(pgdat, highest_zoneidx))) {
-		/*
+		/**
 		 * There may be plenty of free memory available, but it's too
 		 * fragmented for high-order allocations.  Wake up kcompactd
 		 * and rely on compaction_suitable() to determine if it's
 		 * needed.  If it fails, it will defer subsequent attempts to
 		 * ratelimit its work.
+		 * (可能系统仍有大量空闲内存可用，但由于碎片化过于严重，无法满足高阶（High-order）分配的需求。
+		 * 此时应唤醒 kcompactd，并依靠 compaction_suitable() 函数来判断是否确实需要进行规整。
+		 * 如果规整失败，它将推迟后续的尝试，以限制其工作的执行频率（速率限制）)
 		 */
 		if (!(gfp_flags & __GFP_DIRECT_RECLAIM))
 			wakeup_kcompactd(pgdat, order, highest_zoneidx);
 		return;
 	}
 
+	/**
+	 * 核心功能是：在内核决定唤醒 kswapd 守护进程时，向追踪子系统（如 ftrace、eBPF）报告这一事件及其上下文信息。
+	 */
 	trace_mm_vmscan_wakeup_kswapd(pgdat->node_id, highest_zoneidx, order,
 				      gfp_flags);
+	/**
+	 * 具体功能是：唤醒正在等待该内存节点（pgdat）内存回收事件的 kswapd 内核线程。
+	 * 函数定义: #define wake_up_interruptible(x)	__wake_up(x, TASK_INTERRUPTIBLE, 1, NULL): [000.LINUX-5.9/include/linux/wait.h]
+	 * 
+	 * 唤醒 kswapd 线程， (&pgdat->kswapd_wait) 就是 'struct pglist_data ' 对应的kswapd线程
+	 *  */				  
 	wake_up_interruptible(&pgdat->kswapd_wait);
 }
 

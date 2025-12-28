@@ -619,14 +619,16 @@ void __init early_init_fdt_reserve_self(void)
 
 /**
  * of_scan_flat_dt - scan flattened tree blob and call callback on each.
+ * (扫描扁平化的设备树二进制对象，并对每个节点调用回调函数。)
  * @it: callback function
  * @data: context data pointer
  *
  * This function is used to scan the flattened device-tree, it is
  * used to extract the memory information at boot before we can
  * unflatten the tree
+ * (此函数用于扫描扁平设备树，其作用是在我们展开设备树之前，在系统启动时提取内存信息)
  */
-int __init of_scan_flat_dt(int (*it)(unsigned long node,
+__attribute__((optimize("O0"))) int __init of_scan_flat_dt(int (*it)(unsigned long node,
 				     const char *uname, int depth,
 				     void *data),
 			   void *data)
@@ -988,8 +990,11 @@ u64 __init dt_mem_next_cell(int s, const __be32 **cellp)
 
 /**
  * early_init_dt_scan_memory - Look for and parse memory nodes
+ * 
+ * 解析设备树文件，获取内存信息
+ * 
  */
-int __init early_init_dt_scan_memory(unsigned long node, const char *uname,
+__attribute__((optimize("O0"))) int __init early_init_dt_scan_memory(unsigned long node, const char *uname,
 				     int depth, void *data)
 {
 	const char *type = of_get_flat_dt_prop(node, "device_type", NULL);
@@ -1175,7 +1180,7 @@ static void * __init early_init_dt_alloc_memory_arch(u64 size, u64 align)
 	return ptr;
 }
 
-bool __init early_init_dt_verify(void *params)
+__attribute__((optimize("O0"))) bool __init early_init_dt_verify(void *params)
 {
 	if (!params)
 		return false;
@@ -1192,7 +1197,7 @@ bool __init early_init_dt_verify(void *params)
 }
 
 
-void __init early_init_dt_scan_nodes(void)
+__attribute__((optimize("O0"))) void __init early_init_dt_scan_nodes(void)
 {
 	int rc = 0;
 
@@ -1201,14 +1206,19 @@ void __init early_init_dt_scan_nodes(void)
 	if (!rc)
 		pr_warn("No chosen node found, continuing without\n");
 
-	/* Initialize {size,address}-cells info */
+	/** 
+	 * Initialize {size,address}-cells info 
+	 * */
 	of_scan_flat_dt(early_init_dt_scan_root, NULL);
 
-	/* Setup memory, calling early_init_dt_add_memory_arch */
+	/** Setup memory, calling early_init_dt_add_memory_arch
+	 * 
+	 * early_init_dt_scan_memory 是一个函数指针, memblock.memory.regions 会在这里初始化
+	 */
 	of_scan_flat_dt(early_init_dt_scan_memory, NULL);
 }
 
-bool __init early_init_dt_scan(void *params)
+__attribute__((optimize("O0"))) bool __init early_init_dt_scan(void *params)
 {
 	bool status;
 

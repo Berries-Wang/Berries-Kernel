@@ -396,12 +396,16 @@ static inline void drain_zonestat(struct zone *zone,
 			struct per_cpu_pageset *pset) { }
 #endif		/* CONFIG_SMP */
 
+/**
+ * 更新zone中的统计信息
+ */
 static inline void __mod_zone_freepage_state(struct zone *zone, int nr_pages,
 					     int migratetype)
 {
 	__mod_zone_page_state(zone, NR_FREE_PAGES, nr_pages);
-	if (is_migrate_cma(migratetype))
+	if (is_migrate_cma(migratetype)) {
 		__mod_zone_page_state(zone, NR_FREE_CMA_PAGES, nr_pages);
+	}
 }
 
 extern const char * const vmstat_text[];

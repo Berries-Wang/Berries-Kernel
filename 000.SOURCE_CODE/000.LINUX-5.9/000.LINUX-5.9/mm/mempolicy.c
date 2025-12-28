@@ -116,8 +116,9 @@ static struct kmem_cache *sn_cache;
    policied. */
 enum zone_type policy_zone = 0;
 
-/*
+/**
  * run-time system-wide default policy => local allocation
+ * (运行时全系统默认策略 => 本地分配)
  */
 static struct mempolicy default_policy = {
 	.refcnt = ATOMIC_INIT(1), /* never free it */
@@ -1877,26 +1878,27 @@ nodemask_t *policy_nodemask(gfp_t gfp, struct mempolicy *policy)
 {
 	/* Lower zones don't get a nodemask applied for MPOL_BIND */
 	if (unlikely(policy->mode == MPOL_BIND) &&
-			apply_policy_zone(policy, gfp_zone(gfp)) &&
-			cpuset_nodemask_valid_mems_allowed(&policy->v.nodes))
+	    apply_policy_zone(policy, gfp_zone(gfp)) &&
+	    cpuset_nodemask_valid_mems_allowed(&policy->v.nodes)) {
 		return &policy->v.nodes;
+	}
 
 	return NULL;
 }
 
 /* Return the node id preferred by the given mempolicy, or the given id */
-static int policy_node(gfp_t gfp, struct mempolicy *policy,
-								int nd)
+static int policy_node(gfp_t gfp, struct mempolicy *policy, int nd)
 {
-	if (policy->mode == MPOL_PREFERRED && !(policy->flags & MPOL_F_LOCAL))
+	if (policy->mode == MPOL_PREFERRED && !(policy->flags & MPOL_F_LOCAL)) {
 		nd = policy->v.preferred_node;
-	else {
+	} else {
 		/*
 		 * __GFP_THISNODE shouldn't even be used with the bind policy
 		 * because we might easily break the expectation to stay on the
 		 * requested node and not break the policy.
 		 */
-		WARN_ON_ONCE(policy->mode == MPOL_BIND && (gfp & __GFP_THISNODE));
+		WARN_ON_ONCE(policy->mode == MPOL_BIND &&
+			     (gfp & __GFP_THISNODE));
 	}
 
 	return nd;
@@ -2243,10 +2245,14 @@ out:
 EXPORT_SYMBOL(alloc_pages_vma);
 
 /**
- * 	alloc_pages_current - Allocate pages.
+ * 
+ * 分配物理页面
+ * 
+ * 	alloc_pages_current - Allocate pages. 
+ *  这个current表示什么含义?
  *
  *	@gfp:
- *		%GFP_USER   user allocation,
+ *		   %GFP_USER   user allocation,
  *      	%GFP_KERNEL kernel allocation,
  *      	%GFP_HIGHMEM highmem allocation,
  *      	%GFP_FS     don't call back into a file system.
@@ -2256,14 +2262,18 @@ EXPORT_SYMBOL(alloc_pages_vma);
  *	Allocate a page from the kernel page pool.  When not in
  *	interrupt context and apply the current process NUMA policy.
  *	Returns NULL when no page can be allocated.
+ * (从内核页池中分配一个物理页。该操作不在中断上下文中执行，
+ * 并应用当前进程的 NUMA 策略。若无法分配到页面，则返回 NULL。)
  */
 struct page *alloc_pages_current(gfp_t gfp, unsigned order)
 {
+	// 
 	struct mempolicy *pol = &default_policy;
 	struct page *page;
 
-	if (!in_interrupt() && !(gfp & __GFP_THISNODE))
+	if (!in_interrupt() && !(gfp & __GFP_THISNODE)) {
 		pol = get_task_policy(current);
+	}
 
 	/*
 	 * No reference counting needed for current->mempolicy

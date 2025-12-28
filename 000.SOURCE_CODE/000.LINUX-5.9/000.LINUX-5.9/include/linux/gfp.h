@@ -46,7 +46,9 @@ struct vm_area_struct;
 #endif
 /* If the above are modified, __GFP_BITS_SHIFT may need updating */
 
-/*
+/**
+ * 参考: #4.1.2　分配掩码 
+ *
  * Physical address zone modifiers (see linux/mmzone.h - low four bits)
  *
  * Do not put any conditional on these. If necessary modify the definitions
@@ -62,29 +64,37 @@ struct vm_area_struct;
 /**
  * DOC: Page mobility and placement hints
  *
- * Page mobility and placement hints
+ * Page mobility and placement hints (页面可迁移性与放置提示)
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * These flags provide hints about how mobile the page is. Pages with similar
  * mobility are placed within the same pageblocks to minimise problems due
  * to external fragmentation.
+ * (这些标志提供了关于页面移动性的提示。具有相似移动性的页面会被放置在相同的页面块中，以尽量减少外部碎片导致的问题)
  *
  * %__GFP_MOVABLE (also a zone modifier) indicates that the page can be
  * moved by page migration during memory compaction or can be reclaimed.
+ * (__GFP_MOVABLE（同样是一个区域修饰符）表示该页面可以在内存规整期间通过页迁移被移动，或者可以被回收)
  *
  * %__GFP_RECLAIMABLE is used for slab allocations that specify
  * SLAB_RECLAIM_ACCOUNT and whose pages can be freed via shrinkers.
+ * (__GFP_RECLAIMABLE 用于指定了 SLAB_RECLAIM_ACCOUNT 且其页面可通过收缩器释放的 slab 分配)
  *
  * %__GFP_WRITE indicates the caller intends to dirty the page. Where possible,
  * these pages will be spread between local zones to avoid all the dirty
  * pages being in one zone (fair zone allocation policy).
+ * (这表明调用者打算弄脏该页。在可能的情况下，这些页面将被分散到不同的本地内存区域，
+ * 以防止所有脏页集中在单一区域（即公平区域分配策略）)
  *
  * %__GFP_HARDWALL enforces the cpuset memory allocation policy.
+ * (强制执行cpuset内存分配策略)
  *
  * %__GFP_THISNODE forces the allocation to be satisfied from the requested
  * node with no fallbacks or placement policy enforcements.
+ * (强制要求分配必须由指定节点完成，既不启用备用方案，也不执行任何放置策略)
  *
  * %__GFP_ACCOUNT causes the allocation to be accounted to kmemcg.
+ * (使得该分配由kmemcg进行记账)
  */
 #define __GFP_RECLAIMABLE ((__force gfp_t)___GFP_RECLAIMABLE)
 #define __GFP_WRITE	((__force gfp_t)___GFP_WRITE)
@@ -199,6 +209,12 @@ struct vm_area_struct;
 #define __GFP_FS	((__force gfp_t)___GFP_FS)
 #define __GFP_DIRECT_RECLAIM	((__force gfp_t)___GFP_DIRECT_RECLAIM) /* Caller can reclaim */
 #define __GFP_KSWAPD_RECLAIM	((__force gfp_t)___GFP_KSWAPD_RECLAIM) /* kswapd can wake */
+/**
+ * 用于允许或者禁止直接页面回收和kswapd内核线程
+ * 
+ * 	 * kswapd: Kernel Swap Daemon（内核交换守护进程）
+ *	 * >> 参考:[001.UNIX-DOCS/000.内存管理/017.关键词记录/000.kswapd是什么.md]
+ */
 #define __GFP_RECLAIM ((__force gfp_t)(___GFP_DIRECT_RECLAIM|___GFP_KSWAPD_RECLAIM))
 #define __GFP_RETRY_MAYFAIL	((__force gfp_t)___GFP_RETRY_MAYFAIL)
 #define __GFP_NOFAIL	((__force gfp_t)___GFP_NOFAIL)
@@ -233,7 +249,7 @@ struct vm_area_struct;
  * 
  * DOC: Useful GFP flag combinations
  *
- * Useful GFP flag combinations
+ * Useful GFP flag combinations（有用的 GFP 标志组合）
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * Useful GFP flag combinations that are commonly used. It is recommended
@@ -459,13 +475,17 @@ static inline enum zone_type gfp_zone(gfp_t flags)
 	return z;
 }
 
-/*
+/**
  * There is only one page-allocator function, and two main namespaces to
  * it. The alloc_page*() variants return 'struct page *' and as such
  * can allocate highmem pages, the *get*page*() variants return
  * virtual kernel addresses to the allocated page(s).
+ * 页面分配器仅有一个核心函数，但提供两类主要接口。
+ * alloc_page*()系列函数返回struct page *类型，因此能够分配高端内存页面；
+ * 而*get*page*()系列函数则返回已分配页面的虚拟内核地址。
+ * 
+ * 优先从本地内存分配
  */
-
 static inline int gfp_zonelist(gfp_t flags)
 {
 #ifdef CONFIG_NUMA
@@ -480,12 +500,17 @@ static inline int gfp_zonelist(gfp_t flags)
  * This zone list contains a maximum of MAXNODES*MAX_NR_ZONES zones.
  * There are two zonelists per node, one for all zones with memory and
  * one containing just zones from the node the zonelist belongs to.
+ * (我们从当前节点和gfp_mask获取区域列表。该区域列表最多包含MAXNODES*MAX_NR_ZONES个区域。
+ * 每个节点有两个区域列表：一个包含所有具有内存的区域，另一个仅包含该节点所属区域的区域列表) ?
  *
  * For the normal case of non-DISCONTIGMEM systems the NODE_DATA() gets
  * optimized to &contig_page_data at compile-time.
+ * (在非间断内存（非DISCONTIGMEM）系统的常规情况下，
+ * NODE_DATA()会在编译时被优化为&contig_page_data) ?
  */
 static inline struct zonelist *node_zonelist(int nid, gfp_t flags)
 {
+	// 选择zonelist , 选择本地内存还是远端内存
 	return NODE_DATA(nid)->node_zonelists + gfp_zonelist(flags);
 }
 
@@ -551,8 +576,10 @@ static inline struct page *alloc_pages_node(int nid, gfp_t gfp_mask,
 #ifdef CONFIG_NUMA
 extern struct page *alloc_pages_current(gfp_t gfp_mask, unsigned order);
 
-static inline struct page *
-alloc_pages(gfp_t gfp_mask, unsigned int order)
+/**
+ * 分配物理页面 , 分配2^order个物理页面
+ */
+static inline struct page *alloc_pages(gfp_t gfp_mask, unsigned int order)
 {
 	return alloc_pages_current(gfp_mask, order);
 }

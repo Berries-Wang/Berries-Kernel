@@ -146,18 +146,20 @@ struct alloc_context {
 	 * the allocation request. Due to the nature of the zone,
 	 * memory on lower zone than the highest_zoneidx will be
 	 * protected by lowmem_reserve[highest_zoneidx].
+	 * (highest_zoneidx 代表分配请求的最高可用区域索引。基于内存区域的分层特性，
+	 * 低于 highest_zoneidx 的区域中的内存将受到 lowmem_reserve[highest_zoneidx] 的保护) ?
 	 *
 	 * highest_zoneidx is also used by reclaim/compaction to limit
 	 * the target zone since higher zone than this index cannot be
 	 * usable for this allocation request.
+	 * (在回收/压缩过程中，highest_zoneidx 也用于限制目标区域，因为比该索引更高的区域无法用于此次分配请求)
 	 */
 	enum zone_type highest_zoneidx;                              // high_zoneidx分配掩码计算zone的zoneidx，表示这个分配掩码允许内存分配的最高zone
 	bool spread_dirty_pages;                                     // spread_dirty_pages用于指定是否传播脏页。
 };
 
 /**
- * 什么是伙伴块?
- *     物理内存中地址连续的页块，他们互称伙伴，并大小相等且为2的幂 
+ * 什么是伙伴? [001.UNIX-DOCS/000.内存管理/005.内存分配/000.伙伴系统/README.md]
  * 
  * pfn：当前页块的起始页帧号（Page Frame Number）。
  * 
@@ -171,7 +173,7 @@ struct alloc_context {
  *     B2 = B1 ^ (1 << O)
  * For example, if the starting buddy (buddy2) is #8 its order ((若起始伙伴块（buddy2）的编号为 #8，则其 阶数 1（Order 1）的伙伴块 是 #10))
  * 1 buddy is #10:
- *     B2 = 8 ^ (1 << 1) = 8 ^ 2 = 10
+ *     B2 = 8 ^ (1 << 1) = 8 ^ 2 = 10  # ^ 是取反,不是幂运算
  *
  * 2) Any buddy B will have an order O+1 parent P which
  * satisfies the following equation:(在伙伴系统中，任意阶数为 O 的伙伴块 B，其对应的更高阶（O+1）父块 P 均满足以下关系式：)
@@ -179,7 +181,7 @@ struct alloc_context {
  *
  * Assumption: *_mem_map is contiguous at least up to MAX_ORDER (假设 _mem_map 至少在内核定义的 MAX_ORDER 范围内是物理连续的)
  * 
- * @return 返回伙伴块的起始页帧号（PFN），如果伙伴块存在。
+ * @return 返回伙伴块的起始页帧号（PFN），如果伙伴块存在(该页块在当前 order 下的“伙伴”页块的起始 PFN)
  */
 static inline unsigned long
 __find_buddy_pfn(unsigned long page_pfn, unsigned int order)
@@ -255,9 +257,10 @@ struct compact_control {
 	bool alloc_contig;		/* alloc_contig_range allocation */
 };
 
-/*
+/**
  * Used in direct compaction when a page should be taken from the freelists
  * immediately when one is created during the free path.
+ * (当在自由路径中创建页面时，需要立即从自由列表中取出页面时，用于直接压缩。)
  */
 struct capture_control {
 	struct compact_control *cc;
@@ -570,16 +573,16 @@ unsigned int reclaim_clean_pages_from_list(struct zone *zone,
 #define ALLOC_OOM		ALLOC_NO_WATERMARKS
 #endif
 
-#define ALLOC_HARDER		 0x10 /* try to alloc harder */
-#define ALLOC_HIGH		 0x20 /* __GFP_HIGH set */
-#define ALLOC_CPUSET		 0x40 /* check for correct cpuset */
-#define ALLOC_CMA		 0x80 /* allow allocations from CMA areas */
+#define ALLOC_HARDER		 0x10     /* try to alloc harder */
+#define ALLOC_HIGH		     0x20     /* __GFP_HIGH set */
+#define ALLOC_CPUSET		 0x40     /* check for correct cpuset */
+#define ALLOC_CMA		     0x80     /* allow allocations from CMA areas */
 #ifdef CONFIG_ZONE_DMA32
-#define ALLOC_NOFRAGMENT	0x100 /* avoid mixing pageblock types */
+#define ALLOC_NOFRAGMENT	 0x100    /* avoid mixing pageblock types(避免混合页块类型)  ; fragment:碎片*/
 #else
-#define ALLOC_NOFRAGMENT	  0x0
+#define ALLOC_NOFRAGMENT	 0x0
 #endif
-#define ALLOC_KSWAPD		0x800 /* allow waking of kswapd, __GFP_KSWAPD_RECLAIM set */
+#define ALLOC_KSWAPD		 0x800     /* allow waking of kswapd, __GFP_KSWAPD_RECLAIM set :在尝试分配内存时，如果发现空间不足，请允许唤醒 kswapd 线程去后台回收内存。 */
 
 enum ttu_flags;
 struct tlbflush_unmap_batch;

@@ -10,8 +10,17 @@
 
 ---
 
+## 注意事项
+- 关于Linux内核内存布局<sup>**与参考资料有差异**</sup>：所以，注意甄别
+  + 资料[007.BOOKs/Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub] 描述的是Linux 5.0 内核，而当前版本为5.9,内核布局已经不一样了,参考:[000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/Documentation/arm64/memory.rst](../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/Documentation/arm64/memory.rst)
+
+---
+
 ## 从进程的角度分析内存
 ![wechat_2025-11-15_175849_449.png](./999.IMGS/wechat_2025-11-15_175849_449.png)
+
+### 关于内存增长方向的另一个佐证
+![mmap直接映射](./999.IMGS/mmap_20251211080200_89.jpg)
 
 
 ---
@@ -81,3 +90,13 @@ pglist_data数据结构用来描述一个内存节点的所有资源
                          |
                          |---> struct page (物理页帧)
 ```
+
+---
+
+## Linux内核启动内存管理变化
+memblock -> 伙伴系统
+
+
+## 参考资料
+- [中山大学 操作系统原理](https://www.bilibili.com/video/BV1Qx4y1271K/?spm_id_from=333.788.top_right_bar_window_history.content.click&vd_source=9eef164b234175c1ae3ca71733d5a727)
+- [中山大学 操作系统原理·课件](./998.REFS/000.中山大学-操作系统/)

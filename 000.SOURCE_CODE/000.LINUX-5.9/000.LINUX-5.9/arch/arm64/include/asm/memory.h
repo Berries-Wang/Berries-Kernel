@@ -80,12 +80,31 @@
 #define MODULES_VADDR		(BPF_JIT_REGION_END)
 #define MODULES_VSIZE		(SZ_128M)
 /**
- * 是不是很奇怪，大小怎么能当做一个起始地址呢?
+ * 是不是很奇怪，大小怎么能当做一个起始地址呢? 看如下分析:
  * 
- * 换个角度, 这个减数究竟是谁呢 是 “0xFFFF800000000000” 即  _PAGE_END(VA_BITS_MIN) ， 你瞅瞅，VMEMMAP_SIZE是怎么算出来的
- * 以及 ， 结合图来分析:  [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图2.9　ARM64在Linux 5.0内核的内存分布
- * > 切记，此书是基于5.0的内核的，而本内核版本是5.9的，有些出入。例如 KIMAGE_VADDR ，PAGE_OFFSET（书中: '0xFFFF800000000000' , 实际 '0xFFFF000000000000'） 
+ * 结合图来分析:  [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图2.9　ARM64在Linux 5.0内核的内存分布
+ * > 切记，此书是基于5.0的内核的，而本内核版本是5.9的，有些出入[经过考究的]。例如 KIMAGE_VADDR ，PAGE_OFFSET（书中: '0xFFFF800000000000' , 实际 '0xFFFF000000000000'）[正确]
+ * >>> 阅读：[000.LINUX-5.9/Documentation/arm64/memory.rst] 文件就知道了。所以，注意甄别
  * 示意图: 001.UNIX-DOCS/022.内存管理/999.IMGS/wechat_2025-08-16_120801_349.png
+ * 
+ * <pre>
+ * 在64位系统中,任何负数-X被转为unsigned long 时，等价于 2^(64) - X + 1, 且在Linux内核中，在 Linux 内核中，虚拟地址是用 unsigned long 表示的
+ * 
+ * 所以，在此处, (-VMEMMAP_SIZE) 转为地址后为 (2^(64) - (VMEMMAP_SIZE)) + 1
+ * 
+ * try it: 003.TEST-SPACE/010.Calc_BuMa.c
+ * #include <stdio.h>
+ * #include <inttypes.h>
+ * 
+ * int main(int argc, char **argv)
+ * {
+ *     unsigned long addr = -5;
+ *     printf("Address: %" PRIXPTR "\n", addr);   // 大写，适合指针/地址
+ *     return 0;
+ * }
+ * 输出: Address: FFFFFFFFFFFFFFFB (F-B=4)
+ * </pre>
+ * 
  */
 #define VMEMMAP_START		(-VMEMMAP_SIZE - SZ_2M)
 #define VMEMMAP_END		(VMEMMAP_START + VMEMMAP_SIZE)
@@ -282,9 +301,21 @@ static inline const void *__tag_set(const void *addr, u8 tag)
  * The linear kernel range starts at the bottom of the virtual address
  * space. Testing the top bit for the start of the region is a
  * sufficient check and avoids having to worry about the tag.
+ * (线性内核范围从虚拟地址空间的底部开始。
+ * 通过检测最高位来判断该区域的起始位置是一种有效的检查方法，且无需考虑标签问题)
+ * 
+ * 为什么能通过最高位来判断呢?
+ *   -> 线性映射区 ，最高位为1
+ * 
+ * __is_lm_address()宏用于判断虚拟地址是否为线性映射的虚拟地址
+ * vabits_actual = 48,
+ * 
  */
 #define __is_lm_address(addr)	(!(((u64)addr) & BIT(vabits_actual - 1)))
 
+/**
+ * physvirt_offset: arch/arm64/mm/init.c
+ */
 #define __lm_to_phys(addr)	(((addr) + physvirt_offset))
 
 /**
@@ -295,9 +326,13 @@ static inline const void *__tag_set(const void *addr, u8 tag)
  * kimage_voffset 是什么?
  * 当系统刚初始化时，内核映像通过块映射的方式映射到KIMAGE_VADDR + TEXT_OFFSET的虚拟地址上,因此
  * kimage_voffset表示内核映像虚拟地址和物理地址之间的偏移量：“图2.11　kimage_voffset的含义”
+ * > 阅读: arch/arm64/kernel/head.symbol.md
  */
 #define __kimg_to_phys(addr)	((addr) - kimage_voffset)
 
+/**
+ * 先判断虚拟地址在哪个区域，再选择转换方式
+ */
 #define __virt_to_phys_nodebug(x) ({					\
 	phys_addr_t __x = (phys_addr_t)(__tag_reset(x));		\
 	__is_lm_address(__x) ? __lm_to_phys(__x) : __kimg_to_phys(__x);	\
@@ -342,8 +377,9 @@ static inline void *phys_to_virt(phys_addr_t x)
 /**
  * Drivers should NOT use these either.
  * 
- * __pa_symbol: 把内核符号的虚拟地址转换为物理地址
- * __pa: 把内核虚拟地址转换为物理地址 (__pa()宏用于根据内核中线性映射的虚拟地址计算对应的物理地址)
+ * __pa_symbol: 把内核符号的虚拟地址转换为物理地址           --- 内核映像区域 
+ * __pa: 宏用于根据内核中线性映射区的虚拟地址计算对应的物理地址  --- 线性映射区域
+ * >>>>>> 这两个都是处理线性映射，所以可以通过线性地址转换(另外一种则是 MMU,即通过页表转换)
  * 
  * __va()宏用于根据内核线性映射中物理地址计算对应的虚拟地址
  * 

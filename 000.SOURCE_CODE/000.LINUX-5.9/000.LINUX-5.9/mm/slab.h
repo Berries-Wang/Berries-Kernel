@@ -57,11 +57,11 @@ struct kmem_cache {
  * allocated from slab caches themselves.
  */
 enum slab_state {
-	DOWN,			/* No slab functionality yet */
-	PARTIAL,		/* SLUB: kmem_cache_node available */
-	PARTIAL_NODE,		/* SLAB: kmalloc size for node struct available */
-	UP,			/* Slab caches usable but not all extras yet */
-	FULL			/* Everything is working */
+	DOWN,             /* No slab functionality yet */
+	PARTIAL,          /* SLUB: kmem_cache_node available */
+	PARTIAL_NODE,     /* SLAB: kmalloc size for node struct available */
+	UP,               /* Slab caches usable but not all extras yet */
+	FULL              /* Everything is working */
 };
 
 extern enum slab_state slab_state;
@@ -535,14 +535,16 @@ static inline void slab_post_alloc_hook(struct kmem_cache *s,
  * 
  * 在 Linux 内核中，slab 分配器（如 SLAB、SLUB 或 SLOB）会为不同类型的对象（如任务结构、文件描述符等）维护各自的 slab 列表，
  * 以提高内存分配和释放的效率
+ * 
+ * slabs_partial 、slabs_full 链表的元素就是一个个大小固定的内存块
  */
 struct kmem_cache_node {
 	spinlock_t list_lock;
 
 #ifdef CONFIG_SLAB
-	struct list_head slabs_partial;	/* partial list first, better asm code */
-	struct list_head slabs_full;
-	struct list_head slabs_free;
+	struct list_head slabs_partial;	/* partial list first, better asm code : 指向未满的slab链表*/
+	struct list_head slabs_full;    /* 指向全满的slab链表 */
+	struct list_head slabs_free;    /* 完全空闲的slab链表 */
 	unsigned long total_slabs;	/* length of all slab lists */
 	unsigned long free_slabs;	/* length of free slab list only */
 	unsigned long free_objects;

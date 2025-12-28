@@ -7,6 +7,16 @@
  * Logical memory blocks.
  *
  * Copyright (C) 2001 Peter Bergner, IBM Corp.
+ * 
+ * 
+ * https://docs.kernel.org/translations/zh_CN/core-api/boot-time-mm.html
+ * 
+ * 系统初始化早期“正常”的内存管理由于没有设置完毕无法使用。
+ * 但是内核仍然需要 为各种数据结构分配内存，例如物理页分配器。
+ * 
+ * 一个叫做 memblock 的专用分配器执行启动时的内存管理。
+ * 特定架构的初始化 必须在setup_arch()中设置它，并在mem_init()函数中移除它。
+ * 
  */
 
 #include <linux/init.h>
@@ -28,19 +38,19 @@ extern unsigned long long max_possible_pfn;
 /**
  * enum memblock_flags - definition of memory region attributes
  * @MEMBLOCK_NONE: no special request
- * @MEMBLOCK_HOTPLUG: hotpluggable region
- * @MEMBLOCK_MIRROR: mirrored region
+ * @MEMBLOCK_HOTPLUG: hotpluggable region (可热插拔的内存区域: 允许在不停机、不重启的情况下，增加或移除物理内存)
+ * @MEMBLOCK_MIRROR: mirrored region      (镜像内存区域:容错,数据同时写入两个独立的内存区域,故可用容量减半)
  * @MEMBLOCK_NOMAP: don't add to kernel direct mapping
  */
 enum memblock_flags {
-	MEMBLOCK_NONE		= 0x0,	/* No special request */
-	MEMBLOCK_HOTPLUG	= 0x1,	/* hotpluggable region */
-	MEMBLOCK_MIRROR		= 0x2,	/* mirrored region */
-	MEMBLOCK_NOMAP		= 0x4,	/* don't add to kernel direct mapping */
+	MEMBLOCK_NONE = 0x0, /* No special request */
+	MEMBLOCK_HOTPLUG = 0x1, /* hotpluggable region */
+	MEMBLOCK_MIRROR = 0x2, /* mirrored region */
+	MEMBLOCK_NOMAP = 0x4, /* don't add to kernel direct mapping */
 };
 
 /**
- * struct memblock_region - represents a memory region
+ * struct memblock_region - represents a memory region (代表一个内存区域)
  * @base: base address of the region
  * @size: size of the region
  * @flags: memory region attributes
@@ -56,7 +66,7 @@ struct memblock_region {
 };
 
 /**
- * struct memblock_type - collection of memory regions of certain type
+ * struct memblock_type - collection of memory regions of certain type (特定类型内存区域的集合)
  * @cnt: number of regions
  * @max: size of the allocated array
  * @total_size: size of all regions
@@ -74,15 +84,15 @@ struct memblock_type {
 /**
  * struct memblock - memblock allocator metadata（memblock 分配器元数据）
  * @bottom_up: is bottom up direction?
- * @current_limit: physical address of the current allocation limit
+ * @current_limit: physical address of the current allocation limit (当前分配限制的物理地址)
  * @memory: usable memory regions
  * @reserved: reserved memory regions
  */
 struct memblock {
-	bool bottom_up;  /* is bottom up direction? 内存分配方向（自底向上或自顶向下） */
-	phys_addr_t current_limit;       /* 当前内存限制地址*/
-	struct memblock_type memory;     /* 管理可用物理内存的区域*/
-	struct memblock_type reserved;   /* 管理保留内存（如内核、initrd等）的区域*/
+	bool bottom_up; /* is bottom up direction? 内存分配方向（自底向上或自顶向下） */
+	phys_addr_t current_limit; /* 当前内存限制地址*/
+	struct memblock_type memory; /* 管理可用物理内存的区域*/
+	struct memblock_type reserved; /* 管理保留内存（如内核、initrd等）的区域*/
 };
 
 extern struct memblock memblock;
@@ -106,6 +116,10 @@ phys_addr_t memblock_find_in_range(phys_addr_t start, phys_addr_t end,
 void memblock_allow_resize(void);
 int memblock_add_node(phys_addr_t base, phys_addr_t size, int nid);
 int memblock_add(phys_addr_t base, phys_addr_t size);
+
+/**
+ * 
+ */
 int memblock_remove(phys_addr_t base, phys_addr_t size);
 int memblock_free(phys_addr_t base, phys_addr_t size);
 int memblock_reserve(phys_addr_t base, phys_addr_t size);

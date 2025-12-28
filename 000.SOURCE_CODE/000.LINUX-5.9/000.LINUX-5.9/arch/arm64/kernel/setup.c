@@ -168,15 +168,22 @@ static void __init smp_build_mpidr_hash(void)
 		pr_warn("Large number of MPIDR hash buckets detected\n");
 }
 
-static void __init setup_machine_fdt(phys_addr_t dt_phys)
+__attribute__((optimize("O0"))) static void __init setup_machine_fdt(phys_addr_t dt_phys)
 {
 	int size;
+	/**
+	 * arch/arm64/mm/mmu.c
+	 */
 	void *dt_virt = fixmap_remap_fdt(dt_phys, &size, PAGE_KERNEL);
 	const char *name;
 
-	if (dt_virt)
+	if (dt_virt) {
 		memblock_reserve(dt_phys, size);
+	}
 
+	/**
+	 * early_init_dt_scan 内部会解析设备树,初始化 memblock.memory.regions
+	 */
 	if (!dt_virt || !early_init_dt_scan(dt_virt)) {
 		pr_crit("\n"
 			"Error: invalid device tree blob at physical address %pa (virtual address 0x%p)\n"
@@ -300,6 +307,9 @@ void __init __no_sanitize_address setup_arch(char **cmdline_p)
 	early_fixmap_init();
 	early_ioremap_init();
 
+	/**
+	 * 内含DTS(设备树)解析: 会对 memblock 全局变量的 memory.regions 进行赋值
+	 */
 	setup_machine_fdt(__fdt_pointer);
 
 	/*
@@ -328,6 +338,12 @@ void __init __no_sanitize_address setup_arch(char **cmdline_p)
 	if (!efi_enabled(EFI_BOOT) && ((u64)_text % MIN_KIMG_ALIGN) != 0)
 	     pr_warn(FW_BUG "Kernel image misaligned at boot, please fix your bootloader!");
 
+	/**
+	 * 执行到此处, memblock 已经被初始化过了 (memblock_memory_init_regions中有元素了)
+	 * 
+	 * sudo qemu-system-aarch64 -M virt -cpu cortex-a57 -smp 4 -m 1024M -kernel arch/arm64/boot/Image -append "rdinit=/linuxrc console=ttyAMA0 loglevel=8 nokaslr"  -nographic -S -s
+	 * 则: memblock_memory_init_regions中有1个元素，size的值为1G
+	 */
 	arm64_memblock_init();
 
 	/* 内存操作 */

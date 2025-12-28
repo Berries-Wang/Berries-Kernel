@@ -745,11 +745,11 @@ PAGEFLAG_FALSE(DoubleMap)
 #define PAGE_TYPE_BASE	0xf0000000
 /* Reserve		0x0000007f to catch underflows of page_mapcount */
 #define PAGE_MAPCOUNT_RESERVE	-128
-#define PG_buddy	0x00000080
+#define PG_buddy	0x00000080       // 页面在伙伴系统中
 #define PG_offline	0x00000100
 #define PG_kmemcg	0x00000200
 #define PG_table	0x00000400
-#define PG_guard	0x00000800
+#define PG_guard	0x00000800       // guard:卫兵; 这个页是一个保护边界，即使它看起来是空闲的，也不能用于常规分配或与相邻页合并
 
 #define PageType(page, flag)						\
 	((page->page_type & (PAGE_TYPE_BASE | flag)) == PAGE_TYPE_BASE)

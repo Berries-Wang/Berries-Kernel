@@ -242,6 +242,9 @@ static int __init early_mem(char *p)
 }
 early_param("mem", early_mem);
 
+/**
+ * 设备数节点回调
+ */
 static int __init early_init_dt_scan_usablemem(unsigned long node,
 		const char *uname, int depth, void *data)
 {
@@ -262,44 +265,84 @@ static int __init early_init_dt_scan_usablemem(unsigned long node,
 	return 1;
 }
 
+/**
+ * 
+ * 解析设备树-内存部分
+ * 
+ * 函数执行前后,memblock的变化
+ */
 static void __init fdt_enforce_memory_region(void)
 {
 	struct memblock_region reg = {
 		.size = 0,
 	};
 
+	/**
+	 * drivers/of/fdt.c
+	 * of_scan_flat_dt 用于扫描设备树,并对每个节点执行回调函数early_init_dt_scan_usablemem
+	 */
 	of_scan_flat_dt(early_init_dt_scan_usablemem, &reg);
 
-	if (reg.size)
+	if (reg.size) {
 		memblock_cap_memory_range(reg.base, reg.size);
+	}
 }
 
+/**
+ * 
+ */
 void __init arm64_memblock_init(void)
 {
-	const s64 linear_region_size = BIT(vabits_actual - 1);
+	const s64 linear_region_size = BIT(vabits_actual - 1); // vabits_actual : 48
 
 	/* Handle linux,usable-memory-range property */
 	fdt_enforce_memory_region();
 
-	/* Remove memory above our supported physical address size */
+	/**
+	 *  Remove memory above our supported physical address size
+	 *  移除超出我们支持的物理地址大小范围的内存
+	 * 
+	 * PHYS_MASK_SHIFT: 48
+	 * [1ULL<<48 , (1ULL<<65)-1] 地址移除,因为不可用
+	 **/
 	memblock_remove(1ULL << PHYS_MASK_SHIFT, ULLONG_MAX);
 
-	/*
+	/**
 	 * Select a suitable value for the base of physical memory.
+	 * 
+	 * ARM64_MEMSTART_ALIGN 4K页表: 1 << 30 ? 为什么是30
+	 * 将 memblock_start_of_DRAM() 的低29位都置位0
+	 * 
+	 * 获取物理内存的实际起始地址，并确保它对齐到 ARM64 架构要求的大边界(1GB)?
 	 */
 	memstart_addr = round_down(memblock_start_of_DRAM(),
 				   ARM64_MEMSTART_ALIGN);
+    // debug: 1073741824
 
 	physvirt_offset = PHYS_OFFSET - PAGE_OFFSET;
+	// debug: 
 
+	/**
+	 * 一个映射?
+	 *   对于任意物理地址 phys_addr，对应的 struct page 指针可以通过以下方式计算:
+	 * <pre>
+	 *    // 计算物理地址对应的页帧号
+     * pfn = phys_addr >> PAGE_SHIFT;
+     * 
+     * // 计算对应的 struct page 指针
+     * struct page *page = vmemmap + pfn;
+	 * </pre>
+	 * 
+	 */
 	vmemmap = ((struct page *)VMEMMAP_START - (memstart_addr >> PAGE_SHIFT));
+	// debug:
 
 	/*
 	 * If we are running with a 52-bit kernel VA config on a system that
 	 * does not support it, we have to offset our vmemmap and physvirt_offset
 	 * s.t. we avoid the 52-bit portion of the direct linear map
 	 */
-	if (IS_ENABLED(CONFIG_ARM64_VA_BITS_52) && (vabits_actual != 52)) {
+	if (IS_ENABLED(CONFIG_ARM64_VA_BITS_52) && (vabits_actual != 52)) { // -->  if (0 && (vabits_actual != 52)) {
 		vmemmap += (_PAGE_OFFSET(48) - _PAGE_OFFSET(52)) >> PAGE_SHIFT;
 		physvirt_offset = PHYS_OFFSET - _PAGE_OFFSET(48);
 	}
@@ -309,12 +352,16 @@ void __init arm64_memblock_init(void)
 	 * linear mapping. Take care not to clip the kernel which may be
 	 * high in memory.
 	 */
+	u64 mem_remove_start_001 = max_t(u64, memstart_addr + linear_region_size, __pa_symbol(_end));
+	printk("max_t_temp is: 0X%lx", mem_remove_start_001);
 	memblock_remove(max_t(u64, memstart_addr + linear_region_size,
 			__pa_symbol(_end)), ULLONG_MAX);
+
 	if (memstart_addr + linear_region_size < memblock_end_of_DRAM()) {
-		/* ensure that memstart_addr remains sufficiently aligned */
+		/* ensure that memstart_addr remains sufficiently aligned (确保 memstart_addr 保持充分对齐)*/
 		memstart_addr = round_up(memblock_end_of_DRAM() - linear_region_size,
 					 ARM64_MEMSTART_ALIGN);
+		// 将[0,memstart_addr]区域的内存从memblock.memory中移出
 		memblock_remove(0, memstart_addr);
 	}
 
@@ -328,11 +375,20 @@ void __init arm64_memblock_init(void)
 		memblock_add(__pa_symbol(_text), (u64)(_end - _text));
 	}
 
-	if (IS_ENABLED(CONFIG_BLK_DEV_INITRD) && phys_initrd_size) {
+	if (IS_ENABLED(CONFIG_BLK_DEV_INITRD) && phys_initrd_size) { // ->   if (1 && phys_initrd_size) {
 		/*
 		 * Add back the memory we just removed if it results in the
 		 * initrd to become inaccessible via the linear mapping.
 		 * Otherwise, this is a no-op
+		 * (如果导致初始RAM磁盘无法通过线性映射访问，则重新添加我们刚才移除的内存。
+		 * 否则，此操作将不执行。)
+		 */
+		/**
+		 * phys_initrd_start 是一个全局变量，用于存储 初始 RAM 磁盘（initrd）在物理内存中的起始地址
+		 * 
+		 * initrd 是一个临时的根文件系统，它在内核启动过程中被加载到内存中,在真正的根文件系统被挂载之前，为内核提供一个包含必要驱动程序、工具和脚本的临时环境
+		 * 
+		 * 
 		 */
 		u64 base = phys_initrd_start & PAGE_MASK;
 		u64 size = PAGE_ALIGN(phys_initrd_start + phys_initrd_size) - base;
@@ -377,6 +433,8 @@ void __init arm64_memblock_init(void)
 	/*
 	 * Register the kernel text, kernel data, initrd, and initial
 	 * pagetables with memblock.
+	 * 
+	 * 将内核映像区域设置为保留内存
 	 */
 	memblock_reserve(__pa_symbol(_text), _end - _text);
 	if (IS_ENABLED(CONFIG_BLK_DEV_INITRD) && phys_initrd_size) {

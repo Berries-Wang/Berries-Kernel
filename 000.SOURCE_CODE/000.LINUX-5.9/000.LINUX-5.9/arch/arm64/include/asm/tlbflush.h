@@ -17,6 +17,8 @@
 #include <asm/mmu.h>
 
 /**
+ * TLBI 指令
+ * 
  * Raw TLBI operations.
  *
  * Where necessary, use the __tlbi() macro to avoid asm()
@@ -46,6 +48,9 @@
 
 #define __TLBI_N(op, arg, n, ...) __TLBI_##n(op, arg)
 
+/**
+ * 主要是通过TLBI指令来实现
+ */
 #define __tlbi(op, ...)		__TLBI_N(op, ##__VA_ARGS__, 1, 0)
 
 #define __tlbi_user(op, arg) do {						\

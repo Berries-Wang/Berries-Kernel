@@ -950,6 +950,9 @@ static int oom_kill_memcg_member(struct task_struct *task, void *message)
 	return 0;
 }
 
+/**
+ * 选定受害者、确保资源释放、并安全地终止进程
+ */
 static void oom_kill_process(struct oom_control *oc, const char *message)
 {
 	struct task_struct *victim = oc->chosen;
@@ -982,6 +985,7 @@ static void oom_kill_process(struct oom_control *oc, const char *message)
 	 */
 	oom_group = mem_cgroup_get_oom_group(victim, oc->memcg);
 
+	// 终止进程
 	__oom_kill_process(victim, message);
 
 	/*
@@ -1035,12 +1039,16 @@ EXPORT_SYMBOL_GPL(unregister_oom_notifier);
 
 /**
  * out_of_memory - kill the "best" process when we run out of memory
+ * (当内存耗尽时，杀掉那个‘最合适’的进程)
  * @oc: pointer to struct oom_control
  *
  * If we run out of memory, we have the choice between either
  * killing a random task (bad), letting the system crash (worse)
  * OR try to be smart about which process to kill. Note that we
  * don't have to be perfect here, we just have to be good.
+ * (如果内存耗尽，我们面临三种选择：要么随机杀掉一个任务（这很糟糕），
+ * 要么任由系统崩溃（这更糟），或者尝试聪明地选择要杀掉的进程。
+ * 注意，我们不需要做得完美，只要足够好就行了。)
  */
 bool out_of_memory(struct oom_control *oc)
 {
@@ -1092,6 +1100,7 @@ bool out_of_memory(struct oom_control *oc)
 	    current->signal->oom_score_adj != OOM_SCORE_ADJ_MIN) {
 		get_task_struct(current);
 		oc->chosen = current;
+		// 终止进程
 		oom_kill_process(oc, "Out of memory (oom_kill_allocating_task)");
 		return true;
 	}

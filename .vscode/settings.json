@@ -24,6 +24,17 @@
         "stdarg.h": "c",
         "kasan-checks.h": "c",
         "printk.h": "c",
-        "sstream": "c"
+        "sstream": "c",
+        "tlbflush.h": "c",
+        "tlb.h": "c",
+        "bitset": "c",
+        "utility": "c",
+        "ratio": "c",
+        "random": "c",
+        "climits": "c",
+        "fixmap.h": "c",
+        "chrono": "c",
+        "asm_mem_layout_wei.h": "c",
+        "memory.h": "c"
     }
 }

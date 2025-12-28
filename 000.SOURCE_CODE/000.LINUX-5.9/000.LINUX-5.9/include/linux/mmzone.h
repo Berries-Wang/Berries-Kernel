@@ -38,10 +38,27 @@
  */
 #define PAGE_ALLOC_COSTLY_ORDER 3
 
+/**
+ * free_area数据结构中包含了MIGRATE_TYPES个链表，
+ * 这里相当于zone中根据order的大小有0到（MAX_ORDER−1）个free_area，
+ * 每个free_area根据MIGRATE_TYPES类型有几个相应的链表
+ * 
+ * > 图3.12　伙伴系统的空闲页块的管理
+ * 
+ * |        枚举值           |             描述                        |      主要用途和特点|
+ * |MIGRATE_UNMOVABLE       | 不可移动的页                              |包含不能在内存中移动的页，例如内核栈、struct page 结构、某些设备驱动程序使用的页。如果移动它们，系统可能会崩溃|
+ * |MIGRATE_MOVABLE         | 可移动的页                                |包含可以安全地在内存中移动的页。主要是用户空间进程使用的页，例如匿名页（anonymous pages）和文件页（file pages）。这些页可以通过内核的页面迁移机制转移到其他位置|
+ * |MIGRATE_RECLAIMABLE     |可回收的页                                 |包含在系统内存不足时可以被回收（释放）的页，但它们不可移动。例如，页缓存（page cache）中用于只读文件映射的页。回收比移动更容易实现。|
+ * |MIGRATE_PCPTYPES        |管理页类型(MIGRATE_MOVABLE...)的内部组织结构 |需要被缓存到 每 CPU 页列表 (PCP) 中的迁移类型数量,PCP 目的： 避免在每次小分配时都去争抢全局的空闲列表锁，从而提高性能|
+ * |MIGRATE_HIGHATOMIC      |管理页类型(MIGRATE_MOVABLE...)的内部组织结构 |当内核需要进行 GFP_ATOMIC 分配，并且它是一个高优先级的原子分配时（通常是 __GFP_HIGH 标志被设置），内核会尝试从所有适用的迁移类型列表中分配|
+ * |MIGRATE_CMA             |连续内存分配                               |专用于为需要大块连续物理内存的设备（如图形处理器、DMA 缓冲区）预留和分配页。这通常是驱动程序为了满足硬件要求而使用的特殊类型|
+ * |MIGRATE_ISOLATE         |隔离的页                                   |特殊类型。 不用于常规分配，而是用于内存热插拔或内存下线（Memory Offlining）。用于临时隔离一个内存块，确保所有活动页被迁移走或释放，以便安全地移除或下线该内存|
+ * |MIGRATE_TYPES           |枚举值的总数                                |枚举值的总数|
+ */
 enum migratetype {
-	MIGRATE_UNMOVABLE,
-	MIGRATE_MOVABLE,
-	MIGRATE_RECLAIMABLE,
+	MIGRATE_UNMOVABLE,   
+	MIGRATE_MOVABLE,      
+	MIGRATE_RECLAIMABLE,   
 	MIGRATE_PCPTYPES,	/* the number of types on the pcp lists */
 	MIGRATE_HIGHATOMIC = MIGRATE_PCPTYPES,
 #ifdef CONFIG_CMA
@@ -93,11 +110,21 @@ extern int page_group_by_mobility_disabled;
 #define get_pageblock_migratetype(page)					\
 	get_pfnblock_flags_mask(page, page_to_pfn(page), MIGRATETYPE_MASK)
 
+/** 
+ * 这就得结合图来分析了:
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图3.12　伙伴系统的空闲页块的管理
+ * > 1. 每一阶，都是有多个链表的，而不是一个
+*/
 struct free_area {
 	struct list_head	free_list[MIGRATE_TYPES];
 	unsigned long		nr_free;
 };
 
+/**
+ * 这里还是得根据 staruct zone {struct free_area free_area[MAX_ORDER]}
+ * 即 [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图3.12　伙伴系统的空闲页块的管理 来理解
+ * 
+ */
 static inline struct page *get_page_from_free_area(struct free_area *area,
 					    int migratetype)
 {
@@ -345,6 +372,20 @@ struct per_cpu_nodestat {
 
 #endif /* !__GENERATING_BOUNDS.H */
 
+/**
+ * [007.BOOKs/Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#3.3.2　内存管理之数据结构
+ * 在Linux操作系统中常见的内存管理区可以分为以下几种:
+ *      ZONE_DMA     ：  用于ISA设备的DMA操作，范围是0～16MB，只适用于Intel x86架构，ARM架构没有这个内存管理区。
+ *      ZONE_DMA32   ：  用于最低4GB的内存访问的设备，如只支持32位的DMA设备。
+ *      ZONE_NORMAL  ：  4GB以后的物理内存，用于线性映射物理内存。若系统内存小于4GB，则没有这个内存管理区。
+ *      ZONE_HIGHMEM ：  用于管理高端内存，这些高端内存是不能线性映射到内核地址空间的。注意，在64位Linux操作系统中没有这个内存管理区
+ * - https://docs.kernel.org/translations/zh_CN/mm/physical_memory.html
+ * - https://docs.kernel.org/mm/physical_memory.html
+ * 
+ * 实际上存在硬件制约：一些页框由于自身的物理地址的原因不能被一些任务所使用，例如
+*       ISA总线的DMA控制器只能对ram的前16M寻址
+*       在一些具有大容量ram的32位计算机中，CPU不能直接访问所有的物理存储器，因为线性地址空间不够
+ */
 enum zone_type {
 /**
 	 * ZONE_DMA and ZONE_DMA32 are used when there are peripherals not able
@@ -389,8 +430,7 @@ enum zone_type {
 	 * Normal addressable memory is in ZONE_NORMAL. DMA operations can be
 	 * performed on pages in ZONE_NORMAL if the DMA devices support
 	 * transfers to all addressable memory.
-	 * (普通可寻址内存位于ZONE_NORMAL区域。如果DMA设备支持对所有可寻址内存进行传输，
-	 *  则可以对ZONE_NORMAL中的页面执行DMA操作。)
+	 * (普通可寻址内存位于ZONE_NORMAL区域。如果DMA设备支持对所有可寻址内存进行传输，则可以对ZONE_NORMAL中的页面执行DMA操作。)
 	 */
 	ZONE_NORMAL,
 #ifdef CONFIG_HIGHMEM
@@ -417,6 +457,9 @@ enum zone_type {
 
 #ifndef __GENERATING_BOUNDS_H
 
+/**
+ * 1. 要求以L1高速缓存对齐
+ */
 struct zone {
 	/* Read-mostly fields */
 
@@ -441,6 +484,17 @@ struct zone {
 	int node;
 #endif
 	struct pglist_data	*zone_pgdat;
+	/**
+	 * pagesets：表示每个CPU内存分配器中每个CPU缓存的页面信息。
+	 * 
+	 * /proc/zoneinfo
+	 * 
+	 * [007.BOOKs/Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#4.1.6　rmqueue()函数
+	 * per_cpu_pages是一个Per-CPU变量，即每个CPU都有一个本地的per_cpu_pages变量。
+	 * 这个per_cpu_pages数据结构里有一个单页面的链表，里面暂时存放了一小部分单个的物理页面。
+	 * 当系统需要单个物理页面时，就从本地CPU的Per-CPU变量的链表中直接获取物理页面即可，
+	 * 这不仅效率非常高，而且能减少对zone中相关锁的操作。每一个zone里面有一个这样的Per-CPU变量
+	 */
 	struct per_cpu_pageset __percpu *pageset;
 
 #ifndef CONFIG_SPARSEMEM
@@ -451,7 +505,10 @@ struct zone {
 	unsigned long		*pageblock_flags;
 #endif /* CONFIG_SPARSEMEM */
 
-	/* zone_start_pfn == zone_start_paddr >> PAGE_SHIFT */
+	/** 
+	 * zone_start_pfn == zone_start_paddr >> PAGE_SHIFT 
+	 * 
+	 * */
 	unsigned long		zone_start_pfn;
 
 	/*
@@ -520,6 +577,9 @@ struct zone {
 	 * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图3.12　伙伴系统的空闲页块的管理
 	 * 
 	 * 看示意图就可以明白
+	 * 伙伴系统的核心数据结构，管理空闲页块（page block）链表的数组
+	 * 
+	 * MAX_ORDER = 11 , 2^10 * 4K = 4MB , 所以，最大内存块为8MB
 	*/
 	struct free_area	free_area[MAX_ORDER];
 
@@ -568,7 +628,11 @@ struct zone {
 	bool			contiguous;
 
 	ZONE_PADDING(_pad3_)
-	/* Zone statistics */
+	/** 
+	 * Zone statistics 
+	 * zone里有一个关于物理页面统计数据的数组vm_stat[ ]，这个数组里存放了该zone中各种页面的统计数据，包括空闲页面数量NR_FREE_PAGES、不活跃的匿名页面数量NR_ZONE_INACTIVE_ANON等。zone_page_state()函数用于获取zone中空闲页面的数量
+	 * 
+	*/
 	atomic_long_t		vm_stat[NR_VM_ZONE_STAT_ITEMS];
 	atomic_long_t		vm_numa_stat[NR_VM_NUMA_STAT_ITEMS];
 } ____cacheline_internodealigned_in_smp;
@@ -643,19 +707,24 @@ static inline bool zone_intersects(struct zone *zone,
 
 /**
  * 
- * 当CONFIG_NUMA被配置，三个值分别为 0 1 2 , 具体对应关系: ZONELIST_FALLBACK:0  ZONELIST_NOFALLBACK:1 MAX_ZONELISTS:2
+ * 参考:[007.BOOKs/Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#2．prepare_alloc_pages()函数
+ * 
+ * 当CONFIG_NUMA被配置，三个值分别为 0 1 2 , 具体对应关系: 
+ *     ZONELIST_FALLBACK:0    -- 本地内存
+ *     ZONELIST_NOFALLBACK:1  -- 远端内存
+ *     MAX_ZONELISTS:2    -- 元素个数
  */
 enum {
-	ZONELIST_FALLBACK,	/* zonelist with fallback */
+	ZONELIST_FALLBACK, /* zonelist with fallback */
 #ifdef CONFIG_NUMA
 	/*
 	 * The NUMA zonelists are doubled because we need zonelists that
 	 * restrict the allocations to a single node for __GFP_THISNODE.
          * (在 NUMA 架构中，备用区域列表（zonelists）需要被设计为双份，这是因为我们必须为 __GFP_THISNODE 这种内存分配标志提供严格限定在单个节点内分配的专用区域列表)
 	 */
-	ZONELIST_NOFALLBACK,	/* zonelist without fallback (__GFP_THISNODE) */
+	ZONELIST_NOFALLBACK, /* zonelist without fallback (__GFP_THISNODE) */
 #endif
-	MAX_ZONELISTS
+	MAX_ZONELISTS /*C语言技巧:动态枚举个数*/
 };
 
 /**
@@ -672,7 +741,8 @@ struct zoneref {
 };
 
 /**
- * 内核使用zonelist数据结构来管理一个内存节点的zone。
+ * 内核使用zonelist数据结构来管理一个内存节点(这个节点的意思是: NUMA中的Node)的zone。
+ * >>> 一个 struct zone 对应于一个 NUMA 节点上的一段特定物理地址范围
  * 
  * One allocation request operates on a zonelist. A zonelist
  * is a list of zones, the first one is the 'goal' of the
@@ -697,7 +767,7 @@ struct zoneref {
  *    ZONE_DMA32:   _zonerefs[1]->zone_idx=0
  */
 struct zonelist {
-	struct zoneref _zonerefs[MAX_ZONES_PER_ZONELIST + 1];
+	struct zoneref _zonerefs[MAX_ZONES_PER_ZONELIST + 1];  // 按照 zone_type(include/linux/mmzone.h)组织
 };
 
 #ifndef CONFIG_DISCONTIGMEM
@@ -714,39 +784,61 @@ struct deferred_split {
 #endif
 
 /**
- *
- * 通过注释，一个pglist_data就是对一张内存条的抽象表示
+ * 得了解 NUMA SMP架构了
  *
  * On NUMA machines, each NUMA node would have a pg_data_t to describe
  * it's memory layout. On UMA machines there is a single pglist_data which
  * describes the whole memory.
  * (在 NUMA 架构的机器中，每个 NUMA 节点都对应一个 pg_data_t 结构体，用于描述该节点的内存布局；
  *    而在 UMA 架构的机器中，则通过唯一的 pglist_data 结构体描述整个系统的内存。)
- *
+ * >>> Linux 内核中用于管理单个 Node 上所有物理内存的核心结构体,包含该 Node 的统计信息、它所包含的 Zone 列表等
+ * 
  * Memory statistics and page replacement data structures are maintained on a
  * per-zone basis.
  * (内存统计信息和页面置换数据结构是基于每个内存区域（per-zone）维护的)
  * 
  * 在内存节点数据结构pglist_data中有两个zonelist：其中一个是ZONELIST_FALLBACK，指向本地的zone，即包含备选的zone；
  *   另外一个是ZONELIST_NOFALLBACK，用于NUMA系统，指向远端的内存节点的zone。
+ * -------------------------------------------------------------------------
+ *   struct pglist_data
+ *     |-- node_zones     ： struct zone node_zones[MAX_NR_ZONES];
+ *     |
+ *     |-- node_zonelists ： struct zonelist node_zonelists[MAX_ZONELISTS]; 本地内存/远端内存
+ *     
+ *   struct zonelist node_zonelists[MAX_ZONELISTS]; 
+ *     |
+ *     |-- struct zoneref _zonerefs[MAX_ZONES_PER_ZONELIST + 1]; // 这里就是按照zone_type(就在此文件中)划分了,参考: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]图4.2　zone类型、_zoneref[]数组和zone_idx之间的关系
+ *     
+ *     
+ *   struct zoneref
+ *     |
+ *     |-- struct zone *zone;
+ *     |-- int zone_idx;	
+ * ---------------------------------------------------------------------------
  */
 typedef struct pglist_data {
 	/*
 	 * node_zones contains just the zones for THIS node. Not all of the
 	 * zones may be populated, but it is the full list. It is referenced by
 	 * this node's node_zonelists as well as other node's node_zonelists.
-         * (node_zones 仅包含当前节点的内存管理区（zone）。尽管并非所有区都一定被实际填充，但它代表完整的区类型列表。
-         *  该结构既会被本节点的 node_zonelists 引用，也可能被其他节点的 node_zonelists 所引用。)
+     * (node_zones 仅包含当前节点的内存管理区（zone）。尽管并非所有区都一定被实际填充，但它代表完整的区类型列表。
+     *  该结构既会被本节点的 node_zonelists 引用，也可能被其他节点的 node_zonelists 所引用。)
 	 */
 	struct zone node_zones[MAX_NR_ZONES];
 
 	/*
 	 * node_zonelists contains references to all zones in all nodes.
 	 * Generally the first zones will be references to this node's
-	 * node_zones.
-         * (在内存节点数据结构pglist_data中有两个zonelist：其中一个是ZONELIST_FALLBACK，指向本地的zone，即包含备选的zone；
-         *   另外一个是ZONELIST_NOFALLBACK，用于NUMA系统，指向远端的内存节点的zone)
-         *    MAX_ZONELISTS: 就定义在当前文件，值为2，为啥是2？
+	 * node_zones.(node_zonelists包含对所有节点中所有内存区域的引用。通常，首个区域将指向本节点的node_zones)
+     * 
+	 * (在内存节点数据结构pglist_data中有两个zonelist： -> '007.BOOKs/Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub'
+	 *   其中一个是ZONELIST_FALLBACK，指向本地的zone，即包含备选的zone；
+     *   另外一个是ZONELIST_NOFALLBACK，用于NUMA系统，指向远端的内存节点的zone)
+	 * 
+	 * > 得参考: 
+	 *    [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]图4.2　zone类型、_zoneref[]数组和zone_idx之间的关系
+	 *    [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#2．prepare_alloc_pages()函数
+	 * 
 	 */
 	struct zonelist node_zonelists[MAX_ZONELISTS];
 
@@ -777,6 +869,12 @@ typedef struct pglist_data {
 	unsigned long node_spanned_pages; /* total size of physical page
 					     range, including holes */
 	int node_id;
+	/**
+	 * wait_queue_head_t 是内核中的一种基础同步机制。你可以把它想象成一个名单列表，上面挂着正在等待某个特定事件发生的进程
+	 * 本质: 等待队列(Wait Queue)
+	 * 
+	 * 对于 kswapd_wait，名单上通常只有一个常客：该 NUMA 节点对应的 kswapd 线程。
+	 */
 	wait_queue_head_t kswapd_wait;
 	wait_queue_head_t pfmemalloc_wait;
 	struct task_struct *kswapd; 	/* Protected by  mem_hotplug_begin/end() */
@@ -907,8 +1005,28 @@ int local_memory_node(int node_id);
 static inline int local_memory_node(int node_id) { return node_id; };
 #endif
 
-/*
+/**
  * zone_idx() returns 0 for the ZONE_DMA zone, 1 for the ZONE_NORMAL zone, etc.
+ * 
+ * // 调用方式
+ * static inline int is_highmem(struct zone *zone)
+ * {
+ *   #ifdef CONFIG_HIGHMEM
+ *   	return is_highmem_idx(zone_idx(zone));
+ *   #else
+ *   	return 0;
+ *   #endif
+ * }
+ * 
+ * 这个减操作是啥意思? 哦,懂了  
+ * - zone 是数组中的元素, 数组元素地址 - 数组首地址 = 等于索引
+ *    --> 前提: 在 C 语言中，两个同类型指针相减，结果是它们之间相隔的元素个数（而不是字节数）。这里就是 zone 指针与数组首地址之间相隔的 struct zone 元素个数
+ * 
+ *  参考：
+ *  - 《C和指针》：P107 #6.13 指针运算   -- 指针减法，仅允许两个指针都指向同一个数组中的元素
+ *  - 《C Primer Plus (第6版) 中文版》： P253 #10.5 指针操作
+ * 
+ * 
  */
 #define zone_idx(zone)		((zone) - (zone)->zone_pgdat->node_zones)
 
