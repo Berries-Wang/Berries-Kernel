@@ -4164,6 +4164,7 @@ static inline struct page *
 __alloc_pages_may_oom(gfp_t gfp_mask, unsigned int order,
 	const struct alloc_context *ac, unsigned long *did_some_progress)
 {
+	// 结构体初始化方式，标注一下，这种初始化方式更优雅
 	struct oom_control oc = {
 		.zonelist = ac->zonelist,
 		.nodemask = ac->nodemask,
@@ -4185,12 +4186,14 @@ __alloc_pages_may_oom(gfp_t gfp_mask, unsigned int order,
 		return NULL;
 	}
 
-	/*
+	/**
 	 * Go through the zonelist yet one more time, keep very high watermark
 	 * here, this is only to catch a parallel oom killing, we must fail if
 	 * we're still under heavy pressure. But make sure that this reclaim
 	 * attempt shall not depend on __GFP_DIRECT_RECLAIM && !__GFP_NORETRY
 	 * allocation which will never fail due to oom_lock already held.
+	 * (再遍历一次区域列表（zonelist），此时保持极高的水位线（watermark）；这仅仅是为了捕获可能正在发生的并行 OOM 杀除行为。
+	 * 如果内存压力依然巨大，我们必须返回失败。但要确保本次回收尝试不依赖于那些因已持有 oom_lock 而永不失败的分配请求（即设置了 __GFP_DIRECT_RECLAIM 且未设置 __GFP_NORETRY 的请求）。)
 	 */
 	page = get_page_from_freelist((gfp_mask | __GFP_HARDWALL) &
 				      ~__GFP_DIRECT_RECLAIM, order,
@@ -4212,7 +4215,7 @@ __alloc_pages_may_oom(gfp_t gfp_mask, unsigned int order,
 	 */
 	if (gfp_mask & __GFP_RETRY_MAYFAIL)
 		goto out;
-	/* The OOM killer does not needlessly kill tasks for lowmem */
+	/* The OOM killer does not needlessly(不必要地) kill tasks for lowmem */
 	if (ac->highest_zoneidx < ZONE_NORMAL)
 		goto out;
 	if (pm_suspended_storage())
@@ -4231,7 +4234,12 @@ __alloc_pages_may_oom(gfp_t gfp_mask, unsigned int order,
 	if (gfp_mask & __GFP_THISNODE)
 		goto out;
 
-	/* Exhausted what can be done so it's blame time */
+	/** 
+	 * Exhausted what can be done so it's blame time 
+	 * 手段已穷尽，该找个‘替罪羊’了
+	 * 
+	 * out_of_memory: 000.LINUX-5.9/mm/page_alloc.c
+	 * */
 	if (out_of_memory(&oc) || WARN_ON_ONCE(gfp_mask & __GFP_NOFAIL)) {
 		*did_some_progress = 1;
 
@@ -4913,9 +4921,13 @@ retry_cpuset:
 	}
 
 retry:
-	/* Ensure kswapd doesn't accidentally go to sleep as long as we loop */
-	if (alloc_flags & ALLOC_KSWAPD)
+	/** 
+	 * Ensure kswapd doesn't accidentally go to sleep as long as we loop 
+	 * 确保只要循环还在进行，kswapd 就不会意外进入休眠。
+	 * */
+	if (alloc_flags & ALLOC_KSWAPD) {
 		wake_all_kswapds(order, gfp_mask, ac);
+	}
 
 	reserve_flags = __gfp_pfmemalloc_flags(gfp_mask);
 	if (reserve_flags)
@@ -4989,7 +5001,11 @@ retry:
 	if (check_retry_cpuset(cpuset_mems_cookie, ac))
 		goto retry_cpuset;
 
-	/* Reclaim has failed us, start killing things */
+	/** 
+	 * Reclaim has failed us, start killing things
+	 * 内存回收失败，开始终止进程
+	 * OOM Killer？ YES ， OOM Killer代码就在里面
+	 *  */
 	page = __alloc_pages_may_oom(gfp_mask, order, ac, &did_some_progress);
 	if (page)
 		goto got_pg;
