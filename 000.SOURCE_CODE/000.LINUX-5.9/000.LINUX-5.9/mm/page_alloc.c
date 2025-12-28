@@ -5010,7 +5010,12 @@ retry:
 	if (page)
 		goto got_pg;
 
-	/* Avoid allocations with no watermarks from looping endlessly */
+	/** 
+	 * Avoid allocations with no watermarks from looping endlessly
+	 * (避免不带水位线（无限制）的内存分配进入死循环)
+	 * 
+	 * tsk_is_oom_victim: [000.LINUX-5.9/include/linux/oom.h]
+	 *  */
 	if (tsk_is_oom_victim(current) &&
 	    (alloc_flags & ALLOC_OOM ||
 	     (gfp_mask & __GFP_NOMEMALLOC)))
