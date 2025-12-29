@@ -237,6 +237,9 @@ struct kmem_cache *find_mergeable(unsigned int size, unsigned int align,
 
 /**
  * 创建slab描述符
+ * 
+ * @param useroffset
+ * @param usersize 
  */
 static struct kmem_cache *
 create_cache(const char *name, unsigned int object_size, unsigned int align,
@@ -404,7 +407,7 @@ EXPORT_SYMBOL(kmem_cache_create_usercopy);
  * @size: The size of objects to be created in this cache. 缓存对象大小
  * @align: The required alignment for the objects. 缓存对象需要对齐的字节数
  * @flags: SLAB flags
- * @ctor: A constructor for the objects.
+ * @ctor: A constructor for the objects. 对象的构造函数
  *
  * Cannot be called within a interrupt, but can be interrupted.
  * The @ctor is run when new pages are allocated by the cache.

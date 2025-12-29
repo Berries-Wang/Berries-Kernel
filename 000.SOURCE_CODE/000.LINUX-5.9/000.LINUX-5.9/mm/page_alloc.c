@@ -3223,6 +3223,9 @@ void mark_free_pages(struct zone *zone)
 }
 #endif /* CONFIG_PM */
 
+/**
+ * 释放前的检查
+ */
 static bool free_unref_page_prepare(struct page *page, unsigned long pfn)
 {
 	int migratetype;
@@ -3235,6 +3238,9 @@ static bool free_unref_page_prepare(struct page *page, unsigned long pfn)
 	return true;
 }
 
+/**
+ * 释放单个页面到PCP链表中
+ */
 static void free_unref_page_commit(struct page *page, unsigned long pfn)
 {
 	struct zone *zone = page_zone(page);
@@ -3244,12 +3250,16 @@ static void free_unref_page_commit(struct page *page, unsigned long pfn)
 	migratetype = get_pcppage_migratetype(page);
 	__count_vm_event(PGFREE);
 
-	/*
+	/**
 	 * We only track unmovable, reclaimable and movable on pcp lists.
 	 * Free ISOLATE pages back to the allocator because they are being
 	 * offlined but treat HIGHATOMIC as movable pages so we can get those
 	 * areas back if necessary. Otherwise, we may have to free
 	 * excessively into the page allocator
+	 * (我们仅在 PCP 列表上追踪“不可移动”（unmovable）、“可回收”（reclaimable）和“可移动”（movable）类型的页面。
+	 * 对于“隔离”（ISOLATE）类型的空闲页，由于它们正处于下线过程中，应直接将其释放回（全局）分配器；而对于“高原子性”（HIGHATOMIC）类型的页面，
+	 * 则将其视为“可移动”页面处理，以便在必要时能够收回这些区域。
+	 * 否则，我们可能不得不过度地向页面分配器执行释放操作)
 	 */
 	if (migratetype >= MIGRATE_PCPTYPES) {
 		if (unlikely(is_migrate_isolate(migratetype))) {
@@ -3276,13 +3286,18 @@ static void free_unref_page_commit(struct page *page, unsigned long pfn)
 void free_unref_page(struct page *page)
 {
 	unsigned long flags;
+	// 将page数据结构换成页帧号
 	unsigned long pfn = page_to_pfn(page);
 
-	if (!free_unref_page_prepare(page, pfn))
+	if (!free_unref_page_prepare(page, pfn)) {
 		return;
+	}
 
+	// 关闭本地中断
 	local_irq_save(flags);
+	// 释放单个页面到pcp(Per-CPU Pageset)链表中
 	free_unref_page_commit(page, pfn);
+	// 开启本地中断
 	local_irq_restore(flags);
 }
 
@@ -5272,7 +5287,7 @@ unsigned long get_zeroed_page(gfp_t gfp_mask)
 EXPORT_SYMBOL(get_zeroed_page);
 
 /**
- * 页面释放函数
+ * 页面释放函数,分为单页面（4K）和多页面（4xK）释放
  *
  *
  * 
@@ -5291,7 +5306,7 @@ static inline void free_the_page(struct page *page, unsigned int order)
 void __free_pages(struct page *page, unsigned int order)
 {
 	/**
-	 * put_page_testzero 是 Linux 内核中用于管理页引用计数的一个关键函数，
+	 * put_page_testzero[000.LINUX-5.9/include/linux/mm.h] 是 Linux 内核中用于管理页引用计数的一个关键函数，
 	 * 通常用于检查页面的最后一次引用是否被释放
 	 */
 	if (put_page_testzero(page)) {
