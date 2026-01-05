@@ -281,7 +281,9 @@ create_cache(const char *name, unsigned int object_size, unsigned int align,
 	}
 
 	err = -ENOMEM;
-	// 创建一个kmem_cache数据结构
+	/**
+	 * 创建一个kmem_cache数据结构,函数实现是哪个?
+	 */
 	s = kmem_cache_zalloc(kmem_cache, GFP_KERNEL);
 	if (!s) {
 		goto out;

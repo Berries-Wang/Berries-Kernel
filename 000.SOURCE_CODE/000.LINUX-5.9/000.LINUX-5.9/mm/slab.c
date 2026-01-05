@@ -1684,6 +1684,10 @@ static void slabs_destroy(struct kmem_cache *cachep, struct list_head *list)
  *   2)一个slab分配器中能包含多少个slab对象？
  *   3)一个slab分配器中包含多少个着色区？
  * 
+ * <pre>
+ *    这时候，还没有实际分配物理内存页吧!
+ * </pre>
+ * 
  * calculate_slab_order - calculate size (page order) of slabs
  * @cachep: pointer to the cache that is being created
  * @size: size of objects to be created in this cache.
@@ -1730,6 +1734,9 @@ static size_t calculate_slab_order(struct kmem_cache *cachep,
 			struct kmem_cache *freelist_cache;
 			size_t freelist_size;
 
+			/**
+			 * sizeof(freelist_idx_t) 何解?
+			 */
 			freelist_size = num * sizeof(freelist_idx_t);
 			freelist_cache = kmalloc_slab(freelist_size, 0u);
 			if (!freelist_cache)
@@ -1770,8 +1777,9 @@ static size_t calculate_slab_order(struct kmem_cache *cachep,
 		if (gfporder >= slab_max_order)
 			break;
 
-		/*
+		/**
 		 * Acceptable internal fragmentation?
+		 * (允许范围内的内部碎片)
 		 */
 		if (left_over * 8 <= (PAGE_SIZE << gfporder))
 			break;
@@ -1872,12 +1880,15 @@ __kmem_cache_alias(const char *name, unsigned int size, unsigned int align,
 /**
  * OBJFREELIST_SLAB模式下的slab分配器布局
  * #图4.8　OBJFREELIST_SLAB模式下的slab分配器布局
+ * 
+ * @param size 对象大小，包含对齐字节和调试等元数据的大小
  */
-static bool set_objfreelist_slab_cache(struct kmem_cache *cachep,
-			size_t size, slab_flags_t flags)
+static bool set_objfreelist_slab_cache(struct kmem_cache *cachep, size_t size,
+				       slab_flags_t flags)
 {
 	size_t left;
 
+	// cachep->num: 一个slab分配器中最多可以有多少个对象
 	cachep->num = 0;
 
 	/**
@@ -1892,23 +1903,30 @@ static bool set_objfreelist_slab_cache(struct kmem_cache *cachep,
 	 * 那这个自动初始化就是自动选择slab分配器布局模式吗?[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#4.2.3　slab分配器的内存布局
 	 * 
 	 */
-	if (unlikely(slab_want_init_on_free(cachep)))
+	if (unlikely(slab_want_init_on_free(cachep))) {
 		return false;
+	}
 
-	if (cachep->ctor || flags & SLAB_TYPESAFE_BY_RCU)
+	if (cachep->ctor || flags & SLAB_TYPESAFE_BY_RCU) {
 		return false;
+	}
 
+	/**
+	 * 通过函数注释，left是分配后，slab中剩余的字节数
+	*/
 	left = calculate_slab_order(cachep, size,
 				    flags | CFLGS_OBJFREELIST_SLAB);
-	if (!cachep->num)
+	if (!cachep->num) {
 		return false;
+	}
 
 	/**
 	 * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图4.8　OBJFREELIST_SLAB模式下的slab分配器布局
 	 * 这个就是上图中的内容： 是否可以将空闲对象索引(freelist)存储在 slab 对象内部
 	 */
-	if (cachep->num * sizeof(freelist_idx_t) > cachep->object_size)
+	if (cachep->num * sizeof(freelist_idx_t) > cachep->object_size) {
 		return false;
+	}
 
 	cachep->colour = left / cachep->colour_off;
 
@@ -1979,7 +1997,10 @@ static bool set_on_slab_cache(struct kmem_cache *cachep,
  * Returns a ptr to the cache on success, NULL on failure.
  * Cannot be called within a int, but can be interrupted.
  * The @ctor is run when new pages are allocated by the cache.
- *
+ * (这句代码注释有意思了! 'The @ctor is run when new pages are allocated by the cache.'
+ * , 说明ctor函数的功能)
+ * 
+ * 
  * The flags are
  *
  * %SLAB_POISON - Poison the slab with a known test pattern (a5a5a5a5)
@@ -2002,6 +2023,9 @@ int __kmem_cache_create(struct kmem_cache *cachep, slab_flags_t flags)
 	size_t ralign = BYTES_PER_WORD;
 	gfp_t gfp;
 	int err;
+	/**
+	 * 对象的大小： 包含对齐字节和调试等元数据的大小
+	 */
 	unsigned int size = cachep->size;
 
 #if DEBUG
@@ -2118,6 +2142,9 @@ int __kmem_cache_create(struct kmem_cache *cachep, slab_flags_t flags)
      *   正常模式，传统的布局模式, 见 [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图4.10　正常模式下的slab分配器布局
 	 * 
 	 * set_off_slab_cache()函数以及set_on_slab_cache()函数等最终都会调用calculate_slab_order()函数
+	 * <pre>
+	 *   内部调用 calculate_slab_order 函数，会计算该slab缓存需要多少个内存页!!!
+	 * </pre>
      */
 	if (set_objfreelist_slab_cache(cachep, size, flags)) {
 		flags |= CFLGS_OBJFREELIST_SLAB;

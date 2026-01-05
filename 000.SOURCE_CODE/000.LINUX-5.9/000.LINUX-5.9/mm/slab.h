@@ -547,13 +547,13 @@ struct kmem_cache_node {
 	struct list_head slabs_free;    /* 完全空闲的slab链表 */
 	unsigned long total_slabs;	/* length of all slab lists */
 	unsigned long free_slabs;	/* length of free slab list only */
-	unsigned long free_objects;
-	unsigned int free_limit;
-	unsigned int colour_next;	/* Per-node cache coloring */
-	struct array_cache *shared;	/* shared per node */
+	unsigned long free_objects;  /*空闲对象的数目*/
+	unsigned int free_limit; /*表示slab节点中所有空闲对象的最大阈值，即slab节点中可容许的空闲对象数目最大阈值, 超过这个最大值会怎样?*/
+	unsigned int colour_next;	/* Per-node cache coloring : 当前着色区大小,着色区是啥?*/
+	struct array_cache *shared;	/* shared per node:  共享对象缓冲区。在多核CPU中，除了本地CPU外，slab节点中还有一个所有CPU都共享的对象缓冲池*/
 	struct alien_cache **alien;	/* on other nodes */
-	unsigned long next_reap;	/* updated without locking */
-	int free_touched;		/* updated without locking */
+	unsigned long next_reap;	/* updated without locking : 下一次收割slab节点的时间???*/
+	int free_touched;		/* updated without locking : 表示访问了slabs_free的slab节点*/
 #endif
 
 #ifdef CONFIG_SLUB

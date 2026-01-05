@@ -7,31 +7,49 @@
 /**
  * Definitions unique to the original Linux SLAB allocator.（最初Linux SLAB分配器特有的定义）
  *
- * slab 描述符
+ * slab 描述符:
+ * <pre>
+ *   疑问:
+ * - slab/slub/slob 如何与struct page 相关联?
+ *   - int __kmem_cache_create(struct kmem_cache *cachep, slab_flags_t flags);
+ *      + set_objfreelist_slab_cache
+ *        - calculate_slab_order: 计算所需要的内存页的数量
+ * </pre>
  */
 struct kmem_cache {
 	struct array_cache __percpu *cpu_cache; // array_cache数据结构，每个CPU都有一个，表示本地对象缓冲池
 
 /* 1) Cache tunables. Protected by slab_mutex */
 	unsigned int batchcount;
+	/**
+	 * 表示slab描述符中空闲对象的最大阈值。
+	 * 当本地对象缓冲池的空闲对象数目大于limit时，
+	 * 就会主动释放batchcount个对象，
+	 * 便于内核回收和销毁slab分配器
+	 */
 	unsigned int limit;
+	/*共享对象缓冲池*/
 	unsigned int shared;
-
+    /*The size of an object including metadata :对象的长度，这个长度已经加上对齐字节 --> gemini: size 字段代表每个已分配对象的总大小，包括用于对齐的填充（Padding）以及任何调试元数据*/
 	unsigned int size;
 	struct reciprocal_value reciprocal_buffer_size;
 /* 2) touched by every alloc & free from the backend */
-
+    /*对象的分配掩码*/
 	slab_flags_t flags;		/* constant flags */
-	unsigned int num;		/* # of objs per slab */
+	unsigned int num;		/* # of objs per slab : 一个slab分配器中最多可以有多少个对象*/
 
 /* 3) cache_grow/shrink */
-	/* order of pgs per slab (2^n) */
+	/* order of pgs per slab (2^n) :一个slab分配器中占用2^gfporder个页面*/
 	unsigned int gfporder;
 
-	/* force GFP flags, e.g. GFP_DMA */
+	/* force GFP flags, e.g. GFP_DMA :分配掩码*/
 	gfp_t allocflags;
 
-	size_t colour;			/* cache colouring range (一个slab分配器中有多少个不同的高速缓存行，用于着色) */
+	/** 
+	 * cache colouring range (一个slab分配器中有多少个不同的高速缓存行，用于着色)
+	 * 啥意思?
+	 *  */
+	size_t colour;			
 	unsigned int colour_off;	/* colour offset (一个着色区的长度，和L1高速缓存行大小相同)*/
 	struct kmem_cache *freelist_cache; /*用于OFF_SLAB模式的slab分配器，使用额外的内存来保存slab管理区域 */
 	/**
@@ -46,7 +64,7 @@ struct kmem_cache {
 	void (*ctor)(void *obj);
 
 /* 4) cache creation/removal */
-	const char *name;   // slab描述符的名称
+	const char *name;   /*slab描述符的名称*/ 
 	struct list_head list; // 链表节点，用于把slab描述符添加到全局链表slab_caches中
 	/**
 	 * 用于表示这个slab描述符的引用计数。当创建其他slab描述符并需要引用该描述符时会增加引用计数
@@ -96,12 +114,9 @@ struct kmem_cache {
 	unsigned int *random_seq;
 #endif
     /**
-	 * Usercopy区域的偏移量
+	 * 这两个字段参考: [000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/mm/slab_common.c]#'create_cache'函数的代码注释
 	 */
 	unsigned int useroffset;	/* Usercopy region offset */
-	/**
-	 * Usercopy区域的大小
-	 */
 	unsigned int usersize;		/* Usercopy region size */
     
 	/**
