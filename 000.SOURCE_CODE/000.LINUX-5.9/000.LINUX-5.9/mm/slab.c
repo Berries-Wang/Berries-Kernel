@@ -2959,6 +2959,12 @@ static noinline struct page *get_valid_first_slab(struct kmem_cache_node *n,
 	return NULL;
 }
 
+/**
+ * 通过查看代码发现，
+ * 该函数主要功能还是判断slab中是否有足够的空闲内存提供分配
+ * 
+ * 
+ */
 static struct page *get_first_slab(struct kmem_cache_node *n, bool pfmemalloc)
 {
 	struct page *page;
@@ -3057,20 +3063,32 @@ static void *cache_alloc_refill(struct kmem_cache *cachep, gfp_t flags)
 	ac = cpu_cache_get(cachep);
 	batchcount = ac->batchcount;
 	if (!ac->touched && batchcount > BATCHREFILL_LIMIT) {
-		/*
+		/**
 		 * If there was little recent activity on this cache, then
 		 * perform only a partial refill.  Otherwise we could generate
 		 * refill bouncing.
+		 * (如果该缓存近期活动较少，则仅执行部分填充；否则，可能会引发填充抖动（Refill Bouncing）)
+		 *    + 部分填充: Partial refill (部分填充): 不一次性填满整个缓存行或缓冲区，以节省带宽或资源
+		 *    + 填充抖动: “Bouncing” (抖动/反弹): 指缓存内容由于频繁的替换和重新填充，导致数据在缓存和主存（或不同层级）之间反复迁移
 		 */
 		batchcount = BATCHREFILL_LIMIT;
 	}
 	// 获取slab节点
 	n = get_node(cachep, node);
 
+	/**
+	 * 进入到此函数执行的前提就是 ac->avail为0
+	 */
 	BUG_ON(ac->avail > 0 || !n);
-	// shared： 共享对象缓冲池
+	/**
+	 * shared： 共享对象缓冲池
+	 */
 	shared = READ_ONCE(n->shared);
-	// 都没有空闲对象
+	/**
+	 *  都没有空闲对象：
+	 *     - 共享对象缓冲池
+	 *     - CPU 绑定缓冲池(本地对象缓冲池)
+	 */
 	if (!n->free_objects && (!shared || !shared->avail)) {
 		goto direct_grow;
 	}
@@ -3093,6 +3111,9 @@ static void *cache_alloc_refill(struct kmem_cache *cachep, gfp_t flags)
 		 * 注意，一个slab分配器由n个连续物理页面组成，因此这里返回slab分配器中第一个物理页面的page数据结构
 		 *  */
 		page = get_first_slab(n, false);
+		/**
+		 * 没有足够的内存进行分配
+		 */
 		if (!page) {
 			goto must_grow;
 		}
@@ -3214,7 +3235,10 @@ static inline void *____cache_alloc(struct kmem_cache *cachep, gfp_t flags)
 
 	STATS_INC_ALLOCMISS(cachep);
 
-	// 
+	/**
+	 * 执行到此处，说明:
+	 * - ac->avail 为 0,
+	 */
 	objp = cache_alloc_refill(cachep, flags);
 	/*
 	 * the 'ac' may be updated by cache_alloc_refill(),
@@ -3464,8 +3488,8 @@ __do_cache_alloc(struct kmem_cache *cachep, gfp_t flags)
 /**
  * 分配slab缓存对象 (这个缓存对象的类型是创建slab描述符时的类型)
  */
-static __always_inline void *
-slab_alloc(struct kmem_cache *cachep, gfp_t flags, unsigned long caller)
+static __always_inline void *slab_alloc(struct kmem_cache *cachep, gfp_t flags,
+					unsigned long caller)
 {
 	unsigned long save_flags;
 	void *objp;
