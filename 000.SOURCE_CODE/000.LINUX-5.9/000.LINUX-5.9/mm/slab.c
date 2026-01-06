@@ -2970,18 +2970,27 @@ static struct page *get_first_slab(struct kmem_cache_node *n, bool pfmemalloc)
 	struct page *page;
 
 	assert_spin_locked(&n->list_lock);
+	/**
+	 * 先从部分满的队列,
+	 * 为什么返回的是 struct page* ? 因为里面使用了 'container_of'宏
+	 */
 	page = list_first_entry_or_null(&n->slabs_partial, struct page,
 					slab_list);
 	if (!page) {
 		n->free_touched = 1;
+		/**
+		 * 查询空闲队列
+		 */
 		page = list_first_entry_or_null(&n->slabs_free, struct page,
 						slab_list);
-		if (page)
+		if (page) {
 			n->free_slabs--;
+		}
 	}
 
-	if (sk_memalloc_socks())
+	if (sk_memalloc_socks()) {
 		page = get_valid_first_slab(n, page, pfmemalloc);
+	}
 
 	return page;
 }
@@ -3251,6 +3260,10 @@ out:
 	 * To avoid a false negative, if an object that is in one of the
 	 * per-CPU caches is leaked, we need to make sure kmemleak doesn't
 	 * treat the array pointers as a reference to the object.
+	 * (为了避免误报（false negative），如果某个存在于 per-CPU 缓存中的对象发生了泄漏，
+	 * 我们需要确保 kmemleak 不会将数组指针视为对该对象的引用。)
+	 * 
+	 * kmemleak: 内核泄露检测工具
 	 */
 	if (objp) {
 		kmemleak_erase(&ac->entry[ac->avail]);

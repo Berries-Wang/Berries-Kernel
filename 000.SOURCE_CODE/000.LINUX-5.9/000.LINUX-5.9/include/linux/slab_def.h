@@ -5,6 +5,10 @@
 #include <linux/reciprocal_div.h>
 
 /**
+ * 
+ * 数据结构参考:
+ *   - [007.BOOKs/Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub](#图4.17　slab系统的架构)
+ * 
  * Definitions unique to the original Linux SLAB allocator.（最初Linux SLAB分配器特有的定义）
  *
  * slab 描述符:

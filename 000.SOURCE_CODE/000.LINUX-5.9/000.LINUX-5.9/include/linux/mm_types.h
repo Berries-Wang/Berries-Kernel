@@ -68,9 +68,9 @@ struct mem_cgroup;
 /**
  * 
  * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.1.1　page数据结构
- * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.2　RMAP   -- Reverse Mapping Map （反向映射）,确定页面是否被某个进程映射
- * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.3 页面回收 -- 页交换(swapping) 、页回收(page reclaim)
- * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.3.1　LRU链表 -- 页交换算法(Linux内核中采用的页交换算法主要是经典LRU链表算法和第二次机会（second chance）法)
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.2　RMAP       -- Reverse Mapping Map （反向映射）,确定页面是否被某个进程映射
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.3 页面回收     -- 页交换(swapping) 、页回收(page reclaim)
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.3.1　LRU链表   -- 页交换算法(Linux内核中采用的页交换算法主要是经典LRU链表算法和第二次机会（second chance）法)
  * 
  * 
  * 页面回收:
@@ -91,6 +91,7 @@ struct page {
 			 * @lru: Pageout list, eg. active_list protected by
 			 * pgdat->lru_lock.  Sometimes used as a generic list
 			 * by the page owner.
+			 * lru: LRU链表节点，匿名页面或文件映射页面会通过该成员添加到LRU链表中
 			 */
 			struct list_head lru;
 			/** See page-flags.h for PAGE_MAPPING_FLAGS
@@ -106,10 +107,13 @@ struct page {
              *  	page->index = migratetype;
              *  }
 			 * 存储的是 migratetype 
+			 * 
+			 * index: 表示这个页面在一个映射中的序号或偏移量???
 			 */
 			pgoff_t index;		/* Our offset within mapping. */
 			/**
-			 * @private: Mapping-private opaque data.
+			 * @private: 指向私有数据的指针
+			 * @private: Mapping-private opaque data.(映射私有不透明数据)
 			 * Usually used for buffer_heads if PagePrivate.
 			 * Used for swp_entry_t if PageSwapCache.
 			 * Indicates order in the buddy system if PageBuddy.
@@ -125,8 +129,14 @@ struct page {
 		};
 		struct {	/* slab, slob and slub */
 			union {
+				/**
+				 * slab_list: slab链表节点
+				 */
 				struct list_head slab_list;
-				struct {	/* Partial pages */
+				struct {	/* Partial pages： 部分页， 内存页没有完全被填满*/
+					/**
+					 * next: 在slub分配器中使用
+					 */
 					struct page *next;
 #ifdef CONFIG_64BIT
 					int pages;	/* Nr of pages left */
@@ -141,14 +151,23 @@ struct page {
 			 * slab_alloc 从该函数开始分析，slab.c
 			 * 页面对应的slab描述符，
 			 * 即 当前的page是被slab_cache所使用的
+			 * 
+			 * slab_cache: slab缓存描述符，slab分配器中的第一个物理页面的page数据结构中的slab_cache指向slab缓存描述符
 			 */
 			struct kmem_cache *slab_cache; /* not slob */
 			/**
 			 *  Double-word boundary 
 			 * slab的管理信息
+			 * freelist: 管理区。管理区可以看作一个数组，数组的每个成员占用1字节，每个成员代表一个slab对象
+			 * 
 			*/
 			void *freelist;		/* first free object */
 			union {
+				/**
+				 * s_sem: 在slab分配器中用来指向第一个slab对象的起始地址:
+				 * 参考: static inline void *index_to_obj(struct kmem_cache *cache, struct page *page,
+				 unsigned int idx); 由 cache_alloc_refill 函数调用
+				 */
 				void *s_mem;	/* slab: first object */
 				unsigned long counters;		/* SLUB */
 				struct {			/* SLUB */
@@ -229,6 +248,9 @@ struct page {
 		 */
 		unsigned int page_type;
 
+		/**
+		 * 表示slab分配器中活跃对象的数量。当为0时，表示这个slab分配器中没有活跃对象，可以销毁这个slab分配器。活跃对象就是已经被迁移到对象缓冲池中的对象
+		 */
 		unsigned int active;		/* SLAB */
 		int units;			/* SLOB */
 	};
