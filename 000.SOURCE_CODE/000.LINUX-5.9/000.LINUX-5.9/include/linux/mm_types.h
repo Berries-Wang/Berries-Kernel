@@ -364,6 +364,8 @@ struct vm_userfaultfd_ctx {};
  * per VM-area/task. A VM area is any part of the process virtual memory
  * space that has a special rule for the page-fault handlers (ie a shared
  * library, the executable area etc).
+ * (该结构体描述了一个虚拟内存区域（Virtual Memory Area, VMA）。每个虚拟内存区域或每个任务（进程）都对应一个这样的结构。
+ * 虚拟内存区域是指进程虚拟内存空间中，任何对**页面异常处理程序（page-fault handlers）**有特殊规则的特定部分（例如：共享库、可执行代码区等）)
  * 
  * VMA
  * 
@@ -385,6 +387,9 @@ struct vm_area_struct {
 	 */
 	struct vm_area_struct *vm_next, *vm_prev;
 
+	/**
+	 * vm_rb：VMA作为一个节点加入红黑树，每个进程的mm_struct数据结构中都有一棵红黑树——mm->mm_rb
+	 */
 	struct rb_node vm_rb;
 
 	/*
@@ -402,8 +407,24 @@ struct vm_area_struct {
 	/*
 	 * Access permissions of this VMA.
 	 * See vmf_insert_mixed_prot() for discussion.
+	 * 
+	 * vm_page_prot：VMA的访问权限
+	 * 
+	 * VMA属性的标志位可以任意组合，`但是最终要落实到硬件机制上`，即页表项的属性中:  (IN [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图4.21　VMA属性到页表项属性的转换)
+	 * 转换的必要性：VMA的属性是操作系统抽象出来的，与具体硬件无关。
+	 *      但是，当操作系统为VMA建立页表映射时，必须将VMA的属性转换为具体处理器架构的页表项属性。
+	 *      这是因为硬件在访问内存时，会根据页表项的属性来进行权限检查和控制   
+	 * 
+	 * 即： 访问属性机制还是通过硬件来实现的，如： 缺页异常机制...
+	 * 
+	 * 且，不同的硬件平台，机制可能不一致
+	 * 
+	 * 转换函数: vm_get_page_prot  [000.LINUX-5.9/mm/mmap.c]
 	 */
 	pgprot_t vm_page_prot;
+	/**
+	 * vm_flags：描述该VMA的一组标志位
+	 */
 	unsigned long vm_flags;		/* Flags, see mm.h. */
 
 	/*
@@ -429,13 +450,19 @@ struct vm_area_struct {
 					  * page_table_lock */
 	struct anon_vma *anon_vma;	/* Serialized by page_table_lock */
 
-	/* Function pointers to deal with this struct. */
+	/** Function pointers to deal with this struct. 
+	 * 指向许多方法的集合，这些方法用于在VMA中执行各种操作，通常用于文件映射
+	*/
 	const struct vm_operations_struct *vm_ops;
 
-	/* Information about our backing store: */
-	unsigned long vm_pgoff;		/* Offset (within vm_file) in PAGE_SIZE
-					   units */
-	struct file * vm_file;		/* File we map to (can be NULL). */
+	/** Information about our backing store: 
+	 * vm_pgoff：指定文件映射的偏移量，这个变量的单位不是字节，而是页面的大小（PAGE_SIZE）。对于匿名页面来说，它的值可以是0或者vm_addr/PAGE_SIZE。
+	*/
+	unsigned long vm_pgoff;		/* Offset (within vm_file) in PAGE_SIZE  units */
+	/**
+	  *  vm_file：指向file的实例，描述一个被映射的文件
+	*/
+	struct file *vm_file; /* File we map to (can be NULL). */
 	void * vm_private_data;		/* was vm_pte (shared mem) */
 
 #ifdef CONFIG_SWAP
@@ -464,6 +491,7 @@ struct core_state {
 struct kioctx_table;
 /**
  * Linux内核需要管理每个进程所有的内存区域以及它们对应的页表映射，所以必须抽象出一个数据结构，这就是mm_struct数据结构
+ * > 参考:[001.UNIX-DOCS/000.内存管理/013.进程内存管理/README.md]: 进程可以通过内核的内存管理机制动态地添加和删除这些内存区域，这些内存区域在Linux内核采用VMA数据结构(struct vm_area_struct , struct mm_struct成员)来抽象描述
  * 
  * > [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图4.19　mm_struct数据结构
  */
@@ -471,17 +499,25 @@ struct mm_struct {
 	struct {
 		struct vm_area_struct *mmap;		/* list of VMAs  VMA 链表: 管理 vm_area_struct 的数据结构之一*/
 		/**
-		 * 管理 vm_area_struct 的数据结构之二
+		 * 管理 vm_area_struct 的数据结构之二: VMA红黑树的根节点
 		 * 
 		 * 所以，通过 mmap 或 mm_rb 都可以遍历和查找所有的VMA
 		 */
 		struct rb_root mm_rb;
 		u64 vmacache_seqnum;                   /* per-thread vmacache */
 #ifdef CONFIG_MMU
-		unsigned long (*get_unmapped_area) (struct file *filp,
-				unsigned long addr, unsigned long len,
-				unsigned long pgoff, unsigned long flags);
+		  /**
+           * get_unmapped_area：用于判断虚拟内存空间是否有足够的空间，返回一段没有映射过的空间的起始地址，这个函数会使用具体的处理器架构的实现，如对于ARM架构，Linux内核就有相应的函数实现。
+          */
+		unsigned long (*get_unmapped_area)(struct file *filp,
+						   unsigned long addr,
+						   unsigned long len,
+						   unsigned long pgoff,
+						   unsigned long flags);
 #endif
+        /**
+		 * mmap_base：指向mmap空间的起始地址。在32位处理器中，mmap空间的起始地址是0x4000 0000
+		 */
 		unsigned long mmap_base;	/* base of mmap area */
 		unsigned long mmap_legacy_base;	/* base of mmap area in bottom-up allocations */
 #ifdef CONFIG_HAVE_ARCH_COMPAT_MMAP_BASES
