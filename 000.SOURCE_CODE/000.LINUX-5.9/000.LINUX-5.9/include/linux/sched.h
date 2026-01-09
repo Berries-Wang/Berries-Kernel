@@ -1272,7 +1272,7 @@ struct task_struct {
 	/** 
 	 * CGroups 相关
 	 * Control Group info protected by css_set_lock:
-	 * 
+	 * 参考: [001.UNIX-DOCS/032.Control-Groups(CGroups)/README.md]
 	 *  */
 	struct css_set __rcu		*cgroups;
 	/* cg_list protected by css_set_lock and tsk->alloc_lock: */
