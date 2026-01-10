@@ -9,6 +9,10 @@
 |-|-|-|
 
 
+##  cgroup 组成部分
+- 核心（core）：主要负责层级化地组织进程；
+- 控制器（controllers）：大部分控制器负责 cgroup 层级中 特定类型的系统资源的分配，少部分 utility 控制器用于其他目的。
+
 ---
 
 ## 相关概念
@@ -16,9 +20,9 @@
 |-|-|-|
 |任务(Task)|系统中的一个进程，在内核中使用 struct task_struct表示|-|
 |-|-|-|
-|层级(hierarchy)|cgroup以树的形式组织，每一个树称之为一个层级|Hierarchy 怎么理解? 参考:[Linux资源管理之cgroups简介](../999.IMGS/Screenshot%202026-01-08%20at%2023-03-23%20Linux资源管理之cgroups简介%20-%20美团技术团队.png)|
+|层级(hierarchy)|cgroup以树的形式组织，每一个树称之为一个层级|Hierarchy 怎么理解? 参考:[Linux资源管理之cgroups简介](../999.IMGS/Screenshot%202026-01-08%20at%2023-03-23%20Linux资源管理之cgroups简介%20-%20美团技术团队.png) <sub>应该是cgroup v1</sub> <br/> - [001.UNIX-DOCS/032.Control-Groups(CGroups)/cgroup-hierarchy.md](./cgroup-hierarchy.md) <br/> - [000.LINUX-5.9/Documentation/admin-guide/man7-cgroups.7.md](../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/Documentation/admin-guide/man7-cgroups.7.md)#'Terminology(术语)' <br/>  |
 |-|-|-|
-|子系统(subsystem)|一个资源控制器|- memory:设定内存使用限制，统计内存使用情况 </br> - HugeTLB: 限制透明大页的使用量 </br> - cpu: 限制进程CPU的使用率;</br> - cpuacct 子系统，可以统计 cgroups 中的进程的 cpu 使用报告。</br>- cpuset: 为进程分配单独的cpu/mem节点 </br>- blkio: 为块设备设定输入/输出限制 </br> - devices: 允许或拒绝进程访问设备 </br> - net_cls: 标记进程的网络数据包，并进行控制 </br> - net_prio: 动态配置进程每隔网络接口的流量优先级 </br> - freezer: 挂起或恢复进程 </br>- ns 子系统，可以使不同 cgroups 下面的进程使用不同的 namespace。|
+|子系统(subsystem/controller)|一个资源控制器|- memory:设定内存使用限制，统计内存使用情况 </br> - HugeTLB: 限制透明大页的使用量 </br> - cpu: 限制进程CPU的使用率;</br> - cpuacct 子系统，可以统计 cgroups 中的进程的 cpu 使用报告。</br>- cpuset: 为进程分配单独的cpu/mem节点 </br>- blkio: 为块设备设定输入/输出限制 </br> - devices: 允许或拒绝进程访问设备 </br> - net_cls: 标记进程的网络数据包，并进行控制 </br> - net_prio: 动态配置进程每隔网络接口的流量优先级 </br> - freezer: 挂起或恢复进程 </br>- ns 子系统，可以使不同 cgroups 下面的进程使用不同的 namespace。|
 
 
 ---
