@@ -376,6 +376,7 @@ struct vm_area_struct {
     /**
 	 * vm_start和vm_end：指定VMA在进程地址空间的起始地址和结束地址 ?
 	 * 这里的进程地址空间是什么? 看图就很容易理解了
+	 * - [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图4.20　从进程角度看VMA
 	 */ 
 	unsigned long vm_start;		/* Our start address within vm_mm. */
 	unsigned long vm_end;		/* The first byte after our end address
@@ -423,7 +424,10 @@ struct vm_area_struct {
 	 */
 	pgprot_t vm_page_prot;
 	/**
-	 * vm_flags：描述该VMA的一组标志位
+	 * vm_flags：描述该VMA的一组标志位, 即 页面的属性，最终还是得落实到硬件机制上，见:
+	 * - [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图4.21　VMA属性到页表项属性的转换
+	 * <mm/mmap.c> # pgprot_t vm_get_page_prot(unsigned long vm_flags)
+	 * 
 	 */
 	unsigned long vm_flags;		/* Flags, see mm.h. */
 
@@ -494,6 +498,7 @@ struct kioctx_table;
  * > 参考:[001.UNIX-DOCS/000.内存管理/013.进程内存管理/README.md]: 进程可以通过内核的内存管理机制动态地添加和删除这些内存区域，这些内存区域在Linux内核采用VMA数据结构(struct vm_area_struct , struct mm_struct成员)来抽象描述
  * 
  * > [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图4.19　mm_struct数据结构
+ *   - 该结构体映射一个完整的虚拟地址空间 
  */
 struct mm_struct {
 	struct {
