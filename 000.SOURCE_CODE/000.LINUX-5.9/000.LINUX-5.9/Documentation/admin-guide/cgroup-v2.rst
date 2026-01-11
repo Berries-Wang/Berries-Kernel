@@ -95,7 +95,8 @@ Terminology
 singular form is used to designate the whole feature and also as a
 qualifier as in "cgroup controllers".  When explicitly referring to
 multiple individual control groups, the plural form "cgroups" is used.
-
+(“cgroup”代表“control group”（控制组）,且首字母永远不需要大写。其单数形式用于指代该功能的整体,
+也用作限定词,例如“cgroup 控制器”（cgroup controllers）。只有在明确指代多个独立的控制组时,才使用复数形式“cgroups”。)
 
 What is cgroup?
 ---------------
@@ -103,6 +104,7 @@ What is cgroup?
 cgroup is a mechanism to organize processes hierarchically and
 distribute system resources along the hierarchy in a controlled and
 configurable manner.
+(cgroup 是一种以层级化方式组织进程，并以受控且可配置的方式沿该层级结构分配系统资源的机制。)
 
 cgroup is largely composed of two parts - the core and controllers.
 cgroup core is primarily responsible for hierarchically organizing
@@ -110,6 +112,9 @@ processes.  A cgroup controller is usually responsible for
 distributing a specific type of system resource along the hierarchy
 although there are utility controllers which serve purposes other than
 resource distribution.
+(cgroup 主要由两个部分组成：核心（core）和控制器（controller）。
+cgroup 核心主要负责以层级化方式组织进程。cgroup 控制器通常负责沿该层级结构分配特定类型的系统资源，
+但也存在一些用于资源分配以外目的的辅助性控制器。)
 
 cgroups form a tree structure and every process in the system belongs
 to one and only one cgroup.  All threads of a process belong to the
@@ -117,6 +122,10 @@ same cgroup.  On creation, all processes are put in the cgroup that
 the parent process belongs to at the time.  A process can be migrated
 to another cgroup.  Migration of a process doesn't affect already
 existing descendant processes.
+(cgroup 构成了一个树状结构，系统中的每个进程都属于且仅属于一个 cgroup。
+一个进程的所有线程都属于同一个 cgroup。
+在创建时，所有进程都会被放入其父进程当时所属的 cgroup 中。
+进程可以被迁移到另一个 cgroup，但进程的迁移不会影响已经存在的后代进程。)
 
 Following certain structural constraints, controllers may be enabled or
 disabled selectively on a cgroup.  All controller behaviors are
@@ -126,6 +135,7 @@ sub-hierarchy of the cgroup.  When a controller is enabled on a nested
 cgroup, it always restricts the resource distribution further.  The
 restrictions set closer to the root in the hierarchy can not be
 overridden from further away.
+()
 
 
 Basic Operations
