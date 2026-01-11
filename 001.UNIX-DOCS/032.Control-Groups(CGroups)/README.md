@@ -1,7 +1,7 @@
-# Control Groups(CGroups)
+# Control Groups(cgroups)
 
-## What is cgroup? / What are CGroups
-|What is cgroup? / What are CGroups|解释说明|备注|
+## What is cgroup? / What are cgroups
+|What is cgroup? / What are cgroups|解释说明|备注|
 |-|-|-|
 |cgroup-v2|cgroup is a mechanism to organize processes hierarchically and distribute system resources along the hierarchy in a controlled and configurable manner|cgroup 是一种以层级化方式组织进程，并按该层级结构，以受控且可配置的方式分配系统资源的机制。|
 |-|-|-|
@@ -20,7 +20,7 @@
 |-|-|-|
 |任务(Task)|系统中的一个进程，在内核中使用 struct task_struct表示|-|
 |-|-|-|
-|层级(hierarchy)|cgroup以树的形式组织，每一个树称之为一个层级|Hierarchy 怎么理解? 参考:[Linux资源管理之cgroups简介](../999.IMGS/Screenshot%202026-01-08%20at%2023-03-23%20Linux资源管理之cgroups简介%20-%20美团技术团队.png) <sub>应该是cgroup v1</sub> <br/> - [001.UNIX-DOCS/032.Control-Groups(CGroups)/cgroup-hierarchy.md](./cgroup-hierarchy.md) <br/> - [000.LINUX-5.9/Documentation/admin-guide/man7-cgroups.7.md](../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/Documentation/admin-guide/man7-cgroups.7.md)#'Terminology(术语)' <br/>  |
+|层级(hierarchy)|cgroup以树的形式组织，每一个树称之为一个层级|Hierarchy 怎么理解? 参考:[Linux资源管理之cgroups简介](../999.IMGS/Screenshot%202026-01-08%20at%2023-03-23%20Linux资源管理之cgroups简介%20-%20美团技术团队.png) <sub>应该是cgroup v1</sub> <br/> - [001.UNIX-DOCS/032.Control-Groups(cgroups)/cgroup-hierarchy.md](./cgroup-hierarchy.md) <br/> - [000.LINUX-5.9/Documentation/admin-guide/man7-cgroups.7.md](../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/Documentation/admin-guide/man7-cgroups.7.md)#'Terminology(术语)' <br/>  |
 |-|-|-|
 |子系统(subsystem/controller)|一个资源控制器|- memory:设定内存使用限制，统计内存使用情况 </br> - HugeTLB: 限制透明大页的使用量 </br> - cpu: 限制进程CPU的使用率;</br> - cpuacct 子系统，可以统计 cgroups 中的进程的 cpu 使用报告。</br>- cpuset: 为进程分配单独的cpu/mem节点 </br>- blkio: 为块设备设定输入/输出限制 </br> - devices: 允许或拒绝进程访问设备 </br> - net_cls: 标记进程的网络数据包，并进行控制 </br> - net_prio: 动态配置进程每隔网络接口的流量优先级 </br> - freezer: 挂起或恢复进程 </br>- ns 子系统，可以使不同 cgroups 下面的进程使用不同的 namespace。|
 
@@ -56,8 +56,8 @@ The implementation of cgroups requires a few, simple hooks into the rest of the 
 - in init/main.c, to initialize the root cgroups and initial css_set at system boot.
 - in fork and exit, to attach and detach a task from its css_set.(在 fork（创建进程）和 exit（退出进程）过程中，用于将任务关联至其 css_set 或从中分离。)
 
-### 在系统运行时，CGroup时如何生效的呢?
-| 阶段 | 行为 | CGroup 是否干预 | 理由 |
+### 在系统运行时，cgroup时如何生效的呢?
+| 阶段 | 行为 | cgroup 是否干预 | 理由 |
 | --- | --- | --- | --- |
 | **虚拟内存申请** (`malloc`) | 仅修改 VMA 结构体 | **否**<sub>阅读内存页分配流程代码，确实没有cgroup相关代码</sub> | 尚未消耗物理资源。 |
 | **初次读写内存** | 触发缺页异常，申请物理页 | **是(待验证)** | 这是物理内存分配的入口点，必须在此处计费（Charge）。 |
@@ -76,3 +76,4 @@ The implementation of cgroups requires a few, simple hooks into the rest of the 
 - [https://www.kernel.org/doc/html/v6.1/admin-guide/cgroup-v2.html](https://www.kernel.org/doc/html/v6.1/admin-guide/cgroup-v2.html)
 - [Alibaba Cloud Linux: cgroup v1与cgroup v2的区别](https://www.alibabacloud.com/help/zh/alinux/differences-between-cgroup-v1-and-cgroup-v2?spm=a2c63.p38356.help-menu-2632541.d_4_0_2.7c0555d0sdvMjQ)
 - [openEuler kernel 技术分享-第17期-cgroup介绍](https://www.bilibili.com/video/BV1e34y1q7bR?spm_id_from=333.788.videopod.sections&vd_source=9eef164b234175c1ae3ca71733d5a727)
+- [000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/Documentation/admin-guide/cgroup-v2.rst](../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/Documentation/admin-guide/cgroup-v2.rst)

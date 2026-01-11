@@ -19,6 +19,27 @@ cgroup（Control Groups）是 Linux 内核的一个功能，用于限制、记�
   + 限制资源：通过 echo "100M" > memory.max 来限制内存。
   + 加入进程：通过 echo [PID] > cgroup.procs 将一个进程移入该控制组。
 
+
+---
+
+## 查看文件的文件系统类型
+```bash
+# 1. df -T <文件路径>
+wei@Berries:~/VirtualBox_VMs$ df -T /sys/fs/cgroup/
+Filesystem     Type    1K-blocks  Used Available Use% Mounted on
+cgroup2        cgroup2         0     0         0    - /sys/fs/cgroup
+
+
+# 2. state -f <文件路径>
+wei@Berries:~/VirtualBox_VMs$ stat -f /sys/fs/cgroup/
+  File: "/sys/fs/cgroup/"
+    ID: 218518cfb40c0f19 Namelen: 255     Type: cgroup2fs
+Block size: 4096       Fundamental block size: 4096
+Blocks: Total: 0          Free: 0          Available: 0
+Inodes: Total: 0          Free: 0
+
+```
+
 ---
 
 ## 参考代码
