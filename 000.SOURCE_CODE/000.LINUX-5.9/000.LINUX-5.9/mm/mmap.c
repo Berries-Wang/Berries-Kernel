@@ -216,10 +216,12 @@ static int do_brk_flags(unsigned long addr, unsigned long request, unsigned long
  *  }
  *  
  *  static inline long __do_sys_brk(unsigned long brk)
+ *  - 宏的本质就是替换，那么，__do_sys_brk 的实现就是下面的函数体了
  * </pre>
  * 
  * 则:
  *  @param brk 是什么? 将break指针(也称 brk 指针)调整为${brk}，来分配内存 -- 通过malloc函数分析而来
+ *             - 是什么(怎么工作的?)， 参考:mm_struct#brk (mm/mm_types.h) --> [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图4.19　mm_struct数据结构
  */
 SYSCALL_DEFINE1(brk, unsigned long, brk)
 {

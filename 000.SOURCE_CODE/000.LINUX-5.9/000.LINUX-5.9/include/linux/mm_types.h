@@ -623,8 +623,14 @@ struct mm_struct {
 		 */
 		unsigned long start_code, end_code, start_data, end_data;
 		/**
-		 * start_brk：堆空间的起始地址
-		 * brk：表示当前堆中的VMA的结束地址
+		 * start_brk：指向堆内存的起始地址（即数据段之后的固定位置）。在进程生命周期中，这个值通常是不变的
+		 * brk：表示当前堆中的VMA的结束地址(brk: 指向堆内存当前的结束地址（即堆顶）)
+		 *      - 参考:[[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]]#图4.19　mm_struct数据结构
+		 * 核心作用： brk 决定了进程堆空间的大小。通过移动 brk 指针，进程可以动态地增加或减少其可用的内存空间。
+		 * 
+		 * 局限性:
+		 *   - 连续性限制：brk 只能在堆顶进行线性增长或收缩。如果你在堆中间释放了一块内存，brk 无法轻易收缩，除非堆顶的内存也被释放。
+		 *   - 大内存处理：对于非常大的内存请求（通常 > 128 KB），内核通常不再移动 brk，而是使用 mmap 系统调用在**文件映射区（Memory Mapping Segment）**创建一块独立的匿名映射
 		 */
 		unsigned long start_brk, brk, start_stack;
 		unsigned long arg_start, arg_end, env_start, env_end;
