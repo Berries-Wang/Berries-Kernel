@@ -57,3 +57,4 @@ Inodes: Total: 0          Free: 0
 ## 参考资料
 - [17-文件系统：基于inode的文件系统 [中山大学 操作系统原理]](./000.REFS/000.文件系统-1.pdf)
 - [18-文件系统：使用文件系统 [中山大学 操作系统原理]](./000.REFS/001.文件系统-2.pdf)
+- [深入理解Linux内核:虚拟文件系统](../../007.BOOKs/Professional-Linux-Kernel-Architecture.epub)
