@@ -259,7 +259,20 @@ me (void)
   reallocp = (void *(*)(void *, size_t))dlsym (RTLD_NEXT, "realloc");
   callocp = (void *(*)(size_t, size_t))dlsym (RTLD_NEXT, "calloc");
   freep = (void (*)(void *))dlsym (RTLD_NEXT, "free");
-
+  
+  /**
+   * 在不修改原有程序源码的情况下，拦截并重新定义标准库函数 mmap 的行为，同时保留调用“原始版本”的能力
+   *   dlsym(RTLD_NEXT, "mmap")：寻找“下一个”实现:
+   *     - dlsym: 这是一个用于在共享库中查找符号（函数或变量）地址的函数。
+   *     - RTLD_NEXT: 这是一个特殊的伪句柄。它告诉系统：“不要在当前库中找 mmap，而是去搜索顺序中的下一个共享库里找。”
+   *     - 含义: 如果你正在编写一个名为 mmap 的自定义函数（用来记录日志或统计内存），为了防止无限递归调用自己，你需要找到操作系统提供的那个“真正的” mmap 地址。RTLD_NEXT 帮你跳过自己的定义，拿到原始函数的指针
+   * 找到系统中真正的 mmap 函数地址，并把它保存在变量 mmapp 中，以便我稍后在自己的拦截逻辑里调用它
+   * 
+   * [000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/kernel/sys.c]
+   * SYSCALL_DEFINE6(mmap, unsigned long, addr, unsigned long, len,
+	 *       	unsigned long, prot, unsigned long, flags,
+	 *       	unsigned long, fd, unsigned long, off); 是这个吗?
+   */
   mmapp = (void *(*)(void *, size_t, int, int, int, off_t))dlsym (RTLD_NEXT,
                                                                   "mmap");
   mmap64p =
@@ -629,7 +642,10 @@ mmap (void *start, size_t len, int prot, int flags, int fd, off_t offset)
       me ();
     }
 
-  /* Always get a block.  We don't need extra memory.  */
+  /** 
+   * Always get a block.  We don't need extra memory. 
+   * (总是获取一个块。我们不需要额外的内存)
+   *  */
   result = (*mmapp)(start, len, prot, flags, fd, offset);
 
   if (!not_me && trace_mmap)
