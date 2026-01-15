@@ -40,19 +40,30 @@
 #include <asm/traps.h>
 
 /**
- * fn: 定义一个函数指针，用于修复异常状态的函数指针
- * sig: 处理失败时Linux内核要发送的信号类型
- * code: 处理失败时Linux内核要发送的信号编码
- * name：这条异常状态的名称。
+ * 对异常状态处理进行抽象
  */
 struct fault_info {
-	int	(*fn)(unsigned long addr, unsigned int esr,
-		      struct pt_regs *regs);
+	/**
+	 * fn: 定义一个函数指针，用于修复异常状态的函数指针
+	 */
+	int	(*fn)(unsigned long addr, unsigned int esr,struct pt_regs *regs);
+	/**
+	 * sig: 处理失败时Linux内核要发送的信号类型
+	 */
 	int	sig;
+	/**
+	 * code: 处理失败时Linux内核要发送的信号编码
+	 */
 	int	code;
+	/**
+	 * name：这条异常状态的名称。
+	 */
 	const char *name;
 };
 
+/**
+ * 异常状态表（fault_info[]数组） , 下面有个初始化的代码.
+ */
 static const struct fault_info fault_info[];
 static struct fault_info debug_fault_info[];
 
