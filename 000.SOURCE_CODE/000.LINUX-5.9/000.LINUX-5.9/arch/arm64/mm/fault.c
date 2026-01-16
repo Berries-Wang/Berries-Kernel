@@ -531,7 +531,17 @@ static int __kprobes do_page_fault(unsigned long addr, unsigned int esr,
 		mm_flags |= FAULT_FLAG_WRITE;
 	}
 
-	// 特殊情况，见#4.7.2　do_page_fault()函数,暂记录
+	/**
+	 * 特殊情况，见#4.7.2　do_page_fault()函数,暂记录
+	 * 
+	 * ttbr0 是what? 参考: [007.BOOKs/Arm® Architecture Reference Manual for A-profile architecture]
+	 * EL0 ~ EL3 是what? 参考 [001.UNIX-DOCS/009.异常]
+	 * 
+	 * EL0: 用户态 , EL1:内核态 , EL2:Hypervisor EL3:secure monitor
+	 * 
+	 * 这行代码确实是在检测“内核态在未经允许的情况下访问了用户态的地址空间
+	 * 即: 当前内核（EL1）正试图访问一个属于用户态（TTBR0）的地址，但它没有获得允许，这可能是一个 Bug 或者攻击
+	 */
 	if (is_ttbr0_addr(addr) && is_el1_permission_fault(addr, esr, regs)) {
 		/* regs->orig_addr_limit may be 0 if we entered from EL0 */
 		if (regs->orig_addr_limit == KERNEL_DS)
