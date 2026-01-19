@@ -9,8 +9,8 @@
 <table>
 <th>虚拟化类型</th><th>说明</th><th>参考</th>
 <tr><td>Type-1</td><td>直接运行在硬件之上</td><td rowspan="3"><img src="./998.IMGS/wechat_2026-01-19_073810_234.png"/></td></tr>
-<tr><td> </td><td></td><td></td></tr>
-<tr><td>Type-2</td><td>虚拟机当做物理机操作系统的一个进程</td><td></td></tr>
+<tr><td> </td><td></td></tr>
+<tr><td>Type-2</td><td>虚拟机当做物理机操作系统的一个进程</td></tr>
 </table>
 
 ### 如何实现系统虚拟化
