@@ -236,8 +236,8 @@ static inline bool pagefault_disabled(void)
  * 
  * 是否关闭了缺页异常处理，进程描述符的pagefault_disabled成员用于关闭缺页异常处理
  * in_atomic()函数检查当前是否在中断上下文中。
- *    内核正在执行中断处理程序。
- *    内核在禁用内核抢占的情况下执行临界区代码
+ *    - 内核正在执行中断处理程序。
+ *    - 内核在禁用内核抢占的情况下执行临界区代码
  */
 #define faulthandler_disabled() (pagefault_disabled() || in_atomic())
 
