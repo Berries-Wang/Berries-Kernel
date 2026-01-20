@@ -1,7 +1,8 @@
-# KVM（Kernel-based Virtual Machine）
+# KVM（Kernel-based Virtual Machine） <sup>核心: 将底层的物理服务器转变为虚拟机管理程序（Hypervisor）</sup>
 > 原理: [001.UNIX-DOCS/035.系统虚拟化/000.REF-DOCS/HCIA-Cloud Computing V5.5 培训教材.pdf](./../../../../001.UNIX-DOCS/035.系统虚拟化/000.REF-DOCS/HCIA-Cloud%20Computing%20V5.5%20培训教材.pdf)#'虚拟化技术概览'
 ## 摘要
 - KVM + QEMU 实现Type-1 虚拟化
+  + KVM (Kernel-based Virtual Machine) is the leading open source virtualisation technology for Linux. It installs natively on all Linux distributions and turns underlying physical servers into hypervisors so that they can host multiple, isolated virtual machines (VMs).  (能在所有 Linux 发行版上原生安装，并**将底层的物理服务器转变为虚拟机管理程序**<sup>核心: 将底层的物理服务器转变为虚拟机管理程序（Hypervisor）</sup>，以便它们可以托管多个隔离的虚拟机（VM）)
 
 ## KVM 、QEMU在虚拟化中的角色
 - ![wechat_2026-01-20_214709_643.png](./998.IMGS/wechat_2026-01-20_214709_643.png) <sup>in [001.UNIX-DOCS/035.系统虚拟化/000.REF-DOCS/HCIA-Cloud Computing V5.5 培训教材.pdf](./../../../../001.UNIX-DOCS/035.系统虚拟化/000.REF-DOCS/HCIA-Cloud%20Computing%20V5.5%20培训教材.pdf)</sup>
