@@ -65,6 +65,11 @@
 /* Unallocated EC: 0x3D - 0x3F */
 #define ESR_ELx_EC_MAX		(0x3F)
 
+/**
+ * 这就得参考手册: [007.BOOKs/Arm® Architecture Reference Manual for A-profile architecture]
+ *   # D24.2.40 ESR_EL1, Exception Syndrome Register (EL1)
+ *     > Field descriptions >  EC, bits [31:26]
+ */
 #define ESR_ELx_EC_SHIFT	(26)
 #define ESR_ELx_EC_MASK		(UL(0x3F) << ESR_ELx_EC_SHIFT)
 #define ESR_ELx_EC(esr)		(((esr) & ESR_ELx_EC_MASK) >> ESR_ELx_EC_SHIFT)

@@ -452,8 +452,19 @@ static vm_fault_t __do_page_fault(struct mm_struct *mm, unsigned long addr,
 	return handle_mm_fault(vma, addr & PAGE_MASK, mm_flags, regs);
 }
 
+/**
+ * ESR: Exception Syndrome Register (异常综合寄存器)
+ *   in [007.BOOKs/Arm® Architecture Reference Manual for A-profile architecture]#D24.2.40 ESR_EL1, Exception Syndrome Register (EL1)
+ *   Purpose
+ *      Holds syndrome information for an exception taken to EL1.(保存跳转至 EL1 的异常的综合信息)
+ * 
+ * 什么时候写入值到ESR,写入什么值?
+ *   答案在:  [001.UNIX-DOCS/009.异常/002.异常发生后的处理.md]>[006.REFS/learn_the_architecture_-_aarch64_exception_model_102412_0103_02_en.pdf]#'5.1 Taking an exception'
+ *           -- 对应的在线文档: https://developer.arm.com/documentation/102412/0103/Handling-exceptions/Taking-an-exception?lang=en
+ */
 static bool is_el0_instruction_abort(unsigned int esr)
 {
+	// 具体代码得参考手册: [007.BOOKs/Arm® Architecture Reference Manual for A-profile architecture]#D24.2.40 ESR_EL1, Exception Syndrome Register (EL1)##'Field descriptions' 
 	return ESR_ELx_EC(esr) == ESR_ELx_EC_IABT_LOW;
 }
 
@@ -516,7 +527,12 @@ static int __kprobes do_page_fault(unsigned long addr, unsigned int esr,
 	}
 
 	/**
-	 * is_el0_instruction_abort()函数读取ESR的EC字段来判断异常是否为低异常等级的指令异常（ESR_ELx_EC_IABT_LOW）。
+	 * is_el0_instruction_abort()函数读取ESR的EC字段来判断异常是否为低异常等级的指令异常（ESR_ELx_EC_IABT_LOW）
+	 *   > 低异常等级(手册中的原文: lower Exception level),指的是在权限金字塔中(EL0,EL1,EL2,EL3)，比当前等级更低的等级
+	 *     - 怎么理解? 从当前等级的视角看：如果CPU正在EL1（内核态）执行代码，那么“较低异常等级”就是指EL0（用户态）
+	 * 
+	 *   >> 手册: [007.BOOKs/Arm® Architecture Reference Manual for A-profile architecture]
+	 * 
 	 * 若异常是EL0中的指令异常，说明这个进程地址空间是具有可执行权限的，因此把vm_flags设置为VM_EXEC
 	 */
 	if (is_el0_instruction_abort(esr)) {
