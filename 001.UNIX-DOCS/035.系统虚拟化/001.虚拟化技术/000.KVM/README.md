@@ -18,6 +18,12 @@
 |-|-|-|
 |KVM (Kernel-based Virtual Machine) is the leading open source virtualisation technology for Linux. It installs natively on all Linux distributions and **turns underlying physical servers into hypervisors** so that they can host multiple, isolated virtual machines (VMs). <sup>KVM（基于内核的虚拟机）是 Linux 平台上领先的开源虚拟化技术。它可以在所有 Linux 发行版上进行原生安装，并**将底层的物理服务器转变为虚拟机管理程序（Hypervisor）**，使其能够承载多个相互隔离的虚拟机（VM）。</sup>KVM comes with no licenses, type-1 hypervisor capabilities and a variety of performance extensions which makes it an ideal candidate for virtualisation and cloud infrastructure implementation. But what are the benefits of KVM hypervisor and how do you get started?<sup>KVM 无需授权费用，具备 Type-1（裸机型）虚拟机管理程序的能力，并提供多种性能扩展插件，这使其成为虚拟化和云基础设施实施的理想选择。但是，KVM 虚拟机管理程序究竟有哪些优势？你又该如何开始使用它呢？</sup|- [KVM hypervisor: a beginners’ guide](https://ubuntu.com/blog/kvm-hyphervisor) <br/> - [KVM hypervisor: a beginners’ guide](./999.REFS/ubuntu-KVM-hypervisor-a-beginners-guide.png)<sup>local</sup>|- ![wechat_2026-01-20_221635_032.png](./998.IMGS/wechat_2026-01-20_221635_032.png)|
 
+---
+## 注意事项
+|注意事项|说明|来源|思考|
+|-|-|-|-|
+|I/O虚拟化-客户机可使用设备分类|- 在QEMU/KVM中，客户机可以使用的设备大致可分为三类（即 虚拟化方式）: <br/>- 模拟设备：完全由QEMU纯软件模拟的设备 <br/>- Virtio设备：实现VIRTIO API的半虚拟化设备 <br/>- PCI设备直接分配(PCI device assignment)<br/> <sub>不同虚拟化方式，性能不一，使用场景一也就不一样</sub>|[001.UNIX-DOCS/035.系统虚拟化/000.REF-DOCS/HCIA-Cloud Computing V5.5 培训教材.pdf](./../../../../001.UNIX-DOCS/035.系统虚拟化/000.REF-DOCS/HCIA-Cloud%20Computing%20V5.5%20培训教材.pdf)|1. 在某些场景下(游戏/渲染/其他)，需要将显卡分配给某个虚拟机,采用那种虚拟化方式呢? <br/>- GPU 直通 (PCI Passthrough / VFIO) <br/>- vGPU (NVIDIA vGPU / Intel GVT-g) <br/>- 虚拟显卡 (VirtIO-GPU / QXL)  <br/> <sub>不同虚拟化方式，性能不一，使用场景一也就不一样 , 操作时再详细学习吧!!!</sub>|
+|-|-|-|-|
 
 ---
 
