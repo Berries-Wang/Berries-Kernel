@@ -1,9 +1,25 @@
 {
   "configurations": [
     {
-      "name": "Linux",
+      "name": "Linux-arm64",
       "defines": ["__KERNEL__", "CONFIG_ARM64"],
-      "intelliSenseMode": "linux-gcc-arm64",
+      /**
+       * C/C++ Extension Pack 插件的配置
+       *
+       * linux-gcc-arm64 怎么理解?
+       *
+       * linux: 
+       *        - 告诉 VS Code 如何处理文件路径（例如是用 / 还是 \）、如何查找系统头文件，以及如何处理符号链接（Symlinks）
+       * gcc: 语法特征（Compiler Syntax）
+       *        - 决定了编辑器如何解析代码中的“非标准”部分
+       *        - * GNU 扩展： Linux 内核大量使用了 GCC 特有的扩展，比如 __attribute__((aligned(8)))、内联汇编 asm volatile (...)、以及 __builtin_expect（也就是 likely() 和 unlikely() 宏）。
+       *        - 预定义宏： 选 gcc 会让 IntelliSense 默认认为定义了 __GNUC__ 等宏
+       * arm64: 目标架构（Target Architecture）,代表硬件底层的物理属性
+       *        - 字长（Data Width）： 告诉编辑器指针（pointer）占用 8 个字节（64位）
+       *        - 架构宏： 自动定义 __aarch64__ 或 __arm64__ 宏。
+       *        - 条件编译： 在内核代码中，只有这个字段对上了，__aarch64__, __GNUC__, __LP64__ 块里的代码才会被“激活”（颜色加亮），否则代码会变灰，无法跳转
+       */
+      "intelliSenseMode": "linux-gcc-arm64", // 模拟在 Linux 下使用 GCC 开发/分析 64 位 ARM 程序
       "compilerPath": "/home/wei/apps/001.Arm-ToolChain/arm-gnu-toolchain-14.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu-gcc",
       "includePath": [
         "${workspaceFolder}/**/**/arch/arm64/include",
@@ -14,9 +30,9 @@
       ]
     },
     {
-      "name": "Mac",
+      "name": "Mac-arm64",
       "defines": ["__KERNEL__", "CONFIG_ARM64"],
-      "intelliSenseMode": "macos-gcc-arm64",
+      "intelliSenseMode": "macos-gcc-arm64", // 在 macOS 下使用 GCC 开发或分析 64 位 ARM 程序
       "compilerPath": "/opt/softwares/arm64-arm-toolchain/arm-gnu-toolchain-14.3.rel1-darwin-arm64-aarch64-none-elf/bin/aarch64-none-elf-gcc",
       "includePath": [
         "${workspaceFolder}/**/**/arch/arm64/include",
