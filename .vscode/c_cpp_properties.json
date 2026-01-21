@@ -1,0 +1,31 @@
+{
+  "configurations": [
+    {
+      "name": "Linux",
+      "defines": ["__KERNEL__", "CONFIG_ARM64"],
+      "intelliSenseMode": "linux-gcc-arm64",
+      "compilerPath": "/home/wei/apps/001.Arm-ToolChain/arm-gnu-toolchain-14.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu-gcc",
+      "includePath": [
+        "${workspaceFolder}/**/**/arch/arm64/include",
+        "${workspaceFolder}/**/**/arch/arm64/include/generated",
+        "${workspaceFolder}/**/**/include",
+        "${workspaceFolder}/**/**/include/uapi",
+        "${workspaceFolder}/**/**/arch/arm64/include/uapi"
+      ]
+    },
+    {
+      "name": "Mac",
+      "defines": ["__KERNEL__", "CONFIG_ARM64"],
+      "intelliSenseMode": "macos-gcc-arm64",
+      "compilerPath": "/opt/softwares/arm64-arm-toolchain/arm-gnu-toolchain-14.3.rel1-darwin-arm64-aarch64-none-elf/bin/aarch64-none-elf-gcc",
+      "includePath": [
+        "${workspaceFolder}/**/**/arch/arm64/include",
+        "${workspaceFolder}/**/**/arch/arm64/include/generated",
+        "${workspaceFolder}/**/**/include",
+        "${workspaceFolder}/**/**/include/uapi",
+        "${workspaceFolder}/**/**/arch/arm64/include/uapi"
+      ]
+    }
+  ],
+  "version": 4
+}
