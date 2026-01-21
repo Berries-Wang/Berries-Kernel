@@ -20,7 +20,7 @@
        *        - 条件编译： 在内核代码中，只有这个字段对上了，__aarch64__, __GNUC__, __LP64__ 块里的代码才会被“激活”（颜色加亮），否则代码会变灰，无法跳转
        */
       "intelliSenseMode": "linux-gcc-arm64", // 模拟在 Linux 下使用 GCC 开发/分析 64 位 ARM 程序
-      "compilerPath": "/home/wei/apps/001.Arm-ToolChain/arm-gnu-toolchain-14.3.rel1-x86_64-aarch64-none-linux-gnu/aarch64-none-linux-gnu-gcc",
+      "compilerPath": "/home/wei/apps/001.Arm-ToolChain/arm-gnu-toolchain-14.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-gcc",
       "includePath": [
         "${workspaceFolder}/**/**/arch/arm64/include",
         "${workspaceFolder}/**/**/arch/arm64/include/generated",
