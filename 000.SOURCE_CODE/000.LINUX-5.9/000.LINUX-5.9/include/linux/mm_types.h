@@ -533,7 +533,7 @@ struct mm_struct {
 		unsigned long task_size;	/* size of task vm space */
 		unsigned long highest_vm_end;	/* highest vma end address */
 		/**
-		 * pgd：指向进程的PGD（一级页表）
+		 * pgd：指向进程的PGD（一级页表,页表的基地址）
 		 * 
 		 * 当CPU第一次访问虚拟地址空间时会触发缺页异常。
 		 * 在缺页异常处理中，分配物理页面，利用分配的物理页面来创建页表项并且填充页表，完成虚拟地址到物理地址的映射关系的建立。

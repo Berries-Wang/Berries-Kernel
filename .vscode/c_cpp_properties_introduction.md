@@ -10,6 +10,15 @@
 |-|-|-|
 |CONFIG_MMU|决定了内核是否支持和使用 MMU（Memory Management Unit，内存管理单元） 硬件|-|
 |-|-|-|
+|CONFIG_TRANSPARENT_HUGEPAGE|-|-|
+|-|-|-|
+|CONFIG_ARCH_ENABLE_THP_MIGRATION|一个架构相关的配置选项，它开启了 “透明巨页（THP）迁移”<sup>迁移:<br/>- NUMA 平衡：将内存页从一个 CPU 节点移动到离进程更近的另一个 CPU 节点，以减少访问延迟。<br/>- 内存整理 (Compaction)：为了凑出连续的大块空间，把散落在各处的小页挪到一起。<br/> - 热插拔 (Hotplug)：准备拔出某个内存条前，必须把上面的数据搬走。</sup> 的支持|-|
+|-|-|-|
+|CONFIG_HIGHPTE|CONFIG_HIGHPTE 是一个专门针对 32位系统（x86-32、ARM32 等） 的内存管理优化选项；作用：允许将页表（PTE）本身存放到高端内存（High Memory）中|-|
+|-|-|-|
+|-|-|-|
+|-|-|-|
+|-|-|-|
 |-|-|-|
 |-|-|-|
 |-|-|-|

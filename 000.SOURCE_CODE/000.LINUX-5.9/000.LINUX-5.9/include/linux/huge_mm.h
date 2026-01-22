@@ -126,9 +126,12 @@ extern struct kobj_attribute shmem_enabled_attr;
 
 extern unsigned long transparent_hugepage_flags;
 
-/*
+/**
  * to be used on vmas which are known to support THP.
  * Use transparent_hugepage_enabled otherwise
+ * (用于已知支持 THP（透明巨页）的 VMA。否则，请使用 transparent_hugepage_enabled)
+ * 
+ * 是否支持透明大页
  */
 static inline bool __transparent_hugepage_enabled(struct vm_area_struct *vma)
 {
@@ -361,7 +364,11 @@ static inline int thp_nr_pages(struct page *page)
 	VM_BUG_ON_PGFLAGS(PageTail(page), page);
 	return 1;
 }
-
+/**
+ * 是否支持透明大页
+ * Oracle 建议关闭: https://docs.oracle.com/en/database/oracle/oracle-database/18/ladbi/disabling-transparent-hugepages.html
+ *                 > 001.UNIX-DOCS/000.内存管理/998.REFS/database-installation-guide-linux.pdf # 'Disabling Transparent HugePages'
+ */
 static inline bool __transparent_hugepage_enabled(struct vm_area_struct *vma)
 {
 	return false;

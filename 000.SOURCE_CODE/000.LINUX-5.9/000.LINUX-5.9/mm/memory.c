@@ -434,10 +434,12 @@ int __pte_alloc(struct mm_struct *mm, pmd_t *pmd)
 	if (!new)
 		return -ENOMEM;
 
-	/*
+	/**
 	 * Ensure all pte setup (eg. pte page lock and page clearing) are
 	 * visible before the pte is made visible to other CPUs by being
 	 * put into page tables.
+	 * (确保在将页表项（PTE）插入页表并对其他 CPU 可见之前，
+	 * 所有 PTE 的准备工作（例如页锁定和页面内容清除）对其他 CPU 可见。)
 	 *
 	 * The other side of the story is the pointer chasing in the page
 	 * table walking code (when walking the page table without locking;
@@ -446,12 +448,18 @@ int __pte_alloc(struct mm_struct *mm, pmd_t *pmd)
 	 * being the notable exception) will already guarantee loads are
 	 * seen in-order. See the alpha page table accessors for the
 	 * smp_rmb() barriers in page table walking code.
+	 * (另一方面的问题在于页表遍历代码中的指针追踪（在没有锁保护的情况下遍历页表，即大多数场景）。
+	 * 幸运的是，这些数据访问由一系列数据依赖的加载操作构成，
+	 * 意味着大多数CPU（Alpha是明显例外）能保证这些加载操作按顺序被观察到。
+	 * 关于页表遍历代码中的smp_rmb()屏障，请参阅Alpha架构的页表访问器实现。)
 	 */
-	smp_wmb(); /* Could be smp_wmb__xxx(before|after)_spin_lock */
+	// 添加 内存屏障 ,为什么?参考:[001.UNIX-DOCS/036.操作系统安全/README.md]
+	smp_wmb(); /**Could be smp_wmb__xxx(before|after)_spin_lock */
 
 	ptl = pmd_lock(mm, pmd);
 	if (likely(pmd_none(*pmd))) { /* Has another populated it ? */
 		mm_inc_nr_ptes(mm);
+		// 将pte与pmd关联
 		pmd_populate(mm, pmd, new);
 		new = NULL;
 	}
@@ -3504,14 +3512,11 @@ out_release:
  * We enter with non-exclusive mmap_lock (to exclude vma changes,
  * but allow concurrent faults), and pte mapped but not yet locked.
  * We return with mmap_lock still held, but pte unmapped and unlocked.
+ * (进入函数时，持有非排他性的 mmap_lock（以禁止 VMA 变更，但允许并发缺页异常），
+ * 且 PTE（页表项）已映射但尚未加锁。退出函数时，仍持有 mmap_lock，但 PTE 已解除映射并解锁。)
  * 
  * 匿名页处理： 在Linux内核中没有关联到文件(磁盘文件)映射的页面称为匿名页面（anonymous page）
  * > 那还挺重要的！ 像malloc 分配的， 存储堆栈的内存也都没有文件映射，那就都是匿名页
- * 
- * 匿名页就是用来存放程序“自己产生的”临时数据的内存页。因为它没有对应的磁盘文件作为靠山，
- * 所以内核需要一套复杂的机制（交换空间）来确保在内存不足时，
- * 这些宝贵的数据不会丢失，而是被临时写到磁盘上，等需要时再读回来
- * —————— deepseek
  * 
  */
 static vm_fault_t do_anonymous_page(struct vm_fault *vmf)
@@ -3567,12 +3572,9 @@ static vm_fault_t do_anonymous_page(struct vm_fault *vmf)
 	 * 系统零页详细介绍: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#4.7.5　系统零页
 	 * 
 	 * */
-	if (!(vmf->flags & FAULT_FLAG_WRITE) &&
-	    !mm_forbids_zeropage(vma->vm_mm)) {
-		entry = pte_mkspecial(
-			pfn_pte(my_zero_pfn(vmf->address), vma->vm_page_prot));
-		vmf->pte = pte_offset_map_lock(vma->vm_mm, vmf->pmd,
-					       vmf->address, &vmf->ptl);
+	if (!(vmf->flags & FAULT_FLAG_WRITE) && !mm_forbids_zeropage(vma->vm_mm)) {
+		entry = pte_mkspecial(pfn_pte(my_zero_pfn(vmf->address), vma->vm_page_prot));
+		vmf->pte = pte_offset_map_lock(vma->vm_mm, vmf->pmd,vmf->address, &vmf->ptl);
 		if (!pte_none(*vmf->pte)) {
 			update_mmu_tlb(vma, vmf->address, vmf->pte);
 			goto unlock;
@@ -3715,11 +3717,15 @@ static vm_fault_t __do_fault(struct vm_fault *vmf)
 	return ret;
 }
 
-/*
+/**
  * The ordering of these checks is important for pmds with _PAGE_DEVMAP set.
  * If we check pmd_trans_unstable() first we will trip the bad_pmd() check
  * inside of pmd_none_or_trans_huge_or_clear_bad(). This will end up correctly
  * returning 1 but not before it spams dmesg with the pmd_clear_bad() output.
+ * (对于设置了 _PAGE_DEVMAP 标志的 PMD（页中间目录项），
+ * 这些检查的顺序至关重要。如果我们先执行 pmd_trans_unstable() 检查，
+ * 就会触发 pmd_none_or_trans_huge_or_clear_bad() 内部的 bad_pmd() 检查。
+ * 虽然这最终能正确返回 1，但在返回前会向 dmesg（内核日志）发送大量由 pmd_clear_bad() 输出的警告信息。)
  */
 static int pmd_devmap_trans_unstable(pmd_t *pmd)
 {
@@ -4404,14 +4410,19 @@ static vm_fault_t wp_huge_pud(struct vm_fault *vmf, pud_t orig_pud)
 	return VM_FAULT_FALLBACK;
 }
 
-/*
+/**
  * These routines also need to handle stuff like marking pages dirty
  * and/or accessed for architectures that don't do it in hardware (most
  * RISC architectures).  The early dirtying is also good on the i386.
+ * (这些例程还需要处理诸如标记页面为‘脏’（Dirty）和/或‘已访问’（Accessed）之类的工作，
+ * 以适配那些不支持硬件自动处理这些标志的架构（大多数 RISC 架构）。
+ * 此外，在 i386 架构上，提前进行标记‘脏’位也是有益的。)
  *
  * There is also a hook called "update_mmu_cache()" that architectures
  * with external mmu caches can use to update those (ie the Sparc or
  * PowerPC hashed page tables that act as extended TLBs).
+ * (还有一个名为 update_mmu_cache() 的钩子函数，
+ * 那些具有外部 MMU 缓存的架构可以使用它来更新缓存（例如 Sparc 或 PowerPC 的哈希页表，这些页表起到了扩展 TLB 的作用）。)
  *
  * We enter with non-exclusive mmap_lock (to exclude vma changes, but allow
  * concurrent faults).
@@ -4435,24 +4446,32 @@ static vm_fault_t handle_pte_fault(struct vm_fault *vmf)
 		/* See comment in pte_alloc_one_map() */
 		if (pmd_devmap_trans_unstable(vmf->pmd))
 			return 0;
-		/*
+		/**
 		 * A regular pmd is established and it can't morph into a huge
 		 * pmd from under us anymore at this point because we hold the
 		 * mmap_lock read mode and khugepaged takes it in write mode.
 		 * So now it's safe to run pte_offset_map().
+		 * (一个常规的 PMD（页中间目录项）已经建立，且此时它不会再在我们不知情的情况下突然变成巨型 PMD。
+		 * 这是因为我们持有 mmap_lock 的读模式锁，而 khugepaged（透明巨页守护进程）需要获取写模式锁才能进行转换。
+		 * 因此，现在可以安全地执行 pte_offset_map() 了。)
 		 * 
-		 * 根据pmd页表项和虚拟地址计算出pte
 		 */
+		// 根据pmd页表项和虚拟地址计算出pte
 		vmf->pte = pte_offset_map(vmf->pmd, vmf->address);
 		vmf->orig_pte = *vmf->pte;
 
-		/*
+		/**
 		 * some architectures can have larger ptes than wordsize,
 		 * e.g.ppc44x-defconfig has CONFIG_PTE_64BIT=y and
 		 * CONFIG_32BIT=y, so READ_ONCE cannot guarantee atomic
 		 * accesses.  The code below just needs a consistent view
 		 * for the ifs and we later double check anyway with the
 		 * ptl lock held. So here a barrier will do.
+		 * (某些架构的 PTE（页表项）大小可能超过其字长（Wordsize）。
+		 * 例如，ppc44x-defconfig 配置中 CONFIG_PTE_64BIT=y 且 CONFIG_32BIT=y，
+		 * 因此 READ_ONCE() 无法保证原子性访问。
+		 * 下面的代码只需要为后续的 if 判断提供一个一致的视图，并且我们稍后在持有 PTL（页表锁）的情况下还会再次进行双重检查。
+		 * 所以，在这里使用一个内存屏障（Barrier）就足够了)
 		 */
 		barrier();
 		if (pte_none(vmf->orig_pte)) {
@@ -4462,15 +4481,19 @@ static vm_fault_t handle_pte_fault(struct vm_fault *vmf)
 	}
 
 	/**
+	 * 什么是匿名页?
+	 *    Linux 内核中，匿名页 (Anonymous Page) 是指那些**没有文件背景（no file backing）**的内存页
+	 *    即: 若一个内存页里的数据不对应磁盘上的任何文件（比如不是从可执行文件、库文件或普通数据文件中读取的），它就是匿名的
+	 * 
 	 * 若PTE为空，有两种可能:
 	 *    一是页表项还没建立
 	 *    二是页表项的内容被清空了，即调用了ptep_get_and_clear()函数
 	 */
 	if (!vmf->pte) {
-		// 判断是否是匿名映射
+		// 判断是否是匿名映射(匿名页)
 		if (vma_is_anonymous(vmf->vma)) {
 			return do_anonymous_page(vmf);
-		} else { // 不是匿名映射，那就是文件映射 ,为啥?
+		} else { // 不是匿名映射(匿名页)，那就是文件映射(文件页)
 			return do_fault(vmf);
 		}
 	}
@@ -4555,19 +4578,28 @@ static vm_fault_t __handle_mm_fault(struct vm_area_struct *vma,
 	p4d_t *p4d;
 	vm_fault_t ret;
 
+	// 获取虚拟地址对应的pgd页表中的页表项
 	pgd = pgd_offset(mm, address);
+
+    /**
+	 * 当启用48位物理地址时,页表的级数为4级，即这里的p4d的值会等于pgd
+	 * > 参考:[001.UNIX-DOCS/000.内存管理/000.arm64-内核中的页表.md]
+	 */
 	p4d = p4d_alloc(mm, pgd, address);
-	if (!p4d)
+	if (!p4d) {
 		return VM_FAULT_OOM;
+	}
 
 	vmf.pud = pud_alloc(mm, p4d, address);
-	if (!vmf.pud)
+	if (!vmf.pud) {
 		return VM_FAULT_OOM;
+	}
 retry_pud:
 	if (pud_none(*vmf.pud) && __transparent_hugepage_enabled(vma)) {
 		ret = create_huge_pud(&vmf);
-		if (!(ret & VM_FAULT_FALLBACK))
+		if (!(ret & VM_FAULT_FALLBACK)) {
 			return ret;
+		}
 	} else {
 		pud_t orig_pud = *vmf.pud;
 
@@ -4577,8 +4609,9 @@ retry_pud:
 
 			if (dirty && !pud_write(orig_pud)) {
 				ret = wp_huge_pud(&vmf, orig_pud);
-				if (!(ret & VM_FAULT_FALLBACK))
+				if (!(ret & VM_FAULT_FALLBACK)) {
 					return ret;
+				}
 			} else {
 				huge_pud_set_accessed(&vmf, orig_pud);
 				return 0;
@@ -4587,26 +4620,31 @@ retry_pud:
 	}
 
 	vmf.pmd = pmd_alloc(mm, vmf.pud, address);
-	if (!vmf.pmd)
+	if (!vmf.pmd) {
 		return VM_FAULT_OOM;
+	}
 
-	/* Huge pud page fault raced with pmd_alloc? */
-	if (pud_trans_unstable(vmf.pud))
+	/** Huge pud page fault raced with pmd_alloc?
+	 * 
+	 */
+	if (pud_trans_unstable(vmf.pud)) {
 		goto retry_pud;
+	}
 
 	if (pmd_none(*vmf.pmd) && __transparent_hugepage_enabled(vma)) {
 		ret = create_huge_pmd(&vmf);
-		if (!(ret & VM_FAULT_FALLBACK))
+		if (!(ret & VM_FAULT_FALLBACK)) {
 			return ret;
+		}
 	} else {
 		pmd_t orig_pmd = *vmf.pmd;
 
 		barrier();
 		if (unlikely(is_swap_pmd(orig_pmd))) {
-			VM_BUG_ON(thp_migration_supported() &&
-				  !is_pmd_migration_entry(orig_pmd));
-			if (is_pmd_migration_entry(orig_pmd))
+			VM_BUG_ON(thp_migration_supported() && !is_pmd_migration_entry(orig_pmd));
+			if (is_pmd_migration_entry(orig_pmd)) {
 				pmd_migration_entry_wait(mm, vmf.pmd);
+			}
 			return 0;
 		}
 		if (pmd_trans_huge(orig_pmd) || pmd_devmap(orig_pmd)) {
@@ -4761,6 +4799,9 @@ EXPORT_SYMBOL_GPL(handle_mm_fault);
 /*
  * Allocate p4d page table.
  * We've already handled the fast-path in-line.
+ * (我们已经在内联（in-line）代码中处理了快速路径（fast-path）)
+ * 具体是什么意思呢?
+ *   -> 简单的、最常见的情况已经在此之前的代码中处理完毕并返回了，接下来的代码是专门用来处理那些复杂的、罕见的“慢速路径（slow-path）”的
  */
 int __p4d_alloc(struct mm_struct *mm, pgd_t *pgd, unsigned long address)
 {
