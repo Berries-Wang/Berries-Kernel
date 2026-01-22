@@ -26,7 +26,9 @@
         "${workspaceFolder}/**/**/arch/arm64/include/generated",
         "${workspaceFolder}/**/**/include",
         "${workspaceFolder}/**/**/include/uapi",
-        "${workspaceFolder}/**/**/arch/arm64/include/uapi"
+        "${workspaceFolder}/**/**/arch/arm64/include/uapi",
+        "${workspaceFolder}/**/**/kernel/locking",
+        "${workspaceFolder}/**/**/include/linux"
       ]
     },
     {
@@ -39,7 +41,9 @@
         "${workspaceFolder}/**/**/arch/arm64/include/generated",
         "${workspaceFolder}/**/**/include",
         "${workspaceFolder}/**/**/include/uapi",
-        "${workspaceFolder}/**/**/arch/arm64/include/uapi"
+        "${workspaceFolder}/**/**/arch/arm64/include/uapi",
+        "${workspaceFolder}/**/**//kernel/locking",
+        "${workspaceFolder}/**/**/include/linux"
       ]
     }
   ],

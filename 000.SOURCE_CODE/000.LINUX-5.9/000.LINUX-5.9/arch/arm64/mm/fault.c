@@ -298,6 +298,10 @@ static bool __kprobes is_spurious_el1_translation_fault(unsigned long addr,
 	return (dfsc & ESR_ELx_FSC_TYPE) != ESR_ELx_FSC_FAULT;
 }
 
+/**
+ * 处理内核模式下发生的致命内存访问错误（Kernel Fault）
+ * 
+ */
 static void die_kernel_fault(const char *msg, unsigned long addr,
 			     unsigned int esr, struct pt_regs *regs)
 {
@@ -311,6 +315,9 @@ static void die_kernel_fault(const char *msg, unsigned long addr,
 	show_pte(addr);
 	die("Oops", regs, esr);
 	bust_spinlocks(0);
+	/**
+	 * 退出当前进程，如果进程是核心系统进程，那么系统会崩溃
+	 */
 	do_exit(SIGKILL);
 }
 
@@ -488,8 +495,9 @@ static bool is_write_abort(unsigned int esr)
  * 缺页异常修复
  * 
  * @param addr 异常发生时的虚拟地址，由FSR提供
- * @param esr 异常发生时的异常状态，由ESR提供
- * @param regs 异常发生时的pt_regs
+ * @param esr  异常发生时的异常状态，由ESR提供
+ * @param regs 异常发生时的pt_regs , 这应该是触发异常的进程当时的寄存器的值 
+ *             -- struct pt_regs *regs 记录的就是触发异常（Page Fault）那一瞬间，CPU 核心所有寄存器的状态快照
  */
 static int __kprobes do_page_fault(unsigned long addr, unsigned int esr,
 				   struct pt_regs *regs)
@@ -499,9 +507,13 @@ static int __kprobes do_page_fault(unsigned long addr, unsigned int esr,
 	vm_fault_t fault;
 	unsigned long vm_flags = VM_ACCESS_FLAGS;
 	unsigned int mm_flags = FAULT_FLAG_DEFAULT;
-
-	if (kprobe_page_fault(regs, esr))
+ 
+	/**
+	 * kprobe： 内核调试机制
+	 */
+	if (kprobe_page_fault(regs, esr)) {
 		return 0;
+	}
 
 	/**
 	 * 结合 [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#4.7.2　do_page_fault()函数 来学习
@@ -577,10 +589,21 @@ static int __kprobes do_page_fault(unsigned long addr, unsigned int esr,
 
 	perf_sw_event(PERF_COUNT_SW_PAGE_FAULTS, 1, regs, addr);
 
-	/*
+	/**
+	 * 
+	 * mm->mmap_sem锁被别人占用时要区分两种情况：
+	 *    一种是发生在内核空间
+	 *    另外一种是发生在用户空间
+	 * 发生在用户空间的情况下可以调用down_read()来睡眠，以等待锁持有者释放该锁。
+	 * 内核一般不会随意访问用户地址空间，只有少数几个函数会代表内核访问用户地址空间，
+	 *     如copy_to_user()，为了防止访问错误的地址空间，为每处代码设置了出错修正地址（见异常表）
+	 * mm semaphore(mmap_sem) 和 mmap_lock 的关系: 它们是同一个东西，只是不同时期的称呼。
+	 * 
 	 * As per x86, we may deadlock here. However, since the kernel only
 	 * validly references user space from well defined areas of the code,
 	 * we can bug out early if this is from code which shouldn't.
+	 * (参照 x86 架构的情况，此处可能会发生死锁。然而，由于内核只允许在特定的代码区域引用用户空间，
+	 * 因此如果错误发生在这些规定区域之外，我们可以尽早报错（Bug out）以规避风险)
 	 */
 	if (!mmap_read_trylock(mm)) {
 		if (!user_mode(regs) && !search_exception_tables(regs->pc))
@@ -601,6 +624,7 @@ retry:
 #endif
 	}
 
+	// 进一步处理
 	fault = __do_page_fault(mm, addr, mm_flags, vm_flags, regs);
 
 	/* Quick path to respond to signals */

@@ -4680,16 +4680,18 @@ static inline void mm_account_fault(struct pt_regs *regs,
 		perf_sw_event(PERF_COUNT_SW_PAGE_FAULTS_MIN, 1, regs, address);
 }
 
-/*
+/**
  * By the time we get here, we already hold the mm semaphore
  *
  * The mmap_lock may have been released depending on flags and our
  * return value.  See filemap_fault() and __lock_page_or_retry().
+ * mm semaphore 和 mmap_lock 的关系: 它们是同一个东西，只是不同时期的称呼。
  * 
  * @param vma      发生缺页异常的地址空间
  * @param address  发生缺页异常的虚拟地址,这个地址是以页面大小对齐的
  * @param flags    内存相关的标志位
- * @param regs 
+ * @param regs      异常发生时的pt_regs , 这应该是触发异常的进程当时的寄存器的值 
+ *                   -- struct pt_regs *regs 记录的就是触发异常（Page Fault）那一瞬间，CPU 核心所有寄存器的状态快照
  */
 vm_fault_t handle_mm_fault(struct vm_area_struct *vma, unsigned long address,
 			   unsigned int flags, struct pt_regs *regs)

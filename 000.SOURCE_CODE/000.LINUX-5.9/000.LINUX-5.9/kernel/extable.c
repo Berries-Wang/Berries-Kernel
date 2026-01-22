@@ -49,7 +49,11 @@ struct exception_table_entry *search_kernel_exception_table(unsigned long addr)
 			      __stop___ex_table - __start___ex_table, addr);
 }
 
-/* Given an address, look for it in the exception tables. */
+/**
+ *  Given an address, look for it in the exception tables.
+ * (给定一个地址，在异常表（exception tables）中查找它)
+ * 
+ **/
 const struct exception_table_entry *search_exception_tables(unsigned long addr)
 {
 	const struct exception_table_entry *e;

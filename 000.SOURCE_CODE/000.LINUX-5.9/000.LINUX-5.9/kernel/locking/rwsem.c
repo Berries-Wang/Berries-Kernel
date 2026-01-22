@@ -1571,7 +1571,7 @@ static inline void __downgrade_write(struct rw_semaphore *sem)
 }
 
 /*
- * lock for reading
+ * lock for reading (申请读锁)
  */
 void __sched down_read(struct rw_semaphore *sem)
 {
