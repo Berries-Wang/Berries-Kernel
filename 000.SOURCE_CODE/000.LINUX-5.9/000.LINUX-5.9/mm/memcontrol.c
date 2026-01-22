@@ -999,10 +999,11 @@ static void memcg_check_events(struct mem_cgroup *memcg, struct page *page)
 
 struct mem_cgroup *mem_cgroup_from_task(struct task_struct *p)
 {
-	/*
+	/**
 	 * mm_update_next_owner() may clear mm->owner to NULL
 	 * if it races with swapoff, page migration, etc.
 	 * So this can be called with p == NULL.
+	 * 由于 mm_update_next_owner() 在与 swapoff（关闭交换分区）、页面迁移（page migration）等操作竞争时，可能会将 mm->owner 清写为 NULL。因此，调用此函数时传入的任务指针 p 可能是 NULL
 	 */
 	if (unlikely(!p))
 		return NULL;

@@ -657,11 +657,14 @@ struct mm_struct {
 		struct kioctx_table __rcu	*ioctx_table;
 #endif
 #ifdef CONFIG_MEMCG
-		/*
+		/**
+		 * CONFIG_MEMCG 指: Memory Control Group
+		 * 
 		 * "owner" points to a task that is regarded as the canonical
 		 * user/owner of this mm. All of the following must be true in
 		 * order for it to be changed:
-		 *
+		 * (“‘owner’ 指向一个被视为该内存管理结构（mm）法定用户/所有者的任务（task）。只有当以下所有条件都满足时，才能对其进行更改：”)
+		 * 
 		 * current == mm->owner
 		 * current->mm != mm
 		 * new_owner->mm == mm
