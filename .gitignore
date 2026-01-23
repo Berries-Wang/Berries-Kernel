@@ -7,3 +7,4 @@
 app
 009.IGNORE/*
 !009.IGNORE/README.md
+**/**/.DS_Store
