@@ -20,6 +20,7 @@
         "CONFIG_CGROUP_NET_PRIO",
         "CONFIG_CGROUP_HUGETLB",
         "CONFIG_CGROUP_PIDS",
+        "CONFIG_NUMA", // numactl --hardware 来判断是否开启
         "CONFIG_CGROUP_RDMA"
       ],
       "intelliSenseMode": "linux-gcc-arm64", // 模拟在 Linux 下使用 GCC 开发/分析 64 位 ARM 程序
@@ -54,6 +55,7 @@
         "CONFIG_CGROUP_NET_PRIO",
         "CONFIG_CGROUP_HUGETLB",
         "CONFIG_CGROUP_PIDS",
+        "CONFIG_NUMA", // numactl --hardware 来判断是否开启
         "CONFIG_CGROUP_RDMA"
       ],
       "intelliSenseMode": "macos-gcc-arm64", // 在 macOS 下使用 GCC 开发或分析 64 位 ARM 程序

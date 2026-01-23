@@ -1805,9 +1805,10 @@ struct mempolicy *__get_vma_policy(struct vm_area_struct *vma,
 	return pol;
 }
 
-/*
+/**
  * get_vma_policy(@vma, @addr)
  * @vma: virtual memory area whose policy is sought
+ *       (待查询（其内存）策略的虚拟内存区域（VMA）)
  * @addr: address in @vma for shared policy lookup
  *
  * Returns effective policy for a VMA at specified address.
@@ -1816,9 +1817,13 @@ struct mempolicy *__get_vma_policy(struct vm_area_struct *vma,
  * count--added by the get_policy() vm_op, as appropriate--to protect against
  * freeing by another task.  It is the caller's responsibility to free the
  * extra reference for shared policies.
+ * (返回指定地址处 VMA（虚拟内存区域）的生效策略。如有必要，
+ * 该函数会回退（Fall back）到 current->mempolicy（当前进程策略）或系统默认策略。
+ * 共享策略［即标记为 MPOL_F_SHARED 的策略］需要一个额外的引用计数——该计数由 get_policy()
+ *  虚拟内存操作（vm_op）视情况增加——以防止被其他任务释放。调用者负责释放共享策略的这一额外引用)
  */
 static struct mempolicy *get_vma_policy(struct vm_area_struct *vma,
-						unsigned long addr)
+					unsigned long addr)
 {
 	struct mempolicy *pol = __get_vma_policy(vma, addr);
 
@@ -2160,13 +2165,16 @@ static struct page *alloc_page_interleave(gfp_t gfp, unsigned order,
  *      %GFP_KERNEL  kernel allocations,
  *      %GFP_HIGHMEM highmem/user allocations,
  *      %GFP_FS      allocation should not call back into a file system.
+ *                   (内存分配不应回调（或重入）文件系统)
  *      %GFP_ATOMIC  don't sleep.
  *
- *	@order:Order of the GFP allocation.
- * 	@vma:  Pointer to VMA or NULL if not available.
- *	@addr: Virtual Address of the allocation. Must be inside the VMA.
- *	@node: Which node to prefer for allocation (modulo policy).
+ *	@order: Order of the GFP allocation.
+ * 	@vma:   Pointer to VMA or NULL if not available.
+ *	@addr:  Virtual Address of the allocation. Must be inside the VMA.
+ *	@node:  Which node to prefer for allocation (modulo policy).
+ *          (在不考虑策略的情况下，优先选择哪个节点进行分配。)
  *	@hugepage: for hugepages try only the preferred node if possible
+ *             (对于大页分配，尽可能只尝试从首选节点（Preferred Node）获取内存)
  *
  * 	This function allocates a page from the kernel page pool and applies
  *	a NUMA policy associated with the VMA or the current process.
@@ -2174,10 +2182,13 @@ static struct page *alloc_page_interleave(gfp_t gfp, unsigned order,
  *	mm_struct of the VMA to prevent it from going away. Should be used for
  *	all allocations for pages that will be mapped into user space. Returns
  *	NULL when no page can be allocated.
+ * (该函数从内核页池（Page Pool）中分配一个页面，
+ * 并应用与该 VMA（虚拟内存区域）或当前进程相关联的 NUMA 策略。
+ * 当 VMA 参数不为 NULL 时，调用者必须对该 VMA 所属 mm_struct 的 mmap_lock 加读锁，
+ * 以防止其被销毁。该函数应被用于所有“将被映射到用户空间”的页面分配。若无法分配页面，则返回 NULL。)
  */
-struct page *
-alloc_pages_vma(gfp_t gfp, int order, struct vm_area_struct *vma,
-		unsigned long addr, int node, bool hugepage)
+struct page *alloc_pages_vma(gfp_t gfp, int order, struct vm_area_struct *vma,
+			     unsigned long addr, int node, bool hugepage)
 {
 	struct mempolicy *pol;
 	struct page *page;
