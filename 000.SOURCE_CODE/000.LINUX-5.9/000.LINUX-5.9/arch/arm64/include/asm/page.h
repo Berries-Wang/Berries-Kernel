@@ -21,6 +21,9 @@ extern void __cpu_copy_user_page(void *to, const void *from,
 extern void copy_page(void *to, const void *from);
 extern void clear_page(void *to);
 
+/**
+ * include/linux/gfp.h
+ */
 #define __alloc_zeroed_user_highpage(movableflags, vma, vaddr) \
 	alloc_page_vma(GFP_HIGHUSER | __GFP_ZERO | movableflags, vma, vaddr)
 #define __HAVE_ARCH_ALLOC_ZEROED_USER_HIGHPAGE

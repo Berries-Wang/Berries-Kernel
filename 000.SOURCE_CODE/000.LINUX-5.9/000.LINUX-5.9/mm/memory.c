@@ -3606,8 +3606,13 @@ static vm_fault_t do_anonymous_page(struct vm_fault *vmf)
 		goto oom;
 	}
 
-	if (mem_cgroup_charge(page, vma->vm_mm, GFP_KERNEL))
+	/**
+	 * 注意，和cgroup相关 , 例如:
+	 *   - 当内存超过 memory.max ， 则会OOM
+	 */
+	if (mem_cgroup_charge(page, vma->vm_mm, GFP_KERNEL)) {
 		goto oom_free_page;
+	}
 	cgroup_throttle_swaprate(page, GFP_KERNEL);
 
 	/*

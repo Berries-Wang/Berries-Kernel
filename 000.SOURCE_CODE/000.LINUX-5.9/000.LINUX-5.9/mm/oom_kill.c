@@ -1124,10 +1124,12 @@ bool out_of_memory(struct oom_control *oc)
 	return !!oc->chosen;
 }
 
-/*
+/**
  * The pagefault handler calls here because it is out of memory, so kill a
  * memory-hogging task. If oom_lock is held by somebody else, a parallel oom
  * killing is already in progress so do nothing.
+ * (缺页异常处理程序（pagefault handler）因内存耗尽而调用此处，目的是杀掉一个占用大量内存的任务。
+ * 如果 oom_lock 已被其他对象持有，说明另一个并行的 OOM 杀除操作正在进行中，因此无需采取任何行动)
  */
 void pagefault_out_of_memory(void)
 {
@@ -1139,11 +1141,17 @@ void pagefault_out_of_memory(void)
 		.order = 0,
 	};
 
-	if (mem_cgroup_oom_synchronize(true))
+	if (mem_cgroup_oom_synchronize(true)) {
 		return;
+	}
 
-	if (!mutex_trylock(&oom_lock))
+	if (!mutex_trylock(&oom_lock)) {
 		return;
+	}
+	/**
+	 *  OOM Killer
+	 */
 	out_of_memory(&oc);
+	
 	mutex_unlock(&oom_lock);
 }

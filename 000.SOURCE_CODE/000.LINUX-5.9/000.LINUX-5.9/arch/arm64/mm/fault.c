@@ -649,18 +649,23 @@ retry:
 			      VM_FAULT_BADACCESS))))
 		return 0;
 
-	/*
+	/**
 	 * If we are in kernel mode at this point, we have no context to
 	 * handle this fault with.
+	 * (如果我们此时处于内核模式（Kernel Mode），我们便没有上下文（Context）来处理这个故障)
 	 */
-	if (!user_mode(regs))
+	if (!user_mode(regs)) {
 		goto no_context;
+	}
 
+	// OOM 了
 	if (fault & VM_FAULT_OOM) {
-		/*
+		/**
 		 * We ran out of memory, call the OOM killer, and return to
 		 * userspace (which will retry the fault, or kill us if we got
 		 * oom-killed).
+		 * (内存已耗尽，调用 OOM Killer（内存溢出终止机制），
+		 * 然后返回用户态（届时将重试该错误访问，或者如果我们已被 OOM Killer 选中，则会被终止）)
 		 */
 		pagefault_out_of_memory();
 		return 0;

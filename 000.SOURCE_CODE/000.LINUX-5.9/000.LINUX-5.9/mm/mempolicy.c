@@ -1781,7 +1781,7 @@ bool vma_migratable(struct vm_area_struct *vma)
 }
 
 struct mempolicy *__get_vma_policy(struct vm_area_struct *vma,
-						unsigned long addr)
+				   unsigned long addr)
 {
 	struct mempolicy *pol = NULL;
 
@@ -1791,14 +1791,17 @@ struct mempolicy *__get_vma_policy(struct vm_area_struct *vma,
 		} else if (vma->vm_policy) {
 			pol = vma->vm_policy;
 
-			/*
+			/**
 			 * shmem_alloc_page() passes MPOL_F_SHARED policy with
 			 * a pseudo vma whose vma->vm_ops=NULL. Take a reference
 			 * count on these policies which will be dropped by
 			 * mpol_cond_put() later
+			 * (shmem_alloc_page() 在调用时会传递 MPOL_F_SHARED 标志，并使用一个 vma->vm_ops 为 NULL 的伪 VMA（pseudo vma）。
+			 * 必须对这些策略增加引用计数，该计数随后将由 mpol_cond_put() 进行释放)
 			 */
-			if (mpol_needs_cond_ref(pol))
+			if (mpol_needs_cond_ref(pol)) {
 				mpol_get(pol);
+			}
 		}
 	}
 
@@ -1875,9 +1878,10 @@ static int apply_policy_zone(struct mempolicy *policy, enum zone_type zone)
 	return zone >= dynamic_policy_zone;
 }
 
-/*
+/**
  * Return a nodemask representing a mempolicy for filtering nodes for
  * page allocation
+ * (返回一个节点掩码（nodemask），该掩码代表了用于过滤页面分配节点的内存策略)
  */
 nodemask_t *policy_nodemask(gfp_t gfp, struct mempolicy *policy)
 {
@@ -1988,7 +1992,12 @@ static unsigned offset_il_node(struct mempolicy *pol, unsigned long n)
 	return nid;
 }
 
-/* Determine a node number for interleave */
+/**
+ *  Determine a node number for interleave
+ * (确定用于交错（访问）的节点编号)
+ * 
+ * 交错： 一种内存管理策略。为了防止某个 CPU 节点的内存带宽成为瓶颈，系统将数据分散存储在多个不同的内存节点上
+ *  */
 static inline unsigned interleave_nid(struct mempolicy *pol,
 		 struct vm_area_struct *vma, unsigned long addr, int shift)
 {
@@ -2248,6 +2257,7 @@ struct page *alloc_pages_vma(gfp_t gfp, int order, struct vm_area_struct *vma,
 
 	nmask = policy_nodemask(gfp, pol);
 	preferred_nid = policy_node(gfp, pol, node);
+	// 从伙伴系统中分配物理页面
 	page = __alloc_pages_nodemask(gfp, order, preferred_nid, nmask);
 	mpol_cond_put(pol);
 out:

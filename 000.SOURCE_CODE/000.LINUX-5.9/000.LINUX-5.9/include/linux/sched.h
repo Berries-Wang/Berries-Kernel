@@ -985,6 +985,10 @@ struct task_struct {
 	unsigned			restore_sigmask:1;
 #endif
 #ifdef CONFIG_MEMCG
+    /**
+	 * 是否处于用户态缺页中
+	 * :1: 关键点。这表示该变量仅占用 1 个比特（bit）。它的值只能是 0（假）或 1（真）
+	 */
 	unsigned			in_user_fault:1;
 #endif
 #ifdef CONFIG_COMPAT_BRK

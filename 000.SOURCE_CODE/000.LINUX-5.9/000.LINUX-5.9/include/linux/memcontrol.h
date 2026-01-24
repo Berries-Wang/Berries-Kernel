@@ -202,11 +202,14 @@ struct obj_cgroup {
 	};
 };
 
-/*
+/**
  * The memory controller data structure. The memory controller controls both
  * page cache and RSS per cgroup. We would eventually like to provide
  * statistics based on the statistics developed by Rik Van Riel for clock-pro,
  * to help the administrator determine what knobs to tune.
+ * (内存控制器的数据结构。该内存控制器针对每个 cgroup（控制组）同时管理页面缓存（Page Cache）和常驻内存集（RSS）。
+ * 我们最终希望提供基于 Rik Van Riel 为 clock-pro 算法开发的统计数据，
+ * 以帮助管理员确定需要调整哪些参数。)
  */
 struct mem_cgroup {
 	struct cgroup_subsys_state css;
