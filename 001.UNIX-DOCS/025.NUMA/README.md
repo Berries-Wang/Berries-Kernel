@@ -2,7 +2,7 @@
 先学习[001.UNIX-DOCS/025.NUMA/README.md(另一个Git仓库)](Berries-Kernel:001.UNIX-DOCS/025.NUMA/README.md) & [006.BOOKs/RISC-V Architecture Programming and Practice.pdf#11.2 高速缓存的访问延时](../../007.BOOKs/RISC-V%20Architecture%20Programming%20and%20Practice/) & [奔跑吧Linux内核（第2版）卷1：基础架构#1.1.17　NUMA](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) & [3.3.1　内存架构之UMA和NUMA](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) & [1.1.17　NUMA#图1.24　NUMA系统](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) & [28-多核处理器：内存一致性模型 [中山大学 操作系统原理]](./../000.内存管理/998.REFS/000.中山大学-操作系统/16-0612-multiprocessor-2.pdf)再看以下内容
 
 - ![wechat_2026-01-25_235731_402.png](./999.IMGS/wechat_2026-01-25_235731_402.png)
-   + UPI (Intel Ultra Path Interconnect)，在NUMA中扮演 “跨处理器桥梁”角色
+   + UPI (Intel Ultra Path Interconnect)，在NUMA中扮演 “跨处理器桥梁”角色<sup>A cache-coherent, link-based Interconnect specification for Intel processors. Also known as Intel® UPI：一种用于英特尔® 处理器的、基于链路的缓存一致性互连规范。亦被称为英特尔® UPI。</sup>
    + UPI 在 NUMA 中的具体位置: 在 NUMA 架构下，每一颗 CPU 都有自己直连的本地内存（Local Memory）。但如果 CPU 0 想要访问 CPU 1 挂载的内存，它就必须跨越物理边界,UPI 就是这条边界上的高速公路：
      - 本地访问： CPU 0 → 本地内存控制器 → 本地 RAM（延迟低，带宽大）。
      - 远端访问 (Remote Access)： CPU 0 → UPI 总线 → CPU 1 → CPU 1 的内存控制器 → 远端 RAM（延迟高，带宽受限于 UPI）。
