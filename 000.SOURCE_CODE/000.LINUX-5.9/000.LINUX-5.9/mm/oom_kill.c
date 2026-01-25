@@ -499,9 +499,10 @@ bool process_shares_mm(struct task_struct *p, struct mm_struct *mm)
 }
 
 #ifdef CONFIG_MMU
-/*
+/**
  * OOM Reaper kernel thread which tries to reap the memory used by the OOM
  * victim (if that is possible) to help the OOM killer to move on.
+ * (OOM Reaper 内核线程会尝试回收（Reap）由 OOM 牺牲者所占用的内存（如果可行的话），以帮助 OOM Killer 尽快推进后续流程)
  */
 static struct task_struct *oom_reaper_th;
 static DECLARE_WAIT_QUEUE_HEAD(oom_reaper_wait);
@@ -668,6 +669,11 @@ static void wake_oom_reaper(struct task_struct *tsk)
 	oom_reaper_list = tsk;
 	spin_unlock(&oom_reaper_lock);
 	trace_wake_reaper(tsk->pid);
+	/**
+	 * 这行代码，得结合 
+	 *     [subsys_initcall(oom_init)](mm/oom_kill.c)
+	 * 进行分析了
+	 */
 	wake_up(&oom_reaper_wait);
 }
 
@@ -676,6 +682,12 @@ static int __init oom_init(void)
 	oom_reaper_th = kthread_run(oom_reaper, NULL, "oom_reaper");
 	return 0;
 }
+/**
+ * subsys_initcall(oom_init) 是一个宏，用于定义内核初始化时执行特定函数的顺序和等级
+ * 
+ * 含义：将 oom_init 函数注册为“子系统级”的初始化函数。
+ *      当 Linux 内核启动时，它不会随机运行初始化代码，而是按照预定义的优先级（Level）依次执行
+ */
 subsys_initcall(oom_init)
 #else
 static inline void wake_oom_reaper(struct task_struct *tsk)
@@ -685,22 +697,31 @@ static inline void wake_oom_reaper(struct task_struct *tsk)
 
 /**
  * mark_oom_victim - mark the given task as OOM victim
+ * (将给定任务标记为 OOM 牺牲者:将指定任务标记为 OOM 杀除对象)
  * @tsk: task to mark
  *
  * Has to be called with oom_lock held and never after
  * oom has been disabled already.
+ * (必须在持有 oom_lock 的情况下调用，且绝不能在 OOM 已被禁用后调用。)
  *
  * tsk->mm has to be non NULL and caller has to guarantee it is stable (either
  * under task_lock or operate on the current).
+ * (tsk->mm 必须为非空（non-NULL），
+ * 且调用者必须保证其稳定性（通过持有 task_lock 锁，或操作对象为 current 进程）。)
  */
 static void mark_oom_victim(struct task_struct *tsk)
 {
 	struct mm_struct *mm = tsk->mm;
 
 	WARN_ON(oom_killer_disabled);
-	/* OOM killer might race with memcg OOM */
-	if (test_and_set_tsk_thread_flag(tsk, TIF_MEMDIE))
+	/** OOM killer might race with memcg OOM 
+	 * TIF_MEMDIE: Thread Information Flag - Memory Die
+	 *     --> 当系统内存耗尽（OOM, Out of Memory）时，OOM Killer 会选中一个进程并将其杀掉。
+	 *         为了让这个进程能够快点“死掉”并释放内存，内核会给它打上 TIF_MEMDIE 标记
+	*/
+	if (test_and_set_tsk_thread_flag(tsk, TIF_MEMDIE)) {
 		return;
+	}
 
 	/* oom_mm is bound to the signal struct life time. */
 	if (!cmpxchg(&tsk->signal->oom_mm, NULL, mm)) {
@@ -708,11 +729,26 @@ static void mark_oom_victim(struct task_struct *tsk)
 		set_bit(MMF_OOM_VICTIM, &mm->flags);
 	}
 
-	/*
+	/**
 	 * Make sure that the task is woken up from uninterruptible sleep
 	 * if it is frozen because OOM killer wouldn't be able to free
 	 * any memory and livelock. freezing_slow_path will tell the freezer
 	 * that TIF_MEMDIE tasks should be ignored.
+	 * 确保当任务因被冻结（Frozen）而处于不可中断睡眠状态（Uninterruptible Sleep）时能被唤醒。
+	 * 否则，OOM Killer 将无法释放任何内存，
+	 * 从而导致活锁（Livelock）。freezing_slow_path 会通知冻结器忽略带有 TIF_MEMDIE 标志的任务。
+	 * 
+	 * 为什么要唤醒?
+	 * ---> 如果一个进程被“冻结”了（通常发生在系统挂起到硬盘/内存时），它处于一种深度睡眠状态。如果此时 OOM Killer 选中了它并杀了它，但它因为被冻结而无法运行退出代码，那么它持有的内存就永远无法释放
+	 * 
+	 * 什么是活锁（Livelock）?
+	 * ---> 在这种情况下，OOM Killer 认为自己已经杀了一个进程（并等待它释放内存），但该进程因为冻结动弹不得。系统不断尝试回收内存却毫无进展，整个系统就会卡死
+	 * 
+	 * freezing_slow_path 的角色?
+	 * ---> 这是内核冻结机制的一个关键函数。它会检查进程的标志位，如果发现进程被打上了 TIF_MEMDIE（即它是 OOM 的牺牲者），就会“网开一面”，不再尝试冻结它，或者允许它从冻结状态中解脱出来去执行自杀逻辑
+	 */
+	/**
+	 * thaw ： 解冻;freezing的反操作
 	 */
 	__thaw_task(tsk);
 	atomic_inc(&oom_victims);
@@ -778,33 +814,53 @@ bool oom_killer_disable(signed long timeout)
 	return true;
 }
 
+/**
+ * PF_EXITING 是任务级别（单个线程）的状态，而 SIGNAL_GROUP_EXIT 和 SIGNAL_GROUP_COREDUMP 是进程组级别（整个线程组）的状态
+ */
 static inline bool __task_will_free_mem(struct task_struct *task)
 {
 	struct signal_struct *sig = task->signal;
 
-	/*
+	/**
 	 * A coredumping process may sleep for an extended period in exit_mm(),
 	 * so the oom killer cannot assume that the process will promptly exit
 	 * and release memory.
+	 * (正在进行核心转储（Coredump）的进程可能会在 exit_mm() 中长时间睡眠，
+	 * 因此 OOM Killer 不能假设该进程会立即退出并释放内存。)
 	 */
-	if (sig->flags & SIGNAL_GROUP_COREDUMP)
+	/**
+	 * SIGNAL_GROUP_COREDUMP:特殊的退出状态。表示进程因为收到了某种信号（如 SIGSEGV）正在产生核心转储文件
+	 */
+	if (sig->flags & SIGNAL_GROUP_COREDUMP) {
 		return false;
+	}
 
-	if (sig->flags & SIGNAL_GROUP_EXIT)
+	/**
+	 * SIGNAL_GROUP_EXIT: 表示整个进程组（包括所有线程）正在退出。这通常由 exit_group() 系统调用触发
+	 */
+	if (sig->flags & SIGNAL_GROUP_EXIT) {
 		return true;
+	}
 
-	if (thread_group_empty(task) && (task->flags & PF_EXITING))
+	/**
+	 * PF_EXITING: 当一个特定的线程开始调用 do_exit() 时，内核会立即为该线程设置这个标志
+	 */
+	if (thread_group_empty(task) && (task->flags & PF_EXITING)) {
 		return true;
+	}
 
 	return false;
 }
 
-/*
+/**
  * Checks whether the given task is dying or exiting and likely to
  * release its address space. This means that all threads and processes
  * sharing the same mm have to be killed or exiting.
  * Caller has to make sure that task->mm is stable (hold task_lock or
  * it operates on the current).
+ * (检查给定任务（task）是否处于垂死或退出状态，并极有可能释放其地址空间。
+ * 这意味着所有共享同一 mm（内存描述符）的线程和进程都必须处于被杀掉或正在退出的状态。
+ * 调用者必须确保 task->mm 的稳定性（通过持有 task_lock 或操作 current 进程）。)
  */
 static bool task_will_free_mem(struct task_struct *task)
 {
@@ -812,33 +868,46 @@ static bool task_will_free_mem(struct task_struct *task)
 	struct task_struct *p;
 	bool ret = true;
 
-	/*
+	/**
 	 * Skip tasks without mm because it might have passed its exit_mm and
 	 * exit_oom_victim. oom_reaper could have rescued that but do not rely
 	 * on that for now. We can consider find_lock_task_mm in future.
+	 * (跳过没有 mm（内存描述符）的任务，因为该任务可能已经通过了 exit_mm 和 exit_oom_victim 阶段。
+	 * 虽然 oom_reaper（OOM 收割机）可能已经回收了这些内存，
+	 * 但目前还不能依赖它。未来可以考虑使用 find_lock_task_mm。)
 	 */
-	if (!mm)
+	if (!mm) {
 		return false;
+	}
 
-	if (!__task_will_free_mem(task))
+	if (!__task_will_free_mem(task)) {
 		return false;
+	}
 
-	/*
+	/**
 	 * This task has already been drained by the oom reaper so there are
 	 * only small chances it will free some more
+	 * (该任务已被 OOM Reaper（OOM 收割机）清理过，因此它进一步释放内存的可能性微乎其微)
 	 */
-	if (test_bit(MMF_OOM_SKIP, &mm->flags))
+	if (test_bit(MMF_OOM_SKIP, &mm->flags)) {
 		return false;
+	}
 
-	if (atomic_read(&mm->mm_users) <= 1)
+	// 当只有一个task使用mm时(就是当前这个task了)
+	if (atomic_read(&mm->mm_users) <= 1) {
 		return true;
+	}
 
-	/*
+	/**
 	 * Make sure that all tasks which share the mm with the given tasks
 	 * are dying as well to make sure that a) nobody pins its mm and
 	 * b) the task is also reapable by the oom reaper.
+	 * (确保所有与给定任务共享内存管理结构的任务也都处于退出状态，以保证：
+	 * a) 无人能固定其内存管理结构；
+	 * b) 该任务也能够被OOM终结者回收。)
 	 */
 	rcu_read_lock();
+	// 遍历所有的task
 	for_each_process(p) {
 		if (!process_shares_mm(p, mm))
 			continue;
@@ -1046,8 +1115,10 @@ EXPORT_SYMBOL_GPL(unregister_oom_notifier);
  * killing a random task (bad), letting the system crash (worse)
  * OR try to be smart about which process to kill. Note that we
  * don't have to be perfect here, we just have to be good.
- * (如果内存耗尽，我们面临三种选择：要么随机杀掉一个任务（这很糟糕），
- * 要么任由系统崩溃（这更糟），或者尝试聪明地选择要杀掉的进程。
+ * (如果内存耗尽，我们面临三种选择：
+ *   - 要么随机杀掉一个任务（这很糟糕），
+ *   - 要么任由系统崩溃（这更糟）
+ *   - 或者尝试聪明地选择要杀掉的进程。
  * 注意，我们不需要做得完美，只要足够好就行了。)
  */
 bool out_of_memory(struct oom_control *oc)
@@ -1060,17 +1131,25 @@ bool out_of_memory(struct oom_control *oc)
 	if (!is_memcg_oom(oc)) {
 		blocking_notifier_call_chain(&oom_notify_list, 0, &freed);
 		if (freed > 0)
-			/* Got some memory back in the last second. */
+			/* Got some memory back in the last second.(在最后一秒（最后一刻）回收了部分内存) */
 			return true;
 	}
 
-	/*
+	/**
 	 * If current has a pending SIGKILL or is exiting, then automatically
 	 * select it.  The goal is to allow it to allocate so that it may
 	 * quickly exit and free its memory.
+	 * (如果当前进程（current）有一个待处理的 SIGKILL 信号或者正在退出，则自动选中它。
+	 * 这样做的目的是允许其分配内存，以便它能快速退出并释放所占用的内存)
 	 */
 	if (task_will_free_mem(current)) {
+		/**
+		 * victim: 受害者;牺牲品
+		 */
 		mark_oom_victim(current);
+		/**
+		 * reaper: 收割者
+		 */
 		wake_oom_reaper(current);
 		return true;
 	}
@@ -1152,6 +1231,6 @@ void pagefault_out_of_memory(void)
 	 *  OOM Killer
 	 */
 	out_of_memory(&oc);
-	
+
 	mutex_unlock(&oom_lock);
 }

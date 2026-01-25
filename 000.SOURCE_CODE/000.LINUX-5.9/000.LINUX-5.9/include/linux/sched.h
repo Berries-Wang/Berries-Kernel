@@ -1506,6 +1506,9 @@ struct task_struct {
 #endif
 	int				pagefault_disabled;
 #ifdef CONFIG_MMU
+    /**
+	 * oom_reaper_list 成员是一个单向链表节点，它将所有等待“收割”内存的进程组织在一起
+	 */
 	struct task_struct		*oom_reaper_list;
 #endif
 #ifdef CONFIG_VMAP_STACK

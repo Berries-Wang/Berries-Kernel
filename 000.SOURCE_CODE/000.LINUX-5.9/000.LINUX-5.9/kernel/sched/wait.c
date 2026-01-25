@@ -58,14 +58,19 @@ EXPORT_SYMBOL(remove_wait_queue);
  * The core wakeup function. Non-exclusive wakeups (nr_exclusive == 0) just
  * wake everything up. If it's an exclusive wakeup (nr_exclusive == small +ve
  * number) then we wake all the non-exclusive tasks and one exclusive task.
+ * (这是核心唤醒函数。非互斥唤醒（nr_exclusive == 0）会直接唤醒所有任务。
+ * 如果是互斥唤醒（nr_exclusive 为较小的正数），
+ * 则我们会唤醒所有非互斥任务以及其中一个互斥任务。)
  *
  * There are circumstances in which we can try to wake a task which has already
  * started to run but is not in state TASK_RUNNING. try_to_wake_up() returns
  * zero in this (rare) case, and we handle it by continuing to scan the queue.
+ * (在某些情况下，我们可能会尝试唤醒一个已经开始运行、但状态尚不为 TASK_RUNNING 的任务。
+ * 在这种（罕见）情况下，try_to_wake_up() 会返回 0，而我们的处理方式是继续扫描队列)
  */
 static int __wake_up_common(struct wait_queue_head *wq_head, unsigned int mode,
-			int nr_exclusive, int wake_flags, void *key,
-			wait_queue_entry_t *bookmark)
+			    int nr_exclusive, int wake_flags, void *key,
+			    wait_queue_entry_t *bookmark)
 {
 	wait_queue_entry_t *curr, *next;
 	int cnt = 0;
@@ -77,27 +82,34 @@ static int __wake_up_common(struct wait_queue_head *wq_head, unsigned int mode,
 
 		list_del(&bookmark->entry);
 		bookmark->flags = 0;
-	} else
-		curr = list_first_entry(&wq_head->head, wait_queue_entry_t, entry);
+	} else {
+		curr = list_first_entry(&wq_head->head, wait_queue_entry_t,
+					entry);
+	}
 
-	if (&curr->entry == &wq_head->head)
+	if (&curr->entry == &wq_head->head) {
 		return nr_exclusive;
+	}
 
-	list_for_each_entry_safe_from(curr, next, &wq_head->head, entry) {
+	list_for_each_entry_safe_from (curr, next, &wq_head->head, entry) {
 		unsigned flags = curr->flags;
 		int ret;
 
-		if (flags & WQ_FLAG_BOOKMARK)
+		if (flags & WQ_FLAG_BOOKMARK) {
 			continue;
+		}
 
+		// 执行这个回调函数
 		ret = curr->func(curr, mode, wake_flags, key);
-		if (ret < 0)
+		if (ret < 0) {
 			break;
-		if (ret && (flags & WQ_FLAG_EXCLUSIVE) && !--nr_exclusive)
+		}
+		if (ret && (flags & WQ_FLAG_EXCLUSIVE) && !--nr_exclusive) {
 			break;
+		}
 
 		if (bookmark && (++cnt > WAITQUEUE_WALK_BREAK_CNT) &&
-				(&next->entry != &wq_head->head)) {
+		    (&next->entry != &wq_head->head)) {
 			bookmark->flags = WQ_FLAG_BOOKMARK;
 			list_add_tail(&bookmark->entry, &next->entry);
 			break;

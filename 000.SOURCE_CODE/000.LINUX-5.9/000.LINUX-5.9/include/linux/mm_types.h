@@ -555,12 +555,18 @@ struct mm_struct {
 
 		/**
 		 * @mm_users: The number of users including userspace.
+		 * (包含用户态（引用）在内的用户总数)
 		 *
 		 * Use mmget()/mmget_not_zero()/mmput() to modify. When this
 		 * drops to 0 (i.e. when the task exits and there are no other
 		 * temporary reference holders), we also release a reference on
 		 * @mm_count (which may then free the &struct mm_struct if
 		 * @mm_count also drops to 0).
+		 * (请使用 mmget()、mmget_not_zero() 或 mmput() 进行修改。
+		 * 当该计数降至 0 时（即任务退出且没有其他临时引用持有者时），
+		 * 我们还会释放一个对 @mm_count 的引用（如果此时 @mm_count 也降至 0，
+		 * 则会释放 &struct mm_struct 结构体）。)
+		 * 
 		 * mm_users：记录正在使用该进程地址空间的进程数目，如果两个线程共享该地址空间，那么mm_users的值等于2。
 		 */
 		atomic_t mm_users;
