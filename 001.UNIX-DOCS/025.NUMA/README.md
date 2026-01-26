@@ -18,6 +18,10 @@
   + 结构框图 (Node = Socket + 所属于他的内存插槽 , 不同Node之间访问方式)
      - ![20251103100323.jpg](./999.IMGS/20251103100323.jpg)
      - 参考手册：[User Manual: 对该图(该主板)有详细介绍](./999.IMGS/server_manual_e_mz73lm2_e_v3.0.pdf)
+     - GMI : AMD的高速互连技术，用于连接多个处理器和加速器，提供高带宽和低延迟的数据传输。功能与Intel UPI类似,参考资料:
+       + [4TH GEN AMD EPYC™ PROCESSOR ARCHITECTURE](./998.REFS/4th-gen-epyc-processor-architecture-white-paper.pdf)
+       + [TUNING GUIDE AMD EPYC 9004#Figure 2-9: Two EPYC 9004 Processors connect through 4 xGMI links (NPS1)](./998.REFS/58011-epyc-9004-tg-bios-and-workload.pdf)
+         - ![wechat_2026-01-26_081151_181.png](./999.IMGS/wechat_2026-01-26_081151_181.png)
   + [https://www.gigabyte.cn/Enterprise/Server-Motherboard/MZ73-LM2-rev-3x](https://www.gigabyte.cn/Enterprise/Server-Motherboard/MZ73-LM2-rev-3x)
        - ![0aa08cb3-6ba2-4100-9082-4f2103a8d9f8.png](./999.IMGS/0aa08cb3-6ba2-4100-9082-4f2103a8d9f8.png)
 
