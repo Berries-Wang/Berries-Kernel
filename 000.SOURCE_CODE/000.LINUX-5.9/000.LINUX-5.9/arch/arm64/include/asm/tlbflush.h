@@ -250,6 +250,9 @@ static inline void local_flush_tlb_all(void)
 	isb();
 }
 
+/**
+ * tlbi 指令,参考: [007.BOOKs/Arm Architecture Reference Manual for A-profile architecture]#'C5.5.10 TLBI ASIDE1, TLBI ASIDE1NXS, TLB Invalidate by ASID, EL1'
+ */
 static inline void flush_tlb_all(void)
 {
 	dsb(ishst);
