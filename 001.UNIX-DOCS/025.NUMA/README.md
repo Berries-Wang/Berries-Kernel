@@ -1,6 +1,17 @@
 # NUMA（Non-Uniform Memory Access，非一致性内存访问）
 先学习[006.BOOKs/RISC-V Architecture Programming and Practice.pdf#11.2 高速缓存的访问延时](../../007.BOOKs/RISC-V%20Architecture%20Programming%20and%20Practice/) & [奔跑吧Linux内核（第2版）卷1：基础架构#1.1.17　NUMA](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) & [3.3.1　内存架构之UMA和NUMA](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) & [1.1.17　NUMA#图1.24　NUMA系统](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) & [28-多核处理器：内存一致性模型 [中山大学 操作系统原理]](./../000.内存管理/998.REFS/000.中山大学-操作系统/16-0612-multiprocessor-2.pdf)再看以下内容
 
+## 摘要
+在现在广泛应用的计算机系统中，以内存为研究对象可以分成两种架构，一种是统一内存访问（Uniform Memory Access，UMA）架构，另外一种是非统一内存访问（Non-Uniform Memory Access，NUMA）架构
+
+- UMA架构：内存有统一的结构并且可以统一寻址。目前大部分嵌入式系统、手机操作系统以及台式机操作系统等采用UMA架构。如图3.6所示，该系统使用UMA架构，有4个CPU，它们都有L1高速缓存，其中CPU0和CPU1组成一个簇（Cluster0），它们共享一个L2高速缓存。另外，CPU2和CPU3组成另外一个簇（Cluster1），它们共享另外一个L2高速缓存。4个CPU都共享同一个L3的高速缓存。最重要的一点，它们可以通过系统总线来访问物理内存DDR。
+- NUMA架构：系统中有多个内存节点和多个CPU簇，CPU访问本地内存节点的速度最快，访问远端的内存节点的速度要慢一点。如图3.7所示，该系统使用NUMA架构，有两个内存节点，其中CPU0和CPU1组成一个节点（Node0），它们可以通过系统总线访问本地DDR物理内存，同理，CPU2和CPU3组成另外一个节点（Node1），它们也可以通过系统总线访问本地的DDR物理内存。如果两个节点通过超路径互连（Ultra Path Interconnect，UPI）总线连接，那么CPU0可以通过这个内部总线访问远端的内存节点的物理内存，但是访问速度要比访问本地物理内存慢很多。
+
+> 示意图请参考: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#3.3.1　内存架构之UMA和NUMA
+
+
+---
+## 图示
 - ![20260126111608.jpg](./999.IMGS/20260126111608.jpg)
    + UPI (Intel Ultra Path Interconnect)，在NUMA中扮演 “跨处理器桥梁”角色<sup>A cache-coherent, link-based Interconnect specification for Intel processors. Also known as Intel® UPI：一种用于英特尔® 处理器的、基于链路的缓存一致性互连规范。亦被称为英特尔® UPI。<sup>([Second Generation Intel® Xeon® Scalable Processors](./998.REFS/2nd-gen-xeon-scalable-datasheet-vol-1.pdf))</sup></sup>
      - 参考:[Intel® Xeon® Processor Scalable Family Technical Overview#Intel® Ultra Path Interconnect (Intel® UPI)](./999.IMGS/Screenshot%202026-01-26%20at%2007-56-17%20英特尔®至强®处理器可扩展系列技术概述%20---%20Intel®%20Xeon®%20Processor%20Scalable%20Family%20Technical%20Overview.png)
