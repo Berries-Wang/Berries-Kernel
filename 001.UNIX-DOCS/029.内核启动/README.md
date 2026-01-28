@@ -1,11 +1,18 @@
 # 内核启动
+## 内核启动重要文件
+|文件名|路径|包含内容|备注|
+|-|-|-|-|
+|head.S|arch/arm64/kernel/head.S.copy|-|-|
+|-|-|-|-|
+|vmlinux.lds.S|arch/arm64/kernel/vmlinux.lds.S.copy|-|-|
+|-|-|-|-|
+|entry.S|arch/arm64/kernel/entry.S.md|-|-|
+|-|-|-|-|
 
-页表究竟放在哪里
+----
 
-映射的过程究竟是怎样的?
-
-
-
+## 内核启动日志
+```shell
 wei@Berries:~/OPEN_SOURCE/Berries-Kernel/000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9$ sudo qemu-system-aarch64 -M virt -cpu cortex-a57 -smp 4 -m 1024M -kernel arch/arm64/boot/Image -append "rdinit=/linuxrc console=ttyAMA0 loglevel=8"  -nographic
 [sudo] password for wei: 
 [    0.000000] Booting Linux on physical CPU 0x0000000000 [0x411fd070]
@@ -272,3 +279,4 @@ wei@Berries:~/OPEN_SOURCE/Berries-Kernel/000.SOURCE_CODE/000.LINUX-5.9/000.LINUX
 /etc/init.d/rcS: line 8: can't create /proc/sys/kernel/hotplug: nonexistent directory
 
 Please press Enter to activate this console. 
+```

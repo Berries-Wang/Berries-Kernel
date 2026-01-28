@@ -13,9 +13,11 @@
 |__idmap_text_start|.idmap.text段的起始地址<sup>查看000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/.tmp_System.map就可以知道这段区域有什么:汇编函数,如__enable_mmu</sup>||arch/arm64/kernel/vmlinux.lds.S|
 |kimage_vaddr|内核镜像的虚拟地址|虚拟地址_text - 物理地址_text<sup>阅读:[000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/kernel/head.S.copy](../../../../../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/kernel/head.S.copy) kimage_voffset计算规则 即可理解</sup>|通过 vmlinux.lds.S发现,_text 与 (KIMAGE_VADDR + TEXT_OFFSET) 相等|
 |KIMAGE_VADDR|内核镜像的虚拟地址|#define KIMAGE_VADDR		(MODULES_END)<sup>宏展开后,值: 0xFFFF800010000000</sup>|arch/arm64/include/asm/memory.h|
-|kimage_voffset|内核映像虚拟地址和物理地址之间的偏移量|kimage_vaddr - __PHYS_OFFSET <sup>从head.S 的 __primary_switched 分析得了</sup>|arch/arm64/kernel/head.S|
+|kimage_voffset|内核映像虚拟地址和物理地址之间的偏移量|kimage_vaddr - __PHYS_OFFSET <sup>从head.S 的 __primary_switched 分析得来</sup>|arch/arm64/kernel/head.S|
 |swapper_pg_dir|内核页表的PGD页表基地址(虚拟地址)||arch/arm64/kernel/vmlinux.lds.S|
 |VMEMMAP_START||||
+
+---
 
 ### 计算 kimage_voffset 
 <pre>

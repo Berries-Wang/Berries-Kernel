@@ -130,11 +130,19 @@ pe_header:
 	 *
 	 * adrp 指令:
 	 *    在 ARM64 汇编中,adrp x23, symbol 的核心作用是 计算 symbol 表达式对应的虚拟地址的 “页基址”，并将其加载到 x23 寄存器中
-	 *       解析 symbol 表达式得到最终虚拟地址，对该地址按当前页大小（默认 4KB）做页对齐,将得到的页基址加载到 x23 寄存器。
+	 *       解析 symbol 表达式得到最终虚拟地址，对该地址按当前页大小(默认 4KB)做页对齐,将得到的页基址加载到 x23 寄存器。
 	 */
 SYM_CODE_START(primary_entry)
 	bl	preserve_boot_args              // 保存启动参数到boot_args[]数组
 	bl	el2_setup			            // Drop to EL1, w0=cpu_boot_mode , 把模式切换到el1以运行Linux内核
+	/**
+	 * 在 adrp x23, __PHYS_OFFSET 指令中，__PHYS_OFFSET 虽然在 C 语言代码里表现为一个“宏”，但在汇编阶段，它被处理为一个链接符号(Symbol)
+	 * 
+	 * adrp: (Address of Page Relative) , 以“页”为单位，计算 __PHYS_OFFSET 符号所在的物理地址，并将结果存入 x23
+	 *                         这个地址: x23 最终存储的是包含 __PHYS_OFFSET 符号的那一个 4KB 内存页的基地址
+	 * 这时候还没开启MMU,所以访问的都是物理地址
+	 * 
+	 */
 	adrp	x23, __PHYS_OFFSET          // 将 _text 所在页的物理基地址存储到x23寄存器; 通过分析,__PHYS_OFFSET = _text - 0 = _text,所以, adrp	x23, __PHYS_OFFSET 等价于 adrp x23, _text; , 所以,这行代码的含义就是: 将 _text 所在页的物理基地址存储到x23寄存器; adrp(Address of Page):计算一个标签或符号所在页的基地址 
 	and	x23, x23, MIN_KIMG_ALIGN - 1	// KASLR offset, defaults to 0 | KASLR 支持：在内核地址空间布局随机化(KASLR)中用于计算实际加载地址
 	bl	set_cpu_boot_mode_flag          // 读取CPU的启动异常级别并保存
@@ -437,7 +445,7 @@ SYM_FUNC_START_LOCAL(__create_page_tables)
     
 	/**
 	 * 
-	 * 学习: [奔跑吧Linux内核（第2版）卷1·基础架构]#2.6.3 启动汇编代码
+	 * 学习: [奔跑吧Linux内核(第2版)卷1·基础架构]#2.6.3 启动汇编代码
 	 *  创建页表1: 恒等映射页表
 	 * > 阅读 map_memory 宏的注释和原理, 得出: 将 .idmap.text段的虚拟地址(__idmap_text_start)映射到了相同的物理地址(__idmap_text_start)上
 	 * 
@@ -590,15 +598,43 @@ EXPORT_SYMBOL(kimage_vaddr)
  * Returns either BOOT_CPU_MODE_EL1 or BOOT_CPU_MODE_EL2 in w0 if
  * booted in EL1 or EL2 respectively.
  * (根据启动时的异常级别,函数将在 w0 寄存器中返回 BOOT_CPU_MODE_EL1(如果在 EL1 启动)或 BOOT_CPU_MODE_EL2(如果在 EL2 启动))
+ *
+ * 
+ * HCR_EL2 的全称是 Hypervisor Configuration Register (EL2)，即 EL2 级虚拟化控制寄存器
  */
 SYM_FUNC_START(el2_setup)
+    /**
+	 * MSR (Move System Register)：将操作数写入系统寄存器
+	 * SPsel (Stack Pointer Select)：这是一个专门控制“当前使用哪个 SP”的系统寄存器
+	 * #1 (操作值) (这样写表明是立即数):
+     *   - 当 SPsel = 1 时:处理器使用当前异常级别的专属堆栈指针(即 SP_ELx)。例如，如果你正处于内核态(EL1)，系统将切换到使用 SP_EL1。
+     *   - 当 SPsel = 0 时:无论处于哪个异常级别(EL1/EL2/EL3)，处理器都统一使用 SP_EL0。
+	 * 
+	 * msr	SPsel, #1 : 将立即数1写入到寄存器SPsel
+	 * msr	SPsel, #0 : 将立即数0写入到寄存器SPsel
+	*/
 	msr	SPsel, #1			 // We want to use SP_EL{1,2} ,选择使用当前异常级别的专用栈指针(SP_ELx),而不是共享的用户栈指针(SP_EL0);SPsel: Stack Pointer Select - 栈指针选择器寄存器
 	mrs	x0, CurrentEL        // CurrentEL作为一个特殊寄存器,用来获取PSTATE寄存器中EL域的值,该EL域保存了当前的异常等级.
+	/**
+	 *  #CurrentEL_EL2  : #CurrentEL_EL2 并不是一个普通的数字，而是一个常量宏(Literal Constant)
+	 *                    定义在: arch/arm64/include/asm/ptrace.h ?
+	 */
 	cmp	x0, #CurrentEL_EL2  //  X0寄存器存放了当前异常等级,判断其是否为EL2:从PSTATE寄存器中获取当前异常等级.
 	b.eq	1f
+	/**
+	 * mov_q: 将一个 64 位的立即数(Immediate Value)加载到通用寄存器中
+	 *  
+	 *  SCTLR_EL1_RES1 (保留位掩码)
+	 *  ENDIAN_SET_EL1 (字节序配置)
+	 *
+	 *  sctlr_el1 [24] [25] 是控制大小端的,这里保持为0，即 “little-endian”(小端)
+	 */
 	mov_q	x0, (SCTLR_EL1_RES1 | ENDIAN_SET_EL1)  // 若处理器运行到此处,说明当前异常等级为EL1.接下来要配置系统控制寄存器SCTLR_EL1
 	msr	sctlr_el1, x0                              // 配置SCTLR_EL1,设置大/小端模式,其中EE域用来控制EL1处于大端还是小端模式,E0E域用来控制EL0处于大端还是小端模式
-	mov	w0, #BOOT_CPU_MODE_EL1		// This cpu booted in EL1 , 将立即数移动到w0寄存器中
+	/**
+	 * 将立即数移动到w0寄存器中 , 说明是从EL1启动的
+	 */
+	mov	w0, #BOOT_CPU_MODE_EL1		// This cpu booted in EL1 
 	isb                            // 内存屏障指令,确保该指令前面所有的指令都运行完成
 	ret                            // 使用ret返回
 
