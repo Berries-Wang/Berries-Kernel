@@ -12,9 +12,10 @@
 #define MIN_FDT_ALIGN		8
 #define MAX_FDT_SIZE		SZ_2M
 
-/*
+/**
  * arm64 requires the kernel image to placed
  * TEXT_OFFSET bytes beyond a 2 MB aligned base
+ * (ARM64 要求内核映像（Kernel Image）必须放置在 2MB 对齐的基地址之上，并再往后偏移 TEXT_OFFSET 个字节的位置)
  */
 #define MIN_KIMG_ALIGN		SZ_2M
 

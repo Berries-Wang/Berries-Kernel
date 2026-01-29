@@ -578,6 +578,11 @@ USER(\label, ic	ivau, \tmp2)			// invalidate I line PoU
 	orr	\pte, \phys, \phys, lsr #36
 	and	\pte, \pte, #PTE_ADDR_MASK
 #else
+    /**
+	 * MOV 用于将数据从一个位置传送到另一个位置。其基本格式为： MOV <Xd/Wd>, <Xm/Wm>
+     *  - Xd/Wd: 目标寄存器（64位或32位）。
+     *  - Xm/Wm: 源寄存器。
+	 */
 	mov	\pte, \phys
 #endif
 	.endm

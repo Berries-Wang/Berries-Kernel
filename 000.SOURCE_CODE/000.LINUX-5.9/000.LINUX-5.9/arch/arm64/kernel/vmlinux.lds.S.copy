@@ -104,7 +104,7 @@ SECTIONS
 		*(.dynsym .dynstr .hash .gnu.hash)
 		*(.eh_frame)
 	}
-
+    /*起始链接地址*/
 	. = KIMAGE_VADDR + TEXT_OFFSET; /*起始链接地址  0XFFFF800010000000 + TEXT_OFFSET := 0x0*/
 
     /*.head.text: 代码段*/
@@ -140,7 +140,7 @@ SECTIONS
 	RO_DATA(PAGE_SIZE)
 
 	idmap_pg_dir = .;  /*idmap_pg_dir是恒等映射的页表,怎么理解?只读数据段后面就是他了*/
-	. += IDMAP_DIR_SIZE;
+	. += IDMAP_DIR_SIZE; /* 3*4K */
 	idmap_pg_end = .;
 
 #ifdef CONFIG_UNMAP_KERNEL_AT_EL0

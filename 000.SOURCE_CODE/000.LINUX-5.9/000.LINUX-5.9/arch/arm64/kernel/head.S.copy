@@ -38,7 +38,24 @@
 #include "efi-header.S"
 
 /**
+ * TEXT_OFFSET := 0x0  在  000.LINUX-5.9/arch/arm64/Makefile
  *      #define KERNEL_START		_text
+ * 
+ * head.S:  大写 .S：告诉编译器：“这个汇编文件里有预处理指令,请先跑一遍 cpp”
+ *          cpp： C 预处理器（CPP）
+ *
+ * > 参考： [arch/arm64/kernel/head.o.readlf.copy] 文件, 会发现,在最终的.o文件中,
+ *         已经没有了 __PHYS_OFFSET 了,只存在 _text
+ *         即: 000000000008  004000000113 R_AARCH64_ADR_PRE 0000000000000000 _text + 0
+ *
+ * 疑问: #define __PHYS_OFFSET	(KERNEL_START - TEXT_OFFSET) 是一个宏,展开后也是一个减法表达式: (_text - 0),
+ *      那为什么还存在_text这个符号呢?
+ *
+ * 关键就是: 汇编器（AS）。它在生成 .o 文件时,会将这种“符号与常量的算术运算”转化为重定位项中的 Addend（加数/偏移量）
+ *    - 如果你的代码是 adrp x23, _text,重定位项就是 _text + 0
+ *    - 如果你的代码是 adrp x23, (_text - 0x80000),重定位项就会变成 _text - 0x80000。
+ *  可以参考 init_pg_dir 、 init_pg_end标签
+ *    
  */
 #define __PHYS_OFFSET	(KERNEL_START - TEXT_OFFSET)
 
@@ -128,22 +145,25 @@ pe_header:
 	 *
 	 *
 	 *
-	 * adrp 指令:
-	 *    在 ARM64 汇编中,adrp x23, symbol 的核心作用是 计算 symbol 表达式对应的虚拟地址的 “页基址”，并将其加载到 x23 寄存器中
-	 *       解析 symbol 表达式得到最终虚拟地址，对该地址按当前页大小(默认 4KB)做页对齐,将得到的页基址加载到 x23 寄存器。
+	 * adrp 指令: https://developer.arm.com/documentation/ddi0602/2025-12/Base-Instructions/ADRP--Form-PC-relative-address-to-4KB-page-?lang=en
+	 *       > 相对于PC寄存器计算出来的
+	 * adrp 指令本身不具备“物理”或“虚拟”的属性,它只是一次“相对于 PC 寄存器的数学加法”。它算出来的是什么地址,完全取决于当前 PC 寄存器里存的是什么地址   
 	 */
 SYM_CODE_START(primary_entry)
 	bl	preserve_boot_args              // 保存启动参数到boot_args[]数组
 	bl	el2_setup			            // Drop to EL1, w0=cpu_boot_mode , 把模式切换到el1以运行Linux内核
 	/**
-	 * 在 adrp x23, __PHYS_OFFSET 指令中，__PHYS_OFFSET 虽然在 C 语言代码里表现为一个“宏”，但在汇编阶段，它被处理为一个链接符号(Symbol)
+	 * > 先学习 “#define __PHYS_OFFSET	(KERNEL_START - TEXT_OFFSET)” 上的注释
 	 * 
-	 * adrp: (Address of Page Relative) , 以“页”为单位，计算 __PHYS_OFFSET 符号所在的物理地址，并将结果存入 x23
-	 *                         这个地址: x23 最终存储的是包含 __PHYS_OFFSET 符号的那一个 4KB 内存页的基地址
-	 * 这时候还没开启MMU,所以访问的都是物理地址
+	 * 将 _text 所在页的物理基地址存储到x23寄存器; (这时候还没开启MMU,所以访问的都是物理地址)
 	 * 
 	 */
-	adrp	x23, __PHYS_OFFSET          // 将 _text 所在页的物理基地址存储到x23寄存器; 通过分析,__PHYS_OFFSET = _text - 0 = _text,所以, adrp	x23, __PHYS_OFFSET 等价于 adrp x23, _text; , 所以,这行代码的含义就是: 将 _text 所在页的物理基地址存储到x23寄存器; adrp(Address of Page):计算一个标签或符号所在页的基地址 
+	adrp	x23, __PHYS_OFFSET 
+	/**
+	 * MIN_KIMG_ALIGN 就是arm64的硬性要求了: 
+	 *   arm64 requires the kernel image to placed  TEXT_OFFSET bytes beyond a 2 MB aligned base
+     *   (ARM64 要求内核映像（Kernel Image）必须放置在 2MB 对齐的基地址之上,并再往后偏移 TEXT_OFFSET 个字节的位置)
+	 */         
 	and	x23, x23, MIN_KIMG_ALIGN - 1	// KASLR offset, defaults to 0 | KASLR 支持：在内核地址空间布局随机化(KASLR)中用于计算实际加载地址
 	bl	set_cpu_boot_mode_flag          // 读取CPU的启动异常级别并保存
 	bl	__create_page_tables            // 创建恒等映射页表以及内核映像映射页表
@@ -175,6 +195,7 @@ SYM_CODE_END(preserve_boot_args)
 
 /*
  * Macro to create a table entry to the next page.
+ * (用于创建指向下一页表项的宏)
  *
  *	tbl:	page table address
  *	virt:	virtual address
@@ -183,12 +204,20 @@ SYM_CODE_END(preserve_boot_args)
  *
  * Preserves:	virt
  * Corrupts:	ptrs, tmp1, tmp2
- * Returns:	tbl -> next level table page address
+ * Returns:	tbl -> next level table page address 哎哟，这有提示哦
  */
 	.macro	create_table_entry, tbl, virt, shift, ptrs, tmp1, tmp2
 	add	\tmp1, \tbl, #PAGE_SIZE
+	/*[arch/arm64/include/asm/assembler.h]*/
 	phys_to_pte \tmp2, \tmp1
+	/**
+	 * \tmp2 = \tmp2 | #PMD_TYPE_TABLE
+	 */
 	orr	\tmp2, \tmp2, #PMD_TYPE_TABLE	// address of next table and entry type
+	/**
+	 * LSR 是 Logical Shift Right（逻辑右移）
+	 * \tmp1 = \virt >> #\shift
+	 */
 	lsr	\tmp1, \virt, #\shift
 	sub	\ptrs, \ptrs, #1
 	and	\tmp1, \tmp1, \ptrs		// table index
@@ -200,7 +229,7 @@ SYM_CODE_END(preserve_boot_args)
  * Macro to populate page table entries, 
  * these entries can be pointers to the next level
  * or last level entries pointing to physical memory.
- * (用于填充页表项的宏，这些页表项可以是指向下一级页表的指针，也可以是指向物理内存的末级页表项)
+ * (用于填充页表项的宏,这些页表项可以是指向下一级页表的指针,也可以是指向物理内存的末级页表项)
  *     ----> 这就是按照MMU的翻译方式来组织了
  *	tbl:	page table address       页表的起始地址
  *	rtbl:	pointer to page table or physical memory
@@ -319,6 +348,9 @@ SYM_CODE_END(preserve_boot_args)
 	.endm
 
 /**
+ * 描述:
+ *   1. 创建恒等映射       为啥需要这俩映射?,主要是和MMU有关,参考: [001.UNIX-DOCS/000.内存管理/020.内存映射.md]
+ *   2. 创建内核映像映射
  * Setup the initial page tables. We only setup the barest amount which is
  * required to get the kernel running. The following sections are required:
  * (设置初始页表.我们仅设置内核运行所需的最基本部分.以下部分是必需的)
@@ -327,7 +359,7 @@ SYM_CODE_END(preserve_boot_args)
  *  # 2.6.4 创建恒等映射和内核映像映射
  *  # 示意图: 图2.17 create_page_tables函数创建的两个映射
  *
- *  当建立了恒等映射之后，虚拟地址和物理地址在数值上是相同的
+ * 重要! >>>当建立了恒等映射之后,虚拟地址和物理地址在数值上是相同的<<<
  *     > 得看看文件 000.LINUX-5.9/.tmp_System.map  标签:__idmap_text_start , 结束地址:__idmap_text_end,则可以分析哪些函数会在恒等映射中
  *
  *
@@ -337,6 +369,9 @@ SYM_CODE_END(preserve_boot_args)
  * 如何规避: 我们在打开MMU时,首先创建一个虚拟地址和物理地址相等的映射——恒等映射(identity mapping),这样就可以巧妙地解决上述问题。注意,这里建立的恒等映射是小范围的,占用的空间通常是内核映像的大小,也就是几兆字节
  */
 SYM_FUNC_START_LOCAL(__create_page_tables)
+   /**
+    * lr 寄存器,在 ARM64（AArch64）架构中,lr 寄存器（Link Register,即寄存器 x30）的核心作用就是：存放子函数（子程序）执行完毕后,应该返回到的那条指令的地址
+    */
 	mov	x28, lr              // 将LR的值放到x28
 
 	/**
@@ -344,9 +379,11 @@ SYM_FUNC_START_LOCAL(__create_page_tables)
 	 * being evicted. Other page tables are allocated in rodata as part of
 	 * the kernel image, and thus are clean to the PoC per the boot
 	 * protocol.
-	 * (对初始化页表进行无效化操作,以避免可能存在脏缓存行被换出的情况.
-	 *  其他页表作为内核镜像的一部分分配在只读数据段中,根据启动协议的规定,
-	 *  这些页表在一致性节点处始终处于干净状态)
+	 * (对初始化页表进行无效化操作,以避免可能存在脏缓存行被换出的情况.其他页表作为内核镜像的一部分分配在只读数据段中
+	 * ,根据启动协议的规定, 这些页表在一致性节点处始终处于干净状态)
+	 */
+	 /**
+	  * init_pg_dir 定义在 arch/arm64/kernel/vmlinux.lds.S.copy
 	 */
 	adrp	x0, init_pg_dir
 	adrp	x1, init_pg_end
@@ -359,21 +396,32 @@ SYM_FUNC_START_LOCAL(__create_page_tables)
 	adrp	x0, init_pg_dir        // 将 init_pg_dir 基地址赋值给x0
 	adrp	x1, init_pg_end
 	sub	x1, x1, x0
-1:	stp	xzr, xzr, [x0], #16   // 将两个零寄存器(xzr)的值(即0)存储到以 x0 为地址的内存中，然后将地址指针 x0 自动向后移动16个字节; 等价于: `[x0] = 0;[x0+8] = 0;x0 = x0 + 16;`
+	/**
+	 * 下面的操作就是 将物理地址[init_pg_dir所在页,init_pg_end]所在页清零
+	 */
+1:	stp	xzr, xzr, [x0], #16   // 将两个零寄存器(xzr)的值(即0)存储到以 x0 为地址的内存中,然后将地址指针 x0 自动向后移动16个字节; 等价于: `[x0] = 0;[x0+8] = 0;x0 = x0 + 16;`
+	stp	xzr, xzr, [x0], #16   // 这么多次一样的操作,是因为 x0 开始的 64 字节内存物理空间清零，并让 x0 指向这 64 字节之后的位置
 	stp	xzr, xzr, [x0], #16
 	stp	xzr, xzr, [x0], #16
-	stp	xzr, xzr, [x0], #16
-	subs	x1, x1, #64
-	b.ne	1b
+	/**
+	 * subs x1, x1, #64 拆解为以下三个核心步骤
+	 *   1. 算术运算 + 2. 结果写回 = 等价 C 代码：x1 = x1 - 64
+	 *   3. 设置标志位 (Set Flags) —— 关键的 "s"  , 指令末尾的这个 s 代表 Set Flags。它会根据运算结果更新 CPU 的状态寄存器（NZCV）,特别是 Z (Zero) 标志位：
+     *      - 如果结果 == 0：CPU 将 Z 标志位设置为 1。
+     *      - 如果结果 != 0：CPU 将 Z 标志位设置为 0
+	 */
+	subs	x1, x1, #64   // sub x1, x1, x0: 计算 x1 减去 x0 的差，并将结果重新存回 x1 中
+	b.ne	1b // 所以,只有x1等于0的时候,才会往下执行
 
 	mov	x7, SWAPPER_MM_MMUFLAGS        // SWAPPER_MM_MMUFLAGS: 段映射的属性,定义在 arch/arm64/include/asm/kernel-pgtable.h
 
 	/*
 	 * Create the identity mapping. (创建恒等映射,原理如何)
 	 * idmap_pg_dir: id,即 identity mapping
+	 *   定义在: arch/arm64/kernel/vmlinux.lds.S.copy
 	 */
 	adrp	x0, idmap_pg_dir
-	adrp	x3, __idmap_text_start		// __pa(__idmap_text_start)
+	adrp	x3, __idmap_text_start	
 
 #ifdef CONFIG_ARM64_VA_BITS_52
 	mrs_s	x6, SYS_ID_AA64MMFR2_EL1
@@ -410,7 +458,7 @@ SYM_FUNC_START_LOCAL(__create_page_tables)
 	dmb	sy
 	dc	ivac, x6		// Invalidate potentially stale cache line
 
-#if (VA_BITS < 48)
+#if (VA_BITS < 48) 
 #define EXTRA_SHIFT	(PGDIR_SHIFT + PAGE_SHIFT - 3)
 #define EXTRA_PTRS	(1 << (PHYS_MASK_SHIFT - EXTRA_SHIFT))
 
@@ -425,7 +473,14 @@ SYM_FUNC_START_LOCAL(__create_page_tables)
 #error "Mismatch between VA_BITS and page size/number of translation levels"
 #endif
 
+    /*>>>>>> 虚拟地址是48位,所以不会执行到这里 <<<<<<*/
+
 	mov	x4, EXTRA_PTRS   // mov 数据移动指令, mov x1, x0  => x0->x1
+	/**
+	 * 此时的x0: adrp	x0, idmap_pg_dir
+	 * > 在 idmap_pg_dir 所在的物理页基址开始创建页表
+	 * 会修改x0的值 --> `add	\tbl, \tbl, #PAGE_SIZE		// next level table page`
+	 */
 	create_table_entry x0, x3, EXTRA_SHIFT, x4, x5, x6
 #else
 	/*
@@ -443,22 +498,22 @@ SYM_FUNC_START_LOCAL(__create_page_tables)
 	mov	x5, x3				// __pa(__idmap_text_start)  x3还是 __idmap_text_start 的物理地址
 	adr_l	x6, __idmap_text_end		// __pa(__idmap_text_end)
     
-	/**
+	/*
 	 * 
 	 * 学习: [奔跑吧Linux内核(第2版)卷1·基础架构]#2.6.3 启动汇编代码
 	 *  创建页表1: 恒等映射页表
 	 * > 阅读 map_memory 宏的注释和原理, 得出: 将 .idmap.text段的虚拟地址(__idmap_text_start)映射到了相同的物理地址(__idmap_text_start)上
 	 * 
-	 * x0   idmap_pg_dir              
-	 * x1   init_pg_end - init_pg_dir
-	 * x3   __idmap_text_start  映射的虚拟地址的起始地址 ,__idmap_text_start是什么?得查询 vmlinux.lds.S
-	 * x6   __idmap_text_end
+	 * x0   adrp	x0, idmap_pg_dir   
+	 * x1   0
+	 * x3   adrp	x3, __idmap_text_start
+	 * x6   adr_l	x6, __idmap_text_end  // 恒等映射区域的代码段的结束地址?
 	 * x7   SWAPPER_MM_MMUFLAGS 属性
-	 * x3   __idmap_text_start: 映射的物理地址的起始地址
 	 * x4   idmap_ptrs_per_pgd  = 1 << 9  , 这是因为每个条目是8字节,那么每个4K页可以有4K/8Byte=512
      *
 	 * 其他寄存器都是临时寄存器
 	 * 
+	 * 查看 map_memory 注释,发现,vstart 和 phys 对应的参数都是x3
 	 */
 	map_memory x0, x1, x3, x6, x7, x3, x4, x10, x11, x12, x13, x14   // 建立映射页表
 
@@ -479,6 +534,9 @@ SYM_FUNC_START_LOCAL(__create_page_tables)
 	 * 创建页表2: 内核映像页表
 	 *
 	 * 那么,这里就是将虚拟地址(KIMAGE_VADDR + TEXT_OFFSET)映射到物理地址(_text)上
+	 * (最终的映射结果看: [奔跑吧Linux内核(第2版)卷1·基础架构]图2.17 create_page_tables函数创建的两个映射)
+	 *        只是里面的数值不太和该版本的内核代码对上。
+	 * 在[001.UNIX-DOCS/000.内存管理/README.md]中搜索 “与参考资料有差异”
 	 */
 	map_memory x0, x1, x5, x6, x7, x3, x4, x10, x11, x12, x13, x14
 
@@ -600,15 +658,15 @@ EXPORT_SYMBOL(kimage_vaddr)
  * (根据启动时的异常级别,函数将在 w0 寄存器中返回 BOOT_CPU_MODE_EL1(如果在 EL1 启动)或 BOOT_CPU_MODE_EL2(如果在 EL2 启动))
  *
  * 
- * HCR_EL2 的全称是 Hypervisor Configuration Register (EL2)，即 EL2 级虚拟化控制寄存器
+ * HCR_EL2 的全称是 Hypervisor Configuration Register (EL2),即 EL2 级虚拟化控制寄存器
  */
 SYM_FUNC_START(el2_setup)
     /**
 	 * MSR (Move System Register)：将操作数写入系统寄存器
 	 * SPsel (Stack Pointer Select)：这是一个专门控制“当前使用哪个 SP”的系统寄存器
 	 * #1 (操作值) (这样写表明是立即数):
-     *   - 当 SPsel = 1 时:处理器使用当前异常级别的专属堆栈指针(即 SP_ELx)。例如，如果你正处于内核态(EL1)，系统将切换到使用 SP_EL1。
-     *   - 当 SPsel = 0 时:无论处于哪个异常级别(EL1/EL2/EL3)，处理器都统一使用 SP_EL0。
+     *   - 当 SPsel = 1 时:处理器使用当前异常级别的专属堆栈指针(即 SP_ELx)。例如,如果你正处于内核态(EL1),系统将切换到使用 SP_EL1。
+     *   - 当 SPsel = 0 时:无论处于哪个异常级别(EL1/EL2/EL3),处理器都统一使用 SP_EL0。
 	 * 
 	 * msr	SPsel, #1 : 将立即数1写入到寄存器SPsel
 	 * msr	SPsel, #0 : 将立即数0写入到寄存器SPsel
@@ -616,7 +674,7 @@ SYM_FUNC_START(el2_setup)
 	msr	SPsel, #1			 // We want to use SP_EL{1,2} ,选择使用当前异常级别的专用栈指针(SP_ELx),而不是共享的用户栈指针(SP_EL0);SPsel: Stack Pointer Select - 栈指针选择器寄存器
 	mrs	x0, CurrentEL        // CurrentEL作为一个特殊寄存器,用来获取PSTATE寄存器中EL域的值,该EL域保存了当前的异常等级.
 	/**
-	 *  #CurrentEL_EL2  : #CurrentEL_EL2 并不是一个普通的数字，而是一个常量宏(Literal Constant)
+	 *  #CurrentEL_EL2  : #CurrentEL_EL2 并不是一个普通的数字,而是一个常量宏(Literal Constant)
 	 *                    定义在: arch/arm64/include/asm/ptrace.h ?
 	 */
 	cmp	x0, #CurrentEL_EL2  //  X0寄存器存放了当前异常等级,判断其是否为EL2:从PSTATE寄存器中获取当前异常等级.
@@ -627,7 +685,7 @@ SYM_FUNC_START(el2_setup)
 	 *  SCTLR_EL1_RES1 (保留位掩码)
 	 *  ENDIAN_SET_EL1 (字节序配置)
 	 *
-	 *  sctlr_el1 [24] [25] 是控制大小端的,这里保持为0，即 “little-endian”(小端)
+	 *  sctlr_el1 [24] [25] 是控制大小端的,这里保持为0,即 “little-endian”(小端)
 	 */
 	mov_q	x0, (SCTLR_EL1_RES1 | ENDIAN_SET_EL1)  // 若处理器运行到此处,说明当前异常等级为EL1.接下来要配置系统控制寄存器SCTLR_EL1
 	msr	sctlr_el1, x0                              // 配置SCTLR_EL1,设置大/小端模式,其中EE域用来控制EL1处于大端还是小端模式,E0E域用来控制EL0处于大端还是小端模式
@@ -941,7 +999,7 @@ SYM_FUNC_END(__secondary_too_slow)
  * If it isn't, park the CPU
  */
 SYM_FUNC_START(__enable_mmu)
-	mrs	x2, ID_AA64MMFR0_EL1        // ID_AA64MMFR0_EL1: 根据手册Page: D24-7939 , 架构指令标识: 判断处理器是否支持 ARMv8-A AArch64 执行状态 。支持，能访问该寄存器;否则会报错
+	mrs	x2, ID_AA64MMFR0_EL1        // ID_AA64MMFR0_EL1: 根据手册Page: D24-7939 , 架构指令标识: 判断处理器是否支持 ARMv8-A AArch64 执行状态 。支持,能访问该寄存器;否则会报错
 	ubfx	x2, x2, #ID_AA64MMFR0_TGRAN_SHIFT, 4     // ubfx : 无符号位域提取指令,ubfx x1, x0, #20, #16 // 从寄存器x0存储的值的位20开始提取16位,存储到寄存器x1 ,这一行得查手册了?  ID_AA64MMFR0_TGRAN_SHIFT 定义在'arch/arm64/include/asm/sysreg.h',若页面是4K,则ID_AA64MMFR0_TGRAN_SHIFT的值为28,那么这行代码就是提取x2的[31,28]再存储到x2,x2的[31,28]存储的值用来判断是否MMU支持4K的翻译粒度
 	cmp	x2, #ID_AA64MMFR0_TGRAN_SUPPORTED            // 判断是否支持内核指定的翻译粒度 --- ID_AA64MMFR0_TGRAN_SUPPORTED 定义在arch/arm64/include/asm/sysreg.h,为什么是0x0,还是得查看手册:<Arm® Architecture Reference Manual for A-profile architecture>
 	b.ne	__no_granule_support

@@ -91,7 +91,7 @@
 			+ EARLY_PMDS((vstart), (vend)))	/* each PMD needs a next level page table */
 #define INIT_DIR_SIZE (PAGE_SIZE * EARLY_PAGES(KIMAGE_VADDR + TEXT_OFFSET, _end))
 /**
- * 4K页: IDMAP_DIR_SIZE = 4 * 4096 , 即 4个4K页
+ * 4K页: IDMAP_DIR_SIZE = 3 * 4096 , 即 3个4K页
  */
 #define IDMAP_DIR_SIZE		(IDMAP_PGTABLE_LEVELS * PAGE_SIZE)
 
