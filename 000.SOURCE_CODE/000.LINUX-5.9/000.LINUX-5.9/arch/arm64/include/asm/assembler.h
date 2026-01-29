@@ -619,6 +619,7 @@ USER(\label, ic	ivau, \tmp2)			// invalidate I line PoU
 /**
  * Errata workaround prior to disable MMU. Insert an ISB immediately prior
  * to executing the MSR that will change SCTLR_ELn[M] from a value of 1 to 0.
+ * (在禁用 MMU 之前应用勘误表（Errata）的变通方案。在执行将 SCTLR_ELn[M] 位的值从 1 修改为 0 的 MSR 指令之前，立即插入一条 ISB 指令)
  */
 	.macro pre_disable_mmu_workaround
 #ifdef CONFIG_QCOM_FALKOR_ERRATUM_E1041

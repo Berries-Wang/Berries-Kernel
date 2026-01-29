@@ -144,7 +144,6 @@ pe_header:
 	 *  x24        __primary_switch() .. relocate_kernel()  current RELR displacement
 	 *
 	 *
-	 *
 	 * adrp 指令: https://developer.arm.com/documentation/ddi0602/2025-12/Base-Instructions/ADRP--Form-PC-relative-address-to-4KB-page-?lang=en
 	 *       > 相对于PC寄存器计算出来的
 	 * adrp 指令本身不具备“物理”或“虚拟”的属性,它只是一次“相对于 PC 寄存器的数学加法”。它算出来的是什么地址,完全取决于当前 PC 寄存器里存的是什么地址   
@@ -170,6 +169,8 @@ SYM_CODE_START(primary_entry)
 	/**
 	 * The following calls CPU setup code, see arch/arm64/mm/proc.S for details.
 	 * On return, the CPU will be ready for the MMU to be turned on and the TCR will have been set.
+	 * (以下内容调用 CPU 设置代码，详见 [arch/arm64/mm/proc.S]。返回时，CPU 将为开启 MMU 做好准备，且 TCR（翻译控制寄存器）已完成设置)
+	 * 
 	 */
 	bl	__cpu_setup			// initialise processor 在 arch/arm64/ mm/proc.S 
 	b	__primary_switch
@@ -261,6 +262,7 @@ SYM_CODE_END(preserve_boot_args)
  * Compute indices of table entries from virtual address range. If multiple entries
  * were needed in the previous page table level then the next page table level is assumed
  * to be composed of multiple pages. (This effectively scales the end index).
+ * (从虚拟地址范围计算页表项的索引。如果在上一级页表中需要多个表项，则假设下一级页表由多个页面组成。（这实际上扩展了结束索引的规模）)
  *
  *	vstart:	virtual address of start of range
  *	vend:	virtual address of end of range
@@ -268,12 +270,13 @@ SYM_CODE_END(preserve_boot_args)
  *	ptrs:	number of entries in page table
  *	istart:	index in table corresponding to vstart
  *	iend:	index in table corresponding to vend
+ *  读下面的注释,count对应的寄存器,在调用和返回有不用的含义
  *	count:	On entry: how many extra entries were required in previous level, scales
  *			  our end index.
- *		On exit: returns how many extra entries required for next page table level
+ *		    On exit: returns how many extra entries required for next page table level
  *
- * Preserves:	vstart, vend, shift, ptrs
- * Returns:	istart, iend, count
+ * Preserves:	vstart, vend, shift, ptrs (保持/保护)
+ * Returns:	istart, iend, count  返回参数
  *
  * ptrs 为2的整数次幂, & (ptrs -1) = %(ptrs) , 即搞笑的取余操作
  */
@@ -300,6 +303,7 @@ SYM_CODE_END(preserve_boot_args)
  * Map memory for specified virtual address range. Each level of page table needed supports
  * multiple entries. If a level requires n entries the next page table level is assumed to be
  * formed from n pages.
+ * (为指定的虚拟地址范围映射内存。每一级页表都支持多个表项。如果某一级页表需要 n 个表项，则假定下一级页表由 n 个物理页组成)
  *
  * 将 虚拟地址vstart 映射到 物理地址phys 上
  *
@@ -324,6 +328,10 @@ SYM_CODE_END(preserve_boot_args)
 	add \rtbl, \tbl, #PAGE_SIZE  // rtbl = tbl +#PAGE_SIZE ,  add x0, x1, x2  // x0 = x1 + x2
 	mov \sv, \rtbl               // sv = rtbl , sv 是个临时寄存器
 	mov \count, #0               // count = 0  , 寄存器赋值
+	/**
+	 * 读 compute_indices 注释, istart iend count 都是返回参数
+	 *   istart: 页表项的索引
+	 */
 	compute_indices \vstart, \vend, #PGDIR_SHIFT, \pgds, \istart, \iend, \count   // PGDIR_SHIFT = 39(4K页时)
 	populate_entries \tbl, \rtbl, \istart, \iend, #PMD_TYPE_TABLE, #PAGE_SIZE, \tmp
 	mov \tbl, \sv     // tbl = sv , 此时 tbl 是相对于调用map_memory传入的tbl+#PAGE_SIZE 
@@ -332,7 +340,7 @@ SYM_CODE_END(preserve_boot_args)
 #if SWAPPER_PGTABLE_LEVELS > 3
 	compute_indices \vstart, \vend, #PUD_SHIFT, #PTRS_PER_PUD, \istart, \iend, \count
 	populate_entries \tbl, \rtbl, \istart, \iend, #PMD_TYPE_TABLE, #PAGE_SIZE, \tmp
-	mov \tbl, \sv
+	mov \tbl, \sv  // tbl = sv
 	mov \sv, \rtbl
 #endif
 
@@ -343,6 +351,13 @@ SYM_CODE_END(preserve_boot_args)
 #endif
 
 	compute_indices \vstart, \vend, #SWAPPER_BLOCK_SHIFT, #PTRS_PER_PTE, \istart, \iend, \count
+	/**
+	 * BIC: Bit Clear(位清除),它的核心功能是：根据掩码将目标寄存器中的特定位清零
+	 *    #define SWAPPER_BLOCK_SIZE	PAGE_SIZE [arch/arm64/include/asm/kernel-pgtable.h]
+	 * 
+	 * 注意: tbl 是在变化的,这会儿,应该指向的是最后一级页表的首地址
+	 *       经过计算后的count,就不是代表数量了,而是内存物理页的基地址.
+	 */
 	bic \count, \phys, #SWAPPER_BLOCK_SIZE - 1
 	populate_entries \tbl, \count, \istart, \iend, \flags, #SWAPPER_BLOCK_SIZE, \tmp
 	.endm
@@ -514,6 +529,8 @@ SYM_FUNC_START_LOCAL(__create_page_tables)
 	 * 其他寄存器都是临时寄存器
 	 * 
 	 * 查看 map_memory 注释,发现,vstart 和 phys 对应的参数都是x3
+	 *  即 这行代码含义:
+	 *       在 "idmap_pg_dir" 处构建页表,页表内容是虚拟地址x3 映射到 物理地址x3 的映射关系
 	 */
 	map_memory x0, x1, x3, x6, x7, x3, x4, x10, x11, x12, x13, x14   // 建立映射页表
 
@@ -537,6 +554,9 @@ SYM_FUNC_START_LOCAL(__create_page_tables)
 	 * (最终的映射结果看: [奔跑吧Linux内核(第2版)卷1·基础架构]图2.17 create_page_tables函数创建的两个映射)
 	 *        只是里面的数值不太和该版本的内核代码对上。
 	 * 在[001.UNIX-DOCS/000.内存管理/README.md]中搜索 “与参考资料有差异”
+	 *
+	 * 翻译一下这行代码的功能:
+	 *   在 init_pg_dir 处构建页表,页表的内容是 建立虚拟地址 'KIMAGE_VADDR + TEXT_OFFSET' 到物理地址'_text'的映射关系
 	 */
 	map_memory x0, x1, x5, x6, x7, x3, x4, x10, x11, x12, x13, x14
 
@@ -563,14 +583,14 @@ SYM_FUNC_END(__create_page_tables)
 /**
  * The following fragment of code is executed with the MMU enabled.
  *
- *   x0 = __PHYS_OFFSET 这个表达式是错的,具体看代码,
+ * 执行路径: __primary_switch -> __primary_switched ,一些寄存器:
+ *      - adrp	x0, __PHYS_OFFSET
  * 
  * init_thread_union  : vmlinux.lds.S.copy -> RW_DATA(L1_CACHE_BYTES, PAGE_SIZE, THREAD_ALIGN) 
  * init_thread_union: 该数据结构中包含了系统第一个进程(init进程)的内核栈
  *
  * sp 是什么?看手册 或 https://developer.arm.com/documentation/111179/2025-09_ASL1/AArch64-Registers/SP-EL0--Stack-Pointer--EL0-?lang=en
- *
- * init_task 为啥赋值到el0, 不应该是el1吗?
+ *    init_task 为啥赋值到el0, 不应该是el1吗?
  * > 006.REFS/learn_the_architecture_-_aarch64_exception_model_102412_0103_02_en.pdf
  */
 SYM_FUNC_START_LOCAL(__primary_switched)
@@ -596,12 +616,18 @@ SYM_FUNC_START_LOCAL(__primary_switched)
 
 	str_l	x21, __fdt_pointer, x5		// Save FDT pointer
 
+    /**
+	 * kimage_vaddr: 内核代码段起始的虚拟地址
+	 */
 	ldr_l	x4, kimage_vaddr		// Save the offset between , 将kimage_vaddr的值拷贝到x4
 	/**
 	 * 这段计算 kimage_voffset 值的代码得注意,
 	 *    x0 中存储的是物理地址,存储的是虚拟地址_text所在物理页的页面基地址,即 “内核物理内存起始地址的页基地址”
-	 *    kimage_vaddr 定义在本文件中, 为 "_text - TEXT_OFFSET"
+	 *    kimage_vaddr 定义在本文件中, 为 "_text - TEXT_OFFSET" , 具体值参考如下代码注释(在定义kimage_vaddr处,即: 'SYM_DATA_START(kimage_vaddr)  ' 处)
+	 *    
 	 * 所以, kimage_voffset = 虚拟地址(_text) - 物理地址(_text) , 所以,kimage_voffset就是内核起始(第一条指令)虚拟地址相对于内核起始(第一条指令)物理地址的偏移量
+	 *
+	 * 所以, kimage_voffset 可不是0 
 	 */
 	sub	x4, x4, x0			        // x4 = x4 - x0 = kimage_vaddr - __PHYS_OFFSET   the kernel virtual and   (x0: )  ; 此时 x0的值是__PHYS_OFFSET所在页表的基地址
 	str_l	x4, kimage_voffset, x5		// physical mappings  str_l是一个宏,
@@ -631,10 +657,14 @@ SYM_FUNC_START_LOCAL(__primary_switched)
 	add	sp, sp, #16
 	mov	x29, #0
 	mov	x30, #0
-	b	start_kernel                            // 启动内核
+	b	start_kernel      // 启动内核
 SYM_FUNC_END(__primary_switched)
 
-	.pushsection ".rodata", "a"
+/**
+ * 参考: [arch/arm64/kernel/head.o.readlf.copy], 明白kimage_vaddr是什么:
+ *   kimage_vaddr: 内核代码段(_text)起始的虚拟地址
+ */
+	.pushsection ".rodata", "a"   // rodata 只读数据段
 SYM_DATA_START(kimage_vaddr)               //  开始定义数据符号 kimage_vaddr
 	.quad		_text - TEXT_OFFSET        //  存储一个64位值: _text - TEXT_OFFSET , 这个是在编译期固定下来的值
 SYM_DATA_END(kimage_vaddr)                //   结束定义
@@ -986,7 +1016,9 @@ SYM_FUNC_END(__secondary_too_slow)
 
 /*
  * Enable the MMU.
- *
+ *  > SCTLR_EL1 参考:[007.BOOKs/Arm Architecture Reference Manual for A-profile architecture](D24.2.175 SCTLR_EL1, System Control Register (EL1))
+ *        M, bit [0] : MMU enable for EL1&0 stage 1 address translation.
+ * 
  *  x0  = SCTLR_EL1 value for turning on the MMU.
  *  x1  = TTBR1_EL1 value
  *
@@ -1004,13 +1036,31 @@ SYM_FUNC_START(__enable_mmu)
 	cmp	x2, #ID_AA64MMFR0_TGRAN_SUPPORTED            // 判断是否支持内核指定的翻译粒度 --- ID_AA64MMFR0_TGRAN_SUPPORTED 定义在arch/arm64/include/asm/sysreg.h,为什么是0x0,还是得查看手册:<Arm® Architecture Reference Manual for A-profile architecture>
 	b.ne	__no_granule_support
 	update_early_cpu_boot_status 0, x2, x3           // 将status值写入到__early_cpu_boot_status
+	/* 恒等映射页表基地址 */
 	adrp	x2, idmap_pg_dir
-	phys_to_ttbr x1, x1                         // 将物理地址转为TTBR格式(在宏中做的处理),在调用__enable_mmu前,会对x1进行赋值, phys_to_ttbr 宏,定义在arch/arm64/include/asm/assembler.h 
+	/**
+	 * 将物理地址写入到TTBR寄存器里：
+	 *    将物理地址转为TTBR格式(在宏中做的处理),在调用__enable_mmu前, 会对x1进行赋值, 
+	 *      -  如 __primary_switch 宏: adrp	x1, init_pg_dir
+	 *
+	 *    phys_to_ttbr 宏,定义在arch/arm64/include/asm/assembler.h 
+	 */
+	/* 物理页表基地址 */
+	phys_to_ttbr x1, x1
 	phys_to_ttbr x2, x2
-	msr	ttbr0_el1, x2			// load TTBR0;msr 将通用寄存器的值写入系统寄存器: msr sctlr_el1, x1   ; 将x1的值写入SCTLR_EL1(系统控制寄存器)
+	/**
+	 * 设置页表基地址寄存器:
+	 *   ttbr0_el1 : 用户态 
+	 *   ttbr1_el1 : 内核态 
+	 * 还没到执行用户态进程的时候,所以 ttbr0_el1 可以在内核启动的时候借用一下
+	 */
+	msr	ttbr0_el1, x2			// load TTBR0;
 	offset_ttbr1 x1, x3
 	msr	ttbr1_el1, x1			// load TTBR1
 	isb
+	/**
+	 * msr(Move to System Registe): 将通用寄存器的值写入系统寄存器
+	 */
 	msr	sctlr_el1, x0           //开启MMU,在启动过程中(__cpu_setup:SCTLR_EL1_SET),x0的值被修改了(开启MMU,即,将x0的值的bit[0]置为1);  注: M, bit [0] MMU enable for EL1&0 stage 1 address translation. 查询手册(具体功能得看手册的字段描述),sctlr_el1 为系统控制寄存器,控制系统(包括内存系统),EL0 EL1级别
 	isb
 	/*
@@ -1162,7 +1212,7 @@ SYM_FUNC_END(__relocate_kernel)
 
 
 /**
-* __PHYS_OFFSET 就是内核的起始地址:_text
+* __PHYS_OFFSET 就是内核的起始地址:_text (虚拟地址)
 * = KERNEL_START(_text in arch/arm64/include/asm/memory.h) + TEXT_OFFSET(0x0 in arch/arm64/Makefile)
 *
 */
@@ -1173,7 +1223,14 @@ SYM_FUNC_START_LOCAL(__primary_switch)
 #endif
 
 	adrp	x1, init_pg_dir
-	bl	__enable_mmu      /*打开MMU: idmap_pg_dir -> ttbr0_el1 , init_pg_dir -> ttbr1_el1 ,开启MMU后,访问的地址就是虚拟地址了*/
+	/**
+	 * 先参考: '__create_page_tables'
+	 * 打开MMU: 
+	 *    idmap_pg_dir(恒等映射的页表基址) -> ttbr0_el1
+	 *    init_pg_dir(内核_text的页表基址) -> ttbr1_el1 
+	 * 开启MMU后,访问的地址就是虚拟地址了
+	 */
+	bl	__enable_mmu 
 #ifdef CONFIG_RELOCATABLE
 #ifdef CONFIG_RELR
 	mov	x24, #0				// no RELR displacement yet
@@ -1183,11 +1240,17 @@ SYM_FUNC_START_LOCAL(__primary_switch)
 	ldr	x8, =__primary_switched    // ldr: Load Register , 从内存加载数据到寄存器
 	adrp	x0, __PHYS_OFFSET
 	blr	x8      // blr: Branch with Link to Register, 跳转到寄存器指定的地址,同时保存返回地址.
+    /**
+	 * 这里可能有个回马枪!!!
+	 *   当在 __primary_switched 中执行了 ret 指令时,才会从 blr	x8 中返回,执行到此处 , 但是否返回,得看 x23 寄存器!
+	 * 既然是学习,暂不考虑执行到此处了!
+	 */
 
 	/*
 	 * If we return here, we have a KASLR displacement in x23 which we need
 	 * to take into account by discarding the current kernel mapping and
 	 * creating a new one.
+	 * (如果在此处返回，寄存器 x23 中将包含一个 KASLR 位移量。我们需要处理这一位移，方法是废弃当前的内核映射并创建一个新的映射)
 	 */
 	pre_disable_mmu_workaround   // 宏,arch/arm64/include/asm/assembler.h?
 	msr	sctlr_el1, x20			// disable the MMU   , msr: Move to System Register , 将通用寄存器的值写入系统寄存器

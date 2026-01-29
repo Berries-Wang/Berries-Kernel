@@ -21,7 +21,9 @@
         "CONFIG_CGROUP_HUGETLB",
         "CONFIG_CGROUP_PIDS",
         "CONFIG_NUMA", // numactl --hardware 来判断是否开启
-        "CONFIG_CGROUP_RDMA"
+        "CONFIG_CGROUP_RDMA",
+        "CONFIG_RANDOMIZE_BASE",
+        "CONFIG_RANDOMIZE_BASE"
       ],
       "intelliSenseMode": "linux-gcc-arm64", // 模拟在 Linux 下使用 GCC 开发/分析 64 位 ARM 程序
       "compilerPath": "/home/wei/apps/001.Arm-ToolChain/arm-gnu-toolchain-14.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-gcc",
@@ -56,7 +58,8 @@
         "CONFIG_CGROUP_HUGETLB",
         "CONFIG_CGROUP_PIDS",
         "CONFIG_NUMA", // numactl --hardware 来判断是否开启
-        "CONFIG_CGROUP_RDMA"
+        "CONFIG_CGROUP_RDMA",
+        "CONFIG_RANDOMIZE_BASE"
       ],
       "intelliSenseMode": "macos-gcc-arm64", // 在 macOS 下使用 GCC 开发或分析 64 位 ARM 程序
       "compilerPath": "/opt/softwares/arm64-arm-toolchain/arm-gnu-toolchain-14.3.rel1-darwin-arm64-aarch64-none-elf/bin/aarch64-none-elf-gcc",
@@ -67,7 +70,8 @@
         "${workspaceFolder}/**/**/include/uapi",
         "${workspaceFolder}/**/**/arch/arm64/include/uapi",
         "${workspaceFolder}/**/**//kernel/locking",
-        "${workspaceFolder}/**/**/include/linux"
+        "${workspaceFolder}/**/**/include/linux",
+        "${workspaceFolder}/000.SOURCE_CODE/002.GLIBC/000.GLIBC-2.40/**"
       ]
     }
   ],

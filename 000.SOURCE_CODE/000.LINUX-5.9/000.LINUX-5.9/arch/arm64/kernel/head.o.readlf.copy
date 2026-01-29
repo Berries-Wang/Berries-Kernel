@@ -203,6 +203,11 @@ Relocation section '.rela.init.text' at offset 0x2d98 contains 53 entries:
 
 Relocation section '.rela.rodata' at offset 0x3290 contains 1 entry:
   Offset          Info           Type           Sym. Value    Sym. Name + Addend
+/*
+* Offset (000000000000): 指的是在 .rodata 段（也就是存储 kimage_vaddr 的地方）的起始位置（偏移量为 0） 。
+* Type (R_AARCH64_ABS64): 这是重定位的类型 。ABS64 表示“绝对 64 位地址”。它告诉链接器：“请在这里填入一个 64 位的绝对地址”。
+* Sym. Name + Addend (_text + 0): 这是重定位的目标 。它告诉链接器：“请把符号 _text 的地址加上 0 后的结果，填到上面的 Offset 位置去”。
+*/
 000000000000  004000000101 R_AARCH64_ABS64   0000000000000000 _text + 0
 
 Relocation section '.rela___ksymtab+kimage_vaddr' at offset 0x32a8 contains 2 entries:

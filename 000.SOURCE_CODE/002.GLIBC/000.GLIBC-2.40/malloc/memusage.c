@@ -625,9 +625,11 @@ free (void *ptr)
   (*freep) (real);
 }
 
-
-/* `mmap' replacement.  We do not have to keep track of the size since
-   `munmap' will get it as a parameter.  */
+/**
+ * `mmap' replacement.  We do not have to keep track of the size since `munmap'
+ * will get it as a parameter.
+ * (“mmap 的替代实现。由于 munmap会将大小（size）作为参数传入，因此我们无需自行记录其大小。”)
+ */
 void *
 mmap (void *start, size_t len, int prot, int flags, int fd, off_t offset)
 {

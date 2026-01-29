@@ -15,7 +15,6 @@
 |KIMAGE_VADDR|内核镜像的虚拟地址|#define KIMAGE_VADDR		(MODULES_END)<sup>宏展开后,值: 0xFFFF800010000000</sup>|arch/arm64/include/asm/memory.h|
 |kimage_voffset|内核映像虚拟地址和物理地址之间的偏移量|kimage_vaddr - __PHYS_OFFSET <sup>从head.S 的 __primary_switched 分析得来</sup>|arch/arm64/kernel/head.S|
 |swapper_pg_dir|内核页表的PGD页表基地址(虚拟地址)||arch/arm64/kernel/vmlinux.lds.S|
-|VMEMMAP_START||||
 
 ---
 
@@ -28,12 +27,18 @@ kimage_voffset = kimage_vaddr - __PHYS_OFFSET
     绝对不可能!!!,但是问题出现在那里呢?
 
     问题出在 “__PHYS_OFFSET ” 这里,从 [000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/kernel/head.S.copy] 中发现,
-    kimage_voffset = x4 - x0 , 这个x0寄存器存储值时的指令: adrp	x0, __PHYS_OFFSET  ,   这表示取的是 虚拟地址 (_text - TEXT_OFFSET) 所在物理页的基地址
-    而kimage_voffset = _text - TEXT_OFFSET
-    所以，kimage_voffset = 虚拟地址_text - 物理地址_text  = kimage_voffset就是内核起始(第一条指令)虚拟地址相对于内核起始(第一条指令)物理地址的偏移量
+    
+    kimage_voffset = x4 - x0 , 这个x0寄存器存储值时的指令: adrp	x0, __PHYS_OFFSET , 这表示取的是标签 _text 所在物理页的基地址 (为什么?参考:[000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/kernel/head.S.copy] 宏: __primary_switched)
+    
+    而kimage_vaddr = _text - TEXT_OFFSET (head.S中定义)
+    > 这里的 _text 表示虚拟地址 (为什么? 参考:[000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/kernel/head.S.copy] 宏: __primary_switched)
+    
+    所以，kimage_voffset = _text的虚拟地址 - _text的物理地址  = kimage_voffset就是内核起始(第一条指令)虚拟地址相对于内核起始(第一条指令)物理地址的偏移量
     > 所以，kimage_voffset 是一个偏移量，且他不等于0！
 
     _text = . = KIMAGE_VADDR + TEXT_OFFSET  (vmlinux.lds.S)
+
+    更多内容，参考:[000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/kernel/head.S.copy] 宏: __primary_switched
 </pre>
 
 

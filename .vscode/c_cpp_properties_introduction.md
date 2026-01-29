@@ -16,7 +16,7 @@
 |-|-|-|
 |CONFIG_HIGHPTE|CONFIG_HIGHPTE 是一个专门针对 32位系统（x86-32、ARM32 等） 的内存管理优化选项；作用：允许将页表（PTE）本身存放到高端内存（High Memory）中|-|
 |-|-|-|
-|-|-|-|
+|CONFIG_RANDOMIZE_BASE|对应KASLR (Kernel Address Space Layout Randomization)，即内核地址空间布局随机化|-|
 |-|-|-|
 |-|-|-|
 |-|-|-|
