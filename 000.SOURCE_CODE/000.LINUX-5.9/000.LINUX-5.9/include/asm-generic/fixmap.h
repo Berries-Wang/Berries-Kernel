@@ -30,6 +30,8 @@
  * 'index to address' translation. If anyone tries to use the idx
  * directly without translation, we catch the bug with a NULL-deference
  * kernel oops. Illegal ranges of incoming indices are caught too.
+ * (索引到地址”的转换。如果有人试图不经过转换而直接使用索引（idx），
+ * 我们会通过“空指针解引用”（NULL-deference）内核崩溃（kernel oops）来捕获该错误。此外，传入索引的非法范围也会被拦截)
  */
 static __always_inline unsigned long fix_to_virt(const unsigned int idx)
 {

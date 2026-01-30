@@ -995,6 +995,9 @@ void __init paging_init(void)
 {
 	{
 		/**
+		 * 开启了MMU,使用的就都是虚拟地址了
+		 */
+		/**
 		 * 这个得参考： Documentation/arm64/memory.rst 来分析
 		 */
 		// 输出 swapper_pg_dir 的值(虚拟&物理地址) kimage_voffset
@@ -1049,7 +1052,7 @@ void __init paging_init(void)
 
 	/**
 	 * pgd_set_fixmap()函数做一个固定映射，把swapper_pg_dir页表重新映射到固定映射区域
-	 * > 这个映射的原理是什么
+	 * > 这个映射的原理是什么?为什么要有这样一个固定映射区域
      * 
      * 获取PGD页表基地址  []#2.1.6　案例分析：ARM64的页表映射过程
 	 * 
@@ -1063,9 +1066,11 @@ void __init paging_init(void)
 	 * 
 	 * pgd_set_fixmap()函数就做这个固定映射的事情，把PGD页表的物理页面映射到固定映射区域，返回PGD页表的虚拟地址。而pgd_clear_fixmap()函数用于取消固定区域的映射
 	 * 
-	 * 通过分析: 001.UNIX-DOCS/029.内核启动/000.pgd_set_fixmap原理.md, 得出这行代码的功能:
+	 * 通过分析: [001.UNIX-DOCS/029.内核启动/000.pgd_set_fixmap原理.md], 得出这行代码的功能:
 	 *    1. 在固定映射区域完成页表基地址(PGD) 虚拟地址到物理地址的映射
 	 *    2. 返回PGD在固定映射区域中的完整的虚拟地址
+	 * 
+	 * 
 	 */
 	pgd_t *pgdp = pgd_set_fixmap(__pa_symbol(swapper_pg_dir));
 
@@ -1102,6 +1107,7 @@ void __init paging_init(void)
 
 	/**
 	 * 取消映射，和 pgd_set_fixmap 对应
+	 * 为什么要取消?
 	 */
 	pgd_clear_fixmap();
 
