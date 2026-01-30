@@ -76,7 +76,14 @@ static inline unsigned long virt_to_fix(const unsigned long vaddr)
 	__set_fixmap(idx, 0, FIXMAP_PAGE_CLEAR)
 #endif
 
-/* Return a pointer with offset calculated */
+/**
+ *  Return a pointer with offset calculated 
+ *  (返回一个计算偏移量后的指针)
+ * 
+ * 怎么分析这几行代码:
+ *  - __set_fixmap(idx, phys, flags); 完成虚拟地址到物理地址的映射: 将虚拟地址发送给CPU,CPU能通过MMU访问到实际的物理地址 (因为基本页表项构建好了,只需要填充PTE即可)
+ *  - fix_to_virt(idx) + ((phys) & (PAGE_SIZE - 1));  计算物理地址对应的虚拟地址(固定映射区域)
+ * */
 #define __set_fixmap_offset(idx, phys, flags)				\
 ({									\
 	unsigned long ________addr;					\

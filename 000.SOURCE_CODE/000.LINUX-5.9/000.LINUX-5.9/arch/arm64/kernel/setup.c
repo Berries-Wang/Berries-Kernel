@@ -304,6 +304,10 @@ void __init __no_sanitize_address setup_arch(char **cmdline_p)
 	 */
 	arm64_use_ng_mappings = kaslr_requires_kpti();
 
+	/**
+	 * 这也是很重要的一步 , 这是在 paging_init() 之前调用: 
+	 *   - 会构建一套临时页表 
+	 */
 	early_fixmap_init();
 	early_ioremap_init();
 
@@ -348,7 +352,7 @@ void __init __no_sanitize_address setup_arch(char **cmdline_p)
 
 	/**
 	 *  内存操作 [arch/arm64/mm/mmu.c]
-	 *  */
+	 * */
 	paging_init();
 
 	acpi_table_upgrade();

@@ -315,10 +315,17 @@ void __init arm64_memblock_init(void)
 	 * 
 	 * 获取物理内存的实际起始地址，并确保它对齐到 ARM64 架构要求的大边界(1GB)?
 	 */
-	memstart_addr = round_down(memblock_start_of_DRAM(),
-				   ARM64_MEMSTART_ALIGN);
+	memstart_addr = round_down(memblock_start_of_DRAM(), ARM64_MEMSTART_ALIGN);
     // debug: 1073741824
 
+	/**
+	 * 为什么这样计算? 
+	 * PHYS_OFFSET : 这个可不是head.S中的，而是[arch/arm64/include/asm/memory.h] , 表示物理内存起始地址
+	 * PAGE_OFFSET:  虚拟起始地址
+	 * -> [007.BOOKs/Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]: map_mem(pgdp)：物理内存的线性映射。物理内存会全部线性映射到以PAGE_OFFSET开始的内核空间的虚拟地址，以加速内核访问内存。
+	 * 
+	 * 所以，这是线性映射区域 物理地址 与 虚拟地址 之间的差值
+	 */
 	physvirt_offset = PHYS_OFFSET - PAGE_OFFSET;
 	// debug: 
 

@@ -27,12 +27,16 @@
  * addresses. The point is to have a constant address at
  * compile time, but to set the physical address only
  * in the boot process.
- * (在Linux内核中，我们在此定义所有编译阶段的"特殊"虚拟地址。关键在于在编译时保持虚拟地址的恒定不变，而实际物理地址则要到启动过程中才会被确定。)
+ * (在Linux内核中，我们在此定义所有编译阶段的"特殊"虚拟地址。
+ * 关键在于在编译时保持虚拟地址的恒定不变，
+ * 而实际物理地址则要到启动过程中才会被确定。)
  *
  * Each enum increment in these 'compile-time allocated'
  * memory buffers is page-sized. Use set_fixmap(idx,phys)
  * to associate physical memory with a fixmap index.
- * (在这些“编译时分配”的内存缓冲区中，`"每一个枚举值的增量都对应一个页面的大小（page-sized）"`。开发者可以通过 set_fixmap(idx, phys) 函数将物理内存与特定的固定映射索引（fixmap index）关联起来。)
+ * (在这些“编译时分配”的内存缓冲区中，
+ * `"每一个枚举值的增量都对应一个页面的大小（page-sized）"`。
+ * 开发者可以通过 set_fixmap(idx, phys) 函数将物理内存与特定的固定映射索引（fixmap index）关联起来。)
  * 
  * 每个索引表示一个固定映射的线性地址，这些地址是 4KB 对齐的，意味着每个地址都是页基地址？
  * 
@@ -89,6 +93,7 @@ enum fixed_addresses {
 	/*
 	 * Used for kernel page table creation, so unmapped memory may be used
 	 * for tables.
+	 * (用于内核页表的创建，因此尚未映射（unmapped）的内存也可以被用来存放页表)
 	 */
 	FIX_PTE,
 	FIX_PMD,

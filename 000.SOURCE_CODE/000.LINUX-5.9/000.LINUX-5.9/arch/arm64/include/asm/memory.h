@@ -60,6 +60,8 @@
  * 
  * PAGE_OFFSET: 
  *    以48位虚拟地址为例，_PAGE_OFFSET(48) = -(1 << 48) = -2^48 = 0xFFFF000000000000 即内核地址空间的起始点
+ * -- map_mem(pgdp)：物理内存的线性映射。物理内存会全部线性映射到以PAGE_OFFSET开始的内核空间的虚拟地址，以加速内核访问内存。
+ *    in [007.BOOKs/Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]
  * 
  * 宏展开: 怎么展开？见 000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/000.Kernel_Build.sh
  * 
@@ -68,6 +70,7 @@
  * > 0XFFFF800010000000 ， 还是要和书中示意图中的值区分开,这是虚拟地址`
  * >>> 就是这个值，验证: arm-gnu-toolchain-14.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-objdump -S  vmlinux   > /home/wei/OPEN_SOURCE/Berries-Kernel/009.IGNORE/vmlinux.objdump.log
  * > 这个值还和 ‘KASAN’ 是否开启有关！
+ * 
  * PHYS_OFFSET: '({ ((void)(sizeof(( long)(memstart_addr & 1)))); memstart_addr; })'
  */
 #define _PAGE_OFFSET(va)	(-(UL(1) << (va)))
@@ -230,7 +233,7 @@ extern u64			vabits_actual;
 
 extern s64			physvirt_offset;
 extern s64			memstart_addr;
-/* PHYS_OFFSET - the physical address of the start of memory. */
+/** PHYS_OFFSET - the physical address of the start of memory. */
 #define PHYS_OFFSET		({ VM_BUG_ON(memstart_addr & 1); memstart_addr; })
 
 /* the virtual base of the kernel image (minus TEXT_OFFSET (在arch/arm64/Makefile中)) */
@@ -315,6 +318,7 @@ static inline const void *__tag_set(const void *addr, u8 tag)
 
 /**
  * physvirt_offset: arch/arm64/mm/init.c
+ * -- 初始化在 [void __init arm64_memblock_init(void)] , 可以得知计算逻辑
  */
 #define __lm_to_phys(addr)	(((addr) + physvirt_offset))
 

@@ -79,6 +79,14 @@ EXPORT_SYMBOL(empty_zero_page);
 /**
  * bm_pte 是Linux内核在ARM64平台上为“固定映射”区域准备的一个临时、
  * 可重用的页表条目（Page Table Entry, PTE）
+ * 
+ * 这是 Fixmap（固定映射）机制专用的“影子页表”或“应急页表”
+ *   - 手动预留并缓存的一套“静态页表”
+ * 
+ * 这些都会在 #'void __init early_fixmap_init(void)' 中初始化好,即会在 paging_init() 之前初始化好
+ * 
+ * '__page_aligned_bss' 这个就有点意思了!
+ *  '__page_aligned_bss' 是一个 编译器指令（属性宏），它的作用是告诉编译器：“请把这个变量放在内存的 BSS 段，并且确保它的起始地址是按页对齐的（通常是 4096 字节的倍数）
  */
 static pte_t bm_pte[PTRS_PER_PTE] __page_aligned_bss;
 static pmd_t bm_pmd[PTRS_PER_PMD] __page_aligned_bss __maybe_unused;
@@ -1054,23 +1062,29 @@ void __init paging_init(void)
 	 * pgd_set_fixmap()函数做一个固定映射，把swapper_pg_dir页表重新映射到固定映射区域
 	 * > 这个映射的原理是什么?为什么要有这样一个固定映射区域
      * 
-     * 获取PGD页表基地址  []#2.1.6　案例分析：ARM64的页表映射过程
+     * 获取PGD页表基地址  [007.BOOKs/Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#2.1.6　案例分析：ARM64的页表映射过程
 	 * 
      * swapper_pg_dir 就是页表基地址，虚拟地址 ， 使用 __pa_symbol 转为物理地址
 	 * > 全局变量swapper_pg_dir是内核页表的PGD页表基地址，可是这是虚拟地址，因为在内核启动的汇编代码中会做一次简单的块映射。
-	 * ____>在链接文件: 000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/kernel/vmlinux.lds.S 
+	 * ____>在链接文件: arch/arm64/kernel/vmlinux.lds.S 
 	 * ---->> 索引可以使用__pa_symbol获取到物理地址
 	 * 
 	 * 内核里面有一个固定映射（fixed mapping）区域，它的范围是0xFFFF 7DFF FE7F 9000～0xFFFF 7DFF FEC0 0000，我们可以把PGD页表映射这个区域，然后才可以使用__pa()宏。
-	 * > #图2.9　ARM64在Linux 5.0内核的内存分布
+	 * (这个固定映射会构建一套临时页表: 参考: bm_pud bm_pmd  bm_pte  (定义在本文件中,具体可以参考代码)
+	 * > [007.BOOKs/Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#'图2.9　ARM64在Linux 5.0内核的内存分布'
 	 * 
 	 * pgd_set_fixmap()函数就做这个固定映射的事情，把PGD页表的物理页面映射到固定映射区域，返回PGD页表的虚拟地址。而pgd_clear_fixmap()函数用于取消固定区域的映射
 	 * 
 	 * 通过分析: [001.UNIX-DOCS/029.内核启动/000.pgd_set_fixmap原理.md], 得出这行代码的功能:
 	 *    1. 在固定映射区域完成页表基地址(PGD) 虚拟地址到物理地址的映射
 	 *    2. 返回PGD在固定映射区域中的完整的虚拟地址
+	 *       --> 简单来说: 在一套临时页表中,构建 swapper_pg_dir 符号的物理地址和虚拟地址的映射关系，使得MMU能够根据swapper_pg_dir的虚拟地址翻译成swapper_pg_dir真实的物理地址，即CPU能正常通过swapper_pg_dir的虚拟地址访问到物理地址。
 	 * 
+	 * 为什么要这么做呢?
+	 *  - 执行到此处,只有恒等映射 和 内核映像映射 , 其他区域MMU尚不能处理
 	 * 
+	 * 看一下 'static pte_t bm_pte[PTRS_PER_PTE] __page_aligned_bss;' 的注释，
+	 * 所以 pgdp 在内核映像区域,又有内核映像映射已经建立,所以 pgdp 可以直接访问,不用修改 ttbr1 寄存器
 	 */
 	pgd_t *pgdp = pgd_set_fixmap(__pa_symbol(swapper_pg_dir));
 
@@ -1593,11 +1607,16 @@ static inline pte_t * fixmap_pte(unsigned long addr)
 	return &bm_pte[pte_index(addr)];
 }
 
-/*
+/**
  * The p*d_populate functions call virt_to_phys implicitly so they can't be used
  * directly on kernel symbols (bm_p*d). This function is called too early to use
  * lm_alias so __p*d_populate functions must be used to populate with the
  * physical address from __pa_symbol.
+ * (由于 p*d_populate 类函数隐式地调用了 virt_to_phys，因此无法直接用于内核符号（如 bm_p*d）。
+ * 同时，由于该函数的调用时机过早，尚不能使用 lm_alias，所以必须使用 __p*d_populate 类函数，并配合 __pa_symbol 获取的物理地址来进行填充。)
+ * 
+ * 重要功能:
+ *   - 构建 bm_pud,bm_pmd,bm_pte 这一套临时页表项
  */
 void __init early_fixmap_init(void)
 {
@@ -1658,14 +1677,15 @@ void __init early_fixmap_init(void)
  * (不寻常的是，该函数（ghes_iounmap_irq）也会在IRQ上下文中被调用。因此，如果我们将来需要使用IPI（处理器间中断）进行TLB广播，这里就会出问题。)
  * 
  * 构建固定映射中的页表:计算虚拟地址对应的页表条目，将物理地址存储到对应页表条目上
- * 
+ * --> 即,此时CPU访问虚拟地址addr,实际上访问的物理地址就是 phys，
+ *       即,为了使得MMU能正常工作(MMU对addr翻译的结果是phys)
  */
 void __set_fixmap(enum fixed_addresses idx, phys_addr_t phys, pgprot_t flags)
 {
 	/**
 	 * #define __fix_to_virt(x)	(FIXADDR_TOP - ((x) << PAGE_SHIFT))
-	 * FIXADDR_TOP: 
-	 * 有一个固定映射区域: fixed区域 
+	 *   FIXADDR_TOP: 
+	 *   有一个固定映射区域: fixed区域 
 	 * 
 	 * 从固定映射区域找到一个地址(虚拟地址)
 	 */
@@ -1676,6 +1696,8 @@ void __set_fixmap(enum fixed_addresses idx, phys_addr_t phys, pgprot_t flags)
 
 	/**
 	 * 计算虚拟地址addr所对应的page table条目(在固定映射区域的),此时标准内存分配机制暂无法使用
+	 * 
+	 * 读取的是"临时页表"
 	 */
 	ptep = fixmap_pte(addr);
 
