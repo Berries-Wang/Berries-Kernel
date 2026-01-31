@@ -6091,11 +6091,15 @@ static void build_thisnode_zonelists(pg_data_t *pgdat)
  * This results in conserving DMA zone[s] until all Normal memory is
  * exhausted, but results in overflowing to remote node while memory
  * may still exist in local DMA zone.
- * 
- * 构建按 zone（内存区域） 和 节点内 zone 顺序排列的 zonelist
- * 这种设计会导致：
- *    优先保留 DMA 区域的内存，直到所有 Normal 内存 耗尽；
- *    但可能引发内存溢出到远端节点，而本地 DMA 区域中仍有可用内存
+ * (按“区域”及区域内的“节点”顺序构建区域列表。
+ * 这可以确保在所有“普通内存区”（Normal zone）耗尽之前保护“直接内存访问区”（DMA zone），
+ * 但也会导致：即便本地 DMA 区仍有剩余内存，系统也可能溢出并请求远程节点的内存)
+ *    怎么理解?
+ *  - Zonelist (区域列表): 内核在分配内存时查找可用内存页的顺序列表。
+ *  - Local vs. Remote Node: 在 NUMA（非一致性内存访问）架构中，访问本地节点的内存速度最快，访问远程节点则会有延迟
+ *  -  DMA vs. Normal Zone: * DMA Zone 通常较小且有特殊硬件用途（地址空间受限）
+ *     + 有限保护DMA资源，不让普通的内存申请占用他
+ *  - Overflow to remote node (溢出到远程节点): 这里的逻辑是：系统宁愿跑远一点去拿远程节点的“普通内存”，也不愿动用本地珍贵的“DMA 内存”	·
  * 
  * 远端节点是什么意思?
  *    在 Linux 内核内存管理上下文中，远端节点（remote node） 指的是非当前 CPU 所属的 NUMA（Non-Uniform Memory Access，非一致性内存访问）节点
@@ -6120,6 +6124,7 @@ static void build_zonelists(pg_data_t *pgdat)
 		 * We don't want to pressure a particular node.
 		 * So adding penalty to the first node in same
 		 * distance group to make it round-robin.
+		 * (我们不希望对某个特定节点造成过大压力。因此，通过对相同距离组（distance group）中的第一个节点增加“惩罚值”（penalty），从而实现轮询（round-robin）分配)
 		 */
 		if (node_distance(local_node, node) !=
 		    node_distance(local_node, prev_node))
@@ -6236,7 +6241,9 @@ static void __build_all_zonelists(void *data)
 	} else {
 		for_each_online_node(nid) {
 			pg_data_t *pgdat = NODE_DATA(nid);
-
+            /**
+			 * 构建 pg_data_t->node_zonelists
+			 */
 			build_zonelists(pgdat);
 		}
 
@@ -7162,6 +7169,9 @@ static void __init free_area_init_core(struct pglist_data *pgdat)
 	pgdat->per_cpu_nodestats = &boot_nodestats;
 
 	for (j = 0; j < MAX_NR_ZONES; j++) {
+		/**
+		 * 初始化 node_zones 
+		 */
 		struct zone *zone = pgdat->node_zones + j;
 		unsigned long size, freesize, memmap_pages;
 		unsigned long zone_start_pfn = zone->zone_start_pfn;
@@ -7279,6 +7289,9 @@ static inline void pgdat_set_deferred_range(pg_data_t *pgdat) {}
 
 static void __init free_area_init_node(int nid)
 {
+	/**
+	 * struct pglist_data?
+	 */
 	pg_data_t *pgdat = NODE_DATA(nid);
 	unsigned long start_pfn = 0;
 	unsigned long end_pfn = 0;
@@ -7795,7 +7808,7 @@ void __init free_area_init(unsigned long *max_zone_pfn)
 	for (i = 0; i < MAX_NUMNODES; i++) {
 		if (zone_movable_pfn[i])
 			pr_info("  Node %d: %#018Lx\n", i,
-			       (u64)zone_movable_pfn[i] << PAGE_SHIFT);
+				(u64)zone_movable_pfn[i] << PAGE_SHIFT);
 	}
 
 	/*
