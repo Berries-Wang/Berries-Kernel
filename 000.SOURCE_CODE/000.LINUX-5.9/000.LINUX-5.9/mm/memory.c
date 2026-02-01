@@ -3118,6 +3118,10 @@ static vm_fault_t do_wp_page(struct vm_fault *vmf) __releases(vmf->ptl)
 	 * 返回普通映射页面，如果返回为NULL，说明就是一个特殊页面
 	 */
 	vmf->page = vm_normal_page(vma, vmf->address, vmf->orig_pte);
+	/**
+	 * 因为父子进程地址空间不一样,所以，算出来的pte也不一样
+	 * 所以，这个判空即可完成写时复制的功能
+	 */
 	if (!vmf->page) {
 		/*
 		 * VM_MIXEDMAP !pfn_valid() case, or VM_SOFTDIRTY clear on a
@@ -4461,7 +4465,10 @@ static vm_fault_t handle_pte_fault(struct vm_fault *vmf)
 		 * 因此，现在可以安全地执行 pte_offset_map() 了。)
 		 * 
 		 */
-		// 根据pmd页表项和虚拟地址计算出pte
+		/**
+		 * 根据pmd页表项和虚拟地址计算出pte , 所以,父子进程算出来的是不一样的(父子进程虚拟地址空间不一样)
+		 * 
+		 */
 		vmf->pte = pte_offset_map(vmf->pmd, vmf->address);
 		vmf->orig_pte = *vmf->pte;
 
@@ -4518,6 +4525,9 @@ static vm_fault_t handle_pte_fault(struct vm_fault *vmf)
 
 	vmf->ptl = pte_lockptr(vmf->vma->vm_mm, vmf->pmd);
 	spin_lock(vmf->ptl);
+	/**
+	 * orig_pte 根据虚拟地址算出来的,父子进程是不一样的(因为地址空间不一样)
+	 */
 	entry = vmf->orig_pte;
 	if (unlikely(!pte_same(*vmf->pte, entry))) {
 		update_mmu_tlb(vmf->vma, vmf->address, vmf->pte);
@@ -4530,6 +4540,8 @@ static vm_fault_t handle_pte_fault(struct vm_fault *vmf)
 		 * 就会触发写时复制。
 		 * 
 		 * > 父子进程之间，不是线程之间!
+		 * 
+		 * 写时复制!写时复制!
 		 */
 		if (!pte_write(entry)) {
 			return do_wp_page(vmf);

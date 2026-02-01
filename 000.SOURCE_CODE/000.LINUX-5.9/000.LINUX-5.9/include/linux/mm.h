@@ -508,6 +508,10 @@ struct vm_fault {
 	pud_t *pud;			/* Pointer to pud entry matching
 					 * the 'address'
 					 */
+	/**
+	 * 嘿嘿，这个有意思!
+	 * 虚拟地址!!! 根据虚拟地址算出来的,所以，在子进程中，因为地址空间不一样，所以，父子进程对应的orig_pte不同
+	 */
 	pte_t orig_pte;			/* Value of PTE at the time of fault */
 
 	struct page *cow_page;		/* Page handler may use for COW fault */

@@ -68,6 +68,7 @@ struct mem_cgroup;
 /**
  * 
  * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.1.1　page数据结构
+ * 
  * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.2　RMAP       -- Reverse Mapping Map （反向映射）,确定页面是否被某个进程映射
  * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.3 页面回收     -- 页交换(swapping) 、页回收(page reclaim)
  * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.3.1　LRU链表   -- 页交换算法(Linux内核中采用的页交换算法主要是经典LRU链表算法和第二次机会（second chance）法)
@@ -75,6 +76,15 @@ struct mem_cgroup;
  * 
  * 页面回收:
  *   [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.3.3　触发页面回收
+ * 
+ * 该数据结构以sizeof(long)对齐，在64位系统中以8字节对齐，因此我们可以把address_space指针（page数据结构中的mapping成员）的低2位用于其他用途。
+ *  - Bit[0]：用于判断该页面是否匿名页面
+ *  - Bit[1]：用于判断该页面是否为非LRU页面。
+ *  - Bit[0～1]：若均设置为1，则表示这是一个KSM页面
+ * 
+ * 
+ * #define _struct_page_alignment	__aligned(2 * sizeof(unsigned long))
+ * 表示以16字节对齐 , 所以，struct page 变量的虚拟地址低4位都是0
  */
 struct page {
 	unsigned long flags;		/* Atomic flags, some possibly
@@ -97,6 +107,13 @@ struct page {
 			/** See page-flags.h for PAGE_MAPPING_FLAGS
 			 * 
 			 * mapping成员表示页面所指向的地址空间 , 见[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.1.5　mapping成员的妙用
+			 * 
+			 * mapping成员所指向的页面对应存储设备的地址空间，主要分成3种情况:
+			 *   - 对于匿名页面，mapping成员指向VMA的anon_vma数据结构。
+             *   - 对于交换高速缓存页面，它的mapping成员指向交换分区的swapper_spaces。
+             *   - 对于文件映射页面，mapping成员指向该文件所属的address_space数据结构，它包含文件所属的存储介质的相关信息，如inode等。
+			 * 
+			 * [mm/util.c] 参考函数
 			 * 
 			 */
 			struct address_space *mapping;
@@ -443,15 +460,21 @@ struct vm_area_struct {
 	/**
 	 * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.2　RMAP
 	 * 
-	 * RMAP系统中有两个重要的数据结构：一个是anon_vma，简称AV；另一个是anon_vma_chain，简称AVC。
+	 * anon_vma_chain数据结构起枢纽作用，比如连接父子进程间的struct anon_vma数据结构
 	 * 
 	 * A file's MAP_PRIVATE vma can be in both i_mmap tree and anon_vma
 	 * list, after a COW of one of the file pages.	A MAP_SHARED vma
 	 * can only be in the i_mmap tree.  An anonymous MAP_PRIVATE, stack
 	 * or brk vma (with NULL file) can only be in an anon_vma list.
 	 */
-	struct list_head anon_vma_chain; /* Serialized by mmap_lock &
-					  * page_table_lock */
+	struct list_head anon_vma_chain; /* Serialized by mmap_lock &  page_table_lock */
+	/**
+	 * 一个物理页可以同时被多个进程的虚拟内存映射，但一个虚拟页面只能同时映射到一个物理页面.
+	 * 
+	 * anon_vma数据结构主要用于连接物理页面的page数据结构和VMA的vm_area_struct数据结构 [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure]#图5.3　anon_vma数据结构
+	 * - 快速找到哪些进程引用这个page
+	 * > 虽然没有直接映射，但是别忘了[005.EXPERIMENTAL_ANALYSIS/000.container_of.md]
+	 */
 	struct anon_vma *anon_vma;	/* Serialized by page_table_lock */
 
 	/** Function pointers to deal with this struct. 
