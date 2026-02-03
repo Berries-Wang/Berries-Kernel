@@ -3925,6 +3925,8 @@ static inline unsigned int current_alloc_flags(gfp_t gfp_mask,
  * -> [get_page_from_freelist()函数的主要作用是从伙伴系统的空闲页面链表中尝试分配物理页]
  * 
  * # 先了解一下数据结构: [001.UNIX-DOCS/000.内存管理/005.内存分配/006.内核内存管理数据结构.md]
+ * 
+ * 和水位(watermark)的关系: ?
  */
 static struct page *get_page_from_freelist(gfp_t gfp_mask, unsigned int order,
 					   int alloc_flags,
@@ -4804,9 +4806,9 @@ check_retry_cpuset(int cpuset_mems_cookie, struct alloc_context *ac)
 	return false;
 }
 
-static inline struct page *
-__alloc_pages_slowpath(gfp_t gfp_mask, unsigned int order,
-						struct alloc_context *ac)
+static inline struct page *__alloc_pages_slowpath(gfp_t gfp_mask,
+						  unsigned int order,
+						  struct alloc_context *ac)
 {
 	bool can_direct_reclaim = gfp_mask & __GFP_DIRECT_RECLAIM;
 	const bool costly_order = order > PAGE_ALLOC_COSTLY_ORDER;
@@ -4823,9 +4825,10 @@ __alloc_pages_slowpath(gfp_t gfp_mask, unsigned int order,
 	/*
 	 * We also sanity check to catch abuse of atomic reserves being used by
 	 * callers that are not in atomic context.
+	 * (我们还进行了完整性检查（或安全性检查），以拦截非原子上下文调用者对原子储备的滥用。)
 	 */
-	if (WARN_ON_ONCE((gfp_mask & (__GFP_ATOMIC|__GFP_DIRECT_RECLAIM)) ==
-				(__GFP_ATOMIC|__GFP_DIRECT_RECLAIM)))
+	if (WARN_ON_ONCE((gfp_mask & (__GFP_ATOMIC | __GFP_DIRECT_RECLAIM)) ==
+			 (__GFP_ATOMIC | __GFP_DIRECT_RECLAIM)))
 		gfp_mask &= ~__GFP_ATOMIC;
 
 retry_cpuset:
@@ -4850,9 +4853,12 @@ retry_cpuset:
 	 * because we might have used different nodemask in the fast path, or
 	 * there was a cpuset modification and we are retrying - otherwise we
 	 * could end up iterating over non-eligible zones endlessly.
+	 * (我们需要重新计算 zonelist 迭代器的起始点，
+	 * 因为我们可能在快速路径（fast path）中使用了不同的节点掩码（nodemask），
+	 * 或者发生了 cpuset 修改并正在重试——否则，我们可能会陷入对不合格区域（zones）的无休止迭代中)
 	 */
-	ac->preferred_zoneref = first_zones_zonelist(ac->zonelist,
-					ac->highest_zoneidx, ac->nodemask);
+	ac->preferred_zoneref = first_zones_zonelist(
+		ac->zonelist, ac->highest_zoneidx, ac->nodemask);
 	if (!ac->preferred_zoneref->zone) {
 		goto nopage;
 	}
@@ -4961,7 +4967,10 @@ retry:
 					ac->highest_zoneidx, ac->nodemask);
 	}
 
-	/* Attempt with potentially adjusted zonelist and alloc_flags */
+	/**
+	 *  Attempt with potentially adjusted zonelist and alloc_flags
+	 * (尝试使用可能调整后的区域列表（zonelist）和分配标志（alloc_flags）进行分配)
+	 *  */
 	page = get_page_from_freelist(gfp_mask, order, alloc_flags, ac);
 	if (page)
 		goto got_pg;
@@ -4983,7 +4992,10 @@ retry:
 	if (page)
 		goto got_pg;
 
-	/* Try direct compaction and then allocating */
+	/** 
+	 * Try direct compaction and then allocating 
+	 * (尝试直接内存规整（direct compaction），然后再次尝试分配)
+	*/
 	page = __alloc_pages_direct_compact(gfp_mask, order, alloc_flags, ac,
 					compact_priority, &compact_result);
 	if (page)

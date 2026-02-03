@@ -1230,10 +1230,12 @@ static __always_inline struct zoneref *next_zones_zonelist(struct zoneref *z,
  * within the allowed nodemask. The zoneref returned is a cursor that can be
  * used to iterate the zonelist with next_zones_zonelist by advancing it by
  * one before calling.
+ * (此函数返回处于或低于给定区域索引（zone index）、且在允许的节点掩码（nodemask）范围内的第一个区域。返回的 zoneref 是一个游标，通过在调用前将其递增 1，即可配合 next_zones_zonelist 函数来遍历整个区域列表（zonelist）。)
  *
  * When no eligible zone is found, zoneref->zone is NULL (zoneref itself is
  * never NULL). This may happen either genuinely, or due to concurrent nodemask
  * update due to cpuset modification.
+ * (当未找到合格的区域（zone）时，zoneref->zone 的值为 NULL（但 zoneref 本身永远不会为 NULL）。这种情况可能是由于确实没有可用资源，也可能是由于 cpuset 修改导致节点掩码（nodemask）发生了并发更新。)
  */
 static inline struct zoneref *first_zones_zonelist(struct zonelist *zonelist,
 					enum zone_type highest_zoneidx,
