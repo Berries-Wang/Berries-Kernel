@@ -4500,10 +4500,12 @@ void fs_reclaim_release(gfp_t gfp_mask)
 EXPORT_SYMBOL_GPL(fs_reclaim_release);
 #endif
 
-/* Perform direct synchronous page reclaim */
-static int
-__perform_reclaim(gfp_t gfp_mask, unsigned int order,
-					const struct alloc_context *ac)
+/** 
+ * Perform direct synchronous page reclaim 
+ * (执行直接同步页面回收)
+ * */
+static int __perform_reclaim(gfp_t gfp_mask, unsigned int order,
+			     const struct alloc_context *ac)
 {
 	int progress;
 	unsigned int noreclaim_flag;
@@ -4972,7 +4974,10 @@ retry:
 	if (current->flags & PF_MEMALLOC)
 		goto nopage;
 
-	/* Try direct reclaim and then allocating */
+	/** 
+	 * Try direct reclaim and then allocating 
+	 * (尝试直接回收，然后进行分配)
+	 * */
 	page = __alloc_pages_direct_reclaim(gfp_mask, order, alloc_flags, ac,
 							&did_some_progress);
 	if (page)

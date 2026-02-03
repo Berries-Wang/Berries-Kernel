@@ -262,6 +262,9 @@ static __always_inline bool vmstat_item_in_bytes(int idx)
  * so it is important to keep the active lists LRU_ACTIVE higher in
  * the array than the corresponding inactive lists, and to keep
  * the *_FILE lists LRU_FILE higher than the corresponding _ANON lists.
+ * (我们在代码的多处位置对 LRU 链表进行算术运算，因此保持列表顺序至关重要：
+ * 活跃链表 (LRU_ACTIVE) 在数组中的位置必须高于对应的非活跃链表，
+ * 且 文件页链表 (*_FILE) 的位置必须高于对应的 匿名页 (_ANON) 链表)
  *
  * This has to be kept in sync with the statistics in zone_stat_item
  * above and the descriptions in vmstat_text in mm/vmstat.c
@@ -270,6 +273,9 @@ static __always_inline bool vmstat_item_in_bytes(int idx)
 #define LRU_ACTIVE 1
 #define LRU_FILE 2
 
+/**
+ * - 可用于页面回收
+ */
 enum lru_list {
 	LRU_INACTIVE_ANON = LRU_BASE,
 	LRU_ACTIVE_ANON = LRU_BASE + LRU_ACTIVE,
