@@ -4467,6 +4467,7 @@ static vm_fault_t handle_pte_fault(struct vm_fault *vmf)
 		 */
 		/**
 		 * 根据pmd页表项和虚拟地址计算出pte , 所以,父子进程算出来的是不一样的(父子进程虚拟地址空间不一样)
+		 * ---> 写时复制实现
 		 * 
 		 */
 		vmf->pte = pte_offset_map(vmf->pmd, vmf->address);

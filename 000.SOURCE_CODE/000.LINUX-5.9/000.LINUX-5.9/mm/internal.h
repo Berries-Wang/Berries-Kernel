@@ -23,7 +23,10 @@
 			__GFP_NORETRY|__GFP_MEMALLOC|__GFP_NOMEMALLOC|\
 			__GFP_ATOMIC)
 
-/* The GFP flags allowed during early boot */
+/** 
+ * The GFP flags allowed during early boot
+ * (在启动早期（early boot）允许使用的 GFP 标志)
+ *  */
 #define GFP_BOOT_MASK (__GFP_BITS_MASK & ~(__GFP_RECLAIM|__GFP_IO|__GFP_FS))
 
 /* Control allocation cpuset and node placement constraints */
@@ -553,7 +556,9 @@ extern unsigned long  __must_check vm_mmap_pgoff(struct file *, unsigned long,
 extern void set_pageblock_order(void);
 unsigned int reclaim_clean_pages_from_list(struct zone *zone,
 					    struct list_head *page_list);
-/* The ALLOC_WMARK bits are used as an index to zone->watermark */
+/** 
+ * The ALLOC_WMARK bits are used as an index to zone->watermark 
+ * */
 #define ALLOC_WMARK_MIN		WMARK_MIN
 #define ALLOC_WMARK_LOW		WMARK_LOW
 #define ALLOC_WMARK_HIGH	WMARK_HIGH
@@ -576,6 +581,9 @@ unsigned int reclaim_clean_pages_from_list(struct zone *zone,
 #define ALLOC_HARDER		 0x10     /* try to alloc harder */
 #define ALLOC_HIGH		     0x20     /* __GFP_HIGH set */
 #define ALLOC_CPUSET		 0x40     /* check for correct cpuset */
+/**
+ * CMA 的全称是 Contiguous Memory Allocator（连续内存分配器）。它的核心任务是解决一个长期的矛盾：如何在保证大块连续物理内存可用的同时，又不浪费这些内存在平时使用中的灵活性
+ */
 #define ALLOC_CMA		     0x80     /* allow allocations from CMA areas */
 #ifdef CONFIG_ZONE_DMA32
 #define ALLOC_NOFRAGMENT	 0x100    /* avoid mixing pageblock types(避免混合页块类型)  ; fragment:碎片*/

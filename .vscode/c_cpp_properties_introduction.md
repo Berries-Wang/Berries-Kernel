@@ -10,7 +10,7 @@
 |-|-|-|
 |CONFIG_MMU|决定了内核是否支持和使用 MMU（Memory Management Unit，内存管理单元） 硬件|-|
 |-|-|-|
-|CONFIG_TRANSPARENT_HUGEPAGE|-|-|
+|CONFIG_TRANSPARENT_HUGEPAGE|- 启用或禁用 透明大页|-|
 |-|-|-|
 |CONFIG_ARCH_ENABLE_THP_MIGRATION|一个架构相关的配置选项，它开启了 “透明巨页（THP）迁移”<sup>迁移:<br/>- NUMA 平衡：将内存页从一个 CPU 节点移动到离进程更近的另一个 CPU 节点，以减少访问延迟。<br/>- 内存整理 (Compaction)：为了凑出连续的大块空间，把散落在各处的小页挪到一起。<br/> - 热插拔 (Hotplug)：准备拔出某个内存条前，必须把上面的数据搬走。</sup> 的支持|-|
 |-|-|-|

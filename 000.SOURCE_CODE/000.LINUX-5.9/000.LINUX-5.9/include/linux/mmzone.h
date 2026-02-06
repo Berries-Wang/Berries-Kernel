@@ -338,11 +338,17 @@ struct lruvec {
 /* LRU Isolation modes. */
 typedef unsigned __bitwise isolate_mode_t;
 
+/**
+ * 	WMARK_MIN:   最小水位线, 只有带有 `GFP_ATOMIC` 标志的紧急请求（如中断处理）才能分配内存
+ *	WMARK_LOW:   低水位线 , 内核会唤醒后台线程 `kswapd` 开始异步回收内存，直到水位回升到 `WMARK_HIGH`
+ *	WMARK_HIGH:  高水位线 , 内存充足状态,`kswapd` 就会认为内存充足，进入睡眠状态
+ *	NR_WMARK  :  水位线数量
+ */
 enum zone_watermarks {
-	WMARK_MIN,
-	WMARK_LOW,
+	WMARK_MIN,    
+	WMARK_LOW, 
 	WMARK_HIGH,
-	NR_WMARK
+	NR_WMARK   
 };
 
 #define min_wmark_pages(z) (z->_watermark[WMARK_MIN] + z->watermark_boost)

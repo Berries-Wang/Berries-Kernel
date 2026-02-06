@@ -1,4 +1,17 @@
 # Control Groups(cgroups)
+## 虚拟文件系统应用之cgroup
+cgroup（Control Groups）是 Linux 内核的一个功能，用于限制、记录和隔离进程组使用的物理资源（如 CPU、内存、磁盘 I/O）。
+
+它们通过一个名为 cgroupfs 的特殊文件系统(VFS.虚拟文件系统)来暴露接口。
+核心关联点：
+- 层级结构 = 目录树：cgroup 的资源分配是树状的。在文件系统中，这表现为层层嵌套的“文件夹”。创建一个新的子 cgroup，只需使用 mkdir 命令创建一个文件夹。
+- 控制参数 = 文件：每个 cgroup 文件夹下都有一系列自动生成的文件（如 cpu.max, memory.limit_in_bytes）。
+- 操作行为 = 读写文件：
+  + 限制资源：通过 echo "100M" > memory.max 来限制内存。
+  + 加入进程：通过 echo [PID] > cgroup.procs 将一个进程移入该控制组。
+
+
+---
 
 ## What is cgroup? / What are cgroups
 |What is cgroup? / What are cgroups|解释说明|备注|

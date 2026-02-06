@@ -4279,8 +4279,14 @@ out:
  */
 #define MAX_COMPACT_RETRIES 16
 
+/**
+ * 内存规整（Memory Compaction）
+ */
 #ifdef CONFIG_COMPACTION
-/* Try memory compaction for high-order allocations before reclaim */
+/**
+ *  Try memory compaction for high-order allocations before reclaim
+ *  (在进行内存回收（reclaim）之前，先尝试通过内存规整（memory compaction）来满足高阶（high-order）分配请求)
+ *  */
 static struct page *
 __alloc_pages_direct_compact(gfp_t gfp_mask, unsigned int order,
 		unsigned int alloc_flags, const struct alloc_context *ac,
@@ -4810,8 +4816,12 @@ static inline struct page *__alloc_pages_slowpath(gfp_t gfp_mask,
 						  unsigned int order,
 						  struct alloc_context *ac)
 {
+	// __GFP_DIRECT_RECLAIM 表示调用者可以直接进入回收流程
 	bool can_direct_reclaim = gfp_mask & __GFP_DIRECT_RECLAIM;
+
+	// 是否是昂贵分配: 000.LINUX-5.9/include/linux/gfp.h
 	const bool costly_order = order > PAGE_ALLOC_COSTLY_ORDER;
+
 	struct page *page = NULL;
 	unsigned int alloc_flags;
 	unsigned long did_some_progress;
@@ -4828,8 +4838,9 @@ static inline struct page *__alloc_pages_slowpath(gfp_t gfp_mask,
 	 * (我们还进行了完整性检查（或安全性检查），以拦截非原子上下文调用者对原子储备的滥用。)
 	 */
 	if (WARN_ON_ONCE((gfp_mask & (__GFP_ATOMIC | __GFP_DIRECT_RECLAIM)) ==
-			 (__GFP_ATOMIC | __GFP_DIRECT_RECLAIM)))
+			 (__GFP_ATOMIC | __GFP_DIRECT_RECLAIM))) {
 		gfp_mask &= ~__GFP_ATOMIC;
+	}
 
 retry_cpuset:
 	compaction_retries = 0;
@@ -5198,7 +5209,8 @@ __alloc_pages_nodemask(gfp_t gfp_mask, unsigned int order, int preferred_nid,
 							nodemask_t *nodemask)
 {
 	struct page *page;
-	unsigned int alloc_flags = ALLOC_WMARK_LOW; // 允许分配内存的判断条件为低水位
+	// 允许分配内存的判断条件为低水位
+	unsigned int alloc_flags = ALLOC_WMARK_LOW;
 	gfp_t alloc_mask; /* The gfp_t that was actually used for allocation */
 	struct alloc_context ac = { };
 

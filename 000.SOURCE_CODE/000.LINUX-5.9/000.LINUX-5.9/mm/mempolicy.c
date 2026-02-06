@@ -2214,19 +2214,25 @@ struct page *alloc_pages_vma(gfp_t gfp, int order, struct vm_area_struct *vma,
 		page = alloc_page_interleave(gfp, order, nid);
 		goto out;
 	}
-
+    /**
+	 * CONFIG_TRANSPARENT_HUGEPAGE 透明大页 开关
+	 */
 	if (unlikely(IS_ENABLED(CONFIG_TRANSPARENT_HUGEPAGE) && hugepage)) {
 		int hpage_node = node;
 
-		/*
+		/**
 		 * For hugepage allocation and non-interleave policy which
 		 * allows the current node (or other explicitly preferred
 		 * node) we only try to allocate from the current/preferred
 		 * node and don't fall back to other nodes, as the cost of
 		 * remote accesses would likely offset THP benefits.
-		 *
+		 *（对于巨页分配以及非交叉（non-interleave）策略——即允许当前节点（或其他明确指定的首选节点）的操作——我们仅尝试从当前/首选节点进行分配，而不会回退（fall back）到其他节点。因为远程访问带来的开销，很可能会抵消巨页（THP）所带来的性能收益）
+		 * 
+		 * THP: 透明巨页
+		 * 
 		 * If the policy is interleave, or does not allow the current
 		 * node in its nodemask, we allocate the standard way.
+		 * (如果策略是交织（interleave），或者其节点掩码（nodemask）不允许在当前节点分配，我们则按照标准方式进行分配)
 		 */
 		if (pol->mode == MPOL_PREFERRED && !(pol->flags & MPOL_F_LOCAL))
 			hpage_node = pol->v.preferred_node;
@@ -2234,18 +2240,28 @@ struct page *alloc_pages_vma(gfp_t gfp, int order, struct vm_area_struct *vma,
 		nmask = policy_nodemask(gfp, pol);
 		if (!nmask || node_isset(hpage_node, *nmask)) {
 			mpol_cond_put(pol);
-			/*
+			/**
+			 * |      特性    |          内存回收 (Reclaim)        |        内存压缩 (Compaction)         |
+             * |-------------|-----------------------------------|-------------------------------------|
+             * | 解决的目标    | 内存总量不足                       | 内存碎片化（缺乏连续大块）              |
+             * | 主要动作      | 丢弃文件页或将数据写入 Swap         | 在物理内存内部移动页面（搬家）           |
+             * | 对 I/O 的影响 | 高：可能涉及大量磁盘写回或 Swap 操作  | 低：主要是 CPU 和内存间的拷贝，不涉及磁盘 |
+             * | 触发诱因      | `free_pages < watermark`         | 无法分配高阶（High-order）内存块        |
+             * | 风险         | 可能导致严重的“Swap 抖动”            | 可能导致瞬时的 CPU 负载升高            |
+			 *
 			 * First, try to allocate THP only on local node, but
-			 * don't reclaim unnecessarily, just compact.
+			 * don't reclaim(回收) unnecessarily, just compact(压缩).
 			 */
 			page = __alloc_pages_node(hpage_node,
 				gfp | __GFP_THISNODE | __GFP_NORETRY, order);
 
-			/*
+			/**
 			 * If hugepage allocations are configured to always
 			 * synchronous compact or the vma has been madvised
 			 * to prefer hugepage backing, retry allowing remote
 			 * memory with both reclaim and compact as well.
+			 * (如果大页分配配置为始终同步压缩，或者虚拟内存区域已被建议优先使用大页支持，
+			 * 则应允许通过回收和压缩两种方式重试远程内存分配。)
 			 */
 			if (!page && (gfp & __GFP_DIRECT_RECLAIM))
 				page = __alloc_pages_node(hpage_node,
