@@ -3574,6 +3574,7 @@ static vm_fault_t do_anonymous_page(struct vm_fault *vmf)
 	 * 当程序需要写入这个页面时就会触发一个缺页异常，于是缺页异常变成了写时复制的缺页异常
 	 * 
 	 * 系统零页详细介绍: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#4.7.5　系统零页
+	 * > 零页是一个被填充全为零、且只读的特殊物理内存页: 当程序需要写入这个页面时就会触发一个缺页异常，于是缺页异常变成了写时复制的缺页异常
 	 * 
 	 * */
 	if (!(vmf->flags & FAULT_FLAG_WRITE) && !mm_forbids_zeropage(vma->vm_mm)) {

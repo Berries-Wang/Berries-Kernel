@@ -4027,11 +4027,17 @@ retry:
 			}
 		}
 
-		// wmark_pages()宏用来计算zone中某个水位的页面大小
+		/**
+		 * wmark_pages()宏用来计算zone中某个水位的页面大小
+		 * > 看一下 struct zone{...}注释
+		 * 
+		 * 根据 alloc_flag 来取对应的水位值
+		 */
 		mark = wmark_pages(zone, alloc_flags & ALLOC_WMARK_MASK);
 		/**
 		 * zone_watermark_fast()函数用于判断当前zone的空闲页面是否满足WMARK_LOW。
-		 * 另外，还会根据order来判断是否有足够大的空闲内存块。若该函数返回true，表示zone的页面高于指定的水位或者满足order分配需求
+		 * 另外，还会根据order来判断是否有足够大的空闲内存块。若该函数返回true，
+		 * 表示zone的页面高于指定的水位或者满足order分配需求
 		 */
 		if (!zone_watermark_fast(zone, order, mark,
 				       ac->highest_zoneidx, alloc_flags,
@@ -4057,6 +4063,9 @@ retry:
 			    !zone_allows_reclaim(ac->preferred_zoneref->zone, zone))
 				continue;
 
+			/**
+			 * 调用node_reclaim()函数对该内存管理区进行页面回收
+			 */
 			ret = node_reclaim(zone->zone_pgdat, gfp_mask, order); // 调用node_reclaim()函数尝试回收一部分内存,跳转到哪个函数?
 			switch (ret) {
 			case NODE_RECLAIM_NOSCAN:
@@ -4066,7 +4075,7 @@ retry:
 				/* scanned but unreclaimable */
 				continue;
 			default:
-				/* did we reclaim enough */
+				/** did we reclaim enough (我们是否回收了足够的内存) */
 				if (zone_watermark_ok(zone, order, mark,
 					ac->highest_zoneidx, alloc_flags))
 					goto try_this_zone;
@@ -5017,7 +5026,7 @@ retry:
 		goto nopage;
 
 	/*
-	 * Do not retry costly high order allocations unless they are
+	 * Do not retry costly high order allocations unless(除非) they are
 	 * __GFP_RETRY_MAYFAIL
 	 */
 	if (costly_order && !(gfp_mask & __GFP_RETRY_MAYFAIL))

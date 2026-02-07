@@ -2452,6 +2452,8 @@ int sysctl_extfrag_threshold = 500;
 
 /**
  * try_to_compact_pages - Direct compact to satisfy a high-order allocation
+ * (通过‘直接规整’（Direct Compaction）来满足高阶内存分配（high-order allocation）。)
+ * 
  * @gfp_mask: The GFP mask of the current allocation
  * @order: The order of the current allocation
  * @alloc_flags: The allocation flags of the current allocation
@@ -2470,16 +2472,26 @@ enum compact_result try_to_compact_pages(gfp_t gfp_mask, unsigned int order,
 	struct zone *zone;
 	enum compact_result rc = COMPACT_SKIPPED;
 
-	/*
+	/**
 	 * Check if the GFP flags allow compaction - GFP_NOIO is really
 	 * tricky context because the migration might require IO
+	 * (检查 GFP 标志是否允许内存规整（Compaction）——GFP_NOIO 实际上是一个非常棘手的上下文，因为页面迁移可能需要启动 I/O 操作)
+	 * 
+	 * 内存规整（Compaction）不仅仅是内存间的拷贝，它有时必须依赖磁盘
+	 * 
+	 * 内存规整的本质：将“已使用的页面”搬移到别处
+	 * + 干净的（Clean）: 直接拷贝
+	 * + 脏页（Dirty Pages）/需要被交换出去的匿名页: 搬移或释放这些页面以凑出连续空间的过程中，内核可能需要将数据刷回磁盘
+	 * 
+	 * GFP_NOIO` 的初衷是: 在处理存储相关的任务，分配内存时千万不要触发 I/O，否则会死锁。
 	 */
-	if (!may_perform_io)
+	if (!may_perform_io) {
 		return COMPACT_SKIPPED;
+	}
 
 	trace_mm_compaction_try_to_compact_pages(order, gfp_mask, prio);
 
-	/* Compact each zone in the list */
+	/** Compact each zone in the list */
 	for_each_zone_zonelist_nodemask(zone, z, ac->zonelist,
 					ac->highest_zoneidx, ac->nodemask) {
 		enum compact_result status;
@@ -2496,11 +2508,14 @@ enum compact_result try_to_compact_pages(gfp_t gfp_mask, unsigned int order,
 
 		/* The allocation should succeed, stop compacting */
 		if (status == COMPACT_SUCCESS) {
-			/*
+			/**
 			 * We think the allocation will succeed in this zone,
 			 * but it is not certain, hence the false. The caller
-			 * will repeat this with true if allocation indeed
+			 * will repeat this with true if allocation indeed(的确)
 			 * succeeds in this zone.
+			 * (我们认为分配在这个区域（zone）内有望成功，但并不能完全确定，
+			 * 因此（此处）返回 false。如果分配确实在该区域内取得了成功，
+			 * 调用者将会以 true 为参数再次重复此操作。)
 			 */
 			compaction_defer_reset(zone, order, false);
 

@@ -153,6 +153,7 @@ struct vm_area_struct;
  * allocations (e.g. %GFP_NOWAIT and %GFP_ATOMIC will ignore them).
  *
  * %__GFP_IO can start physical IO.
+ * (%__GFP_IO 标志允许分配器启动物理 I/O 操作。)
  *
  * %__GFP_FS can call down to the low-level FS. Clearing the flag avoids the
  * allocator recursing into the filesystem which might already be holding
@@ -325,6 +326,20 @@ struct vm_area_struct;
  * (%GFP_NOIO 会通过直接回收（direct reclaim）来释放那些不需要启动任何物理 I/O 的干净页（clean pages）或 Slab 页。
  * 请尽量避免直接使用此标志，而是改用 memalloc_noio_{save,restore} 宏来标记整个无法执行 I/O 的代码范围，
  * 并简要解释原因。在此范围内，所有的分配请求都会隐式继承 GFP_NOIO 标志。)
+ * 
+ * 
+ *	 * Check if the GFP flags allow compaction - GFP_NOIO is really
+ *	 * tricky context because the migration might require IO
+ *	 * (检查 GFP 标志是否允许内存规整（Compaction）——GFP_NOIO 实际上是一个非常棘手的上下文，因为页面迁移可能需要启动 I/O 操作)
+ *	 * 
+ *	 * 内存规整（Compaction）不仅仅是内存间的拷贝，它有时必须依赖磁盘
+ *	 * 
+ *	 * 内存规整的本质：将“已使用的页面”搬移到别处
+ *	 * + 干净的（Clean）: 直接拷贝
+ *	 * + 脏页（Dirty Pages）/需要被交换出去的匿名页: 搬移或释放这些页面以凑出连续空间的过程中，内核可能需要将数据刷回磁盘
+ *	 * 
+ *	 * GFP_NOIO` 的初衷是: 在处理存储相关的任务，分配内存时千万不要触发 I/O，否则会死锁。
+ *	 
  *
  * %GFP_NOFS will use direct reclaim but will not use any filesystem interfaces.
  * Please try to avoid using this flag directly and instead use

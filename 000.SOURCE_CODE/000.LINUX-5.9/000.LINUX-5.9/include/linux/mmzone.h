@@ -478,8 +478,18 @@ enum zone_type {
 struct zone {
 	/* Read-mostly fields */
 
-	/* zone watermarks, access with *_wmark_pages(zone) macros */
+	/**
+	 *  zone watermarks, access with *_wmark_pages(zone) macros
+	 * 存储的就是该内存区域（Zone）具体的物理页帧数量阈值
+	 * 例如:
+	 *  _watermark[0:WMARK_MIN] = 1245;
+	 *  _watermark[1:WMARK_LOW]=1556
+	 *  _watermark[2:WMARK_HIGH]=1867
+	 *  */
 	unsigned long _watermark[NR_WMARK];
+	/**
+	 * watermark_boost表示临时提高的水位（它是在Linux 5.0内核中引入的）
+	 */
 	unsigned long watermark_boost;
 
 	unsigned long nr_reserved_highatomic;
