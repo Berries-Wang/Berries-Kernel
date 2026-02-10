@@ -25,7 +25,7 @@
 
 | 指令 | 全称 | 作用 | 转换方向 |备注|
 | --- | --- | --- | --- | --- |
-| **HVC** <sup>Hypervisor call to allow OS code to call the Hypervisor. It generates an exception targeting exception level 2 (EL2).(虚拟机监控程序调用，允许作系统代码调用虚拟机管理程序。它生成一个针对异常等级 2（EL2）的异常。)</sup> | Hypervisor Call | **发起请求**：从 Non-secure EL1（内核态）调用 EL2（虚拟化层）。 | 向上切换 (Low -> High) |- CPU虚拟化方式之一：`方法3：半虚拟化`[23-虚拟化：CPU虚拟化 [中山大学 操作系统原理]](../000.内存管理/998.REFS/000.中山大学-操作系统/13-0522-virt-1.pdf) 的核心|
+| **HVC** <sup>Hypervisor call to allow OS code to call the Hypervisor. It generates an exception targeting exception level 2 (EL2).(虚拟机监控程序调用，允许作系统代码调用虚拟机管理程序。它生成一个针对异常等级 2（EL2）的异常。)</sup> | Hypervisor Call | **发起请求**：从 Non-secure EL1（内核态）调用 EL2（虚拟化层）。 | 向上切换 (Low -> High) |- CPU虚拟化方式之一：`方法3：半虚拟化`[23-虚拟化：CPU虚拟化 [中山大学 操作系统原理]](../000.内存管理/998.REFS/000.中山大学-操作系统/13-0522-virt-1.pdf) 的核心 <sup>这就要求OS镜像分为 虚拟机版和非虚拟机版</sup>|
 | **ERET** | Exception Return | **异常返回**：从当前异常级别返回到发生异常之前的级别。 | 向下切换 (High -> Low) ||
 
 ---
@@ -35,6 +35,8 @@
 - 向上层虚拟机暴露其所需要的ISA（Instruction Set Architecture）
 - 可同时运行多台虚拟机(VM)
 
+### 不同虚拟机内的进程如何切换? <sup>[23-虚拟化：CPU虚拟化 [中山大学 操作系统原理]](../000.内存管理/998.REFS/000.中山大学-操作系统/14-0526-virt-2.pdf)</sup>
+![wechat_2026-02-10_084616_878.png](./998.IMGS/wechat_2026-02-10_084616_878.png)
 
 ### 虚拟机监控器分类
 <table>
