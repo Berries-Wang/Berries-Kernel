@@ -17,7 +17,7 @@ fn main() {
 
 |工具名称|功能|安装|命令|备注|
 |-|-|-|-|-|
-|- cargo asm ownership::main|- 查看汇编|- ownership git:(master) ✗ cargo install cargo-show-asm|- ➜  ownership git:(master) ✗ cargo asm ownership::main|-|
+|- cargo asm ownership::main|- 查看汇编|- ownership git:(master) ✗ cargo install cargo-show-asm|- ➜  ownership git:(master) ✗ cargo asm ownership::main|- 内存分配: bl __rustc::__rust_alloc <br/> - 内存释放: bl __rustc::__rust_dealloc|
 |-|-|-|-|-|
 |- cargo expand|- 查看宏展开|- ➜  ownership git:(master) ✗ cargo install cargo-expand |- ➜  ownership git:(master) ✗ cargo expand |-|
 |-|-|-|-|-|
