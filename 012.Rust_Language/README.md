@@ -22,7 +22,7 @@ Rust 是 静态类型（statically typed）语言，也就是说在编译时就�
 |-|-|-|
 |- 函数的返回值|- 在 Rust 中，函数的返回值等同于函数体最后一个表达式的值。|-|
 |-|-|-|
-|-|-|-|
+|- 移动（move）|- let s1 = String::from("hello");  let s2 = s1 ; （解读为 s1 被 移动 到了 s2 ）（之后，s1 无效）|- [移动（move）](https://kaisery.github.io/trpl-zh-cn/ch04-01-what-is-ownership.html)|
 |-|-|-|
 |-|-|-|
 |-|-|-|
