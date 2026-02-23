@@ -22,10 +22,24 @@
 |-|-|-|
 
 
+## 模块工作原理(how modules work)
+|一步步开始|说明|备注|
+|-|-|-|
+|- 1.|- 从 crate 根节点开始|-|
+|- 2.|- 声明模块|-|
+|-|-|-|
+|-|- 声明子模块|-|
+|-|-|-|
+|-|- 模块中的代码路径|-|
+|-|-|-|
+|-|- 私有 vs 公用|-|
+|-|-|-|
+|-|- use 关键字|-|
+
 ### 如何理解 Crates ?
-##### 模块树（module tree）
+##### 模块树（module tree）/ (crate root)
 ```rust
-// src/lib.rs:  crate 根
+// src/lib.rs 叫做 crate 根 （create root） 之所以这样叫它(create root)是因为这两个文件的内容都分别在 crate 模块结构的根组成了一个名为 crate 的模块，该结构被称为模块树（module tree）
 mod front_of_house {
     mod hosting {
         fn add_to_waitlist() {}
@@ -39,7 +53,7 @@ mod front_of_house {
     }
 }
 
-// 对应的模块树结构
+// 对应的模块树((module tree）)
 crate
  └── front_of_house
      ├── hosting
@@ -51,11 +65,17 @@ crate
          └── take_payment
 ```
 
----
-
 ##### 如何理解模块树的项?
 “项”（Item） 是构成程序的最小功能单元
 
  “作用域（scope）”：代码所在的嵌套上下文有一组定义为 “in scope” 的名称。当阅读、编写和编译代码时，程序员和编译器需要知道特定位置的特定名称是否引用了变量、函数、结构体、枚举、模块、常量或者其他有意义的项
 
+
+###### 模块路径
+|名称|使用方式|备注|
+|-|-|-|
+|- 绝对路径|-|-|
+|-|-|-|
+|- 相对路径|-|-|
+|-|-|-|
 
