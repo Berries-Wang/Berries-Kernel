@@ -8,5 +8,4 @@
 ---
 
 ## 参考资料
-- [Rust语言圣经(Rust Course)](https://course.rs/about-book.html)
-- [学习 Rust](https://rust-lang.org/zh-CN/learn/)
+- [《Rust 程序设计语言》](https://rust-lang.org/zh-CN/learn/)
