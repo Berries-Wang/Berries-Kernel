@@ -18,6 +18,11 @@ Rust 的 闭包（closures）是可以保存在变量中或作为参数传递给
 
 ---
 
+## 什么是闭包?
+> 阅读: [MDN:闭包](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Guide/Closures) : 或 [MDN:闭包: PDF](./999.REFS/闭包%20-%20JavaScript%20_%20MDN.pdf) <sup>闭包是由捆绑起来（封闭的）的函数和函数周围状态（词法环境）的引用组合而成。换言之，闭包让函数能访问它的外部作用域。</sup> <br/> & [MDN:Closures](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Closures#closure) 或 [MDN:Closures: PDF](./999.REFS/Closures%20-%20JavaScript%20_%20MDN.pdf) <br/> & [Rust语言圣经(Rust Course):闭包 Closure](https://course.rs/advance/functional-programing/closure.html) <sup>闭包是一种匿名函数，它可以赋值给变量也可以作为参数传递给其它函数，不同于函数的是，它允许捕获调用者作用域中的值</sup>: [Rust语言圣经(Rust Course): 闭包： PEF](./999.REFS/闭包%20Closure%20-%20Rust语言圣经(Rust%20Course).pdf) <br/>
+
+---
+
 ## 闭包类型推断和注解
 - 闭包通常不要求像 fn 函数那样对参数和返回值进行类型注解。函数需要类型注解是因为这些类型是暴露给用户的显式接口的一部分。严格定义这些接口对于确保所有人对函数使用和返回值的类型达成一致理解非常重要。
 - 闭包并不用于这样暴露在外的接口：它们储存在变量中并被使用，不用命名它们或暴露给库的用户调用
