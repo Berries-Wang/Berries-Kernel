@@ -18,5 +18,73 @@ Rust 的 闭包（closures）是可以保存在变量中或作为参数传递给
 
 ---
 
+## 闭包类型推断和注解
+- 闭包通常不要求像 fn 函数那样对参数和返回值进行类型注解。函数需要类型注解是因为这些类型是暴露给用户的显式接口的一部分。严格定义这些接口对于确保所有人对函数使用和返回值的类型达成一致理解非常重要。
+- 闭包并不用于这样暴露在外的接口：它们储存在变量中并被使用，不用命名它们或暴露给库的用户调用
+- 在某些罕见的情况下，编译器也需要闭包的类型注解
+  ```rust
+   let expensive_closure = |num: u32| -> u32 {
+        println!("calculating slowly...");
+        std::thread::sleep(std::time::Duration::from_secs(2));
+        num
+    };
+  ```
+- 对于闭包定义，编译器会为每个参数和返回值推断出一个具体类型： 这些类型被锁定进闭包 example_closure 中，如果尝试对同一闭包使用不同类型则就会得到类型错误
+  ```rust
+    let example_closure = |x| x;
 
+    let s = example_closure(String::from("hello")); // 这会推断出 example_closure 的参数和返回值类型为 String
+    let n = example_closure(5); // 这会导致编译错误，因为 example_closure 已经被推断为接受 String 类型的参数，而不是整数 ： 错误信息:  ^ expected `String`, found integer
+  ```
 
+---
+
+## 捕获引用或移动所有权
+闭包可以通过三种方式捕获其环境中的值，它们直接对应到函数获取参数的三种方式：
++ `不可变借用` : 捕获/借用，不会导致所有权转移
+  ```rust
+    fn main() {
+       let list = vec![1, 2, 3];
+       println!("Before defining closure: {list:?}");
+   
+       // 捕获名为 list 的 vector 的不可变引用的闭包
+       // 因为同时可以有多个 list 的不可变引用，所以在闭包定义之前，闭包定义之后调用之前，闭包调用之后代码仍然可以访问 list
+       let only_borrows = || println!("From closure: {list:?}");
+   
+       println!("Before calling closure: {list:?}");
+       only_borrows();
+       println!("After calling closure: {list:?}");
+    }
+  ```
++ `可变借用`: 捕获/借用，不会导致所有权转移
+    ```rust
+    fn main() {
+       let mut list = vec![1, 2, 3];
+       println!("Before defining closure: {list:?}");
+   
+       let mut borrows_mutably = || list.push(7);
+
+       // 因为当可变借用存在时不允许有其它的借用，所以在闭包定义和调用之间不能有不可变引用来进行打印。
+       //这行添加之后会报错:  println!("After calling closure: {list:?}"); // 错误信息: error[E0502]: cannot borrow `list` as immutable because it is also borrowed as mutable
+       // {list:?}: immutable borrow occurs here
+   
+       borrows_mutably();
+       // 闭包在被调用后就不再被使用，这时可变借用结束。
+       println!("After calling closure: {list:?}");
+   }
+    ```
++ `获取所有权`： 即使闭包体不严格需要所有权，如果希望强制闭包获取它在环境中所使用的值的所有权，可以在参数列表前使用 move 关键字
+    ```rust
+        // 当将闭包传递到一个新的线程时，这个技巧特别有用，因为它将数据的所有权移动到新线程中
+        use std::thread;
+
+     fn main() {
+         let list = vec![1, 2, 3];
+         println!("Before defining closure: {list:?}");
+     
+         // 闭包仅通过不可变引用捕获了 list，因为这是打印列表所需的最小访问权限
+         std::thread::spawn(move || println!("From thread: {list:?}"))
+             .join()
+             .unwrap();
+     }
+    ```
