@@ -5,6 +5,9 @@
   + 没有 GC 也无需手动内存管理,性能比肩 C++/C 还能直接调用它们的代码、安全性极高
 
 
+## 笔记
+- [Github: Berries-RUST](https://github.com/Berries-Wang/Berries-RUST)
+
 ---
 
 ## 参考资料
