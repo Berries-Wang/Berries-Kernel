@@ -68,13 +68,23 @@ struct mem_cgroup;
 /**
  * 
  * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.1.1　page数据结构
- * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.2　RMAP   -- Reverse Mapping Map （反向映射）,确定页面是否被某个进程映射
- * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.3 页面回收 -- 页交换(swapping) 、页回收(page reclaim)
- * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.3.1　LRU链表 -- 页交换算法(Linux内核中采用的页交换算法主要是经典LRU链表算法和第二次机会（second chance）法)
+ * 
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.2　RMAP       -- Reverse Mapping Map （反向映射）,确定页面是否被某个进程映射
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.3 页面回收     -- 页交换(swapping) 、页回收(page reclaim)
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.3.1　LRU链表   -- 页交换算法(Linux内核中采用的页交换算法主要是经典LRU链表算法和第二次机会（second chance）法)
  * 
  * 
  * 页面回收:
  *   [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.3.3　触发页面回收
+ * 
+ * 该数据结构以sizeof(long)对齐，在64位系统中以8字节对齐，因此我们可以把address_space指针（page数据结构中的mapping成员）的低2位用于其他用途。
+ *  - Bit[0]：用于判断该页面是否匿名页面
+ *  - Bit[1]：用于判断该页面是否为非LRU页面。
+ *  - Bit[0～1]：若均设置为1，则表示这是一个KSM页面
+ * 
+ * 
+ * #define _struct_page_alignment	__aligned(2 * sizeof(unsigned long))
+ * 表示以16字节对齐 , 所以，struct page 变量的虚拟地址低4位都是0
  */
 struct page {
 	unsigned long flags;		/* Atomic flags, some possibly
@@ -91,11 +101,19 @@ struct page {
 			 * @lru: Pageout list, eg. active_list protected by
 			 * pgdat->lru_lock.  Sometimes used as a generic list
 			 * by the page owner.
+			 * lru: LRU链表节点，匿名页面或文件映射页面会通过该成员添加到LRU链表中
 			 */
 			struct list_head lru;
 			/** See page-flags.h for PAGE_MAPPING_FLAGS
 			 * 
 			 * mapping成员表示页面所指向的地址空间 , 见[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.1.5　mapping成员的妙用
+			 * 
+			 * mapping成员所指向的页面对应存储设备的地址空间，主要分成3种情况:
+			 *   - 对于匿名页面，mapping成员指向VMA的anon_vma数据结构。
+             *   - 对于交换高速缓存页面，它的mapping成员指向交换分区的swapper_spaces。
+             *   - 对于文件映射页面，mapping成员指向该文件所属的address_space数据结构，它包含文件所属的存储介质的相关信息，如inode等。
+			 * 
+			 * [mm/util.c] 参考函数
 			 * 
 			 */
 			struct address_space *mapping;
@@ -106,10 +124,13 @@ struct page {
              *  	page->index = migratetype;
              *  }
 			 * 存储的是 migratetype 
+			 * 
+			 * index: 表示这个页面在一个映射中的序号或偏移量???
 			 */
 			pgoff_t index;		/* Our offset within mapping. */
 			/**
-			 * @private: Mapping-private opaque data.
+			 * @private: 指向私有数据的指针
+			 * @private: Mapping-private opaque data.(映射私有不透明数据)
 			 * Usually used for buffer_heads if PagePrivate.
 			 * Used for swp_entry_t if PageSwapCache.
 			 * Indicates order in the buddy system if PageBuddy.
@@ -125,8 +146,14 @@ struct page {
 		};
 		struct {	/* slab, slob and slub */
 			union {
+				/**
+				 * slab_list: slab链表节点
+				 */
 				struct list_head slab_list;
-				struct {	/* Partial pages */
+				struct {	/* Partial pages： 部分页， 内存页没有完全被填满*/
+					/**
+					 * next: 在slub分配器中使用
+					 */
 					struct page *next;
 #ifdef CONFIG_64BIT
 					int pages;	/* Nr of pages left */
@@ -141,14 +168,23 @@ struct page {
 			 * slab_alloc 从该函数开始分析，slab.c
 			 * 页面对应的slab描述符，
 			 * 即 当前的page是被slab_cache所使用的
+			 * 
+			 * slab_cache: slab缓存描述符，slab分配器中的第一个物理页面的page数据结构中的slab_cache指向slab缓存描述符
 			 */
 			struct kmem_cache *slab_cache; /* not slob */
 			/**
 			 *  Double-word boundary 
 			 * slab的管理信息
+			 * freelist: 管理区。管理区可以看作一个数组，数组的每个成员占用1字节，每个成员代表一个slab对象
+			 * 
 			*/
 			void *freelist;		/* first free object */
 			union {
+				/**
+				 * s_sem: 在slab分配器中用来指向第一个slab对象的起始地址:
+				 * 参考: static inline void *index_to_obj(struct kmem_cache *cache, struct page *page,
+				 unsigned int idx); 由 cache_alloc_refill 函数调用
+				 */
 				void *s_mem;	/* slab: first object */
 				unsigned long counters;		/* SLUB */
 				struct {			/* SLUB */
@@ -229,6 +265,9 @@ struct page {
 		 */
 		unsigned int page_type;
 
+		/**
+		 * 表示slab分配器中活跃对象的数量。当为0时，表示这个slab分配器中没有活跃对象，可以销毁这个slab分配器。活跃对象就是已经被迁移到对象缓冲池中的对象
+		 */
 		unsigned int active;		/* SLAB */
 		int units;			/* SLOB */
 	};
@@ -342,6 +381,8 @@ struct vm_userfaultfd_ctx {};
  * per VM-area/task. A VM area is any part of the process virtual memory
  * space that has a special rule for the page-fault handlers (ie a shared
  * library, the executable area etc).
+ * (该结构体描述了一个虚拟内存区域（Virtual Memory Area, VMA）。每个虚拟内存区域或每个任务（进程）都对应一个这样的结构。
+ * 虚拟内存区域是指进程虚拟内存空间中，任何对**页面异常处理程序（page-fault handlers）**有特殊规则的特定部分（例如：共享库、可执行代码区等）)
  * 
  * VMA
  * 
@@ -352,6 +393,7 @@ struct vm_area_struct {
     /**
 	 * vm_start和vm_end：指定VMA在进程地址空间的起始地址和结束地址 ?
 	 * 这里的进程地址空间是什么? 看图就很容易理解了
+	 * - [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图4.20　从进程角度看VMA
 	 */ 
 	unsigned long vm_start;		/* Our start address within vm_mm. */
 	unsigned long vm_end;		/* The first byte after our end address
@@ -363,6 +405,9 @@ struct vm_area_struct {
 	 */
 	struct vm_area_struct *vm_next, *vm_prev;
 
+	/**
+	 * vm_rb：VMA作为一个节点加入红黑树，每个进程的mm_struct数据结构中都有一棵红黑树——mm->mm_rb
+	 */
 	struct rb_node vm_rb;
 
 	/*
@@ -380,8 +425,27 @@ struct vm_area_struct {
 	/*
 	 * Access permissions of this VMA.
 	 * See vmf_insert_mixed_prot() for discussion.
+	 * 
+	 * vm_page_prot：VMA的访问权限
+	 * 
+	 * VMA属性的标志位可以任意组合，`但是最终要落实到硬件机制上`，即页表项的属性中:  (IN [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图4.21　VMA属性到页表项属性的转换)
+	 * 转换的必要性：VMA的属性是操作系统抽象出来的，与具体硬件无关。
+	 *      但是，当操作系统为VMA建立页表映射时，必须将VMA的属性转换为具体处理器架构的页表项属性。
+	 *      这是因为硬件在访问内存时，会根据页表项的属性来进行权限检查和控制   
+	 * 
+	 * 即： 访问属性机制还是通过硬件来实现的，如： 缺页异常机制...
+	 * 
+	 * 且，不同的硬件平台，机制可能不一致
+	 * 
+	 * 转换函数: vm_get_page_prot  [000.LINUX-5.9/mm/mmap.c]
 	 */
 	pgprot_t vm_page_prot;
+	/**
+	 * vm_flags：描述该VMA的一组标志位, 即 页面的属性，最终还是得落实到硬件机制上，见:
+	 * - [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图4.21　VMA属性到页表项属性的转换
+	 * <mm/mmap.c> # pgprot_t vm_get_page_prot(unsigned long vm_flags)
+	 * 
+	 */
 	unsigned long vm_flags;		/* Flags, see mm.h. */
 
 	/*
@@ -396,24 +460,36 @@ struct vm_area_struct {
 	/**
 	 * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#5.2　RMAP
 	 * 
-	 * RMAP系统中有两个重要的数据结构：一个是anon_vma，简称AV；另一个是anon_vma_chain，简称AVC。
+	 * anon_vma_chain数据结构起枢纽作用，比如连接父子进程间的struct anon_vma数据结构
 	 * 
 	 * A file's MAP_PRIVATE vma can be in both i_mmap tree and anon_vma
 	 * list, after a COW of one of the file pages.	A MAP_SHARED vma
 	 * can only be in the i_mmap tree.  An anonymous MAP_PRIVATE, stack
 	 * or brk vma (with NULL file) can only be in an anon_vma list.
 	 */
-	struct list_head anon_vma_chain; /* Serialized by mmap_lock &
-					  * page_table_lock */
+	struct list_head anon_vma_chain; /* Serialized by mmap_lock &  page_table_lock */
+	/**
+	 * 一个物理页可以同时被多个进程的虚拟内存映射，但一个虚拟页面只能同时映射到一个物理页面.
+	 * 
+	 * anon_vma数据结构主要用于连接物理页面的page数据结构和VMA的vm_area_struct数据结构 [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure]#图5.3　anon_vma数据结构
+	 * - 快速找到哪些进程引用这个page
+	 * > 虽然没有直接映射，但是别忘了[005.EXPERIMENTAL_ANALYSIS/000.container_of.md]
+	 */
 	struct anon_vma *anon_vma;	/* Serialized by page_table_lock */
 
-	/* Function pointers to deal with this struct. */
+	/** Function pointers to deal with this struct. 
+	 * 指向许多方法的集合，这些方法用于在VMA中执行各种操作，通常用于文件映射
+	*/
 	const struct vm_operations_struct *vm_ops;
 
-	/* Information about our backing store: */
-	unsigned long vm_pgoff;		/* Offset (within vm_file) in PAGE_SIZE
-					   units */
-	struct file * vm_file;		/* File we map to (can be NULL). */
+	/** Information about our backing store: 
+	 * vm_pgoff：指定文件映射的偏移量，这个变量的单位不是字节，而是页面的大小（PAGE_SIZE）。对于匿名页面来说，它的值可以是0或者vm_addr/PAGE_SIZE。
+	*/
+	unsigned long vm_pgoff;		/* Offset (within vm_file) in PAGE_SIZE  units */
+	/**
+	  *  vm_file：指向file的实例，描述一个被映射的文件
+	*/
+	struct file *vm_file; /* File we map to (can be NULL). */
 	void * vm_private_data;		/* was vm_pte (shared mem) */
 
 #ifdef CONFIG_SWAP
@@ -442,24 +518,34 @@ struct core_state {
 struct kioctx_table;
 /**
  * Linux内核需要管理每个进程所有的内存区域以及它们对应的页表映射，所以必须抽象出一个数据结构，这就是mm_struct数据结构
+ * > 参考:[001.UNIX-DOCS/000.内存管理/013.进程内存管理/README.md]: 进程可以通过内核的内存管理机制动态地添加和删除这些内存区域，这些内存区域在Linux内核采用VMA数据结构(struct vm_area_struct , struct mm_struct成员)来抽象描述
  * 
  * > [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图4.19　mm_struct数据结构
+ *   - 该结构体映射一个完整的虚拟地址空间 
  */
 struct mm_struct {
 	struct {
 		struct vm_area_struct *mmap;		/* list of VMAs  VMA 链表: 管理 vm_area_struct 的数据结构之一*/
 		/**
-		 * 管理 vm_area_struct 的数据结构之二
+		 * 管理 vm_area_struct 的数据结构之二: VMA红黑树的根节点
 		 * 
 		 * 所以，通过 mmap 或 mm_rb 都可以遍历和查找所有的VMA
 		 */
 		struct rb_root mm_rb;
 		u64 vmacache_seqnum;                   /* per-thread vmacache */
 #ifdef CONFIG_MMU
-		unsigned long (*get_unmapped_area) (struct file *filp,
-				unsigned long addr, unsigned long len,
-				unsigned long pgoff, unsigned long flags);
+		  /**
+           * get_unmapped_area：用于判断虚拟内存空间是否有足够的空间，返回一段没有映射过的空间的起始地址，这个函数会使用具体的处理器架构的实现，如对于ARM架构，Linux内核就有相应的函数实现。
+          */
+		unsigned long (*get_unmapped_area)(struct file *filp,
+						   unsigned long addr,
+						   unsigned long len,
+						   unsigned long pgoff,
+						   unsigned long flags);
 #endif
+        /**
+		 * mmap_base：指向mmap空间的起始地址。在32位处理器中，mmap空间的起始地址是0x4000 0000
+		 */
 		unsigned long mmap_base;	/* base of mmap area */
 		unsigned long mmap_legacy_base;	/* base of mmap area in bottom-up allocations */
 #ifdef CONFIG_HAVE_ARCH_COMPAT_MMAP_BASES
@@ -470,7 +556,7 @@ struct mm_struct {
 		unsigned long task_size;	/* size of task vm space */
 		unsigned long highest_vm_end;	/* highest vma end address */
 		/**
-		 * pgd：指向进程的PGD（一级页表）
+		 * pgd：指向进程的PGD（一级页表,页表的基地址）
 		 * 
 		 * 当CPU第一次访问虚拟地址空间时会触发缺页异常。
 		 * 在缺页异常处理中，分配物理页面，利用分配的物理页面来创建页表项并且填充页表，完成虚拟地址到物理地址的映射关系的建立。
@@ -492,12 +578,18 @@ struct mm_struct {
 
 		/**
 		 * @mm_users: The number of users including userspace.
+		 * (包含用户态（引用）在内的用户总数)
 		 *
 		 * Use mmget()/mmget_not_zero()/mmput() to modify. When this
 		 * drops to 0 (i.e. when the task exits and there are no other
 		 * temporary reference holders), we also release a reference on
 		 * @mm_count (which may then free the &struct mm_struct if
 		 * @mm_count also drops to 0).
+		 * (请使用 mmget()、mmget_not_zero() 或 mmput() 进行修改。
+		 * 当该计数降至 0 时（即任务退出且没有其他临时引用持有者时），
+		 * 我们还会释放一个对 @mm_count 的引用（如果此时 @mm_count 也降至 0，
+		 * 则会释放 &struct mm_struct 结构体）。)
+		 * 
 		 * mm_users：记录正在使用该进程地址空间的进程数目，如果两个线程共享该地址空间，那么mm_users的值等于2。
 		 */
 		atomic_t mm_users;
@@ -560,8 +652,14 @@ struct mm_struct {
 		 */
 		unsigned long start_code, end_code, start_data, end_data;
 		/**
-		 * start_brk：堆空间的起始地址
-		 * brk：表示当前堆中的VMA的结束地址
+		 * start_brk：指向堆内存的起始地址（即数据段之后的固定位置）。在进程生命周期中，这个值通常是不变的
+		 * brk：表示当前堆中的VMA的结束地址(brk: 指向堆内存当前的结束地址（即堆顶）)
+		 *      - 参考:[[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]]#图4.19　mm_struct数据结构
+		 * 核心作用： brk 决定了进程堆空间的大小。通过移动 brk 指针，进程可以动态地增加或减少其可用的内存空间。
+		 * 
+		 * 局限性:
+		 *   - 连续性限制：brk 只能在堆顶进行线性增长或收缩。如果你在堆中间释放了一块内存，brk 无法轻易收缩，除非堆顶的内存也被释放。
+		 *   - 大内存处理：对于非常大的内存请求（通常 > 128 KB），内核通常不再移动 brk，而是使用 mmap 系统调用在**文件映射区（Memory Mapping Segment）**创建一块独立的匿名映射
 		 */
 		unsigned long start_brk, brk, start_stack;
 		unsigned long arg_start, arg_end, env_start, env_end;
@@ -588,11 +686,14 @@ struct mm_struct {
 		struct kioctx_table __rcu	*ioctx_table;
 #endif
 #ifdef CONFIG_MEMCG
-		/*
+		/**
+		 * CONFIG_MEMCG 指: Memory Control Group
+		 * 
 		 * "owner" points to a task that is regarded as the canonical
 		 * user/owner of this mm. All of the following must be true in
 		 * order for it to be changed:
-		 *
+		 * (“‘owner’ 指向一个被视为该内存管理结构（mm）法定用户/所有者的任务（task）。只有当以下所有条件都满足时，才能对其进行更改：”)
+		 * 
 		 * current == mm->owner
 		 * current->mm != mm
 		 * new_owner->mm == mm

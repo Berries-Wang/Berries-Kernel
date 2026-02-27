@@ -1,0 +1,2 @@
+# PVE（Proxmox Virtual Environment）-- 企业级虚拟化管理平台
+Proxmox Virtual Environment is an open source server virtualization management solution based on QEMU/KVM and LXC.(Proxmox 虚拟环境（Proxmox VE）是一个基于 QEMU/KVM 和 LXC 的开源服务器虚拟化管理解决方案。)

@@ -642,6 +642,11 @@ void *page_rmapping(struct page *page)
 /*
  * Return true if this page is mapped into pagetables.
  * For compound page it returns true if any subpage of compound page is mapped.
+ * (如果该页面已被映射到页表（Pagetables）中，则返回 true。
+ * 对于复合页（Compound Page），如果该复合页中的任何子页（Subpage）被映射了，也返回 true)
+ * 
+ * Compound Page:  Linux 内核将多个连续的物理页框（Page Frames）组合在一起，当作一个大页（如 HugePages）来管理的技术
+ * Subpage: 组成复合页的每一个标准的 4KB（或其他基础大小）的页面
  */
 bool page_mapped(struct page *page)
 {

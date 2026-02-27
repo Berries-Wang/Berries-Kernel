@@ -1781,7 +1781,7 @@ bool vma_migratable(struct vm_area_struct *vma)
 }
 
 struct mempolicy *__get_vma_policy(struct vm_area_struct *vma,
-						unsigned long addr)
+				   unsigned long addr)
 {
 	struct mempolicy *pol = NULL;
 
@@ -1791,23 +1791,27 @@ struct mempolicy *__get_vma_policy(struct vm_area_struct *vma,
 		} else if (vma->vm_policy) {
 			pol = vma->vm_policy;
 
-			/*
+			/**
 			 * shmem_alloc_page() passes MPOL_F_SHARED policy with
 			 * a pseudo vma whose vma->vm_ops=NULL. Take a reference
 			 * count on these policies which will be dropped by
 			 * mpol_cond_put() later
+			 * (shmem_alloc_page() 在调用时会传递 MPOL_F_SHARED 标志，并使用一个 vma->vm_ops 为 NULL 的伪 VMA（pseudo vma）。
+			 * 必须对这些策略增加引用计数，该计数随后将由 mpol_cond_put() 进行释放)
 			 */
-			if (mpol_needs_cond_ref(pol))
+			if (mpol_needs_cond_ref(pol)) {
 				mpol_get(pol);
+			}
 		}
 	}
 
 	return pol;
 }
 
-/*
+/**
  * get_vma_policy(@vma, @addr)
  * @vma: virtual memory area whose policy is sought
+ *       (待查询（其内存）策略的虚拟内存区域（VMA）)
  * @addr: address in @vma for shared policy lookup
  *
  * Returns effective policy for a VMA at specified address.
@@ -1816,9 +1820,13 @@ struct mempolicy *__get_vma_policy(struct vm_area_struct *vma,
  * count--added by the get_policy() vm_op, as appropriate--to protect against
  * freeing by another task.  It is the caller's responsibility to free the
  * extra reference for shared policies.
+ * (返回指定地址处 VMA（虚拟内存区域）的生效策略。如有必要，
+ * 该函数会回退（Fall back）到 current->mempolicy（当前进程策略）或系统默认策略。
+ * 共享策略［即标记为 MPOL_F_SHARED 的策略］需要一个额外的引用计数——该计数由 get_policy()
+ *  虚拟内存操作（vm_op）视情况增加——以防止被其他任务释放。调用者负责释放共享策略的这一额外引用)
  */
 static struct mempolicy *get_vma_policy(struct vm_area_struct *vma,
-						unsigned long addr)
+					unsigned long addr)
 {
 	struct mempolicy *pol = __get_vma_policy(vma, addr);
 
@@ -1870,9 +1878,10 @@ static int apply_policy_zone(struct mempolicy *policy, enum zone_type zone)
 	return zone >= dynamic_policy_zone;
 }
 
-/*
+/**
  * Return a nodemask representing a mempolicy for filtering nodes for
  * page allocation
+ * (返回一个节点掩码（nodemask），该掩码代表了用于过滤页面分配节点的内存策略)
  */
 nodemask_t *policy_nodemask(gfp_t gfp, struct mempolicy *policy)
 {
@@ -1983,7 +1992,12 @@ static unsigned offset_il_node(struct mempolicy *pol, unsigned long n)
 	return nid;
 }
 
-/* Determine a node number for interleave */
+/**
+ *  Determine a node number for interleave
+ * (确定用于交错（访问）的节点编号)
+ * 
+ * 交错： 一种内存管理策略。为了防止某个 CPU 节点的内存带宽成为瓶颈，系统将数据分散存储在多个不同的内存节点上
+ *  */
 static inline unsigned interleave_nid(struct mempolicy *pol,
 		 struct vm_area_struct *vma, unsigned long addr, int shift)
 {
@@ -2160,13 +2174,16 @@ static struct page *alloc_page_interleave(gfp_t gfp, unsigned order,
  *      %GFP_KERNEL  kernel allocations,
  *      %GFP_HIGHMEM highmem/user allocations,
  *      %GFP_FS      allocation should not call back into a file system.
+ *                   (内存分配不应回调（或重入）文件系统)
  *      %GFP_ATOMIC  don't sleep.
  *
- *	@order:Order of the GFP allocation.
- * 	@vma:  Pointer to VMA or NULL if not available.
- *	@addr: Virtual Address of the allocation. Must be inside the VMA.
- *	@node: Which node to prefer for allocation (modulo policy).
+ *	@order: Order of the GFP allocation.
+ * 	@vma:   Pointer to VMA or NULL if not available.
+ *	@addr:  Virtual Address of the allocation. Must be inside the VMA.
+ *	@node:  Which node to prefer for allocation (modulo policy).
+ *          (在不考虑策略的情况下，优先选择哪个节点进行分配。)
  *	@hugepage: for hugepages try only the preferred node if possible
+ *             (对于大页分配，尽可能只尝试从首选节点（Preferred Node）获取内存)
  *
  * 	This function allocates a page from the kernel page pool and applies
  *	a NUMA policy associated with the VMA or the current process.
@@ -2174,10 +2191,13 @@ static struct page *alloc_page_interleave(gfp_t gfp, unsigned order,
  *	mm_struct of the VMA to prevent it from going away. Should be used for
  *	all allocations for pages that will be mapped into user space. Returns
  *	NULL when no page can be allocated.
+ * (该函数从内核页池（Page Pool）中分配一个页面，
+ * 并应用与该 VMA（虚拟内存区域）或当前进程相关联的 NUMA 策略。
+ * 当 VMA 参数不为 NULL 时，调用者必须对该 VMA 所属 mm_struct 的 mmap_lock 加读锁，
+ * 以防止其被销毁。该函数应被用于所有“将被映射到用户空间”的页面分配。若无法分配页面，则返回 NULL。)
  */
-struct page *
-alloc_pages_vma(gfp_t gfp, int order, struct vm_area_struct *vma,
-		unsigned long addr, int node, bool hugepage)
+struct page *alloc_pages_vma(gfp_t gfp, int order, struct vm_area_struct *vma,
+			     unsigned long addr, int node, bool hugepage)
 {
 	struct mempolicy *pol;
 	struct page *page;
@@ -2194,19 +2214,25 @@ alloc_pages_vma(gfp_t gfp, int order, struct vm_area_struct *vma,
 		page = alloc_page_interleave(gfp, order, nid);
 		goto out;
 	}
-
+    /**
+	 * CONFIG_TRANSPARENT_HUGEPAGE 透明大页 开关
+	 */
 	if (unlikely(IS_ENABLED(CONFIG_TRANSPARENT_HUGEPAGE) && hugepage)) {
 		int hpage_node = node;
 
-		/*
+		/**
 		 * For hugepage allocation and non-interleave policy which
 		 * allows the current node (or other explicitly preferred
 		 * node) we only try to allocate from the current/preferred
 		 * node and don't fall back to other nodes, as the cost of
 		 * remote accesses would likely offset THP benefits.
-		 *
+		 *（对于巨页分配以及非交叉（non-interleave）策略——即允许当前节点（或其他明确指定的首选节点）的操作——我们仅尝试从当前/首选节点进行分配，而不会回退（fall back）到其他节点。因为远程访问带来的开销，很可能会抵消巨页（THP）所带来的性能收益）
+		 * 
+		 * THP: 透明巨页
+		 * 
 		 * If the policy is interleave, or does not allow the current
 		 * node in its nodemask, we allocate the standard way.
+		 * (如果策略是交织（interleave），或者其节点掩码（nodemask）不允许在当前节点分配，我们则按照标准方式进行分配)
 		 */
 		if (pol->mode == MPOL_PREFERRED && !(pol->flags & MPOL_F_LOCAL))
 			hpage_node = pol->v.preferred_node;
@@ -2214,18 +2240,28 @@ alloc_pages_vma(gfp_t gfp, int order, struct vm_area_struct *vma,
 		nmask = policy_nodemask(gfp, pol);
 		if (!nmask || node_isset(hpage_node, *nmask)) {
 			mpol_cond_put(pol);
-			/*
+			/**
+			 * |      特性    |          内存回收 (Reclaim)        |        内存压缩 (Compaction)         |
+             * |-------------|-----------------------------------|-------------------------------------|
+             * | 解决的目标    | 内存总量不足                       | 内存碎片化（缺乏连续大块）              |
+             * | 主要动作      | 丢弃文件页或将数据写入 Swap         | 在物理内存内部移动页面（搬家）           |
+             * | 对 I/O 的影响 | 高：可能涉及大量磁盘写回或 Swap 操作  | 低：主要是 CPU 和内存间的拷贝，不涉及磁盘 |
+             * | 触发诱因      | `free_pages < watermark`         | 无法分配高阶（High-order）内存块        |
+             * | 风险         | 可能导致严重的“Swap 抖动”            | 可能导致瞬时的 CPU 负载升高            |
+			 *
 			 * First, try to allocate THP only on local node, but
-			 * don't reclaim unnecessarily, just compact.
+			 * don't reclaim(回收) unnecessarily, just compact(压缩).
 			 */
 			page = __alloc_pages_node(hpage_node,
 				gfp | __GFP_THISNODE | __GFP_NORETRY, order);
 
-			/*
+			/**
 			 * If hugepage allocations are configured to always
 			 * synchronous compact or the vma has been madvised
 			 * to prefer hugepage backing, retry allowing remote
 			 * memory with both reclaim and compact as well.
+			 * (如果大页分配配置为始终同步压缩，或者虚拟内存区域已被建议优先使用大页支持，
+			 * 则应允许通过回收和压缩两种方式重试远程内存分配。)
 			 */
 			if (!page && (gfp & __GFP_DIRECT_RECLAIM))
 				page = __alloc_pages_node(hpage_node,
@@ -2237,6 +2273,7 @@ alloc_pages_vma(gfp_t gfp, int order, struct vm_area_struct *vma,
 
 	nmask = policy_nodemask(gfp, pol);
 	preferred_nid = policy_node(gfp, pol, node);
+	// 从伙伴系统中分配物理页面
 	page = __alloc_pages_nodemask(gfp, order, preferred_nid, nmask);
 	mpol_cond_put(pol);
 out:

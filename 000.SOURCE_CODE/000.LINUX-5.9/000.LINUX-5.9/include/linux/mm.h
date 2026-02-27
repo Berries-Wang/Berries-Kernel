@@ -508,6 +508,10 @@ struct vm_fault {
 	pud_t *pud;			/* Pointer to pud entry matching
 					 * the 'address'
 					 */
+	/**
+	 * 嘿嘿，这个有意思!
+	 * 虚拟地址!!! 根据虚拟地址算出来的,所以，在子进程中，因为地址空间不一样，所以，父子进程对应的orig_pte不同
+	 */
 	pte_t orig_pte;			/* Value of PTE at the time of fault */
 
 	struct page *cow_page;		/* Page handler may use for COW fault */
@@ -541,10 +545,12 @@ enum page_entry_size {
 	PE_SIZE_PUD,
 };
 
-/*
+/**
  * These are the virtual MM functions - opening of an area, closing and
  * unmapping it (needed to keep files on disk up-to-date etc), pointer
  * to the functions called when a no-page or a wp-page exception occurs.
+ * (这些是虚拟内存管理（Virtual MM）的功能：包括打开区域、关闭以及解除映射（用于保持磁盘文件同步更新等），
+ * 以及指向处理“缺页中断”（no-page）或“写保护异常”（wp-page）时所调用函数的指针。)
  */
 struct vm_operations_struct {
 	void (*open)(struct vm_area_struct * area);
@@ -586,7 +592,7 @@ struct vm_operations_struct {
 	 */
 	int (*set_policy)(struct vm_area_struct *vma, struct mempolicy *new);
 
-	/*
+	/**
 	 * get_policy() op must add reference [mpol_get()] to any policy at
 	 * (vma,addr) marked as MPOL_SHARED.  The shared policy infrastructure
 	 * in mm/mempolicy.c will do this automatically.
@@ -595,6 +601,11 @@ struct vm_operations_struct {
 	 * If no [shared/vma] mempolicy exists at the addr, get_policy() op
 	 * must return NULL--i.e., do not "fallback" to task or system default
 	 * policy.
+	 * (get_policy() 操作必须为任何在 (vma, addr) 处被标记为 MPOL_SHARED 的策略增加引用计数（调用 mpol_get()）。
+	 * 位于 mm/mempolicy.c 中的共享策略基础设施会自动处理此操作。
+	 * 如果该处的策略未被标记为 MPOL_SHARED，则 get_policy() 绝不能增加引用计数。
+	 * VMA 策略受 mmap_lock 保护。如果在该地址处不存在（共享或 VMA）内存策略，
+	 * get_policy() 操作必须返回 NULL——也就是说，不要“回退”（fallback）到任务或系统的默认策略。)
 	 */
 	struct mempolicy *(*get_policy)(struct vm_area_struct *vma,
 					unsigned long addr);
@@ -1171,11 +1182,18 @@ static inline void put_page(struct page *page)
 {
 	page = compound_head(page);
 
-	/*
+	/**
 	 * For devmap managed pages we need to catch refcount transition from
 	 * 2 to 1, when refcount reach one it means the page is free and we
 	 * need to inform the device driver through callback. See
 	 * include/linux/memremap.h and HMM for details.
+	 * (对于由 devmap 管理的页面，我们需要捕获引用计数从 2 到 1 的转变。
+	 * 当引用计数达到 1 时，意味着该页面已空闲，我们需要通过回调函数通知设备驱动程序。
+	 * 具体细节请参阅 include/linux/memremap.h 和 HMM（异构内存管理）)
+	 * 
+	 * devmap managed pages 是一个专门术语，指的是由设备映射机制（device map）管理，并由设备驱动程序控制其生命周期的物理内存页
+	 * --- 这类页面通常属于内核中的 ZONE_DEVICE 区域，主要用于支持非传统的内存硬件，如 持久内存（Persistent Memory, NVDIMM）、GPU 显存 或 计算加速器内存
+	 *     普通的内存页（Normal Pages）是由内核的伙伴系统（Buddy System）完全自动管理的。但有些内存是属于外部设备的（比如插在 PCIe 槽上的 GPU 显存），内核需要一种方式来引用这些内存，同时又不能让内核像处理普通内存那样随便回收它们
 	 */
 	if (page_is_devmap_managed(page)) {
 		put_devmap_managed_page(page);
@@ -2099,18 +2117,19 @@ int __pte_alloc_kernel(pmd_t *pmd);
 
 #if defined(CONFIG_MMU)
 
+
 static inline p4d_t *p4d_alloc(struct mm_struct *mm, pgd_t *pgd,
-		unsigned long address)
+			       unsigned long address)
 {
 	return (unlikely(pgd_none(*pgd)) && __p4d_alloc(mm, pgd, address)) ?
-		NULL : p4d_offset(pgd, address);
+		       NULL : p4d_offset(pgd, address);
 }
 
 static inline pud_t *pud_alloc(struct mm_struct *mm, p4d_t *p4d,
-		unsigned long address)
+			       unsigned long address)
 {
 	return (unlikely(p4d_none(*p4d)) && __pud_alloc(mm, p4d, address)) ?
-		NULL : pud_offset(p4d, address);
+		       NULL : pud_offset(p4d, address);
 }
 
 static inline pmd_t *pmd_alloc(struct mm_struct *mm, pud_t *pud, unsigned long address)

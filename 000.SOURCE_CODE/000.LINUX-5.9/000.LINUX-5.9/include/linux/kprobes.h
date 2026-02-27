@@ -481,7 +481,14 @@ static inline bool is_kprobe_optinsn_slot(unsigned long addr)
 }
 #endif
 
-/* Returns true if kprobes handled the fault */
+/**
+ *  Returns true if kprobes handled the fault
+ *  (如果 kprobes 处理了该错误（fault），则返回 true)
+ * 
+ *   kprobes 是一种内核调试机制，它可以在特定的指令处插入探测点。
+ *   如果缺页异常是由 kprobes 探测点本身引起的（例如在执行探测钩子函数时发生的异常），
+ *   kprobes 机制会接管并尝试自己修复它。
+ *  */
 static nokprobe_inline bool kprobe_page_fault(struct pt_regs *regs,
 					      unsigned int trap)
 {

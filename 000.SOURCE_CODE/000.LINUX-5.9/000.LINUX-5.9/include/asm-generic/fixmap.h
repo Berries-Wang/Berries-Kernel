@@ -30,6 +30,8 @@
  * 'index to address' translation. If anyone tries to use the idx
  * directly without translation, we catch the bug with a NULL-deference
  * kernel oops. Illegal ranges of incoming indices are caught too.
+ * (索引到地址”的转换。如果有人试图不经过转换而直接使用索引（idx），
+ * 我们会通过“空指针解引用”（NULL-deference）内核崩溃（kernel oops）来捕获该错误。此外，传入索引的非法范围也会被拦截)
  */
 static __always_inline unsigned long fix_to_virt(const unsigned int idx)
 {
@@ -74,7 +76,14 @@ static inline unsigned long virt_to_fix(const unsigned long vaddr)
 	__set_fixmap(idx, 0, FIXMAP_PAGE_CLEAR)
 #endif
 
-/* Return a pointer with offset calculated */
+/**
+ *  Return a pointer with offset calculated 
+ *  (返回一个计算偏移量后的指针)
+ * 
+ * 怎么分析这几行代码:
+ *  - __set_fixmap(idx, phys, flags); 完成虚拟地址到物理地址的映射: 将虚拟地址发送给CPU,CPU能通过MMU访问到实际的物理地址 (因为基本页表项构建好了,只需要填充PTE即可)
+ *  - fix_to_virt(idx) + ((phys) & (PAGE_SIZE - 1));  计算物理地址对应的虚拟地址(固定映射区域)
+ * */
 #define __set_fixmap_offset(idx, phys, flags)				\
 ({									\
 	unsigned long ________addr;					\

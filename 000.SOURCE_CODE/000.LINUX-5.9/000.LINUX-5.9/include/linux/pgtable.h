@@ -124,9 +124,8 @@ static inline pud_t *pud_offset(p4d_t *p4d, unsigned long address)
 #endif
 
 /**
- * 从虚拟地址${address}计算pgd索引
- * 
- * @param pgd pgd页表基地址
+ * 从虚拟地址${address}计算pgd索引(页表项指针)
+ * @param pgd pgd页表基地址 , 参考: [001.UNIX-DOCS/000.内存管理/000.arm64-内核中的页表.md]
  * @param address 虚拟地址
  */
 static inline pgd_t *pgd_offset_pgd(pgd_t *pgd, unsigned long address)
@@ -134,8 +133,9 @@ static inline pgd_t *pgd_offset_pgd(pgd_t *pgd, unsigned long address)
 	return (pgd + pgd_index(address));
 };
 
-/*
+/**
  * a shortcut to get a pgd_t in a given mm
+ * (一个用于获取给定 mm（内存描述符）中 pgd_t（全局页目录项）的快捷方式)
  */
 #ifndef pgd_offset
 #define pgd_offset(mm, address)		pgd_offset_pgd((mm)->pgd, (address))

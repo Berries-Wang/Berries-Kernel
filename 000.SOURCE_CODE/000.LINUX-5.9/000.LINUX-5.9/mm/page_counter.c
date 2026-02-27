@@ -13,6 +13,9 @@
 #include <linux/bug.h>
 #include <asm/page.h>
 
+/**
+ * 
+ */
 static void propagate_protected_usage(struct page_counter *c,
 				      unsigned long usage)
 {
@@ -83,44 +86,57 @@ void page_counter_charge(struct page_counter *counter, unsigned long nr_pages)
 }
 
 /**
- * page_counter_try_charge - try to hierarchically charge pages
+ * page_counter_try_charge - try to hierarchically charge pages(尝试按层级对页面进行计费)
  * @counter: counter
  * @nr_pages: number of pages to charge
  * @fail: points first counter to hit its limit, if any
  *
  * Returns %true on success, or %false and @fail if the counter or one
  * of its ancestors has hit its configured limit.
+ * (如果成功则返回 %true；
+ * 如果该计数器或其任一父级（祖先）计数器已达到配置的限制，则返回 %false 并通过 @fail 返回超限的计数器。)
  */
 bool page_counter_try_charge(struct page_counter *counter,
-			     unsigned long nr_pages,
-			     struct page_counter **fail)
+			     unsigned long nr_pages, struct page_counter **fail)
 {
 	struct page_counter *c;
 
 	for (c = counter; c; c = c->parent) {
 		long new;
-		/*
+		/**
 		 * Charge speculatively to avoid an expensive CAS.  If
 		 * a bigger charge fails, it might falsely lock out a
 		 * racing smaller charge and send it into reclaim
 		 * early, but the error is limited to the difference
 		 * between the two sizes, which is less than 2M/4M in
 		 * case of a THP locking out a regular page charge.
-		 *
+		 * (采用投机性计费（Speculative Charging）以避免昂贵的 CAS（比较并交换）指令开销。
+		 * 如果一次较大的计费请求失败，它可能会错误地锁定正在竞争的较小计费请求，
+		 * 并使其过早进入内存回收流程。但这种误差仅限于两种分配大小之间的差值；
+		 * 例如在透明巨页（THP）锁定常规页面计费的情况下，该差值小于 2MB 或 4MB)
+		 *   > 投机性计费 (Speculative Charging): 在高并发场景下，多个 CPU 可能同时修改同一个计数器。与其频繁使用昂贵的原子锁指令（如 CAS），内核可以先“乐观地”预扣一部分额度。
+		 * 
+		 * page_counter 机制如何利用原子操作和**内存屏障（Memory Barrier）**来保证在多核并发场景下计数与限额检查的一致性:
 		 * The atomic_long_add_return() implies a full memory
 		 * barrier between incrementing the count and reading
 		 * the limit.  When racing with page_counter_limit(),
 		 * we either see the new limit or the setter sees the
 		 * counter has changed and retries.
+		 * (atomic_long_add_return() 隐含了在增加计数与读取限额（limit）之间存在一个全内存屏障（Full Memory Barrier）。当与 page_counter_limit() 发生竞态时，
+		 * 要么我们能看到新的限额，要么限额设置者能看到计数器已发生变化并进行重试。)
 		 */
 		new = atomic_long_add_return(nr_pages, &c->usage);
+		// cgroup的校验吗? memory.max? 应该是的
 		if (new > c->max) {
+			// 既然超限了，这次分配就是非法或不被允许的，所以要把刚才加上的 nr_pages 减回去，恢复现场
 			atomic_long_sub(nr_pages, &c->usage);
+			// 
 			propagate_protected_usage(c, new);
-			/*
+			/**
 			 * This is racy, but we can live with some
 			 * inaccuracy in the failcnt which is only used
 			 * to report stats.
+			 * (这（种做法）存在竞态条件（Racy），但我们可以接受失败计数器（failcnt）中存在一定的误差，因为该计数器仅用于报告统计数据。)
 			 */
 			data_race(c->failcnt++);
 			*fail = c;

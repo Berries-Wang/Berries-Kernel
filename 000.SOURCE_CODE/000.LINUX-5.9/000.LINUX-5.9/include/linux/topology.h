@@ -163,7 +163,10 @@ static inline void set_cpu_numa_mem(int cpu, int node)
 #else	/* !CONFIG_HAVE_MEMORYLESS_NODES */
 
 #ifndef numa_mem_id
-/* Returns the number of the nearest Node with memory */
+/**
+ *  Returns the number of the nearest Node with memory 
+ *  (返回拥有内存的最近节点的编号)
+ * */
 static inline int numa_mem_id(void)
 {
 	return numa_node_id();

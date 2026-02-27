@@ -204,6 +204,19 @@ static inline void forget_syscall(struct pt_regs *regs)
 #define compat_thumb_mode(regs) (0)
 #endif
 
+/**
+ * 通过PSTATE寄存器来判断异常是否发生在EL0 , Why?
+ *   - 在 ARM64 架构中，处理器的运行状态被记录在 PSTATE（Process State）中
+ *   - PSTATE 与 SPSR :
+ *      + 当发生异常（如系统调用、硬件中断）从用户态切换到内核态时，
+ *        硬件会自动将当前的处理器状态保存到 SPSR（Saved Program Status Register）寄存器中。
+ *        内核代码中的 regs->pstate 实际上就是镜像了硬件 SPSR 寄存器的值 , 依据? [001.UNIX-DOCS/009.异常/002.异常发生后的处理.md]>[006.REFS/learn_the_architecture_-_aarch64_exception_model_102412_0103_02_en.pdf]#'Figure 5-2: Saving and restoring processor state'
+ *        - SPSR ， 参考: [007.BOOKs/Arm® Architecture Reference Manual for A-profile architecture]#'C5.2.20 SPSR_EL1, Saved Program Status Register (EL1)'
+ * 
+ * pstate 参考:[007.BOOKs/Arm® Architecture Reference Manual for A-profile architecture]#D1.4 Process state, PSTATE
+ * 
+ * 这行代码，还是得参考 [007.BOOKs/Arm® Architecture Reference Manual for A-profile architecture]#'C5.2.20 SPSR_EL1, Saved Program Status Register (EL1)' 
+ */
 #define user_mode(regs)	\
 	(((regs)->pstate & PSR_MODE_MASK) == PSR_MODE_EL0t)
 

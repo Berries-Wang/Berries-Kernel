@@ -999,10 +999,11 @@ static void memcg_check_events(struct mem_cgroup *memcg, struct page *page)
 
 struct mem_cgroup *mem_cgroup_from_task(struct task_struct *p)
 {
-	/*
+	/**
 	 * mm_update_next_owner() may clear mm->owner to NULL
 	 * if it races with swapoff, page migration, etc.
 	 * So this can be called with p == NULL.
+	 * 由于 mm_update_next_owner() 在与 swapoff（关闭交换分区）、页面迁移（page migration）等操作竞争时，可能会将 mm->owner 清写为 NULL。因此，调用此函数时传入的任务指针 p 可能是 NULL
 	 */
 	if (unlikely(!p))
 		return NULL;
@@ -2628,6 +2629,9 @@ out:
 	css_put(&memcg->css);
 }
 
+/**
+ * 
+ */
 static int try_charge(struct mem_cgroup *memcg, gfp_t gfp_mask,
 		      unsigned int nr_pages)
 {
@@ -2641,18 +2645,22 @@ static int try_charge(struct mem_cgroup *memcg, gfp_t gfp_mask,
 	bool drained = false;
 	unsigned long pflags;
 
-	if (mem_cgroup_is_root(memcg))
+	if (mem_cgroup_is_root(memcg)) {
 		return 0;
+	}
 retry:
-	if (consume_stock(memcg, nr_pages))
+	if (consume_stock(memcg, nr_pages)) {
 		return 0;
+	}
 
 	if (!do_memsw_account() ||
 	    page_counter_try_charge(&memcg->memsw, batch, &counter)) {
-		if (page_counter_try_charge(&memcg->memory, batch, &counter))
+		if (page_counter_try_charge(&memcg->memory, batch, &counter)) {
 			goto done_restock;
-		if (do_memsw_account())
+		}
+		if (do_memsw_account()) {
 			page_counter_uncharge(&memcg->memsw, batch);
+		}
 		mem_over_limit = mem_cgroup_from_counter(counter, memory);
 	} else {
 		mem_over_limit = mem_cgroup_from_counter(counter, memsw);
@@ -2670,8 +2678,9 @@ retry:
 	 * put the burden of reclaim on regular allocation requests
 	 * and let these go through as privileged allocations.
 	 */
-	if (gfp_mask & __GFP_ATOMIC)
+	if (gfp_mask & __GFP_ATOMIC) {
 		goto force;
+	}
 
 	/*
 	 * Unlike in global OOM situations, memcg is not in a physical
@@ -2679,8 +2688,9 @@ retry:
 	 * bypass the last charges so that they can exit quickly and
 	 * free their memory.
 	 */
-	if (unlikely(should_force_charge()))
+	if (unlikely(should_force_charge())) {
 		goto force;
+	}
 
 	/*
 	 * Prevent unbounded recursion when reclaim operations need to
@@ -2688,14 +2698,17 @@ retry:
 	 * but we prefer facilitating memory reclaim and getting back
 	 * under the limit over triggering OOM kills in these cases.
 	 */
-	if (unlikely(current->flags & PF_MEMALLOC))
+	if (unlikely(current->flags & PF_MEMALLOC)) {
 		goto force;
+	}
 
-	if (unlikely(task_in_memcg_oom(current)))
+	if (unlikely(task_in_memcg_oom(current))) {
 		goto nomem;
+	}
 
-	if (!gfpflags_allow_blocking(gfp_mask))
+	if (!gfpflags_allow_blocking(gfp_mask)) {
 		goto nomem;
+	}
 
 	memcg_memory_event(mem_over_limit, MEMCG_MAX);
 
@@ -2704,8 +2717,9 @@ retry:
 						    gfp_mask, may_swap);
 	psi_memstall_leave(&pflags);
 
-	if (mem_cgroup_margin(mem_over_limit) >= nr_pages)
+	if (mem_cgroup_margin(mem_over_limit) >= nr_pages) {
 		goto retry;
+	}
 
 	if (!drained) {
 		drain_all_stock(mem_over_limit);
@@ -2713,8 +2727,9 @@ retry:
 		goto retry;
 	}
 
-	if (gfp_mask & __GFP_NORETRY)
+	if (gfp_mask & __GFP_NORETRY) {
 		goto nomem;
+	}
 	/*
 	 * Even though the limit is exceeded at this point, reclaim
 	 * may have been able to free some pages.  Retry the charge
@@ -2724,26 +2739,32 @@ retry:
 	 * unlikely to succeed so close to the limit, and we fall back
 	 * to regular pages anyway in case of failure.
 	 */
-	if (nr_reclaimed && nr_pages <= (1 << PAGE_ALLOC_COSTLY_ORDER))
+	if (nr_reclaimed && nr_pages <= (1 << PAGE_ALLOC_COSTLY_ORDER)) {
 		goto retry;
+	}
 	/*
 	 * At task move, charge accounts can be doubly counted. So, it's
 	 * better to wait until the end of task_move if something is going on.
 	 */
-	if (mem_cgroup_wait_acct_move(mem_over_limit))
+	if (mem_cgroup_wait_acct_move(mem_over_limit)) {
 		goto retry;
+	}
 
-	if (nr_retries--)
+	if (nr_retries--) {
 		goto retry;
+	}
 
-	if (gfp_mask & __GFP_RETRY_MAYFAIL)
+	if (gfp_mask & __GFP_RETRY_MAYFAIL) {
 		goto nomem;
+	}
 
-	if (gfp_mask & __GFP_NOFAIL)
+	if (gfp_mask & __GFP_NOFAIL) {
 		goto force;
+	}
 
-	if (fatal_signal_pending(current))
+	if (fatal_signal_pending(current)) {
 		goto force;
+	}
 
 	/*
 	 * keep retrying as long as the memcg oom killer is able to make
@@ -2751,7 +2772,7 @@ retry:
 	 * couldn't make any progress.
 	 */
 	oom_status = mem_cgroup_oom(mem_over_limit, gfp_mask,
-		       get_order(nr_pages * PAGE_SIZE));
+				    get_order(nr_pages * PAGE_SIZE));
 	switch (oom_status) {
 	case OOM_SUCCESS:
 		nr_retries = MAX_RECLAIM_RETRIES;
@@ -2762,8 +2783,9 @@ retry:
 		goto nomem;
 	}
 nomem:
-	if (!(gfp_mask & __GFP_NOFAIL))
+	if (!(gfp_mask & __GFP_NOFAIL)) {
 		return -ENOMEM;
+	}
 force:
 	/*
 	 * The allocation either can't fail or will lead to more memory
@@ -2771,14 +2793,16 @@ force:
 	 * temporarily by force charging it.
 	 */
 	page_counter_charge(&memcg->memory, nr_pages);
-	if (do_memsw_account())
+	if (do_memsw_account()) {
 		page_counter_charge(&memcg->memsw, nr_pages);
+	}
 
 	return 0;
 
 done_restock:
-	if (batch > nr_pages)
+	if (batch > nr_pages) {
 		refill_stock(memcg, batch - nr_pages);
+	}
 
 	/*
 	 * If the hierarchy is above the normal consumption range, schedule
@@ -2793,9 +2817,9 @@ done_restock:
 		bool mem_high, swap_high;
 
 		mem_high = page_counter_read(&memcg->memory) >
-			READ_ONCE(memcg->memory.high);
+			   READ_ONCE(memcg->memory.high);
 		swap_high = page_counter_read(&memcg->swap) >
-			READ_ONCE(memcg->swap.high);
+			    READ_ONCE(memcg->swap.high);
 
 		/* Don't bother a random interrupted task */
 		if (in_interrupt()) {
@@ -6670,54 +6694,73 @@ void mem_cgroup_calculate_protection(struct mem_cgroup *root,
 }
 
 /**
+ * 
+ * 
+ * 
+ * 
  * mem_cgroup_charge - charge a newly allocated page to a cgroup
+ * (将新分配的内存页计入（Charge）一个 cgroup)
  * @page: page to charge
  * @mm: mm context of the victim
  * @gfp_mask: reclaim mode
  *
  * Try to charge @page to the memcg that @mm belongs to, reclaiming
  * pages according to @gfp_mask if necessary.
- *
+ * (尝试将页面 @page 计入 @mm 所属的内存控制组（memcg）；如果有必要，则根据 @gfp_mask（分配标志）回收页面。)
+ * 
  * Returns 0 on success. Otherwise, an error code is returned.
  */
 int mem_cgroup_charge(struct page *page, struct mm_struct *mm, gfp_t gfp_mask)
 {
 	unsigned int nr_pages = thp_nr_pages(page);
+	// cgroup 相关
 	struct mem_cgroup *memcg = NULL;
 	int ret = 0;
 
-	if (mem_cgroup_disabled())
+	if (mem_cgroup_disabled()) {
 		goto out;
+	}
 
 	if (PageSwapCache(page)) {
-		swp_entry_t ent = { .val = page_private(page), };
+		swp_entry_t ent = {
+			.val = page_private(page),
+		};
 		unsigned short id;
 
-		/*
+		/**
 		 * Every swap fault against a single page tries to charge the
 		 * page, bail as early as possible.  shmem_unuse() encounters
 		 * already charged pages, too.  page->mem_cgroup is protected
 		 * by the page lock, which serializes swap cache removal, which
 		 * in turn serializes uncharging.
+		 * (针对单个页面的每一次交换缺页异常（Swap Fault）都会尝试对该页进行计费，
+		 * 因此应尽早退出（以减少开销）。shmem_unuse() 也会遇到已经计费过的页面。
+		 * page->mem_cgroup 受到页面锁（Page Lock）的保护，
+		 * 该锁使交换缓存（Swap Cache）的移除操作串行化，
+		 * 进而也使解除计费（Uncharging）操作实现了串行化。)
 		 */
 		VM_BUG_ON_PAGE(!PageLocked(page), page);
-		if (compound_head(page)->mem_cgroup)
+		if (compound_head(page)->mem_cgroup) {
 			goto out;
+		}
 
 		id = lookup_swap_cgroup_id(ent);
 		rcu_read_lock();
 		memcg = mem_cgroup_from_id(id);
-		if (memcg && !css_tryget_online(&memcg->css))
+		if (memcg && !css_tryget_online(&memcg->css)) {
 			memcg = NULL;
+		}
 		rcu_read_unlock();
 	}
 
-	if (!memcg)
+	if (!memcg) {
 		memcg = get_mem_cgroup_from_mm(mm);
+	}
 
 	ret = try_charge(memcg, gfp_mask, nr_pages);
-	if (ret)
+	if (ret) {
 		goto out_put;
+	}
 
 	css_get(&memcg->css);
 	commit_charge(page, memcg);

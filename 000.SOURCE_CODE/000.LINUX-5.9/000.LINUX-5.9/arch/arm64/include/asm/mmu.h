@@ -26,10 +26,12 @@ typedef struct {
 	unsigned long	flags;
 } mm_context_t;
 
-/*
+/**
  * This macro is only used by the TLBI and low-level switch_mm() code,
  * neither of which can race with an ASID change. We therefore don't
  * need to reload the counter using atomic64_read().
+ * (该宏仅被 TLBI（TLB 无效化）和底层 switch_mm() 代码调用，这两者都不会与 ASID 的变更产生竞态。
+ * 因此，我们不需要使用 atomic64_read() 来重新加载计数器)
  */
 #define ASID(mm)	((mm)->context.id.counter & 0xffff)
 

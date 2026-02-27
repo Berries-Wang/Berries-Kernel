@@ -1,40 +1,15 @@
 {
-    "clang-format.executable": "/usr/bin/clang-format",
-    "files.associations": {
-        "*.tbl": "c",
-        "array": "c",
-        "deque": "c",
-        "list": "c",
-        "string": "c",
-        "unordered_map": "c",
-        "vector": "c",
-        "initializer_list": "c",
-        "string_view": "c",
-        "build_bug.h": "c",
-        "stringify.h": "c",
-        "barrier.h": "c",
-        "mcs_spinlock.h": "c",
-        "mutex": "c",
-        "cache.h": "c",
-        "byteorder.h": "c",
-        "atomic": "c",
-        "006.print_bits.h": "c",
-        "compiler.h": "c",
-        "atomic_ll_sc.h": "c",
-        "stdarg.h": "c",
-        "kasan-checks.h": "c",
-        "printk.h": "c",
-        "sstream": "c",
-        "tlbflush.h": "c",
-        "tlb.h": "c",
-        "bitset": "c",
-        "utility": "c",
-        "ratio": "c",
-        "random": "c",
-        "climits": "c",
-        "fixmap.h": "c",
-        "chrono": "c",
-        "asm_mem_layout_wei.h": "c",
-        "memory.h": "c"
-    }
+  "clang-format.executable": "clang-format", // 应该是会根据宿主机OS,从而选择 target.osx 或 target.linux的值
+  // 针对 macOS 系统的配置
+  "target.osx": {
+    "clang-format.executable": "/opt/homebrew/bin/clang-format"
+  },
+  // 针对 Linux 系统的配置
+  "target.linux": {
+    "clang-format.executable": "/usr/bin/clang-format"
+  },
+  "files.associations": {
+    "*.h": "c",
+    "*.c": "c"
+  }
 }

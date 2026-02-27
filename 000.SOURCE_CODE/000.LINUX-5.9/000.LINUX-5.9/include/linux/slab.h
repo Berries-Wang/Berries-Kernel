@@ -486,12 +486,15 @@ static __always_inline void *kmalloc_large(size_t size, gfp_t flags)
 }
 
 /**
+ * 内核中常用的kmalloc()函数的核心实现是slab机制。类似于伙伴系统机制，在内存块中按照2order字节来创建多个slab描述符，如16字节、32字节、64字节、128字节等大小，系统会分别创建kmalloc-16、kmalloc-32、kmalloc-64等slab描述符，在系统启动时这在create_kmalloc_caches()函数中完成
+ * 
  * kmalloc - allocate memory
  * @size: how many bytes of memory are required.
  * @flags: the type of memory to allocate.
  *
  * kmalloc is the normal method of allocating memory
  * for objects smaller than page size in the kernel.
+ * (kmalloc 是内核中为小于页大小（page size）的对象分配内存的常规方法)
  *
  * The allocated object address is aligned to at least ARCH_KMALLOC_MINALIGN
  * bytes. For @size of power of two bytes, the alignment is also guaranteed
@@ -550,15 +553,15 @@ static __always_inline void *kmalloc(size_t size, gfp_t flags)
 		if (size > KMALLOC_MAX_CACHE_SIZE)
 			return kmalloc_large(size, flags);
 #ifndef CONFIG_SLOB
-                // kmalloc_index 可以用于寻找使用的是哪个slab缓冲区
+		// kmalloc_index 可以用于寻找使用的是哪个slab缓冲区
 		index = kmalloc_index(size);
 
 		if (!index)
 			return ZERO_SIZE_PTR;
 
 		return kmem_cache_alloc_trace(
-				kmalloc_caches[kmalloc_type(flags)][index],
-				flags, size);
+			kmalloc_caches[kmalloc_type(flags)][index], flags,
+			size);
 #endif
 	}
 	return __kmalloc(size, flags);

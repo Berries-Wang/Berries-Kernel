@@ -1,0 +1,91 @@
+{
+  "configurations": [
+    {
+      "name": "Linux-arm64",
+      "defines": [
+        "__KERNEL__",
+        "CONFIG_ARM64",
+        "CONFIG_MEMCG",
+        "CONFIG_VM_EVENT_COUNTERS",
+        "CONFIG_MMU",
+        "CONFIG_CGROUPS",
+        "CONFIG_CPUSETS",
+        "CONFIG_CGROUP_SCHED",
+        "CONFIG_CGROUP_CPUACCT",
+        "CONFIG_BLK_CGROUP",
+        "CONFIG_CGROUP_DEVICE",
+        "CONFIG_CGROUP_FREEZER",
+        "CONFIG_CGROUP_NET_CLASSID",
+        "CONFIG_CGROUP_PERF",
+        "CONFIG_CGROUP_NET_PRIO",
+        "CONFIG_CGROUP_HUGETLB",
+        "CONFIG_CGROUP_PIDS",
+        "CONFIG_NUMA", // numactl --hardware 来判断是否开启
+        "CONFIG_CGROUP_RDMA",
+        "CONFIG_RANDOMIZE_BASE",
+        "CONFIG_RANDOMIZE_BASE",
+        "CONFIG_HAVE_ALIGNED_STRUCT_PAGE",
+        "CONFIG_ZONE_DMA",
+        "CONFIG_HIGHMEM",
+        "CONFIG_ZONE_DMA32",
+        "CONFIG_CMA",
+        "CONFIG_COMPACTION", /*内存规整（Memory Compaction）*/ 
+      ],
+      "intelliSenseMode": "linux-gcc-arm64", // 模拟在 Linux 下使用 GCC 开发/分析 64 位 ARM 程序
+      "compilerPath": "/home/wei/apps/001.Arm-ToolChain/arm-gnu-toolchain-14.3.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-gcc",
+      "includePath": [
+        "${workspaceFolder}/**/**/arch/arm64/include",
+        "${workspaceFolder}/**/**/arch/arm64/include/generated",
+        "${workspaceFolder}/**/**/include",
+        "${workspaceFolder}/**/**/include/uapi",
+        "${workspaceFolder}/**/**/arch/arm64/include/uapi",
+        "${workspaceFolder}/**/**/kernel/locking",
+        "${workspaceFolder}/**/**/include/linux"
+      ]
+    },
+    {
+      "name": "Mac-arm64",
+      "defines": [
+        "__KERNEL__",
+        "CONFIG_ARM64",
+        "CONFIG_MEMCG",
+        "CONFIG_VM_EVENT_COUNTERS",
+        "CONFIG_MMU",
+        "CONFIG_CGROUPS",
+        "CONFIG_CPUSETS",
+        "CONFIG_CGROUP_SCHED",
+        "CONFIG_CGROUP_CPUACCT",
+        "CONFIG_BLK_CGROUP",
+        "CONFIG_CGROUP_DEVICE",
+        "CONFIG_CGROUP_FREEZER",
+        "CONFIG_CGROUP_NET_CLASSID",
+        "CONFIG_CGROUP_PERF",
+        "CONFIG_CGROUP_NET_PRIO",
+        "CONFIG_CGROUP_HUGETLB",
+        "CONFIG_CGROUP_PIDS",
+        "CONFIG_NUMA", // numactl --hardware 来判断是否开启
+        "CONFIG_CGROUP_RDMA",
+        "CONFIG_RANDOMIZE_BASE",
+        "CONFIG_HAVE_ALIGNED_STRUCT_PAGE",
+        "CONFIG_ZONE_DMA",
+        "CONFIG_HIGHMEM",
+        "CONFIG_ZONE_DMA32",
+        "CONFIG_CMA",
+        "CONFIG_COMPACTION", /*内存规整（Memory Compaction）*/ 
+      ],
+      "intelliSenseMode": "macos-gcc-arm64", // 在 macOS 下使用 GCC 开发或分析 64 位 ARM 程序
+      "compilerPath": "/opt/softwares/arm64-arm-toolchain/arm-gnu-toolchain-14.3.rel1-darwin-arm64-aarch64-none-elf/bin/aarch64-none-elf-gcc",
+      "includePath": [
+        "${workspaceFolder}/**/**/arch/arm64/include",
+        "${workspaceFolder}/**/**/arch/arm64/include/generated",
+        "${workspaceFolder}/**/**/include",
+        "${workspaceFolder}/**/**/include/uapi",
+        "${workspaceFolder}/**/**/arch/arm64/include/uapi",
+        "${workspaceFolder}/**/**//kernel/locking",
+        "${workspaceFolder}/**/**/include/linux",
+        "${workspaceFolder}/000.SOURCE_CODE/002.GLIBC/000.GLIBC-2.40/**"
+      ]
+    }
+  ],
+  "version": 4
+}

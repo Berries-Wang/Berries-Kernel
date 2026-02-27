@@ -1684,6 +1684,10 @@ static void slabs_destroy(struct kmem_cache *cachep, struct list_head *list)
  *   2)一个slab分配器中能包含多少个slab对象？
  *   3)一个slab分配器中包含多少个着色区？
  * 
+ * <pre>
+ *    这时候，还没有实际分配物理内存页吧!
+ * </pre>
+ * 
  * calculate_slab_order - calculate size (page order) of slabs
  * @cachep: pointer to the cache that is being created
  * @size: size of objects to be created in this cache.
@@ -1730,6 +1734,9 @@ static size_t calculate_slab_order(struct kmem_cache *cachep,
 			struct kmem_cache *freelist_cache;
 			size_t freelist_size;
 
+			/**
+			 * sizeof(freelist_idx_t) 何解?
+			 */
 			freelist_size = num * sizeof(freelist_idx_t);
 			freelist_cache = kmalloc_slab(freelist_size, 0u);
 			if (!freelist_cache)
@@ -1770,8 +1777,9 @@ static size_t calculate_slab_order(struct kmem_cache *cachep,
 		if (gfporder >= slab_max_order)
 			break;
 
-		/*
+		/**
 		 * Acceptable internal fragmentation?
+		 * (允许范围内的内部碎片)
 		 */
 		if (left_over * 8 <= (PAGE_SIZE << gfporder))
 			break;
@@ -1872,12 +1880,15 @@ __kmem_cache_alias(const char *name, unsigned int size, unsigned int align,
 /**
  * OBJFREELIST_SLAB模式下的slab分配器布局
  * #图4.8　OBJFREELIST_SLAB模式下的slab分配器布局
+ * 
+ * @param size 对象大小，包含对齐字节和调试等元数据的大小
  */
-static bool set_objfreelist_slab_cache(struct kmem_cache *cachep,
-			size_t size, slab_flags_t flags)
+static bool set_objfreelist_slab_cache(struct kmem_cache *cachep, size_t size,
+				       slab_flags_t flags)
 {
 	size_t left;
 
+	// cachep->num: 一个slab分配器中最多可以有多少个对象
 	cachep->num = 0;
 
 	/**
@@ -1892,23 +1903,30 @@ static bool set_objfreelist_slab_cache(struct kmem_cache *cachep,
 	 * 那这个自动初始化就是自动选择slab分配器布局模式吗?[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#4.2.3　slab分配器的内存布局
 	 * 
 	 */
-	if (unlikely(slab_want_init_on_free(cachep)))
+	if (unlikely(slab_want_init_on_free(cachep))) {
 		return false;
+	}
 
-	if (cachep->ctor || flags & SLAB_TYPESAFE_BY_RCU)
+	if (cachep->ctor || flags & SLAB_TYPESAFE_BY_RCU) {
 		return false;
+	}
 
+	/**
+	 * 通过函数注释，left是分配后，slab中剩余的字节数
+	*/
 	left = calculate_slab_order(cachep, size,
 				    flags | CFLGS_OBJFREELIST_SLAB);
-	if (!cachep->num)
+	if (!cachep->num) {
 		return false;
+	}
 
 	/**
 	 * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图4.8　OBJFREELIST_SLAB模式下的slab分配器布局
 	 * 这个就是上图中的内容： 是否可以将空闲对象索引(freelist)存储在 slab 对象内部
 	 */
-	if (cachep->num * sizeof(freelist_idx_t) > cachep->object_size)
+	if (cachep->num * sizeof(freelist_idx_t) > cachep->object_size) {
 		return false;
+	}
 
 	cachep->colour = left / cachep->colour_off;
 
@@ -1979,7 +1997,10 @@ static bool set_on_slab_cache(struct kmem_cache *cachep,
  * Returns a ptr to the cache on success, NULL on failure.
  * Cannot be called within a int, but can be interrupted.
  * The @ctor is run when new pages are allocated by the cache.
- *
+ * (这句代码注释有意思了! 'The @ctor is run when new pages are allocated by the cache.'
+ * , 说明ctor函数的功能)
+ * 
+ * 
  * The flags are
  *
  * %SLAB_POISON - Poison the slab with a known test pattern (a5a5a5a5)
@@ -2002,6 +2023,9 @@ int __kmem_cache_create(struct kmem_cache *cachep, slab_flags_t flags)
 	size_t ralign = BYTES_PER_WORD;
 	gfp_t gfp;
 	int err;
+	/**
+	 * 对象的大小： 包含对齐字节和调试等元数据的大小
+	 */
 	unsigned int size = cachep->size;
 
 #if DEBUG
@@ -2118,6 +2142,9 @@ int __kmem_cache_create(struct kmem_cache *cachep, slab_flags_t flags)
      *   正常模式，传统的布局模式, 见 [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图4.10　正常模式下的slab分配器布局
 	 * 
 	 * set_off_slab_cache()函数以及set_on_slab_cache()函数等最终都会调用calculate_slab_order()函数
+	 * <pre>
+	 *   内部调用 calculate_slab_order 函数，会计算该slab缓存需要多少个内存页!!!
+	 * </pre>
      */
 	if (set_objfreelist_slab_cache(cachep, size, flags)) {
 		flags |= CFLGS_OBJFREELIST_SLAB;
@@ -2932,23 +2959,38 @@ static noinline struct page *get_valid_first_slab(struct kmem_cache_node *n,
 	return NULL;
 }
 
+/**
+ * 通过查看代码发现，
+ * 该函数主要功能还是判断slab中是否有足够的空闲内存提供分配
+ * 
+ * 
+ */
 static struct page *get_first_slab(struct kmem_cache_node *n, bool pfmemalloc)
 {
 	struct page *page;
 
 	assert_spin_locked(&n->list_lock);
+	/**
+	 * 先从部分满的队列,
+	 * 为什么返回的是 struct page* ? 因为里面使用了 'container_of'宏
+	 */
 	page = list_first_entry_or_null(&n->slabs_partial, struct page,
 					slab_list);
 	if (!page) {
 		n->free_touched = 1;
+		/**
+		 * 查询空闲队列
+		 */
 		page = list_first_entry_or_null(&n->slabs_free, struct page,
 						slab_list);
-		if (page)
+		if (page) {
 			n->free_slabs--;
+		}
 	}
 
-	if (sk_memalloc_socks())
+	if (sk_memalloc_socks()) {
 		page = get_valid_first_slab(n, page, pfmemalloc);
+	}
 
 	return page;
 }
@@ -3030,20 +3072,32 @@ static void *cache_alloc_refill(struct kmem_cache *cachep, gfp_t flags)
 	ac = cpu_cache_get(cachep);
 	batchcount = ac->batchcount;
 	if (!ac->touched && batchcount > BATCHREFILL_LIMIT) {
-		/*
+		/**
 		 * If there was little recent activity on this cache, then
 		 * perform only a partial refill.  Otherwise we could generate
 		 * refill bouncing.
+		 * (如果该缓存近期活动较少，则仅执行部分填充；否则，可能会引发填充抖动（Refill Bouncing）)
+		 *    + 部分填充: Partial refill (部分填充): 不一次性填满整个缓存行或缓冲区，以节省带宽或资源
+		 *    + 填充抖动: “Bouncing” (抖动/反弹): 指缓存内容由于频繁的替换和重新填充，导致数据在缓存和主存（或不同层级）之间反复迁移
 		 */
 		batchcount = BATCHREFILL_LIMIT;
 	}
 	// 获取slab节点
 	n = get_node(cachep, node);
 
+	/**
+	 * 进入到此函数执行的前提就是 ac->avail为0
+	 */
 	BUG_ON(ac->avail > 0 || !n);
-	// shared： 共享对象缓冲池
+	/**
+	 * shared： 共享对象缓冲池
+	 */
 	shared = READ_ONCE(n->shared);
-	// 都没有空闲对象
+	/**
+	 *  都没有空闲对象：
+	 *     - 共享对象缓冲池
+	 *     - CPU 绑定缓冲池(本地对象缓冲池)
+	 */
 	if (!n->free_objects && (!shared || !shared->avail)) {
 		goto direct_grow;
 	}
@@ -3066,6 +3120,9 @@ static void *cache_alloc_refill(struct kmem_cache *cachep, gfp_t flags)
 		 * 注意，一个slab分配器由n个连续物理页面组成，因此这里返回slab分配器中第一个物理页面的page数据结构
 		 *  */
 		page = get_first_slab(n, false);
+		/**
+		 * 没有足够的内存进行分配
+		 */
 		if (!page) {
 			goto must_grow;
 		}
@@ -3187,7 +3244,10 @@ static inline void *____cache_alloc(struct kmem_cache *cachep, gfp_t flags)
 
 	STATS_INC_ALLOCMISS(cachep);
 
-	// 
+	/**
+	 * 执行到此处，说明:
+	 * - ac->avail 为 0,
+	 */
 	objp = cache_alloc_refill(cachep, flags);
 	/*
 	 * the 'ac' may be updated by cache_alloc_refill(),
@@ -3200,6 +3260,10 @@ out:
 	 * To avoid a false negative, if an object that is in one of the
 	 * per-CPU caches is leaked, we need to make sure kmemleak doesn't
 	 * treat the array pointers as a reference to the object.
+	 * (为了避免误报（false negative），如果某个存在于 per-CPU 缓存中的对象发生了泄漏，
+	 * 我们需要确保 kmemleak 不会将数组指针视为对该对象的引用。)
+	 * 
+	 * kmemleak: 内核泄露检测工具
 	 */
 	if (objp) {
 		kmemleak_erase(&ac->entry[ac->avail]);
@@ -3437,8 +3501,8 @@ __do_cache_alloc(struct kmem_cache *cachep, gfp_t flags)
 /**
  * 分配slab缓存对象 (这个缓存对象的类型是创建slab描述符时的类型)
  */
-static __always_inline void *
-slab_alloc(struct kmem_cache *cachep, gfp_t flags, unsigned long caller)
+static __always_inline void *slab_alloc(struct kmem_cache *cachep, gfp_t flags,
+					unsigned long caller)
 {
 	unsigned long save_flags;
 	void *objp;

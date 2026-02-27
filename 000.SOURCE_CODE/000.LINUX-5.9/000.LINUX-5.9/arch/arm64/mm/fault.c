@@ -40,19 +40,30 @@
 #include <asm/traps.h>
 
 /**
- * fn: 定义一个函数指针，用于修复异常状态的函数指针
- * sig: 处理失败时Linux内核要发送的信号类型
- * code: 处理失败时Linux内核要发送的信号编码
- * name：这条异常状态的名称。
+ * 对异常状态处理进行抽象
  */
 struct fault_info {
-	int	(*fn)(unsigned long addr, unsigned int esr,
-		      struct pt_regs *regs);
+	/**
+	 * fn: 定义一个函数指针，用于修复异常状态的函数指针
+	 */
+	int	(*fn)(unsigned long addr, unsigned int esr,struct pt_regs *regs);
+	/**
+	 * sig: 处理失败时Linux内核要发送的信号类型
+	 */
 	int	sig;
+	/**
+	 * code: 处理失败时Linux内核要发送的信号编码
+	 */
 	int	code;
+	/**
+	 * name：这条异常状态的名称。
+	 */
 	const char *name;
 };
 
+/**
+ * 异常状态表（fault_info[]数组） , 下面有个初始化的代码.
+ */
 static const struct fault_info fault_info[];
 static struct fault_info debug_fault_info[];
 
@@ -287,6 +298,10 @@ static bool __kprobes is_spurious_el1_translation_fault(unsigned long addr,
 	return (dfsc & ESR_ELx_FSC_TYPE) != ESR_ELx_FSC_FAULT;
 }
 
+/**
+ * 处理内核模式下发生的致命内存访问错误（Kernel Fault）
+ * 
+ */
 static void die_kernel_fault(const char *msg, unsigned long addr,
 			     unsigned int esr, struct pt_regs *regs)
 {
@@ -300,6 +315,9 @@ static void die_kernel_fault(const char *msg, unsigned long addr,
 	show_pte(addr);
 	die("Oops", regs, esr);
 	bust_spinlocks(0);
+	/**
+	 * 退出当前进程，如果进程是核心系统进程，那么系统会崩溃
+	 */
 	do_exit(SIGKILL);
 }
 
@@ -441,8 +459,19 @@ static vm_fault_t __do_page_fault(struct mm_struct *mm, unsigned long addr,
 	return handle_mm_fault(vma, addr & PAGE_MASK, mm_flags, regs);
 }
 
+/**
+ * ESR: Exception Syndrome Register (异常综合寄存器)
+ *   in [007.BOOKs/Arm® Architecture Reference Manual for A-profile architecture]#D24.2.40 ESR_EL1, Exception Syndrome Register (EL1)
+ *   Purpose
+ *      Holds syndrome information for an exception taken to EL1.(保存跳转至 EL1 的异常的综合信息)
+ * 
+ * 什么时候写入值到ESR,写入什么值?
+ *   答案在:  [001.UNIX-DOCS/009.异常/002.异常发生后的处理.md]>[006.REFS/learn_the_architecture_-_aarch64_exception_model_102412_0103_02_en.pdf]#'5.1 Taking an exception'
+ *           -- 对应的在线文档: https://developer.arm.com/documentation/102412/0103/Handling-exceptions/Taking-an-exception?lang=en
+ */
 static bool is_el0_instruction_abort(unsigned int esr)
 {
+	// 具体代码得参考手册: [007.BOOKs/Arm® Architecture Reference Manual for A-profile architecture]#D24.2.40 ESR_EL1, Exception Syndrome Register (EL1)##'Field descriptions' 
 	return ESR_ELx_EC(esr) == ESR_ELx_EC_IABT_LOW;
 }
 
@@ -466,8 +495,9 @@ static bool is_write_abort(unsigned int esr)
  * 缺页异常修复
  * 
  * @param addr 异常发生时的虚拟地址，由FSR提供
- * @param esr 异常发生时的异常状态，由ESR提供
- * @param regs 异常发生时的pt_regs
+ * @param esr  异常发生时的异常状态，由ESR提供
+ * @param regs 异常发生时的pt_regs , 这应该是触发异常的进程当时的寄存器的值 
+ *             -- struct pt_regs *regs 记录的就是触发异常（Page Fault）那一瞬间，CPU 核心所有寄存器的状态快照
  */
 static int __kprobes do_page_fault(unsigned long addr, unsigned int esr,
 				   struct pt_regs *regs)
@@ -477,9 +507,13 @@ static int __kprobes do_page_fault(unsigned long addr, unsigned int esr,
 	vm_fault_t fault;
 	unsigned long vm_flags = VM_ACCESS_FLAGS;
 	unsigned int mm_flags = FAULT_FLAG_DEFAULT;
-
-	if (kprobe_page_fault(regs, esr))
+ 
+	/**
+	 * kprobe： 内核调试机制
+	 */
+	if (kprobe_page_fault(regs, esr)) {
 		return 0;
+	}
 
 	/**
 	 * 结合 [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#4.7.2　do_page_fault()函数 来学习
@@ -505,7 +539,12 @@ static int __kprobes do_page_fault(unsigned long addr, unsigned int esr,
 	}
 
 	/**
-	 * is_el0_instruction_abort()函数读取ESR的EC字段来判断异常是否为低异常等级的指令异常（ESR_ELx_EC_IABT_LOW）。
+	 * is_el0_instruction_abort()函数读取ESR的EC字段来判断异常是否为低异常等级的指令异常（ESR_ELx_EC_IABT_LOW）
+	 *   > 低异常等级(手册中的原文: lower Exception level),指的是在权限金字塔中(EL0,EL1,EL2,EL3)，比当前等级更低的等级
+	 *     - 怎么理解? 从当前等级的视角看：如果CPU正在EL1（内核态）执行代码，那么“较低异常等级”就是指EL0（用户态）
+	 * 
+	 *   >> 手册: [007.BOOKs/Arm® Architecture Reference Manual for A-profile architecture]
+	 * 
 	 * 若异常是EL0中的指令异常，说明这个进程地址空间是具有可执行权限的，因此把vm_flags设置为VM_EXEC
 	 */
 	if (is_el0_instruction_abort(esr)) {
@@ -520,7 +559,17 @@ static int __kprobes do_page_fault(unsigned long addr, unsigned int esr,
 		mm_flags |= FAULT_FLAG_WRITE;
 	}
 
-	// 特殊情况，见#4.7.2　do_page_fault()函数,暂记录
+	/**
+	 * 特殊情况，见#4.7.2　do_page_fault()函数,暂记录
+	 * 
+	 * ttbr0 是what? 参考: [007.BOOKs/Arm® Architecture Reference Manual for A-profile architecture]
+	 * EL0 ~ EL3 是what? 参考 [001.UNIX-DOCS/009.异常]
+	 * 
+	 * EL0: 用户态 , EL1:内核态 , EL2:Hypervisor EL3:secure monitor
+	 * 
+	 * 这行代码确实是在检测“内核态在未经允许的情况下访问了用户态的地址空间
+	 * 即: 当前内核（EL1）正试图访问一个属于用户态（TTBR0）的地址，但它没有获得允许，这可能是一个 Bug 或者攻击
+	 */
 	if (is_ttbr0_addr(addr) && is_el1_permission_fault(addr, esr, regs)) {
 		/* regs->orig_addr_limit may be 0 if we entered from EL0 */
 		if (regs->orig_addr_limit == KERNEL_DS)
@@ -540,10 +589,21 @@ static int __kprobes do_page_fault(unsigned long addr, unsigned int esr,
 
 	perf_sw_event(PERF_COUNT_SW_PAGE_FAULTS, 1, regs, addr);
 
-	/*
+	/**
+	 * 
+	 * mm->mmap_sem锁被别人占用时要区分两种情况：
+	 *    一种是发生在内核空间
+	 *    另外一种是发生在用户空间
+	 * 发生在用户空间的情况下可以调用down_read()来睡眠，以等待锁持有者释放该锁。
+	 * 内核一般不会随意访问用户地址空间，只有少数几个函数会代表内核访问用户地址空间，
+	 *     如copy_to_user()，为了防止访问错误的地址空间，为每处代码设置了出错修正地址（见异常表）
+	 * mm semaphore(mmap_sem) 和 mmap_lock 的关系: 它们是同一个东西，只是不同时期的称呼。
+	 * 
 	 * As per x86, we may deadlock here. However, since the kernel only
 	 * validly references user space from well defined areas of the code,
 	 * we can bug out early if this is from code which shouldn't.
+	 * (参照 x86 架构的情况，此处可能会发生死锁。然而，由于内核只允许在特定的代码区域引用用户空间，
+	 * 因此如果错误发生在这些规定区域之外，我们可以尽早报错（Bug out）以规避风险)
 	 */
 	if (!mmap_read_trylock(mm)) {
 		if (!user_mode(regs) && !search_exception_tables(regs->pc))
@@ -564,6 +624,7 @@ retry:
 #endif
 	}
 
+	// 进一步处理
 	fault = __do_page_fault(mm, addr, mm_flags, vm_flags, regs);
 
 	/* Quick path to respond to signals */
@@ -588,18 +649,23 @@ retry:
 			      VM_FAULT_BADACCESS))))
 		return 0;
 
-	/*
+	/**
 	 * If we are in kernel mode at this point, we have no context to
 	 * handle this fault with.
+	 * (如果我们此时处于内核模式（Kernel Mode），我们便没有上下文（Context）来处理这个故障)
 	 */
-	if (!user_mode(regs))
+	if (!user_mode(regs)) {
 		goto no_context;
+	}
 
+	// OOM 了
 	if (fault & VM_FAULT_OOM) {
-		/*
+		/**
 		 * We ran out of memory, call the OOM killer, and return to
 		 * userspace (which will retry the fault, or kill us if we got
 		 * oom-killed).
+		 * (内存已耗尽，调用 OOM Killer（内存溢出终止机制），
+		 * 然后返回用户态（届时将重试该错误访问，或者如果我们已被 OOM Killer 选中，则会被终止）)
 		 */
 		pagefault_out_of_memory();
 		return 0;

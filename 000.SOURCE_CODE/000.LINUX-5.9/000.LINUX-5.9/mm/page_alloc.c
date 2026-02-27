@@ -3223,6 +3223,9 @@ void mark_free_pages(struct zone *zone)
 }
 #endif /* CONFIG_PM */
 
+/**
+ * 释放前的检查
+ */
 static bool free_unref_page_prepare(struct page *page, unsigned long pfn)
 {
 	int migratetype;
@@ -3235,6 +3238,9 @@ static bool free_unref_page_prepare(struct page *page, unsigned long pfn)
 	return true;
 }
 
+/**
+ * 释放单个页面到PCP链表中
+ */
 static void free_unref_page_commit(struct page *page, unsigned long pfn)
 {
 	struct zone *zone = page_zone(page);
@@ -3244,12 +3250,16 @@ static void free_unref_page_commit(struct page *page, unsigned long pfn)
 	migratetype = get_pcppage_migratetype(page);
 	__count_vm_event(PGFREE);
 
-	/*
+	/**
 	 * We only track unmovable, reclaimable and movable on pcp lists.
 	 * Free ISOLATE pages back to the allocator because they are being
 	 * offlined but treat HIGHATOMIC as movable pages so we can get those
 	 * areas back if necessary. Otherwise, we may have to free
 	 * excessively into the page allocator
+	 * (我们仅在 PCP 列表上追踪“不可移动”（unmovable）、“可回收”（reclaimable）和“可移动”（movable）类型的页面。
+	 * 对于“隔离”（ISOLATE）类型的空闲页，由于它们正处于下线过程中，应直接将其释放回（全局）分配器；而对于“高原子性”（HIGHATOMIC）类型的页面，
+	 * 则将其视为“可移动”页面处理，以便在必要时能够收回这些区域。
+	 * 否则，我们可能不得不过度地向页面分配器执行释放操作)
 	 */
 	if (migratetype >= MIGRATE_PCPTYPES) {
 		if (unlikely(is_migrate_isolate(migratetype))) {
@@ -3276,13 +3286,18 @@ static void free_unref_page_commit(struct page *page, unsigned long pfn)
 void free_unref_page(struct page *page)
 {
 	unsigned long flags;
+	// 将page数据结构换成页帧号
 	unsigned long pfn = page_to_pfn(page);
 
-	if (!free_unref_page_prepare(page, pfn))
+	if (!free_unref_page_prepare(page, pfn)) {
 		return;
+	}
 
+	// 关闭本地中断
 	local_irq_save(flags);
+	// 释放单个页面到pcp(Per-CPU Pageset)链表中
 	free_unref_page_commit(page, pfn);
+	// 开启本地中断
 	local_irq_restore(flags);
 }
 
@@ -3910,6 +3925,8 @@ static inline unsigned int current_alloc_flags(gfp_t gfp_mask,
  * -> [get_page_from_freelist()函数的主要作用是从伙伴系统的空闲页面链表中尝试分配物理页]
  * 
  * # 先了解一下数据结构: [001.UNIX-DOCS/000.内存管理/005.内存分配/006.内核内存管理数据结构.md]
+ * 
+ * 和水位(watermark)的关系: ?
  */
 static struct page *get_page_from_freelist(gfp_t gfp_mask, unsigned int order,
 					   int alloc_flags,
@@ -4010,11 +4027,17 @@ retry:
 			}
 		}
 
-		// wmark_pages()宏用来计算zone中某个水位的页面大小
+		/**
+		 * wmark_pages()宏用来计算zone中某个水位的页面大小
+		 * > 看一下 struct zone{...}注释
+		 * 
+		 * 根据 alloc_flag 来取对应的水位值
+		 */
 		mark = wmark_pages(zone, alloc_flags & ALLOC_WMARK_MASK);
 		/**
 		 * zone_watermark_fast()函数用于判断当前zone的空闲页面是否满足WMARK_LOW。
-		 * 另外，还会根据order来判断是否有足够大的空闲内存块。若该函数返回true，表示zone的页面高于指定的水位或者满足order分配需求
+		 * 另外，还会根据order来判断是否有足够大的空闲内存块。若该函数返回true，
+		 * 表示zone的页面高于指定的水位或者满足order分配需求
 		 */
 		if (!zone_watermark_fast(zone, order, mark,
 				       ac->highest_zoneidx, alloc_flags,
@@ -4040,6 +4063,9 @@ retry:
 			    !zone_allows_reclaim(ac->preferred_zoneref->zone, zone))
 				continue;
 
+			/**
+			 * 调用node_reclaim()函数对该内存管理区进行页面回收
+			 */
 			ret = node_reclaim(zone->zone_pgdat, gfp_mask, order); // 调用node_reclaim()函数尝试回收一部分内存,跳转到哪个函数?
 			switch (ret) {
 			case NODE_RECLAIM_NOSCAN:
@@ -4049,7 +4075,7 @@ retry:
 				/* scanned but unreclaimable */
 				continue;
 			default:
-				/* did we reclaim enough */
+				/** did we reclaim enough (我们是否回收了足够的内存) */
 				if (zone_watermark_ok(zone, order, mark,
 					ac->highest_zoneidx, alloc_flags))
 					goto try_this_zone;
@@ -4262,8 +4288,14 @@ out:
  */
 #define MAX_COMPACT_RETRIES 16
 
+/**
+ * 内存规整（Memory Compaction）
+ */
 #ifdef CONFIG_COMPACTION
-/* Try memory compaction for high-order allocations before reclaim */
+/**
+ *  Try memory compaction for high-order allocations before reclaim
+ *  (在进行内存回收（reclaim）之前，先尝试通过内存规整（memory compaction）来满足高阶（high-order）分配请求)
+ *  */
 static struct page *
 __alloc_pages_direct_compact(gfp_t gfp_mask, unsigned int order,
 		unsigned int alloc_flags, const struct alloc_context *ac,
@@ -4485,10 +4517,12 @@ void fs_reclaim_release(gfp_t gfp_mask)
 EXPORT_SYMBOL_GPL(fs_reclaim_release);
 #endif
 
-/* Perform direct synchronous page reclaim */
-static int
-__perform_reclaim(gfp_t gfp_mask, unsigned int order,
-					const struct alloc_context *ac)
+/** 
+ * Perform direct synchronous page reclaim 
+ * (执行直接同步页面回收)
+ * */
+static int __perform_reclaim(gfp_t gfp_mask, unsigned int order,
+			     const struct alloc_context *ac)
 {
 	int progress;
 	unsigned int noreclaim_flag;
@@ -4787,12 +4821,16 @@ check_retry_cpuset(int cpuset_mems_cookie, struct alloc_context *ac)
 	return false;
 }
 
-static inline struct page *
-__alloc_pages_slowpath(gfp_t gfp_mask, unsigned int order,
-						struct alloc_context *ac)
+static inline struct page *__alloc_pages_slowpath(gfp_t gfp_mask,
+						  unsigned int order,
+						  struct alloc_context *ac)
 {
+	// __GFP_DIRECT_RECLAIM 表示调用者可以直接进入回收流程
 	bool can_direct_reclaim = gfp_mask & __GFP_DIRECT_RECLAIM;
+
+	// 是否是昂贵分配: 000.LINUX-5.9/include/linux/gfp.h
 	const bool costly_order = order > PAGE_ALLOC_COSTLY_ORDER;
+
 	struct page *page = NULL;
 	unsigned int alloc_flags;
 	unsigned long did_some_progress;
@@ -4806,10 +4844,12 @@ __alloc_pages_slowpath(gfp_t gfp_mask, unsigned int order,
 	/*
 	 * We also sanity check to catch abuse of atomic reserves being used by
 	 * callers that are not in atomic context.
+	 * (我们还进行了完整性检查（或安全性检查），以拦截非原子上下文调用者对原子储备的滥用。)
 	 */
-	if (WARN_ON_ONCE((gfp_mask & (__GFP_ATOMIC|__GFP_DIRECT_RECLAIM)) ==
-				(__GFP_ATOMIC|__GFP_DIRECT_RECLAIM)))
+	if (WARN_ON_ONCE((gfp_mask & (__GFP_ATOMIC | __GFP_DIRECT_RECLAIM)) ==
+			 (__GFP_ATOMIC | __GFP_DIRECT_RECLAIM))) {
 		gfp_mask &= ~__GFP_ATOMIC;
+	}
 
 retry_cpuset:
 	compaction_retries = 0;
@@ -4833,9 +4873,12 @@ retry_cpuset:
 	 * because we might have used different nodemask in the fast path, or
 	 * there was a cpuset modification and we are retrying - otherwise we
 	 * could end up iterating over non-eligible zones endlessly.
+	 * (我们需要重新计算 zonelist 迭代器的起始点，
+	 * 因为我们可能在快速路径（fast path）中使用了不同的节点掩码（nodemask），
+	 * 或者发生了 cpuset 修改并正在重试——否则，我们可能会陷入对不合格区域（zones）的无休止迭代中)
 	 */
-	ac->preferred_zoneref = first_zones_zonelist(ac->zonelist,
-					ac->highest_zoneidx, ac->nodemask);
+	ac->preferred_zoneref = first_zones_zonelist(
+		ac->zonelist, ac->highest_zoneidx, ac->nodemask);
 	if (!ac->preferred_zoneref->zone) {
 		goto nopage;
 	}
@@ -4944,7 +4987,10 @@ retry:
 					ac->highest_zoneidx, ac->nodemask);
 	}
 
-	/* Attempt with potentially adjusted zonelist and alloc_flags */
+	/**
+	 *  Attempt with potentially adjusted zonelist and alloc_flags
+	 * (尝试使用可能调整后的区域列表（zonelist）和分配标志（alloc_flags）进行分配)
+	 *  */
 	page = get_page_from_freelist(gfp_mask, order, alloc_flags, ac);
 	if (page)
 		goto got_pg;
@@ -4957,13 +5003,19 @@ retry:
 	if (current->flags & PF_MEMALLOC)
 		goto nopage;
 
-	/* Try direct reclaim and then allocating */
+	/** 
+	 * Try direct reclaim and then allocating 
+	 * (尝试直接回收，然后进行分配)
+	 * */
 	page = __alloc_pages_direct_reclaim(gfp_mask, order, alloc_flags, ac,
 							&did_some_progress);
 	if (page)
 		goto got_pg;
 
-	/* Try direct compaction and then allocating */
+	/** 
+	 * Try direct compaction and then allocating 
+	 * (尝试直接内存规整（direct compaction），然后再次尝试分配)
+	*/
 	page = __alloc_pages_direct_compact(gfp_mask, order, alloc_flags, ac,
 					compact_priority, &compact_result);
 	if (page)
@@ -4974,7 +5026,7 @@ retry:
 		goto nopage;
 
 	/*
-	 * Do not retry costly high order allocations unless they are
+	 * Do not retry costly high order allocations unless(除非) they are
 	 * __GFP_RETRY_MAYFAIL
 	 */
 	if (costly_order && !(gfp_mask & __GFP_RETRY_MAYFAIL))
@@ -5010,7 +5062,12 @@ retry:
 	if (page)
 		goto got_pg;
 
-	/* Avoid allocations with no watermarks from looping endlessly */
+	/** 
+	 * Avoid allocations with no watermarks from looping endlessly
+	 * (避免不带水位线（无限制）的内存分配进入死循环)
+	 * 
+	 * tsk_is_oom_victim: [000.LINUX-5.9/include/linux/oom.h]
+	 *  */
 	if (tsk_is_oom_victim(current) &&
 	    (alloc_flags & ALLOC_OOM ||
 	     (gfp_mask & __GFP_NOMEMALLOC)))
@@ -5161,7 +5218,8 @@ __alloc_pages_nodemask(gfp_t gfp_mask, unsigned int order, int preferred_nid,
 							nodemask_t *nodemask)
 {
 	struct page *page;
-	unsigned int alloc_flags = ALLOC_WMARK_LOW; // 允许分配内存的判断条件为低水位
+	// 允许分配内存的判断条件为低水位
+	unsigned int alloc_flags = ALLOC_WMARK_LOW;
 	gfp_t alloc_mask; /* The gfp_t that was actually used for allocation */
 	struct alloc_context ac = { };
 
@@ -5267,7 +5325,7 @@ unsigned long get_zeroed_page(gfp_t gfp_mask)
 EXPORT_SYMBOL(get_zeroed_page);
 
 /**
- * 页面释放函数
+ * 页面释放函数,分为单页面（4K）和多页面（4xK）释放
  *
  *
  * 
@@ -5286,7 +5344,7 @@ static inline void free_the_page(struct page *page, unsigned int order)
 void __free_pages(struct page *page, unsigned int order)
 {
 	/**
-	 * put_page_testzero 是 Linux 内核中用于管理页引用计数的一个关键函数，
+	 * put_page_testzero[000.LINUX-5.9/include/linux/mm.h] 是 Linux 内核中用于管理页引用计数的一个关键函数，
 	 * 通常用于检查页面的最后一次引用是否被释放
 	 */
 	if (put_page_testzero(page)) {
@@ -6071,11 +6129,15 @@ static void build_thisnode_zonelists(pg_data_t *pgdat)
  * This results in conserving DMA zone[s] until all Normal memory is
  * exhausted, but results in overflowing to remote node while memory
  * may still exist in local DMA zone.
- * 
- * 构建按 zone（内存区域） 和 节点内 zone 顺序排列的 zonelist
- * 这种设计会导致：
- *    优先保留 DMA 区域的内存，直到所有 Normal 内存 耗尽；
- *    但可能引发内存溢出到远端节点，而本地 DMA 区域中仍有可用内存
+ * (按“区域”及区域内的“节点”顺序构建区域列表。
+ * 这可以确保在所有“普通内存区”（Normal zone）耗尽之前保护“直接内存访问区”（DMA zone），
+ * 但也会导致：即便本地 DMA 区仍有剩余内存，系统也可能溢出并请求远程节点的内存)
+ *    怎么理解?
+ *  - Zonelist (区域列表): 内核在分配内存时查找可用内存页的顺序列表。
+ *  - Local vs. Remote Node: 在 NUMA（非一致性内存访问）架构中，访问本地节点的内存速度最快，访问远程节点则会有延迟
+ *  -  DMA vs. Normal Zone: * DMA Zone 通常较小且有特殊硬件用途（地址空间受限）
+ *     + 有限保护DMA资源，不让普通的内存申请占用他
+ *  - Overflow to remote node (溢出到远程节点): 这里的逻辑是：系统宁愿跑远一点去拿远程节点的“普通内存”，也不愿动用本地珍贵的“DMA 内存”	·
  * 
  * 远端节点是什么意思?
  *    在 Linux 内核内存管理上下文中，远端节点（remote node） 指的是非当前 CPU 所属的 NUMA（Non-Uniform Memory Access，非一致性内存访问）节点
@@ -6100,6 +6162,7 @@ static void build_zonelists(pg_data_t *pgdat)
 		 * We don't want to pressure a particular node.
 		 * So adding penalty to the first node in same
 		 * distance group to make it round-robin.
+		 * (我们不希望对某个特定节点造成过大压力。因此，通过对相同距离组（distance group）中的第一个节点增加“惩罚值”（penalty），从而实现轮询（round-robin）分配)
 		 */
 		if (node_distance(local_node, node) !=
 		    node_distance(local_node, prev_node))
@@ -6216,7 +6279,9 @@ static void __build_all_zonelists(void *data)
 	} else {
 		for_each_online_node(nid) {
 			pg_data_t *pgdat = NODE_DATA(nid);
-
+            /**
+			 * 构建 pg_data_t->node_zonelists
+			 */
 			build_zonelists(pgdat);
 		}
 
@@ -7142,6 +7207,9 @@ static void __init free_area_init_core(struct pglist_data *pgdat)
 	pgdat->per_cpu_nodestats = &boot_nodestats;
 
 	for (j = 0; j < MAX_NR_ZONES; j++) {
+		/**
+		 * 初始化 node_zones 
+		 */
 		struct zone *zone = pgdat->node_zones + j;
 		unsigned long size, freesize, memmap_pages;
 		unsigned long zone_start_pfn = zone->zone_start_pfn;
@@ -7259,6 +7327,9 @@ static inline void pgdat_set_deferred_range(pg_data_t *pgdat) {}
 
 static void __init free_area_init_node(int nid)
 {
+	/**
+	 * struct pglist_data?
+	 */
 	pg_data_t *pgdat = NODE_DATA(nid);
 	unsigned long start_pfn = 0;
 	unsigned long end_pfn = 0;
@@ -7775,7 +7846,7 @@ void __init free_area_init(unsigned long *max_zone_pfn)
 	for (i = 0; i < MAX_NUMNODES; i++) {
 		if (zone_movable_pfn[i])
 			pr_info("  Node %d: %#018Lx\n", i,
-			       (u64)zone_movable_pfn[i] << PAGE_SHIFT);
+				(u64)zone_movable_pfn[i] << PAGE_SHIFT);
 	}
 
 	/*

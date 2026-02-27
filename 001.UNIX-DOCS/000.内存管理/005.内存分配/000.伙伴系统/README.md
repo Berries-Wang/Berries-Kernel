@@ -9,7 +9,9 @@
 
 ## 合并的标准 <sup>伙伴判断依据</sup>
 ```c
-
+ 阅读:[static inline void __free_one_page(struct page *page, unsigned long pfn,
+				   struct zone *zone, unsigned int order,
+				   int migratetype, bool report)]   代码:[mm/page_alloc.c]
 ```
 
 
@@ -41,7 +43,8 @@
 ```
 
 ###### 使用链表数组管理空闲块
-![wechat_2025-12-02_075007_518.png](./../../999.IMGS/wechat_2025-12-02_075007_518.png)
+![wechat_2026-02-02_074413_121.png](../../999.IMGS/wechat_2026-02-02_074413_121.png)
+![wechat_2026-02-02_075217_653.png](../../999.IMGS/wechat_2026-02-02_075217_653.png)
 - 对应上图的: free_area
 - 链表数组操作: <sup>对应 ‘图1:伙伴系统’</sup>
    +  当**分配页面**时，例如，分配2*4K页面，就会从链表数组(2^1)中寻找空闲的页，没有，那就从更大内存块(2^2 、2^3、...、2(MAX_ORDER-1))切割，并维护链表数组
@@ -51,4 +54,6 @@
 ---
 
 ## 参考
-- [07-物理内存管理I：伙伴系统 [中山大学 操作系统原理]](https://www.bilibili.com/video/BV1jq421P7f7/?spm_id_from=333.337.search-card.all.click&vd_source=9eef164b234175c1ae3ca71733d5a727)
+- [07-物理内存管理I：伙伴系统 [中山大学 操作系统原理]](https://www.bilibili.com/video/BV1jq421P7f7/?spm_id_from=333.1007.top_right_bar_window_history.content.click&vd_source=9eef164b234175c1ae3ca71733d5a727)
+   - [000.中山大学-操作系统/4-0317-physical-mem-1.pdf](../../998.REFS/000.中山大学-操作系统/4-0317-physical-mem-1.pdf)
+   - [000.中山大学-操作系统/4-0320-physical-mem-2.pdf](../../998.REFS/000.中山大学-操作系统/4-0320-physical-mem-2.pdf)

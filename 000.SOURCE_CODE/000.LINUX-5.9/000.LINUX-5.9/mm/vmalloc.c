@@ -2571,7 +2571,7 @@ void *__vmalloc(unsigned long size, gfp_t gfp_mask)
 EXPORT_SYMBOL(__vmalloc);
 
 /**
- * vmalloc - allocate virtually contiguous memory
+ * vmalloc - allocate virtually contiguous memory (分配虚拟地址连续的内存 —— 物理地址空间不一定连续)
  * @size:    allocation size
  *
  * Allocate enough pages to cover @size from the page level

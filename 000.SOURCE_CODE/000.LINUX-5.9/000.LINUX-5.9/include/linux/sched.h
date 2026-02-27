@@ -985,6 +985,10 @@ struct task_struct {
 	unsigned			restore_sigmask:1;
 #endif
 #ifdef CONFIG_MEMCG
+    /**
+	 * 是否处于用户态缺页中
+	 * :1: 关键点。这表示该变量仅占用 1 个比特（bit）。它的值只能是 0（假）或 1（真）
+	 */
 	unsigned			in_user_fault:1;
 #endif
 #ifdef CONFIG_COMPAT_BRK
@@ -1272,7 +1276,7 @@ struct task_struct {
 	/** 
 	 * CGroups 相关
 	 * Control Group info protected by css_set_lock:
-	 * 
+	 * 参考: [001.UNIX-DOCS/032.Control-Groups(CGroups)/README.md]
 	 *  */
 	struct css_set __rcu		*cgroups;
 	/* cg_list protected by css_set_lock and tsk->alloc_lock: */
@@ -1502,6 +1506,9 @@ struct task_struct {
 #endif
 	int				pagefault_disabled;
 #ifdef CONFIG_MMU
+    /**
+	 * oom_reaper_list 成员是一个单向链表节点，它将所有等待“收割”内存的进程组织在一起
+	 */
 	struct task_struct		*oom_reaper_list;
 #endif
 #ifdef CONFIG_VMAP_STACK

@@ -22,9 +22,10 @@ enum oom_constraint {
 	CONSTRAINT_MEMCG,
 };
 
-/*
+/**
  * Details of the page allocation that triggered the oom killer that are used to
  * determine what should be killed.
+ * (用于确定哪些任务应当被终止的、触发 OOM Killer 的页面分配详情。)
  */
 struct oom_control {
 	/* Used to determine cpuset */

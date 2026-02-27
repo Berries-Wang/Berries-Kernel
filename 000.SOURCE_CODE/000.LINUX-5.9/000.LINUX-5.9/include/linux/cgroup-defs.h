@@ -190,17 +190,26 @@ struct cgroup_subsys_state {
  * cgroup_subsys_state objects. This saves space in the task struct
  * object and speeds up fork()/exit(), since a single inc/dec and a
  * list_add()/del() can bump the reference count on the entire cgroup
- * set for a task.
+ * set for a task.(css_set 是一个保存了一组指向 cgroup_subsys_state 对象指针的结构体。
+ * 这种设计节省了任务结构体（task struct）对象的空间，并加速了 fork() 和 exit() 的执行，
+ * 因为仅需一次简单的增/减操作以及一次链表添加/删除操作，就能完成对一个任务所属整个 cgroup 集合引用计数的更新。)
+ * 
+ * >> 批量处理子系统
  */
 struct css_set {
 	/*
 	 * Set of subsystem states, one for each subsystem. This array is
 	 * immutable after creation apart from the init_css_set during
 	 * subsystem registration (at boot time).
+	 * 
+	 * 存储具体子系统（如内存、CPU）限制参数的实例
 	 */
 	struct cgroup_subsys_state *subsys[CGROUP_SUBSYS_COUNT];
 
-	/* reference count */
+	/** 
+	 * reference count 
+	 * 确保对象在仍有进程使用时不会被内核销毁
+	 * */
 	refcount_t refcount;
 
 	/*

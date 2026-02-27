@@ -1,15 +1,17 @@
 ================
-Control Group v2
+Control Group v2 (控制组 v2)
 ================
 
-:Date: October, 2015
-:Author: Tejun Heo <tj@kernel.org>
+:Date: October, 2015 (日期：2015年10月)
+:Author: Tejun Heo <tj@kernel.org> (作者：Tejun Heo)
 
 This is the authoritative documentation on the design, interface and
 conventions of cgroup v2.  It describes all userland-visible aspects
 of cgroup including core and specific controller behaviors.  All
 future changes must be reflected in this document.  Documentation for
 v1 is available under :ref:`Documentation/admin-guide/cgroup-v1/index.rst <cgroup-v1>`.
+
+(这是关于cgroup v2的设计、接口和约定的权威文档。它描述了cgroup的所有用户空间可见方面，包括核心和特定控制器的行为。所有未来的更改必须在本文档中反映。v1的文档可在:ref:`Documentation/admin-guide/cgroup-v1/index.rst <cgroup-v1>`下获得。)
 
 .. CONTENTS
 
@@ -95,7 +97,8 @@ Terminology
 singular form is used to designate the whole feature and also as a
 qualifier as in "cgroup controllers".  When explicitly referring to
 multiple individual control groups, the plural form "cgroups" is used.
-
+(“cgroup”代表“control group”（控制组）,且首字母永远不需要大写。其单数形式用于指代该功能的整体,
+也用作限定词,例如“cgroup 控制器”（cgroup controllers）。只有在明确指代多个独立的控制组时,才使用复数形式“cgroups”。)
 
 What is cgroup?
 ---------------
@@ -103,6 +106,7 @@ What is cgroup?
 cgroup is a mechanism to organize processes hierarchically and
 distribute system resources along the hierarchy in a controlled and
 configurable manner.
+(cgroup 是一种以层级化方式组织进程,并以受控且可配置的方式沿该层级结构分配系统资源的机制。)
 
 cgroup is largely composed of two parts - the core and controllers.
 cgroup core is primarily responsible for hierarchically organizing
@@ -110,6 +114,9 @@ processes.  A cgroup controller is usually responsible for
 distributing a specific type of system resource along the hierarchy
 although there are utility controllers which serve purposes other than
 resource distribution.
+(cgroup 主要由两个部分组成：核心（core）和控制器（controller）。
+cgroup 核心主要负责以层级化方式组织进程。cgroup 控制器通常负责沿该层级结构分配特定类型的系统资源,
+但也存在一些用于资源分配以外目的的辅助性控制器。)
 
 cgroups form a tree structure and every process in the system belongs
 to one and only one cgroup.  All threads of a process belong to the
@@ -117,6 +124,10 @@ same cgroup.  On creation, all processes are put in the cgroup that
 the parent process belongs to at the time.  A process can be migrated
 to another cgroup.  Migration of a process doesn't affect already
 existing descendant processes.
+(cgroup 构成了一个树状结构,系统中的每个进程都属于且仅属于一个 cgroup。
+一个进程的所有线程都属于同一个 cgroup。
+在创建时,所有进程都会被放入其父进程当时所属的 cgroup 中。
+进程可以被迁移到另一个 cgroup,但进程的迁移不会影响已经存在的后代进程。)
 
 Following certain structural constraints, controllers may be enabled or
 disabled selectively on a cgroup.  All controller behaviors are
@@ -126,6 +137,13 @@ sub-hierarchy of the cgroup.  When a controller is enabled on a nested
 cgroup, it always restricts the resource distribution further.  The
 restrictions set closer to the root in the hierarchy can not be
 overridden from further away.
+(在遵循特定结构约束的前提下,可以在 cgroup 上选择性地启用或禁用控制器。
+所有控制器的行为都是层级化的——如果某个控制器在某个 cgroup 上被启用,
+它将影响属于该 cgroup 及其完整子层级结构（包含自身）的所有进程。
+当在一个嵌套的 cgroup 上启用控制器时,它总是会进一步限制资源分配。
+在层级结构中,靠近根部（root）所设置的限制,无法被远离根部的下游设置所超越（覆盖）)
+
+(即 生效的cgroup是哪一个,即 cgroup的优先级)
 
 
 Basic Operations
@@ -136,6 +154,7 @@ Mounting
 
 Unlike v1, cgroup v2 has only single hierarchy.  The cgroup v2
 hierarchy can be mounted with the following mount command::
+(与 v1 不同,cgroup v2 仅包含单一层级结构。可以使用以下挂载命令来挂载 cgroup v2 层级结构：)
 
   # mount -t cgroup2 none $MOUNT_POINT
 
@@ -145,6 +164,10 @@ automatically bound to the v2 hierarchy and show up at the root.
 Controllers which are not in active use in the v2 hierarchy can be
 bound to other hierarchies.  This allows mixing v2 hierarchy with the
 legacy v1 multiple hierarchies in a fully backward compatible way.
+(cgroup2 文件系统的魔数（magic number）为 0x63677270（即“cgrp”的 ASCII 码）。
+所有支持 v2 且未绑定到 v1 层级结构的控制器，都会自动绑定到 v2 层级结构并显示在根目录下。
+未在 v2 层级结构中活跃使用的控制器，可以被绑定到其他层级结构。
+这允许将 v2 层级结构与传统的 v1 多层级结构混合使用，从而实现完全的向后兼容。)
 
 A controller can be moved across hierarchies only after the controller
 is no longer referenced in its current hierarchy.  Because per-cgroup
@@ -156,20 +179,35 @@ the unified hierarchy and it may take some time for the disabled
 controller to become available for other hierarchies; furthermore, due
 to inter-controller dependencies, other controllers may need to be
 disabled too.
+(只有在控制器不再被当前层级结构引用后，才能将其移动到其他层级结构。
+由于每个 cgroup 的控制器状态是异步销毁的，且控制器可能存在残余引用，
+因此在旧层级结构最终卸载（umount）后，控制器可能不会立即出现在 v2 层级结构中。
+同样地，控制器必须被完全禁用才能移出统一层级结构（unified hierarchy），
+且被禁用的控制器可能需要一段时间才能在其他层级结构中可用；此外，由于控制器之间存在依赖关系，
+可能还需要同时禁用其他相关的控制器。)
+
+(cgroup 移除&卸载)
 
 While useful for development and manual configurations, moving
 controllers dynamically between the v2 and other hierarchies is
 strongly discouraged for production use.  It is recommended to decide
 the hierarchies and controller associations before starting using the
 controllers after system boot.
+(虽然在开发和手动配置时动态移动控制器很有用，
+但在生产环境中，强烈建议不要在 v2 与其他层级结构之间动态移动控制器。
+建议在系统启动后、开始使用控制器之前，就确定好层级结构以及控制器之间的关联关系。)
 
 During transition to v2, system management software might still
 automount the v1 cgroup filesystem and so hijack all controllers
 during boot, before manual intervention is possible. To make testing
 and experimenting easier, the kernel parameter cgroup_no_v1= allows
 disabling controllers in v1 and make them always available in v2.
+(在向 v2 过渡期间，系统管理软件（如 systemd）可能仍会在启动时自动挂载 v1 cgroup 文件系统，
+从而在人工干预之前就‘劫持’了所有控制器。为了方便测试和实验，内核参数 cgroup_no_v1= 允许在 v1 中禁用特定的控制器，
+从而使它们在 v2 中始终可用。)
 
 cgroup v2 currently supports the following mount options.
+(cgroup v2 目前支持以下挂载选项：)
 
   nsdelegate
 
@@ -178,6 +216,9 @@ cgroup v2 currently supports the following mount options.
 	through remount from the init namespace.  The mount option is
 	ignored on non-init namespace mounts.  Please refer to the
 	Delegation section for details.
+	(将 cgroup 命名空间视为委托边界（delegation boundaries）。此选项是全局生效的（system wide），
+	且只能在初始命名空间（init namespace）中通过挂载或重新挂载（remount）来进行设置或修改。
+	在非初始命名空间中进行的挂载会忽略此选项。有关详细信息，请参阅‘委托’（Delegation）章节)
 
   memory_localevents
 
@@ -187,6 +228,10 @@ cgroup v2 currently supports the following mount options.
         This option is system wide and can only be set on mount or
         modified through remount from the init namespace. The mount
         option is ignored on non-init namespace mounts.
+		(仅为当前 cgroup 填充 memory.events 数据，而不包含任何子树的数据。
+		这属于旧有（legacy）行为；在不启用此选项的情况下，默认行为是包含子树的统计计数。
+		此选项是全局生效的，且只能在初始命名空间（init namespace）中通过挂载或重新挂载来进行设置或修改。
+		在非初始命名空间中进行的挂载会忽略此选项。)
 
   memory_recursiveprot
 
@@ -198,16 +243,20 @@ cgroup v2 currently supports the following mount options.
         behavior but is a mount-option to avoid regressing setups
         relying on the original semantics (e.g. specifying bogusly
         high 'bypass' protection values at higher tree levels).
+		(将 memory.min 和 memory.low 的保护机制递归应用于整个子树，而无需显式地向叶子 cgroup 进行向下传播。
+		这使得各子树之间能够相互保护，同时在这些子树内部保留自由竞争。这本应是默认行为，
+		但为了避免那些依赖原始语义的设置出现退化（例如：在树的高层级指定了极大的、仅用于‘绕过’的保护值），目前将其设为一个挂载选项)
 
 
 Organizing Processes and Threads
 --------------------------------
 
-Processes
+Processes(进程)
 ~~~~~~~~~
 
 Initially, only the root cgroup exists to which all processes belong.
 A child cgroup can be created by creating a sub-directory::
+(最初，系统中仅存在根（root）cgroup，所有进程都属于该组。可以通过创建一个子目录来创建一个子 cgroup。)
 
   # mkdir $CGROUP_NAME
 
@@ -217,12 +266,17 @@ structure.  Each cgroup has a read-writable interface file
 belong to the cgroup one-per-line.  The PIDs are not ordered and the
 same PID may show up more than once if the process got moved to
 another cgroup and then back or the PID got recycled while reading.
+(一个给定的 cgroup 可以拥有多个子 cgroup，从而构成树状结构。
+每个 cgroup 都有一个可读写的接口文件 cgroup.procs。读取该文件时，它会逐行提取并列出属于该 cgroup 的所有进程的 PID。
+这些 PID 是无序排列的；此外，如果某个进程在读取期间被移动到另一个 cgroup 后又移回，或者 PID 在读取过程中被循环重用，则同一个 PID 可能会出现多次。)
 
 A process can be migrated into a cgroup by writing its PID to the
 target cgroup's "cgroup.procs" file.  Only one process can be migrated
 on a single write(2) call.  If a process is composed of multiple
 threads, writing the PID of any thread migrates all threads of the
 process.
+(可以通过将进程的 PID 写入目标 cgroup 的 cgroup.procs 文件来将其迁移。
+单次 write(2) 系统调用只能迁移一个进程。如果一个进程由多个线程组成，写入该进程下任意线程的 PID 都会将其所有线程一并迁移。)
 
 When a process forks a child process, the new process is born into the
 cgroup that the forking process belongs to at the time of the
@@ -230,11 +284,16 @@ operation.  After exit, a process stays associated with the cgroup
 that it belonged to at the time of exit until it's reaped; however, a
 zombie process does not appear in "cgroup.procs" and thus can't be
 moved to another cgroup.
+(当一个进程 fork（派生）出一个子进程时，新进程在操作执行的那一刻便诞生于父进程所属的 cgroup 中。
+进程在退出后，会一直保持与退出时所属 cgroup 的关联，直到其被收割（reaped）；
+然而，僵尸进程不会出现在 cgroup.procs 文件中，因此无法被移动到另一个 cgroup。)
 
 A cgroup which doesn't have any children or live processes can be
 destroyed by removing the directory.  Note that a cgroup which doesn't
 have any children and is associated only with zombie processes is
 considered empty and can be removed::
+(不包含任何子 cgroup 或活跃进程的 cgroup 可以通过删除目录来销毁。请注意，
+如果一个 cgroup 没有子 cgroup 且仅与僵尸进程相关联，则该 cgroup 被视为‘空’，可以被删除：)
 
   # rmdir $CGROUP_NAME
 
@@ -242,6 +301,8 @@ considered empty and can be removed::
 cgroup is in use in the system, this file may contain multiple lines,
 one for each hierarchy.  The entry for cgroup v2 is always in the
 format "0::$PATH"::
+(/proc/$PID/cgroup 列出了进程所属的 cgroup。如果系统中正在使用旧版（legacy）cgroup，
+该文件可能包含多行，每一行对应一个层级结构。对于 cgroup v2，其条目始终采用 0::$PATH 的格式：)
 
   # cat /proc/842/cgroup
   ...
@@ -249,13 +310,14 @@ format "0::$PATH"::
 
 If the process becomes a zombie and the cgroup it was associated with
 is removed subsequently, " (deleted)" is appended to the path::
+(如果进程变成了僵尸进程，并且随后其所属的 cgroup 被删除，那么该路径后会追加 (deleted) 字样：)
 
   # cat /proc/842/cgroup
   ...
   0::/test-cgroup/test-cgroup-nested (deleted)
 
 
-Threads
+Threads(线程)
 ~~~~~~~
 
 cgroup v2 supports thread granularity for a subset of controllers to
@@ -265,9 +327,13 @@ process belong to the same cgroup, which also serves as the resource
 domain to host resource consumptions which are not specific to a
 process or thread.  The thread mode allows threads to be spread across
 a subtree while still maintaining the common resource domain for them.
+(cgroup v2 的部分控制器支持线程级粒度，以支持那些需要在进程组内的各线程之间进行层级化资源分配的使用场景。
+默认情况下，一个进程的所有线程都属于同一个 cgroup，该 cgroup 同时也作为‘资源域’（resource domain），
+承载那些不特定于某个进程或线程的资源消耗。线程模式允许将线程分布在某个子树中，同时仍为它们维持共同的资源域。)
 
 Controllers which support thread mode are called threaded controllers.
 The ones which don't are called domain controllers.
+(支持线程模式的控制器被称为‘线程级控制器’（threaded controllers），而不支持该模式的控制器则被称为‘域控制器’（domain controllers）。)
 
 Marking a cgroup threaded makes it join the resource domain of its
 parent as a threaded cgroup.  The parent may be another threaded
@@ -275,11 +341,17 @@ cgroup whose resource domain is further up in the hierarchy.  The root
 of a threaded subtree, that is, the nearest ancestor which is not
 threaded, is called threaded domain or thread root interchangeably and
 serves as the resource domain for the entire subtree.
+(将一个 cgroup 标记为‘线程级’（threaded），会使其作为一个线程级 cgroup 加入其父组的资源域。
+其父组可以是另一个线程级 cgroup，而该父组的资源域则位于层级结构中更上层的位置。
+线程级子树的根节点（即最近的非线程级祖先节点）被称为‘线程域’（threaded domain）或‘线程根’（thread root），
+这两个术语可以互换使用；它是整个子树的资源域。)
 
 Inside a threaded subtree, threads of a process can be put in
 different cgroups and are not subject to the no internal process
 constraint - threaded controllers can be enabled on non-leaf cgroups
 whether they have threads in them or not.
+(在线程级子树（threaded subtree）内部，属于同一进程的各个线程可以被放置在不同的 cgroup 中，
+且不再受‘无内层进程’（no internal process）限制的影响——无论非叶子节点中是否包含线程，都可以在其上启用线程级控制器。”)
 
 As the threaded domain cgroup hosts all the domain resource
 consumptions of the subtree, it is considered to have internal
@@ -287,30 +359,42 @@ resource consumptions whether there are processes in it or not and
 can't have populated child cgroups which aren't threaded.  Because the
 root cgroup is not subject to no internal process constraint, it can
 serve both as a threaded domain and a parent to domain cgroups.
+(由于线程域 cgroup 承载了整个子树内所有‘域资源’（domain resource）的消耗，
+因此无论其内部是否包含进程，它都被视为存在‘内层资源消耗’（internal resource consumptions），
+并且不能拥有非线程级的活跃（populated）子 cgroup。由于根 cgroup 不受‘无内层进程’限制的影响，
+它既可以作为线程域使用，也可以作为普通域 cgroup 的父节点。)
 
 The current operation mode or type of the cgroup is shown in the
 "cgroup.type" file which indicates whether the cgroup is a normal
 domain, a domain which is serving as the domain of a threaded subtree,
 or a threaded cgroup.
+(cgroup 当前的运行模式或类型显示在 cgroup.type 文件中。该文件指明了该 cgroup 是一个普通域（normal domain）、
+一个充当线程级子树根节点的域（threaded domain），还是一个线程级 cgroup（threaded cgroup）。)
 
 On creation, a cgroup is always a domain cgroup and can be made
 threaded by writing "threaded" to the "cgroup.type" file.  The
 operation is single direction::
+(在创建时，cgroup 始终是一个‘域’（domain）cgroup，可以通过向 cgroup.type 文件写入 ‘threaded’ 将其转变为‘线程级’（threaded）cgroup。此操作是单向的：)
 
   # echo threaded > cgroup.type
 
 Once threaded, the cgroup can't be made a domain again.  To enable the
 thread mode, the following conditions must be met.
+(一旦转变为线程级（threaded）模式，该 cgroup 就无法再恢复为域（domain）模式。要启用线程模式，必须满足以下条件：)
 
 - As the cgroup will join the parent's resource domain.  The parent
   must either be a valid (threaded) domain or a threaded cgroup.
+  (由于该 cgroup 将加入父组的资源域，因此其父组必须是一个有效的（线程级）域（threaded domain），或者是一个线程级（threaded）cgroup。)
 
 - When the parent is an unthreaded domain, it must not have any domain
   controllers enabled or populated domain children.  The root is
   exempt from this requirement.
+  (当父组是一个非线程级域（unthreaded domain）时，它必须未启用任何域控制器，
+  且不包含任何已存有进程（populated）的域子组。根 cgroup（root）不受此要求的限制。)
 
 Topology-wise, a cgroup can be in an invalid state.  Please consider
 the following topology::
+(从拓扑结构上看，cgroup 可能会处于无效（invalid）状态。请考虑以下拓扑结构：)
 
   A (threaded domain) - B (threaded) - C (domain, just created)
 
@@ -319,12 +403,18 @@ host child domains.  C can't be used until it is turned into a
 threaded cgroup.  "cgroup.type" file will report "domain (invalid)" in
 these cases.  Operations which fail due to invalid topology use
 EOPNOTSUPP as the errno.
+(C 虽然被创建为一个‘域’（domain）cgroup，但它连接到的父节点无法承载子域。在这种情况下，
+直到 C 被转变为线程级（threaded）cgroup 之前，它都无法被使用。
+此时 cgroup.type 文件会报告为 domain (invalid)。因拓扑结构无效而失败的操作将使用 EOPNOTSUPP 作为错误码（errno）)
 
 A domain cgroup is turned into a threaded domain when one of its child
 cgroup becomes threaded or threaded controllers are enabled in the
 "cgroup.subtree_control" file while there are processes in the cgroup.
 A threaded domain reverts to a normal domain when the conditions
 clear.
+(当一个域（domain）cgroup 的某个子 cgroup 变为线程级（threaded），
+或者在包含进程的情况下其 cgroup.subtree_control 文件启用了线程级控制器时，
+该域 cgroup 就会转变为‘线程域’（threaded domain）。当这些触发条件消失时，线程域会恢复为普通域。)
 
 When read, "cgroup.threads" contains the list of the thread IDs of all
 threads in the cgroup.  Except that the operations are per-thread
@@ -333,6 +423,9 @@ behaves the same way as "cgroup.procs".  While "cgroup.threads" can be
 written to in any cgroup, as it can only move threads inside the same
 threaded domain, its operations are confined inside each threaded
 subtree.
+(读取时，cgroup.threads 包含该 cgroup 内所有线程的线程 ID（TID）列表。除了操作对象是针对单个线程而非整个进程外，
+cgroup.threads 的格式和行为方式与 cgroup.procs 完全相同。虽然可以向任何 cgroup 的 cgroup.threads 写入数据，
+但由于它只能在同一个线程域（threaded domain）内移动线程，因此其操作被限制在各个线程级子树（threaded subtree）内部)
 
 The threaded domain cgroup serves as the resource domain for the whole
 subtree, and, while the threads can be scattered across the subtree,
@@ -341,20 +434,29 @@ all the processes are considered to be in the threaded domain cgroup.
 processes in the subtree and is not readable in the subtree proper.
 However, "cgroup.procs" can be written to from anywhere in the subtree
 to migrate all threads of the matching process to the cgroup.
+(线程域（threaded domain）cgroup 作为整个子树的资源域；
+尽管各线程可以分布在子树的不同位置，但所有进程仍被视为处于该线程域 cgroup 中。
+线程域 cgroup 中的 cgroup.procs 包含了子树内所有进程的 PID，而子树内部（狭义子树）的该文件是不可读的。
+然而，可以从子树内的任何位置向 cgroup.procs 写入数据，从而将匹配进程的所有线程迁移到该 cgroup 中。)
 
 Only threaded controllers can be enabled in a threaded subtree.  When
 a threaded controller is enabled inside a threaded subtree, it only
 accounts for and controls resource consumptions associated with the
 threads in the cgroup and its descendants.  All consumptions which
 aren't tied to a specific thread belong to the threaded domain cgroup.
+(在线程级子树（threaded subtree）中，只能启用线程级控制器。
+当在线程级子树内部启用某个线程级控制器时，它仅负责核算并控制与该 cgroup 及其后代中的线程相关的资源消耗。
+所有不与特定线程绑定的资源消耗，均归属于线程域（threaded domain）cgroup。)
 
 Because a threaded subtree is exempt from no internal process
 constraint, a threaded controller must be able to handle competition
 between threads in a non-leaf cgroup and its child cgroups.  Each
 threaded controller defines how such competitions are handled.
+(由于线程级子树（threaded subtree）不受‘无内层进程’限制的影响，
+线程级控制器必须能够处理非叶子 cgroup 中的线程与其子 cgroup 之间的竞争。每个线程级控制器都定义了处理此类竞争的具体方式。)
 
 
-[Un]populated Notification
+[Un]populated Notification(活跃状态通知)
 --------------------------
 
 Each non-root cgroup has a "cgroup.events" file which contains
@@ -367,6 +469,11 @@ sub-hierarchy have exited.  The populated state updates and
 notifications are recursive.  Consider the following sub-hierarchy
 where the numbers in the parentheses represent the numbers of processes
 in each cgroup::
+(每个非根 cgroup 都有一个 "cgroup.events" 文件，其中包含 "populated" 字段，
+用于指示该 cgroup 的子层级结构中是否存在活跃进程。如果该 cgroup 及其后代中没有活跃进程，
+其值为 0；否则为 1。当该值发生变化时，会触发 poll 和 [id]notify 事件。
+例如，这可以用于在给定子层级结构的所有进程退出后启动清理操作。活跃状态（populated state）的更新和通知是递归的。
+考虑以下子层级结构，括号中的数字代表每个 cgroup 中的进程数量：)
 
   A(4) - B(0) - C(1)
               \ D(0)
@@ -375,6 +482,8 @@ A, B and C's "populated" fields would be 1 while D's 0.  After the one
 process in C exits, B and C's "populated" fields would flip to "0" and
 file modified events will be generated on the "cgroup.events" files of
 both cgroups.
+(A、B 和 C 的 "populated" 字段将为 1，而 D 的为 0
+在 C 中的那一个进程退出后，B 和 C 的 "populated" 字段将翻转为 "0"，并且这两个 cgroup 的 "cgroup.events" 文件都会产生文件修改事件。)
 
 
 Controlling Controllers
@@ -385,6 +494,7 @@ Enabling and Disabling
 
 Each cgroup has a "cgroup.controllers" file which lists all
 controllers available for the cgroup to enable::
+- 通过 [001.UNIX-DOCS/032.Control-Groups(CGroups)/man7-cgroups.7.md] 知道，cgroup.controllers是只读文件，要修改，只能使用cgroup.subtree_control
 
   # cat cgroup.controllers
   cpu io memory
@@ -398,11 +508,14 @@ Only controllers which are listed in "cgroup.controllers" can be
 enabled.  When multiple operations are specified as above, either they
 all succeed or fail.  If multiple operations on the same controller
 are specified, the last one is effective.
+(只有在 cgroup.controllers 中列出的控制器才能被启用。当如上所述指定了多个操作时，
+它们要么全部成功，要么全部失败。如果针对同一个控制器指定了多个操作，则最后一个操作生效。)
 
 Enabling a controller in a cgroup indicates that the distribution of
 the target resource across its immediate children will be controlled.
 Consider the following sub-hierarchy.  The enabled controllers are
 listed in parentheses::
+(在某个 cgroup 中启用控制器，意味着该目标资源在其直接子组（immediate children）之间的分配将受到控制。请考虑以下子层级结构，括号中列出了已启用的控制器：)
 
   A(cpu,memory) - B(memory) - C()
                             \ D()
@@ -411,6 +524,8 @@ As A has "cpu" and "memory" enabled, A will control the distribution
 of CPU cycles and memory to its children, in this case, B.  As B has
 "memory" enabled but not "CPU", C and D will compete freely on CPU
 cycles but their division of memory available to B will be controlled.
+(由于 A 启用了 'cpu' 和 'memory' 控制器，A 将控制其子节点（在此示例中为 B）的 CPU 周期和内存分配。
+由于 B 启用了 'memory' 但未启用 'cpu'，C 和 D 将在 CPU 周期上自由竞争，但它们对 B 可用内存的分配将受到控制。)
 
 As a controller regulates the distribution of the target resource to
 the cgroup's children, enabling it creates the controller's interface
@@ -420,9 +535,13 @@ D.  Likewise, disabling "memory" from B would remove the "memory."
 prefixed controller interface files from C and D.  This means that the
 controller interface files - anything which doesn't start with
 "cgroup." are owned by the parent rather than the cgroup itself.
+(由于控制器负责调节目标资源向该 cgroup 子组的分配，因此启用它会在子 cgroup 中创建控制器的接口文件。
+在上述示例中，在 B 上启用 'cpu' 控制器将会在 C 和 D 中创建以 'cpu.' 为前缀的控制器接口文件。
+同样，在 B 上禁用 'memory' 将会从 C 和 D 中移除以 'memory.' 为前缀的控制器接口文件。
+这意味着控制器接口文件（任何不以 'cgroup.' 开头的文件）的所有权归父节点所有，而不是归该 cgroup 本身所有。)
 
 
-Top-down Constraint
+Top-down Constraint(自上而下的约束)
 ~~~~~~~~~~~~~~~~~~~
 
 Resources are distributed top-down and a cgroup can further distribute
@@ -432,20 +551,24 @@ can only contain controllers which are enabled in the parent's
 "cgroup.subtree_control" file.  A controller can be enabled only if
 the parent has the controller enabled and a controller can't be
 disabled if one or more children have it enabled.
+(资源是自上而下分发的，只有当父节点将资源分发给某个 cgroup 时，该 cgroup 才能进一步分发该资源。
+这意味着所有非根节点的 cgroup.subtree_control 文件只能包含那些已在父节点 cgroup.subtree_control 文件中启用的控制器。
+只有当父节点启用了某个控制器时，该控制器才能被启用；而如果有一个或多个子节点启用了某个控制器，则该控制器不能被禁用。)
 
-
-No Internal Process Constraint
+No Internal Process Constraint(无内部进程约束)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Non-root cgroups can distribute domain resources to their children
 only when they don't have any processes of their own.  In other words,
 only domain cgroups which don't contain any processes can have domain
 controllers enabled in their "cgroup.subtree_control" files.
+(非根 cgroup 只有在自身不包含任何进程时，才能向其子组分发域资源（domain resources）。换句话说，只有不包含任何进程的域 cgroup，才能在其 cgroup.subtree_control 文件中启用域控制器。)
 
 This guarantees that, when a domain controller is looking at the part
 of the hierarchy which has it enabled, processes are always only on
 the leaves.  This rules out situations where child cgroups compete
 against internal processes of the parent.
+(这保证了当域控制器观察启用了该控制器的层级部分时，进程始终只存在于叶子节点上。这排除了子 cgroup 与父节点的内部进程相互竞争的情况。)
 
 The root cgroup is exempt from this restriction.  Root contains
 processes and anonymous resource consumption which can't be associated
@@ -454,6 +577,8 @@ controllers.  How resource consumption in the root cgroup is governed
 is up to each controller (for more information on this topic please
 refer to the Non-normative information section in the Controllers
 chapter).
+(根 cgroup（root cgroup）不受此限制。根节点包含进程以及无法归属于任何其他 cgroup 的匿名资源消耗，因此大多数控制器都需要对其进行特殊处理。
+根 cgroup 中的资源消耗如何管理，取决于各个控制器的具体实现（有关此话题的更多信息，请参阅‘控制器’章节中的‘非规范性信息’部分）。)
 
 Note that the restriction doesn't get in the way if there is no
 enabled controller in the cgroup's "cgroup.subtree_control".  This is
@@ -462,12 +587,15 @@ populated cgroup.  To control resource distribution of a cgroup, the
 cgroup must create children and transfer all its processes to the
 children before enabling controllers in its "cgroup.subtree_control"
 file.
+(请注意，如果该 cgroup 的 cgroup.subtree_control 中没有启用任何控制器，则该限制（无内部进程约束）并不会产生阻碍。这一点非常重要，
+否则将无法在一个已包含进程的 cgroup 下创建子组。要控制某个 cgroup 的资源分配，该 cgroup 必须先创建子组，
+并将其所有进程转移到子组中，然后才能在其 cgroup.subtree_control 文件中启用控制器。)
 
 
 Delegation
 ----------
 
-Model of Delegation
+Model of Delegation(委托模型)
 ~~~~~~~~~~~~~~~~~~~
 
 A cgroup can be delegated in two ways.  First, to a less privileged
@@ -475,6 +603,8 @@ user by granting write access of the directory and its "cgroup.procs",
 "cgroup.threads" and "cgroup.subtree_control" files to the user.
 Second, if the "nsdelegate" mount option is set, automatically to a
 cgroup namespace on namespace creation.
+(cgroup 可以通过两种方式进行委托。第一种，通过将该目录及其 cgroup.procs、cgroup.threads 和 cgroup.subtree_control 文件的写权限授予某个低特权用户，
+从而委托给该用户。第二种，如果设置了 nsdelegate 挂载选项，则在创建 cgroup 命名空间（namespace）时，会自动将其委托给该命名空间。)
 
 Because the resource control interface files in a given directory
 control the distribution of the parent's resources, the delegatee
@@ -483,6 +613,8 @@ achieved by not granting access to these files.  For the second, the
 kernel rejects writes to all files other than "cgroup.procs" and
 "cgroup.subtree_control" on a namespace root from inside the
 namespace.
+(由于特定目录下的资源控制接口文件控制着父级资源的分配，受托者不应被允许对这些文件进行写入。对于第一种委托方式（基于文件权限），这是通过不授予这些文件的访问权限来实现的。
+对于第二种方式（基于命名空间），内核会拒绝在命名空间内部对命名空间根目录下除 cgroup.procs 和 cgroup.subtree_control 以外的所有文件进行写入。)
 
 The end results are equivalent for both delegation types.  Once
 delegated, the user can build sub-hierarchy under the directory,
@@ -491,35 +623,44 @@ resources it received from the parent.  The limits and other settings
 of all resource controllers are hierarchical and regardless of what
 happens in the delegated sub-hierarchy, nothing can escape the
 resource restrictions imposed by the parent.
+(两种委托方式的最终结果是等效的。一旦完成了委托，用户就可以在该目录下建立子层级，
+根据需要组织内部的进程，并进一步分发从父级获得的资源。所有资源控制器的限制和其他设置都是层级化的，
+无论在受委托的子层级中发生什么，任何操作都无法逃脱父级所施加的资源限制)
 
 Currently, cgroup doesn't impose any restrictions on the number of
 cgroups in or nesting depth of a delegated sub-hierarchy; however,
 this may be limited explicitly in the future.
+(目前，cgroup 对于受委托子层级中的 cgroup 数量或嵌套深度没有任何限制；然而，未来可能会对此进行明确的限制)
 
 
-Delegation Containment
+Delegation Containment（委托封闭性）
 ~~~~~~~~~~~~~~~~~~~~~~
 
 A delegated sub-hierarchy is contained in the sense that processes
 can't be moved into or out of the sub-hierarchy by the delegatee.
+(受委托的子层级在某种意义上是封闭的，即受托者（delegatee）无法将进程移入或移出该子层级)
 
 For delegations to a less privileged user, this is achieved by
 requiring the following conditions for a process with a non-root euid
 to migrate a target process into a cgroup by writing its PID to the
 "cgroup.procs" file.
+(对于向低特权用户的委托，这是通过以下方式实现的：要求一个具有非 root 有效用户 ID（euid）的进程在通过向 cgroup.procs 文件写入 PID 来将目标进程迁移到某个 cgroup 时，必须满足以下条件)
 
 - The writer must have write access to the "cgroup.procs" file.
 
 - The writer must have write access to the "cgroup.procs" file of the
   common ancestor of the source and destination cgroups.
+  (写入者必须对源 cgroup 和目的 cgroup 的共同祖先节点的 cgroup.procs 文件拥有写权限)
 
 The above two constraints ensure that while a delegatee may migrate
 processes around freely in the delegated sub-hierarchy it can't pull
 in from or push out to outside the sub-hierarchy.
+(上述两个约束确保了：虽然受托者（delegatee）可以在受委托的子层级内自由迁移进程，但其无法将进程从子层级之外拉入，也无法将其推向子层级之外)
 
 For an example, let's assume cgroups C0 and C1 have been delegated to
 user U0 who created C00, C01 under C0 and C10 under C1 as follows and
 all processes under C0 and C1 belong to U0::
+(举例来说，假设 cgroup C0 和 C1 已经委托给了用户 U0。用户 U0 在 C0 下创建了 C00 和 C01，并在 C1 下创建了 C10，结构如下所示；且 C0 和 C1 下的所有进程均属于 U0：)
 
   ~~~~~~~~~~~~~ - C0 - C00
   ~ cgroup    ~      \ C01
@@ -788,19 +929,22 @@ All cgroup core files are prefixed with "cgroup."
   cgroup.type
 
 	A read-write single value file which exists on non-root
-	cgroups.
+	cgroups.（这是一个存在于非根 cgroup 中的可读写单值文件）
 
 	When read, it indicates the current type of the cgroup, which
-	can be one of the following values.
+	can be one of the following values.(读取该文件时，它会显示当前 cgroup 的类型，其值可以是以下之一：)
 
 	- "domain" : A normal valid domain cgroup.
 
 	- "domain threaded" : A threaded domain cgroup which is
           serving as the root of a threaded subtree.
+		  (一个线程域（threaded domain）cgroup，它正充当线程子树（threaded subtree）的根节点)
 
 	- "domain invalid" : A cgroup which is in an invalid state.
 	  It can't be populated or have controllers enabled.  It may
 	  be allowed to become a threaded cgroup.
+	  (一个处于无效状态（invalid state）的 cgroup。它既不能包含进程（即无法被填充），
+	  也无法启用控制器。但它可能被允许转变为一个线程 cgroup（threaded cgroup）。)
 
 	- "threaded" : A threaded cgroup which is a member of a
           threaded subtree.
@@ -1869,9 +2013,13 @@ This is especially valuable on large NUMA systems where placing jobs
 on properly sized subsets of the systems with careful processor and
 memory placement to reduce cross-node memory access and contention
 can improve overall system performance.
+(cpuset 控制器提供了一种机制，用于将任务的 CPU 和内存节点分配（placement）限制在当前 cgroup 的接口文件中所指定的资源范围内。
+这在大规模 NUMA（非统一内存访问）系统上尤为宝贵。在这些系统上，通过精细的处理器和内存分配，
+将作业放置在规模合适的系统子集中，可以减少跨节点内存访问和竞争，从而提升系统的整体性能。)
 
 The "cpuset" controller is hierarchical.  That means the controller
 cannot use CPUs or memory nodes not allowed in its parent.
+(cpuset 控制器是层级化的。这意味着该控制器无法使用其父级 cgroup 不允许使用的 CPU 或内存节点)
 
 
 Cpuset Interface Files
@@ -1880,13 +2028,16 @@ Cpuset Interface Files
   cpuset.cpus
 	A read-write multiple values file which exists on non-root
 	cpuset-enabled cgroups.
+	(这是一个存在于启用了 cpuset 的非根 cgroup 中的可读写多值文件)
 
 	It lists the requested CPUs to be used by tasks within this
 	cgroup.  The actual list of CPUs to be granted, however, is
 	subjected to constraints imposed by its parent and can differ
 	from the requested CPUs.
+	(它列出了该 cgroup 内任务申请使用的 CPU。然而，最终授予的实际 CPU 列表受限于父级施加的约束，可能与申请的 CPU 列表有所不同)
 
 	The CPU numbers are comma-separated numbers or ranges.
+	(CPU 编号是由逗号分隔的数字或范围组成。)
 	For example::
 
 	  # cat cpuset.cpus
@@ -1895,17 +2046,22 @@ Cpuset Interface Files
 	An empty value indicates that the cgroup is using the same
 	setting as the nearest cgroup ancestor with a non-empty
 	"cpuset.cpus" or all the available CPUs if none is found.
+	(空值表示该 cgroup 将使用与其最近的、且 cpuset.cpus 非空的祖先 cgroup 相同的设置；如果没找到任何这样的祖先节点，则使用所有可用的 CPU。)
 
 	The value of "cpuset.cpus" stays constant until the next update
 	and won't be affected by any CPU hotplug events.
+	(cpuset.cpus 的值将保持恒定，直到下一次更新为止；它不会受到任何 CPU 热插拔（hotplug）事件的影响)
 
   cpuset.cpus.effective
 	A read-only multiple values file which exists on all
 	cpuset-enabled cgroups.
+	(这是一个存在于所有启用了 cpuset 的 cgroup 中的只读多值文件)
+	- 如果要绑定CPU怎么操作? 如上，修改cpuset.cpus
 
 	It lists the onlined CPUs that are actually granted to this
 	cgroup by its parent.  These CPUs are allowed to be used by
 	tasks within the current cgroup.
+	(它列出了由父级 cgroup 实际授予该 cgroup 的、且处于上线（online）状态的 CPU。当前 cgroup 内的任务允许使用这些 CPU)
 
 	If "cpuset.cpus" is empty, the "cpuset.cpus.effective" file shows
 	all the CPUs from the parent cgroup that can be available to
@@ -1916,9 +2072,9 @@ Cpuset Interface Files
 
 	Its value will be affected by CPU hotplug events.
 
-  cpuset.mems
+  cpuset.mems  -- 限制 memory.node
 	A read-write multiple values file which exists on non-root
-	cpuset-enabled cgroups.
+	cpuset-enabled cgroups.(可读可写)
 
 	It lists the requested memory nodes to be used by tasks within
 	this cgroup.  The actual list of memory nodes granted, however,
@@ -1939,9 +2095,10 @@ Cpuset Interface Files
 	The value of "cpuset.mems" stays constant until the next update
 	and won't be affected by any memory nodes hotplug events.
 
-  cpuset.mems.effective
+  cpuset.mems.effective  -- 实际使用的memory-node
 	A read-only multiple values file which exists on all
 	cpuset-enabled cgroups.
+	(只读)
 
 	It lists the onlined memory nodes that are actually granted to
 	this cgroup by its parent. These memory nodes are allowed to
@@ -1959,6 +2116,7 @@ Cpuset Interface Files
 	A read-write single value file which exists on non-root
 	cpuset-enabled cgroups.  This flag is owned by the parent cgroup
 	and is not delegatable.
+	(这是一个存在于启用了 cpuset 的非根 cgroup 中的可读写单值文件。该标志位的所有权归父级 cgroup 所有，且不可委托（not delegatable）)
 
         It accepts only the following input values when written to.
 
@@ -1970,39 +2128,56 @@ Cpuset Interface Files
 	itself and all its descendants except those that are separate
 	partition roots themselves and their descendants.  The root
 	cgroup is always a partition root.
+	(当被设置为‘分区根节点’（partition root）时，
+	当前 cgroup 就成为了一个新分区（或调度域）的根。
+	该分区包含了它自身及其所有后代节点，但本身已成为独立分区根节点的后代及其子树除外。根 cgroup 始终是一个分区根节点)
 
 	There are constraints on where a partition root can be set.
 	It can only be set in a cgroup if all the following conditions
 	are true.
+	(对于在何处可以设置分区根节点是存在约束的。只有当满足以下所有条件时，才可以在某个 cgroup 中进行设置)
 
 	1) The "cpuset.cpus" is not empty and the list of CPUs are
 	   exclusive, i.e. they are not shared by any of its siblings.
 	2) The parent cgroup is a partition root.
 	3) The "cpuset.cpus" is also a proper subset of the parent's
 	   "cpuset.cpus.effective".
+	   (cpuset.cpus 的值还必须是父级 cgroup 中 cpuset.cpus.effective 的真子集（proper subset）)
 	4) There is no child cgroups with cpuset enabled.  This is for
 	   eliminating corner cases that have to be handled if such a
 	   condition is allowed.
+	   (不存在任何已启用 cpuset 的子 cgroup。这是为了消除如果允许此类情况发生而必须处理的边缘案例（corner cases）)
+	   `txt
+	     1. 先保证 A 的所有子组都没开 cpuset（即 A/cgroup.subtree_control 里没有 cpuset）。 
+		 2. 执行 echo root > A/cpuset.cpus.partition。此时 A 身份转变成功。
+		  3. 转正后，你再执行 echo +cpuset > A/cgroup.subtree_control。 4. 现在你可以给子组分配 A 领地内的核心了
+	   `
 
 	Setting it to partition root will take the CPUs away from the
 	effective CPUs of the parent cgroup.  Once it is set, this
 	file cannot be reverted back to "member" if there are any child
 	cgroups with cpuset enabled.
+	(将其设置为分区根节点（partition root）会从父级 cgroup 的有效 CPU 列表中扣除相应的 CPU。
+	一旦设置完成，如果存在任何已启用 cpuset 的子 cgroup，该文件就无法恢复回‘成员’（member）状态。)
 
 	A parent partition cannot distribute all its CPUs to its
 	child partitions.  There must be at least one cpu left in the
-	parent partition.
+	parent partition.(父级分区不能将其所有的 CPU 都分配给子级分区。父级分区中必须至少保留一个 CPU)
+	- 不能掏空父级
 
 	Once becoming a partition root, changes to "cpuset.cpus" is
 	generally allowed as long as the first condition above is true,
 	the change will not take away all the CPUs from the parent
 	partition and the new "cpuset.cpus" value is a superset of its
 	children's "cpuset.cpus" values.
+	(一旦成为分区根节点（partition root），通常允许更改 cpuset.cpus 的值，
+	只要满足上述第一个条件、该更改不会夺走父级分区的所有 CPU，且新的 cpuset.cpus 值是其子级 cpuset.cpus 值的超集（superset）。)
 
 	Sometimes, external factors like changes to ancestors'
 	"cpuset.cpus" or cpu hotplug can cause the state of the partition
 	root to change.  On read, the "cpuset.sched.partition" file
 	can show the following values.
+	(有时，诸如祖先节点 cpuset.cpus 的变更或 CPU 热插拔（hotplug）等外部因素，可能会导致分区根节点的状态发生改变。在读取时，cpuset.cpus.partition 文件可能会显示以下数值：)
 
 	"member"       Non-root member of a partition
 	"root"         Partition root
@@ -2011,6 +2186,7 @@ Cpuset Interface Files
 	It is a partition root if the first 2 partition root conditions
 	above are true and at least one CPU from "cpuset.cpus" is
 	granted by the parent cgroup.
+	(如果上述前两个分区根节点条件均满足，且父级 cgroup 至少授予了 cpuset.cpus 中的一个 CPU，那么它就是一个分区根节点（partition root）)
 
 	A partition root can become invalid if none of CPUs requested
 	in "cpuset.cpus" can be granted by the parent cgroup or the
@@ -2019,6 +2195,9 @@ Cpuset Interface Files
 	of the first partition root condition above will still apply.
 	The cpu affinity of all the tasks in the cgroup will then be
 	associated with CPUs in the nearest ancestor partition.
+	(如果父级 cgroup 未授予 cpuset.cpus 中请求的任何 CPU，或者父级 cgroup 本身不再是分区根节点，那么该分区根节点将变为‘无效’（invalid）。
+	在这种情况下，即便上述第一个分区根节点的限制条件仍然适用，它也不再是一个真正的分区。
+	该 cgroup 中所有任务的 CPU 亲和性（affinity）将转而关联至最近的祖先分区中的 CPU。)
 
 	An invalid partition root can be transitioned back to a
 	real partition root if at least one of the requested CPUs
@@ -2027,6 +2206,9 @@ Cpuset Interface Files
 	will be associated to the CPUs of the newly formed partition.
 	Changing the partition state of an invalid partition root to
 	"member" is always allowed even if child cpusets are present.
+	(如果父级 cgroup 现在能够授予请求中的至少一个 CPU，那么无效的分区根节点可以重新转变为真正的分区根节点。
+	在这种情况下，先前无效分区中所有任务的 CPU 亲和性将关联到新形成分区的 CPU 上。
+	此外，即使存在子级 cpuset，也始终允许将无效分区根节点的状态更改回‘成员’（member）。)
 
 
 Device controller

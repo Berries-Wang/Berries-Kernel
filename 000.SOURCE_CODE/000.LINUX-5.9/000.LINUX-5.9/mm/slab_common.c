@@ -237,6 +237,36 @@ struct kmem_cache *find_mergeable(unsigned int size, unsigned int align,
 
 /**
  * 创建slab描述符
+ * 
+ * @param name        要创建的slab对象的名称，它会显示在/proc/slabinfo中
+ * @param object_size slab对象的大小。
+ * @param align       slab对象的对齐要求
+ * @param flags       slab分配器的分配掩码和标志位
+ * @param ctor        对象的构造函数
+ * @param root_cache
+ * @param useroffset   Usercopy区域的偏移量？？
+ * @param usersize     Usercopy区域的大小
+ * 
+ * <pre>
+ *   在 Linux 内核开发中，useroffset 和 usersize 是为了配合 Hardened Usercopy（增强型用户拷贝保护）机制而设计的
+ *   这两个参数定义了缓存对象中哪一部分数据是允许与用户空间进行交互的
+ *   - useroffset (用户空间偏移量)： 指从缓存对象（object）的起始地址开始算起，允许复制到用户空间的数据区域的起始位置（偏移字节数）。
+ *   - usersize (用户空间大小)： 指从 useroffset 开始，允许复制到用户空间的数据区域的长度（字节数）。
+ * 
+ *   为什么需要这两个参数？
+ *     + 为了防止内核中的敏感信息泄漏（如内核指针、金丝雀值/stack canary 等），Linux 内核引入了限制：只有被显式标记为 "usercopy-safe" 的内存区域，才能通过 copy_to_user() 或 copy_from_user() 函数进行操作。
+ *  
+ *   > 那这种偏移量怎么计算? 
+ * <stddef.h>/<linux/stddef.h> #offsetof 宏
+ * struct my_data {
+ *     int id;           // 偏移量 0
+ *     char buffer[64];  // 偏移量 4 (假设 int 占 4 字节)
+ *     int secret;
+ * };
+ * 
+ * // 获取 buffer 的偏移量
+ * size_t off = offsetof(struct my_data, buffer);
+ *  </pre>
  */
 static struct kmem_cache *
 create_cache(const char *name, unsigned int object_size, unsigned int align,
@@ -246,14 +276,18 @@ create_cache(const char *name, unsigned int object_size, unsigned int align,
 	struct kmem_cache *s;
 	int err;
 
-	if (WARN_ON(useroffset + usersize > object_size))
+	if (WARN_ON(useroffset + usersize > object_size)) {
 		useroffset = usersize = 0;
+	}
 
 	err = -ENOMEM;
-	// 创建一个kmem_cache数据结构
+	/**
+	 * 创建一个kmem_cache数据结构,函数实现是哪个?
+	 */
 	s = kmem_cache_zalloc(kmem_cache, GFP_KERNEL);
-	if (!s)
+	if (!s) {
 		goto out;
+	}
 
 	s->name = name;
 	s->size = s->object_size = object_size;
@@ -266,15 +300,17 @@ create_cache(const char *name, unsigned int object_size, unsigned int align,
      * 分配slab
      */
 	err = __kmem_cache_create(s, flags);
-	if (err)
+	if (err) {
 		goto out_free_cache;
+	}
 
 	s->refcount = 1;
 	// 将新建的slab描述符添加到全局的slab_cach中
 	list_add(&s->list, &slab_caches);
 out:
-	if (err)
+	if (err) {
 		return ERR_PTR(err);
+	}
 	return s;
 
 out_free_cache:
@@ -404,7 +440,7 @@ EXPORT_SYMBOL(kmem_cache_create_usercopy);
  * @size: The size of objects to be created in this cache. 缓存对象大小
  * @align: The required alignment for the objects. 缓存对象需要对齐的字节数
  * @flags: SLAB flags
- * @ctor: A constructor for the objects.
+ * @ctor: A constructor for the objects. 对象的构造函数
  *
  * Cannot be called within a interrupt, but can be interrupted.
  * The @ctor is run when new pages are allocated by the cache.

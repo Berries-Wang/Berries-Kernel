@@ -107,10 +107,7 @@ static inline pgprot_t arch_filter_pgprot(pgprot_t prot)
 #endif
 
 /**
- * VMA属性的标志位可以任意组合，但是最终要落实到硬件机制上，即页表项的属性中。
- * VMA属性到页表属性的转换如图4.21所示。 vm_area_struct数据结构中有两个成员和属性相关：
- *   一个是vm_flags成员，用于描述VMA的属性；
- *   另外一个是vm_page_prot成员，用于将VMA属性标志位转换成与处理器相关的页表项的属性，它和具体架构相关
+ * VMA属性的标志位可以任意组合，但是最终要落实到硬件机制上，即页表项的属性中。(IN [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图4.21　VMA属性到页表项属性的转换)
  * 
  * 把vm_flags标志位转化成具体的页表项的硬件标志位
  */
@@ -219,10 +216,12 @@ static int do_brk_flags(unsigned long addr, unsigned long request, unsigned long
  *  }
  *  
  *  static inline long __do_sys_brk(unsigned long brk)
+ *  - 宏的本质就是替换，那么，__do_sys_brk 的实现就是下面的函数体了
  * </pre>
  * 
  * 则:
  *  @param brk 是什么? 将break指针(也称 brk 指针)调整为${brk}，来分配内存 -- 通过malloc函数分析而来
+ *             - 是什么(怎么工作的?)， 参考:mm_struct#brk (mm/mm_types.h) --> [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#图4.19　mm_struct数据结构
  */
 SYSCALL_DEFINE1(brk, unsigned long, brk)
 {

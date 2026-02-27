@@ -262,6 +262,9 @@ static __always_inline bool vmstat_item_in_bytes(int idx)
  * so it is important to keep the active lists LRU_ACTIVE higher in
  * the array than the corresponding inactive lists, and to keep
  * the *_FILE lists LRU_FILE higher than the corresponding _ANON lists.
+ * (我们在代码的多处位置对 LRU 链表进行算术运算，因此保持列表顺序至关重要：
+ * 活跃链表 (LRU_ACTIVE) 在数组中的位置必须高于对应的非活跃链表，
+ * 且 文件页链表 (*_FILE) 的位置必须高于对应的 匿名页 (_ANON) 链表)
  *
  * This has to be kept in sync with the statistics in zone_stat_item
  * above and the descriptions in vmstat_text in mm/vmstat.c
@@ -270,6 +273,9 @@ static __always_inline bool vmstat_item_in_bytes(int idx)
 #define LRU_ACTIVE 1
 #define LRU_FILE 2
 
+/**
+ * - 可用于页面回收
+ */
 enum lru_list {
 	LRU_INACTIVE_ANON = LRU_BASE,
 	LRU_ACTIVE_ANON = LRU_BASE + LRU_ACTIVE,
@@ -332,11 +338,17 @@ struct lruvec {
 /* LRU Isolation modes. */
 typedef unsigned __bitwise isolate_mode_t;
 
+/**
+ * 	WMARK_MIN:   最小水位线, 只有带有 `GFP_ATOMIC` 标志的紧急请求（如中断处理）才能分配内存
+ *	WMARK_LOW:   低水位线 , 内核会唤醒后台线程 `kswapd` 开始异步回收内存，直到水位回升到 `WMARK_HIGH`
+ *	WMARK_HIGH:  高水位线 , 内存充足状态,`kswapd` 就会认为内存充足，进入睡眠状态
+ *	NR_WMARK  :  水位线数量
+ */
 enum zone_watermarks {
-	WMARK_MIN,
-	WMARK_LOW,
+	WMARK_MIN,    
+	WMARK_LOW, 
 	WMARK_HIGH,
-	NR_WMARK
+	NR_WMARK   
 };
 
 #define min_wmark_pages(z) (z->_watermark[WMARK_MIN] + z->watermark_boost)
@@ -354,6 +366,9 @@ struct per_cpu_pages {
 };
 
 struct per_cpu_pageset {
+	/**
+	 * 
+	 */
 	struct per_cpu_pages pcp;
 #ifdef CONFIG_NUMA
 	s8 expire;
@@ -463,8 +478,18 @@ enum zone_type {
 struct zone {
 	/* Read-mostly fields */
 
-	/* zone watermarks, access with *_wmark_pages(zone) macros */
+	/**
+	 *  zone watermarks, access with *_wmark_pages(zone) macros
+	 * 存储的就是该内存区域（Zone）具体的物理页帧数量阈值
+	 * 例如:
+	 *  _watermark[0:WMARK_MIN] = 1245;
+	 *  _watermark[1:WMARK_LOW]=1556
+	 *  _watermark[2:WMARK_HIGH]=1867
+	 *  */
 	unsigned long _watermark[NR_WMARK];
+	/**
+	 * watermark_boost表示临时提高的水位（它是在Linux 5.0内核中引入的）
+	 */
 	unsigned long watermark_boost;
 
 	unsigned long nr_reserved_highatomic;
@@ -1221,10 +1246,12 @@ static __always_inline struct zoneref *next_zones_zonelist(struct zoneref *z,
  * within the allowed nodemask. The zoneref returned is a cursor that can be
  * used to iterate the zonelist with next_zones_zonelist by advancing it by
  * one before calling.
+ * (此函数返回处于或低于给定区域索引（zone index）、且在允许的节点掩码（nodemask）范围内的第一个区域。返回的 zoneref 是一个游标，通过在调用前将其递增 1，即可配合 next_zones_zonelist 函数来遍历整个区域列表（zonelist）。)
  *
  * When no eligible zone is found, zoneref->zone is NULL (zoneref itself is
  * never NULL). This may happen either genuinely, or due to concurrent nodemask
  * update due to cpuset modification.
+ * (当未找到合格的区域（zone）时，zoneref->zone 的值为 NULL（但 zoneref 本身永远不会为 NULL）。这种情况可能是由于确实没有可用资源，也可能是由于 cpuset 修改导致节点掩码（nodemask）发生了并发更新。)
  */
 static inline struct zoneref *first_zones_zonelist(struct zonelist *zonelist,
 					enum zone_type highest_zoneidx,

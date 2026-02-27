@@ -49,17 +49,26 @@
  * If KASLR is enabled, then an offset K is added to the kernel address
  * space. The bottom 21 bits of this offset are zero to guarantee 2MB
  * alignment for PA and VA.
+ * (如果启用了 KASLR（内核地址空间布局随机化），则会向内核地址空间添加一个偏移量 K。该偏移量的低 21 位始终为零，以确保物理地址和虚拟地址保持 2MB 对齐。)
  *
  * For each pagetable level of the swapper, we know that the shift will
  * be larger than 21 (for the 4KB granule case we use section maps thus
  * the smallest shift is actually 30) thus there is the possibility that
  * KASLR can increase the number of pagetable entries by 1, so we make
  * room for this extra entry.
+ * (对于 swapper 进程（内核初始化进程）的每个页表层级，
+ * 我们知道其页表移位量（shift）将大于 21（在使用 4KB 粒度的情况下，
+ * 我们采用区段映射，因此最小的移位量实际上是 30）。
+ * 这意味着 KASLR 有可能导致页表项的数量增加 1 个，
+ * 因此我们需要为这个额外的页表项预留空间。)
  *
  * Note KASLR cannot increase the number of required entries for a level
  * by more than one because it increments both the virtual start and end
  * addresses equally (the extra entry comes from the case where the end
  * address is just pushed over a boundary and the start address isn't).
+ * (需要注意的是，KASLR 导致任何一个层级所需的页表项数量最多只会增加 1 个。
+ * 这是因为 KASLR 会同时、等量地增加虚拟起始地址和结束地址（额外的页表项仅出现在结束地址刚好被推到边界之外，
+ * 而起始地址仍在边界之内的情况下）)
  */
 
 #ifdef CONFIG_RANDOMIZE_BASE
@@ -91,7 +100,7 @@
 			+ EARLY_PMDS((vstart), (vend)))	/* each PMD needs a next level page table */
 #define INIT_DIR_SIZE (PAGE_SIZE * EARLY_PAGES(KIMAGE_VADDR + TEXT_OFFSET, _end))
 /**
- * 4K页: IDMAP_DIR_SIZE = 4 * 4096 , 即 4个4K页
+ * 4K页: IDMAP_DIR_SIZE = 3 * 4096 , 即 3个4K页
  */
 #define IDMAP_DIR_SIZE		(IDMAP_PGTABLE_LEVELS * PAGE_SIZE)
 

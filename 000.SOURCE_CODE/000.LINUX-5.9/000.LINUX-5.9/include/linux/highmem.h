@@ -263,16 +263,19 @@ __alloc_zeroed_user_highpage(gfp_t movableflags,
 #endif
 
 /**
- * alloc_zeroed_user_highpage_movable - Allocate a zeroed HIGHMEM page for a VMA that the caller knows can move
- * @vma: The VMA the page is to be allocated for
+ * alloc_zeroed_user_highpage_movable - 
+ * Allocate a zeroed HIGHMEM page for a VMA that the caller knows can move(为调用者确认可移动的虚拟内存区域（VMA）分配一个已清零的高端内存（HIGHMEM）页)
+ * 
+ * @vma: The VMA the page is to be allocated for (要为其分配页面的虚拟内存区域（VMA）)
  * @vaddr: The virtual address the page will be inserted into
  *
  * This function will allocate a page for a VMA that the caller knows will
  * be able to migrate in the future using move_pages() or reclaimed
+ * (此函数将为调用者已知未来可通过 move_pages() 迁移或回收的 VMA 分配一个页面)
  */
 static inline struct page *
 alloc_zeroed_user_highpage_movable(struct vm_area_struct *vma,
-					unsigned long vaddr)
+				   unsigned long vaddr)
 {
 	return __alloc_zeroed_user_highpage(__GFP_MOVABLE, vma, vaddr);
 }

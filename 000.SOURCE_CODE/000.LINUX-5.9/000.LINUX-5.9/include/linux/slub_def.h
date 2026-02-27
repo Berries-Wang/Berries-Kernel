@@ -81,12 +81,15 @@ struct kmem_cache_order_objects {
  * Slab cache management.
  */
 struct kmem_cache {
+	/**
+	 * 这里面有struct page*
+	 */
 	struct kmem_cache_cpu __percpu *cpu_slab;
 	/* Used for retrieving partial slabs, etc. */
 	slab_flags_t flags;
 	unsigned long min_partial;
-	unsigned int size;	/* The size of an object including metadata */
-	unsigned int object_size;/* The size of an object without metadata */
+	unsigned int size;	/* The size of an object including metadata :对象的长度，这个长度已经加上对齐字节 --> gemini: size 字段代表每个已分配对象的总大小，包括用于对齐的填充（Padding）以及任何调试元数据*/
+	unsigned int object_size;/* The size of an object without metadata : 对象的实际大小*/
 	struct reciprocal_value reciprocal_size;
 	unsigned int offset;	/* Free pointer offset */
 #ifdef CONFIG_SLUB_CPU_PARTIAL
@@ -102,7 +105,7 @@ struct kmem_cache {
 	int refcount;		/* Refcount for slab cache destroy */
 	void (*ctor)(void *);
 	unsigned int inuse;		/* Offset to metadata */
-	unsigned int align;		/* Alignment */
+	unsigned int align;		/* Alignment : 对齐的长度*/
 	unsigned int red_left_pad;	/* Left redzone padding size */
 	const char *name;	/* Name (only for display!) */
 	struct list_head list;	/* List of slab caches */
@@ -127,10 +130,16 @@ struct kmem_cache {
 #ifdef CONFIG_KASAN
 	struct kasan_cache kasan_info;
 #endif
-
+  
+    /**
+	 * 这两个字段参考: [000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/mm/slab_common.c]#'create_cache'函数的代码注释
+	 */
 	unsigned int useroffset;	/* Usercopy region offset */
 	unsigned int usersize;		/* Usercopy region size */
 
+	/**
+	 * slab节点，在NUMA系统中每个节点有一个kmem_cache_node数据结构
+	 */
 	struct kmem_cache_node *node[MAX_NUMNODES];
 };
 

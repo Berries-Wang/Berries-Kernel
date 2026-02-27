@@ -1,7 +1,28 @@
-# NUMA
-先学习[001.UNIX-DOCS/025.NUMA/README.md(另一个Git仓库)](Berries-Kernel:001.UNIX-DOCS/025.NUMA/README.md) & [006.BOOKs/RISC-V Architecture Programming and Practice.pdf#11.2 高速缓存的访问延时](../../007.BOOKs/RISC-V%20Architecture%20Programming%20and%20Practice/) & [奔跑吧Linux内核（第2版）卷1：基础架构#1.1.17　NUMA](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) & [3.3.1　内存架构之UMA和NUMA](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) & [1.1.17　NUMA#图1.24　NUMA系统](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub)再看以下内容
+# NUMA（Non-Uniform Memory Access，非一致性内存访问）
+先学习[006.BOOKs/RISC-V Architecture Programming and Practice.pdf#11.2 高速缓存的访问延时](../../007.BOOKs/RISC-V%20Architecture%20Programming%20and%20Practice/) & [奔跑吧Linux内核（第2版）卷1：基础架构#1.1.17　NUMA](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) & [3.3.1　内存架构之UMA和NUMA](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) & [1.1.17　NUMA#图1.24　NUMA系统](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) & [28-多核处理器：内存一致性模型 [中山大学 操作系统原理]#P47](./../000.内存管理/998.REFS/000.中山大学-操作系统/16-0612-multiprocessor-2.pdf)再看以下内容
 
-![20251016102238.jpg](./999.VIDEOS/20251016102238.jpg)
+## 摘要
+在现在广泛应用的计算机系统中，以内存为研究对象可以分成两种架构，一种是统一内存访问（Uniform Memory Access，UMA）架构，另外一种是非统一内存访问（Non-Uniform Memory Access，NUMA）架构
+
+- UMA架构：内存有统一的结构并且可以统一寻址。目前大部分嵌入式系统、手机操作系统以及台式机操作系统等采用UMA架构。如图3.6所示，该系统使用UMA架构，有4个CPU，它们都有L1高速缓存，其中CPU0和CPU1组成一个簇（Cluster0），它们共享一个L2高速缓存。另外，CPU2和CPU3组成另外一个簇（Cluster1），它们共享另外一个L2高速缓存。4个CPU都共享同一个L3的高速缓存。最重要的一点，它们可以通过系统总线来访问物理内存DDR。
+- NUMA架构：系统中有多个内存节点和多个CPU簇，CPU访问本地内存节点的速度最快，访问远端的内存节点的速度要慢一点。如图3.7所示，该系统使用NUMA架构，有两个内存节点，其中CPU0和CPU1组成一个节点（Node0），它们可以通过系统总线访问本地DDR物理内存，同理，CPU2和CPU3组成另外一个节点（Node1），它们也可以通过系统总线访问本地的DDR物理内存。如果两个节点通过超路径互连（Ultra Path Interconnect，UPI）总线连接，那么CPU0可以通过这个内部总线访问远端的内存节点的物理内存，但是访问速度要比访问本地物理内存慢很多。
+
+> 示意图请参考: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#3.3.1　内存架构之UMA和NUMA
+
+
+---
+## 图示
+- ![20260126111608.jpg](./999.IMGS/20260126111608.jpg)
+   + UPI (Intel Ultra Path Interconnect)，在NUMA中扮演 “跨处理器桥梁”角色<sup>A cache-coherent, link-based Interconnect specification for Intel processors. Also known as Intel® UPI：一种用于英特尔® 处理器的、基于链路的缓存一致性互连规范。亦被称为英特尔® UPI。<sup>([Second Generation Intel® Xeon® Scalable Processors](./998.REFS/2nd-gen-xeon-scalable-datasheet-vol-1.pdf))</sup></sup>
+     - 参考:[Intel® Xeon® Processor Scalable Family Technical Overview#Intel® Ultra Path Interconnect (Intel® UPI)](./999.IMGS/Screenshot%202026-01-26%20at%2007-56-17%20英特尔®至强®处理器可扩展系列技术概述%20---%20Intel®%20Xeon®%20Processor%20Scalable%20Family%20Technical%20Overview.png)
+   + UPI 在 NUMA 中的具体位置: 在 NUMA 架构下，每一颗 CPU 都有自己直连的本地内存（Local Memory）。但如果 CPU 0 想要访问 CPU 1 挂载的内存，它就必须跨越物理边界,UPI 就是这条边界上的高速公路：
+     - 本地访问： CPU 0 → 本地内存控制器 → 本地 RAM（延迟低，带宽大）。
+     - 远端访问 (Remote Access)： CPU 0 → UPI 总线 → CPU 1 → CPU 1 的内存控制器 → 远端 RAM（延迟高，带宽受限于 UPI）。
+   + UPI 处理的核心任务:
+      - 跨插槽请求路由： 当一个核心发出的内存地址不在本地地址范围内时，硬件路由表会识别出该地址属于哪个 Socket，并将其封装成 UPI 数据包发送出去
+      - 缓存一致性维护： UPI 协助维护多处理器系统中的缓存一致性，确保各 CPU 的缓存数据与内存数据保持同步。
+- ![wechat_2026-01-25_235308_678.png](./999.IMGS/wechat_2026-01-25_235308_678.png)
+- ![wechat_2026-02-11_145047_411.png](./999.IMGS/wechat_2026-02-11_145047_411.png) <sup>[28-多核处理器：内存一致性模型 [中山大学 操作系统原理]#P47](./../000.内存管理/998.REFS/000.中山大学-操作系统/16-0612-multiprocessor-2.pdf)</sup>
 
 请注意，NUMA中的Node是什么意思? Node =  一个物理CPU + 属于他的物理内存插槽<sub>(含义为DDR内存)</sub> ， 例如，购买的 ’华硕STRIX B550-A GAMING 吹雪‘(一个CPU插槽(Socket)+四个物理内存插槽<sub>(含义为DDR内存)</sub>) ， 那么这一个物理内存插槽<sub>(含义为DDR内存)</sub>和所有的4个内存插槽构成一个Node。有些主板支持多Socket，那么每个Socket和属于他的内存插槽<sub>(含义为DDR内存)</sub>构成一个Node，即，这个多Socket主板则存在多个Node。
 - ![wechat_2025-11-03_080211_874.png](./999.IMGS/wechat_2025-11-03_080211_874.png)
@@ -9,6 +30,10 @@
   + 结构框图 (Node = Socket + 所属于他的内存插槽 , 不同Node之间访问方式)
      - ![20251103100323.jpg](./999.IMGS/20251103100323.jpg)
      - 参考手册：[User Manual: 对该图(该主板)有详细介绍](./999.IMGS/server_manual_e_mz73lm2_e_v3.0.pdf)
+     - GMI : AMD的高速互连技术，用于连接多个处理器和加速器，提供高带宽和低延迟的数据传输。功能与Intel UPI类似,参考资料:
+       + [4TH GEN AMD EPYC™ PROCESSOR ARCHITECTURE](./998.REFS/4th-gen-epyc-processor-architecture-white-paper.pdf)
+       + [TUNING GUIDE AMD EPYC 9004#Figure 2-9: Two EPYC 9004 Processors connect through 4 xGMI links (NPS1)](./998.REFS/58011-epyc-9004-tg-bios-and-workload.pdf)
+         - ![wechat_2026-01-26_081151_181.png](./999.IMGS/wechat_2026-01-26_081151_181.png)
   + [https://www.gigabyte.cn/Enterprise/Server-Motherboard/MZ73-LM2-rev-3x](https://www.gigabyte.cn/Enterprise/Server-Motherboard/MZ73-LM2-rev-3x)
        - ![0aa08cb3-6ba2-4100-9082-4f2103a8d9f8.png](./999.IMGS/0aa08cb3-6ba2-4100-9082-4f2103a8d9f8.png)
 
