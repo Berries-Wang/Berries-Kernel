@@ -1,2 +1,2 @@
 # 编译原理
-- 学习:[008.COMPUTER_SCIENCE/000.编译-汇编-链接](../../008.COMPUTER_SCIENCE/000.编译-汇编-链接/README.md)
+- 学习: <br/> - [008.COMPUTER_SCIENCE/000.编译-汇编-链接](../../008.COMPUTER_SCIENCE/000.编译-汇编-链接/README.md) <br/>- [第5章 GNU汇编器 & 第6章 链接器与链接脚本](../../007.BOOKs/RISC-V%20Architecture%20Programming%20and%20Practice/)

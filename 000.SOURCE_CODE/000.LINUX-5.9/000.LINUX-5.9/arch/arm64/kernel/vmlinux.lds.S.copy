@@ -15,8 +15,11 @@
 
 #include "image.h"
 
+/**
+ * 阅读:[第5章 GNU汇编器 & 第6章 链接器与链接脚本](007.BOOKs/RISC-V Architecture Programming and Practice/)
+*/
 OUTPUT_ARCH(aarch64)
-ENTRY(_text)
+ENTRY(_text) 
 
 jiffies = jiffies_64;
 
