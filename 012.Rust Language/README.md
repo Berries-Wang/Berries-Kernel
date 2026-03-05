@@ -6,7 +6,7 @@
 
 
 ## 笔记
-- [Github: Berries-RUST](https://github.com/Berries-Wang/Berries-RUST)
+- [GitHub: Berries-RUST](https://github.com/Berries-Wang/Berries-RUST)
 
 ---
 
