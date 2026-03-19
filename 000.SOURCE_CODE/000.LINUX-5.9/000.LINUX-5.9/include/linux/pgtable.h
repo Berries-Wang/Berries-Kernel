@@ -144,6 +144,7 @@ static inline pgd_t *pgd_offset_pgd(pgd_t *pgd, unsigned long address)
 /*
  * a shortcut which implies the use of the kernel's pgd, instead
  * of a process's
+ * (一个快捷方式，它暗示使用内核的页全局目录（pgd），而不是进程的。)
  */
 #ifndef pgd_offset_k
 #define pgd_offset_k(address)		pgd_offset(&init_mm, (address))

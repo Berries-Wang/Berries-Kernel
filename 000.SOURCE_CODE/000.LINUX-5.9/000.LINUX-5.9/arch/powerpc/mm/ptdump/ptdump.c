@@ -327,6 +327,9 @@ static void walk_pud(struct pg_state *st, p4d_t *p4d, unsigned long start)
 	}
 }
 
+/**
+ * 软件遍历页表
+ */
 static void walk_pagetables(struct pg_state *st)
 {
 	unsigned int i;
