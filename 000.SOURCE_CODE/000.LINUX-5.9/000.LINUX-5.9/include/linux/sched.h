@@ -826,23 +826,35 @@ struct task_struct {
 	 * prio 保存着进程的动态优先级，是调度类考虑的优先级，有些情况下需要暂时提高进程优先级，例如实时互斥量等
 	 * 可用于判断：
 	 *    - 是否是实时进程: [static inline int rt_task(struct task_struct *p);] -- 000.LINUX-5.9/include/linux/sched/rt.h
+	 * 
+	 * 内核调度器最终查看的值，值越小优先级越高。
+	 * --> 范围:[0,139]
 	 */
 	int				prio;
 	/**
 	 * 静态优先级: 在进程启动时分配
 	 * 
+	 * 内核不存储nice值，取而代之的是static_prio。NICE_TO_PRIO()宏可以把nice值转换成static_prio。
+	 * 它之所以称为静态优先级是因为它不会随着时间而改变，用户可以通过nice()或sched_setscheduler()等系统调用来修改该值。
+	 * 
 	 * 宏 NICE_TO_PRIO() (include/linux/sched/prio.h)实现由 nice 值转换成 static_prio
+	 * 
+	 * 故: 该字段是由nice值映射过来的
+	 * --> 范围:[100,139]
 	 */
 	int				static_prio;
 
 	/**
 	 * normal_prio 是基于 static_prio 和调度策略计算出来的优先级，在创建进程时会继承父进程的 normal_prio
-	 * 对于普通进程来说，normal_prio 等同于 static_prio，对于实时进程，会根据 rt_priority 重新计算 normal_prio，详见 effective_prio()函数
+	 * 对于普通进程来说，normal_prio 等同于 static_prio;
+	 * 对于实时进程，会根据 rt_priority 重新计算 normal_prio
+	 * 
+	 * 详见 effective_prio()函数 ?
 	 */
 	int				normal_prio;
 	
 	/**
-	 * rt_priority 是实时进程的优先级 
+	 * rt_priority 是实时进程的优先级 , 范围:[0,99]
 	 */
 	unsigned int			rt_priority;
     

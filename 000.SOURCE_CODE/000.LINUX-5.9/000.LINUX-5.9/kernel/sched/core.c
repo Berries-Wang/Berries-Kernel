@@ -8780,12 +8780,18 @@ void dump_cpu_task(int cpu)
  * nice level changed. I.e. when a CPU-bound task goes from nice 0 to
  * nice 1, it will get ~10% less CPU time than another CPU-bound task
  * that remained on nice 0.
+ * (Nice 等级是乘性关系，每改变一个 Nice 等级会产生约 10% 的变化。
+ * 例如，当一个 CPU 密集型任务的 Nice 值从 0 变为 1 时，与另一个保持在 Nice 值为 0 的 CPU 密集型任务相比，
+ * 它将获得约少 10% 的 CPU 时间。)
  *
  * The "10% effect" is relative and cumulative: from _any_ nice level,
  * if you go up 1 level, it's -10% CPU usage, if you go down 1 level
  * it's +10% CPU usage. (to achieve that we use a multiplier of 1.25.
  * If a task goes up by ~10% and another task goes down by ~10% then
  * the relative distance between them is ~25%.)
+ * (“10% 效应”是相对且累积的：从_任意_一个 Nice 等级出发，每提升 1 级，CPU 使用率减少 10%；每降低 1 级，
+ * CPU 使用率增加 10%。（为了实现这一点，我们使用了一个 1.25 的乘数。如果一个任务的 CPU 使用率提升约 10%，
+ * 而另一个任务降低约 10%，那么它们之间的相对差距约为 25%。）)
  * 
  * 因此，nice值越小，权重越大，优先级越高
  */
