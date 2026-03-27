@@ -8794,6 +8794,12 @@ void dump_cpu_task(int cpu)
  * 而另一个任务降低约 10%，那么它们之间的相对差距约为 25%。）)
  * 
  * 因此，nice值越小，权重越大，优先级越高
+ * 
+ * 为什么是这些数值:
+ *   前面所述的10%的影响是相对的、累加的，如一个进程增加了10%的CPU时间，则另外一个进程减少10%，因此差距大约是20%，这里使用一个系数1.25来计算。
+ * 举个例子，若进程A和进程B的nice值都为0，那么权重值都是1024，它们获得50%的CPU时间，计算公式为1024/(1024+1024)=50%。
+ * 假设进程A增加nice值，即nice=1，进程B的nice值不变，那么进程B应该获得55%的CPU时间，进程A应该获得45%的CPU时间。
+ * 我们利用prio_to_weight[]表来计算，对于进程A，820/(1024+820)≈44.5%；而对于进程B，1024/(1024+820)≈55.5%
  */
 const int sched_prio_to_weight[40] = {
  /* -20 */     88761,     71755,     56483,     46273,     36291,
@@ -8806,8 +8812,9 @@ const int sched_prio_to_weight[40] = {
  /*  15 */        36,        29,        23,        18,        15,
 };
 
-/*
+/**
  * Inverse (2^32/x) values of the sched_prio_to_weight[] array, precalculated.
+ * (sched_prio_to_weight[] 数组的倒数（2^32/x），已预先计算。)
  *
  * In cases where the weight does not change often, we can use the
  * precalculated inverse to speed up arithmetics by turning divisions

@@ -229,7 +229,17 @@ static void __update_inv_weight(struct load_weight *lw)
 		lw->inv_weight = WMULT_CONST / w;
 }
 
-/*
+/**
+ * 
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure#P8.1.1　vruntime的计算]
+ * 
+ * 这个函数计算公式:
+ *   (delta_exec * nice_0_weight) / weight
+ * -> vruntime表示进程虚拟的运行时间，
+ *    delta_exec表示实际运行时间，
+ *    nice_0_weight表示nice值为0的进程的权重值，
+ *    weight表示该进程的权重值。
+ * 
  * delta_exec * weight / lw.weight
  *   OR
  * (delta_exec * (weight * lw->inv_weight)) >> WMULT_SHIFT
@@ -237,9 +247,15 @@ static void __update_inv_weight(struct load_weight *lw)
  * Either weight := NICE_0_LOAD and lw \e sched_prio_to_wmult[], in which case
  * we're guaranteed shift stays positive because inv_weight is guaranteed to
  * fit 32 bits, and NICE_0_LOAD gives another 10 bits; therefore shift >= 22.
+ * (要么权重取值为 NICE_0_LOAD 且 lw 取自 sched_prio_to_wmult[]，在这种情况下，
+ * 我们可以保证移位值（shift）保持为正数，因为 inv_weight 保证能放入 32 位，
+ * 而 NICE_0_LOAD 又提供了额外的 10 个比特位；因此，移位值至少为 22)
  *
  * Or, weight =< lw.weight (because lw.weight is the runqueue weight), thus
  * weight/lw.weight <= 1, and therefore our shift will also be positive.
+ * (或者，权重小于等于 lw.weight（因为 lw.weight 代表的是运行队列的总权重），
+ * 因此 weight/lw.weight 的值小于等于 1，所以我们的移位值（shift）同样会是正数)
+ * --> 上面两段话的意思就是 保证 shift 是正数
  */
 __attribute__((optimize("O0"))) static u64  __calc_delta(u64 delta_exec, unsigned long weight, struct load_weight *lw)
 {
@@ -709,7 +725,6 @@ int sched_proc_update_handler(struct ctl_table *table, int write,
  * 
  * 
  * 计算虚拟时间(vruntime)的核心函数
- * >> 通过 基准值(sysctl_sched_wakeup_granularity) + weight 来计算???
  * 
  * @param delta ： 实际运行时间
  */

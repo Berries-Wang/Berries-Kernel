@@ -28,6 +28,8 @@
   |- normal_prio|-|-|
   |- rt_priority|-|-|
 
+- 关于权重:[000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/kernel/sched/core.c#`sched_prio_to_weight`](../../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/kernel/sched/core.c)
+
 ---
 
 ## 调度策略
