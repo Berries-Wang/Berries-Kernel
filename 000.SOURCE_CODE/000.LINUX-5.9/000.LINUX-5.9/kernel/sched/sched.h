@@ -107,6 +107,7 @@ extern void call_trace_sched_update_nr_running(struct rq *rq, int count);
 
 /*
  * Increase resolution of nice-level calculations for 64-bit architectures.
+ * (提高 64 位架构下 nice 级别计算的分辨率。)
  * The extra resolution improves shares distribution and load balancing of
  * low-weight task groups (eg. nice +19 on an autogroup), deeper taskgroup
  * hierarchies, especially on larger systems. This is not a user-visible change
@@ -115,9 +116,12 @@ extern void call_trace_sched_update_nr_running(struct rq *rq, int count);
  * We increase resolution only if we have enough bits to allow this increased
  * resolution (i.e. 64-bit). The costs for increasing resolution when 32-bit
  * are pretty high and the returns do not justify the increased costs.
+ * (我们仅在拥有足够位宽（即 64 位）以支持这种更高分辨率时，才会提高分辨率。
+ * 在 32 位架构上提高分辨率的代价相当高昂，而其带来的收益无法证明增加这些成本是合理的。)
  *
  * Really only required when CONFIG_FAIR_GROUP_SCHED=y is also set, but to
  * increase coverage and consistency always enable it on 64-bit platforms.
+ * (严格来说，这仅在设置了 CONFIG_FAIR_GROUP_SCHED=y 时才是必需的，但为了增加覆盖范围并保持一致性，我们在 64 位平台上始终启用它。)
  */
 #ifdef CONFIG_64BIT
 # define NICE_0_LOAD_SHIFT	(SCHED_FIXEDPOINT_SHIFT + SCHED_FIXEDPOINT_SHIFT)
@@ -556,7 +560,10 @@ struct cfs_bandwidth { };
 
 #endif	/* CONFIG_CGROUP_SCHED */
 
-/* CFS-related fields in a runqueue */
+/** 
+ * CFS-related fields in a runqueue
+ * cfs_rq是表示CFS就绪队列的数据结构
+ *  */
 struct cfs_rq {
 	struct load_weight	load;  // load 是权重的意思
 	unsigned int		nr_running;        /*可运行任务总数*/
@@ -977,7 +984,7 @@ DECLARE_STATIC_KEY_FALSE(sched_uclamp_used);
  * 
  * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub] 8.1.2　调度器的数据结构
  * 
- * rq数据结构是描述CPU的通用就绪队列，rq数据结构中记录了一个就绪队列所需要的全部信息，
+ * rq数据结构是描述CPU的"通用"就绪队列，rq数据结构中记录了一个就绪队列所需要的全部信息，
  * 包括一个CFS就绪队列数据结构cfs_rq、一个实时进程调度器就绪队列数据结构rt_rq和一个实时调度器就绪队列数据结构dl_rq，
  * 以及就绪队列的负载权重等信息
  */
@@ -1016,7 +1023,9 @@ struct rq {
 	unsigned int		uclamp_flags;
 #define UCLAMP_FLAG_IDLE 0x01
 #endif
-
+    /**
+	 * 通用就绪队列中的CFS就绪队列
+	 */
 	struct cfs_rq		cfs;
 	struct rt_rq		rt;
 	struct dl_rq		dl;
@@ -1221,7 +1230,7 @@ static inline void update_idle_core(struct rq *rq) { }
 #endif
 
 /**
- * 系统中每个CPU有一个就绪队列，它是PER-CPU类型的，即每个CPU有一个rq数据结构
+ * 系统中每个CPU有一个就绪队列(通用就绪队列)，它是PER-CPU类型的，即每个CPU有一个rq数据结构
  */
 DECLARE_PER_CPU_SHARED_ALIGNED(struct rq, runqueues);
 

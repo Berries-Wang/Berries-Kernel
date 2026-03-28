@@ -260,8 +260,14 @@ static void __update_inv_weight(struct load_weight *lw)
 __attribute__((optimize("O0"))) static u64  __calc_delta(u64 delta_exec, unsigned long weight, struct load_weight *lw)
 {
 	/**
-	 * weight 右移10位： 获取定点数的整数部分?
+	 * weight 右移10位： 获取定点数的整数部分? 
+	 * 即 把那个被放大了 2^10 倍的整数，通过 右移 10 位，还原回普通的整数(丢弃小数部分)
+	 * --> 将权重值右移 LOAD_AVG_SHIFT 位（通常是 10 位），从而获取定点数的整数部分
+	 * 
+	 * 右移 10 位刚好够防止溢出，同时保留了足够的计算精度；
+	 * 如果右移 20 位，虽然更安全，但会导致严重的精度丢失，让调度器变“笨”
 	 */
+	// 当nice值>1,则这里fact都是返回2
 	u64 fact = scale_load_down(weight);
 	int shift = WMULT_SHIFT;
 
@@ -275,6 +281,9 @@ __attribute__((optimize("O0"))) static u64  __calc_delta(u64 delta_exec, unsigne
 	}
 
 	// fact = fact * lw->inv_weight
+	/**
+	 * fact * inv_weight 依然能正确反映出权重的比例关系
+	 */
 	fact = mul_u32_u32(fact, lw->inv_weight);
 
 	while (fact >> 32) {
@@ -783,8 +792,9 @@ __attribute__((optimize("O0")))  static u64 sched_slice(struct cfs_rq *cfs_rq, s
 	return slice;
 }
 
-/*
+/**
  * We calculate the vruntime slice of a to-be-inserted task.
+ * 我们计算一个待插入任务的虚拟运行时间（vruntime）切片
  *
  * vs = s/w
  */
@@ -4186,8 +4196,12 @@ static void check_spread(struct cfs_rq *cfs_rq, struct sched_entity *se)
 }
 
 /**
+ * 当一个新任务（刚 fork 出来）或一个唤醒的任务（从睡眠中醒来）要进入就绪队列（Runqueue）时，
+ * 内核必须给它一个 vruntime。如果直接给 0，它会霸占 CPU 直到赶上别人；如果给得太大，它就永远排不上队
+ * 
  * place_entity()函数根据情况对进程虚拟时间进行一些惩罚
  * 
+ * @param cfs_rq 父进程对应的CFS就绪队列
  * @param se 新创建的进程
  * 
  */

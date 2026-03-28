@@ -513,16 +513,40 @@ struct sched_statistics {
 };
 
 /**
- * 调度实体
+ * 
+ * 
+ * 调度实体：
+ * 
+ * - runnable_weight: 与 PELT (Per-Entity Load Tracking) 机制紧密相关
+ * 
+ *  --> 单个任务
+ * - load_weight：根据其 nice 值查表得出
+ * - 在单个任务层面，runnable_weight 的值等于 load_weight
+ * 
+ * +++++++++++++++++++++++++++++++++++++
+ *  
+ *  --> 任务组
+ * - load_weight: 这个任务组所有下属任务的 load_weight 之和。它代表了该组的“总优先级”
+ * - runnable_weight： 这个任务组当前实际可运行的负载
+ *                     - 一个调度组的 runnable_weight 不仅仅取决于它的配置权重，还取决于该组内当前有多少个实体（子进程）真正处于可运行状态。
+ * 
+ * 为什么需要runnable_weight: 
+ *   - 更精确地衡量“当前有多少压力正在竞争 CPU”。如果一个组配置了很高的 load，但里面只有一个线程在跑，那么它的 runnable_weight 会被相应调整，以避免过度占据调度资源
+ *   - 将 “你拥有的权利 (load)” 与 “你当前行使的权利 (runnable_weight)” 分开，CFS 能够更优雅地处理嵌套调度组的情况，确保 CPU 时间片既符合优先级，又能根据实际需求动态流动 
  */
 struct sched_entity {
 	/* For load-balancing: */
 	struct load_weight		load;       // load 表示该调度实体的权重
 	struct rb_node			run_node;   // run_node 表示该调度实体在红黑树中的节点
+	/**
+	 * 在就绪队列里有一个链表rq->cfs_tasks，调度实体添加到就绪队列之后会添加到该链表中
+	 */
 	struct list_head		group_node; 
 	unsigned int			on_rq;      // on_rq 表示该调度实体是否在就绪队列中接受调度
     
 	/**
+	 * 计算调度实体虚拟时间的起始时间
+	 * 
 	 * 记录任务开始时间: exec_start 是一个时间戳（通常基于 rq->clock_task），
 	 *                 表示当前任务最近一次被调度到 CPU 上开始执行的时间。
      *                  当任务被调度器选中并投入运行时，exec_start 会被更新为当前运行队列的 clock_task 值。
@@ -540,6 +564,8 @@ struct sched_entity {
 	u64				exec_start;
 
 	/**
+	 * 调度实体的总运行时间，这是真实时间
+	 * 
 	 * static void update_curr(struct cfs_rq *cfs_rq);
 	 * 在该函数中，会更新该字段，即 将运行的时间累加
 	 */
@@ -549,10 +575,19 @@ struct sched_entity {
 	 * 在函数 static void update_curr(struct cfs_rq *cfs_rq); 中会更新该值
 	 */
 	u64				vruntime;           // vruntime 表示虚拟运行时间
+	/**
+	 * 上一次统计调度实体运行的总时间,用于计算增量
+	 */
 	u64				prev_sum_exec_runtime;
 
+	/**
+	 * 该调度实体发生迁移的次数(在不同 CPU 核心之间发生迁移的次数)
+	 */
 	u64				nr_migrations;
-
+    
+	/**
+	 * 调度实体的调度统计信息: 包含了哪些信息
+	 */
 	struct sched_statistics		statistics;
 
 #ifdef CONFIG_FAIR_GROUP_SCHED
@@ -580,7 +615,11 @@ struct sched_entity {
 	 *   为NULL ， 则说明是个普通进程；否则，是个组调度实体；
 	 * */
 	struct cfs_rq			*my_q;
-	/* cached value of my_q->h_nr_running */
+	/** 
+	 * cached value of my_q->h_nr_running 
+	 * 
+	 * 表示进程在可运行（runnable）状态的权重，这个值等于进程的权重
+	 * */
 	unsigned long			runnable_weight;
 #endif
 
@@ -747,7 +786,10 @@ struct task_struct {
 	 */
 	struct thread_info		thread_info;
 #endif
-	/* -1 unrunnable, 0 runnable, >0 stopped: */
+	/** 
+	 * 进程的当前状态
+	 * -1 unrunnable, 0 runnable, >0 stopped: 
+	 * */
 	volatile long			state;
 
 	/*
