@@ -74,6 +74,12 @@
 |-|-|
 |- 不支持抢占|- 当前进程调用cond_resched时会检查是否要调度。<br/> - 主动调用schedule。|
 
+##### 调度节拍(8.1.7　调度节拍)
+每当时钟中断发生时，Linux调度器的[scheduler_tick](../../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/kernel/sched/core.c)函数会被调用，执行和调度相关的一些操作，如检查是否有进程需要调度和切换。
+|注意事项|说明|备注|
+|-|-|-|
+|- 在scheduler_tick执行流程中，并不会执行schedule，而是给当前进程设置TIF_NEED_RESCHED标志位|-|-|
+|-|-|-|
 
 ---
 

@@ -4,6 +4,7 @@
 /**
  * 
  * runnable_avg_yN_inv[]表包括32个下标，对应过去0～32ms的负载贡献的衰减因子
+ * > 1ms（准确来说是1024μs，为了方便移位操作）的时间跨度算成一个周期（period），简称PI
  * 
  * 这个是怎么计算的？ 先参考: [001.UNIX-DOCS/016.负载计算.md] 
  *     & [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#8.2.7　PELT代码分析
@@ -20,7 +21,7 @@ static const u32 runnable_avg_yN_inv[] __maybe_unused = {
 	0x8ea4398a, 0x8b95c1e3, 0x88980e80, 0x85aac367, 0x82cd8698,
 };
 
-#define LOAD_AVG_PERIOD 32   // 半衰期 ms
+#define LOAD_AVG_PERIOD 32   // 半衰期 ms -> y^32 约等于 0.5 , 因此: 计算过去的第32个周期的贡献度可以简单地把负载值减半
 #define LOAD_AVG_MAX 47742   // 表示在无限个时间周期里，历史累计衰减总时间的最大值是多少
 
 

@@ -572,7 +572,7 @@ struct sched_entity {
 	u64				sum_exec_runtime;
 	/**
 	 * vruntime计算函数: calc_delta_fair (kernel/sched/fair.c)
-	 * 在函数 static void update_curr(struct cfs_rq *cfs_rq); 中会更新该值
+	 * 在函数 static void update_curr(struct cfs_rq *cfs_rq); 中会更新该值 [YES]
 	 */
 	u64				vruntime;           // vruntime 表示虚拟运行时间
 	/**
