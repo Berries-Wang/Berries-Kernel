@@ -8,7 +8,8 @@
  * 
  * 这个是怎么计算的？ 先参考: [001.UNIX-DOCS/016.负载计算.md] 
  *     & [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#8.2.7　PELT代码分析
- * 
+ *  
+ * runnable_avg_yN_inv[i] = 衰减因子[i] * (2^32) , 将浮点运算修改为移位运算
  */
 static const u32 runnable_avg_yN_inv[] __maybe_unused = {
 	0xffffffff, /*y^0 * 2^32*/

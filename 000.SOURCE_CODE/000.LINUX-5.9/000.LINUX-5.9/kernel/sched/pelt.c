@@ -47,6 +47,10 @@ static u64 decay_load(u64 val, u64 n)
     
 	/**
 	 * 为什么返回0 , 即 周期太大，衰减后的值会太小，接近于0
+	 * ---> 为什么是 "LOAD_AVG_PERIOD * 63"
+	 * - 这要结合下面的代码：'val >>= local_n / LOAD_AVG_PERIOD;' 来分析 
+	 * - 因为 每增加LOAD_AVG_PERIOD(半衰期)，负载就要衰减为原来的1/2
+	 * -- 即 LOAD_AVG_PERIOD * 63 等价于 (x / (2^63))
 	 */
 	if (unlikely(n > LOAD_AVG_PERIOD * 63)) {
 		return 0;

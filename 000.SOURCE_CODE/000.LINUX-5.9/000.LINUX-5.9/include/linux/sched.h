@@ -465,6 +465,8 @@ struct sched_avg {
 	 * 
 	 * 公式： load_sum / period_sum​。
 	 * 作用：负载均衡的基准。如果一个 CPU 的 load_avg 很高，说明这里有很多高权重且活跃的任务，需要把任务迁走。
+	 * 
+	 * load_avg计算的是量化负载，它是一个量化值，把负载量化到权重值里，这样不同行为的进程才有一个统一和量化的比较标准
 	 */
 	unsigned long			load_avg;
 
