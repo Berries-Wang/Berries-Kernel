@@ -122,7 +122,8 @@ static u32 __accumulate_pelt_segments(u64 periods, u32 d1, u32 d3)
  * Accumulate the three separate parts of the sum; d1 the remainder
  * of the last (incomplete) period, d2 the span of full periods and d3
  * the remainder of the (incomplete) current period.
- * (累计总和的三个独立部分；d1 为上一个（不完整）期间的余数，d2 为完整期间的跨度，d3 为（不完整）当前期间的余数。)
+ * (累计总和的三个独立部分；d1 为上一个（不完整）期间(周期)的余数，
+ * d2 为完整期间(周期)的跨度，d3 为（不完整）当前期间(周期)的余数。)
  *
  *           d1          d2           d3
  *           ^           ^            ^
@@ -146,6 +147,7 @@ static __always_inline u32 accumulate_sum(u64 delta, struct sched_avg *sa,
 	u32 contrib = (u32)delta; /* p == 0 -> delta < 1024 */
 	u64 periods;
 
+	// 加上 上一次不满足一个完整周期的时间
 	delta += sa->period_contrib;
 
 	// 计算有多少个完整的周期? yes
@@ -183,6 +185,7 @@ static __always_inline u32 accumulate_sum(u64 delta, struct sched_avg *sa,
 					1024 - sa->period_contrib, delta);
 		}
 	}
+	// 记录不满足一个周期的时间片
 	sa->period_contrib = delta;
 
 	if (load)
@@ -201,29 +204,40 @@ static __always_inline u32 accumulate_sum(u64 delta, struct sched_avg *sa,
  * 代码不好理解，查阅:[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#8.2.7 PELT代码分析#5．工作负载的计算
  * 
  * We can represent the historical contribution to runnable average as the
- * coefficients of a geometric series.  To do this we sub-divide our runnable
+ * coefficients of a geometric series. 
+ * (我们可以将历史运行负载的贡献表示为一个几何级数（等比数列）的系数。)
+ * 
+ * To do this we sub-divide our runnable
  * history into segments of approximately 1ms (1024us); label the segment that
  * occurred N-ms ago p_N, with p_0 corresponding to the current period, e.g.
+ * (为了实现这一点，我们将运行历史记录细分为大约 1ms (1024us) 的片段；将 N 毫秒前发生的片段标记为 p_N，其中 p_0 对应当前的周期，例如……)
+ * 
  *
  * [<- 1024us ->|<- 1024us ->|<- 1024us ->| ...
  *      p0            p1           p2
  *     (now)       (~1ms ago)  (~2ms ago)
  *
  * Let u_i denote the fraction of p_i that the entity was runnable.
+ * (设 u_i 表示该实体在 p_i 时间段内处于可运行状态的时间比例。)
+ * > ui​ 就是记录在那个特定的 1ms 片段里，这个进程有多“忙”（比如是忙了 0.5ms 还是整整 1ms）
  *
  * We then designate the fractions u_i as our co-efficients, yielding the
  * following representation of historical load:
+ * (随后，我们将这些比例 u_i​ 指定为系数，从而得出历史负载的如下表示形式：)
  *   u_0 + u_1*y + u_2*y^2 + u_3*y^3 + ...
  *
  * We choose y based on the with of a reasonably scheduling period, fixing:
+ * (我们根据一个合理的调度周期宽度来选择 y，从而确定)
  *   y^32 = 0.5
  *
  * This means that the contribution to load ~32ms ago (u_32) will be weighted
  * approximately half as much as the contribution to load within the last ms
  * (u_0).
+ * (这意味着，大约 32ms 之前的负载贡献（u_32），其权重将大约是当前 1ms 内负载贡献（u_0）的一半。)
  *
  * When a period "rolls over" and we have new u_0`, multiplying the previous
  * sum again by y is sufficient to update:
+ * (当一个周期‘翻转’（即进入下一个周期）并且我们有了新的 u_0' 时，只需将之前的总和再次乘以 y，就足以完成更新：)
  *   load_avg = u_0` + y*(u_0 + u_1*y + u_2*y^2 + ... )
  *            = u_0 + u_1*y + u_2*y^2 + ... [re-labeling u_i --> u_{i+1}]
  */
