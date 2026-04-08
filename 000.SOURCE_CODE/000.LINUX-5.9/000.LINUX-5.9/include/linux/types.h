@@ -7,6 +7,10 @@
 
 #ifndef __ASSEMBLY__
 
+/**
+ * 长整数类型数组 name , 每位代表一个CPU。
+ * -> 对于64位处理器来说，一个长整数类型数组成员只能表示64个CPU内核。
+ */
 #define DECLARE_BITMAP(name,bits) \
 	unsigned long name[BITS_TO_LONGS(bits)]
 

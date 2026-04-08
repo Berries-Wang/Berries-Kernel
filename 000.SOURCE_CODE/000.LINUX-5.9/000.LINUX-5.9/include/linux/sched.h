@@ -424,7 +424,7 @@ struct util_est {
 struct sched_avg {
 	/**
 	 * 上一次更新的时间点，用于计算时间间隔
-	 * 单位: 纳秒 (ns)
+	 * 更新，见: accumulate_sum (kernel/sched/pelt.c)
 	 */
 	u64				last_update_time;
 

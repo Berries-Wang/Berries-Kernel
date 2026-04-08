@@ -16,6 +16,8 @@
 #include <linux/bug.h>
 
 /**
+ * 内核对CPU的管理是通过位图（bitmap）变量来管理的
+ * 
  *  Don't assign or return these: may not be this big!
  *  
  * DECLARE_BITMAP [000.LINUX-5.9/include/linux/types.h]
@@ -102,7 +104,7 @@ extern unsigned int nr_cpu_ids;
  *    optimization - don't waste any instructions or memory references
  *    asking if you're online or how many CPUs there are if there is
  *    only one CPU.
- * (UP 架构（NR_CPUS == 1，CONFIG_SMP 未定义）硬编码假设其单 CPU 在线。UP cpu_{online,possible,present}_masks 是安慰剂。
+ * (UP 架构（单路架构，意味着主板上只有一个物理CPU插槽（Socket）,NR_CPUS == 1，CONFIG_SMP 未定义）硬编码假设其单 CPU 在线。UP cpu_{online,possible,present}_masks 是安慰剂。
  * 更改它们不会对 UP 情况下的后续 num_*_cpus() 和 cpu_*() 宏产生任何实际影响。这种不美观的设计是对 UP 的优化——如果只有一个 CPU，
  * 就不要浪费任何指令或内存引用来询问是否在线或有多少个 CPU。)
  */
