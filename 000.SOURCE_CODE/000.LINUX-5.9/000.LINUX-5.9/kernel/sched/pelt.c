@@ -164,7 +164,8 @@ static __always_inline u32 accumulate_sum(u64 delta, struct sched_avg *sa,
 		sa->util_sum = decay_load((u64)(sa->util_sum), periods);
 
 		/*
-		 * Step 2
+		 * Step 2： 这里计算之后的结果就是 '不满足一个完整周期的时间'
+		 * 为什么是1024? 因为1024us 是一个完整的周期
 		 */
 		delta %= 1024;
 		if (load) {
@@ -185,7 +186,12 @@ static __always_inline u32 accumulate_sum(u64 delta, struct sched_avg *sa,
 					1024 - sa->period_contrib, delta);
 		}
 	}
-	// 记录不满足一个周期的时间片
+	/**
+	 * delta %= 1024; 这个就是计算本次不满足一个完整周期时间 (D3)
+	 * > 参考[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub] '图8.16　进程工作负载计算'
+	 * 
+	 * 记录不满足一个周期(1ms , 即 1024 us)的时间片
+	 */
 	sa->period_contrib = delta;
 
 	if (load)
@@ -268,6 +274,8 @@ ___update_load_sum(u64 now, struct sched_avg *sa,
 	 * (使用 1024ns 作为测量单位，因为它是 1us 的合理近似值并且计算速度很快。)
 	 * 
 	 * 将时间转为us(微秒)
+	 * 
+	 * 其实 1us = 1024ns，这里使用1024，是为了极致的计算效率，移位操作远远快于除法操作
 	 */
 	delta >>= 10;
 	if (!delta)
