@@ -6,6 +6,9 @@ Each CPU has a "base" scheduling domain (struct sched_domain). The domain
 hierarchy is built from these base domains via the ->parent pointer. ->parent
 MUST be NULL terminated, and domain structures should be per-CPU as they are
 locklessly updated.
+(每个 CPU 都有一个“基础”调度域（struct sched_domain）。
+整个域的层级结构是通过 ->parent 指针从这些基础域构建起来的。
+->parent 指针必须以 NULL 结尾，而且域结构体必须是每 CPU 的，因为它们是在无锁状态下进行更新的。)
 
 Each scheduling domain spans a number of CPUs (stored in the ->span field).
 A domain's span MUST be a superset of it child's span (this restriction could

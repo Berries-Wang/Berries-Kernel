@@ -1629,11 +1629,14 @@ struct sched_group {
 	int			asym_prefer_cpu;	/* CPU of highest priority in group */
 
 	/*
-	 * The CPUs this group covers.
+	 * The CPUs this group covers.（该组涵盖的 CPU）
 	 *
 	 * NOTE: this field is variable length. (Allocated dynamically
 	 * by attaching extra space to the end of the structure,
 	 * depending on how many CPUs the kernel has booted up with)
+	 * (注意：此字段的长度是可变的。（通过在该结构体末尾附加额外的空间来进行动态分配，具体取决于内核启动时检测到的 CPU 数量。）)
+	 * 
+	 * 零长数组，用于存储 CPU 标识符
 	 */
 	unsigned long		cpumask[];
 };

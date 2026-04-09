@@ -7,7 +7,10 @@
 |项|说明|备注|
 |-|-|-|
 |- 特点|- 所有CPU共享同一个内存和I/O,并且每个CPU访问内存的速度是一样的|-|
+|-|-|-|
 |- 别名|- UMA（Uniform Memory Access，一致性内存访问）|-|
+|-|-|-|
+|- SDTL|- Linux内核通过数据结构sched_domain_topology_level来描述CPU的层次关系，本节将其简称为SDTL|-|
 |-|-|-|
 
 

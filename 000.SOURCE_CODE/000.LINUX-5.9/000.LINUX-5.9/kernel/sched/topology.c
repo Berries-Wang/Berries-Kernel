@@ -1093,8 +1093,12 @@ static struct sched_group *get_group(int cpu, struct sd_data *sdd)
  * build_sched_groups will build a circular linked list of the groups
  * covered by the given span, will set each group's ->cpumask correctly,
  * and will initialize their ->sgc.
+ * (build_sched_groups 将构建一个由给定 span (CPU集合)所覆盖的调度组的循环链表，
+ * 设置每个组的 ->cpumask，并初始化它们的 ->sgc。)
  *
  * Assumes the sched_domain tree is fully constructed
+ * 
+ * 创建调度组
  */
 static int
 build_sched_groups(struct sched_domain *sd, int cpu)
@@ -2181,6 +2185,7 @@ int sched_init_domains(const struct cpumask *cpu_map)
 	if (!doms_cur)
 		doms_cur = &fallback_doms;
 	cpumask_and(doms_cur[0], cpu_map, housekeeping_cpumask(HK_FLAG_DOMAIN));
+	// 建立调度域拓扑关系
 	err = build_sched_domains(doms_cur[0], NULL);
 	register_sched_domain_sysctl();
 
