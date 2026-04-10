@@ -67,6 +67,9 @@ struct sched_domain_shared {
 	int		has_idle_cores;
 };
 
+/**
+ * 调度域数据结构
+ */
 struct sched_domain {
 	/* These fields must be setup */
 	struct sched_domain __rcu *parent;	/* top domain must be null terminated */

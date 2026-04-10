@@ -10418,6 +10418,13 @@ static void rebalance_domains(struct rq *rq, enum cpu_idle_type idle)
 	u64 max_cost = 0;
 
 	rcu_read_lock();
+	/**
+	 * 当前CPU开始从下到上遍历调度域
+	 * -> 当前CPU , 怎么理解? 因为 参数 rq =  this_rq();
+	 * 
+	 * 如[001.UNIX-DOCS/026.SMP/017.SMP负载均衡.md]所描述，调度器优先在本地域(调度域)内进行调整
+	 * -> 最大化数据局部性
+	 */
 	for_each_domain(cpu, sd) {
 		/*
 		 * Decay the newidle max times here because this is a regular

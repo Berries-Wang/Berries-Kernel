@@ -604,7 +604,10 @@ static void destroy_sched_domains(struct sched_domain *sd)
 		call_rcu(&sd->rcu, destroy_sched_domains_rcu);
 }
 
-/*
+/**
+ * LLC调度域 , 参考:[#6．LLC调度域]
+ * 
+ * 
  * Keep a special pointer to the highest sched_domain that has
  * SD_SHARE_PKG_RESOURCE set (Last Level Cache Domain) for this
  * allows us to avoid some pointer chasing select_idle_sibling().
@@ -651,7 +654,9 @@ static void update_top_cache_domain(int cpu)
 	rcu_assign_pointer(per_cpu(sd_asym_cpucapacity, cpu), sd);
 }
 
-/*
+/**
+ * 将调度组 调度域 添加到就绪队列中
+ * 
  * Attach the domain 'sd' to 'cpu' as its base domain. Callers must
  * hold the hotplug lock.
  */

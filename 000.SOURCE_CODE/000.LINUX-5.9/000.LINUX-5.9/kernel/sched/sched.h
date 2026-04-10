@@ -1114,7 +1114,7 @@ struct rq {
 	int			push_cpu;
 	struct cpu_stop_work	active_balance_work;
 
-	/* CPU of this runqueue: */
+	/** CPU of this runqueue: */
 	int			cpu;
 	int			online;
 
