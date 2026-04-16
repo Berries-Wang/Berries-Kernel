@@ -6018,7 +6018,8 @@ static void record_wakee(struct task_struct *p)
  * 
  * @return 1则跨LLC域选核（find_idlest_cpu）; 0则优先本地唤醒（wake_affine）;
  * 
- * 返回1,说明有一个进程唤醒地很频繁，那么待唤醒的进程和当前进程不能放在一个CPU上!!!
+ * 若wake_wide()返回true，说明wakeup_cpu已经频繁地唤醒了很多进程，因此不适宜继续把wakee放到自己的CPU中。
+ * 
  */
 static int wake_wide(struct task_struct *p)
 {
