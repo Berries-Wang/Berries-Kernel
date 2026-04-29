@@ -1,5 +1,5 @@
 # NUMA（Non-Uniform Memory Access，非一致性内存访问）
-先学习[006.BOOKs/RISC-V Architecture Programming and Practice.pdf#11.2 高速缓存的访问延时](../../007.BOOKs/RISC-V%20Architecture%20Programming%20and%20Practice/) & [奔跑吧Linux内核（第2版）卷1：基础架构#1.1.17　NUMA](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) & [3.3.1　内存架构之UMA和NUMA](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) & [1.1.17　NUMA#图1.24　NUMA系统](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) & [28-多核处理器：内存一致性模型 [中山大学 操作系统原理]#P47](./../000.内存管理/998.REFS/000.中山大学-操作系统/16-0612-multiprocessor-2.pdf)再看以下内容
+先学习[006.BOOKs/RISC-V Architecture Programming and Practice.pdf#11.2 高速缓存的访问延时](../../007.BOOKs/RISC-V%20Architecture%20Programming%20and%20Practice/) & [奔跑吧Linux内核（第2版）卷1：基础架构#1.1.17　NUMA](../../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) & [3.3.1　内存架构之UMA和NUMA](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) & [1.1.17　NUMA#图1.24　NUMA系统](../../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) & [28-多核处理器：内存一致性模型 [中山大学 操作系统原理]#P47](./../../000.内存管理/998.REFS/000.中山大学-操作系统/16-0612-multiprocessor-2.pdf)再看以下内容
 
 ## 摘要
 在现在广泛应用的计算机系统中，以内存为研究对象可以分成两种架构，一种是统一内存访问（Uniform Memory Access，UMA）架构，另外一种是非统一内存访问（Non-Uniform Memory Access，NUMA）架构
@@ -42,7 +42,7 @@
 多个CPU对于内存属于同一层级，所有的CPU都通过总线访问内存(Intel)，ARM是通过‘Exclusive accesses’ ，单都是需要进行加锁操作， 随着CPU的处理速度越来越快，这种方式会成为系统瓶颈。NUMA架构能更好地解决这个问题，提升系统性能.
 
 - X86_64: 目前的x86/x64的多核/多处理器系统是SMP结构，共享主存，内存是共享设备，多个处理器/核心要访问内存，首先要获得内存总线的控制权，任何时刻只有一个处理器/核心能获得内存总线的控制权，所以单就内存来说，不会出现多个处理器/核心同时访问一个内存地址的情况。但是每个处理器/核心可能有自己的cache（非共享的），所以，如果某个内存地址的数据在多个处理器/核心的cache中都存在的话，是可能出现并发读的情况，对于读写，或者写写的并发操作，处理器实现的cache一致性协议可以保证物理上不会出现真正的并发操作。
-  + 参考:[奔跑吧Linux内核（第2版）卷1：基础架构](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) '1.4.10　独占内存访问指令' : 访问的时候，会在内存总线中申请独占访问的锁
+  + 参考:[奔跑吧Linux内核（第2版）卷1：基础架构](../../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) '1.4.10　独占内存访问指令' : 访问的时候，会在内存总线中申请独占访问的锁
 
 ## R7-5700G 16G*2
 ```shell

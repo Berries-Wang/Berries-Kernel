@@ -1,0 +1,1 @@
+# SMP(对称多处理器.Symmetric Multi-Processor) & NUMA(Non-Uniform Memory Access，非一致性内存访问)
