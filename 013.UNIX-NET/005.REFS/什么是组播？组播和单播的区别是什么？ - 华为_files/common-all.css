@@ -1,0 +1,656 @@
+*{
+    font-family: HuaweiSans, Arial, Microsoft YaHei, 方正兰亭黑;
+}
+html, body, ol, ul {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+iframe{
+    border-width: 0;
+}
+
+a {
+    text-decoration: none;
+}
+
+button {
+    outline: none;
+}
+
+ol, li {
+    list-style: none;
+}
+
+.btn:focus {
+    box-shadow: none;
+}
+
+input:focus {
+    outline: none;
+}
+
+i, em {
+    font-style: normal;
+}
+
+.clearfix:after {
+    content: '';
+    height: 0;
+    overflow: hidden;
+    clear: both;
+    display: block;
+}
+
+pre {
+    margin: 0;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+@font-face {
+    font-family: FontAwesome,HuaweiSans, Arial, Microsoft YaHei, 方正兰亭黑;
+    src: url('../fonts/fontawesome-webfont.eot?v=4.7.0');
+    src: url('../fonts/fontawesome-webfont.eot?#iefix&v=4.7.0') format('embedded-opentype'), url('../fonts/fontawesome-webfont.woff2?v=4.7.0') format('woff2'), url('../fonts/fontawesome-webfont.woff?v=4.7.0') format('woff'), url('../fonts/fontawesome-webfont.ttf?v=4.7.0') format('truetype'), url('../fonts/fontawesome-webfont.svg?v=4.7.0#fontawesomeregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/**分享按钮和意见反馈**//**分享按钮和意见反馈**/
+#global-top-button {
+    bottom: 90px !important;
+}
+
+/*智能问卷*/
+#survey_feedback {
+    position: fixed;
+    right: 100px;
+    bottom: calc(290px - var(--height) / 2);
+    color: #333;
+    font-size: 14px;
+    z-index: 999;
+    overflow: hidden;
+}
+/*邮件订阅*/
+#email_subscribe{
+    position: fixed;
+    right: 100px;
+    bottom: 250px;
+    color: #333;
+    font-size: 14px;
+    z-index: 999;
+    overflow: hidden;
+}
+
+#survey_feedback.NpsItem.score {
+    width: 520px;
+    height: 270px;
+    --height: 270px;
+}
+
+#survey_feedback.ReasonItem.score {
+    width: 260px;
+    height: 220px;
+    --height: 220px;
+}
+
+#survey_feedback.ReasonItem.score.baike_short {
+    width: 260px;
+    height: 180px;
+    --height: 180px;
+}
+
+#survey_feedback.NpsItem.detail {
+    width: 520px;
+    height: 525px;
+    --height: 525px;
+}
+
+#survey_feedback.NpsItem.detailNo {
+    width: 520px;
+    height: 580px;
+    --height: 580px;
+}
+
+#survey_feedback.ReasonItem.detail {
+    width: 420px;
+    height: 385px;
+    --height: 385px;
+}
+
+#survey_feedback.ReasonItem.detailNo {
+    width: 420px;
+    height: 430px;
+    --height: 430px;
+}
+
+.right-layer {
+    position: fixed;
+    bottom: 160px;
+    right: 35px;
+    z-index: 101;
+}
+
+.right-layer .right-con {
+    width: 56px;
+    box-shadow: rgb(238, 238, 238) 0px 0px 8px;
+    background: white;
+    text-align: center;
+}
+
+.right-layer .right-con .right_item {
+    overflow: hidden;
+    margin: 0 auto;
+    position: relative;
+    height: 53px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.right-layer .right_item .text {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    padding: 8px 10px;
+    font-size: 14px;
+    color: #666;
+    top: -54px;
+    transition: top 0.2s;
+    position: absolute;
+    background: #f5f6f8;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.right-layer .right_item:hover .text {
+    top: -1px;
+}
+
+.right-layer.en .right_item .text {
+    font-size: 12px;
+    padding: 8px 0;
+    width: 100%;
+    text-align: center;
+}
+
+.right-layer.en .right_item:last-child .text {
+    line-height: inherit;
+}
+
+.right-layer .right_icon {
+    width: 32px;
+    height: 32px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f2f2f2;
+    background-repeat: no-repeat;
+    background-position: center;
+    margin: 0 auto;
+    box-sizing: content-box;
+    background-size: 100%;
+}
+
+.right-layer .share {
+    display: none;
+    font-size: 12px;
+    color: #333;
+    padding: 16px;
+    position: absolute;
+    right: 80px;
+    bottom: 30px;
+    width: 100px;
+    box-shadow: rgb(238, 238, 238) 0px 0px 8px;
+    background: white;
+    box-sizing: content-box;
+}
+
+.right-layer .share > ul {
+    margin-top: 8px;
+    display: grid;
+    grid-template-columns: repeat(2, 46px);
+    grid-column-gap: 8px;
+    grid-row-gap: 8px;
+}
+
+.right-layer .share > ul > li {
+    border: 1px solid #f2f2f2;
+}
+
+.right-layer .share > ul .svg-icon {
+    display: block;
+    width: 24px;
+    height: 24px;
+    border: 0;
+    cursor: pointer;
+    box-sizing: content-box;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100%;
+}
+
+.right-layer .share > ul li:hover {
+    border-color: #c7000b;
+}
+.right-layer .right-con.collapses .right_item.normal {
+    height: 0;
+}
+.right-layer .right_item.fold {
+    background: #c7000b;
+    color: white;
+    border: #c7000b;
+}
+.right-layer .right_item.fold .text {
+    background: #c7000b;
+    color: white;
+}
+.right-layer .right_item.fold .right_icon{
+    background-image: url("../commonIcon/ic_unfold.svg");
+}
+.right-layer .right-con.collapse .right_item.fold .right_icon{
+    background-image: url("../commonIcon/ic_fold.svg");
+}
+.right-layer .right_item:last-child .right_icon {
+    border-bottom: 0;
+}
+@media screen and (max-width: 767px) {
+    .right-layer .right-con {
+        display: none;
+    }
+
+    .more-contacts {
+        position: fixed;
+        bottom: 60px;
+        right: 20px;
+        z-index: 100;
+        display: block !important;
+    }
+
+    #global-top-button {
+        bottom: 120px !important;
+        width: 38px !important;
+        height: 38px !important;
+        font-size: 20px !important;
+    }
+}
+
+/*弹窗*/
+.common-dialog-box {
+    top: 0%;
+    left: 0%;
+    width: 100%;
+    height: 100%;
+    z-index: 999999;
+    position: fixed;
+    background-color: rgba(255, 255, 255, 0);
+    display: flex;
+    align-items: center;
+}
+
+/*查询弹窗内容*/
+.common-dialog-box .tips-dialog-box {
+    width: 300px;
+    margin: auto;
+    background: #ffffff;
+    padding-bottom: 20px;
+    padding-top: 16px;
+    border: 1px solid #bbbbbb;
+}
+
+.common-dialog-box .selectBox-head {
+    padding: 0 22px 0 12px; /*height: 40px;*/
+    position: relative; /*border-bottom: 1px solid #ccc;*/
+}
+
+.common-dialog-box .selectBox-head-title {
+    text-align: left;
+    display: block;
+    font-size: 16px !important; /*font-weight: 700;*/
+    align-items: center;
+    display: flex;
+    padding-left: 28px;
+}
+
+.selectBox-tips-icon {
+    background: url(../commonIcon/windowTips.svg) no-repeat;
+    width: 18px;
+    height: 18px;
+    display: inline-block;
+    background-size: 18px 18px;
+    position: absolute;
+    top: 2px;
+}
+
+.selectBox-head-icon {
+    background: url(../commonIcon/spec-close.png) no-repeat;
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background-size: 16px 16px;
+    right: 22px;
+    top: 2px;
+    cursor: pointer;
+}
+
+.tips-dialog-content {
+    font-size: 14px;
+    padding-left: 38px;
+    padding-right: 22px;
+    margin-top: 10px;
+    margin-bottom: 12px;
+}
+
+.common-dialog-box .cancel-btn, .sure-btn {
+    border-radius: 2px;
+    width: 60px;
+    height: 26px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 26px;
+}
+
+.common-dialog-box .cancel-btn {
+    border: 1px solid #D7D7D7;
+    background: #FFFFFF;
+    color: #191919;
+}
+
+.sure-btn {
+    background: #CF262F;
+    color: #FFFFFF;
+    margin-right: 12px;
+}
+
+.common-dialog-box .tips-dialog-footer {
+    padding: 0 22px 0 32px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.dialogTip {
+    display: inline-block;
+    padding: 16px;
+    width: 300px;
+    min-height: 100px;
+    border-radius: 4px;
+    font-size: 14px;
+    border: 1px solid #ebebeb;
+    color: #333;
+    background-color: #fff;
+    transition: 0.2s;
+    visibility: visible;
+    opacity: 1;
+    position: absolute;
+}
+
+.dialogTip:before {
+    top: 0;
+    left: 90%;
+    position: absolute;
+    display: block;
+    border: 7px solid #fff;
+    transform: translateX(-50%) translateY(-100%);
+    content: "";
+    border-color: transparent transparent #ebebeb;
+}
+
+.dialogTip:after {
+    top: 0;
+    left: 90%;
+    transform: translateX(-50%) translateY(-100%);
+    position: absolute;
+    display: block;
+    border: 6px solid #fff;
+    content: "";
+    border-color: transparent transparent #fff;
+}
+
+.dialogTip .title i.warning {
+    display: inline-block;
+    width: 17px;
+    height: 17px;
+    background: url("../commonIcon/warning.svg") no-repeat center 100%;
+    margin-right: 10px;
+    margin-bottom: -2px;
+}
+
+.dialogTip .title {
+    font-size: 16px;
+}
+
+.dialogTip .content {
+    font-size: 14px;
+    padding: 16px 0;
+    padding-right: 0;
+    margin-left: 27px;
+}
+
+.dialogTip .content a {
+    font-size: inherit;
+    color: #0067d1;
+    text-decoration: underline;
+}
+
+.dialogTip .content a:hover {
+    color: #0067d1 !important;
+    text-decoration: underline !important;
+}
+
+.dialogTip .foot {
+    display: flex;
+    line-height: 26px;
+    grid-column-gap: 15px;
+    grid-row-gap: 8px;
+    justify-content: space-around;
+    margin-left: 27px;
+    flex-wrap: wrap;
+}
+
+.dialogTip .time {
+    color: #BDBDBD;
+}
+
+.dialogTip .foot.noTime {
+    justify-content: end;
+}
+
+.dialogTip .content.enContent {
+    padding: 8px 0;
+}
+
+.dialogTip .foot.enFoot {
+    justify-content: end;
+}
+
+.dialogTip .foot.enFoot .time {
+    width: 100%;
+}
+
+.dialogTip .btn-group {
+    display: inline-flex;
+    grid-column-gap: 10px;
+}
+
+.dialogTip a.common-btn {
+    display: inline-block;
+    height: 26px;
+    padding: 0 10px;
+    text-align: center;
+    cursor: pointer;
+    margin: 0;
+    min-width: 60px;
+    width: auto;
+}
+
+.dialogTip a.sure-btn {
+    background: #c7000b;
+    color: white;
+}
+
+.dialogTip a.cancel-btn {
+    background: white;
+    border: 1px solid #ccc;
+    color: #333;
+}
+
+.dialogTip a.common-btn:hover {
+    color: inherit;
+}
+
+.dialogTip {
+    display: inline-block;
+    padding: 16px;
+    width: 300px;
+    min-height: 100px;
+    border-radius: 4px;
+    font-size: 14px;
+    border: 1px solid #ebebeb;
+    color: #333;
+    background-color: #fff;
+    transition: 0.2s;
+    visibility: visible;
+    opacity: 1;
+    position: absolute;
+}
+
+.dialogTip:before {
+    top: 0;
+    left: 90%;
+    position: absolute;
+    display: block;
+    border: 7px solid #fff;
+    transform: translateX(-50%) translateY(-100%);
+    content: "";
+    border-color: transparent transparent #ebebeb;
+}
+
+.dialogTip:after {
+    top: 0;
+    left: 90%;
+    transform: translateX(-50%) translateY(-100%);
+    position: absolute;
+    display: block;
+    border: 6px solid #fff;
+    content: "";
+    border-color: transparent transparent #fff;
+}
+
+.dialogTip .title i.warning {
+    display: inline-block;
+    width: 17px;
+    height: 17px;
+    background: url("../commonIcon/warning.svg") no-repeat center 100%;
+    margin-right: 10px;
+    margin-bottom: -2px;
+}
+
+.dialogTip i.close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    background: url(../commonIcon/closed.svg) no-repeat center 100%;
+    background-size: 100%;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.dialogTip .title {
+    font-size: 16px;
+}
+
+.dialogTip .content {
+    font-size: 14px;
+    padding: 16px 0;
+    padding-right: 0;
+    margin-left: 27px;
+}
+
+.dialogTip .content a {
+    font-size: inherit;
+    color: #0067d1;
+    text-decoration: underline;
+}
+
+.dialogTip .content a:hover {
+    color: #0067d1 !important;
+    text-decoration: underline !important;
+}
+
+.dialogTip .foot {
+    display: flex;
+    line-height: 26px;
+    grid-column-gap: 15px;
+    grid-row-gap: 8px;
+    justify-content: space-around;
+    margin-left: 27px;
+    flex-wrap: wrap;
+}
+
+.dialogTip .time {
+    color: #BDBDBD;
+}
+
+.dialogTip .foot.noTime {
+    justify-content: end;
+}
+
+.dialogTip .content.enContent {
+    padding: 8px 0;
+}
+
+.dialogTip .foot.enFoot {
+    justify-content: end;
+}
+
+.dialogTip .foot.enFoot .time {
+    width: 100%;
+}
+
+.dialogTip .btn-group {
+    display: inline-flex;
+    grid-column-gap: 10px;
+}
+
+.dialogTip a.common-btn {
+    display: inline-block;
+    height: 26px;
+    padding: 0 10px;
+    text-align: center;
+    cursor: pointer;
+    margin: 0;
+    min-width: 60px;
+    width: auto;
+}
+
+.dialogTip a.sure-btn {
+    background: #c7000b;
+    color: white;
+}
+
+.dialogTip a.cancel-btn {
+    background: white;
+    border: 1px solid #ccc;
+    color: #333;
+}
+
+.dialogTip a.common-btn:hover {
+    color: inherit;
+}

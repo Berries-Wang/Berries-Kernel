@@ -1,0 +1,47 @@
+.catalogue-box {
+  overflow: hidden;
+  background: #ccd8e3;
+  position: relative;
+}
+.catalogue-left {
+  float: left;
+  width: 11%;
+  text-align: center;
+  position: absolute;
+  top: 50%;
+  transform: translate(0, -50%);
+}
+.catalogue-left span {
+  display: inline-block;
+  width: 20px;
+  font-size: 24px;
+  text-align: center;
+  color: #282828;
+  font-weight: 700;
+}
+.catalogue-right {
+  float: right;
+  width: 89%;
+  padding: 14px 30px;
+  background: #f2f2f2;
+}
+.catalogue-right ul {
+  overflow: hidden;
+  height: 72px;
+}
+.catalogue-list {
+  float: left;
+  width: 30%;
+  margin-right: 3%;
+  line-height: 36px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.catalogue-list a {
+  color: #494949;
+}
+.catalogue-list a:hover {
+  color: #c00;
+  text-decoration: underline;
+}
