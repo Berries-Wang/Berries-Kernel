@@ -1798,7 +1798,7 @@ const struct cpumask *tl_pkg_mask(struct sched_domain_topology_level *tl, int cp
 }
 
 /*
- * Topology list, bottom-up.
+ * Topology list, bottom-up.(拓扑列表（自底向上）)
  */
 static struct sched_domain_topology_level default_topology[] = {
 #ifdef CONFIG_SCHED_SMT

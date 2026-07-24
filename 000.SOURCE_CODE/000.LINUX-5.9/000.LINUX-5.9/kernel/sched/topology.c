@@ -1427,9 +1427,10 @@ sd_init(struct sched_domain_topology_level *tl,
 }
 
 /**
- * Topology list, bottom-up.
+ * Topology list, bottom-up.(拓扑列表（自底向上）)
  * 
  * > SMT MC 是什么?参考:[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#8.3.2　CPU调度域 CPU域的分类
+ * > [001.UNIX-DOCS/031.进程管理/008.进程调度/000.调度组与调度域/000.KERNEL_5.9.md]
  * 
  * 
  * 内核默认定义了一个数组default_topology[]来概括CPU物理域的层次结构
