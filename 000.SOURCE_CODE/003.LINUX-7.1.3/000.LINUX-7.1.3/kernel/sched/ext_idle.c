@@ -416,19 +416,31 @@ static inline bool task_affinity_all(const struct task_struct *p)
 /*
  * Built-in CPU idle selection policy:
  *
- * 1. Prioritize full-idle cores:
+ * 1. Prioritize full-idle cores:（优先选择完全空闲的核心）
  *   - always prioritize CPUs from fully idle cores (both logical CPUs are
- *     idle) to avoid interference caused by SMT.
+ *     idle) to avoid interference(干扰,资源竞争;) caused by SMT.
+ *     (始终优先选择完全空闲核心上的 CPU（即该核心上的所有逻辑核心均处于空闲状态），以避免由 SMT 引起的干扰。)
+ *     (保证任务独占资源，避免超线程带来的互相干扰)
  *
  * 2. Reuse the same CPU:
  *   - prefer the last used CPU to take advantage of cached data (L1, L2) and
  *     branch prediction optimizations.
+ *     (优先选择上次使用的 CPU，以充分利用已缓存的数据（L1、L2 缓存）及分支预测优化。)
+ *     + branch prediction optimizations：“分支预测优化”
+ *     + prefer: 优先选择
  *
  * 3. Prefer @prev_cpu's SMT sibling:
  *   - if @prev_cpu is busy and no fully idle core is available, try to
  *     place the task on an idle SMT sibling of @prev_cpu; keeping the
  *     task on the same core makes migration cheaper, preserves L1 cache
  *     locality and reduces wakeup latency.
+ *     + 若 @prev_cpu 处于繁忙状态，且系统中无完全空闲的核心可用，则尝试将该任务调度至 @prev_cpu 的空闲 SMT 兄弟核心上。
+ *       将任务保留在同一物理核心上，不仅能降低任务迁移开销，还能维持 L1 缓存的局部性，并减少唤醒延迟。
+ *     + @prev_cpu：这是 Linux 内核源码中的变量名，通常指代进程上一次运行所在的 CPU
+ *     + try to place the task：“尝试将该任务调度至...”
+ *     + migration cheaper：“降低任务迁移开销”。在跨核心或跨节点移动进程时，系统需要保存和恢复寄存器、刷新缓存等，这些都会消耗性能
+ *     + preserves L1 cache locality：翻译为“维持 L1 缓存的局部性”。Locality（局部性原理）是计算机体系结构的核心概念，指数据在时间和空间上被重复访问的特性。
+ *     + 最大化性能、最小化开销而做出的权衡（Trade-off）
  *
  * 4. Pick a CPU within the same LLC (Last-Level Cache):
  *   - if the above conditions aren't met, pick a CPU that shares the same

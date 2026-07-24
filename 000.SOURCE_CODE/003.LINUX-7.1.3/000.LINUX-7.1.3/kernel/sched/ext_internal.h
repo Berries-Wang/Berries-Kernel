@@ -1187,8 +1187,15 @@ enum scx_reenq_flags {
 };
 
 enum scx_pick_idle_cpu_flags {
-	SCX_PICK_IDLE_CORE	= 1LLU << 0,	/* pick a CPU whose SMT siblings are also idle */
-	SCX_PICK_IDLE_IN_NODE	= 1LLU << 1,	/* pick a CPU in the same target NUMA node */
+	/**
+	 * Pick a CPU whose SMT siblings are also idle.(选择一个其 SMT 兄弟核心也处于空闲状态的 CPU)
+	 * > 选择一个完全空闲的CPU（这个核心上所有的逻辑线程目前都是空闲）
+	 */
+	SCX_PICK_IDLE_CORE	= 1LLU << 0,
+	/**
+	 * pick a CPU in the same target NUMA node.(在同一个目标 NUMA 节点中选择一个 CPU)
+	 */
+	SCX_PICK_IDLE_IN_NODE	= 1LLU << 1,
 };
 
 enum scx_kick_flags {
