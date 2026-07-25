@@ -867,7 +867,8 @@ struct task_struct {
 	int				static_prio;
 	int				normal_prio;
 	unsigned int			rt_priority;
-
+    
+	/* 普通进程调度实体(CFS调度实体)*/
 	struct sched_entity		se;
 	struct sched_rt_entity		rt;
 	struct sched_dl_entity		dl;
@@ -875,6 +876,7 @@ struct task_struct {
 #ifdef CONFIG_SCHED_CLASS_EXT
 	struct sched_ext_entity		scx;
 #endif
+    /* task调度类 */
 	const struct sched_class	*sched_class;
 
 #ifdef CONFIG_SCHED_CORE

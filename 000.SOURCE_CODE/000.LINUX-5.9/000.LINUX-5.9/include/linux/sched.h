@@ -923,13 +923,11 @@ struct task_struct {
 	 */
 	unsigned int			rt_priority;
     
-	/**
-	 * task调度类
-	 */
+	/* task调度类 */
 	const struct sched_class	*sched_class;
 
 	/**
-	 * 普通进程调度实体
+	 * 普通进程调度实体(CFS调度实体)
 	 */
 	struct sched_entity		se;
 

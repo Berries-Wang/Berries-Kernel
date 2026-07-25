@@ -24,9 +24,8 @@ extern struct task_struct *__switch_to(struct task_struct *,
 /**
  * 为什么switch_to 需要三个参数? last指向的是什么?
  *  - 假设当前从进程A 切换到进程B
- *   + last 指向的是 switch_to 被执行前的prev进程，即 A进程
- *   + 在switch_to执行完成之后，那么CPU就切换到next进程(B)执行了，
- *      切换到next进程(B)的内核栈后，prev 就不一定指向的A了
+ *   + last 指向的是 switch_to 被执行前的prev进程，即 A进程,是一个输出参数,存储 “谁刚把CPU让给了我”(帮人善后:资源释放)
+ *   + 在switch_to执行完成之后，那么CPU就切换到next进程(B)执行了，切换到next进程(B)的内核栈后，prev 就不一定指向的A了
  * 
  * 执行完成之后，CPU就会切换到next进程执行了
  * 

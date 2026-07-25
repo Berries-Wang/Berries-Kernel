@@ -4730,6 +4730,11 @@ static void __sched notrace __schedule(bool preempt)
 	prev_state = prev->state;
 
 	if (!preempt && prev_state) {
+        /**
+		 * 如果prev不可再运行，那就从红黑树中移除.
+		 * - 陷入IO操作
+		 * - ...
+		 */
 		// 是否有特别信号(挂起、KILL)需要处理
 		if (signal_pending_state(prev_state, prev)) {
 			prev->state = TASK_RUNNING;

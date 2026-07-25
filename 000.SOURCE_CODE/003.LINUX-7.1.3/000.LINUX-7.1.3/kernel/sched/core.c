@@ -6983,42 +6983,61 @@ find_proxy_task(struct rq *rq, struct task_struct *donor, struct rq_flags *rf)
 
 /*
  * __schedule() is the main scheduler function.
+ * （__schedule() 是主调度器函数。）
  *
  * The main means of driving the scheduler and thus entering this function are:
+ * （驱动调度器从而进入此函数的主要途径有：）
  *
  *   1. Explicit blocking: mutex, semaphore, waitqueue, etc.
+ *    （显式阻塞：mutex、semaphore、waitqueue 等。）
  *
  *   2. TIF_NEED_RESCHED flag is checked on interrupt and userspace return
  *      paths. For example, see arch/x86/entry_64.S.
+ *    （TIF_NEED_RESCHED 标志在中断返回路径和用户空间返回路径上被检查。
+ *      例如，参见 arch/x86/entry_64.S。）
  *
  *      To drive preemption between tasks, the scheduler sets the flag in timer
  *      interrupt handler sched_tick().
+ *    （为了驱动任务间的抢占，调度器在定时器中断处理函数 sched_tick() 中设置该标志。）
  *
  *   3. Wakeups don't really cause entry into schedule(). They add a
  *      task to the run-queue and that's it.
+ *    （唤醒操作并不会直接导致进入 schedule()。它们只是将任务添加到运行队列中，仅此而已。）
  *
  *      Now, if the new task added to the run-queue preempts the current
  *      task, then the wakeup sets TIF_NEED_RESCHED and schedule() gets
  *      called on the nearest possible occasion:
+ *    （但是，如果添加到运行队列的新任务需要抢占当前任务，那么唤醒操作会设置
+ *      TIF_NEED_RESCHED，并且 schedule() 会在最近的可行时机被调用：）
  *
  *       - If the kernel is preemptible (CONFIG_PREEMPTION=y):
+ *         （如果内核是可抢占的（CONFIG_PREEMPTION=y）：）
  *
  *         - in syscall or exception context, at the next outmost
  *           preempt_enable(). (this might be as soon as the wake_up()'s
  *           spin_unlock()!)
+ *           （在系统调用或异常上下文中，在下一个最外层的 preempt_enable() 处。
+ *           （这可能紧跟在 wake_up() 的 spin_unlock() 之后！））
  *
  *         - in IRQ context, return from interrupt-handler to
  *           preemptible context
+ *           （在 IRQ 上下文中，从中断处理程序返回到可抢占上下文时）
  *
  *       - If the kernel is not preemptible (CONFIG_PREEMPTION is not set)
  *         then at the next:
+ *         （如果内核是不可抢占的（未设置 CONFIG_PREEMPTION），则在以下时机：）
  *
  *          - cond_resched() call
+ *            （cond_resched() 调用）
  *          - explicit schedule() call
+ *            （显式调用 schedule()）
  *          - return from syscall or exception to user-space
+ *            （从系统调用或异常返回到用户空间）
  *          - return from interrupt-handler to user-space
+ *            （从中断处理程序返回到用户空间）
  *
  * WARNING: must be called with preemption disabled!
+ * （警告：必须在禁用抢占的情况下调用！）
  */
 static void __sched notrace __schedule(int sched_mode)
 {
@@ -7095,6 +7114,11 @@ static void __sched notrace __schedule(int sched_mode)
 			goto picked;
 		}
 	} else if (!preempt && prev_state) {
+		/**
+		 * 如果prev不可再运行，那就从红黑树中移除.
+		 * - 陷入IO操作
+		 * - ...
+		 */
 		/*
 		 * We pass task_is_blocked() as the should_block arg
 		 * in order to keep mutex-blocked tasks on the runqueue

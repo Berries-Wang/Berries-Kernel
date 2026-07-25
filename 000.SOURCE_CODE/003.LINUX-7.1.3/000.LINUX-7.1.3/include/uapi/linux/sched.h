@@ -119,15 +119,31 @@ struct clone_args {
 #define CLONE_ARGS_SIZE_VER2 88 /* sizeof third published struct */
 
 /*
- * Scheduling policies
+ * Scheduling policies (调度策略)
+ *
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub] 7.4.3　调度策略
+ *   SCHED_NORMAL（以前称为SCHED_OTHER）分分时调度策略是非实时进程的默认调度策略。
+ *                 所有普通进程的静态优先级都为 0，因此，任何一个基于SCHED_FIFO或SCHED_RR调度策略的就绪进程都会抢占它们
+ * 
+ *   SCHED_FIFO（先进先出调度）策略与SCHED_RR调度策略类似，只不过没有时间片概念
+ *   
+ *   SCHED_BATCH（批处理调度）策略是普通进程调度策略。这个调度策略表示让调度器认为该进程是CPU消耗型的。
+ *               因此，调度器对这类进程的唤醒惩罚（wakeup penalty）比较小。在Linux内核里，该类调度策略表示使用CFS。
+ * 
+ * 用户空间程序可以使用调度策略接口函数（如sched_setscheduler()）来设定用户进程的调度策略。
+ * 其中，SCHED_NORMAL、SCHED_BATCH以及SCHED_IDLE指使用CFS，SCHED_FIFO和SCHED_RR指使用realtime调度器，
+ * SCHED_DEADLINE指使用deadline调度器。
+ * 
+ * sched_setaffinity 可以将进程绑定到特定的CPU
  */
-#define SCHED_NORMAL		0
-#define SCHED_FIFO		1
-#define SCHED_RR		2
-#define SCHED_BATCH		3
+#define SCHED_NORMAL		0    // CFS CFS 调度类 
+#define SCHED_FIFO		    1    // realtime 调度器,实时进程;先进先出，高优先级永远抢占
+#define SCHED_RR		    2    // realtime 调度器,Round Robin,同优先级时间片轮转；  RT 无条件抢占CFS
+#define SCHED_BATCH		    3    // CFS 调度类  
 /* SCHED_ISO: reserved but not implemented yet */
-#define SCHED_IDLE		5
-#define SCHED_DEADLINE		6
+#define SCHED_IDLE		5        // idle 调度  SCHED_IDLE（空闲调度）策略用于运行低优先级的任务。 CFS 调度类
+#define SCHED_DEADLINE		6    // deadline 调度器  SCHED_DEADLINE（实时调度）策略用于调度有严格时间要求的实时进程。
+/*SCHED_EXT: Linux-6.12合并的BPF可拓展调度器*/
 #define SCHED_EXT		7
 
 /* Can be ORed in to make sure the process is reverted back to SCHED_NORMAL on fork */
