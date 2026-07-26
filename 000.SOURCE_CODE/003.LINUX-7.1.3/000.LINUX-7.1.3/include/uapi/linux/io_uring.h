@@ -30,10 +30,10 @@ extern "C" {
  * IO submission data structure (Submission Queue Entry)
  */
 struct io_uring_sqe {
-	__u8	opcode;		/* type of operation for this sqe */
+	__u8	opcode;		/* type of operation for this sqe:操作类型 参考:{@link enum io_uring_op } */
 	__u8	flags;		/* IOSQE_ flags */
 	__u16	ioprio;		/* ioprio for the request */
-	__s32	fd;		/* file descriptor to do IO on */
+	__s32	fd;		    /* file descriptor to do IO on */
 	union {
 		__u64	off;	/* offset into file */
 		__u64	addr2;
@@ -77,7 +77,7 @@ struct io_uring_sqe {
 		__u32		nop_flags;
 		__u32		pipe_flags;
 	};
-	__u64	user_data;	/* data to be passed back at completion time */
+	__u64	user_data;	/* data to be passed back at completion time: 用户自定义数据，原样回传到CQE */
 	/* pack this to avoid bogus arm OABI complaints */
 	union {
 		/* index into fixed buffers, if used */
@@ -498,8 +498,8 @@ enum io_uring_msg_ring_flags {
  * IO completion data structure (Completion Queue Entry)
  */
 struct io_uring_cqe {
-	__u64	user_data;	/* sqe->user_data value passed back */
-	__s32	res;		/* result code for this event */
+	__u64	user_data;	/* sqe->user_data value passed back: SQE->user_data的原样拷贝 */
+	__s32	res;		/* result code for this event: 操作结果(成功:字节数;失败:-error_no) */
 	__u32	flags;
 
 	/*

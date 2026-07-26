@@ -143,7 +143,11 @@ struct clone_args {
 /* SCHED_ISO: reserved but not implemented yet */
 #define SCHED_IDLE		5        // idle 调度  SCHED_IDLE（空闲调度）策略用于运行低优先级的任务。 CFS 调度类
 #define SCHED_DEADLINE		6    // deadline 调度器  SCHED_DEADLINE（实时调度）策略用于调度有严格时间要求的实时进程。
-/*SCHED_EXT: Linux-6.12合并的BPF可拓展调度器*/
+/**
+ * SCHED_EXT: Linux-6.12合并的BPF可拓展调度器
+ * 
+ * > [000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/Documentation/scheduler/sched-ext.rst]
+ * */
 #define SCHED_EXT		7
 
 /* Can be ORed in to make sure the process is reverted back to SCHED_NORMAL on fork */

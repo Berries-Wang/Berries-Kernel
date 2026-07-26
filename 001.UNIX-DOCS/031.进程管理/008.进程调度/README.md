@@ -38,13 +38,13 @@
 - 100-139 (普通)：由完全公平调度器（Completely Fair Scheduler, CFS）处理，采用时间片轮转和优先级调整机制。
 
 
-### 调度类
+### 调度类 <sup>[000.LINUX-7.1.3/include/uapi/linux/sched.h](../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/include/uapi/linux/sched.h)</sup>
 进程调度依赖于调度策略（schedule policy），Linux内核把相同的调度策略抽象成调度类（schedule class）。不同类型的进程采用不同的调度策略，目前Linux内核中默认实现了5种调度类，分别是stop、deadline、realtime、CFS和idle，它们分别使用sched_class来定义，并且通过next指针串联在一起
 ```txt
     # 按照优先级从高到低的顺序串联在一起的
-    +----------+      +------------+      +------------+      +---------+      +----------+
-    |   stop   | ---> |  deadline  | ---> |  realtime  | ---> |   CFS   | ---> |   idle   |
-    +----------+      +------------+      +------------+      +---------+      +----------+
+    +----------+      +------------+      +------------+      +---------+      +-----------+        +----------+
+    |   stop   | ---> |  deadline  | ---> |  realtime  | ---> |   CFS   | ---> |EXT(>=6.12)|  --->  |   idle   |
+    +----------+      +------------+      +------------+      +---------+      +-----------+        +----------+
 ```
 
 |调度类|调度策略|使用范围|说　　明|
@@ -56,6 +56,8 @@
 |- realtime|- SCHED_FIFO、SCHED_RR|- 普通实时进程。优先级为0～99|- 用于普通的实时进程，如IRQ线程化|
 |-|-|-|-|
 |- CFS|- SCHED_NORMAL、 SCHED_BATCH、 SCHED_IDLE|- 普通进程。 优先级为100～139|- 由CFS来调度|
+|-|-|-|-|
+|- sched_ext|- SCHED_EXT|- 优先级在CFS与idle之间，通过BPF程序动态加载|- 由BPF调度器调度，可热插拔替换CFS调度策略。<br/>- 通过 ``struct sched_ext_ops`` 实现自定义调度算法。<br/>- 支持 ``SCX_OPS_SWITCH_PARTIAL`` 仅接管SCHED_EXT任务。<br/>- 出错时自动回退到CFS调度器。|
 |-|-|-|-|
 |- idle|- 无|- 	最低优先级的进程|- **当就绪队列中没有其他进程时进入idle调度类**。<br/> - idle调度类会让CPU进入低功耗模式|
 

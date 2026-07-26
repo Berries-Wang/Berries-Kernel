@@ -2,9 +2,11 @@
 /*
  * Shared application/kernel submission and completion ring pairs, for
  * supporting fast/efficient IO.
+ * 共享的应用程序/内核提交和完成环形缓冲区对，用于支持快速高效的 IO。
  *
  * A note on the read/write ordering memory barriers that are matched between
  * the application and kernel side.
+ * 关于应用程序和内核端之间匹配的读/写顺序内存屏障的说明。
  *
  * After the application reads the CQ ring tail, it must use an
  * appropriate smp_rmb() to pair with the smp_wmb() the kernel uses
@@ -14,6 +16,8 @@
  * through a control-dependency in io_get_cqe (smp_store_release to
  * store head will do). Failure to do so could lead to reading invalid
  * CQ entries.
+ * 应用程序读取 CQ 环尾指针后，必须使用适当的 smp_rmb() 来与内核在写入尾指针之前使用的 smp_wmb() 配对（使用 smp_load_acquire 读取尾指针也可以）。
+ * 在更新 CQ 头指针之前还需要一个 smp_mb()（对 entry 加载和头指针存储进行排序），与 io_get_cqe 中通过控制依赖实现的隐式屏障配对（使用 smp_store_release 存储头指针也可以）。不这样做可能导致读取无效的 CQ 条目。
  *
  * Likewise, the application must use an appropriate smp_wmb() before
  * writing the SQ tail (ordering SQ entry stores with the tail store),
@@ -21,13 +25,17 @@
  * to store the tail will do). And it needs a barrier ordering the SQ
  * head load before writing new SQ entries (smp_load_acquire to read
  * head will do).
+ * 同样，应用程序在写入 SQ 尾指针之前必须使用适当的 smp_wmb()（对 SQ entry 存储和尾指针存储进行排序），这与 io_get_sqring 中的 smp_load_acquire 配对（使用 smp_store_release 存储尾指针也可以）。
+ * 在写入新的 SQ 条目之前还需要一个屏障来对 SQ 头指针加载进行排序（使用 smp_load_acquire 读取头指针也可以）。
  *
  * When using the SQ poll thread (IORING_SETUP_SQPOLL), the application
  * needs to check the SQ flags for IORING_SQ_NEED_WAKEUP *after*
  * updating the SQ tail; a full memory barrier smp_mb() is needed
  * between.
+ * 当使用 SQ 轮询线程（IORING_SETUP_SQPOLL）时，应用程序需要在更新 SQ 尾指针 *之后* 检查 SQ 标志中的 IORING_SQ_NEED_WAKEUP；两者之间需要一个完整的内存屏障 smp_mb()。
  *
  * Also see the examples in the liburing library:
+ * 另请参阅 liburing 库中的示例：
  *
  *	git://git.kernel.org/pub/scm/linux/kernel/git/axboe/liburing.git
  *
@@ -35,6 +43,7 @@
  * from data shared between the kernel and application. This is done both
  * for ordering purposes, but also to ensure that once a value is loaded from
  * data that the application could potentially modify, it remains stable.
+ * io_uring 还对内核和应用程序之间共享的数据的 *任何* 存储或加载使用 READ/WRITE_ONCE()。这样做既是为了排序目的，也是为了确保一旦从应用程序可能修改的数据中加载了一个值，该值保持稳定。
  *
  * Copyright (C) 2018-2019 Jens Axboe
  * Copyright (c) 2018-2019 Christoph Hellwig

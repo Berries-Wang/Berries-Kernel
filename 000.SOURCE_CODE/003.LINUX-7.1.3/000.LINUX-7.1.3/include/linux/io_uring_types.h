@@ -141,12 +141,18 @@ struct iou_vec {
 	unsigned		nr; /* number of struct iovec it can hold */
 };
 
+/**
+ * SQ环中, 用户态写tail推进生产,内核读head推进消费
+ * CQ环中, 内核写tail推进生产，用户态读head推进消费
+ */
 struct io_uring {
 	u32 head;
 	u32 tail;
 };
 
-/*
+/**
+ * io_rings是通过mmap映射到用户空间的共享结构体,则用户态和内核态共享一块物理内存
+ *
  * This data is shared with the application through the mmap at offsets
  * IORING_OFF_SQ_RING and IORING_OFF_CQ_RING.
  *
@@ -161,8 +167,10 @@ struct io_rings {
 	 * The kernel controls head of the sq ring and the tail of the cq ring,
 	 * and the application controls tail of the sq ring and the head of the
 	 * cq ring.
+	 * 
+	 * sq、cq环元数据
 	 */
-	struct io_uring		sq, cq;
+	struct io_uring		sq, cq; 
 	/*
 	 * Bitmasks to apply to head and tail offsets (constant, equals
 	 * ring_entries - 1)
@@ -289,9 +297,15 @@ enum {
 	IO_RING_F_COMPAT		= BIT(11),
 	IO_RING_F_IOWQ_LIMITS_SET	= BIT(12),
 };
-
+/**
+ *
+ * io_uring 实例的大脑
+ * 
+ * 
+ * ____cacheline_aligned_in_smp: 将数据分部到CPU上不同的cache_line中
+ */
 struct io_ring_ctx {
-	/* const or read-mostly hot data */
+	/* const or read-mostly hot data: 热路径：提交阶段 */
 	struct {
 		/* ring setup flags */
 		unsigned int		flags;
@@ -299,19 +313,19 @@ struct io_ring_ctx {
 		unsigned int		int_flags;
 
 		struct task_struct	*submitter_task;
-		struct io_rings		*rings;
+		struct io_rings		*rings;  // 共享环结构指针?
 		/* cache of ->restrictions.bpf_filters->filters */
 		struct io_bpf_filter __rcu	**bpf_filters;
 		struct percpu_ref	refs;
 
-		clockid_t		clockid;
+		clockid_t		    clockid;
 		enum tk_offsets		clock_offset;
 
 		enum task_work_notify_mode	notify_method;
 		unsigned			sq_thread_idle;
 	} ____cacheline_aligned_in_smp;
 
-	/* submission data */
+	/* submission data ,热路径: 提交阶段*/
 	struct {
 		struct mutex		uring_lock;
 
@@ -704,6 +718,9 @@ static inline struct io_kiocb *cmd_to_io_kiocb(void *ptr)
 	return ptr;
 }
 
+/**
+ * 内核内部流转的请求对象
+ */
 struct io_kiocb {
 	union {
 		/*
@@ -732,6 +749,7 @@ struct io_kiocb {
 
 	struct io_cqe			cqe;
 
+	/*所属上下文*/
 	struct io_ring_ctx		*ctx;
 	struct io_uring_task		*tctx;
 
@@ -777,7 +795,8 @@ struct io_kiocb {
 	void				*async_data;
 	/* linked requests, IFF REQ_F_HARDLINK or REQ_F_LINK are set */
 	atomic_t			poll_refs;
-	struct io_kiocb			*link;
+	/*链式请求指针: 前一个请求处理完成，自动触发下一个: req_A -> req_B -> req_C 通过这个*link将请求链接起来*/
+	struct io_kiocb			*link; 
 	/* custom credentials, valid IFF REQ_F_CREDS is set */
 	const struct cred		*creds;
 	struct io_wq_work		work;
