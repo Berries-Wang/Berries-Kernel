@@ -3964,7 +3964,9 @@ context_switch(struct rq *rq, struct task_struct *prev,
 			prev->active_mm = NULL;
 	} else {                                        // to user
 		membarrier_switch_mm(rq, prev->active_mm, next->mm);
-		/*
+		/**
+		 * 内存切换
+		 * 
 		 * sys_membarrier() requires an smp_mb() between setting
 		 * rq->curr / membarrier_switch_mm() and returning to userspace.
 		 *
@@ -3998,6 +4000,12 @@ context_switch(struct rq *rq, struct task_struct *prev,
 	 * 栈空间的切换
 	 * 
 	 * [include/asm-generic/switch_to.h]
+	 * 
+	 * 仔细阅读: [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#8.1.6进程切换#3．switch_to()函数
+	 * 为什么需要第三个prev参数呢?
+	 * ==> 因为在进程切换（switch_to返回之后）之后，就是next进程在执行了，需要对prev进程进行清理工作，这个prev进程，一定要是本次切换的prev进程。
+	 * - 假设本次执行进程A 切换为 进程B , 
+	 * - 但是上次如果是C->B,只有两个参数的话,那么就是使用的内核栈的参数，prev就是进程C，而本次需要清理的是进程A。
 	*/
 	switch_to(prev, next, prev);
 	barrier();
@@ -4006,7 +4014,9 @@ context_switch(struct rq *rq, struct task_struct *prev,
 	 * switch_to 执行后，那么CPU就已经运行了next进程了
 	 */
 
-	// 这个函数是由谁执行的呢?
+	/**
+	 * next进程执行finish_task_switch(last)函数来对last进程进行清理工作，通常last进程指的是prev进程。
+	 */
 	return finish_task_switch(prev);
 }
 
@@ -4720,6 +4730,11 @@ static void __sched notrace __schedule(bool preempt)
 	prev_state = prev->state;
 
 	if (!preempt && prev_state) {
+        /**
+		 * 如果prev不可再运行，那就从红黑树中移除.
+		 * - 陷入IO操作
+		 * - ...
+		 */
 		// 是否有特别信号(挂起、KILL)需要处理
 		if (signal_pending_state(prev_state, prev)) {
 			prev->state = TASK_RUNNING;
@@ -4882,7 +4897,7 @@ asmlinkage __visible void __sched schedule(void)
 		
 		__schedule(false);
 
-		// 与 preempt_disable(); 调用匹配
+		// 与 preempt_disable(); 调用匹配,即打开内核抢占
 		sched_preempt_enable_no_resched();
 	} while (need_resched());
 
@@ -8780,14 +8795,33 @@ void dump_cpu_task(int cpu)
  * nice level changed. I.e. when a CPU-bound task goes from nice 0 to
  * nice 1, it will get ~10% less CPU time than another CPU-bound task
  * that remained on nice 0.
+ * (Nice 等级是乘性关系，每改变一个 Nice 等级会产生约 10% 的变化。
+ * 例如，当一个 CPU 密集型任务的 Nice 值从 0 变为 1 时，与另一个保持在 Nice 值为 0 的 CPU 密集型任务相比，
+ * 它将获得约少 10% 的 CPU 时间。)
  *
  * The "10% effect" is relative and cumulative: from _any_ nice level,
  * if you go up 1 level, it's -10% CPU usage, if you go down 1 level
  * it's +10% CPU usage. (to achieve that we use a multiplier of 1.25.
  * If a task goes up by ~10% and another task goes down by ~10% then
  * the relative distance between them is ~25%.)
+ * (“10% 效应”是相对且累积的：从_任意_一个 Nice 等级出发，每提升 1 级，CPU 使用率减少 10%；每降低 1 级，
+ * CPU 使用率增加 10%。（为了实现这一点，我们使用了一个 1.25 的乘数(这个1.25得记住)。如果一个任务的 CPU 使用率提升约 10%，
+ * 而另一个任务降低约 10%，那么它们之间的相对差距约为 25%。）)
  * 
  * 因此，nice值越小，权重越大，优先级越高
+ * 
+ * 为什么是这些数值:
+ *   前面所述的10%的影响是相对的、累加的，如一个进程增加了10%的CPU时间，则另外一个进程减少10%，因此差距大约是20%，这里使用一个系数1.25来计算。
+ * 举个例子，若进程A和进程B的nice值都为0，那么权重值都是1024，它们获得50%的CPU时间，计算公式为1024/(1024+1024)=50%。
+ * 假设进程A增加nice值，即nice=1，进程B的nice值不变，那么进程B应该获得55%的CPU时间，进程A应该获得45%的CPU时间。
+ * 我们利用prio_to_weight[]表来计算，对于进程A，820/(1024+820)≈44.5%；而对于进程B，1024/(1024+820)≈55.5%
+ * 
+ * 
+ * 这里涉及到定点数和浮点数:
+ * 浮点数 (Floating-Point)：就像科学计数法（例如 1.23×1051.23×105 ）。小数点可以“浮动”，通过指数（阶码）来调整位置。但硬件实现复杂，计算相对慢。
+ * 定点数 (Fixed-Point)：就像人民币的金额（例如 12.34 元）。我们约定好“最后两位是小数”，这个位置永远不变。计算速度极快（本质上就是整数运算）
+ * 
+ * nice = 0 , 是基准值，权重为1024
  */
 const int sched_prio_to_weight[40] = {
  /* -20 */     88761,     71755,     56483,     46273,     36291,
@@ -8800,8 +8834,9 @@ const int sched_prio_to_weight[40] = {
  /*  15 */        36,        29,        23,        18,        15,
 };
 
-/*
+/**
  * Inverse (2^32/x) values of the sched_prio_to_weight[] array, precalculated.
+ * (sched_prio_to_weight[] 数组的倒数（2^32/x），已预先计算。)
  *
  * In cases where the weight does not change often, we can use the
  * precalculated inverse to speed up arithmetics by turning divisions
@@ -8809,6 +8844,10 @@ const int sched_prio_to_weight[40] = {
  * 
  * sched_prio_to_wmult[i] = 2^32 / sched_prio_to_weight[i] , 是为了在计算vruntime时会涉及浮点运算，将除法改为乘法和移位操作（calc_delta_fair()函数实现），提高计算效率
  * calc_delta_fair: 000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/kernel/sched/fair.c
+ * 
+ * 这是因为vruntime的计算公式为： (delta_exec * nice_0_weight) / weight
+ * 计算这个，是为了将除法转换为乘法和移位操作
+ * 
  */
 const u32 sched_prio_to_wmult[40] = {
  /* -20 */     48388,     59856,     76040,     92818,    118348,

@@ -124,13 +124,15 @@ struct clone_args {
  * 用户空间程序可以使用调度策略接口函数（如sched_setscheduler()）来设定用户进程的调度策略。
  * 其中，SCHED_NORMAL、SCHED_BATCH以及SCHED_IDLE指使用CFS，SCHED_FIFO和SCHED_RR指使用realtime调度器，
  * SCHED_DEADLINE指使用deadline调度器。
+ * 
+ * sched_setaffinity 可以将进程绑定到特定的CPU
  */
-#define SCHED_NORMAL		0    // CFS 调度器 
-#define SCHED_FIFO		    1    // realtime 调度器
-#define SCHED_RR		    2    // realtime 调度器
-#define SCHED_BATCH		    3    // CFS 调度器  
+#define SCHED_NORMAL		0    // CFS CFS 调度类 
+#define SCHED_FIFO		    1    // realtime 调度器,实时进程;先进先出，高优先级永远抢占
+#define SCHED_RR		    2    // realtime 调度器,Round Robin,同优先级时间片轮转；  RT 无条件抢占CFS
+#define SCHED_BATCH		    3    // CFS 调度类  
 /* SCHED_ISO: reserved but not implemented yet */
-#define SCHED_IDLE		5        // idle 调度  SCHED_IDLE（空闲调度）策略用于运行低优先级的任务。
+#define SCHED_IDLE		5        // idle 调度  SCHED_IDLE（空闲调度）策略用于运行低优先级的任务。 CFS 调度类
 #define SCHED_DEADLINE		6    // deadline 调度器  SCHED_DEADLINE（实时调度）策略用于调度有严格时间要求的实时进程。
 
 /* Can be ORed in to make sure the process is reverted back to SCHED_NORMAL on fork （可以进行“或”运算，以确保进程在 fork 时恢复到 SCHED_NORMAL 状态） */

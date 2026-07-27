@@ -604,7 +604,10 @@ static void destroy_sched_domains(struct sched_domain *sd)
 		call_rcu(&sd->rcu, destroy_sched_domains_rcu);
 }
 
-/*
+/**
+ * LLC调度域 , 参考:[#6．LLC调度域]
+ * 
+ * 
  * Keep a special pointer to the highest sched_domain that has
  * SD_SHARE_PKG_RESOURCE set (Last Level Cache Domain) for this
  * allows us to avoid some pointer chasing select_idle_sibling().
@@ -651,7 +654,9 @@ static void update_top_cache_domain(int cpu)
 	rcu_assign_pointer(per_cpu(sd_asym_cpucapacity, cpu), sd);
 }
 
-/*
+/**
+ * 将调度组 调度域 添加到就绪队列中
+ * 
  * Attach the domain 'sd' to 'cpu' as its base domain. Callers must
  * hold the hotplug lock.
  */
@@ -1093,8 +1098,12 @@ static struct sched_group *get_group(int cpu, struct sd_data *sdd)
  * build_sched_groups will build a circular linked list of the groups
  * covered by the given span, will set each group's ->cpumask correctly,
  * and will initialize their ->sgc.
+ * (build_sched_groups 将构建一个由给定 span (CPU集合)所覆盖的调度组的循环链表，
+ * 设置每个组的 ->cpumask，并初始化它们的 ->sgc。)
  *
  * Assumes the sched_domain tree is fully constructed
+ * 
+ * 创建调度组
  */
 static int
 build_sched_groups(struct sched_domain *sd, int cpu)
@@ -1418,9 +1427,10 @@ sd_init(struct sched_domain_topology_level *tl,
 }
 
 /**
- * Topology list, bottom-up.
+ * Topology list, bottom-up.(拓扑列表（自底向上）)
  * 
  * > SMT MC 是什么?参考:[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#8.3.2　CPU调度域 CPU域的分类
+ * > [001.UNIX-DOCS/031.进程管理/008.进程调度/000.调度组与调度域/000.KERNEL_5.9.md]
  * 
  * 
  * 内核默认定义了一个数组default_topology[]来概括CPU物理域的层次结构
@@ -2181,6 +2191,7 @@ int sched_init_domains(const struct cpumask *cpu_map)
 	if (!doms_cur)
 		doms_cur = &fallback_doms;
 	cpumask_and(doms_cur[0], cpu_map, housekeeping_cpumask(HK_FLAG_DOMAIN));
+	// 建立调度域拓扑关系
 	err = build_sched_domains(doms_cur[0], NULL);
 	register_sched_domain_sysctl();
 

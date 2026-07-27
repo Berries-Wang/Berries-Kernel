@@ -17,6 +17,9 @@
 
 #ifndef __ASSEMBLY__
 
+/**
+ * 参考: [001.UNIX-DOCS/003.高速缓存/008.内核代码中的ASID.md]
+ */
 typedef struct {
 	atomic64_t	id;
 #ifdef CONFIG_COMPAT

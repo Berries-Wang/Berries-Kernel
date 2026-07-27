@@ -8,3 +8,4 @@ app
 009.IGNORE/*
 !009.IGNORE/README.md
 **/**/.DS_Store
+000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/_install

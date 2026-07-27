@@ -23,6 +23,9 @@ static DEFINE_RAW_SPINLOCK(cpu_asid_lock);
 static atomic64_t asid_generation;
 static unsigned long *asid_map;
 
+/**
+ * static DEFINE_PER_CPU(atomic64_t, active_asids); 核心作用是追踪每个 CPU 核心当前正在使用的 ASID（Address Space Identifier，地址空间标识符），从而避免不必要的 TLB 刷新，提升性能。
+ */
 static DEFINE_PER_CPU(atomic64_t, active_asids);
 static DEFINE_PER_CPU(u64, reserved_asids);
 static cpumask_t tlb_flush_pending;
@@ -198,36 +201,52 @@ set_asid:
 	return idx2asid(asid) | generation;
 }
 
+/**
+ * 执行 asid 、 ttbr0_el1 、 ttbr1_el1 切换操作
+ */
 void check_and_switch_context(struct mm_struct *mm)
 {
 	unsigned long flags;
 	unsigned int cpu;
 	u64 asid, old_active_asid;
 
-	if (system_supports_cnp())
+	if (system_supports_cnp()) {
 		cpu_set_reserved_ttbr0();
+	}
 
 	asid = atomic64_read(&mm->context.id);
 
-	/*
-	 * The memory ordering here is subtle.
+	/**
+	 * The memory ordering here is subtle.(这里的内存屏障（内存排序）逻辑非常隐蔽)
 	 * If our active_asids is non-zero and the ASID matches the current
 	 * generation, then we update the active_asids entry with a relaxed
 	 * cmpxchg. Racing with a concurrent rollover means that either:
+	 * (如果我们的 active_asids 非零，且该 ASID 与当前生成计数（generation）匹配，
+	 * 那么我们使用一个松散型（relaxed）的 cmpxchg 来更新 active_asids 条目。与并发执行的轮转（rollover）操作发生竞争时，意味着以下两种情况之一：)
 	 *
 	 * - We get a zero back from the cmpxchg and end up waiting on the
 	 *   lock. Taking the lock synchronises with the rollover and so
 	 *   we are forced to see the updated generation.
+	 *   (我们从 cmpxchg 操作得到了一个零返回值，最终导致我们在锁上等待。
+	 *    获取这把锁会与（版本号的）回滚操作进行同步，从而强制我们观察到更新后的版本号。)
 	 *
 	 * - We get a valid ASID back from the cmpxchg, which means the
 	 *   relaxed xchg in flush_context will treat us as reserved
 	 *   because atomic RmWs are totally ordered for a given location.
+	 *   (我们从 cmpxchg 操作获得了一个有效的 ASID，这意味着 flush_context 中的松弛版 xchg 操作会将我们视为已预留（reserved），
+	 *    因为针对同一内存位置的原子读改写（RmW）操作是全局全序的)
 	 */
 	old_active_asid = atomic64_read(this_cpu_ptr(&active_asids));
+	/**
+	 * asid_gen_match: 执行版本校验,参考: 001.UNIX-DOCS/003.高速缓存/008.内核代码中的ASID.md
+	 * 
+	 * atomic64_cmpxchg_relaxed: 执行当前CPU asid切换
+	 */
 	if (old_active_asid && asid_gen_match(asid) &&
 	    atomic64_cmpxchg_relaxed(this_cpu_ptr(&active_asids),
-				     old_active_asid, asid))
+				     old_active_asid, asid)) {
 		goto switch_mm_fastpath;
+	}
 
 	raw_spin_lock_irqsave(&cpu_asid_lock, flags);
 	/* Check that our ASID belongs to the current generation. */
@@ -251,9 +270,11 @@ switch_mm_fastpath:
 	/*
 	 * Defer TTBR0_EL1 setting for user threads to uaccess_enable() when
 	 * emulating PAN.
+	 * (在模拟 PAN（特权访问禁止）功能时，将用户线程的 TTBR0_EL1 设置操作延迟到执行 uaccess_enable() 时进行)
 	 */
-	if (!system_uses_ttbr0_pan())
+	if (!system_uses_ttbr0_pan()) {
 		cpu_switch_mm(mm->pgd, mm);
+	}
 }
 
 /* Errata workaround post TTBRx_EL1 update. */

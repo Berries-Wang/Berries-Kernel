@@ -1,0 +1,245 @@
+#headerTop{width:100%;height:40px;background-color: black;position: relative;z-index:90;}
+#headerTop .headerTop{max-width:1440px;margin:0 auto;}
+#headerDIV{position: sticky;position: -webkit-sticky;top:-1px;width: 100%;height:60px;z-index:88;background:white;box-shadow: 0px 0px 5px 1px rgba(180,180,180,0.5);}
+#headerPosition{max-width:1440px;margin:0 auto;display: flex;align-items: center}
+#headerDIV .header{max-width:1440px;margin:0 auto;}
+.header {height: 60px;}
+.header_boxshadow{height: 4px;width: 100%;background-image: linear-gradient(to bottom, rgba(180, 180, 180, 0.4) , transparent);}
+.header_boxshadow.device_shadow {height: 4px;background-image: linear-gradient(to bottom, rgba(200, 200, 200, 0.3) , transparent);}
+.header-wrapper {max-width: 1430px;margin:0 auto;}
+.header-left {float: left;}
+.header-left>div{height: 60px;line-height: 60px;font-size: 24px;color: #333;font-weight: 700;}
+.header-left img {float: left;height:24px;margin-top: 8px;padding-left: 12px;}
+.header-left span {float: left;font-size: 24px;font-weight: 700;color: #333;line-height: 60px;margin-left: 10px;font-family: Arial Negreta, Arial Normal, Arial,HuaweiSans;}
+.header-con{width:100%;/*float:right;margin-top:-60px;*/}
+#headerPosition .headerSearch .headerSearch_box{
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  font-family: HuaweiSans, Arial, Microsoft YaHei, 方正兰亭黑;
+  font-weight: 400;
+  font-size: 12px;
+  color: #bbbbbb;
+  width: 100px;
+  height: 2rem;
+  border: 1px solid #c9c9c9;
+  box-sizing: border-box;
+  border-radius: 20px;
+  margin: auto 0;
+  cursor: pointer;
+}
+#headerPosition .headerSearch .headerSearch_box .saerch-box-ForIndex-img{
+  background-image: url('../img/info-all-search.png');
+  width: 17px;
+  height:17px;
+}
+.headerTopLogo{max-width:1740px;margin:0 auto}
+.headerLogo-con{max-width:1740px;margin:0 auto}
+.header-logo{float: left;height: 60px;width: 110px;padding-left: 12px;display: flex;align-items: center;justify-content: left;}
+.header-logo>a{background-image: url("../img/info-logo.png");width:85px;height:36px;background-repeat: no-repeat;background-size:auto 100%;display: block;background-position: center center; }
+.header-mid {margin:0 auto;display: flex;justify-content: center;}
+.header-right {float: right;margin-right: 10px;height:40px;display: flex;align-items: center;position: relative;}
+#change-userLevel-tip{position:absolute;top:33px;right:30px}
+#bullentins-tip{position:absolute;top:24px;left:-31px;width:271px;padding:0;height: 37px;min-height: unset;z-index:99;border-radius: 1px}
+#bullentins-tip:before,#bullentins-tip:after{left:20%}
+#bullentins-tip .content{padding:0;margin:0;height:15px;font-size: 12px;line-height: 15px; color:rgb(78, 78, 78);overflow: hidden}
+#bullentins-tip .content i{position: absolute;top: 4px;display: inline-block;width: 6px;height: 6px;border-radius: 10px;background: #c7000b;margin-right:14px }
+#bullentins-tip .content ul{margin-left:24px;width:calc(100% - 35px)}
+#bullentins-tip .content ul li{overflow: hidden;text-overflow: ellipsis;white-space: nowrap;}
+#bullentins-tip .content a{color:rgb(78, 78, 78);text-decoration: unset}
+#bullentins-tip .content a:hover{color: #c7000b!important;text-decoration: unset!important;}
+#bullentins-popWindow{background: rgba(0,0,0,0.5)}
+#header-searchPop{
+  display: flex;
+  flex-flow: column nowrap;
+  position: absolute;
+  z-index: 9999;
+  background-color: white;
+  height: 625px;
+  width: 100%;
+  padding: 0 10px 10px 0;
+  border-top: 1px solid rgb(238, 238, 238);
+  box-sizing: border-box;
+
+}
+#header-searchPop-mask {
+  position: fixed;
+  top: 144px;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+}
+.header-searchPop-close{
+  text-align: end;
+  display: flex;
+  flex-direction: row;
+  justify-content: end;
+  position: relative;
+  right:10%;
+  top: 10%;
+}
+.header-searchPop-close-icon{
+  text-align: end;
+  width: 20px;
+  height:20px;
+  background-image: url("../img/ic_close_filled.png");
+  cursor: pointer;
+  background-size: cover;
+}
+.header-searchPop-iframe{
+  position: relative;
+  top: 10%;
+}
+#emergency_iframe{margin: 15vh auto}
+.header-mid .nav {color: #3D3F43;line-height: 60px;height:60px;border-bottom: 2px solid transparent;font-size: 18px;font-family: HuaweiSans, Arial, Microsoft YaHei, 方正兰亭黑;margin-right: 59px;min-width: 40px;justify-content: center;cursor: pointer}
+.header-mid.header_carrier .nav{font-size:16px;}
+.header-mid.header_en.header_carrier .nav{font-size:14px;margin-right: 50px;}
+.header_en .nav:last-child{margin-right: 0;}
+.header-mid .active {border-bottom: 2px solid #e71414;}
+.header-mid .nav.bidding,.header-mid .nav.technology,.header-mid .nav.course{position: relative;}
+.header-mid .nav.bidding i{position: absolute;color: #c7000b;font-size:12px;top:10px;right:-28px;background-image: url("../img/beta.gif");display: block;width:28px;height:16px;}
+.header-mid .nav.course i{position: absolute;color: #c7000b;font-size:12px;top:10px;top: 10px;right: -32px;background-image: url(../commonIcon/new.png);display: block;width: 32px;height: 14px;background-size: 100%;background-repeat: no-repeat;background-position: center;}
+.header-mid .nav.technology span{position: absolute;color: #c7000b;font-size:12px;top:10px;top: 10px;right: -32px;background-image: url(../commonIcon/ipv6+.png);display: block;width: 32px;height: 14px;background-size: 100%;background-repeat: no-repeat;background-position: center;}
+/*.header-mid .nav.technology span{position: absolute;color: white;font-size:12px;top:10px;right:-50px;background-image: url("../img/pop_icon.png");display: block;min-width:50px;height:21px; background-repeat: no-repeat;line-height: 21px;padding: 0 5px 0 15px;background-size: 100% 100%;text-align: center}*/
+.header-mid .nav:hover {border-bottom: 2px solid #e71414;text-decoration: none!important;color:#3D3F43!important; ;}
+.header-mid .active:hover{border-bottom: 2px solid #e71414;}
+.header-right a,.header-right .lang{font-size: 12px;color:  #ccc;cursor: pointer}
+.header-right a.chang-version{margin-right:10px;}
+.header-right .user-id{display: inline-block;font-size: 12px;color: #ccc;line-height: 1;cursor: pointer;}
+.header-right .user-id:hover{color: white;}
+.header-right i.notice{display: inline-block;width: 14px;height: 14px;background:url("../img/notice.svg") no-repeat center 100%;margin-left:5px;position:relative}
+#hover-userLevel-tip{position:absolute;top:20px;right:-20px;visibility: hidden;opacity: 0;transition: 0.2s}
+.header-right .lang{display: inline-block;position: relative;cursor: pointer;}
+.header-right a:hover,.header-right .lang-name:hover{color: white!important;text-decoration: none;}
+.dialogTip a.cancel-btn:hover{color: inherit!important;}
+.header-right .lang em{font-style: normal;}
+.header-right .lang em.lang-name{line-height:1;}
+.header-right span.login-logout{display: flex;align-items: center;}
+.header-right .lang ul{line-height: 30px;background: #ffffff;text-align: center;border: 1px solid #cccccc;box-shadow: 1px 1px 5px #aaa;display: none;position: absolute;z-index: 100;left:-10%;top:26px;}
+.header-right .lang ul.lang-val-zh{left:-18px;}
+.header-right .lang ul li{color: #666666;padding: 0 15px;}
+.header-right .lang ul li:hover{background: #e71414;color: #ffffff;}
+.header-right .login-line,#iphone-nav .login-line{display: inline-block;width: 2px;height: 10px;border-right: 1px solid #e4e4e4;margin: 0px 9px;vertical-align: middle;}
+.lang-select img{width:10px;margin-left:5px;}
+#ehead_logout{display: inline-block;line-height:1;}
+#ehead_logout{display: inline-block;line-height:1;}
+.iphone-btn{display: none;}
+#iphone-nav{display: none;}
+#search-count #ui-id-1{background: #fff;border: 1px solid #bcbcbc;z-index:10}
+#search-count #ui-id-1 .ui-autocomplete-category{color: #fff;}
+#search-count #ui-id-1 li:first-child{padding-top:6px;}
+#search-count .ui-menu-item .ui-menu-item-wrapper{font-family: inherit,HuaweiSans, Arial, Microsoft YaHei, 方正兰亭黑;font-size: 14px;font-weight: normal;color: #333;white-space: nowrap;display: block;white-space:normal;opacity: .9;padding-bottom:6px;}
+#search-count .ui-menu .ui-state-active {background: #ededed;font-weight: normal;color: #2b2b2b;border: 0;cursor: pointer!important;margin: 0;}
+#solution-modal{position:absolute;top:55px;margin-left:-20px;display: flex;align-items: center;min-height:50px;font-size:14px;background: white;box-shadow: 1px 2px 5px rgb(208 208 208);flex-wrap: wrap;}
+#solution-modal .solutionNav{margin:0 10px;color:black;}
+#solution-modal.hideModal{display: none;}
+#solution-modal .solutionNav{height:50px;border:2px solid transparent;border-width:2px 0;line-height:50px;}
+#solution-modal a.solutionNav:hover{border-bottom:2px solid #c7000b!important;}
+i.select-down{ display: inline-block;width:10px;height:7px;background:url("../commonIcon/select-down.png") no-repeat center 100%; margin-left: 2px;background-size: 100%;transition: all 0.2s;transform:rotate(0) !important;}
+@media only screen
+and (max-width : 1590px){
+  #bullentins-tip.noLogin{left:-100px}
+  #bullentins-tip.noLogin:before,#bullentins-tip.noLogin:after{left:42%}
+}
+
+@media only screen
+and (max-width : 1350px){
+  .header-mid.header_carrier .nav{margin-right:32px}
+  .header-mid.header_en.header_carrier .nav{margin-right:20px}
+}
+@media only screen
+and (max-width : 1217px){
+  #solutionContent{margin-top:-50px;}
+}
+@media only screen
+and (max-width : 1150px){
+
+}
+@media only screen
+and (max-width : 1100px){
+  .header-mid.header_carrier .nav{margin-right:32px}
+  .header-mid.header_en.header_carrier .nav{margin-right:20px}
+}
+@media only screen and (max-width : 1536px) and (min-width : 1024px){
+#headerPosition .header-logo{
+  padding-left: 24px;
+}
+}
+/*屏幕的宽度小于1024 则开始加载移动端的导航*/
+@media screen and (max-width: 1024px){
+  #headerTop{display: none;}
+  #headerDIV{position: fixed;top:0;width: 100%;background: white;height:50px;z-index:999;}
+  .header{height:50px;}
+  .headerLogo-con{display: none}
+  .headerSearch{display: none;}
+  .header-con{float: none;margin-top:0;}
+  .header-mid{display: none;}
+  .header-right{display: none;}
+  .header-left{margin-left: 1.2rem;}
+  .header-left>div{height: 50px;line-height: 50px;}
+  .header-left span{font-size: 18px;line-height:50px;}
+  .header-left img {float: left;width: 140px;margin-top: 10px;}
+  .header-mid .nav{line-height:47px;}
+  .iphone-btn{display: block;float: right;}
+  .iphone-btn span{display:inline-block;margin-top: 16px;margin-right: 22px;width: 24px;height:18px;background:url("../img/iphone-nav.png") no-repeat; background-size:24px auto;cursor: pointer;}
+  #iphone-nav{position: fixed;width: 100%;height: 100%;background: #fff;top: 0;z-index:999;}
+  #iphone-nav .ip-head{height: 50px;text-align: right;border-bottom: 1px solid #e4e4e4;}
+  #iphone-nav .ip-head span{display:inline-block;width:16px;height:16px;background:url("../img/iphone-close.png") no-repeat; background-size:16px auto;margin-top: 16px;margin-right: 22px;}
+  #iphone-nav .ip-nav a{display: block;line-height: 55px;border-bottom: 1px solid #d7d7d7;color: #333333;font-size: 16px;padding-left: 1.5rem;height:55px}
+  #iphone-nav .ip-nav a.bidding,#iphone-nav .ip-nav a.technology{position: relative;}
+  #iphone-nav .ip-nav a.bidding i{position: absolute;color: #c7000b;font-size:12px;top:10px;margin-left:2px;background-image: url("../img/beta.gif");width:28px;height:16px;}
+  #iphone-nav .ip-nav a.technology span{position: absolute;color: white;font-size:12px;top:10px;margin-left:3px;background-image: url("../img/pop_icon.png");min-width:50px;height:21px; background-repeat: no-repeat;line-height: 21px;padding: 0 5px 0 15px;background-size: 100% 100%;}
+  #iphone-nav .ip-footer{position: fixed;width: 100%;height: 50px;bottom: 0;font-size: 15px;background: #4d4d4d;color: #ffffff;display: flex;display: -webkit-flex;justify-content: space-between;align-items: center;}
+  #iphone-nav .ip-footer .lang-select{cursor: pointer;}
+  #iphone-nav .ip-footer em{text-indent: 1rem;}
+  #iphone-nav .ip-footer img{transform: rotate(180deg);}
+  #iphone-nav .ip-footer a{margin-right: 1rem;color: #ffffff;}
+  #iphone-nav .ip-footer ul{line-height: 30px;background: #ffffff;text-align: center;border: 1px solid #cccccc;box-shadow: 1px 1px 5px #aaa;display: none;position: absolute;z-index: 20;left:1rem;top:-64px;}
+  #iphone-nav .ip-footer ul li{color: #666666;padding: 0 20px;list-style: none!important;}
+  #iphone-nav .ip-footer ul li:hover{background: #e71414;color: #ffffff;}
+  #iphone-nav .ip-footer .ip-right{padding-right: 1rem;}
+  #iphone-nav .ip-footer .ip-right > span{text-indent: 0;}
+  #iphone-nav #login-mobile{margin-right: 0;}
+  #ehead-login-mobile:hover{color:white;}
+  #solution-modal-mobile li{line-height: 40px;height: 40px;color: #666;font-size: 14px;padding-left: 1.5rem;}
+  #solutionContent{margin-top:0px;}
+  .lang-select i.select-down{transform: rotate(180deg)}
+}
+@media screen and (max-width: 768px){
+  .header-left{
+    display: block!important;
+    margin-left: calc(50% - 100px) !important;
+  }
+  .header-left>div{
+    height: 50px;
+    line-height: 50px;
+    font-size: 18px!important;
+    width: 200px;
+    text-align: center;
+  }
+}
+@media screen and (max-width: 767px){
+  body .ebg-btn-box, body .ebg-btn-box-block {padding-top: 5px;}
+  #feedDiv .feedback,#feedDiv .share{display: none}
+  .layout-toobar .more-contacts .ebg-btn-box a {width: 40px;height: 40px;border-radius: 2px;position: relative;margin-right: 10px;padding-left: 0;padding-right: 0;}
+  body .ebg-btn-box-block .ebg-btn-bg-red-l, body .ebg-btn-box .ebg-btn-bg-red-l {padding: 7px 9px;}
+  .more-contacts .ebg-btn-box a span {display: none;}
+  .info-contacts {background: url(../img/info-contacts.png) no-repeat center;width: 16px;height: 20px;display: block;}
+  .more-contacts {position: fixed;bottom: 20px;right: 20px;z-index: 100;display: block !important;}
+  body .ebg-btn-box-block .ebg-btn-bg-red-l, body .ebg-btn-box .ebg-btn-bg-red-l{display: inline-block;cursor: pointer;border: 2px solid #c7000b;color: #c7000b;border-radius: 2px;text-align: center;background-color: #c7000b;color: #fff;}
+  #ehead-login-mobile:hover{color:white;}
+
+}
+@media screen and (max-width: 440px){
+  #iphone-nav .ip-footer .ip-right{
+    max-width:250px;
+  }
+}
+@media (any-hover: hover){
+  .header-right .user-id:hover{color: white;}
+  .header-right a:hover,.header-right .lang-name:hover{color: white!important;text-decoration: none;}
+}

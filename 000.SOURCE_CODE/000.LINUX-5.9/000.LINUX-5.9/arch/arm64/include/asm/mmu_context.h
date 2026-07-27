@@ -211,7 +211,9 @@ enter_lazy_tlb(struct mm_struct *mm, struct task_struct *tsk)
 	 */
 	update_saved_ttbr0(tsk, &init_mm);
 }
-
+/**
+ * 切换进程内存
+ */
 static inline void __switch_mm(struct mm_struct *next)
 {
 	/*
@@ -233,11 +235,15 @@ switch_mm(struct mm_struct *prev, struct mm_struct *next,
 	if (prev != next)
 		__switch_mm(next);
 
-	/*
+	/**
 	 * Update the saved TTBR0_EL1 of the scheduled-in task as the previous
 	 * value may have not been initialised yet (activate_mm caller) or the
 	 * ASID has changed since the last run (following the context switch
 	 * of another thread of the same process).
+	 * (更新即将被调度进来的任务的已保存 TTBR0_EL1 值，因为其之前的值可能尚未初始化（例如在 activate_mm 调用者场景下），
+	 * 或者自上次运行以来 ASID 已经发生了变化（这发生在同一进程的另一个线程进行上下文切换之后）)
+	 * 
+	 * TTBR0_EL1:  (参考[001.UNIX-DOCS/000.内存管理/011.MMU(Memory Management Unit)/README.md] ,  TTBR0_EL1:用户空间页表基地址寄存器)
 	 */
 	update_saved_ttbr0(tsk, next);
 }

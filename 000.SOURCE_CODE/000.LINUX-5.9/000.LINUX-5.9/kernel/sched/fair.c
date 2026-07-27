@@ -229,7 +229,17 @@ static void __update_inv_weight(struct load_weight *lw)
 		lw->inv_weight = WMULT_CONST / w;
 }
 
-/*
+/**
+ * 
+ * [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure#P8.1.1　vruntime的计算]
+ * 
+ * 这个函数计算公式:
+ *   (delta_exec * nice_0_weight) / weight
+ * -> vruntime表示进程虚拟的运行时间，
+ *    delta_exec表示实际运行时间，
+ *    nice_0_weight表示nice值为0的进程的权重值，
+ *    weight表示该进程的权重值。
+ * 
  * delta_exec * weight / lw.weight
  *   OR
  * (delta_exec * (weight * lw->inv_weight)) >> WMULT_SHIFT
@@ -237,15 +247,27 @@ static void __update_inv_weight(struct load_weight *lw)
  * Either weight := NICE_0_LOAD and lw \e sched_prio_to_wmult[], in which case
  * we're guaranteed shift stays positive because inv_weight is guaranteed to
  * fit 32 bits, and NICE_0_LOAD gives another 10 bits; therefore shift >= 22.
+ * (要么权重取值为 NICE_0_LOAD 且 lw 取自 sched_prio_to_wmult[]，在这种情况下，
+ * 我们可以保证移位值（shift）保持为正数，因为 inv_weight 保证能放入 32 位，
+ * 而 NICE_0_LOAD 又提供了额外的 10 个比特位；因此，移位值至少为 22)
  *
  * Or, weight =< lw.weight (because lw.weight is the runqueue weight), thus
  * weight/lw.weight <= 1, and therefore our shift will also be positive.
+ * (或者，权重小于等于 lw.weight（因为 lw.weight 代表的是运行队列的总权重），
+ * 因此 weight/lw.weight 的值小于等于 1，所以我们的移位值（shift）同样会是正数)
+ * --> 上面两段话的意思就是 保证 shift 是正数
  */
 __attribute__((optimize("O0"))) static u64  __calc_delta(u64 delta_exec, unsigned long weight, struct load_weight *lw)
 {
 	/**
-	 * weight 右移10位： 获取定点数的整数部分?
+	 * weight 右移10位： 获取定点数的整数部分? 
+	 * 即 把那个被放大了 2^10 倍的整数，通过 右移 10 位，还原回普通的整数(丢弃小数部分)
+	 * --> 将权重值右移 LOAD_AVG_SHIFT 位（通常是 10 位），从而获取定点数的整数部分
+	 * 
+	 * 右移 10 位刚好够防止溢出，同时保留了足够的计算精度；
+	 * 如果右移 20 位，虽然更安全，但会导致严重的精度丢失，让调度器变“笨”
 	 */
+	// 当nice值>1,则这里fact都是返回2
 	u64 fact = scale_load_down(weight);
 	int shift = WMULT_SHIFT;
 
@@ -259,6 +281,9 @@ __attribute__((optimize("O0"))) static u64  __calc_delta(u64 delta_exec, unsigne
 	}
 
 	// fact = fact * lw->inv_weight
+	/**
+	 * fact * inv_weight 依然能正确反映出权重的比例关系
+	 */
 	fact = mul_u32_u32(fact, lw->inv_weight);
 
 	while (fact >> 32) {
@@ -709,7 +734,6 @@ int sched_proc_update_handler(struct ctl_table *table, int write,
  * 
  * 
  * 计算虚拟时间(vruntime)的核心函数
- * >> 通过 基准值(sysctl_sched_wakeup_granularity) + weight 来计算???
  * 
  * @param delta ： 实际运行时间
  */
@@ -768,8 +792,9 @@ __attribute__((optimize("O0")))  static u64 sched_slice(struct cfs_rq *cfs_rq, s
 	return slice;
 }
 
-/*
+/**
  * We calculate the vruntime slice of a to-be-inserted task.
+ * 我们计算一个待插入任务的虚拟运行时间（vruntime）切片
  *
  * vs = s/w
  */
@@ -4171,8 +4196,12 @@ static void check_spread(struct cfs_rq *cfs_rq, struct sched_entity *se)
 }
 
 /**
+ * 当一个新任务（刚 fork 出来）或一个唤醒的任务（从睡眠中醒来）要进入就绪队列（Runqueue）时，
+ * 内核必须给它一个 vruntime。如果直接给 0，它会霸占 CPU 直到赶上别人；如果给得太大，它就永远排不上队
+ * 
  * place_entity()函数根据情况对进程虚拟时间进行一些惩罚
  * 
+ * @param cfs_rq 父进程对应的CFS就绪队列
  * @param se 新创建的进程
  * 
  */
@@ -5989,7 +6018,8 @@ static void record_wakee(struct task_struct *p)
  * 
  * @return 1则跨LLC域选核（find_idlest_cpu）; 0则优先本地唤醒（wake_affine）;
  * 
- * 返回1,说明有一个进程唤醒地很频繁，那么待唤醒的进程和当前进程不能放在一个CPU上!!!
+ * 若wake_wide()返回true，说明wakeup_cpu已经频繁地唤醒了很多进程，因此不适宜继续把wakee放到自己的CPU中。
+ * 
  */
 static int wake_wide(struct task_struct *p)
 {
@@ -10389,6 +10419,13 @@ static void rebalance_domains(struct rq *rq, enum cpu_idle_type idle)
 	u64 max_cost = 0;
 
 	rcu_read_lock();
+	/**
+	 * 当前CPU开始从下到上遍历调度域
+	 * -> 当前CPU , 怎么理解? 因为 参数 rq =  this_rq();
+	 * 
+	 * 如[001.UNIX-DOCS/026.SMP/017.SMP负载均衡.md]所描述，调度器优先在本地域(调度域)内进行调整
+	 * -> 最大化数据局部性
+	 */
 	for_each_domain(cpu, sd) {
 		/*
 		 * Decay the newidle max times here because this is a regular
