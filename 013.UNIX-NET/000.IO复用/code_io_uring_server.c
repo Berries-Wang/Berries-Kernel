@@ -1,6 +1,55 @@
 /*****************************************************************************
  * code_io_uring_server.c — 基于 io_uring 的 TCP 聊天室服务器
  *
+ * 架构图：
+ *
+ * ┌─────────────────────────────────────────────────────────────────────┐
+ * │                         用户空间 (Userspace)                        │
+ * │                                                                     │
+ * │  ┌──────────────┐     ┌─────────────────────────────────────────┐   │
+ * │  │  主事件循环    │────▶│  io_uring 实例                          │   │
+ * │  │  (event loop) │     │                                         │   │
+ * │  │              │     │  ┌──────────────────┐  ┌──────────────┐  │   │
+ * │  │  1. wait_cqe │     │  │  SQ (提交队列)    │  │ CQ (完成队列) │  │   │
+ * │  │  2. 处理结果   │     │  │                  │  │              │  │   │
+ * │  │  3. 重新提交   │     │  │  SQE: accept     │  │ CQE: res=fd  │  │   │
+ * │  │              │     │  │  SQE: read        │  │ CQE: res=n   │  │   │
+ * │  └──────┬───────┘     │  └────────┬─────────┘  └──────┬────────┘  │   │
+ * │         │             └───────────┼───────────────────┼────────────┘   │
+ * │         │                         │                   │                │
+ * │         ▼                         ▼                   ▼                │
+ * │  ┌──────────────┐     ┌─────────────────────────────────────┐         │
+ * │  │  conn_info    │     │  io_uring_submit / io_uring_wait_cqe │         │
+ * │  │  (请求上下文)  │     └─────────────────────────────────────┘         │
+ * │  │  - fd, type   │                                                  │
+ * │  │  - buf        │                                                  │
+ * │  └──────────────┘                                                  │
+ * ├───────────────────────────────┬─────────────────────────────────────┤
+ * │           系统调用 (syscall)     │                                     │
+ * │   io_uring_enter / mmap ring buffer                                │
+ * ├───────────────────────────────┴─────────────────────────────────────┤
+ * │                         内核空间 (Kernel)                           │
+ * │                                                                     │
+ * │  ┌──────────────────────────────────────────────────────────────┐   │
+ * │  │                   I/O 线程 (io-wq)                           │   │
+ * │  │                                                              │   │
+ * │  │   SQ 条目 → 解析请求 → 执行操作 → 写 CQ 条目 → 唤醒用户      │   │
+ * │  │                                                              │   │
+ * │  │   ┌──────────┐    ┌──────────┐    ┌──────────┐              │   │
+ * │  │   │ accept   │───▶│  read    │───▶│  write   │  (广播)      │   │
+ * │  │   └──────────┘    └──────────┘    └──────────┘              │   │
+ * │  └──────────────────────────────────────────────────────────────┘   │
+ * │                                                                     │
+ * │  ┌──────────────────────────────────────────────────────────────┐   │
+ * │  │                    TCP 连接池 (Socket层)                      │   │
+ * │  │   listenfd ──▶ client_fd[0] ◀─▶ client_fd[1] ◀─▶ ...       │   │
+ * │  └──────────────────────────────────────────────────────────────┘   │
+ * └─────────────────────────────────────────────────────────────────────┘
+ *
+ * 数据流：
+ *   用户提交 SQE ──▶ 内核读取 SQ ──▶ 执行 I/O 操作 ──▶ 写入 CQE ──▶
+ *   用户消费 CQE ──▶ 处理数据 ──▶ 重新提交 SQE (异步链持续)
+ *
  * 功能：
  *   多个客户端连接服务器，任一客户端发送消息，服务器将消息广播给所有
  *   其他在线客户端（类似于简易聊天室）。
@@ -107,7 +156,7 @@ int main(int argc, char **argv) {
      *   - flags:   0 表示默认行为（IORING_SETUP_IOPOLL 等高级选项见内核文档）
      *   - 返回:    0 成功，负数表示错误码（-ENOMEM 等）
      *------------------------------------------------------------------------*/
-    ret = io_uring_queue_init(ENTRIES_LEN, &ring, 0);
+    ret = io_uring_queue_init(ENTRIES_LEN, &ring, 0); /* 初始化 io_uring 实例，创建 SQ 和 CQ 两个 ring buffer */
     if (ret < 0) {
         printf("io_uring_queue_init failed: %d\n", ret);
         return ret;
@@ -156,10 +205,10 @@ int main(int argc, char **argv) {
     listen_info->type = 0;  /* type=0 表示这是一个 accept 请求 */
     listen_info->buf = NULL;
 
-    struct io_uring_sqe *sqe = io_uring_get_sqe(&ring);
-    io_uring_prep_accept(sqe, listenfd, (struct sockaddr *)cliaddr, clilen, 0);
-    io_uring_sqe_set_data(sqe, listen_info);
-    io_uring_submit(&ring);
+    struct io_uring_sqe *sqe = io_uring_get_sqe(&ring); /* 从 SQ 获取一个空闲 SQE 条目 */
+    io_uring_prep_accept(sqe, listenfd, (struct sockaddr *)cliaddr, clilen, 0); /* 填充 SQE：准备异步 accept 新连接 */
+    io_uring_sqe_set_data(sqe, listen_info);                                       /* 绑定上下文，CQE 时能识别这是 accept 请求 */
+    io_uring_submit(&ring);                                                        /* 提交 SQE 到内核，触发异步 accept */
 
     printf("io_uring chat server started on port %d\n", PROGRAM_PORT);
 
@@ -183,14 +232,14 @@ int main(int argc, char **argv) {
          *               负数表示错误码（如 -EAGAIN）
          *   - cqe->user_data: 提交时通过 io_uring_sqe_set_data() 设置的值
          */
-        ret = io_uring_wait_cqe(&ring, &cqe);
+        ret = io_uring_wait_cqe(&ring, &cqe); /* 阻塞等待内核完成一个异步操作，结果写入 CQE */
         if (ret < 0) {
             printf("io_uring_wait_cqe failed: %d\n", ret);
             continue;
         }
 
         /* 取出之前绑定的 conn_info，判断这是哪个操作完成了 */
-        struct conn_info *info = (struct conn_info *)io_uring_cqe_get_data(cqe);
+        struct conn_info *info = (struct conn_info *)io_uring_cqe_get_data(cqe); /* 从 CQE 取出之前绑定的 conn_info 上下文 */
 
         /* 操作失败处理 */
         if (cqe->res < 0) {
@@ -198,7 +247,7 @@ int main(int argc, char **argv) {
             if (info->buf)
                 free(info->buf);
             free(info);
-            io_uring_cqe_seen(&ring, cqe);
+            io_uring_cqe_seen(&ring, cqe); /* 标记 CQE 已消费，内核可回收该条目 */
             continue;
         }
 
@@ -233,10 +282,10 @@ int main(int argc, char **argv) {
             new_listen_info->type = 0;
             new_listen_info->buf = NULL;
 
-            struct io_uring_sqe *accept_sqe = io_uring_get_sqe(&ring);
+            struct io_uring_sqe *accept_sqe = io_uring_get_sqe(&ring); /* 从 SQ 获取一个空闲 SQE 条目 */
             io_uring_prep_accept(accept_sqe, listenfd,
-                                 (struct sockaddr *)cliaddr, clilen, 0);
-            io_uring_sqe_set_data(accept_sqe, new_listen_info);
+                                 (struct sockaddr *)cliaddr, clilen, 0); /* 填充 SQE：准备异步 accept 新连接 */
+            io_uring_sqe_set_data(accept_sqe, new_listen_info);                       /* 绑定上下文，CQE 时能识别这是 accept 请求 */
 
             /* 为新连接提交第一个 read 请求 */
             struct conn_info *conn_info_ptr = malloc(sizeof(struct conn_info));
@@ -245,9 +294,9 @@ int main(int argc, char **argv) {
             conn_info_ptr->buf = malloc(MAXLINE);
             memset(conn_info_ptr->buf, 0, MAXLINE);
 
-            struct io_uring_sqe *read_sqe = io_uring_get_sqe(&ring);
-            io_uring_prep_read(read_sqe, connfd, conn_info_ptr->buf, MAXLINE, 0);
-            io_uring_sqe_set_data(read_sqe, conn_info_ptr);
+            struct io_uring_sqe *read_sqe = io_uring_get_sqe(&ring); /* 从 SQ 获取一个空闲 SQE 条目 */
+            io_uring_prep_read(read_sqe, connfd, conn_info_ptr->buf, MAXLINE, 0); /* 填充 SQE：准备从新连接异步读取数据 */
+            io_uring_sqe_set_data(read_sqe, conn_info_ptr);                                          /* 绑定上下文，CQE 时能识别这是哪个连接的 read */
 
             /* 批量提交上面两个 SQE（accept + read）到内核 */
             io_uring_submit(&ring);
@@ -296,7 +345,7 @@ int main(int argc, char **argv) {
 
                 /* 重新提交 read 请求，继续监听该客户端的数据 */
                 memset(info->buf, 0, MAXLINE);
-                struct io_uring_sqe *read_sqe = io_uring_get_sqe(&ring);
+                struct io_uring_sqe *read_sqe = io_uring_get_sqe(&ring); /* 从 SQ 获取一个空闲 SQE 条目 */
                 io_uring_prep_read(read_sqe, sockfd, info->buf, MAXLINE, 0); /* 填充 SQE：准备从 sockfd 异步读取数据 */
                 io_uring_sqe_set_data(read_sqe, info);                      /* 绑定上下文，CQE 回调时区分是哪个连接的 read */
                 io_uring_submit(&ring);                                     /* 提交 SQE 到内核，触发异步读操作 */
@@ -308,11 +357,11 @@ int main(int argc, char **argv) {
          *   - 通知内核我们已经消费了这个 CQE，内核可以回收该条目
          *   - 如果不调用，CQ 队列会被占满，内核无法提交新的完成事件
          */
-        io_uring_cqe_seen(&ring, cqe);
+        io_uring_cqe_seen(&ring, cqe); /* 标记 CQE 已消费，内核可回收该条目 */
     }
 
     /* 清理（实际不会执行到这里，因为主循环是无限循环） */
-    io_uring_queue_exit(&ring);
+    io_uring_queue_exit(&ring); /* 销毁 io_uring 实例，释放 ring buffer 资源 */
     close(listenfd);
     return 0;
 }
