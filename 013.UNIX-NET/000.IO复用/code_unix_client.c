@@ -12,6 +12,7 @@ int len;
 int clientfile;
 
 void *sendcli(void *arg);
+void *recvcli(void *arg);
 
 int main(int argc, char *argv[]) {
 
@@ -44,10 +45,13 @@ tryagin:
 
   int jj = pthread_create(&pid2, NULL, sendcli, argv[1]);
   if (jj == 0) {
-
     printf("%s\n", "开始聊天");
   }
   pthread_detach(pid2);
+
+  pthread_t pid3;
+  pthread_create(&pid3, NULL, recvcli, NULL);
+  pthread_detach(pid3);
 
   while (1)
     ;
@@ -64,10 +68,21 @@ void *sendcli(void *arg) {
 
     len = read(STDIN_FILENO, mess, sizeof(mess)); //从键盘读取数据
     char mess1[1024];
-    int ii = strlen(argv);
-    sprintf(mess1, "%s : %s", argv, mess);
-    bzero(mess, sizeof(mess1));
-    int i = write(clientfile, mess1, len + i); //向服务器发送数据
+    int msglen = sprintf(mess1, "%s : %s", argv, mess);
+    bzero(mess, sizeof(mess));
+    write(clientfile, mess1, msglen); //向服务器发送数据
     fflush(stdin);
+  }
+}
+
+void *recvcli(void *arg) {
+  char recvbuf[1024];
+  while (1) {
+    int n = read(clientfile, recvbuf, sizeof(recvbuf));
+    if (n > 0) {
+      recvbuf[n] = '\0';
+      printf("%s", recvbuf);
+      fflush(stdout);
+    }
   }
 }
