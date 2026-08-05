@@ -193,13 +193,46 @@
 /**
  * 内存属性
  * Memory types available.
+ *
+ * +------------------+------+--------------+--------------+------------------+----------------------+
+ * | 宏               | 值   | 类型         | 聚合操作(G)  | 指令重排(R)     | 提前写应答(E)        |
+ * +------------------+------+--------------+--------------+------------------+----------------------+
+ * | MT_DEVICE_nGnRnE | 0    | 设备内存     | 不支持(nG)   | 不支持(nR)       | 不支持(nE)           |
+ * | MT_DEVICE_nGnRE  | 1    | 设备内存     | 不支持(nG)   | 不支持(nR)       | 支持(E)              |
+ * | MT_DEVICE_GRE    | 2    | 设备内存     | 支持(G)      | 支持(R)          | 支持(E)              |
+ * | MT_NORMAL_NC     | 3    | 普通内存     | N/A          | N/A              | N/A (Non-Cacheable)  |
+ * | MT_NORMAL        | 4    | 普通内存     | N/A          | N/A              | N/A (Write-Back)     |
+ * | MT_NORMAL_WT     | 5    | 普通内存     | N/A          | N/A              | N/A (Write-Through)  |
+ * +------------------+------+--------------+--------------+------------------+----------------------+
+ *
+ * 术语说明:
+ *   G  = Gathering    (聚合操作): 允许将多个内存访问合并为一次总线事务
+ *   R  = Reordering   (指令重排): 允许CPU对内存访问指令进行重排序
+ *   E  = Early Write  (提前写应答): 允许写操作在数据到达目标前返回应答
+ *   nG = non-Gathering, nR = non-Reordering, nE = non-Early
+ *
+ * 严格程度: MT_DEVICE_nGnRnE > MT_DEVICE_nGnRE > MT_DEVICE_GRE > MT_NORMAL_NC > MT_NORMAL > MT_NORMAL_WT
+ *
+ * +----------------------+----------------------------------------+----------------------------------------------------------+
+ * | 宏                   | ioremap 接口                           | 典型使用场景                                             |
+ * +----------------------+----------------------------------------+----------------------------------------------------------+
+ * | MT_DEVICE_nGnRnE     | pci_remap_cfgspace()                   | PCI 配置空间: 必须严格保序, 不可推测, 无提前应答          |
+ * | MT_DEVICE_nGnRE      | ioremap() (默认)                        | 绝大多数 MMIO 寄存器: 不可聚合/重排, 但允许提前应答       |
+ * | MT_DEVICE_GRE        | (无直接 API, 极少使用)                   | 已废弃/极少使用, 行为过于宽松, 易导致数据不一致           |
+ * | MT_NORMAL_NC         | ioremap_wc() (Write-Combine)           | 显存/帧缓冲: 大块写操作, 可聚合 & 重排以提升带宽         |
+ * | MT_NORMAL            | ioremap_cache() / 线性映射中隐含使用      | 普通 RAM: 经 L1/L2 Cache, 用于内核代码/数据/堆           |
+ * | MT_NORMAL_WT         | (无直接 API)                            | Write-Through 模式: 写操作同时更新 Cache+内存, 极少使用   |
+ * +----------------------+----------------------------------------+----------------------------------------------------------+
+ *
+ * 使用场景详解:
+ *   - ioremap()         → MT_DEVICE_nGnRE: 控制寄存器、状态寄存器、FIFO 等。禁止聚合和重排保证访问
+ *                         顺序与代码一致, 允许提前写应答提升写性能(写 FIFO 时不必等待总线确认)。
+ *   - pci_remap_cfgspace → MT_DEVICE_nGnRnE: PCI 配置空间访问必须最严格, 不可提前应答, 因为某些
+ *                         旧式 PCI 设备依赖读取偏移 0 来判断设备是否存在。
+ *   - ioremap_wc()      → MT_NORMAL_NC: 显存/帧缓冲写入, 允许 CPU 将多个写操作合并为 burst
+ *                         传输, 极大提升带宽。但读操作不受此保证(可能读到旧值)。
+ *   - ioremap_cache()   → MT_NORMAL: 仅用于系统 RAM 已覆盖的地址, 利用 Cache 加速。
  */
-#define MT_DEVICE_nGnRnE	0      /*设备内存属性，不支持聚合操作，不支持指令重排，不支持提前写应答*/
-#define MT_DEVICE_nGnRE		1      /*设备内存属性，不支持聚合操作，不支持指令重排，支持提前写应答*/
-#define MT_DEVICE_GRE		2      /*设备内存属性，支持聚合操作，支持指令重排，支持提前写应答*/
-#define MT_NORMAL_NC		3      /*普通内存属性，关闭高速缓存，其中NC是Non-Cacheable的意思*/
-#define MT_NORMAL	    	4      /*普通内存属性*/
-#define MT_NORMAL_WT		5      /*普通内存属性，高速缓存的回写策略为直写（write through）策略*/
 
 /*
  * Memory types for Stage-2 translation

@@ -162,16 +162,58 @@
 #define SEGMENT_ALIGN		SZ_64K
 
 /*
- * Memory types available.
+ * Memory types available.(可用的内存类型)
  *
  * IMPORTANT: MT_NORMAL must be index 0 since vm_get_page_prot() may 'or' in
  *	      the MT_NORMAL_TAGGED memory type for PROT_MTE mappings. Note
  *	      that protection_map[] only contains MT_NORMAL attributes.
+ *
+ * +------------------+------+--------------+--------------+------------------+----------------------+
+ * | 宏               | 值   | 类型         | 聚合操作(G)  | 指令重排(R)     | 提前写应答(E)        |
+ * +------------------+------+--------------+--------------+------------------+----------------------+
+ * | MT_DEVICE_nGnRnE | 3    | 设备内存     | 不支持(nG)   | 不支持(nR)       | 不支持(nE)           |
+ * | MT_DEVICE_nGnRE  | 4    | 设备内存     | 不支持(nG)   | 不支持(nR)       | 支持(E)              |
+ * | MT_NORMAL_NC     | 2    | 普通内存     | N/A          | N/A              | N/A (Non-Cacheable)  |
+ * | MT_NORMAL        | 0    | 普通内存     | N/A          | N/A              | N/A (Write-Back)     |
+ * | MT_NORMAL_TAGGED | 1    | 普通内存     | N/A          | N/A              | N/A (Tagged, WB)     |
+ * +------------------+------+--------------+--------------+------------------+----------------------+
+ *
+ * 术语说明:
+ *   G  = Gathering    (聚合操作): 允许将多个内存访问合并为一次总线事务
+ *   R  = Reordering   (指令重排): 允许CPU对内存访问指令进行重排序
+ *   E  = Early Write  (提前写应答): 允许写操作在数据到达目标前返回应答
+ *   nG = non-Gathering, nR = non-Reordering, nE = non-Early
+ *
+ * 严格程度: MT_DEVICE_nGnRnE > MT_DEVICE_nGnRE > MT_NORMAL_NC > MT_NORMAL > MT_NORMAL_TAGGED
+ *
+ * 注: Linux 7.1.3 相比 5.9 移除了 MT_DEVICE_GRE 和 MT_NORMAL_WT, 新增 MT_NORMAL_TAGGED(支持 MTE).
+ *
+ * +----------------------+----------------------------------------+----------------------------------------------------------+
+ * | 宏                   | ioremap 接口                           | 典型使用场景                                             |
+ * +----------------------+----------------------------------------+----------------------------------------------------------+
+ * | MT_DEVICE_nGnRnE     | ioremap_np() ("non-posted")             | PCI 配置空间 / 敏感控制寄存器: 读写必须严格按序到达设备   |
+ * | MT_DEVICE_nGnRE      | ioremap() (默认)                        | 绝大多数 MMIO 寄存器: 不可聚合/重排, 允许提前写应答       |
+ * | MT_NORMAL_NC         | ioremap_wc() (Write-Combine)           | 显存/帧缓冲: 大块写操作, 可聚合 & 重排以提升带宽         |
+ * | MT_NORMAL            | ioremap_cache() / 线性映射中隐含使用      | 普通 RAM: 经 L1/L2 Cache, 用于内核代码/数据/堆           |
+ * | MT_NORMAL_TAGGED     | (MTE 分配时由 vm_get_page_prot() 选择)   | 启用 MTE 的内存页: 每 16 字节带 4-bit 标签, 防 UAF/OOB   |
+ * +----------------------+----------------------------------------+----------------------------------------------------------+
+ *
+ * 使用场景详解:
+ *   - ioremap()         → MT_DEVICE_nGnRE: 控制寄存器、状态寄存器、FIFO 等。禁止聚合和重排保证访问
+ *                         顺序与代码一致, 允许提前写应答提升写性能(写 FIFO 时不必等待总线确认)。
+ *   - ioremap_np()      → MT_DEVICE_nGnRnE: "non-posted" 映射。设备和 CPU 之间采用严格同步的读写
+ *                         时序, 任何对设备的读/写都要求设备立即响应。适用于 PCI 配置空间、对时序
+ *                         敏感的寄存器(如中断状态清除), 代价是访问延迟更高。
+ *   - ioremap_wc()      → MT_NORMAL_NC: 显存/帧缓冲写入, 允许 CPU 将多个写操作合并为 burst
+ *                         传输, 极大提升带宽。但读操作不受此保证(可能读到旧值)。
+ *   - ioremap_cache()   → MT_NORMAL: 仅用于系统 RAM 已覆盖的地址, 利用 Cache 加速(内核 7.1 中
+ *                         实现为 __ioremap_prot(addr, size, __pgprot(PROT_NORMAL)))。
  */
-#define MT_NORMAL		0
+#define MT_NORMAL		    0
 #define MT_NORMAL_TAGGED	1
 #define MT_NORMAL_NC		2
 #define MT_DEVICE_nGnRnE	3
+/*设备内存属性，不支持聚合操作，不支持指令重排，支持提前写应答,参考:001.UNIX-DOCS/000.内存管理/023.MMIO/01-MMIO核心调用链.md*/
 #define MT_DEVICE_nGnRE		4
 
 /*
