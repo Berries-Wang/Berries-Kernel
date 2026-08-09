@@ -1,6 +1,7 @@
 # 内存管理
 - 学习:[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#2.1　ARM64内存管理
 - 学习: 000.LINUX-5.9/Documentation/translations/zh_CN/arm64/memory.txt (Linux 在 AArch64 中的内存布局)
+- 学习:[001.UNIX-DOCS/001.操作系统课程/001.中山大学-操作系统2026/第二周：硬件环境与软件抽象-ARM指令集架构.pdf](../../001.UNIX-DOCS/001.操作系统课程/001.中山大学-操作系统2026/第二周：硬件环境与软件抽象-ARM指令集架构.pdf)
 
 ## ARM64内存管理
 ![wechat_2025-10-28_073540_557.png](../003.高速缓存/IMGS/wechat_2025-10-28_073540_557.png)
@@ -17,10 +18,13 @@
 ---
 
 ## 从进程的角度分析内存
+> 注意事项: <br/> - 有段内存是不可用的! <br/>
+
 ![wechat_2025-11-15_175849_449.png](./999.IMGS/wechat_2025-11-15_175849_449.png)
+![001.UNIX-DOCS/999.IMGS/ScreenShot_2026-08-09_213444_891.png](../../001.UNIX-DOCS/999.IMGS/ScreenShot_2026-08-09_213444_891.png)<sup>[001.UNIX-DOCS/001.操作系统课程/001.中山大学-操作系统2026/第二周：硬件环境与软件抽象-ARM指令集架构.pdf](../../001.UNIX-DOCS/001.操作系统课程/001.中山大学-操作系统2026/第二周：硬件环境与软件抽象-ARM指令集架构.pdf)</sup>
 
 ### 关于内存增长方向的另一个佐证
-![mmap直接映射](./999.IMGS/mmap_20251211080200_89.jpg)
+![mmap直接映射](./999.IMGS/mmap_20251211080200_89.jpg) & [001.UNIX-DOCS/001.操作系统课程/001.中山大学-操作系统2026/第二周：硬件环境与软件抽象-ARM指令集架构.pdf](../../001.UNIX-DOCS/001.操作系统课程/001.中山大学-操作系统2026/第二周：硬件环境与软件抽象-ARM指令集架构.pdf)P50~P53
 
 
 ---
@@ -92,3 +96,4 @@ memblock -> 伙伴系统
 ## 参考资料
 - [中山大学 操作系统原理](https://www.bilibili.com/video/BV1Qx4y1271K/?spm_id_from=333.788.top_right_bar_window_history.content.click&vd_source=9eef164b234175c1ae3ca71733d5a727)
 - [中山大学 操作系统原理·课件](./998.REFS/000.中山大学-操作系统/)
+- [中山大学 操作系统原理·课件`2026](../../001.UNIX-DOCS/001.操作系统课程/001.中山大学-操作系统2026)

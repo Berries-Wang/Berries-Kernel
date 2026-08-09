@@ -8,6 +8,7 @@
 /*
  * struct cpu_suspend_ctx must be 16-byte aligned since it is allocated on
  * the stack, which must be 16-byte aligned on v8
+ * (struct cpu_suspend_ctx 结构体必须是 16 字节对齐的，因为它被分配在栈上，而在 ARMv8 架构中，栈本身必须保持 16 字节对齐。)
  */
 struct cpu_suspend_ctx {
 	/*

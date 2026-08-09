@@ -23,7 +23,10 @@ the same bits set to 1. TTBRx selection is given by bit 63 of the
 virtual address. The swapper_pg_dir contains only kernel (global)
 mappings while the user pgd contains only user (non-global) mappings.
 The swapper_pg_dir address is written to TTBR1 and never written to
-TTBR0.
+TTBR0.(用户空间地址的第 63 到 48 位被设置为 0，而内核空间地址的相同位（即第 63 到 48 位）则被设置为 1。
+TTBRx（Translation Table Base Register，转换表基址寄存器）的选择是由虚拟地址的第 63 位决定的。
+swapper_pg_dir 仅包含内核（全局）映射，而用户空间页目录（pgd）仅包含用户空间（非全局）映射。
+swapper_pg_dir 的地址会被写入 TTBR1 中，并且永远不会被写入 TTBR0。)
 
 # kernel logical memory map -- 操作系统内核地址空间中的线性映射区
 “内核逻辑内存映射”特指内核空间中的一部分，这部分虚拟地址与物理内存之间存在一个固定偏移的、线性的映射关系，
