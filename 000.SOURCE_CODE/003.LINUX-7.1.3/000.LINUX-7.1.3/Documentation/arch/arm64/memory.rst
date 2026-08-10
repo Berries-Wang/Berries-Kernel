@@ -222,3 +222,281 @@ Note: the kernel stopped printing the memory layout at boot time
 for security reasons. ``CONFIG_PTDUMP_DEBUGFS`` is the recommended
 replacement for development and debugging purposes.
 > 注意：出于安全考虑，内核已停止在启动时打印内存布局（提交 ``071929dbdd86`` "arm64: Stop printing the virtual memory layout"）。``CONFIG_PTDUMP_DEBUGFS`` 是推荐的开发和调试替代方案。
+
+.. code-block::
+   ~ # cat /sys/kernel/debug/kernel_page_tables
+---[ Linear Mapping start ]---
+0xffff000000000000-0xffff000000200000           2M PTE       RW NX SHD AF NG         UXN    MEM/NORMAL-TAGGED
+0xffff000000200000-0xffff000002200000          32M PMD       ro NX SHD AF NG     BLK UXN    MEM/NORMAL
+0xffff000002200000-0xffff0000022c0000         768K PTE       ro NX SHD AF NG         UXN    MEM/NORMAL
+0xffff0000022c0000-0xffff000003a00000       23808K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL-TAGGED
+0xffff000003a00000-0xffff000003c00000           2M PTE       ro NX SHD AF NG         UXN    MEM/NORMAL-TAGGED
+0xffff000003c00000-0xffff000040000000         964M PTE       RW NX SHD AF NG         UXN    MEM/NORMAL-TAGGED
+0xffff000040000000-0xffff008000000000         511G PUD
+0xffff008000000000-0xffff800000000000      130560G PGD
+---[ Linear Mapping end ]---
+---[ Modules start ]---
+0xffff800000000000-0xffff800080000000           2G PUD
+---[ Modules end ]---
+---[ vmalloc() area ]---
+0xffff800080000000-0xffff800080004000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080004000-0xffff800080005000           4K PTE
+0xffff800080005000-0xffff800080006000           4K PTE       RW NX SHD AF NG         UXN    DEVICE/nGnRE
+0xffff800080006000-0xffff800080008000           8K PTE
+0xffff800080008000-0xffff80008000c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008000c000-0xffff80008000d000           4K PTE
+0xffff80008000d000-0xffff80008000e000           4K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008000e000-0xffff800080010000           8K PTE
+0xffff800080010000-0xffff800080014000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080014000-0xffff800080015000           4K PTE
+0xffff800080015000-0xffff800080016000           4K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080016000-0xffff800080018000           8K PTE
+0xffff800080018000-0xffff80008001c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008001c000-0xffff800080020000          16K PTE
+0xffff800080020000-0xffff800080030000          64K PTE       RW NX SHD AF NG CON     UXN    DEVICE/nGnRE
+0xffff800080030000-0xffff800080035000          20K PTE
+0xffff800080035000-0xffff800080036000           4K PTE       RW NX SHD AF NG         UXN    DEVICE/nGnRE
+0xffff800080036000-0xffff800080038000           8K PTE
+0xffff800080038000-0xffff80008003c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008003c000-0xffff80008003d000           4K PTE
+0xffff80008003d000-0xffff80008003e000           4K PTE       RW NX SHD AF NG         UXN    DEVICE/nGnRE
+0xffff80008003e000-0xffff800080040000           8K PTE
+0xffff800080040000-0xffff800080050000          64K PTE       RW NX SHD AF NG CON     UXN    DEVICE/nGnRE
+0xffff800080050000-0xffff800080058000          32K PTE
+0xffff800080058000-0xffff80008005c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008005c000-0xffff800080060000          16K PTE
+0xffff800080060000-0xffff800080064000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080064000-0xffff800080068000          16K PTE
+0xffff800080068000-0xffff80008006c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008006c000-0xffff800080070000          16K PTE
+0xffff800080070000-0xffff800080074000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080074000-0xffff800080078000          16K PTE
+0xffff800080078000-0xffff80008007c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008007c000-0xffff800080080000          16K PTE
+0xffff800080080000-0xffff800080084000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080084000-0xffff800080088000          16K PTE
+0xffff800080088000-0xffff80008008c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008008c000-0xffff800080090000          16K PTE
+0xffff800080090000-0xffff800080094000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080094000-0xffff800080098000          16K PTE
+0xffff800080098000-0xffff80008009c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008009c000-0xffff8000800a0000          16K PTE
+0xffff8000800a0000-0xffff8000800a4000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000800a4000-0xffff8000800a8000          16K PTE
+0xffff8000800a8000-0xffff8000800ac000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000800ac000-0xffff8000800b0000          16K PTE
+0xffff8000800b0000-0xffff8000800b4000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000800b4000-0xffff8000800b8000          16K PTE
+0xffff8000800b8000-0xffff8000800bc000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000800bc000-0xffff8000800c0000          16K PTE
+0xffff8000800c0000-0xffff8000800c4000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000800c4000-0xffff8000800c8000          16K PTE
+0xffff8000800c8000-0xffff8000800cc000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000800cc000-0xffff8000800d0000          16K PTE
+0xffff8000800d0000-0xffff8000800d4000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000800d4000-0xffff8000800d8000          16K PTE
+0xffff8000800d8000-0xffff8000800dc000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000800dc000-0xffff8000800e0000          16K PTE
+0xffff8000800e0000-0xffff8000800e4000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000800e4000-0xffff8000800e8000          16K PTE
+0xffff8000800e8000-0xffff8000800ec000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000800ec000-0xffff8000800f0000          16K PTE
+0xffff8000800f0000-0xffff8000800f4000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000800f4000-0xffff8000800f8000          16K PTE
+0xffff8000800f8000-0xffff8000800fc000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000800fc000-0xffff800080100000          16K PTE
+0xffff800080100000-0xffff800080104000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080104000-0xffff800080108000          16K PTE
+0xffff800080108000-0xffff80008010c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008010c000-0xffff800080110000          16K PTE
+0xffff800080110000-0xffff800080114000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080114000-0xffff800080118000          16K PTE
+0xffff800080118000-0xffff80008011c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008011c000-0xffff800080120000          16K PTE
+0xffff800080120000-0xffff800080124000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080124000-0xffff800080128000          16K PTE
+0xffff800080128000-0xffff80008012c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008012c000-0xffff800080130000          16K PTE
+0xffff800080130000-0xffff800080134000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080134000-0xffff800080138000          16K PTE
+0xffff800080138000-0xffff80008013c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008013c000-0xffff800080140000          16K PTE
+0xffff800080140000-0xffff800080144000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080144000-0xffff800080145000           4K PTE
+0xffff800080145000-0xffff800080146000           4K PTE       RW NX SHD AF NG         UXN    DEVICE/nGnRE
+0xffff800080146000-0xffff800080148000           8K PTE
+0xffff800080148000-0xffff80008014c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008014c000-0xffff80008014d000           4K PTE
+0xffff80008014d000-0xffff80008014e000           4K PTE       RW NX SHD AF NG         UXN    DEVICE/nGnRE
+0xffff80008014e000-0xffff800080150000           8K PTE
+0xffff800080150000-0xffff800080154000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080154000-0xffff800080155000           4K PTE
+0xffff800080155000-0xffff800080156000           4K PTE       RW NX SHD AF NG         UXN    DEVICE/nGnRE
+0xffff800080156000-0xffff800080158000           8K PTE
+0xffff800080158000-0xffff80008015c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008015c000-0xffff80008015d000           4K PTE
+0xffff80008015d000-0xffff80008015e000           4K PTE       RW NX SHD AF NG         UXN    DEVICE/nGnRE
+0xffff80008015e000-0xffff800080160000           8K PTE
+0xffff800080160000-0xffff800080164000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080164000-0xffff800080165000           4K PTE
+0xffff800080165000-0xffff800080166000           4K PTE       RW NX SHD AF NG         UXN    DEVICE/nGnRE
+0xffff800080166000-0xffff800080168000           8K PTE
+0xffff800080168000-0xffff80008016c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008016c000-0xffff80008016d000           4K PTE
+0xffff80008016d000-0xffff80008016e000           4K PTE       RW NX SHD AF NG         UXN    DEVICE/nGnRE
+0xffff80008016e000-0xffff800080170000           8K PTE
+0xffff800080170000-0xffff800080174000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080174000-0xffff800080178000          16K PTE
+0xffff800080178000-0xffff80008017c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008017c000-0xffff800080180000          16K PTE
+0xffff800080180000-0xffff800080184000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080184000-0xffff800080188000          16K PTE
+0xffff800080188000-0xffff80008018c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008018c000-0xffff80008018d000           4K PTE
+0xffff80008018d000-0xffff80008038d000           2M PTE       ro x  SHD AF NG         UXN    MEM/NORMAL
+0xffff80008038d000-0xffff80008038e000           4K PTE
+0xffff80008038e000-0xffff8000803ae000         128K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL-NC
+0xffff8000803ae000-0xffff8000803b0000           8K PTE
+0xffff8000803b0000-0xffff8000803b4000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000803b4000-0xffff8000803b8000          16K PTE
+0xffff8000803b8000-0xffff8000803bc000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000803bc000-0xffff8000803c0000          16K PTE
+0xffff8000803c0000-0xffff8000803c4000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000803c4000-0xffff8000803c8000          16K PTE
+0xffff8000803c8000-0xffff8000803cc000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000803cc000-0xffff8000803d0000          16K PTE
+0xffff8000803d0000-0xffff8000803d4000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000803d4000-0xffff8000803d8000          16K PTE
+0xffff8000803d8000-0xffff8000803dc000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000803dc000-0xffff8000803e0000          16K PTE
+0xffff8000803e0000-0xffff8000803e4000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000803e4000-0xffff8000803e8000          16K PTE
+0xffff8000803e8000-0xffff8000803ec000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000803ec000-0xffff8000803f0000          16K PTE
+0xffff8000803f0000-0xffff8000803f4000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000803f4000-0xffff8000803f8000          16K PTE
+0xffff8000803f8000-0xffff8000803fc000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000803fc000-0xffff800080400000          16K PTE
+0xffff800080400000-0xffff800080404000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080404000-0xffff800080408000          16K PTE
+0xffff800080408000-0xffff80008040c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008040c000-0xffff800080410000          16K PTE
+0xffff800080410000-0xffff800080414000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080414000-0xffff800080418000          16K PTE
+0xffff800080418000-0xffff80008041c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008041c000-0xffff800080420000          16K PTE
+0xffff800080420000-0xffff800080424000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080424000-0xffff800080428000          16K PTE
+0xffff800080428000-0xffff80008042c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008042c000-0xffff800080430000          16K PTE
+0xffff800080430000-0xffff800080434000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080434000-0xffff800080438000          16K PTE
+0xffff800080438000-0xffff80008043c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008043c000-0xffff800080440000          16K PTE
+0xffff800080440000-0xffff800080444000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080444000-0xffff800080448000          16K PTE
+0xffff800080448000-0xffff80008044c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008044c000-0xffff800080450000          16K PTE
+0xffff800080450000-0xffff800080454000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080454000-0xffff800080458000          16K PTE
+0xffff800080458000-0xffff80008045c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008045c000-0xffff800080460000          16K PTE
+0xffff800080460000-0xffff800080464000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080464000-0xffff800080468000          16K PTE
+0xffff800080468000-0xffff80008046c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008046c000-0xffff800080470000          16K PTE
+0xffff800080470000-0xffff800080474000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080474000-0xffff800080478000          16K PTE
+0xffff800080478000-0xffff80008047c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008047c000-0xffff800080480000          16K PTE
+0xffff800080480000-0xffff800080484000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080484000-0xffff800080488000          16K PTE
+0xffff800080488000-0xffff80008048c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008048c000-0xffff800080490000          16K PTE
+0xffff800080490000-0xffff800080494000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080494000-0xffff800080495000           4K PTE
+0xffff800080495000-0xffff8000804c9000         208K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000804c9000-0xffff8000804ca000           4K PTE
+0xffff8000804ca000-0xffff8000804cd000          12K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000804cd000-0xffff8000804d0000          12K PTE
+0xffff8000804d0000-0xffff8000804d4000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000804d4000-0xffff8000804d8000          16K PTE
+0xffff8000804d8000-0xffff8000804dc000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000804dc000-0xffff8000804e0000          16K PTE
+0xffff8000804e0000-0xffff8000804e4000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000804e4000-0xffff8000804e8000          16K PTE
+0xffff8000804e8000-0xffff8000804ec000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000804ec000-0xffff8000804f0000          16K PTE
+0xffff8000804f0000-0xffff8000804f4000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000804f4000-0xffff8000804f8000          16K PTE
+0xffff8000804f8000-0xffff8000804fc000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff8000804fc000-0xffff800080530000         208K PTE
+0xffff800080530000-0xffff800080534000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff800080534000-0xffff800080538000          16K PTE
+0xffff800080538000-0xffff80008053c000          16K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xffff80008053c000-0xffff800080600000         784K PTE
+0xffff800080600000-0xffff800084000000          58M PMD
+0xffff800084000000-0xffff800088000000          64M PMD       RW NX SHD AF NG     BLK UXN    DEVICE/nGnRE
+0xffff800088000000-0xffff800090000000         128M PMD
+0xffff800090000000-0xffff8000a0000000         256M PMD       RW NX SHD AF NG     BLK UXN    DEVICE/nGnRnE
+0xffff8000a0000000-0xffff8000a4000000          64M PMD
+0xffff8000a4000000-0xffff8000a8000000          64M PMD       RW NX SHD AF NG     BLK UXN    DEVICE/nGnRE
+0xffff8000a8000000-0xffff8000c0000000         384M PMD
+0xffff8000c0000000-0xffff808000000000         509G PUD
+0xffff808000000000-0xffffcb0000000000       76288G PGD
+0xffffcb0000000000-0xffffcb7e40000000         505G PUD
+0xffffcb7e40000000-0xffffcb7e65800000         600M PMD
+0xffffcb7e65800000-0xffffcb7e65810000          64K PTE       ro NX SHD AF NG         UXN    MEM/NORMAL
+0xffffcb7e65810000-0xffffcb7e65a00000        1984K PTE       ro x  SHD AF NG CON     UXN    MEM/NORMAL
+0xffffcb7e65a00000-0xffffcb7e66a00000          16M PMD       ro x  SHD AF NG     BLK UXN    MEM/NORMAL
+0xffffcb7e66a00000-0xffffcb7e66a80000         512K PTE       ro x  SHD AF NG CON     UXN    MEM/NORMAL
+0xffffcb7e66a80000-0xffffcb7e66c00000        1536K PTE       ro NX SHD AF NG         UXN    MEM/NORMAL
+0xffffcb7e66c00000-0xffffcb7e67800000          12M PMD       ro NX SHD AF NG     BLK UXN    MEM/NORMAL
+0xffffcb7e67800000-0xffffcb7e678c0000         768K PTE       ro NX SHD AF NG         UXN    MEM/NORMAL
+0xffffcb7e678c0000-0xffffcb7e67a00000        1280K PTE
+0xffffcb7e67a00000-0xffffcb7e67c00000           2M PMD
+0xffffcb7e67c00000-0xffffcb7e67d30000        1216K PTE
+0xffffcb7e67d30000-0xffffcb7e67e00000         832K PTE       RW NX SHD AF NG CON     UXN    MEM/NORMAL
+0xffffcb7e67e00000-0xffffcb7e68200000           4M PMD       RW NX SHD AF NG     BLK UXN    MEM/NORMAL
+0xffffcb7e68200000-0xffffcb7e68320000        1152K PTE       RW NX SHD AF NG CON     UXN    MEM/NORMAL
+0xffffcb7e68320000-0xffffcb7e68400000         896K PTE
+0xffffcb7e68400000-0xffffcb7e80000000         380M PMD
+0xffffcb7e80000000-0xffffcb8000000000           6G PUD
+0xffffcb8000000000-0xfffffd8000000000          50T PGD
+0xfffffd8000000000-0xfffffdff80000000         510G PUD
+0xfffffdff80000000-0xfffffdffbf600000        1014M PMD
+0xfffffdffbf600000-0xfffffdffbf798000        1632K PTE
+0xfffffdffbf798000-0xfffffdffbf79b000          12K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xfffffdffbf79b000-0xfffffdffbf7b2000          92K PTE
+0xfffffdffbf7b2000-0xfffffdffbf7b5000          12K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xfffffdffbf7b5000-0xfffffdffbf7cc000          92K PTE
+0xfffffdffbf7cc000-0xfffffdffbf7cf000          12K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xfffffdffbf7cf000-0xfffffdffbf7e6000          92K PTE
+0xfffffdffbf7e6000-0xfffffdffbf7e9000          12K PTE       RW NX SHD AF NG         UXN    MEM/NORMAL
+0xfffffdffbf7e9000-0xfffffdffbf800000          92K PTE
+---[ vmalloc() end ]---
+0xfffffdffbf800000-0xfffffdffc0000000           8M PMD
+---[ vmemmap start ]---
+0xfffffdffc0000000-0xfffffdffc1000000          16M PMD       RW NX SHD AF NG     BLK UXN    MEM/NORMAL
+0xfffffdffc1000000-0xfffffe0000000000        1008M PMD
+0xfffffe0000000000-0xffffff8000000000        1536G PGD
+0xffffff8000000000-0xffffffffc0000000         511G PUD
+---[ vmemmap end ]---
+0xffffffffc0000000-0xffffffffc0800000           8M PMD
+---[ PCI I/O start ]---
+0xffffffffc0800000-0xffffffffc0810000          64K PTE       RW NX SHD AF NG CON     UXN    DEVICE/nGnRE
+0xffffffffc0810000-0xffffffffc0a00000        1984K PTE
+0xffffffffc0a00000-0xffffffffc1800000          14M PMD
+---[ PCI I/O end ]---
+0xffffffffc1800000-0xffffffffff200000         986M PMD
+0xffffffffff200000-0xffffffffff22d000         180K PTE
+---[ Fixmap start ]---
+0xffffffffff22d000-0xffffffffff3f3000        1816K PTE
+0xffffffffff3f3000-0xffffffffff3f6000          12K PTE       ro x  SHD AF            UXN    MEM/NORMAL
+0xffffffffff3f6000-0xffffffffff3f7000           4K PTE       ro NX SHD AF NG         UXN    MEM/NORMAL
+0xffffffffff3f7000-0xffffffffff5fe000        2076K PTE
+0xffffffffff5fe000-0xffffffffff6fe000           1M PTE       ro NX SHD AF NG         UXN    MEM/NORMAL
+0xffffffffff6fe000-0xffffffffff800000        1032K PTE
+---[ Fixmap end ]---
+0xffffffffff800000-0x0000000000000000           8M PMD
+~ # [  198.894563] random: crng init done
