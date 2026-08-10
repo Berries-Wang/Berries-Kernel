@@ -224,7 +224,7 @@ replacement for development and debugging purposes.
 > 注意：出于安全考虑，内核已停止在启动时打印内存布局（提交 ``071929dbdd86`` "arm64: Stop printing the virtual memory layout"）。``CONFIG_PTDUMP_DEBUGFS`` 是推荐的开发和调试替代方案。
 
 
-.. code-block::
+.. code-block:: text
 
 ~ # cat /sys/kernel/debug/kernel_page_tables
 ---[ Linear Mapping start ]---
