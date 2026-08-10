@@ -223,8 +223,10 @@ for security reasons. ``CONFIG_PTDUMP_DEBUGFS`` is the recommended
 replacement for development and debugging purposes.
 > 注意：出于安全考虑，内核已停止在启动时打印内存布局（提交 ``071929dbdd86`` "arm64: Stop printing the virtual memory layout"）。``CONFIG_PTDUMP_DEBUGFS`` 是推荐的开发和调试替代方案。
 
+
 .. code-block::
-   ~ # cat /sys/kernel/debug/kernel_page_tables
+
+~ # cat /sys/kernel/debug/kernel_page_tables
 ---[ Linear Mapping start ]---
 0xffff000000000000-0xffff000000200000           2M PTE       RW NX SHD AF NG         UXN    MEM/NORMAL-TAGGED
 0xffff000000200000-0xffff000002200000          32M PMD       ro NX SHD AF NG     BLK UXN    MEM/NORMAL
