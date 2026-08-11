@@ -12,7 +12,7 @@ Linux内核支持众多的处理器架构，因此从系统角度来看，Linux�
 
 ## 图1.32　中断模型
 [006.BOOKs/Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub#1.7.1　异常类型]
-- ![wechat_2025-10-23_074007_638.png](../../999.IMGS/wechat_2025-10-23_074007_638.png)
+- ![001.UNIX-DOCS/999.IMGS/ScreenShot_2026-08-11_083248_035.png](../../../001.UNIX-DOCS/999.IMGS/ScreenShot_2026-08-11_083248_035.png)
 
 
 
