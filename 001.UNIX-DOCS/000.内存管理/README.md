@@ -104,5 +104,5 @@ memblock -> 伙伴系统
 
 ## 参考资料
 - [中山大学 操作系统原理](https://www.bilibili.com/video/BV1Qx4y1271K/?spm_id_from=333.788.top_right_bar_window_history.content.click&vd_source=9eef164b234175c1ae3ca71733d5a727)
-- [中山大学 操作系统原理·课件](./998.REFS/000.中山大学-操作系统/)
+- [中山大学 操作系统原理·课件](../../001.UNIX-DOCS/001.操作系统课程/000.中山大学-操作系统2025)
 - [中山大学 操作系统原理·课件`2026](../../001.UNIX-DOCS/001.操作系统课程/001.中山大学-操作系统2026)

@@ -55,5 +55,5 @@
 
 ## 参考
 - [07-物理内存管理I：伙伴系统 [中山大学 操作系统原理]](https://www.bilibili.com/video/BV1jq421P7f7/?spm_id_from=333.1007.top_right_bar_window_history.content.click&vd_source=9eef164b234175c1ae3ca71733d5a727)
-   - [000.中山大学-操作系统/4-0317-physical-mem-1.pdf](../../998.REFS/000.中山大学-操作系统/4-0317-physical-mem-1.pdf)
-   - [000.中山大学-操作系统/4-0320-physical-mem-2.pdf](../../998.REFS/000.中山大学-操作系统/4-0320-physical-mem-2.pdf)
+   - [000.中山大学-操作系统/4-0317-physical-mem-1.pdf](../../../../001.UNIX-DOCS/001.操作系统课程/000.中山大学-操作系统2025/4-0317-physical-mem-1.pdf)
+   - [000.中山大学-操作系统/4-0320-physical-mem-2.pdf](../../../../001.UNIX-DOCS/001.操作系统课程/000.中山大学-操作系统2025/4-0320-physical-mem-2.pdf)
