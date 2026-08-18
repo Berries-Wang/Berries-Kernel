@@ -168,8 +168,7 @@ struct pthread
      GL (dl_stack_user) list.  */
   list_t list;
 
-  /* Thread ID - which is also a 'is this thread descriptor (and
-     therefore stack) used' flag.  */
+  /* Thread ID - which is also a 'is this thread descriptor (and therefore stack) used' flag.(内核返回的真实轻量级进程 ID (LWP))  */
   pid_t tid;
 
   /* List of robust mutexes the thread is holding.  */

@@ -1213,7 +1213,9 @@ struct task_struct {
 	/* Filesystem information: */
 	struct fs_struct		*fs;
 
-	/* Open file information: */
+	/** Open file information:
+	 * 每个进程都会维护一张已打开文件的文件描述符
+	 */
 	struct files_struct		*files;
 
 	/* Namespaces: */

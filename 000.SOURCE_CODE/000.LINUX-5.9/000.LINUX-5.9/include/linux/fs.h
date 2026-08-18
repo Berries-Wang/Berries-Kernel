@@ -937,6 +937,9 @@ struct file {
 	unsigned int 		f_flags;
 	fmode_t			f_mode;
 	struct mutex		f_pos_lock;
+    /**
+	 * 读写位置
+	 */
 	loff_t			f_pos;
 	struct fown_struct	f_owner;
 	const struct cred	*f_cred;
