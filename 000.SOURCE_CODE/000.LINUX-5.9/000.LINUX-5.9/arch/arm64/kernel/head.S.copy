@@ -93,7 +93,7 @@
  *        在 ARM、x86、RISC-V 等架构的 Linux 内核中,head.S 是体系结构相关的汇编代码,负责早期硬件初始化(如 CPU 模式设置、内存管理单元 MMU 初始化等)
  *
  *
- *
+ * __HEAD： include/linux/init.h:95 定义
  */
 	__HEAD
 _head: // 通过aarch64-none-linux-gnu-objdump -S head.o 发现, "section .head.text" 就是这里
