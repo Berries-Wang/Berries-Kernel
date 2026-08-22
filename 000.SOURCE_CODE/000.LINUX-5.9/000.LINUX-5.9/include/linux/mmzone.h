@@ -810,6 +810,9 @@ struct deferred_split {
 
 /**
  * 得了解 NUMA SMP架构了
+ * 
+ * 在 NUMA 架构下：每个 NUMA 节点都会有一个独立的 pg_data_t 结构体，用来描述该节点专属的内存布局
+ * 在 UMA 架构下：系统只有一个内存节点，内核会使用一个静态的 pg_data_t 结构体（名为 contig_page_data）来描述整个系统的物理内存
  *
  * On NUMA machines, each NUMA node would have a pg_data_t to describe
  * it's memory layout. On UMA machines there is a single pglist_data which
@@ -817,6 +820,7 @@ struct deferred_split {
  * (在 NUMA 架构的机器中，每个 NUMA 节点都对应一个 pg_data_t 结构体，用于描述该节点的内存布局；
  *    而在 UMA 架构的机器中，则通过唯一的 pglist_data 结构体描述整个系统的内存。)
  * >>> Linux 内核中用于管理单个 Node 上所有物理内存的核心结构体,包含该 Node 的统计信息、它所包含的 Zone 列表等
+ * >>>>>> NUMA 架构下的每一个内存存储区（通常由一个或多个物理内存条组成，且物理上靠近某个 CPU）被称为一个节点（Node）
  * 
  * Memory statistics and page replacement data structures are maintained on a
  * per-zone basis.
@@ -889,6 +893,7 @@ typedef struct pglist_data {
 	 */
 	spinlock_t node_size_lock;
 #endif
+    /*该节点物理内存的最小页帧号（起始页号）*/
 	unsigned long node_start_pfn;
 	unsigned long node_present_pages; /* total number of physical pages */
 	unsigned long node_spanned_pages; /* total size of physical page

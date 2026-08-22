@@ -1465,6 +1465,7 @@ struct memory_failure_stats {
  * On NUMA machines, each NUMA node would have a pg_data_t to describe
  * it's memory layout. On UMA machines there is a single pglist_data which
  * describes the whole memory.
+ * > 注意 "each NUMA node would have a pg_data_t to describe it's memory layout"
  *
  * Memory statistics and page replacement data structures are maintained on a
  * per-zone basis.
