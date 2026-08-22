@@ -16,6 +16,9 @@ CAS 家族属于 FEAT_LSE（Large System Extensions）（ARMv8.1 引入），页
   - "The atomic instructions perform atomic read and write operations on a memory location such that the architecture guarantees that no modification of that memory location by another observer can occur between the read and the write."<sup>原子指令会对内存位置执行原子的读和写操作。架构保证，在读操作和写操作之间，其他观察者（other observer）无法对该内存位置进行任何修改。</sup>（C3-393）
   - LL/SC 需要"加载-尝试存储-失败重试"的循环，竞争激烈时反复回退；而 LSE CAS 是单条指令完成整个 read-modify-write，不需要重试。
 
+
+
+
 ---
 
 ## 附录
