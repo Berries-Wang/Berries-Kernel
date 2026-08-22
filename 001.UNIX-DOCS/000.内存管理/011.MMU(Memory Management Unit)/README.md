@@ -1,4 +1,5 @@
 # 011.MMU(Memory Management Unit)
+> 学习: <br/>- [007.BOOKs/learn_the_architecture_aarch64_memory_management_guide_101811_0105_00_en.pdf](../../../007.BOOKs/learn_the_architecture_aarch64_memory_management_guide_101811_0105_00_en.pdf) <br/>
 
 ## ARMv8-A 架构中，有效的 TTBR 寄存器
 | 异常级别 | 角色 | 存在的寄存器 | 用途 |
