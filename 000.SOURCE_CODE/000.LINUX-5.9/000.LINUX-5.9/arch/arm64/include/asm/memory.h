@@ -233,6 +233,12 @@
  *                         传输, 极大提升带宽。但读操作不受此保证(可能读到旧值)。
  *   - ioremap_cache()   → MT_NORMAL: 仅用于系统 RAM 已覆盖的地址, 利用 Cache 加速。
  */
+#define MT_DEVICE_nGnRnE	0      /*设备内存属性，不支持聚合操作，不支持指令重排，不支持提前写应答*/
+#define MT_DEVICE_nGnRE		1      /*设备内存属性，不支持聚合操作，不支持指令重排，支持提前写应答*/
+#define MT_DEVICE_GRE		2      /*设备内存属性，支持聚合操作，支持指令重排，支持提前写应答*/
+#define MT_NORMAL_NC		3      /*普通内存属性，关闭高速缓存，其中NC是Non-Cacheable的意思*/
+#define MT_NORMAL	    	4      /*普通内存属性*/
+#define MT_NORMAL_WT		5      /*普通内存属性，高速缓存的回写策略为直写（write through）策略*/
 
 /*
  * Memory types for Stage-2 translation
