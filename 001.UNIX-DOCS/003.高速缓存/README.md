@@ -1,5 +1,5 @@
 # 高速缓存 
-> 学习:[1.1.5　高速缓存的工作方式](../../007.BOOKs/UNIX%20Network%20Programming%20Volume%201:%20Socket%20Networking%20API%20(3rd%20Edition).epub) <br/> [27-多核处理器：缓存一致性 [中山大学 操作系统原理]](../000.内存管理/998.REFS/000.中山大学-操作系统/16-0609-multiprocessor-1.pdf)
+> 学习:<br/> [1.1.5　高速缓存的工作方式](../../007.BOOKs/UNIX%20Network%20Programming%20Volume%201:%20Socket%20Networking%20API%20(3rd%20Edition).epub) <br/> [27-多核处理器：缓存一致性 [中山大学 操作系统原理]](../000.内存管理/998.REFS/000.中山大学-操作系统/16-0609-multiprocessor-1.pdf) <br/> 详细阅读:[ARM® Cortex®-A Series Programmer’s Guide for ARMv8-A](../../006.REFS/ARMv8-A-Programmer-Guide.pdf)#PChapter 11 Caches ![001.UNIX-DOCS/003.高速缓存/IMGS/ScreenShot_2026-08-25_001318_244.png](../../001.UNIX-DOCS/003.高速缓存/IMGS/ScreenShot_2026-08-25_001318_244.png)
 
 ---
 
