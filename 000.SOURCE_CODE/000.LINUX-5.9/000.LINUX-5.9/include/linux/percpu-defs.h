@@ -130,10 +130,19 @@
  * data corresponds to a particular CPU, inefficiencies due to direct access by
  * other CPUs are reduced by preventing the data from unnecessarily spanning
  * cachelines.
+ * (用于声明或定义每个 CPU 独立的变量（per-CPU 变量）。在 SMP（对称多处理器）条件下，
+ * 这些变量必须进行缓存行对齐（cacheline aligned）。这样，虽然某个数据实例只对应特定的 CPU，
+ * 但通过防止数据不必要地跨越缓存行，可以降低其他 CPU 直接访问该数据时产生的低效问题。”)
  *
  * An example of this would be statistical data, where each CPU's set of data
  * is updated by that CPU alone, but the data from across all CPUs is collated
  * by a CPU processing a read from a proc file.
+ * (一个典型的例子是统计数据（statistical data）：每个 CPU 的数据集仅由该 CPU 自身进行更新，
+ * 但当通过读取 proc 文件触发数据读取时，某个 CPU 会将所有 CPU 的数据汇总（collated）在一起。)
+ * 
+ * ____cacheline_aligned_in_smp: 解决多核 CPU 环境下的“伪共享（False Sharing）”问题，从而提升系统性能。
+ *   + cacheline_aligned：表示“缓存行对齐”。
+ *   + in_smp：表示“在 SMP（对称多处理器）环境下”。这意味着该对齐操作仅在多核/多处理器系统下生效
  */
 #define DECLARE_PER_CPU_SHARED_ALIGNED(type, name)			\
 	DECLARE_PER_CPU_SECTION(type, name, PER_CPU_SHARED_ALIGNED_SECTION) \
