@@ -2,6 +2,7 @@
 - 学习:[Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#2.1　ARM64内存管理
 - 学习: 000.LINUX-5.9/Documentation/translations/zh_CN/arm64/memory.txt (Linux 在 AArch64 中的内存布局)
 - 学习:[001.UNIX-DOCS/001.操作系统课程/001.中山大学-操作系统2026/第二周：硬件环境与软件抽象-ARM指令集架构.pdf](../../001.UNIX-DOCS/001.操作系统课程/001.中山大学-操作系统2026/第二周：硬件环境与软件抽象-ARM指令集架构.pdf)
+- 学习:[最权威的文档: Documentation/admin-guide/mm/](../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/Documentation/admin-guide/mm/concepts.rst)
 
 ## ARM64内存管理
 ![wechat_2025-10-28_073540_557.png](../003.高速缓存/IMGS/wechat_2025-10-28_073540_557.png)

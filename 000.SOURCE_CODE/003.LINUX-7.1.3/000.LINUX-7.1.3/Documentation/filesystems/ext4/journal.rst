@@ -27,6 +27,10 @@ option to control journal behavior. If ``data=journal``, all data and
 metadata are written to disk through the journal. This is slower but
 safest. If ``data=writeback``, dirty data blocks are not flushed to the
 disk before the metadata are written to disk through the journal.
+(出于性能考虑,ext4 默认只将文件系统的元数据写入日志。这意味着在系统崩溃后,文件的数据块无法保证处于一致的状态。)
+(如果这种默认的保证级别（即 data=ordered 模式）无法满足需求,可以通过挂载选项来调整日志的行为：)
+(如果设置为 data=journal,所有的数据和元数据都会通过日志写入磁盘。这种方式速度较慢,但安全性最高。) 
+(如果设置为 data=writeback,在元数据通过日志写入磁盘之前,不会强制将脏数据块刷写到磁盘中。)
 
 In case of ``data=ordered`` mode, Ext4 also supports fast commits which
 help reduce commit latency significantly. The default ``data=ordered``
