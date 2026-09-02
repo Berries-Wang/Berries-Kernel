@@ -72,10 +72,3 @@ Blocks: Total: 0          Free: 0          Available: 0
 Inodes: Total: 0          Free: 0
 
 ```
-
----
-
-
-## 附录
-### 待获取的书籍
-+ [《Linux System Programming: Mastering the Filesystem》]

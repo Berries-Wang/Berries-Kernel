@@ -394,6 +394,9 @@ static inline int blkdev_zone_mgmt_ioctl(struct block_device *bdev,
 
 #endif /* CONFIG_BLK_DEV_ZONED */
 
+/**
+ * 块设备读写请求队列
+ */
 struct request_queue {
 	struct request		*last_merge;
 	struct elevator_queue	*elevator;

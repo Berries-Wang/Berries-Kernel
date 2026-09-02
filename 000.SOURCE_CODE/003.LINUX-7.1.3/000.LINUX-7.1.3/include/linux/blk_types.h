@@ -206,6 +206,10 @@ typedef unsigned int blk_qc_t;
 /*
  * main unit of I/O for the block layer and lower layers (ie drivers and
  * stacking drivers)
+ * 块层及其下层（如驱动程序和堆叠驱动程序）的主要 I/O 单元。
+ * 
+ * bio 是块层以及它下面所有层级（不管是直接操作硬件的物理驱动，还是做逻辑转换的虚拟堆叠驱动）用来传递和处理 I/O 请求的最基本单位。
+ * 
  */
 struct bio {
 	struct bio		*bi_next;	/* request queue link */

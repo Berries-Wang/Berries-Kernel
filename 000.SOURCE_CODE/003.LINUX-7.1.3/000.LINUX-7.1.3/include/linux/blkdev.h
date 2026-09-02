@@ -481,6 +481,9 @@ struct blk_independent_access_ranges {
 	struct blk_independent_access_range	ia_range[];
 };
 
+/**
+ * 块设备读写请求队列
+ */
 struct request_queue {
 	/*
 	 * The queue owner gets to use this for whatever they like.
