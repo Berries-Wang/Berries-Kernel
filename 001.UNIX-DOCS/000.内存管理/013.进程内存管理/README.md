@@ -1,5 +1,5 @@
 # 进程地址空间
-> [#4.4　虚拟内存管理之进程地址空间](../../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub)
+> [#4.4　虚拟内存管理之进程地址空间](../../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) <br/> - [ARM® Cortex®-A Series Programmer’s Guide for ARMv8-A#Chapter 12  The Memory Management U](../../../006.REFS/ARMv8-A-Programmer-Guide.pdf)(值得好好读一下)
 
 ## 进程地址空间（process address space）是指进程可寻址的虚拟地址空间
 在64位的处理器中，进程可以寻址256TB的用户态地址空间，但是进程没有权限去寻址内核空间的虚拟地址，只能通过系统调用的方式间接访问。而用户空间的进程地址空间则可以被合法访问，地址空间称为内存区域（memory area）,进程可以通过内核的内存管理机制动态地添加和删除这些内存区域，这些内存区域在Linux内核采用VMA(struct vm_area_struct , struct mm_struct成员)数据结构来抽象描述
