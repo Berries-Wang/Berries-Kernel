@@ -1801,6 +1801,9 @@ struct dir_context {
 
 struct iov_iter;
 
+/**
+ * 文件操作
+ */
 struct file_operations {
 	struct module *owner;
 	loff_t (*llseek) (struct file *, loff_t, int);

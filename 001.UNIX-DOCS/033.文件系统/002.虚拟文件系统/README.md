@@ -11,7 +11,7 @@
 |- struct file_operations |- 由VFS层用来与用户空间通信，会调用 stuct block_device_operations 中的函数，来实现与块设备通信 |-|
 |-|-|-|
 |- Linux 内核在用户进程（或C标准库）和文件系统实现之间引入了一个抽象层： 虚拟文件系统（Virtual File System.VFS）|- ![ScreenShot_2026-09-02_082618_778.png](../../../001.UNIX-DOCS/033.文件系统/999.IMGS/ScreenShot_2026-09-02_082618_778.png) <br/> - 用来提供一种操作文件、目录及其他对象的统一方法<br/>- 必须能够与各种方法给出的具体文件系统的实现达成妥协<br/>- 内核支持多种文件系统: 网络文件系统（NFS、coda）、虚拟的文件系统（proc）、ReiserFS 和 XFS 都是基于块设备（Block Device）的日志文件系统|-|
-|-|-|-|
+|- 文件系统类型|- 基于磁盘的文件系统（Disk-based Filesystem）:Ext2/3/4,FAT/... <br/>- 虚拟文件系统（Virtual Filesystem）: proc文件系统 <br/> - 网络文件系统(Network Filesystem): 这种文件系统允许访问另外一台计算机上的数据，该计算机通过网络连接到本地计算机： NFS、...|-|
 
 ---
 
