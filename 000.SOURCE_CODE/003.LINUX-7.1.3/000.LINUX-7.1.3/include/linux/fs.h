@@ -451,7 +451,7 @@ struct mapping_metadata_bhs {
 };
 
 /**
- * struct address_space - Contents of a cacheable, mappable object.
+ * struct address_space - Contents of a cacheable, mappable object(一个可缓存、可映射对象的内容).
  * @host: Owner, either the inode or the block_device.
  * @i_pages: Cached pages.
  * @invalidate_lock: Guards coherency between page cache contents and
@@ -1924,48 +1924,114 @@ struct offset_ctx;
 typedef unsigned int __bitwise fop_flags_t;
 
 struct file_operations {
+	/* 模块所有者:驱动中通常初始化为 THIS_MODULE。文件被打开期间 VFS 借此对
+	 * 模块引用计数,防止操作仍被使用时模块被卸载 */
 	struct module *owner;
+	/* FOP_* 能力位(取值见下方 FOP_BUFFER_RASYNC 等宏):向 VFS 声明本文件
+	 * 支持的特性,如异步缓冲读写、同步缺页、并行 DIO 写、含大页等 */
 	fop_flags_t fop_flags;
+	/* 实现 lseek(2):按 whence(SEEK_SET/SEEK_CUR/SEEK_END)调整并返回
+	 * 文件读写位置(偏移量) */
 	loff_t (*llseek) (struct file *, loff_t, int);
+	/* 实现 read(2):从 *ppos 处读 count 字节到用户缓冲区 buf 并推进 *ppos,
+	 * 返回读取的字节数 */
 	ssize_t (*read) (struct file *, char __user *, size_t, loff_t *);
+	/* 实现 write(2):把用户缓冲区 buf 中的 count 字节写入 *ppos 处并推进
+	 * *ppos,返回写入的字节数 */
 	ssize_t (*write) (struct file *, const char __user *, size_t, loff_t *);
+	/* 基于 kiocb/iov_iter 的读接口:readv/preadv 及异步 IO(io_uring/libaio)
+	 * 走此路径,支持分散-聚集(scatter-gather)IO */
 	ssize_t (*read_iter) (struct kiocb *, struct iov_iter *);
+	/* 基于 kiocb/iov_iter 的写接口:writev/pwritev 及异步 IO(io_uring/libaio)
+	 * 走此路径 */
 	ssize_t (*write_iter) (struct kiocb *, struct iov_iter *);
+	/* 轮询已提交的异步 IO(通常为 HIPRI/polled IO,不依赖完成中断)的完成
+	 * 情况,完成的 kiocb 挂入 io_comp_batch 批次一次性收割,供 io_uring 使用 */
 	int (*iopoll)(struct kiocb *kiocb, struct io_comp_batch *,
 			unsigned int flags);
+	/* 遍历目录,实现 getdents(2):对每个目录项调用 ctx 中的回调填充给用户态;
+	 * 持有目录 inode 的共享锁,允许并发遍历。旧的独占版 ->iterate 已移除,
+	 * 需要独占访问的文件系统用 WRAP_DIR_ITER() 包装实现 */
 	int (*iterate_shared) (struct file *, struct dir_context *);
+	/* 实现 poll(2)/select/epoll:返回当前就绪事件位(EPOLLIN/EPOLLOUT...),
+	 * 并通过 poll_table 注册等待队列,状态变化时唤醒调用者 */
 	__poll_t (*poll) (struct file *, struct poll_table_struct *);
+	/* 实现 ioctl(2):文件/设备专用的控制命令入口(运行在进程上下文,可睡眠) */
 	long (*unlocked_ioctl) (struct file *, unsigned int, unsigned long);
+	/* 32 位 compat 任务在 64 位内核上执行 ioctl(2) 时的兼容入口,
+	 * 处理用户态结构体的布局差异;未实现则返回 -ENOTTY */
 	long (*compat_ioctl) (struct file *, unsigned int, unsigned long);
+	/* 实现 mmap(2):把文件/设备内存映射到进程地址空间(建立 vma);
+	 * 新代码建议改用下面的 mmap_prepare */
 	int (*mmap) (struct file *, struct vm_area_struct *);
+	/* 实现 open(2):VFS 创建好 struct file 后调用,做打开阶段的初始化,
+	 * 驱动常在此把私有数据挂到 file->private_data */
 	int (*open) (struct inode *, struct file *);
+	/* 进程关闭一个引用该文件的 fd 时调用(close(2),含 dup/fork 产生的副本),
+	 * 常用于收尾刷新(如 NFS 在此提交脏页) */
 	int (*flush) (struct file *, fl_owner_t id);
+	/* 文件的最后一个引用被释放(fput)时调用,与 open 配对,
+	 * 释放 open 中申请的私有资源 */
 	int (*release) (struct inode *, struct file *);
+	/* 实现 fsync(2)/fdatasync(2):把 [start, end) 内的脏数据回写到稳定存储,
+	 * datasync 为真时只同步数据不同步元数据 */
 	int (*fsync) (struct file *, loff_t, loff_t, int datasync);
+	/* 文件的 FASYNC 标志改变(fcntl F_SETFL)时通知驱动,
+	 * 用于建立/拆除基于 SIGIO 的异步通知 */
 	int (*fasync) (int, struct file *, int);
+	/* 实现 fcntl(2) 的 POSIX 字节范围锁(F_SETLK/F_GETLK/F_SETLKW) */
 	int (*lock) (struct file *, int, struct file_lock *);
+	/* 为 mmap 挑选一段合适的未映射地址区间(实现 get_unmapped_area 语义),
+	 * 特殊文件/设备可自定义地址选择策略 */
 	unsigned long (*get_unmapped_area)(struct file *, unsigned long, unsigned long, unsigned long, unsigned long);
+	/* fcntl(F_SETFL) 设置文件状态标志前校验其合法性(如 O_NONBLOCK) */
 	int (*check_flags)(int);
+	/* 实现 flock(2) 的整文件锁(区别于 lock 实现的 POSIX 字节范围锁) */
 	int (*flock) (struct file *, int, struct file_lock *);
+	/* splice(2) 路径:把管道(pipe)中的数据写入本文件 */
 	ssize_t (*splice_write)(struct pipe_inode_info *, struct file *, loff_t *, size_t, unsigned int);
+	/* splice(2) 路径:把本文件的数据读入管道(pipe) */
 	ssize_t (*splice_read)(struct file *, loff_t *, struct pipe_inode_info *, size_t, unsigned int);
+	/* 从本文件 splice 读取遇到 EOF 且调用方未示意还有后续数据(未设
+	 * SPLICE_F_MORE)时调用,让文件系统做收尾处理(典型如网络文件系统刷新) */
 	void (*splice_eof)(struct file *file);
+	/* 实现 fcntl(F_SETLEASE):设置/解除文件租约(file_lease),
+	 * 他人打开或写入该文件前可先收到信号通知 */
 	int (*setlease)(struct file *, int, struct file_lease **, void **);
+	/* 实现 fallocate(2):按 mode 对 [offset, offset+len) 预分配/去分配磁盘块
+	 * (如 punch hole、zero range) */
 	long (*fallocate)(struct file *file, int mode, loff_t offset,
 			  loff_t len);
+	/* 把本 fd 的私有信息打印到 /proc/<pid>/fdinfo/<fd>,用于调试
+	 * (epoll、eventfd 等会实现) */
 	void (*show_fdinfo)(struct seq_file *m, struct file *f);
 #ifndef CONFIG_MMU
+	/* 仅无 MMU 系统可用:返回该文件支持的 mmap 能力位
+	 * (NOMMU_MAP_READ/WRITE/EXEC 等) */
 	unsigned (*mmap_capabilities)(struct file *);
 #endif
+	/* 实现 copy_file_range(2):在两个文件之间于内核内复制数据
+	 * (如 NFS 可下推到服务端复制),避免数据绕经用户态 */
 	ssize_t (*copy_file_range)(struct file *, loff_t, struct file *,
 			loff_t, size_t, unsigned int);
+	/* 实现 remap_file_range(2)/FICLONE:把源文件 [pos_in, pos_in+len)
+	 * 以 reflink/克隆方式映射到目标文件,len==0 表示复制到源文件末尾 */
 	loff_t (*remap_file_range)(struct file *file_in, loff_t pos_in,
 				   struct file *file_out, loff_t pos_out,
 				   loff_t len, unsigned int remap_flags);
+	/* 实现 posix_fadvise(2):提示内核对 [offset, offset+len) 的访问模式
+	 * (SEQUENTIAL/RANDOM/WILLNEED/DONTNEED 等),影响预读与缓存回收策略 */
 	int (*fadvise)(struct file *, loff_t, loff_t, int);
+	/* io_uring 直通命令(IORING_OP_URING_CMD):把设备/文件自定义命令经
+	 * io_uring 直接下发(如 NVMe passthrough),issue_flags 表明提交上下文
+	 * 的限制(如是否允许阻塞) */
 	int (*uring_cmd)(struct io_uring_cmd *ioucmd, unsigned int issue_flags);
+	/* 轮询以 IORING_SETUP_IOPOLL 方式提交的 uring_cmd 的完成情况 */
 	int (*uring_cmd_iopoll)(struct io_uring_cmd *, struct io_comp_batch *,
 				unsigned int poll_flags);
+	/* 新一代 mmap 回调(取代直接操纵 vma 的旧 ->mmap):VMA 建立并与相邻
+	 * VMA 尝试合并之前调用,文件通过填充 vm_area_desc 中白名单内的字段
+	 * (vm_ops、private_data、vma_flags、page_prot、pgoff 等)定制映射 */
 	int (*mmap_prepare)(struct vm_area_desc *);
 } __randomize_layout;
 
