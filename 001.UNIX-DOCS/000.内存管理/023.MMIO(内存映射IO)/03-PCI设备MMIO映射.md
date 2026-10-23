@@ -11,6 +11,8 @@ PCI/PCIe 设备通过 BAR (Base Address Register) 暴露其 MMIO 寄存器区域
 | Memory BAR | IORESOURCE_MEM | ioremap |
 | I/O BAR | IORESOURCE_IO | __pci_ioport_map (访问 I/O 端口空间) |
 
+> **教科书对应**:Memory BAR 与 I/O BAR 并存,正是《现代操作系统》第5版 §5.1.3 Fig 5-2(c) 的**混合方案**——"A hybrid scheme, with memory-mapped I/O data buffers and separate I/O ports for the control registers, is shown in Fig. 5-2(c). The x86 uses this architecture, with addresses 640K to 1M − 1 being reserved for device data buffers in IBM PC compatibles, in addition to I/O ports 0 to 64K − 1."([#page:370](../../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf#page:370))。老 PCI 设备常把大块数据缓冲区放在 Memory BAR、控制寄存器放在 I/O BAR,即书中的 (c)。ARM64 没有 `IN/OUT` 指令,I/O BAR 通过 `PCI_IOBASE` 窗口被映射成内存访问——连"端口 I/O"也被 MMIO 吸收(见 [006](006.MMIO的缺点-多总线路由与ARM64处理.md) §四.3)。
+
 ### 1.2 BAR 配置过程
 
 1. 上电后，BIOS/UEFI 或内核为每个 BAR 分配物理地址空间

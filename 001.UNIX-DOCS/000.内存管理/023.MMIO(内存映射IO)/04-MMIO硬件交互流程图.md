@@ -419,3 +419,17 @@ Attr4 (MT_NORMAL, index=4): 0xff = 1111_1111
 | `lib/pci_iomap.c` | pci_iomap_range, pci_iomap, pci_iomap_wc | 28-137 |
 | `drivers/base/platform.c` | platform_get_resource, devm_platform_ioremap_resource | 49-137 |
 | `drivers/of/address.c` | of_address_to_resource, of_iomap | 865-900 |
+
+## 9. 教科书对应(《现代操作系统》第5版)
+
+> 页码为 [Modern Operating Systems 5th Edition](../../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf) 的 PDF 页码;上面各图中的硬件环节,在书中都有一句对应的原理陈述。
+
+| 图中环节 | 教科书陈述 | 出处 |
+|------|---------|------|
+| UART 寄存器组:UARTDR(数据)/ UARTFR(状态) | "Each controller has a few registers that are used for communicating with the CPU. By writing into these registers, the operating system can command the device... By reading from these registers, the operating system can learn what the device's state is" | §5.1.3 [#page:369](../../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf#page:369) |
+| 设备寄存器被映射为物理地址空间的一部分(0x09000000) | "Each control register is assigned a unique memory address to which no memory is assigned. This system is called memory-mapped I/O." | §5.1.3 [#page:370](../../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf#page:370) |
+| `ldr/str` 直接访问寄存器,`readl/writel` 仅是 C 封装 | 优点一 "an I/O device driver can be written entirely in C";优点三 "every instruction that can reference memory can also reference control registers" | §5.1.3 [#page:371](../../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf#page:371) |
+| MMU 读到 Device 属性 → 跳过所有 Cache | 缺点一:"Caching a device control register would be disastrous... the hardware has to be able to selectively disable caching, for example, on a per-page basis" | §5.1.3 [#page:372](../../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf#page:372);实现见 [01](01-MMIO核心调用链.md) §1.3 |
+| Interconnect 地址解码:0x09000000 → UART 控制器 | "every memory module and every I/O device compares the address lines to the range of addresses that it services. If the address falls in its range, it responds" —— 单总线下的译码;多总线下由范围寄存器 / 互连 SAM 完成 | §5.1.3 [#page:371](../../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf#page:371)、[#page:372-373](../../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf#page:372);详见 [006](006.MMIO的缺点-多总线路由与ARM64处理.md) |
+| AXI 事务等待 RVALID,延迟取决于设备速度 | 方案二(snoop)的问题:"I/O devices may not be able to process requests at the speed the memory can" —— 设备慢于内存是总线设计的基本约束 | §5.1.3 [#page:373](../../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf#page:373) |
+| 轮询 UARTFR 的 BUSY/TXFF 位 | "the CPU continuously polls the device to see if it is ready... This behavior is often called polling or busy waiting" | §5.2.2 [#page:384](../../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf#page:384) |

@@ -73,6 +73,8 @@ MAIR 寄存器初始化位于 `arch/arm64/mm/proc.S:47-54`：
      MAIR_ATTRIDX(MAIR_ATTR_NORMAL_WT, MT_NORMAL_WT))
 ```
 
+> **教科书对应**:《现代操作系统》第5版 §5.1.3 指出 MMIO 的第一个缺点——缓存设备控制寄存器会让轮询永远读到缓存里的旧值("the loop would go on forever"),因此 "the hardware has to be able to selectively disable caching, for example, on a per-page basis. This feature adds extra complexity to both the hardware and the operating system, which has to manage the selective caching."([#page:372](../../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf#page:372))。ARM64 正是用页表描述符的 `AttrIndx` 索引 MAIR 中的 Device 属性来实现这种**按页禁用缓存**,上面这张 MAIR 表就是书中那句"硬件必须具备的能力"的具体形态;"操作系统必须管理选择性缓存"则对应下文 `ioremap()` 为设备页选择 `PROT_DEVICE_*`、为显存选择 `PROT_NORMAL_NC` 的过程。x86 的对应机制是 MTRR/PAT。详见 [006](006.MMIO的缺点-多总线路由与ARM64处理.md)。
+
 ---
 
 ## 2. ioremap 核心调用链
@@ -422,6 +424,8 @@ struct vm_struct *remove_vm_area(const void *addr)
 | Relaxed 访问 | `readl_relaxed/writel_relaxed` | 不做内存屏障 |
 | 严格访问 | `readl/writel` | 带内存屏障 |
 | 通用接口 | `ioread32/iowrite32` | 架构无关，内部调用 readl/writel |
+
+> **教科书对应**:这一组接口本身就是《现代操作系统》第5版 §5.1.3 所说 MMIO 优点一的体现——"with memory-mapped I/O, device control registers are just variables in memory and can be addressed in C the same way as any other variables. Thus, with memory-mapped I/O, an I/O device driver can be written entirely in C."([#page:371](../../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf#page:371))。`readl/writel` 只是给普通 `ldr/str` 包了一层字节序转换和内存屏障,没有任何 x86 `IN/OUT` 那样的专用 I/O 指令;驱动里 `while (readl(status) & BUSY);` 这种轮询也对应书中优点三("every instruction that can reference memory can also reference control registers")。
 
 ### 4.2 __raw_readl / __raw_writel：汇编层
 

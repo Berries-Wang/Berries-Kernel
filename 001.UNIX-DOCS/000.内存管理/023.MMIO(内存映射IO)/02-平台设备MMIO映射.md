@@ -4,6 +4,8 @@
 
 在 ARM64 嵌入式系统中，设备通常通过 Device Tree (设备树) 描述其硬件资源。平台设备 (platform_device) 是 Linux 内核中最重要的设备模型之一。
 
+> **教科书对应**:设备树 `reg` 给出的那段物理地址,就是《现代操作系统》第5版 §5.1.3 所说的 MMIO 定义——"Each control register is assigned a unique memory address to which no memory is assigned."([#page:370](../../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf#page:370))。书中说这些地址"多数系统放在地址空间顶端附近",但 ARM SoC 没有 BIOS 式固定地图,每颗 SoC 一张自己的图,由设备树 `reg`/`ranges` 传给内核(见 [006](006.MMIO的缺点-多总线路由与ARM64处理.md) §四.1)。下文 platform 驱动所做的事,对应 §5.3.2 Device Drivers 对驱动职责的定义([#page:388](../../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf#page:388))。
+
 ### 1.1 设备树中 MMIO 资源的描述
 
 ```dts
