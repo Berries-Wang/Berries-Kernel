@@ -11,6 +11,11 @@
 
 ----
 
+## 版本对照:内核启动流程(arm64)
+- [002.内核启动流程](./002.内核启动流程/README.md) —— Linux 5.9 与 7.1.3 两版启动流程图(`<pre>`风格)整理,含内核符号的变化过程(_head/__PHYS_OFFSET/kimage_vaddr/TEXT_OFFSET 的删除与 init_idmap_pg_dir/reserved_pg_dir/early_init_stack 的新生)
+
+----
+
 ## 内核启动日志
 ```shell
 wei@Berries:~/OPEN_SOURCE/Berries-Kernel/000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9$ sudo qemu-system-aarch64 -M virt -cpu cortex-a57 -smp 4 -m 1024M -kernel arch/arm64/boot/Image -append "rdinit=/linuxrc console=ttyAMA0 loglevel=8"  -nographic
