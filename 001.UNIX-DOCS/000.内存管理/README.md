@@ -4,6 +4,9 @@
 - 学习:[001.UNIX-DOCS/001.操作系统课程/001.中山大学-操作系统2026/第二周：硬件环境与软件抽象-ARM指令集架构.pdf](../../001.UNIX-DOCS/001.操作系统课程/001.中山大学-操作系统2026/第二周：硬件环境与软件抽象-ARM指令集架构.pdf)
 - 学习:[最权威的文档: Documentation/admin-guide/mm/](../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/Documentation/admin-guide/mm/concepts.rst)
 
+## 页面类型总览(防混淆)
+- [024.Linux内核内存页面类型总览(LINUX-7.1.3).md](./024.Linux内核内存页面类型总览(LINUX-7.1.3).md) —— 匿名页/文件页/shmem/swapcache/page_type(PGTY_*)/migratetype/zone/arm64 虚拟地址空间/大页家族, 5 个维度 + 混淆点 FAQ + file:line 速查表(7.1.3 逐条核实, 内嵌源码)
+
 ## ARM64内存管理
 ![wechat_2025-10-28_073540_557.png](../003.高速缓存/IMGS/wechat_2025-10-28_073540_557.png)
 > 学习:[奔跑吧Linux内核（第2版）卷1：基础架构#2.1　ARM64内存管理](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub)

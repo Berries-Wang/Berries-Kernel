@@ -1,5 +1,17 @@
 # Control Groups(cgroups)
 ## 虚拟文件系统应用之cgroup
+
+### 本目录源码走读系列（Linux 7.1.3，file:line 已逐条核实）
+| 文档 | 内容 |
+|---|---|
+| [004.CGroup如何影响CPU调度.md](./004.CGroup如何影响CPU调度.md) | cpu.weight/cpu.max（CFS 带宽与限流 throttle）/cpuset/cpu.idle，`task_group`→`cfs_rq` 分层运行队列全链路 |
+| [006.CGroup如何影响内存分配.md](./006.CGroup如何影响内存分配.md) | memcg charge 钩子全景、`try_charge_memcg()` 主流程、min/low/high/max 四层水位、memcg OOM |
+| [007.CGroup如何影响IO与其他系统行为.md](./007.CGroup如何影响IO与其他系统行为.md) | io.max 限速（blk-throttle）、pids（fork 防火墙）、cgroup.freeze、BPF 设备过滤、fork/exit 总钩子 |
+| [008.CGroup日常排查与实战.md](./008.CGroup日常排查与实战.md) | systemd/systemd-run/手动 cgroupfs 三种用法、排查 Playbook（限流/OOM/PSI/fork/IO）、实战配方 |
+| [009.CGroup核心机制深挖.md](./009.CGroup核心机制深挖.md) | cgroupfs/kernfs、css 创建与生命周期、css_set 哈希去重、`echo PID > cgroup.procs` 的 attach 全或无事务、rstat 统计聚合 |
+| [010.EEVDF与组调度深挖.md](./010.EEVDF与组调度深挖.md) | vruntime/vlag/deadline、eligible 判定、pick_eevdf 双条件搜索、place_entity 的 lag 保持、calc_group_shares 把 cpu.weight 分到每 CPU 的组实体 |
+| [011.memcg记账内部深挖.md](./011.memcg记账内部深挖.md) | obj_cgroup 字节级记账、per-CPU stock（页/字节双库存）、memory.stat 的三视角聚合、PSI 标注点、memory.reclaim 主动回收 |
+
 cgroup（Control Groups）是 Linux 内核的一个功能，用于限制、记录和隔离进程组使用的物理资源（如 CPU、内存、磁盘 I/O）。
 
 它们通过一个名为 cgroupfs 的特殊文件系统(VFS.虚拟文件系统)来暴露接口。
@@ -81,7 +93,8 @@ The implementation of cgroups requires a few, simple hooks into the rest of the 
 ---
 
 ## 实操
-> 参考: 
+> 手动 cgroupfs 实测: [003.DEMO/000.memory.max.md](./003.DEMO/000.memory.max.md)（Ubuntu 5.15, memory.max 触发 OOM）
+> systemd/临时任务/排查 Playbook/配方: [008.CGroup日常排查与实战.md](./008.CGroup日常排查与实战.md)
 
 ---
 ## 参考资料
