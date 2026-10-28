@@ -1,5 +1,7 @@
 # NUMA（Non-Uniform Memory Access，非一致性内存访问）
-先学习[006.BOOKs/RISC-V Architecture Programming and Practice.pdf#11.2 高速缓存的访问延时](../../007.BOOKs/RISC-V%20Architecture%20Programming%20and%20Practice/) & [奔跑吧Linux内核（第2版）卷1：基础架构#1.1.17　NUMA](../../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) & [3.3.1　内存架构之UMA和NUMA](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) & [1.1.17　NUMA#图1.24　NUMA系统](../../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) & [28-多核处理器：内存一致性模型 [中山大学 操作系统原理]#P47](./../../000.内存管理/998.REFS/000.中山大学-操作系统/16-0612-multiprocessor-2.pdf)再看以下内容
+先学习[007.BOOKs/RISC-V Architecture Programming and Practice#11.2 高速缓存的访问延时](../../../007.BOOKs/RISC-V%20Architecture%20Programming%20and%20Practice/RISC-V%20Architecture%20Programming%20and%20Practice-231-464.pdf) & [奔跑吧Linux内核（第2版）卷1：基础架构#1.1.17　NUMA](../../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) & [3.3.1　内存架构之UMA和NUMA](../../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) & [1.1.17　NUMA#图1.24　NUMA系统](../../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) & [现代操作系统(第5版)#8.1.1 NUMA Multiprocessors(PDF P564-566)](../../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf) & [28-多核处理器：内存一致性模型 [中山大学 操作系统原理]#P47](../../001.操作系统课程/000.中山大学-操作系统2025/16-0612-multiprocessor-2.pdf)再看以下内容
+
+> 理论总结见 [../002.多处理器理论/README.md](../002.多处理器理论/README.md)（现代操作系统 §8.1 全节），内核侧实现（节点管理、NUMA balancing、调度域）见 [../003.Linux-7.1.3实现/README.md](../003.Linux-7.1.3实现/README.md)
 
 ## 摘要
 在现在广泛应用的计算机系统中，以内存为研究对象可以分成两种架构，一种是统一内存访问（Uniform Memory Access，UMA）架构，另外一种是非统一内存访问（Non-Uniform Memory Access，NUMA）架构
@@ -22,9 +24,9 @@
       - 跨插槽请求路由： 当一个核心发出的内存地址不在本地地址范围内时，硬件路由表会识别出该地址属于哪个 Socket，并将其封装成 UPI 数据包发送出去
       - 缓存一致性维护： UPI 协助维护多处理器系统中的缓存一致性，确保各 CPU 的缓存数据与内存数据保持同步。
 - ![wechat_2026-01-25_235308_678.png](./999.IMGS/wechat_2026-01-25_235308_678.png)
-- ![wechat_2026-02-11_145047_411.png](./999.IMGS/wechat_2026-02-11_145047_411.png) <sup>[28-多核处理器：内存一致性模型 [中山大学 操作系统原理]#P47](./../000.内存管理/998.REFS/000.中山大学-操作系统/16-0612-multiprocessor-2.pdf)</sup>
+- ![wechat_2026-02-11_145047_411.png](./999.IMGS/wechat_2026-02-11_145047_411.png) <sup>[28-多核处理器：内存一致性模型 [中山大学 操作系统原理]#P47](../../001.操作系统课程/000.中山大学-操作系统2025/16-0612-multiprocessor-2.pdf)</sup>
 
-请注意，NUMA中的Node是什么意思? Node =  一个物理CPU + 属于他的物理内存插槽<sub>(含义为DDR内存)</sub> ， 例如，购买的 ’华硕STRIX B550-A GAMING 吹雪‘(一个CPU插槽(Socket)+四个物理内存插槽<sub>(含义为DDR内存)</sub>) ， 那么这一个物理内存插槽<sub>(含义为DDR内存)</sub>和所有的4个内存插槽构成一个Node。有些主板支持多Socket，那么每个Socket和属于他的内存插槽<sub>(含义为DDR内存)</sub>构成一个Node，即，这个多Socket主板则存在多个Node。
+请注意，NUMA中的Node是什么意思? Node = 一个物理CPU（Socket）+ 直属于它的一组物理内存插槽<sub>(含义为DDR内存)</sub>。例如，购买的 '华硕STRIX B550-A GAMING 吹雪'（一个CPU插槽(Socket)+四个物理内存插槽），那么这个Socket和属于它的全部4个内存插槽共同构成**一个**Node（单NUMA节点系统）。有些服务器主板支持多Socket（如MZ73-LM2双路），那么每个Socket和属于它的内存插槽构成一个Node，即，这个多Socket主板则存在多个Node。
 - ![wechat_2025-11-03_080211_874.png](./999.IMGS/wechat_2025-11-03_080211_874.png)
   + MZ73-LM2
   + 结构框图 (Node = Socket + 所属于他的内存插槽 , 不同Node之间访问方式)
@@ -39,7 +41,7 @@
 
 ## 传统SMP架构
 ![Screenshot-SMP.png](./999.IMGS/Screenshot-SMP.png)
-多个CPU对于内存属于同一层级，所有的CPU都通过总线访问内存(Intel)，ARM是通过‘Exclusive accesses’ ，单都是需要进行加锁操作， 随着CPU的处理速度越来越快，这种方式会成为系统瓶颈。NUMA架构能更好地解决这个问题，提升系统性能.
+多个CPU对于内存属于同一层级，所有的CPU都通过总线访问内存(Intel)，ARM是通过'Exclusive accesses'（LDXR/STXR 独占访问指令），但都需要进行加锁操作。随着CPU的处理速度越来越快，这种方式会成为系统瓶颈。NUMA架构能更好地解决这个问题，提升系统性能.
 
 - X86_64: 目前的x86/x64的多核/多处理器系统是SMP结构，共享主存，内存是共享设备，多个处理器/核心要访问内存，首先要获得内存总线的控制权，任何时刻只有一个处理器/核心能获得内存总线的控制权，所以单就内存来说，不会出现多个处理器/核心同时访问一个内存地址的情况。但是每个处理器/核心可能有自己的cache（非共享的），所以，如果某个内存地址的数据在多个处理器/核心的cache中都存在的话，是可能出现并发读的情况，对于读写，或者写写的并发操作，处理器实现的cache一致性协议可以保证物理上不会出现真正的并发操作。
   + 参考:[奔跑吧Linux内核（第2版）卷1：基础架构](../../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub) '1.4.10　独占内存访问指令' : 访问的时候，会在内存总线中申请独占访问的锁
@@ -100,4 +102,15 @@ Vulnerabilities:
 
 ## NUMA 和物理CPU 内存节点的关系
 ![NUMA](./999.IMGS/Screenshot%202025-09-12%20at%2008-03-39%20一个%20---%20NUMA.png)
+
+## 内核如何管理 NUMA 节点（Linux 7.1.3）
+> 详细源码分析见 [../003.Linux-7.1.3实现/README.md](../003.Linux-7.1.3实现/README.md)，这里只列关键数据结构。
+
+- **节点状态位图**：内核用 `enum node_states`（N_POSSIBLE / N_ONLINE / ...）描述节点生命周期，与 CPU 的 possible/online 位图思路一致 <sub>[/include/linux/nodemask.h:384](../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/include/linux/nodemask.h)</sub>
+- **节点描述符**：每个 Node 一个 `pglist_data`（含 `node_mem_map`、zonelist 等），是内存侧"Node = Socket + 本地内存"的软件抽象 <sub>[/include/linux/mmzone.h:1473](../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/include/linux/mmzone.h)</sub>
+- **CPU↔Node 映射**：`cpu_to_node()` / `numa_node_id()` <sub>[/include/linux/topology.h:84](../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/include/linux/topology.h)</sub>；arm64 启动时由 `numa_store_cpu_info()` 建立 <sub>[/arch/arm64/kernel/smp.c](../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/arch/arm64/kernel/smp.c)</sub>
+- **NUMA balancing（内核自动把内存/任务迁回本地节点）**：`task_numa_migrate()` <sub>[/kernel/sched/fair.c:2683](../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/kernel/sched/fair.c)</sub>，开关 `/proc/sys/kernel/numa_balancing`
+- **内存策略（手动控制分配位置）**：`mm/mempolicy.c`（MPOL_BIND / MPOL_INTERLEAVE / MPOL_PREFERRED 等）
+- 注意：书中 8.1.1 讲的**目录式缓存一致性（directory-based）是硬件/互连实现**（如 AMD xGMI、Intel UPI 内的一致性协议），Linux 内核并不实现它，只是拓扑信息的消费者。
+
 

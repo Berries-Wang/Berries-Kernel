@@ -1,6 +1,6 @@
 # 总线(BUS)
 > 由 [037.内核基础](../037.内核基础/README.md) 拆解而来 <br/>
-> 相关: <br/> - [000.内存管理/023.MMIO(内存映射IO)](../000.内存管理/023.MMIO(内存映射IO)/README.md): 地址/数据/控制总线、AXI总线、PCI专用总线 <br/> - [025.SMP-NUMA](../025.SMP-NUMA/000.NUMA/README.md): UPI/QPI 总线跨NUMA节点访问远端内存 <br/> - [051.AI-ASSISANT/001.CPU与DMA双向交互(网络收包事件全流程)](../051.AI-ASSISANT/001.CPU与DMA双向交互(网络收包事件全流程).md): PCI/PCI-X 总线主控(bus master)、总线地址、总线仲裁
+> 相关: <br/> - [000.内存管理/023.MMIO(内存映射IO)](../000.内存管理/023.MMIO(内存映射IO)/README.md): 地址/数据/控制总线、AXI总线、PCI专用总线 <br/> - [025.MULTIPLE_PROCESSOR_SYSTEM](../025.MULTIPLE_PROCESSOR_SYSTEM/000.NUMA/README.md): UPI/QPI 总线跨NUMA节点访问远端内存 <br/> - [051.AI-ASSISANT/001.CPU与DMA双向交互(网络收包事件全流程)](../051.AI-ASSISANT/001.CPU与DMA双向交互(网络收包事件全流程).md): PCI/PCI-X 总线主控(bus master)、总线地址、总线仲裁
 
 |总线类型|说明|备注|
 |-|-|-|
