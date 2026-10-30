@@ -3,6 +3,16 @@
 > 来源：[Modern Operating Systems 5th Edition # 8.1 MULTIPROCESSORS](../../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf)（PDF 第 559–586 页，书页 530–557）。
 > 配套：硬件实物（UPI/xGMI、主板框图）见 [../000.NUMA/README.md](../000.NUMA/README.md)；Linux 内核实现对照见 [../003.Linux-7.1.3实现/README.md](../003.Linux-7.1.3实现/README.md)。
 
+## 分节精读（每小节一个文件，理论 + Linux/arm64 实现对照）
+
+| 文件 | 内容 |
+|-|-|
+| [001.8.1.1-多处理器硬件.md](./001.8.1.1-多处理器硬件.md) | UMA 三种互连、NUMA 目录协议、多核/众核/SMT；内核作为拓扑"消费者" |
+| [002.8.1.2-多处理器OS类型与SMP.md](./002.8.1.2-多处理器OS类型与SMP.md) | 三种 OS 模型 → **Linux 的 SMP 实现（arm64 启动/IPI/per-CPU/BKL 消亡史）** |
+| [003.8.1.3-多处理器同步.md](./003.8.1.3-多处理器同步.md) | TSL/缓存抖动/先读后锁/退避/spin vs switch 理论 → **qspinlock、乐观自旋、WFE 实现** |
+| [004.8.1.4-多处理器调度.md](./004.8.1.4-多处理器调度.md) | 分时/亲和性/空间共享/组调度/安全调度 → per-CPU rq、调度域、cpuset、core scheduling |
+| [005.专题-图8-11多锁避免缓存抖动.md](./005.专题-图8-11多锁避免缓存抖动.md) | **MCS 锁专篇**：书中图 8-11 与 `mcs_spinlock.h`/`qspinlock`/`osq_lock.c` 三处实现的逐行对照 |
+
 **基本定义**：共享内存多处理器（multiprocessor）= 两个以上 CPU 共享完整访问同一 RAM。程序看到的是普通（分页的）虚拟地址空间，唯一特殊之处是：CPU 写一个内存字再读回，可能得到不同值（别的 CPU 改了）——这正是处理器间通信的基础。多处理器 OS 基本就是普通 OS，特殊之处集中在**同步、资源管理、调度**三件事上。
 
 ---
