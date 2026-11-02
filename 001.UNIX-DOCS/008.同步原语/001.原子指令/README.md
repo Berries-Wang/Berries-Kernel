@@ -1,5 +1,5 @@
 # 原子指令<sup>ARM64</sup>
-- arm64： <br/>[000.LINUX-5.9/arch/arm64/include/asm/atomic.h](../../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/include/asm/atomic.h) <br/> [000.LINUX-5.9/arch/arm64/include/asm/atomic_ll_sc.h](../../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/include/asm/atomic_ll_sc.h)<br/> [000.LINUX-5.9/arch/arm64/include/asm/atomic_lse.h](../../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/include/asm/atomic_lse.h)（LSE 路径）· [lse.h](../../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/include/asm/lse.h)（启动期选路）<br/> LL/SC 实现原理（架构手册分析）： [003.LLSC实现原理.md](./003.LLSC实现原理.md) <br/> CAS 实现原理（架构手册分析）： [002.CAS实现原理.md](./002.CAS实现原理.md) <br/> LL/SC 与 LSE 的区别（对照枢纽）： [004.LLSC与LSE的区别.md](./004.LLSC与LSE的区别.md)
+- arm64： <br/>[000.LINUX-5.9/arch/arm64/include/asm/atomic.h](../../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/include/asm/atomic.h) <br/> [000.LINUX-5.9/arch/arm64/include/asm/atomic_ll_sc.h](../../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/include/asm/atomic_ll_sc.h)<br/> [000.LINUX-5.9/arch/arm64/include/asm/atomic_lse.h](../../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/include/asm/atomic_lse.h)（LSE 路径）· [lse.h](../../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/include/asm/lse.h)（启动期选路）<br/> LL/SC 实现原理（架构手册分析）： [003.LLSC实现原理.md](./003.LLSC实现原理.md) <br/> CAS 实现原理（架构手册分析）： [002.CAS实现原理.md](./002.CAS实现原理.md) <br/> LL/SC 与 LSE 的区别（对照枢纽）： [004.LLSC与LSE的区别.md](./004.LLSC与LSE的区别.md) <br/> LSE 内核实现（7.1.3：探测/双路径/启动期补丁/A725 near-far）： [005.LSE内核实现.md](./005.LSE内核实现.md)
 
 
 原子操作是指保证指令以原子的方式执行，执行过程中不会被打断。
@@ -24,7 +24,7 @@ arm64 的两种"焊法"（正对应下表两族指令）：
 |-|-|-|-|
 |- LL/SC|LDXR / STXR（含 LDAXR / STLXR 等）|Load-Exclusive 读+标记；Store-Exclusive 条件写，失败返回状态位，软件循环重试|Monitor（独占监视器）是 LDXR/STXR 专用的机制，原子性靠"监视器检测他人写入→STXR 失败"兑现，见 [003.LLSC实现原理.md](./003.LLSC实现原理.md)|
 |-|-|-|-|
-|- LSE(Large System Extensions) |CAS / CASP / SWP / LDADD 等|单条指令完成无条件原子 read-modify-write|LSE 的 CAS 走的是另一套机制——由缓存一致性系统执行的原子 RMW，见 [002.CAS实现原理.md](./002.CAS实现原理.md)；LL/SC 重试环 → LSE 指令的替换对照与 LL/SC 的保留地见 [003.LLSC实现原理.md §8](./003.LLSC实现原理.md)|
+|- LSE(Large System Extensions) |CAS / CASP / SWP / LDADD 等|单条指令完成无条件原子 read-modify-write|LSE 的 CAS 走的是另一套机制——由缓存一致性系统执行的原子 RMW，见 [002.CAS实现原理.md](./002.CAS实现原理.md)；LL/SC 重试环 → LSE 指令的替换对照与 LL/SC 的保留地见 [003.LLSC实现原理.md §8](./003.LLSC实现原理.md)；内核侧落地（探测/双路径/补丁/微架构 near-far）见 [005.LSE内核实现.md](./005.LSE内核实现.md)|
 
 ## 1. 指令本质：LSE 的"读-比较-写"原子操作
 CAS 家族属于 FEAT_LSE（Large System Extensions）（ARMv8.1 引入），页面上标注 (FEAT_LSE)。它是对传统 LL/SC 对（LDXR/STXR）的替代：
@@ -44,3 +44,5 @@ Linux内核启用 CONFIG_ARM64_LSE_ATOMICS
 Kernel Features  --->
     [*] Enable support for Large System Extensions (LSE) atomic instructions
 ```
+
+> ⚠️ 上面是 **5.9 时代**的开关。**7.1.3 树里 `CONFIG_ARM64_LSE_ATOMICS` 已删除**——LSE 路径无条件编译，只靠启动期按 `ID_AA64ISAR0_EL1.Atomic` 探测后打补丁选路；5.9 → 7.1.3 完整演进对照与两套补丁机制见 [005.LSE内核实现.md §5/§8](./005.LSE内核实现.md)。
