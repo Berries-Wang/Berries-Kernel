@@ -21,6 +21,13 @@
 - 代码引用规范：路径写成 `kernel/sched/xxx.c`，行号必须用 `grep -n` 实测（```c 代码块首行注释如 `// kernel/sched/topology.c:1803`），不得凭记忆编写代码；
 - 历史对照：`000.SOURCE_CODE/000.LINUX-5.9` 仅作版本差异对比（如 "5.9 vs 7.1.3" 对照表）使用，主基准始终是 7.1.3。
 
+## 原子指令写作规范
+
+- **正文以 LSE 为主**：后续写原子指令相关笔记（示例代码、执行流程、争用分析）时，主路径一律用 **LSE 原子指令**（`LDADD`/`LDCLR`/`LDSET`/`LDEOR`/`SWP`/`CAS`…，含 `A/L/AL` 内存序后缀）；
+- **LL/SC 写到附录**：LL/SC（`LDXR/STXR`）相关内容——独占监视器两级状态机、配对限制、ERG 粒度、cmpwait/WFE 等待（LSE 无等待类指令）、非标准 RMW、128 位原子（FEAT_LSE128 之前）、Armv8.0 基线兼容——统一放到**附录**（标题如"附录：LL/SC（LDXR/STXR）与独占监视器"），与上面"异构部分放附录"同一组织方式；正文只在需要对照时一句话带过并链接附录。附录里**不得写成"LL/SC 已淘汰"**，须注明其保留地；
+- **术语**：RMW 首次出现时展开为"RMW（Read-Modify-Write，读-改-写）"，定义见 [001.UNIX-DOCS/008.同步原语/001.原子指令/README.md](001.UNIX-DOCS/008.同步原语/001.原子指令/README.md)；
+- **对照表复用**：两路线全区别总表见 [004.LLSC与LSE的区别.md](001.UNIX-DOCS/008.同步原语/001.原子指令/004.LLSC与LSE的区别.md)，LL/SC→LSE 逐条替换对照与四块保留地见 [003.LLSC实现原理.md §8](001.UNIX-DOCS/008.同步原语/001.原子指令/003.LLSC实现原理.md)——新笔记链接这两处，不重复抄表。
+
 ## 参考资料（TRM）
 
 - Neoverse V3（AGI CPU 核心）：[arm_neoverse_v3_core_technical_reference_manual_107734_0002_06_en.pdf](007.BOOKs/arm_neoverse_v3_core_technical_reference_manual_107734_0002_06_en.pdf)；互连/SLC 另见 [arm_neoverse_cmn_700_trm_102308_0307_08_en.pdf](007.BOOKs/arm_neoverse_cmn_700_trm_102308_0307_08_en.pdf)

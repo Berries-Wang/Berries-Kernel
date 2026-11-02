@@ -46,7 +46,7 @@
 
 | 书中概念 | Linux 实现 |
 |-|-|
-| 总线锁定的 TSL/原子"读+置1" | 原子指令：x86 `LOCK CMPXCHG/XCHG`（旧总线锁语义进化为缓存行锁），arm64 LSE 原子指令（`LDXR/STXR` 独占对 / `SWPAL` 等）|
+| 总线锁定的 TSL/原子"读+置1" | 原子指令：x86 `LOCK CMPXCHG/XCHG`（旧总线锁语义进化为缓存行锁），arm64 双路径——基线 LL/SC（`LDXR/STXR` 独占对）+ ARMv8.1 LSE（`SWPAL`/`CAS`/`LDADD` 单条 RMW），启动期按 CPU 能力选路 |
 | Mellor-Crummey–Scott 私有锁队列（每个等待者自旋自己的变量，图 8-11）| `kernel/locking/mcs_spinlock.h:57` 的 `mcs_spin_lock()`——教科书方案在内核中的直接实现 |
 | 高效自旋锁成品 | **qspinlock** <sub>[/kernel/locking/qspinlock.c](../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/kernel/locking/qspinlock.c)</sub>：锁字 + MCS 队列（pending 位先乐观自旋、再入队）；x86 与 arm64 均默认启用（两架构都 `select ARCH_USE_QUEUED_SPINLOCKS`）|
 | 先读探测再上锁（减少缓存行乒乓）| qspinlock 的 pending 乐观路径、以及 `atomic_read` 先行探测等技巧 |
