@@ -41,7 +41,7 @@
 
 ## 符号变迁总表(5.9 → 7.1.3)
 |5.9符号/机制|7.1.3状态|替代方案|数值变化|
-|-|-|-|-|-|
+|-|-|-|-|
 |_head(head.S:65)|✝删除|Image头就在 _text,第一条指令 head.S:61-62|—|
 |__PHYS_OFFSET(head.S:39)|✝删除|`adrp x0, KERNEL_START`(head.S:521)运行期取PA;链接期由`_text==KIMAGE_VADDR`断言(lds:413)接管|—|
 |kimage_vaddr(head.S:476-477)|✝删除|`adrp x4, _text`直接取;kaslr_offset()内联(memory.h:291-294)|—|

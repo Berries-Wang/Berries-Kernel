@@ -1,2 +1,41 @@
-# 编译原理
-- 学习: <br/> - [008.COMPUTER_SCIENCE/000.编译-汇编-链接](../../008.COMPUTER_SCIENCE/000.编译-汇编-链接/README.md) <br/>- [第5章 GNU汇编器 & 第6章 链接器与链接脚本](../../007.BOOKs/RISC-V%20Architecture%20Programming%20and%20Practice/)
+# 编译原理（理论 × Linux 内核构建落地）
+
+> **定位**：教科书讲编译器内部（前端→优化→后端），但内核仓库把它**当成一台可观测的机器**——`make` 的依赖图就是编译流水线的展开，链接脚本就是"代码生成器"的最终排版指令。本系列以 [编译原理（张昱/陈意云）](../../007.BOOKs/编译原理-张昱_陈意云.pdf) 的章节为理论坐标，以 [003.LINUX-7.1.3](../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3) 树的构建系统为落地实例（`file:line` 全部实测）。
+>
+> 与姊妹系列的分工：[008.COMPUTER_SCIENCE/000.编译-汇编-链接](../../008.COMPUTER_SCIENCE/000.编译-汇编-链接/README.md) 讲**宏观流程**（编译器/汇编器/链接器各干什么、目标文件六大部分）；本系列往**深**走——构建规则逐条、链接脚本逐段、编译器扩展逐宏、重定位逐类型。
+
+## 目录
+
+| # | 文档 | 定位 |
+| - | - | - |
+| 000 | [链接器](./000.链接器/README.md)（子目录） | 概念总纲：符号解析 + 重定位两大动作，两文件最小实验逐字节观察（llvm-nm/objdump -r） |
+| 001 | [从 C 到 Image：内核构建流水线](./001.从C到Image：内核构建流水线.md) | `.c → .s → .o → built-in.a → vmlinux(+kallsyms 两遍) → Image.gz` 的规则走读：Makefile.build / Makefile.lib / link-vmlinux.sh |
+| 002 | [链接脚本走读：vmlinux.lds.S](./002.链接脚本走读：vmlinux.lds.S.md) | arm64 链接脚本逐段：内存布局总图、链接器四武器（合成符号/段归并/排布控制/断言）、`__init_begin` 围栏与 initcall 表、`.altinstructions` 与 `.rela.dyn` |
+| 003 | [编译器扩展与内核：compiler.h 深读](./003.编译器扩展与内核：compiler.h深读.md) | 内核怎么驾驭编译器：`__section/__weak/__always_inline` 属性层、`likely/barrier`、asm goto 静态键、以及"机器码被改四次"总时间线（ftrace 的 `-fpatchable-function-entry`） |
+| 004 | [模块加载：运行期的链接器](./004.模块加载：运行期的链接器.md) | `insmod` = 运行期 ld：`layout_and_allocate → apply_relocate_add`，R_AARCH64_* 重定位逐类型、`S + A` 公式实码 |
+
+阅读顺序：001（流水线全景）→ 002（链接期深潜）→ 003（编译期深潜）→ 004（运行期收尾）。
+
+## 理论坐标（教材章节 ↔ 本系列落点）
+
+| 教材章节（张昱/陈意云） | 页码 | 本系列落点 |
+| - | - | - |
+| 引论：编译器的阶段（词法→语法→语义→中间代码→优化→代码生成/符号表） | p22~28 | 001 §2（全部折叠在 `cmd_cc_o_c` 一条命令里） |
+| 词法分析 | p47 | 001 §2（词法器是 cc1 的前端，构建系统不感知） |
+| 语法分析 / 语法制导的翻译 | p84 / p179 | 001 §2 |
+| 类型检查 | p214 | 001 §2（BUILD_BUG 系列把部分检查提前到编译期，003 §2） |
+| 运行时存储空间的组织和管理 | p258 | 002 §2（段的内存布局 = 链接脚本排版；BSS/静态数据） |
+| 中间语言与中间代码生成 | p313 | 003 §1（`__section` 把 IR 产物钉进命名段） |
+| 代码生成（含重定位） | p365 | **002 全篇 + 004 全篇** |
+| 独立于机器的优化 / 依赖于机器的优化 | p402 / p479 | 003 §5（LTO/objtool）；001 §4（--gc-sections 是链接期死代码消除） |
+
+## 核心资料
+
+| 资料 | 用途 |
+| - | - |
+| [编译原理-张昱_陈意云.pdf](../../007.BOOKs/编译原理-张昱_陈意云.pdf) | 理论坐标（章节页码见上表） |
+| [RISC-V Architecture Programming and Practice](../../007.BOOKs/RISC-V%20Architecture%20Programming%20and%20Practice/) 第 5/6 章 | GNU 汇编器 / 链接器与链接脚本（工具链视角的姊妹读本） |
+| [计算机组成与设计 #2.12 翻译并启动程序](../../007.BOOKs/计算机组成与设计-硬件-软件_接口/) | 编译→汇编→链接→加载的最短教材路径 |
+| [Run Linux Kernel vol1 #2.6 内核汇编代码分析](../../007.BOOKs/Run%20Linux%20Kernel%20%282nd%20Edition%29%20Volume%201:%20Infrastructure.epub) | 内核侧汇编/链接实践 |
+| 7.1.3 树 | 全部源码锚点（Makefile / scripts/ / arch/arm64/） |
+| 关联本仓库笔记 | [008.同步原语/001.原子指令/005.LSE内核实现](../008.同步原语/001.原子指令/005.LSE内核实现.md)（.altinstructions 的启动期补丁）、[008.同步原语/002.内存屏障](../008.同步原语/002.内存屏障.md)（barrier/READ_ONCE 的编译器层） |
