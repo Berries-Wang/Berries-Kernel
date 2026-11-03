@@ -1,5 +1,5 @@
 # 原子指令<sup>ARM64</sup>
-- arm64： <br/>[000.LINUX-5.9/arch/arm64/include/asm/atomic.h](../../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/include/asm/atomic.h) <br/> [000.LINUX-5.9/arch/arm64/include/asm/atomic_ll_sc.h](../../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/include/asm/atomic_ll_sc.h)<br/> [000.LINUX-5.9/arch/arm64/include/asm/atomic_lse.h](../../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/include/asm/atomic_lse.h)（LSE 路径）· [lse.h](../../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/include/asm/lse.h)（启动期选路）<br/> LL/SC 实现原理（架构手册分析）： [003.LLSC实现原理.md](./003.LLSC实现原理.md) <br/> CAS 实现原理（架构手册分析）： [002.CAS实现原理.md](./002.CAS实现原理.md) <br/> LL/SC 与 LSE 的区别（对照枢纽）： [004.LLSC与LSE的区别.md](./004.LLSC与LSE的区别.md) <br/> LSE 内核实现（7.1.3：探测/双路径/启动期补丁/A725 near-far）： [005.LSE内核实现.md](./005.LSE内核实现.md) <br/> 执行流程图集（LSE 端到端 + CAS 全流程 + near/far 决策 + 总线事务序列 RN→HN-F + 双核同址串行化 + LL/SC 双泳道/失败全景，附录）： [006.LLSC与LSE执行流程图.md](./006.LLSC与LSE执行流程图.md)
+- arm64： <br/>[000.LINUX-5.9/arch/arm64/include/asm/atomic.h](../../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/include/asm/atomic.h) <br/> [000.LINUX-5.9/arch/arm64/include/asm/atomic_ll_sc.h](../../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/include/asm/atomic_ll_sc.h)<br/> [000.LINUX-5.9/arch/arm64/include/asm/atomic_lse.h](../../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/include/asm/atomic_lse.h)（LSE 路径）· [lse.h](../../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/include/asm/lse.h)（启动期选路）<br/> LL/SC 实现原理（架构手册分析；附录 A=监视器部署图+成功/互踢逐帧时序）： [003.LLSC实现原理.md](./003.LLSC实现原理.md) <br/> CAS 实现原理（架构手册分析；§3.4=memresult/regresult 两条通道，附录 A=独占态/行锁逐帧展开）： [002.CAS实现原理.md](./002.CAS实现原理.md) <br/> LL/SC 与 LSE 的区别（对照枢纽）： [004.LLSC与LSE的区别.md](./004.LLSC与LSE的区别.md) <br/> LSE 内核实现（7.1.3：探测/双路径/启动期补丁/A725 near-far）： [005.LSE内核实现.md](./005.LSE内核实现.md) <br/> 执行流程图集（LSE 端到端 + CAS 全流程 + near/far 决策 + 总线事务序列 RN→HN-F + 双核同址串行化 + LL/SC 双泳道/失败全景，附录）： [006.LLSC与LSE执行流程图.md](./006.LLSC与LSE执行流程图.md)
 
 
 原子操作是指保证指令以原子的方式执行，执行过程中不会被打断。
@@ -15,9 +15,9 @@ arm64 的两种"焊法"（正对应下表两族指令）：
 | | 形态 | 原子性来源 |
 |-|-|-|
 | LL/SC | 把 RMW **拆开**：`LDXR` 读+标记 → 计算 → `STXR` 条件写，失败重试 | 独占监视器事后检测"有人写过" → STXR 失败（[003.LLSC实现原理.md](./003.LLSC实现原理.md)）|
-| LSE（x86 对应 `LOCK` 前缀）| 把 RMW **焊死**：单条指令在缓存行独占态上一笔完成 | 缓存一致性协议充当"锁"（[002.CAS实现原理.md](./002.CAS实现原理.md)）|
+| LSE（x86 对应 `LOCK` 前缀）| 把 RMW **焊死**：读、改、写打包成**一笔访存事务**——单条指令发出，在缓存行独占态上一次做完，不拆成 load+store 两笔 | 缓存一致性协议充当"锁"（[002.CAS实现原理.md](./002.CAS实现原理.md)）|
 
-> 各文档常说的"**单笔 RMW**"即后者：读、改、写三个效应对外表现为一次不可分割的访存，其他观察者要么看到旧值、要么看到新值，绝不会看到中间态。LL/SC 重试环 → LSE 指令的逐条替换对照见 [003.LLSC实现原理.md §8](./003.LLSC实现原理.md)，全景区别对照见 [004.LLSC与LSE的区别.md](./004.LLSC与LSE的区别.md)。
+> 各文档常说的"**单笔 RMW**"即后者："一笔"是**访存事务**意义上的一笔——读、改、写三个效应由同一条指令产生、在内存系统里作为同一笔请求完成，对外表现为一次不可分割的访存；其他观察者要么看到旧值、要么看到新值，绝不会看到中间态（这笔事务在一致性系统里"拿独占→行锁窗口→写"的逐帧展开见 [002 附录 A](./002.CAS实现原理.md)）。LL/SC 重试环 → LSE 指令的逐条替换对照见 [003.LLSC实现原理.md §8](./003.LLSC实现原理.md)，全景区别对照见 [004.LLSC与LSE的区别.md](./004.LLSC与LSE的区别.md)。
 
 ## 原子指令族
 |指令类型|代表指令|说明|备注|
