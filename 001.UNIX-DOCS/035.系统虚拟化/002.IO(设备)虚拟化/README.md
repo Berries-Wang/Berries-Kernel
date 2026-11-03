@@ -1,5 +1,5 @@
 # I/O虚拟化
-一定得先学习: <br/> · [24-虚拟化：内存、设备虚拟化 [中山大学 操作系统原理]：怎么实现I/O虚拟化?](../../000.内存管理/998.REFS/000.中山大学-操作系统/14-0526-virt-2.pdf) <br/> · <a href="./000.REF-DOCS/HCIA-Cloud Computing V5.5 培训教材.pdf">HCIA-Cloud Computing V5.5 培训教材.pdf#'虚拟化技术概览'#I/O虚拟化</a>
+一定得先学习: <br/> · [24-虚拟化：内存、设备虚拟化 [中山大学 操作系统原理]：怎么实现I/O虚拟化?](../../000.内存管理/998.REFS/000.中山大学-操作系统/14-0526-virt-2.pdf) <br/> · <a href="../../../007.BOOKs/HCIA-Cloud Computing V5.5 培训教材.pdf">HCIA-Cloud Computing V5.5 培训教材.pdf#'虚拟化技术概览'#I/O虚拟化</a>
 
 ## I/O虚拟化方式
 |虚拟化方式|说明|备注|
