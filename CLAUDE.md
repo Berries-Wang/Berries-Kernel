@@ -33,7 +33,7 @@
 整理笔记引用参考资料（ARM ARM、TRM、Learn the Architecture、书籍等 PDF）时：
 
 - **出处必须落到"文档 + 章节 + 页码"**：写明哪份文档、哪一节（章节号和标题，如 "B2.8.2 Alignment of data accesses"、"Table A-233: CTR_EL0 bit descriptions"）、物理页码；分卷 PDF 用 "vol1(-1-3000.pdf) 物理页 309" 这类写法。**不得只给文件链接不给章节页码**；
-- **出处必须可点击跳转**：引用写成 Markdown 链接 `[]()`，链接文字保留"卷号(分卷文件名) 物理页 N"，目标指向真实文件并带 `#page=N` 锚点（N 为该分卷内 1 起始的物理页），分卷 PDF 链接到对应分卷文件，如：`[vol1(-1-3000.pdf) 物理页 309](../../007.BOOKs/Arm%20Architecture%20Reference%20Manual%20for%20A-profile%20Architecture/DDI0487_M_a_a_a-profile_architecture_reference_manual-1-3000.pdf#page=309)`；路径含空格用 `%20` 编码；
+- **出处必须可点击跳转**：引用写成 Markdown 链接 `[]()`，链接文字保留"卷号(分卷文件名) 物理页 N"，目标指向真实文件并带 `#page=N` 锚点（N 为该分卷内 1 起始的物理页），分卷 PDF 链接到对应分卷文件，如：`[vol1(-1-3000.pdf) 物理页 309](../../007.BOOKs/Arm%20Architecture%20Reference%20Manual%20for%20A-profile%20architecture/DDI0487_M_a_a_a-profile_architecture_reference_manual-1-3000.pdf#page=309)`；路径含空格用 `%20` 编码；
 - **关键论断处摘录原文**：把支撑论断的关键原文句（英文原句 + 中文对照/转述）摘进笔记，放进文首「核心资料」表（列：原文摘录｜说明｜出处）或引用点旁——保证脱离 PDF 也能核对该论断的措辞；
 - 摘录必须是**逐字节选**（允许省略号截断），不得凭记忆改写后伪装成原文；中文对照放在原文下方或 `<sup>…</sup>` 中；
 - 勘误与复核结论要在笔记中留档（如 README 的「审核记录」表），注明依据的章节页码。
