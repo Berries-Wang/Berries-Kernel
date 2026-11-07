@@ -5,7 +5,7 @@
 > 学习/出处:
 > + 本仓库源码:[000.SOURCE_CODE/000.LINUX-5.9](../../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/kernel/head.S)(head.S/head.S.copy/kaslr.c)、[000.SOURCE_CODE/003.LINUX-7.1.3](../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/arch/arm64/kernel/head.S)(head.S 与 kernel/pi/)
 > + 本仓库文档:[head.symbol.md (5.9)](../../../000.SOURCE_CODE/000.LINUX-5.9/000.LINUX-5.9/arch/arm64/kernel/head.symbol.md)、[head.symbol.md (7.1.3)](../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/arch/arm64/kernel/head.symbol.md)(符号定义级分析)、[001.KASLR.md](../001.KASLR.md)(5.9 KASLR链路)、[README.md](../README.md)(5.9 QEMU启动日志实测值)
-> + ARM官方资料(本仓库 `006.REFS/` 收录):[AArch64 Memory Management Guide](../../../006.REFS/learn_the_architecture_aarch64_memory_management_guide_101811_0105_00_en.pdf)、[A64 Instruction Set Guide](../../../006.REFS/learn_the_architecture_a64_instruction_set_architecture_guide_102374_0103_02_en.pdf);[ARM ARM DDI0487](../../../007.BOOKs/Arm%20Architecture%20Reference%20Manual%20for%20A-profile%20architecture/README.md)(本仓库 `007.BOOKs/`)
+> + ARM官方资料(本仓库 `007.BOOKs/` 收录):[AArch64 Memory Management Guide](../../../007.BOOKs/learn_the_architecture_aarch64_memory_management_guide_101811_0105_00_en.pdf)、[A64 Instruction Set Guide](../../../007.BOOKs/learn_the_architecture_a64_instruction_set_architecture_guide_102374_0103_02_en.pdf);[ARM ARM DDI0487](../../../007.BOOKs/Arm%20Architecture%20Reference%20Manual%20for%20A-profile%20architecture/README.md)(本仓库 `007.BOOKs/`)
 > + 内核自带启动协议文档:两版源码树内 `Documentation/arch/arm64/booting.rst`
 
 ## 目录

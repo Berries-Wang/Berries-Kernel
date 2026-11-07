@@ -289,6 +289,6 @@
 - [KVM介绍](../../007.BOOKs/HCIA-Cloud%20Computing%20V5.5%20培训教材.pdf) #'KVM虚拟化简介'章节
 - [HVC (A64)](https://developer.arm.com/documentation/dui0801/l/A64-General-Instructions/HVC--A64-?lang=en)
 - [Learn the architecture - AArch64 virtualization](https://developer.arm.com/documentation/102142/0100/Stage-2-translation)
-- [Learn the architecture - AArch64 virtualization](../../006.REFS/learn_the_architecture_aarch64_virtualization_guide_102142_0100_06_en.pdf)
+- [Learn the architecture - AArch64 virtualization](../../007.BOOKs/learn_the_architecture_aarch64_virtualization_guide_102142_0100_06_en.pdf)
 - [Modern Operating Systems, 5th Edition](../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf) §7.3 "Type 1 and Type 2 Hypervisors"（p484–486）：附录 A 的定义、图 7-1/7-2 与中英对照出处
 - [Modern Operating Systems, 5th Edition](../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf) §1.7.5 "Virtual Machines"（p69–73）：附录 B 的 VM/370、可虚拟性、JVM 与容器中英对照出处

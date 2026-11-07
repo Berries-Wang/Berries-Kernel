@@ -20,4 +20,4 @@
 
 ## 参考资料
 - [Learn the architecture - AArch64 virtualization](https://developer.arm.com/documentation/102142/0100/Stage-2-translation)
-- [Learn the architecture - AArch64 virtualization](../../../006.REFS/learn_the_architecture_aarch64_virtualization_guide_102142_0100_06_en.pdf)
+- [Learn the architecture - AArch64 virtualization](../../../007.BOOKs/learn_the_architecture_aarch64_virtualization_guide_102142_0100_06_en.pdf)

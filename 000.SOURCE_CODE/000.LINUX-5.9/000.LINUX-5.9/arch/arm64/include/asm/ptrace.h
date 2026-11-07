@@ -210,7 +210,7 @@ static inline void forget_syscall(struct pt_regs *regs)
  *   - PSTATE 与 SPSR :
  *      + 当发生异常（如系统调用、硬件中断）从用户态切换到内核态时，
  *        硬件会自动将当前的处理器状态保存到 SPSR（Saved Program Status Register）寄存器中。
- *        内核代码中的 regs->pstate 实际上就是镜像了硬件 SPSR 寄存器的值 , 依据? [001.UNIX-DOCS/009.异常/002.异常发生后的处理.md]>[006.REFS/learn_the_architecture_-_aarch64_exception_model_102412_0103_02_en.pdf]#'Figure 5-2: Saving and restoring processor state'
+ *        内核代码中的 regs->pstate 实际上就是镜像了硬件 SPSR 寄存器的值 , 依据? [001.UNIX-DOCS/009.异常/002.异常发生后的处理.md]>[007.BOOKs/learn_the_architecture_-_aarch64_exception_model_102412_0103_02_en.pdf]#'Figure 5-2: Saving and restoring processor state'
  *        - SPSR ， 参考: [007.BOOKs/Arm® Architecture Reference Manual for A-profile architecture]#'C5.2.20 SPSR_EL1, Saved Program Status Register (EL1)'
  * 
  * pstate 参考:[007.BOOKs/Arm® Architecture Reference Manual for A-profile architecture]#D1.4 Process state, PSTATE

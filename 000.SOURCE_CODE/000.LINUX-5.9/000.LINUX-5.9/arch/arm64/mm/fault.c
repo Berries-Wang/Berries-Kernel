@@ -466,7 +466,7 @@ static vm_fault_t __do_page_fault(struct mm_struct *mm, unsigned long addr,
  *      Holds syndrome information for an exception taken to EL1.(保存跳转至 EL1 的异常的综合信息)
  * 
  * 什么时候写入值到ESR,写入什么值?
- *   答案在:  [001.UNIX-DOCS/009.异常/002.异常发生后的处理.md]>[006.REFS/learn_the_architecture_-_aarch64_exception_model_102412_0103_02_en.pdf]#'5.1 Taking an exception'
+ *   答案在:  [001.UNIX-DOCS/009.异常/002.异常发生后的处理.md]>[007.BOOKs/learn_the_architecture_-_aarch64_exception_model_102412_0103_02_en.pdf]#'5.1 Taking an exception'
  *           -- 对应的在线文档: https://developer.arm.com/documentation/102412/0103/Handling-exceptions/Taking-an-exception?lang=en
  */
 static bool is_el0_instruction_abort(unsigned int esr)

@@ -591,7 +591,7 @@ SYM_FUNC_END(__create_page_tables)
  *
  * sp 是什么?看手册 或 https://developer.arm.com/documentation/111179/2025-09_ASL1/AArch64-Registers/SP-EL0--Stack-Pointer--EL0-?lang=en
  *    init_task 为啥赋值到el0, 不应该是el1吗?
- * > 006.REFS/learn_the_architecture_-_aarch64_exception_model_102412_0103_02_en.pdf
+ * > 007.BOOKs/learn_the_architecture_-_aarch64_exception_model_102412_0103_02_en.pdf
  */
 SYM_FUNC_START_LOCAL(__primary_switched)
 	adrp	x4, init_thread_union   // 将 init_thread_union 所在页的基地址加载到 x4 , adrp:Address of Page , 计算一个符号(变量或函数名)所在 4KB 内存页的基地址,并将其加载到目标寄存器中

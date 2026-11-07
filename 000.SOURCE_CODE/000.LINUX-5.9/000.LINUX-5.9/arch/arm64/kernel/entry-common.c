@@ -73,7 +73,7 @@ NOKPROBE_SYMBOL(el1_dbg);
 asmlinkage void notrace el1_sync_handler(struct pt_regs *regs)
 {
 	/**
-	 * 获取异常原因: `Exception-handling-examples` (006.REFS/learn_the_architecture_-_aarch64_exception_model_102412_0103_02_en.pdf)
+	 * 获取异常原因: `Exception-handling-examples` (007.BOOKs/learn_the_architecture_-_aarch64_exception_model_102412_0103_02_en.pdf)
 	 * 
 	 * Types of privilege: ESR_ELx (Exception Syndrome Register)
 	 * 

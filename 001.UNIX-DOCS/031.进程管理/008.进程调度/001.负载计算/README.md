@@ -1,5 +1,5 @@
 # 负载计算
-> 学习: <br/> [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub#8.2　负载计算](../../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub)  <br/> 有些还是得参考 'struct sched_avg ' 各个字段的注释来理解。
+> 学习: <br/> [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub#8.2　负载计算](../../../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub)  <br/> 有些还是得参考 'struct sched_avg ' 各个字段的注释来理解。
 
 |注意事项|说明|备注|
 |-|-|-|

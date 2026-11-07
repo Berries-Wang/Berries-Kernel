@@ -351,4 +351,4 @@ For each lookup level supported by the 4KB translation granule, the following ta
 
 
 ## 参考
-- [D8.1.2 Translation regimes](../../../../007.BOOKs/Arm®%20Architecture%20Reference%20Manual%20for%20A-profile%20architecture/) # D8.1.2 Translation regimes
+- [D8.1.2 Translation regimes](../../../../007.BOOKs/Arm%20Architecture%20Reference%20Manual%20for%20A-profile%20architecture/) # D8.1.2 Translation regimes

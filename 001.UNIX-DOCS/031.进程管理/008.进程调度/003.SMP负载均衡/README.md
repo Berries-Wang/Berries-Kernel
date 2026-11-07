@@ -2,7 +2,7 @@
 > 在Linux内核中，SMP和NUMA是可同时存在的，且是共生的: NUMA 是多个 SMP 节点通过高速互联组成的更大系统 , 见:<br/>- [017.SMP负载均衡.md](./017.SMP负载均衡.md) <br/>- [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub#图8.18　调度域和调度组的关系]
 
 
-> 学习:<br/> - [RISC-V Architecture Programming and Practice: 图11.2 UMA体系结构](../../007.BOOKs/RISC-V%20Architecture%20Programming%20and%20Practice/RISC-V%20Architecture%20Programming%20and%20Practice-231-464.pdf) <br/> - [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#8.3　SMP负载均衡
+> 学习:<br/> - [RISC-V Architecture Programming and Practice: 图11.2 UMA体系结构](../../../../007.BOOKs/RISC-V%20Architecture%20Programming%20and%20Practice/RISC-V%20Architecture%20Programming%20and%20Practice-231-464.pdf) <br/> - [Run Linux Kernel (2nd Edition) Volume 1: Infrastructure.epub]#8.3　SMP负载均衡 <br/> - [001.亲和性-affinity.md](./001.亲和性-affinity.md) —— 什么是亲和性(affinity)：MOS5 p.552 理论源头 / 《深入Linux内核架构》硬亲和 / RLK1 wake affine / GICv3 同词异义
 
 |项|说明|备注|
 |-|-|-|

@@ -34,5 +34,5 @@
 3. [003.架构图-vCPU与物理CPU](003.架构图-vCPU与物理CPU.md)——vCPU 到底是什么、和 pCPU 的多对多关系
 4. [002.场景流程图-PSCI-CPU_ON中的hvc与eret](002.场景流程图-PSCI-CPU_ON中的hvc与eret.md)——用具体场景把 2 次 hvc + 4 次 eret 串成时间线
 5. [004.架构图-内存-中断-定时器-设备的映射](004.架构图-内存-中断-定时器-设备的映射.md)——CPU 之外的四类资源映射
-6. 配合 [Learn the architecture: AArch64 virtualization Guide](../../../006.REFS/learn_the_architecture_aarch64_virtualization_guide_102142_0100_06_en.pdf) §4-7（stage 2 / trap / 虚拟异常 / 定时器）
+6. 配合 [Learn the architecture: AArch64 virtualization Guide](../../../007.BOOKs/learn_the_architecture_aarch64_virtualization_guide_102142_0100_06_en.pdf) §4-7（stage 2 / trap / 虚拟异常 / 定时器）
 7. 待补：stage 2 页表走读（挂 [../003.内存虚拟化](../003.内存虚拟化/README.md)）、vgic 虚拟中断深入、VHE/nVHE/pKVM 对比

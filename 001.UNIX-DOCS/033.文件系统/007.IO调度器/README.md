@@ -6,4 +6,4 @@
 
 
 ## 参考资料
-- [007.BOOKs/Professional-Linux-Kernel-Architecture.epub#6.5.8 I/O调度](../../007.BOOKs/Professional-Linux-Kernel-Architecture.epub)
+- [007.BOOKs/Professional-Linux-Kernel-Architecture.epub#6.5.8 I/O调度](../../../007.BOOKs/Professional-Linux-Kernel-Architecture.epub)
