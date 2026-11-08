@@ -14,7 +14,7 @@
 | 量化计算能力 | DT `capacity-dmips-mhz` × 最大频率归一化, 最强 CPU = 1024 | [drivers/base/arch_topology.c:241](../../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/drivers/base/arch_topology.c) |
 | 能效模型 EM | `struct em_perf_domain` + `em_perf_state[]`, `cost = 10*power/performance` | [include/linux/energy_model.h:24](../../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/include/linux/energy_model.h) |
 | EAS 唤醒路径 | `find_energy_efficient_cpu()`, 每个性能域选剩余算力最大 CPU, 再比能量 | [kernel/sched/fair.c:8640](../../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/kernel/sched/fair.c) |
-| overutilized | util ≥ CFS 算力的 80%(`cap*1280 < util*1024`), 全根域退出 EAS | [kernel/sched/fair.c:104](../../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/kernel/sched/fair.c), fair.c:7105 |
+| overutilized | util ≥ CFS 算力的 80%(`util*1280 >= cap*1024`), 全根域退出 EAS | [kernel/sched/fair.c:104](../../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/kernel/sched/fair.c), fair.c:7105 |
 | CPU 动态调频 | schedutil: `next_freq = map_util_freq(util+util/4, ref_freq, cap)` | [kernel/sched/cpufreq_schedutil.c:193](../../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/kernel/sched/cpufreq_schedutil.c) |
 | x86 现实 | x86 无任何 EM 注册 → EAS 静止; EPYC 9996 走 amd-pstate(EPP)+SMU | [drivers/cpufreq/amd-pstate.c](../../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/drivers/cpufreq/amd-pstate.c) |
 
@@ -54,8 +54,8 @@ EAS 的统一思路:
                   +-->| 能效模型 EM   |<------+
                       | capacity+power|  (注册功耗表)
                       +-------+-------+
-                              |
-                  +-----------v-----------+
+                              ^
+                  +-----------+-----------+
                   | OPP 表 (freq, voltage)|
                   | DT operating-points-v2|
                   +-----------------------+
@@ -65,10 +65,10 @@ EAS 的统一思路:
 
 **PELT 与 WALT 的取舍**: 原文档指出"Linux 内核中绿色节能调度器还是使用 PELT 计算负载, 放弃了原本的 WALT 算法"。EAS 上游化时选择 PELT 作为公共负载信号(`util_avg`/`util_est`), 原因是 PELT 已在主线 CFS 中承担负载均衡与负载跟踪, EAS 直接复用同一套 scale-invariant 信号(见 sched-capacity.rst), 避免维护两套语义; WALT 留在 Android vendor 分支。
 
-**EAS 启用的前提**(7.1.3, [kernel/sched/topology.c:213](../../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/kernel/sched/topology.c) `sched_is_eas_possible()`), 4 个条件缺一不可:
+**EAS 启用的前提**(7.1.3, [kernel/sched/topology.c:215](../../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/kernel/sched/topology.c) `sched_is_eas_possible()`), 4 个条件缺一不可:
 
 1. 存在非对称容量拓扑(`sd_asym_cpucapacity`, 如 big.LITTLE);
-2. **不支持 SMT**("EAS definitely does \*not\* handle SMT", topology.c:232);
+2. **不支持 SMT**("EAS definitely does \*not\* handle SMT", topology.c:235);
 3. 频率不变性负载跟踪可用(`arch_scale_freq_invariant()`, arm64 用 AMU 计数器);
 4. cpufreq 就绪(每个 CPU 有 policy 且可拿到参考频率)。
 
@@ -88,7 +88,7 @@ EAS 的统一思路:
 
 ### arm64: 从设备树/CPPC 到 cpu_scale
 
-arm64 平台以 **Arm AGI CPU（SP113012，136×Neoverse V3，ACPI 服务器，无 DT）** 为例：capacity 走 **CPPC 路径**——`topology_init_cpu_capacity_cppc()`(arch_topology.c:327)从每个 CPU 的 CPPC `highest_perf` 寄存器读原始算力(arch_topology.c:348)，136 核同构 → 归一化后**全部 1024，只有一档**（这也是后文"EAS 在 AGI 上不启用"的第一个伏笔：`asym_cap_list` 单档）。
+arm64 平台以 **Arm AGI CPU（SP113012，136×Neoverse V3，ACPI 服务器，无 DT）** 为例：capacity 走 **CPPC 路径**——`topology_init_cpu_capacity_cppc()`(arch_topology.c:327)从每个 CPU 的 CPPC `highest_perf` 寄存器读原始算力(arch_topology.c:345)，136 核同构 → 归一化后**全部 1024，只有一档**（这也是后文"EAS 在 AGI 上不启用"的第一个伏笔：`asym_cap_list` 单档）。
 
 书 5.x 基于 DT 平台（HiKey 时代的机制，内核至今保留）：DT 在每个 cpu 节点用 `capacity-dmips-mhz` 描述原始算力（异构大小核的具体示例——Cortex-A725/A520、真实 DTS 取值——见**附录 B**）:
 
@@ -133,7 +133,7 @@ void topology_normalize_cpu_scale(void)
 
 - `capacity_freq_ref` 来自 cpufreq policy 的 `cpuinfo.max_freq`(arch_topology.c:407), 即**容量 = DMIPS/MHz × 最大频率**的综合(书的 5.x 时代只按 `capacity-dmips-mhz` 比值; 异构系统中小核会被"压低"——附录 B 教学模型: 小核(403)@2.0GHz vs 大核(1024)@3.2GHz 归一化后 ≈ **252**。AGI 136 核同频同构, 全部归一化为 1024, 无此效应)。
 - 访问入口: [arch/arm64/include/asm/topology.h:30](../../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/arch/arm64/include/asm/topology.h) `#define arch_scale_cpu_capacity topology_get_cpu_scale`; 默认实现恒返回 1024([include/linux/sched/topology.h:225](../../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/include/linux/sched/topology.h))。
-- arm64 服务器(无 DT)路径: `topology_init_cpu_capacity_cppc()`(arch_topology.c:327)从 **CPPC `highest_perf`** 读取原始算力(arch_topology.c:348)。
+- arm64 服务器(无 DT)路径: `topology_init_cpu_capacity_cppc()`(arch_topology.c:327)从 **CPPC `highest_perf`** 读取原始算力(arch_topology.c:345)。
 
 ### 频率不变性 FIE (arm64 AMU)
 
@@ -211,7 +211,7 @@ struct em_perf_domain {
 ### cost 与 energy 公式(以源码为准)
 
 ```c
-// kernel/power/energy_model.c:227 (为每个频点算 performance)
+// kernel/power/energy_model.c:229 (为每个频点算 performance)
 static void em_init_performance(struct device *dev, struct em_perf_domain *pd,
                                 struct em_perf_state *table, int nr_states)
 {
@@ -286,11 +286,11 @@ int dev_pm_opp_calc_power(struct device *dev, unsigned long *uW, unsigned long *
         *uW = (unsigned long)tmp;
 }
 
-// drivers/opp/of.c:1593 (注册)
+// drivers/opp/of.c:1587 (注册)
         ret = em_dev_register_perf_domain(dev, nr_opp, &em_cb, cpus, true); // microwatts=true
 ```
 
-(2) **ACPI/CPPC arm64 服务器**: [drivers/cpufreq/cppc_cpufreq.c:542](../../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/drivers/cpufreq/cppc_cpufreq.c) `cppc_cpufreq_register_em()` 直接注册 EM(用 CPPC 寄存器的 `highest_perf` 等生成分级功耗/成本), 这是 arm64 服务器跑 EAS 的入口:
+(2) **ACPI/CPPC arm64 服务器**: [drivers/cpufreq/cppc_cpufreq.c:542](../../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/drivers/cpufreq/cppc_cpufreq.c) `cppc_cpufreq_register_em()` 直接注册 EM(按 CPPC `highest_perf` 划分性能档; 功耗为人工刻度、EAS 比较只用 cost, 即 artificial EM), 这是 arm64 服务器跑 EAS 的入口:
 
 ```c
 // drivers/cpufreq/cppc_cpufreq.c:542
@@ -329,12 +329,12 @@ OPP(Operating Performance Point) = 电源域的一个 {频率, 电压} 点; 一�
   |    opp-microvolt=<600000>|------------------------------------>|> policy->        |
   |  }  ... opp03            |                                     |  freq_table[]    |
   +--------------------------+                                     +------------------+
-        cpu4/5 { operating-points-v2 = <&a520_opp>;  /* 对共享 */       |
-                  capacity-dmips-mhz = <403>;                           |
+        cpu4/5 { operating-points-v2 = <&a520_opp>;  /* 对共享 */
+                  capacity-dmips-mhz = <403>;
                   dynamic-power-coefficient = <...>; } ---> EM 注册时的功耗回调
 ```
 
-"OPP 与频域": 同一个 `opp-shared` 表覆盖的 CPU 共享一个调频域——cpufreq-dt 用 `dev_pm_opp_of_get_sharing_cpus()` 把它们并入同一个 `policy->cpus`(cpufreq-dt.c:184), EM 又以 `policy->cpus` 建 PD, 因此 **DT 的 opp-shared 边界最终决定了 PD 的边界**。电压由 OPP 层配合 regulator 管理(`dev_pm_opp_set_regulators`, cpufreq-dt.c:176), 高频需要高压, 这是功耗曲线上翘(V² 项)的物理来源。
+"OPP 与频域": 同一个 `opp-shared` 表覆盖的 CPU 共享一个调频域——cpufreq-dt 用 `dev_pm_opp_of_get_sharing_cpus()` 把它们并入同一个 `policy->cpus`(cpufreq-dt.c:197), EM 又以 `policy->cpus` 建 PD, 因此 **DT 的 opp-shared 边界最终决定了 PD 的边界**。电压由 OPP 层配合 regulator 管理(`dev_pm_opp_set_regulators`, cpufreq-dt.c:188), 高频需要高压, 这是功耗曲线上翘(V² 项)的物理来源。
 
 ---
 
@@ -379,7 +379,7 @@ policy 建立流程(cpufreq 核心 + cpufreq-dt + EM):
    |  cpufreq_table_validate_and_sort()
    |  register_em 回调: cpufreq_driver->register_em(policy)  (cpufreq.c:1555)
    v                      |
-   governor 启动          +-> cpufreq_register_em_with_opp() [include/linux/cpufreq.h:1245]
+   governor 启动            +-> cpufreq_register_em_with_opp() [include/linux/cpufreq.h:1245]
    (默认 schedutil)            -> dev_pm_opp_of_register_em()  [drivers/opp/of.c:1542]
                                     -> em_dev_register_perf_domain() [kernel/power/energy_model.c:588]
                                         PD 建表 + em_compute_costs() + debugfs
@@ -430,13 +430,13 @@ policy 建立流程(cpufreq 核心 + cpufreq-dt + EM):
      |      spare = cpu_cap - util                                  |
      |      cpu==prev_cpu  -> prev_spare_cap/prev_fits              |
      |      else 取剩余算力最大者 -> max_spare_cap_cpu              |
-     | ③ base_energy = compute_energy(..., dst=-1)  无 p 基准   [8760]
-     | ④ prev_delta = compute_energy(..., prev_cpu) - base      [8764]
-     |    (若 prev_delta < base: util 已变, 直接返回 prev)      [8767]
-     | ⑤ max_spare_cap_cpu 更优时:                              |
-     |    cur_delta = compute_energy(..., max_spare_cap_cpu)    [8788]
-     |    fits 更差/容量不高/能量不省 -> 维持原 best              [8777-8801]
-     |    否则 best_delta/best_energy_cpu 更新                   [8803]
+     | ③ base_energy = compute_energy(..., dst=-1) 无 p 基准 [8760] |
+     | ④ prev_delta = compute_energy(..., prev_cpu) - base [8764]   |
+     |    (若 prev_delta < base: util 已变, 直接返回 prev) [8767]   |
+     | ⑤ max_spare_cap_cpu 更优时:                                  |
+     |    cur_delta = compute_energy(..., max_spare_cap_cpu) [8788] |
+     |    fits 更差/容量低/能量不省 -> 维持 best [8777-8801]        |
+     |    否则 best_delta/best_energy_cpu 更新 [8803]               |
      +--------------------------------------------------------------+
      |
      v  收尾 [8810-8813]
@@ -475,8 +475,8 @@ prev vs 候选 两次估算对比图(书图 8.36/8.39 场景: 大小核各一忙
  假设(附录 B 教学模型): CPU4(小核)util=100, CPU5(小核)空闲, CPU0(大核)util=256, CPU1(大核)空闲, p util=150
 
  方案 A: p -> CPU5 (小核 PD)                    方案 B: p -> CPU1 (大核 PD)
-   max_util = 150 -> 1.25 余量 = 188             max_util = 150 -> 1.25 余量 = 188
-   需 performance>=188 => 选 1600MHz(perf=202)   需 performance>=188 => 选 1000MHz(perf=320)
+   max_util = 150 -> 1.25 余量 = 188             max_util = 256(CPU0) -> 1.25 余量 = 320
+   需 performance>=188 => 选 1600MHz(perf=202)   需 performance>=320 => 选 1000MHz(perf=320)
    cost(1600) = 10*43*2000/(252*1600)≈2.13       cost(1000) = 10*210*3200/(1024*1000)≈6.56
    sum_util  = 100+150 = 250                     sum_util  = 256+150 = 406
    E_A = 2.13 * 250  ≈ 533 (相对单位)            E_B = 6.56 * 406  ≈ 2663 (相对单位)
@@ -537,13 +537,13 @@ static inline void check_update_overutilized_status(struct rq *rq)
                     |  负载均衡被抑制: group_is_overloaded() [fair.c:10513]           |
                     |      "if (sched_energy_enabled() && !sgs->group_overutilized)   |
                     |           return false;"  组内无 CPU overutilized => 不算过载   |
-                    +----------------任何 CPU util>=80% (enqueue/tick 检测)----------------+
+                    +----------------任何 CPU util>=80% (enqueue/tick 检测)-----------+
                                        | set_rd_overutilized(rd, 1)
                     +------------------v-- rd->overutilized == 1 ---------------------+
                     |  select_task_rq_fair 跳过 EAS [fair.c:8850] -> 普通唤醒路径     |
                     |  负载均衡全速运行(性能优先); 大小核间可自由迁移                 |
                     |  (update_sg_lb_stats 逐 CPU 检查 cpu_overutilized, fair.c:10726)|
-                    +----------------------------------------------------------------+
+                    +-----------------------------------------------------------------+
 ```
 
 要点: 一旦触发 overutilized, **整个系统(根域)暂时退出 EAS**, 回到吞吐量优先的负载均衡; 反之在拐点以下时负载均衡基本不搬任务, 避免破坏 EAS 的能量最优放置(sched-energy.rst 第 289-307 行对此有权威阐述)。
@@ -592,7 +592,7 @@ static inline unsigned long map_util_perf(unsigned long util)
 }
 ```
 
-即 **next_freq = ref_freq × min(util×1.25, cap) / cap**(util 已是频率不变量)。示例计算(附录 B 教学模型): 大核 cap=1024, ref_freq=3200MHz, 当前 util=300 → util' = 300×1.25 = 375 → next_freq = 3200×375/1024 ≈ 1172MHz → 向上取频表中不小于 1172 的频点(1600MHz)。AGI (SP113012) 上同理, cap=1024, ref_freq 取 V3 最高频。EAS 的 `eenv_pd_max_util()` 走同一套 `sugov_effective_cpu_perf()`(cpufreq_schedutil.c:207), 保证能量估算与实际调频一致。
+即 **next_freq = ref_freq × min(util×1.25, cap) / cap**(util 已是频率不变量)。示例计算(附录 B 教学模型): 大核 cap=1024, ref_freq=3200MHz, 当前 util=300 → util' = 300×1.25 = 375 → next_freq = 3200×375/1024 ≈ 1172MHz → 向上取频表中不小于 1172 的频点(1600MHz)。AGI (SP113012) 上同理, cap=1024, ref_freq 取 V3 最高频。EAS 的 `eenv_pd_max_util()` 走同一套 `sugov_effective_cpu_perf()`(cpufreq_schedutil.c:209), 保证能量估算与实际调频一致。
 
 iowait boost(cpufreq_schedutil.c:239-290): 检测到 `SCHED_CPUFREQ_IOWAIT` 时把 util 抬到 `IOWAIT_BOOST_MIN` 起步、指数提升至 policy 最大频, 用于缩短 IO 等待时的频压爬升延迟; RT 任务则通过 uclamp/min util 直接拉满(见 `sugov_effective_cpu_perf` 注释)。
 
@@ -622,7 +622,7 @@ iowait boost(cpufreq_schedutil.c:239-290): 检测到 `SCHED_CPUFREQ_IOWAIT` 时�
 ```
   EPYC 9996 (Venice, 256C/512T)
   +-------------------------------------------------------------------------+
-  | IOD #1 (DDR5 x8, PCIe/IO)          IOD #2 (DDR5 x8, PCIe/IO)           |
+  | IOD #1 (DDR5 x8, PCIe/IO)          IOD #2 (DDR5 x8, PCIe/IO)            |
   +-------------------------------------------------------------------------+
   | CCD0 | CCD1 | CCD2 | CCD3 | CCD4 | CCD5 | CCD6 | CCD7                   |
   | +--------------+  (每 CCD = 2 CCX × 16 Zen 6c, CCX 共享 64MB L3)        |
@@ -634,10 +634,10 @@ iowait boost(cpufreq_schedutil.c:239-290): 检测到 `SCHED_CPUFREQ_IOWAIT` 时�
 ### 为什么 9996 上没有 EAS(三重原因)
 
 1. **x86 无 CPU 能效模型注册**。全树 `grep -rln "em_dev_register_perf_domain"` 只有 [mediatek-cpufreq-hw.c](../../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/drivers/cpufreq/mediatek-cpufreq-hw.c)、[scmi-cpufreq.c](../../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/drivers/cpufreq/scmi-cpufreq.c)、[cppc_cpufreq.c](../../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/drivers/cpufreq/cppc_cpufreq.c)(arm/arm64 平台)与 drivers/opp/of.c 通用路径; [amd-pstate.c](../../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/drivers/cpufreq/amd-pstate.c) **没有** `.register_em` 回调 → `build_perf_domains()` 建 PD 链为空 → `sched_energy_present` 不打开;
-2. **SMT**: 9996 是 SMT2, `sched_is_eas_possible()` 明确拒绝("EAS definitely does \*not\* handle SMT", topology.c:232);
-3. **对称容量**: 256 核全是同构 Zen 6c, 无 `sd_asym_cpucapacity` 非对称容量层(topology.c:218 检查失败)。
+2. **SMT**: 9996 是 SMT2, `sched_is_eas_possible()` 明确拒绝("EAS definitely does \*not\* handle SMT", topology.c:235);
+3. **对称容量**: 256 核全是同构 Zen 6c, 无 `sd_asym_cpucapacity` 非对称容量层(topology.c:227 检查失败)。
 
-即使手工给 9996 注册 EM, 后两条也使 EAS 依旧不激活——EAS 的收益来自大小核非对称性, 在同构众核上收益趋零, 这也是 x86 阵营没有动力接 EM 的根本原因。Zen 6 识别方面: 本树**已识别 Zen 6**——[arch/x86/include/asm/cpufeatures.h:78](../../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/arch/x86/include/asm/cpufeatures.h) 定义 `X86_FEATURE_ZEN6`(3*32+6), 早期启动时 [arch/x86/kernel/cpu/amd.c:522](../../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/arch/x86/kernel/cpu/amd.c) 按型号区间 `0x60 ... 0xaf` 调 `setup_force_cpu_cap(X86_FEATURE_ZEN6)` 打上能力位; 但后续 `init_amd()` 的 per-Zen 初始化分支只写到 `init_amd_zen1()`~`init_amd_zen5()`(amd.c:1084-1093), Zen 6 落入 `init_amd_zen_common()`(c->x86 >= 0x17, amd.c:1082)通用路径, 无专属工作项——即"认得出, 但无特殊优待"。
+即使手工给 9996 注册 EM, 后两条也使 EAS 依旧不激活——EAS 的收益来自大小核非对称性, 在同构众核上收益趋零, 这也是 x86 阵营没有动力接 EM 的根本原因。Zen 6 识别方面: 本树**已识别 Zen 6**——[arch/x86/include/asm/cpufeatures.h:78](../../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/arch/x86/include/asm/cpufeatures.h) 定义 `X86_FEATURE_ZEN6`(3*32+6), 早期启动时 [arch/x86/kernel/cpu/amd.c:522](../../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/arch/x86/kernel/cpu/amd.c) 按型号区间 `0x50...0x5f` / `0x80...0xaf` / `0xc0...0xef` 调 `setup_force_cpu_cap(X86_FEATURE_ZEN6)` 打上能力位; 但后续 `init_amd()` 的 per-Zen 初始化分支只写到 `init_amd_zen1()`~`init_amd_zen5()`(amd.c:1084-1093), Zen 6 落入 `init_amd_zen_common()`(c->x86 >= 0x17, amd.c:1082)通用路径, 无专属工作项——即"认得出, 但无特殊优待"。
 
 ### Arm AGI CPU (SP113012) 对照: 有 EM 也未必有 EAS
 
@@ -646,8 +646,8 @@ arm64 平台实例换成 Arm AGI CPU 后, EAS 的处境与 9996 **同而不同**
 |对比项|EPYC 9996|Arm AGI CPU (SP113012)|
 |-|-|-|
 |EM 注册|amd-pstate **无** `.register_em` → debugfs `energy_model/` 为空|arm64 服务器的 [cppc_cpufreq.c](../../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/drivers/cpufreq/cppc_cpufreq.c) **有** `.register_em`(:542) → PD 链建立, debugfs 可见(若固件走 ACPI CPPC, 示意)|
-|SMT|SMT2 → `sched_is_eas_possible()` 拒绝(topology.c:232)|无 SMT → 通过此条|
-|容量对称性|同构 Zen 6c → 拒绝(topology.c:218)|**同构 Neoverse V3 ×136 → 同样拒绝**|
+|SMT|SMT2 → `sched_is_eas_possible()` 拒绝(topology.c:235)|无 SMT → 通过此条|
+|容量对称性|同构 Zen 6c → 拒绝(topology.c:227)|**同构 Neoverse V3 ×136 → 同样拒绝**|
 |EAS|不激活|**不激活**(卡在最后一条)|
 
 教学点: AGI 上"EM 已注册、无 SMT"只差异构容量一条, EAS 仍不激活——**EAS 的前提是"有得可选"(异构), 而不是"有能耗数据"**。同构服务器上 schedutil + CPPC(或 amd-pstate EPP)负责能效, 与调度器的分工依旧是"调度器给 util, 硬件/驱动定频压"。AGI 的 capacity 全部经 CPPC `highest_perf` 归一化为 1024(见上文量化计算能力节), `asym_cap_list` 单档, `SD_ASYM_CPUCAPACITY` 全树不存在。
@@ -662,7 +662,7 @@ amd-pstate 三种模式([drivers/cpufreq/amd-pstate.h:141](../../../../000.SOURC
 | active | AMD_PSTATE_ACTIVE(3) | 硬件 EPP 自主(SMU 按 EPP 提示自行调频) | powersave 壳 |
 | guided | AMD_PSTATE_GUIDED(4) | 混合: schedutil 定 min/max 边界, 硬件在边界内自主 | schedutil |
 
-内核配置 `X86_AMD_PSTATE_DEFAULT_MODE` 默认 **3 = active**(drivers/cpufreq/Kconfig.x86:59); 启动参数 `amd_pstate=active|guided|passive`(amd-pstate.c:2324, early_param 于 :2356), 运行时可经 `/sys/devices/system/cpu/amd_pstate/status` 改写(amd-pstate.c:1795 `status_show/store` → `amd_pstate_update_status()`)。
+内核配置 `X86_AMD_PSTATE_DEFAULT_MODE` 默认 **3 = active**(drivers/cpufreq/Kconfig.x86:59); 启动参数 `amd_pstate=active|guided|passive`(amd-pstate.c:2324, early_param 于 :2356), 运行时可经 `/sys/devices/system/cpu/amd_pstate/status` 改写(amd-pstate.c:1782/1791 `status_show/store` → `amd_pstate_update_status()`)。
 
 EPP(energy_performance_preference)是 8 位提示, sysfs 字符串(amd-pstate.c:121-126): `default / performance / balance_performance / balance_power / power / custom`, 经 `/sys/devices/system/cpu/cpufreq/policyN/energy_performance_preference` 读写(amd-pstate.c:1402 `store_energy_performance_preference`)。
 
@@ -701,7 +701,7 @@ policy 粒度(以源码核实): cpufreq 核心先给单 CPU 掩码([drivers/cpuf
  sugov: get_next_freq() = ref_freq*(util*1.25)/cap      [cpufreq_schedutil.c:193]
     |
     v
- amd_pstate_update_perf()/fast: freq -> des_perf        [amd-pstate.c:1128 附近]
+ amd_pstate_update_perf()/fast: freq -> des_perf        [amd-pstate.c:283]
     |   min_perf = policy->min 换算, max_perf = policy->max 换算
     |   active 模式另写 EPP(epp 提示), 由 SMU 自主决策
     v
@@ -834,14 +834,13 @@ capacity 归一化(主文"量化计算能力"一节的异构版):
 
 ```
  异构 big.LITTLE 的 cpu_scale(主文柱状图的完整版):
-  1024 +----------------+  Cortex-A725 @3.2GHz (大核, 每核私有 L2, 数核一个性能域)
-       |################|
-       |################|
-       |################|
-   252 +----------------+  Cortex-A520 @2.0GHz (小核, 成对共享 L2, 一对一个性能域)
-       |****            |
-       |****            |
-     0 +----------------+
+  1024 +----------------+----------------+
+       |################|                |
+       |################|                |   Cortex-A725 @3.2GHz (大核, 每核私有 L2, 数核一个性能域)
+       |################|                |
+   252 |- - - - - - - - |- - - - - - - - |
+       |################|****            |   Cortex-A520 @2.0GHz (小核, 成对共享 L2, 一对一个性能域)
+     0 +----------------+----------------+
 ```
 
 主文引用本模型的数字一览: PD0/PD1 的 em_perf_state 表(252/1024 两档)、compute_energy 两次估算(E_A≈533 vs E_B≈2663)、schedutil 示例(大核 cap=1024@3200MHz)。
