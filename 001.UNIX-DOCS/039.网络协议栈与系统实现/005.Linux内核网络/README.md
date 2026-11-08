@@ -38,22 +38,22 @@ e1000 家族卡在"抽象文档"与"25G 驱动巨石代码"之间的甜点区:
 
 <pre>
 ┌─────────────────────────────────────────────────────────────────────────┐
-│ ① 应用层       socket()/send()/recv()/epoll_wait/io_uring_enter        │  用户态
-├─────────────── 系统调用边界 syscall ────────────────────────────────────┤
-│ ② socket 层    net/socket.c  __sys_socket/__sys_sendto/sock_sendmsg    │
-│                struct socket(net.h:137) + struct sock(sock.h)          │
-├─────────────── proto_ops 回调(inet_stream_ops af_inet.c:1062) ─────────┤
-│ ③ 协议栈层     TCP: tcp_sendmsg/tcp_v4_rcv    IP: ip_rcv/ip_queue_xmit │
+│ ① 应用层       socket()/send()/recv()/epoll_wait/io_uring_enter         │  用户态
+├───────────────────────── 系统调用边界 syscall ──────────────────────────┤
+│ ② socket 层    net/socket.c  __sys_socket/__sys_sendto/sock_sendmsg     │
+│                struct socket(net.h:137) + struct sock(sock.h)           │
+├──────────── proto_ops 回调(inet_stream_ops af_inet.c:1062) ─────────────┤
+│ ③ 协议栈层     TCP: tcp_sendmsg/tcp_v4_rcv    IP: ip_rcv/ip_queue_xmit  │
 │                分发表: inet_protos[] (protocol.c:27)  路由: fib/dst     │
-├─────────────── net_device_ops 回调(netdevice.h:1436) ──────────────────┤
-│ ④ 设备抽象层   struct net_device(netdevice.h:2124) 统一所有网卡      │
-│                dev_queue_xmit / netif_receive_skb / NAPI(napi_struct)  │
-├─────────────── 驱动实现回调(e1000e netdev.c:7334 e1000e_netdev_ops) ───┤
-│ ⑤ 驱动层       e1000e: e1000e_open/e1000_xmit_frame/e1000e_poll        │
+├───────────────── net_device_ops 回调(netdevice.h:1436) ─────────────────┤
+│ ④ 设备抽象层   struct net_device(netdevice.h:2124) 统一所有网卡         │
+│                dev_queue_xmit / netif_receive_skb / NAPI(napi_struct)   │
+├───────── 驱动实现回调(e1000e netdev.c:7334 e1000e_netdev_ops) ──────────┤
+│ ⑤ 驱动层       e1000e: e1000e_open/e1000_xmit_frame/e1000e_poll         │
 │                描述符环 + er32/ew32 读写寄存器(e1000.h:607)             │
-├─────────────── MMIO 寄存器 + DMA 描述符 ────────────────────────────────┤
-│ ⑥ 硬件层       MAC 控制器(82574/I219) + PHY(物理层芯片)                │
-│                挂在 PCIe 总线上,BAR 空间映射寄存器,总线主控 DMA        │
+├─────────────────────── MMIO 寄存器 + DMA 描述符 ────────────────────────┤
+│ ⑥ 硬件层       MAC 控制器(82574/I219) + PHY(物理层芯片)                 │
+│                挂在 PCIe 总线上,BAR 空间映射寄存器,总线主控 DMA         │
 └─────────────────────────────────────────────────────────────────────────┘
 </pre>
 
@@ -77,3 +77,4 @@ e1000 家族卡在"抽象文档"与"25G 驱动巨石代码"之间的甜点区:
 |2026-11-06|建立本目录;全部行号按 7.1.3 树 `grep -n` 实测;e1000e 寄存器偏移以 [regs.h](../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/drivers/net/ethernet/intel/e1000e/regs.h) 为准|
 |2026-11-07|全量复核:①脚本化 1062 处 file:line 引用(强锚定口径:冒号前符号必须出现在被引行)逐条对 7.1.3 树实测(0 FAIL);②代码引文 903 行逐行对源码比对(0 不匹配);③修正 30 余处凭旧版内核(5.x/6.x)记忆引入的**伪引文**——7.1.3 实际为:`ip_route_input_noref(...,ip4h_dscp(iph),dev)`(ip_input.c:407)、`__inet_lookup_skb(skb,...)` 无 hashinfo 参数(:2112)、`__sys_socket` 经 `__sys_socket_create`+`update_socket_protocol`(:1807)、TCP 唤醒走 `tcp_data_ready`(:5661,定义 :5568)、`tcp_poll` 用 `tcp_stream_is_readable/__sk_stream_is_writeable`(:598/:602)、`th->source = inet->inet_sport` 无 htons(:1624)、queue_xmit 为 `INDIRECT_CALL_INET`(:1715)、`do_epoll_create` 用 `ep_alloc(&ep)`+`FD_PREPARE`(:2182/:2188)、epitem 无 `f` 字段(ffd :144)、eppoll_entry 为 next/base/wait/whead(:108)、`poll_wait` 判 `p->_qproc`(poll.h:44)、e1000e ISR 无 `likely(`(:1801)、`clean_rx_irq` 末参 `work_to_do`(:916)、dma_map 用 `adapter->rx_buffer_len`(:679)、补环经 `adapter->alloc_rx_buf` 函数指针(:1041)、TX 唤醒条件 `TX_WAKE_THRESHOLD`(:1271)、MDIC 读为手写 for 轮询(phy.c:146-161);二轮深检补修:`inet_add_protocol` 无 netns_ok 检查(protocol.c:33 纯 cmpxchg)、`rx_handler` 分派为 `switch(RX_HANDLER_*)`(dev.c:6089)、`update_socket_protocol` 为弱符号(:1795)、e1000e ICR LSC 判定在 :1759;三轮强锚定补修:`er32(ICR)` 在 :1756(非 :1759)、`tcp_stream_alloc_skb` 在 :1257、`tcp_v4_rcv` 二次 pull 后 th/iph 在 :2109/:2110、`__inet_lookup_skb` 在 :2112、图/表格单元格补齐符号名(如 `netdev.c:5942 writel`、`e1000_watchdog_task` 去 e)、`netif_wake_queue` 统一 :1279、`validate_xmit_skb_list` :4078;④相对链接 279 条全通;⑤外部文章出处痕迹已全部移除(用户要求)|
 |2026-11-08|图文复核(聚焦脚本审计覆盖不到的"图语义", 逐条对 7.1.3 树实证):①修正 008/009/000 中"netif_wake_queue → sock_def_write_space"伪因果——TX 完成链只解停 qdisc(__QUEUE_STATE_DRV_XOFF), 写者唤醒实为 ACK → tcp_clean_rtx_queue(tcp_input.c:3602)释放写队列已确认 skb → sock_wfree(sock.c:2676)→ sock_def_write_space;TX 回收释放的是 __tcp_transmit_skb 的 clone(__skb_clone 置 destructor=NULL, skbuff.c:1615), 不动 sk_wmem_alloc;②002 收包图 ip_rcv_finish 嵌套层级(应为 ip_rcv_core 同级, NF_HOOK 下半场);③000 五层图硬件栏"e1000e 驱动"盒改"驱动接触面(硬件一半)", 收包箭头从协议栈层改落设备抽象层(netif_receive_skb);④004 生命周期图去掉 __dev_open 下虚构的 netif_carrier_on——实测 open 路径为 ndo_open + netif_set_up/dev_activate(dev.c:1709-1711), e1000e_open 先 netif_carrier_off(:4638), carrier 由 watchdog 上报;⑤006 RX 环 RDT 语义改"下一个待填槽(有效到 RDT-1)"(驱动 writel 的是递增后 i), 环满条件改"RDH 追上 RDT"(与 007 §4 口径统一);⑥另修:009 ffd 箭头方向(epitem→目标 file)、001 睡眠图唤醒箭头落点、007 协议栈泳道缩进与 weight/budget 表述、004 __dev_queue_xmit 节选括号配对、010 PBUF 图内核盒封口、005/008 的 ```pre 围栏、002 ip_defarg typo、000 NET_IP_ALIGN 图注(对齐垫非以太头预留)、000 §2 对象图溢出行|
+|2026-11-08(二轮)|独立复核(列标尺脚本逐图核验 + 图内 ~200 处 file:line/符号引用回查源码;对齐口径统一为 CJK=2 显示宽度):①重排 9 处参差图/表——000 五层图(中间盒右壁 61~65 参差、左盒首行超宽 1、PCIe 内"控制器"盒超宽 1、回传箭头缺 1 格未顶到盒边)、000 对象图右盒超宽 1~3 且 ▲/│/┘ 断 1 列、000 sk_buff 图尾部竖线 63≠65 断链且 tail 标签 ┘ 落 65 而 ▲ 在 59(标签改挂 ▲59 所在行)、000 §4 上下文表三列起点统一 16/44/79、006 anatomy 图(网卡盒顶底差 2、PHY/MAC 内盒超宽 1~3、PCIe 竖线 58↔59 之字、主机 PCIe 盒超宽 1、§5 index 标号从分隔线移入格中心)、README 五层图右壁 72~75 参差、002 inet_protos 第 4 格超宽 1、010 PBUF 图左盒超宽 1+┬30/└29 差 1+底边随盒宽重排、009 §7 收发包带顶(┐73)底(┘77)差 4;②图内引用纠错——008 泳道图 TX 回收的 dma_unmap_single:1353 实属 e1000_clean_rx_irq_ps(RX packet-split 路径), 改 e1000_put_txbuf:1251(内部 dma_unmap_single:1074);000 §5 发包链与 008 泳道的"ip_queue_xmit@463"名实不符(:463 是 __ip_queue_xmit, ip_queue_xmit wrapper 在 :546), 统一为 __ip_queue_xmit;000 §2 表 struct sock 定义行号 411→365(411 是 sk_receive_queue 字段行);③节选注对源修正:raise_softirq_irqoff 4994→4990(dev.c)、FD_PREPARE 2188→2189、fd_prepare_file 2195→2196、ep_insert 内 wake_up 1676→1675、ep_poll_callback 内 goto out_unlock 1279→1278、list_add_tail 1291→1294(eventpoll.c);④其余图(007/008 泳道、002/004/005/011 树形图、003/007/009 三岔口、001 唤醒图)连接符列全部对齐、图内引用全部一致|
