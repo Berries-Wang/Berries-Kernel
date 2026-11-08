@@ -92,7 +92,8 @@
 
 ## 3. 多处理器同步（8.1.3）
 
-- **为什么关中断失效**：单处理器上关中断即可保护临界表；多处理器上关中断只影响本 CPU，其他 CPU 照常运行 → 必须用真正的锁协议。
+- **为什么关中断失效**：单处理器上关中断即可保护临界表；多处理器上关中断只影响本 CPU，其他 CPU 照常运行<sup>On a multiprocessor, disabling  interrupts  affects  only  the  CPU  doing  the
+disable. (在多处理器系统上，禁用中断只影响执行禁用操作的那个CPU)[007.BOOKs/现代操作系统/Modern Operating Systems 5th Edition-PDF-01.pdf](../../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf)</sup> → 必须用真正的锁协议。
 - **TSL（Test and Set Lock）**：读内存字进寄存器、同时写入 1，占两个总线周期。若不锁总线，两个 CPU 可能都读到 0（图 8-10 四步失败序列）→ 互斥失效。正确实现：**先锁总线**（拉高专用总线线），完成两次访存再解锁。早期总线没有该硬件，所以才诞生了纯软件的 Peterson 协议。
 
 ![图 8-10 若总线不能被锁定，TSL 指令可能失效](./999.IMGS/fig-8-10.png)
