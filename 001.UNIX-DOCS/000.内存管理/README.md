@@ -7,6 +7,12 @@
 ## 页面类型总览(防混淆)
 - [024.Linux内核内存页面类型总览(LINUX-7.1.3).md](./024.Linux内核内存页面类型总览(LINUX-7.1.3).md) —— 匿名页/文件页/shmem/swapcache/page_type(PGTY_*)/migratetype/zone/arm64 虚拟地址空间/大页家族, 5 个维度 + 混淆点 FAQ + file:line 速查表(7.1.3 逐条核实, 内嵌源码)
 
+## MOS5 精读系列（Modern Operating Systems 5th Edition §10.4）
+- [003.Linux内核内存组织方式.md](./003.Linux内核内存组织方式.md) —— 新增「内存区域(ZONE)划分」一节:ZONE_DMA/DMA32/NORMAL/HIGHMEM 教科书引文(书页 750-751) + x86 32 位与 64 位布局图 + `enum zone_type`(mmzone.h:872) 与 arm64 `zone_sizes_init` 对照
+- [011.MMU(Memory Management Unit)](./011.MMU%28Memory%20Management%20Unit%29/011.MMU%28Memory%20Management%20Unit%29.md) —— 新增附录「MOS5 Figure 10-16:Linux 四级页表(通用模型)」:五字段逐级查表重绘图、两级/三级"折叠"实现、五级页表(4.14+)、arm64 字段宽度对照
+- [025.MOS5-Figure10-18-页面回收状态机(PFRA).md](./025.MOS5-Figure10-18-页面回收状态机%28PFRA%29.md) —— Figure 10-18 重绘:PG_active×PG_referenced 四状态 + 升降级箭头,与 `folio_mark_accessed`/`folio_check_references` 源码逐条对应
+- Figure 10-13(内存映射文件)在 [033.文件系统/008.地址空间/002](../033.文件系统/008.地址空间/002.MOS5-10.4-内存映射文件Figure10-13.md)
+
 ## ARM64内存管理
 ![wechat_2025-10-28_073540_557.png](../003.高速缓存/IMGS/wechat_2025-10-28_073540_557.png)
 > 学习:[奔跑吧Linux内核（第2版）卷1：基础架构#2.1　ARM64内存管理](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub)

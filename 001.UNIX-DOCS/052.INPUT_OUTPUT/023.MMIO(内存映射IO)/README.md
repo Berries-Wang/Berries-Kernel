@@ -7,9 +7,50 @@
 - “内存映射I/O与内存驻留的地址空间相同。内核使用通常由RAM（实际上是HIGH_MEM）使用的部分地址空间来映射设备寄存器，所以在该地址上不是实际内存（RAM），而是I/O设备。因此，与I/O设备通信变得像读取和写入内存地址一样，该地址专用于I/O设备。”<sup>摘录来自 [Linux设备驱动开发 （法）约翰·马迪厄（John Madieu）# “11.4.2　MMIO设备访问”](../../../007.BOOKs/Linux设备驱动开发)</sup>
 
 
-- ![001.UNIX-DOCS/999.IMGS/ScreenShot_2026-07-15_221200_787.png](../../../001.UNIX-DOCS/999.IMGS/ScreenShot_2026-07-15_221200_787.png)
+- ![001.UNIX-DOCS/999.IMGS/ScreenShot_2026-07-15_221200_787.png](../../999.IMGS/ScreenShot_2026-07-15_221200_787.png)
    + 将设备的寄存器，映射到内存地址空间中。
 
+
+## 1.3.4 × 5.1.3 联动：控制器 = 寄存器的宿主，MMIO = 触达寄存器的方式
+> 这两段话出自同一本书的两章：第 1 章讲硬件组成，第 5 章讲 I/O 硬件原理。把它们拼起来，正好构成一条完整的因果链——**§1.3.4 回答"谁在替 OS 控制设备"，§5.1.3 回答"OS 怎么跟这个'谁'说话"**。
+
+第一段(第 1 章 §1.3.4 I/O Devices)：
+> "As we saw in Fig. 1-6, I/O devices generally consist of two parts: a controller and the device itself. The controller is a chip (or a set of chips) that physically controls the device. It accepts commands from the operating system, for example, to read data from the device, and carries them out."（如图 1-6 所示，I/O 设备一般包括两个部分：控制器和设备本身。控制器是插在电路板上的一块芯片或一组芯片，这块芯片物理地控制着设备。它从操作系统接收命令，例如从设备中读取数据，并完成这些命令。）<sup>[Modern Operating Systems 5th, 书页 29(PDF 58)](../../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf#page=58)</sup>
+
+图中「控制器 + 设备」的组合关系(自书 EPUB 提取，未拉伸):
+
+![MOS5 Figure 1-6: Some of the components of a simple personal computer](../../999.IMGS/MOS5-Fig1-6-简单个人计算机的组成.png)
+<sup>原图出自 [Modern Operating Systems 5th Edition, Fig. 1-6](../../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf#page=50)</sup>
+
+第二段(第 5 章 §5.1.3 Memory-Mapped I/O 开篇)：
+> "Each controller has a few registers that are used for communicating with the CPU. By writing into these registers, the operating system can command the device to deliver data, accept data, switch itself on or off, or otherwise perform some action. By reading from these registers, the operating system can learn what the device's state is, whether it is prepared to accept a new command, and so on."（每个控制器都有少量用于与 CPU 通信的寄存器。通过向这些寄存器写入内容，操作系统可以命令设备发送数据、接收数据、自我开启或关闭，或者执行其他某种操作。通过从这些寄存器读取内容，操作系统可以了解设备的状态、设备是否准备好接受新命令，等等。）<sup>[Modern Operating Systems 5th, 书页 340(PDF 369)](../../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf#page=369)</sup>
+
+**两段话的交点**：§1.3.4 说控制器"从操作系统接收命令"——但没有说命令放在哪里；§5.1.3 开头补上了这个缺：**命令就放在控制器的那"少量寄存器"里**。也就是说，§1.3.4 的"控制器"正是 §5.1.3 里"少量寄存器"的宿主：
+
+```text
+      §1.3.4：硬件组成(谁在控制设备)            §5.1.3：通信接口(OS 怎么说话)
+ ┌────────────────────────────────┐      ┌─────────────────────────────────────┐
+ │  I/O 设备 = 控制器 + 设备本身    │      │  控制器上有"少量寄存器"(命令/状态)    │
+ │  控制器:芯片,从 OS 接收命令并执行 │ ───► │  写寄存器 = 下命令(取数/收数/开关…)   │
+ │  设备本身:接口简单且已标准化      │      │  读寄存器 = 查状态(能否接受新命令…)   │
+ └────────────────────────────────┘      └─────────────────────────────────────┘
+                          OS ──读写控制器寄存器──► 控制器 ──物理控制──► 设备
+                                   ▲
+                                   │ 寄存器如何编址、用什么指令访问?
+                                   │ ——这正是本页主题: PMIO / MMIO / 混合(Fig 5-2)
+```
+
+而"读写控制器寄存器"的具体途径就是 §5.1.3 顺次展开的三种编址方案：独立 I/O 端口(`IN`/`OUT`)、内存映射 I/O(本页主题)、混合方案。**MMIO 的定义域由此确定：它只负责"OS → 控制器寄存器"这一段；控制器拿到命令后再去物理地控制设备，那是 §1.3.4 的职责**。磁盘控制器的例子在两章各讲了一半：§1.3.4 给出命令的高层形态("从 2 号盘读 11206 号扇区")，§5.1.2/§5.1.3 解释这个命令被翻译成对寄存器的一组读写，再由控制器内嵌的微控制器固件完成换算扇区号、寻道、校验、组字等物理动作。
+
+**落到 Linux 内核源码**，这条链上的三个实体都有对应物：
+
+| MOS5 概念 | 内核实体(Linux 7.1.3) | 说明 |
+|-|-|-|
+| 控制器(§1.3.4) | `struct device` + 驱动模型(`drivers/base/`) | 控制器在内核中抽象为设备，驱动 `probe` 时与其绑定 |
+| 少量寄存器(§5.1.3) | `struct resource`(flags=`IORESOURCE_MEM`) <sup>[include/linux/ioport.h:22-41](../../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/include/linux/ioport.h)</sup> | 控制器寄存器窗口 = 平台设备树 `reg` / PCI BAR 描述的内存资源 |
+| "向寄存器写入命令" | `platform_get_resource`(drivers/base/platform.c:55) → `ioremap`(arch/arm64/include/asm/io.h:284, 打上 `PROT_DEVICE_nGnRE`) → `readl`/`writel` | 即下文与 [01-MMIO核心调用链](01-MMIO核心调用链.md) 展开的完整路径 |
+
+一句话总结：**1.3.4 定义了寄存器在谁身上(控制器)，5.1.3 定义了寄存器地址怎么编、用什么指令触达(MMIO)**——前者是后者的对象，后者是前者的接口。
 
 ## 《现代操作系统》第5版 §5.1.3 对 MMIO 的定义(查漏补缺)
 > 出处: [Modern Operating Systems 5th Edition §5.1.3 Memory-Mapped I/O](../../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf#page:369) PDF #page:369-371(书页 340-342);缺点部分 #page:372-373 见 [006](006.MMIO的缺点-多总线路由与ARM64处理.md)
@@ -59,20 +100,20 @@
 ## MMIO工作原理
 > 流程：<br/>1. 将设备寄存器，映射到内存地址空间中<br/> 2. ARM内存访问 虚拟地址 -> MMU -> 物理地址 -> 地址译码(属于RAM区域走DRAM控制器 / 属于MMIO区域走外设总线)
 
-- ![ScreenShot_2026-07-16_233118_913.png](../../../001.UNIX-DOCS/999.IMGS/ScreenShot_2026-07-16_233118_913.png)
+- ![ScreenShot_2026-07-16_233118_913.png](../../999.IMGS/ScreenShot_2026-07-16_233118_913.png)
    + 地址译码器模块（Decoder）：   拥有自己的使能信号，每个条件对应一个地址范围，每个分支对应一个使能信号： 他们不将（芯片设计者）所有内存地址映射到RAM这样的常规内存，而是将其中一部分映射到其他设备，例如 IO（视频中的示例是控制GPIO引脚）
       - ![ScreenShot_2026-07-20_082824_446](../../999.IMGS/ScreenShot_2026-07-20_082824_446.png)
         + 以地址作为输入，然后激活相应的使能信号。
         + 译码器是电路原语。《现代操作系统》§5.1.3 方案三"范围寄存器过滤"本质 = **可编程地址译码器**(两个幅度比较器+与门,寄存器存上下界,引导时由固件装载),见 [006.MMIO的缺点-多总线路由与ARM64处理](006.MMIO的缺点-多总线路由与ARM64处理.md)
       - ![微信图片_20260720081828_116_49.jpg](../../999.IMGS/微信图片_20260720081828_116_49.jpg)
 
-- ![ScreenShot_2026-07-16_234129_927](../../../001.UNIX-DOCS/999.IMGS/ScreenShot_2026-07-16_234129_927.png)
+- ![ScreenShot_2026-07-16_234129_927](../../999.IMGS/ScreenShot_2026-07-16_234129_927.png)
    + Addresses in ARM Linux are:
      1. Issued as virtual addresses by the ARM core, then （由 ARM 内核发出虚拟地址，接着）
      2. Mapped into a physical address by the ARM MMU, then（经 ARM MMU（内存管理单元）映射为物理地址，然后）
      3. Used to select the appropriate peripheral or location in RAM（用于选中相应的外设或 RAM 中的特定位置。）
 
-- ![ScreenShot_2026-07-17_000030_275.png](../../../001.UNIX-DOCS/999.IMGS/ScreenShot_2026-07-17_000030_275.png)
+- ![ScreenShot_2026-07-17_000030_275.png](../../999.IMGS/ScreenShot_2026-07-17_000030_275.png)
    + Linux内核映射函数: ioremap() 
 
 
@@ -89,8 +130,8 @@
 |地址译码器(Address Decoder)/ 片选(Chip Select, CS)|组合逻辑电路:输入地址,比较是否落在本模块服务的地址范围,命中则输出使能信号(片选)。教科书表述:"every memory module and every I/O device compares the address lines to the range of addresses that it services"|第5版 #page:371;本页「MMIO工作原理」;可编程形态 = 范围寄存器,见 [006](006.MMIO的缺点-多总线路由与ARM64处理.md)「方案三的实现本质」|
 |范围寄存器(Range Registers)|引导时由固件预装的地址区间寄存器(上下界),内存控制器 / 互连据此决定地址转发给内存还是设备——本质是可编程地址译码器|第5版 #page:373;[006](006.MMIO的缺点-多总线路由与ARM64处理.md)|
 |统一地址空间的"全员解码义务"|单一地址空间下,所有内存模块和设备都必须比较每一次内存引用;内存改走专用总线后设备看不见地址 → MMIO 失效,需试错 / snoop / 范围寄存器过滤|第5版 #page:372;[006](006.MMIO的缺点-多总线路由与ARM64处理.md) 缺点二|
-|轮询 / 忙等待(Polling / Busy Waiting / Programmed I/O)|CPU 输出后持续读设备状态寄存器直到就绪,占满 CPU:"This behavior is often called polling or busy waiting"|第5版 §5.2.2 #page:384;[052.IO设备/002](../../052.IO设备/002.输入输出实现方式.md)|
-|中断驱动 I/O(Interrupt-Driven I/O)|设备就绪时发中断,CPU 等待期间切换去跑其他进程|第5版 §5.2.3 #page:384、§5.3.1 #page:386;[052.IO设备/002](../../052.IO设备/002.输入输出实现方式.md)|
+|轮询 / 忙等待(Polling / Busy Waiting / Programmed I/O)|CPU 输出后持续读设备状态寄存器直到就绪,占满 CPU:"This behavior is often called polling or busy waiting"|第5版 §5.2.2 #page:384;[052.IO设备/002](../002.输入输出实现方式.md)|
+|中断驱动 I/O(Interrupt-Driven I/O)|设备就绪时发中断,CPU 等待期间切换去跑其他进程|第5版 §5.2.3 #page:384、§5.3.1 #page:386;[052.IO设备/002](../002.输入输出实现方式.md)|
 |DMA(Direct Memory Access)|由 DMA 控制器代替 CPU 搬运整块数据,完成后发一次中断:"In essence, DMA is programmed I/O, only with the DMA controller doing all the work"|第5版 §5.1.4 #page:373、§5.2.4 #page:385|
 |设备驱动程序(Device Driver)|与特定控制器对话、发命令收响应的内核软件,把 OS 命令翻译成对寄存器的写入|第5版 §5.3.2 #page:388;[02](02-平台设备MMIO映射.md)|
 |Device memory(ARM64 内存类型)/ MAIR / AttrIndx|页表描述符的 AttrIndx 索引 MAIR_EL1 属性表;设备页标为 Device(nGnRnE / nGnRE)即不缓存、不预取、不重排——教科书"按页选择性禁用缓存"的 ARM 实现(x86 对应 MTRR/PAT)|第5版 #page:372;[01](01-MMIO核心调用链.md) §1.3、本页「ARM64 关键内存属性速查」|
