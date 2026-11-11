@@ -213,7 +213,21 @@ __CMPXCHG_GEN(_mb)
 /**
  * 条件轮询中的“等待辅助函数”：如果 *ptr 仍等于旧值 val，就尝试用 WFE 等待事件；如果已经不同，就直接返回，让外层重新检查条件。
  * 
- * wfe 指令: 
+ * wfe 指令: [007.BOOKs/Arm Architecture Reference Manual for A-profile architecture/DDI0487_M_a_a_a-profile_architecture_reference_manual-1-3000.pdf]#C6.2.501 WFE
+ * wfe: Wait for event :
+ *   This instruction is a hint instruction that indicates that the PE can enter a low-power state and remain there until a wakeup event occurs. 
+ *   Wakeup events include the event signaled as a result of executing the SEV instruction on any PE in the multiprocessor system.
+ *  (这是一条提示指令，表示PE可以进入低功耗状态并保持在该状态，直到发生唤醒事件。唤醒事件包括由于在多处理器系统中的任何PE上执行SEV指令而发出信号的事件)
+ * 
+ * -> SEVL, Send Event Local: Causes an event to be signaled locally without requiring the event to be signaled to other PEs in a multiprocessor system.
+ * -> ldxr: [C6.2.265 LDXR] This instruction derives an address from a base register value, loads a 32-bit word or a 64-bit doubleword from memory, and writes it to a register. The memory access is atomic. The PE marks the physical address being accessed as an exclusive access. This exclusive access mark is checked by Store Exclusive instructions.
+ * -> eor: [F5.1.49 EOR, EORS (immediate)]  按位异或
+ * -> cbnz: [C6.2.77 CBNZ] Compare and branch on nonzero
+ * 
+ * 
+ * [B2.12 Synchronization and semaphores#独占访问标记如何取消标记]: 
+ * - [由 A Store-Exclusive instruction 指令(STXR)取消] A Load-Exclusive instruction marks a small block of memory for exclusive access. The size of the marked block is IMPLEMENTATION DEFINED, see Marking and the size of the marked memory block. A Store-Exclusive instruction to any address in the marked block clears the marking.
+ * - 参考: [001.UNIX-DOCS/008.同步原语/001.原子指令/003.LLSC实现原理.md]
  */
 #define __CMPWAIT_CASE(w, sfx, sz)					\
 static inline void __cmpwait_case_##sz(volatile void *ptr,		\
@@ -263,9 +277,7 @@ static __always_inline void __cmpwait##sfx(volatile void *ptr,		\
 
 /**
  * 
- * 因为 sfx 为空，会生成 static __always_inline void __cmpwait(volatile void *ptr, unsigned long val, int size) 函数,
- * 
- * 
+ * 因为 sfx 为空，会生成 static __always_inline void __cmpwait(volatile void *ptr, unsigned long val, int size) 函数
  */
 __CMPWAIT_GEN()
 

@@ -1,7 +1,8 @@
 ===================================================
 Scalable Vector Extension support for AArch64 Linux
-(AArch64 Linux 的可伸缩向量扩展支持)
 ===================================================
+
+(AArch64 Linux 的可伸缩向量扩展支持)
 
 Author: Dave Martin <Dave.Martin@arm.com>
 (作者: Dave Martin <Dave.Martin@arm.com>)

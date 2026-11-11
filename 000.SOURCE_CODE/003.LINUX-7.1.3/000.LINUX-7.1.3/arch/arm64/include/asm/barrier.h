@@ -193,6 +193,18 @@ do {									\
 	(typeof(*p))__u.__val;						\
 })
 
+
+/**
+ * smp_cond_load_relaxed() - (Spin) wait for cond with no ordering guarantees (（自旋）等待条件，无顺序保证)
+ * @ptr: pointer to the variable to wait on
+ * @cond: boolean expression to wait for
+ *
+ * Equivalent to using READ_ONCE() on the condition variable.
+ *
+ * Due to C lacking lambda expressions we load the value of *ptr into a
+ * pre-named variable @VAL to be used in @cond.
+ * (由于C语言缺乏lambda表达式，我们将*ptr的值加载到一个预先命名的变量@VAL中，以便在@cond中使用。)
+ */
 #define smp_cond_load_relaxed(ptr, cond_expr)				\
 ({									\
 	typeof(ptr) __PTR = (ptr);					\

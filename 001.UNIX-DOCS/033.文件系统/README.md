@@ -144,8 +144,8 @@ Inodes: Total: 0          Free: 0
 |-|-|---|---|
 | file system(细节框) | 本地磁盘 FS 列 | [fs/ext4/](../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/fs/ext4) | 013.MOS5-Ext4文件系统 |
 | VFS | 顶部四对象 | [fs/super.c:46](../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/fs/super.c)(super_blocks 链表) | 002.虚拟文件系统 |
-| page cache | 页缓存大框 | [mm/filemap.c:2769](../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/mm/filemap.c)(filemap_read) | 005.页缓存和块缓存 / 008.地址空间 |
-| generic block layer | 通用块层 | [block/blk-core.c:627](../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/block/blk-core.c)(submit_bio) | 000.块设备 |
+| page cache(对应原图 "Cache" 阴影框) | 页缓存大框 | [mm/filemap.c:2769](../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/mm/filemap.c)(filemap_read) | 005.页缓存和块缓存 / 008.地址空间 |
+| generic block layer(出自 Fig 10-22 所在页正文,原图无此框) | 通用块层 | [block/blk-core.c:627](../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/block/blk-core.c)(submit_bio) | 000.块设备 |
 | I/O scheduler | 调度器层 | [block/mq-deadline.c:30-38](../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/block/mq-deadline.c) | 007.IO调度器(052/008) |
 | disk driver | 驱动层 | [drivers/nvme/](../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/drivers/nvme) 等 | 052/000.块设备 |
 | (10-22 未画)网络 FS | NFS 分支 | [fs/nfs/](../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/fs/nfs) | 014.MOS5-NFS网络文件系统 |

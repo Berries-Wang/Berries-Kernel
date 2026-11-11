@@ -166,14 +166,19 @@
 
 ```
 ioremap(phys, size)
-  → __ioremap(phys, size, PROT_DEVICE_nGnRE)        [arch/arm64/include/asm/io.h:169]
-    → __ioremap_caller(phys, size, prot, caller)     [arch/arm64/mm/ioremap.c:20]
-      → get_vm_area_caller(size, VM_IOREMAP, ...)   [mm/vmalloc.c:2121]
-      → ioremap_page_range(vaddr, vend, phys, prot)  [mm/ioremap.c:222]
-        → ioremap_p4d_range → pud → pmd → pte
-          → pfn_pte(pfn, prot) | set_pte_at()        [mm/ioremap.c:76-77]
-      → return (void __iomem *)(offset + vaddr)
+  → __ioremap_prot(phys, size, __pgprot(PROT_DEVICE_nGnRE))   [arch/arm64/include/asm/io.h:283-284 宏;原型 :267]
+    → __ioremap_prot(phys_addr, size, pgprot) 定义             [arch/arm64/mm/ioremap.c:17]
+      (校验 PHYS_MASK / 拒绝 RAM / ioremap_prot_hook)
+      → generic_ioremap_prot(phys_addr, size, prot)            [arch/arm64/mm/ioremap.c:41]
+        → __get_vm_area_caller(size, VM_IOREMAP, IOREMAP_START/END, ...)  [mm/ioremap.c:36;定义 mm/vmalloc.c:3247]
+        → ioremap_page_range(vaddr, vaddr+size, phys_addr, prot)          [mm/ioremap.c:43;定义 mm/vmalloc.c:346]
+          → find_vm_area 校验 VM_IOREMAP → vmap_page_range(...)          [mm/vmalloc.c:363;定义 :332]
+            → vmap_range_noflush [:298] → vmap_p4d_range [:271] → … → vmap_pte_range [:94]
+              → set_pte_at(&init_mm, addr, pte, pfn_pte(pfn, prot))     [mm/vmalloc.c:133]
+        → return (void __iomem *)(vaddr + offset)            [mm/ioremap.c:48]
 ```
+
+> 注:以上行号已按 7.1.3 现状核实——`__ioremap`/`__ioremap_caller` 旧符号已不存在(现为 `__ioremap_prot`);`get_vm_area_caller` 在 mm/vmalloc.c:3274(此处调用的是 `__get_vm_area_caller` :3247);`ioremap_page_range` 已从 mm/ioremap.c 移至 mm/vmalloc.c:346(mm/ioremap.c 仅剩 74 行通用封装)。
 
 ### 普通内存 vs MMIO 的关键差异
 
