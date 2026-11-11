@@ -87,7 +87,7 @@ Inodes: Total: 0          Free: 0
 ---
 
 ## 附录:Linux 文件系统全景图
-> 参考 MOS5 [Figure 10-22 "The Linux I/O system showing one file system in detail"](../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf#page=792)(书页 767/PDF 792)重绘并扩展成"全景"视角:10-22 只画了一个本地文件系统的 I/O 路径,这里把 VFS 之下"挂着的各种文件系统"与左右两侧的内存管理/网络栈一并画出。各层内核实体均标注 Linux 7.1.3 源码位置。
+> 参考 MOS5 [Figure 10-22 "The Linux I/O system showing one file system in detail"](../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf#page=792)(书页 763/PDF 792)重绘并扩展成"全景"视角:10-22 只画了一个本地文件系统的 I/O 路径,这里把 VFS 之下"挂着的各种文件系统"与左右两侧的内存管理/网络栈一并画出。各层内核实体均标注 Linux 7.1.3 源码位置。
 
 ```text
                                 用户进程 (task_struct → files_struct)
