@@ -188,7 +188,7 @@ bool osq_lock(struct optimistic_spin_queue *lock)
 	 * 即 已经解锁 或者 当前进程需重新调度 ， vcpu_is_preempted 固定返回false
 	 */
 	if (smp_cond_load_relaxed( &node->locked,
-		    VAL || need_resched() ||vcpu_is_preempted(node_cpu(node->prev)))) {
+		    VAL || need_resched() || vcpu_is_preempted(node_cpu(node->prev)))) {
 		return true;
 	}
 

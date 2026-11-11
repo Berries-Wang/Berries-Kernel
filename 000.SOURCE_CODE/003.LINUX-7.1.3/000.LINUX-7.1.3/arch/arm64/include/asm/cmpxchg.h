@@ -210,6 +210,11 @@ __CMPXCHG_GEN(_mb)
 	__cmpxchg128((ptr), (o), (n));						\
 })
 
+/**
+ * 条件轮询中的“等待辅助函数”：如果 *ptr 仍等于旧值 val，就尝试用 WFE 等待事件；如果已经不同，就直接返回，让外层重新检查条件。
+ * 
+ * wfe 指令: 
+ */
 #define __CMPWAIT_CASE(w, sfx, sz)					\
 static inline void __cmpwait_case_##sz(volatile void *ptr,		\
 				       unsigned long val)		\
@@ -256,6 +261,12 @@ static __always_inline void __cmpwait##sfx(volatile void *ptr,		\
 	unreachable();							\
 }
 
+/**
+ * 
+ * 因为 sfx 为空，会生成 static __always_inline void __cmpwait(volatile void *ptr, unsigned long val, int size) 函数,
+ * 
+ * 
+ */
 __CMPWAIT_GEN()
 
 #undef __CMPWAIT_GEN
