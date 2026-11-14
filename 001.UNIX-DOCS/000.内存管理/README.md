@@ -5,7 +5,7 @@
 - 学习:[最权威的文档: Documentation/admin-guide/mm/](../../000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/Documentation/admin-guide/mm/concepts.rst)
 
 ## 页面类型总览(防混淆)
-- [024.Linux内核内存页面类型总览(LINUX-7.1.3).md](./024.Linux内核内存页面类型总览(LINUX-7.1.3).md) —— 匿名页/文件页/shmem/swapcache/page_type(PGTY_*)/migratetype/zone/arm64 虚拟地址空间/大页家族, 5 个维度 + 混淆点 FAQ + file:line 速查表(7.1.3 逐条核实, 内嵌源码)
+- [024.Linux内核内存页面类型总览(LINUX-7.1.3).md](./024.Linux内核内存页面类型总览%28LINUX-7.1.3%29.md) —— 匿名页/文件页/shmem/swapcache/page_type(PGTY_*)/migratetype/zone/arm64 虚拟地址空间/大页家族, 5 个维度 + 混淆点 FAQ + file:line 速查表(7.1.3 逐条核实, 内嵌源码)
 
 ## MOS5 精读系列（Modern Operating Systems 5th Edition §10.4）
 - [003.Linux内核内存组织方式.md](./003.Linux内核内存组织方式.md) —— 新增「内存区域(ZONE)划分」一节:ZONE_DMA/DMA32/NORMAL/HIGHMEM 教科书引文(书页 750-751) + x86 32 位与 64 位布局图 + `enum zone_type`(mmzone.h:872) 与 arm64 `zone_sizes_init` 对照
@@ -15,7 +15,7 @@
 
 ## ARM64内存管理
 ![wechat_2025-10-28_073540_557.png](../003.高速缓存/IMGS/wechat_2025-10-28_073540_557.png)
-> 学习:[奔跑吧Linux内核（第2版）卷1：基础架构#2.1　ARM64内存管理](../../007.BOOKs/Run%20Linux%20Kernel%20(2nd%20Edition)%20Volume%201:%20Infrastructure.epub)
+> 学习:[奔跑吧Linux内核（第2版）卷1：基础架构#2.1　ARM64内存管理](../../007.BOOKs/Run%20Linux%20Kernel%20%282nd%20Edition%29%20Volume%201:%20Infrastructure.epub)
 - MMU 提供进程空间（虚拟地址空间） 到 物理地址空间的映射
 - 对于多任务操作系统，每个进程都拥有独立的进程地址空间。这些进程地址空间在虚拟地址空间内是相互隔离的，但是在物理地址空间可能映射同一个物理页面,需要使用`MMU提供的映射和管理功能`完成`进程地址空间`到`物理空间`的映射
 
