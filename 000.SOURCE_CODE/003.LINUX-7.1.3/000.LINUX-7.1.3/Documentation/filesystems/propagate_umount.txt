@@ -1,4 +1,5 @@
 	Notes on propagate_umount()
+	(propagate_umount() 的说明。)
 
 Umount propagation starts with a set of mounts we are already going to
 take out.  Ideally, we would like to add all downstream cognates to
@@ -6,22 +7,28 @@ that set - anything with the same mountpoint as one of the removed
 mounts and with parent that would receive events from the parent of that
 mount.  However, there are some constraints the resulting set must
 satisfy.
+(卸载传播(unmount propagation)从一个我们已经准备移除的挂载集合开始。理想情况下，我们希望把所有下游的同源挂载都加入该集合——即挂载点与某个被移除挂载相同、且其父挂载会从该挂载的父挂载接收事件的任何挂载。然而，结果集合必须满足某些约束。)
 
 It is convenient to define several properties of sets of mounts:
+(为挂载集合定义几个性质会很方便：)
 
 1) A set S of mounts is non-shifting if for any mount X belonging
 to S all subtrees mounted strictly inside of X (i.e. not overmounting
 the root of X) contain only elements of S.
+   (如果对于属于 S 的任何挂载 X，严格挂载在 X 内部的所有子树(即不覆盖挂载 X 的根)只包含 S 的元素，则挂载集合 S 是非移位的(non-shifting)。)
 
 2) A set S is non-revealing if all locked mounts that belong to S have
 parents that also belong to S.
+   (如果属于 S 的所有被锁定挂载的父挂载也属于 S，则集合 S 是非暴露的(non-revealing)。)
 
 3) A set S is closed if it contains all children of its elements.
+   (如果集合 S 包含其所有元素的子挂载，则 S 是封闭的(closed)。)
 
 The set of mounts taken out by umount(2) must be non-shifting and
 non-revealing; the first constraint is what allows to reparent
 any remaining mounts and the second is what prevents the exposure
 of any concealed mountpoints.
+(被 umount(2) 移除的挂载集合必须是非移位且非暴露的；第一个约束使我们能够为任何剩余的挂载重新指定父挂载(reparent)，第二个约束防止任何被隐藏的挂载点暴露出来。)
 
 propagate_umount() takes the original set as an argument and tries to
 extend that set.  The original set is a full subtree and its root is
@@ -38,20 +45,26 @@ conflicts created by reparenting have common parent *not* in the
 set and one side of the conflict (bottom of the stack of overmounts)
 is in the set, it will be resolved.  However, we rely upon umount_tree()
 doing that pretty much immediately after the call of propagate_umount().
+(propagate_umount() 把原始集合作为参数，并尝试扩展该集合。原始集合是一棵完整的子树，且其根未被锁定；重要的是它是封闭且非暴露的。结果集合可能不再是封闭的；集合之外可能仍有挂载，但只会在集合中那些覆盖挂载根的元素所构成的栈的顶上。这些挂载可以被重新指定父挂载，移到栈底所附着的、将被保留的挂载那里。注意：这样做会违反"同一 parent/mountpoint 对最多只能有一个挂载"的约束；不过调用者(umount_tree())会立即纠正这一点——它可能让已卸载的元素继续附着在父挂载上，但前提是父挂载本身也被卸载。由于重新指定父挂载所产生的所有冲突都有一个*不在*集合中的共同父挂载，而冲突的一侧(覆盖挂载栈的底部)在集合中，因此冲突会得到解决。不过，我们依赖 umount_tree() 在调用 propagate_umount() 之后几乎立即完成这一工作。)
 
 Algorithm is based on two statements:
+(该算法基于两个论断：)
 	1) for any set S, there is a maximal non-shifting subset of S
 and it can be calculated in O(#S) time.
+	   (对任意集合 S，存在 S 的一个最大非移位子集，且它可以在 O(#S) 时间内计算出来。)
 	2) for any non-shifting set S, there is a maximal non-revealing
 subset of S.  That subset is also non-shifting and it can be calculated
 in O(#S) time.
+	   (对任意非移位集合 S，存在 S 的一个最大非暴露子集。该子集也是非移位的，且它可以在 O(#S) 时间内计算出来。)
 
 		Finding candidates.
+		(寻找候选。)
 
 We are given a closed set U and we want to find all mounts that have
 the same mountpoint as some mount m in U *and* whose parent receives
 propagation from the parent of the same mount m.  Naive implementation
 would be
+(给定一个封闭集合 U，我们希望找出所有这样的挂载：其挂载点与 U 中某个挂载 m 的挂载点相同，*且*其父挂载从同一个挂载 m 的父挂载接收传播。朴素的实现会是)
 	S = {}
 	for each m in U
 		add m to S
@@ -66,6 +79,7 @@ many times.  Since propagation is transitive, the same will happen to
 everything downstream of that candidate and it's not hard to construct
 cases where the approach above leads to the time quadratic by the actual
 number of candidates.
+(但这可能导致过多的工作——U 的各子树之间可能存在传播，在这种情况下我们最终会对相同的候选考察多次。由于传播是传递性的，同样的事情会发生在该候选下游的一切上，而且不难构造出使上述方法的时间按实际候选数量呈平方级增长的例子。)
 
 Note that if we run into a candidate we'd already seen, it must've been
 added on an earlier iteration of the outer loop - all additions made
@@ -73,6 +87,7 @@ during one iteration of the outer loop have different parents.  So
 if we find a child already added to the set, we know that everything
 in Propagation(parent(child)) with the same mountpoint has been already
 added.
+(注意，如果我们遇到一个已经见过的候选，它必定是在外层循环更早的某次迭代中加入的——外层循环一次迭代期间所做的所有添加都具有不同的父挂载。所以如果我们发现某个子挂载已被加入集合，我们知道 Propagation(parent(child)) 中具有相同挂载点的一切都已被加入。)
 	S = {}
 	for each m in U
 		if m in S
@@ -98,30 +113,37 @@ skip_them().  That's not hard to do - split propagation_next() into
 "down into mnt_slave_list" and "forward-and-up" parts, with the
 skip_them() being "repeat the forward-and-up part until we get NULL
 or something that isn't a peer of the one we are skipping".
+(这样就能摆脱那个问题，但我们还需要一个合理的 skip_them() 实现。这并不难做到——把 propagation_next() 拆分为"向下进入 mnt_slave_list"和"向前并向上"两个部分，而 skip_them() 就是"重复'向前并向上'部分，直到得到 NULL 或某个不是我们正要跳过的那个对象的 peer 为止"。)
 
 Note that there can be no absolute roots among the extra candidates -
 they all come from mount lookups.  Absolute root among the original
 set is _currently_ impossible, but it might be worth protecting
 against.
+(注意，额外的候选中不可能有绝对根——它们都来自挂载查找。原始集合中出现绝对根_目前_是不可能的，但对其进行防护可能是值得的。)
 
 		Maximal non-shifting subsets.
+		(最大非移位子集。)
 
 Let's call a mount m in a set S forbidden in that set if there is a
 subtree mounted strictly inside m and containing mounts that do not
 belong to S.
+(我们把集合 S 中的挂载 m 称为"在该集合中被禁止"(forbidden)，如果存在一棵严格挂载在 m 内部、且包含不属于 S 的挂载的子树。)
 
 The set is non-shifting when none of its elements are forbidden in it.
+(当集合中没有任何元素在其内部被禁止时，该集合是非移位的。)
 
 If mount m is forbidden in a set S, it is forbidden in any subset S' it
 belongs to.  In other words, it can't belong to any of the non-shifting
 subsets of S.  If we had a way to find a forbidden mount or show that
 there's none, we could use it to find the maximal non-shifting subset
 simply by finding and removing them until none remain.
+(如果挂载 m 在集合 S 中被禁止，那么在它所属的任何子集 S' 中它也被禁止。换句话说，它不可能属于 S 的任何非移位子集。如果我们有办法找到一个被禁止的挂载、或证明不存在这样的挂载，我们就可以用它来找出最大非移位子集——只需反复找出并移除它们，直到一个都不剩。)
 
 Suppose mount m is forbidden in S; then any mounts forbidden in S - {m}
 must have been forbidden in S itself.  Indeed, since m has descendents
 that do not belong to S, any subtree that fits into S will fit into
 S - {m} as well.
+(假设挂载 m 在 S 中被禁止；那么任何在 S - {m} 中被禁止的挂载必定原本就在 S 中被禁止。的确，由于 m 拥有不属于 S 的后代，任何能装入 S 的子树也必然能装入 S - {m}。)
 
 So in principle we could go through elements of S, checking if they
 are forbidden in S and removing the ones that are.  Removals will
@@ -129,29 +151,40 @@ not invalidate the checks done for earlier mounts - if they were not
 forbidden at the time we checked, they won't become forbidden later.
 It's too costly to be practical, but there is a similar approach that
 is linear by size of S.
+(所以原则上我们可以遍历 S 的元素，检查它们在 S 中是否被禁止，并移除被禁止的那些。移除不会使先前对其他挂载所做的检查失效——如果在我们检查时它们没有被禁止，之后也不会变为被禁止。这个做法代价太高而不实用，但有一个类似的方法，其开销与 S 的大小呈线性关系。)
 
 Let's say that mount x in a set S is forbidden by mount y, if
+(我们把集合 S 中的挂载 x 称为"被挂载 y 所禁止"，如果：)
 	* both x and y belong to S.
+	  (x 和 y 都属于 S。)
 	* there is a chain of mounts starting at x and leaving S
 	  immediately after passing through y, with the first
 	  mountpoint strictly inside x.
+	  (存在一条从 x 开始、在经过 y 之后立即离开 S 的挂载链，且其第一个挂载点严格位于 x 内部。)
 Note 1: x may be equal to y - that's the case when something not
 belonging to S is mounted strictly inside x.
+(注 1：x 可以等于 y——这就是当某个不属于 S 的东西被严格挂载在 x 内部时的情况。)
 Note 2: if y does not belong to S, it can't forbid anything in S.
+(注 2：如果 y 不属于 S，它不能禁止 S 中的任何东西。)
 Note 3: if y has no children outside of S, it can't forbid anything in S.
+(注 3：如果 y 在 S 之外没有子挂载，它不能禁止 S 中的任何东西。)
 
 It's easy to show that mount x is forbidden in S if and only if x is
 forbidden in S by some mount y.  And it's easy to find all mounts in S
 forbidden by a given mount.
+(很容易证明：挂载 x 在 S 中被禁止，当且仅当它在 S 中被某个挂载 y 所禁止。而且很容易找出 S 中被某个给定挂载所禁止的所有挂载。)
 
 Consider the following operation:
+(考虑以下操作：)
 	Trim(S, m) = S - {x : x is forbidden by m in S}
 
 Note that if m does not belong to S or has no children outside of S we
 are guaranteed that Trim(S, m) is equal to S.
+(注意，如果 m 不属于 S，或在 S 之外没有子挂载，我们可以保证 Trim(S, m) 等于 S。)
 
 The following is true: if x is forbidden by y in Trim(S, m), it was
 already forbidden by y in S.
+(以下命题成立：如果 x 在 Trim(S, m) 中被 y 禁止，那么它在 S 中就已经被 y 禁止。)
 
 Proof: Suppose x is forbidden by y in Trim(S, m).  Then there is a
 chain of mounts (x_0 = x, ..., x_k = y, x_{k+1} = r), such that x_{k+1}
@@ -164,14 +197,17 @@ and prepending (x_0, ..., x_k) to that chain demonstrates that x is also
 forbidden in S by m, and thus can't belong to Trim(S, m).
 Therefore r can not belong to S and our chain demonstrates that
 x is forbidden by y in S.  QED.
+(证明：假设 x 在 Trim(S, m) 中被 y 禁止。那么存在一条挂载链 (x_0 = x, ..., x_k = y, x_{k+1} = r)，使得 x_{k+1} 是第一个不属于 Trim(S, m) 的元素，且 x_1 的挂载点严格位于 x 内部。如果挂载 r 属于 S，它必定是被 Trim(S, m) 移除的，也就是说它在 S 中被 m 禁止。那么就存在一条从 r 到 m 的某个子挂载的挂载链，沿途一直留在 S 中直到 m，但这是不可能的，因为 x 属于 Trim(S, m)，而把 (x_0, ..., x_k) 前置到那条链上就表明 x 也在 S 中被 m 禁止，因此不可能属于 Trim(S, m)。所以 r 不可能属于 S，而我们的链表明 x 在 S 中被 y 禁止。证毕。)
 
 Corollary: no mount is forbidden by m in Trim(S, m).  Indeed, any
 such mount would have been forbidden by m in S and thus would have been
 in the part of S removed in Trim(S, m).
+(推论：在 Trim(S, m) 中没有任何挂载被 m 禁止。的确，任何这样的挂载都会在 S 中被 m 禁止，因而会落在 Trim(S, m) 从 S 中移除的那部分里。)
 
 Corollary: no mount is forbidden by m in Trim(Trim(S, m), n).  Indeed,
 any such would have to have been forbidden by m in Trim(S, m), which
 is impossible.
+(推论：在 Trim(Trim(S, m), n) 中没有任何挂载被 m 禁止。的确，任何这样的挂载都必须在 Trim(S, m) 中被 m 禁止，而这是不可能的。)
 
 Corollary: after
 	S = Trim(S, x_1)
@@ -179,8 +215,10 @@ Corollary: after
 	...
 	S = Trim(S, x_k)
 no mount remaining in S will be forbidden by either of x_1,...,x_k.
+(推论：在依次执行 S = Trim(S, x_1)、S = Trim(S, x_2)、……、S = Trim(S, x_k) 之后，S 中剩余的任何挂载都不会再被 x_1,...,x_k 中的任何一个所禁止。)
 
 The following will reduce S to its maximal non-shifting subset:
+(以下过程将把 S 缩减为它的最大非移位子集：)
 	visited = {}
 	while S contains elements not belonging to visited
 		let m be an arbitrary such element of S
@@ -195,6 +233,7 @@ by any element of visited.  In other words, no mount remaining in S will
 be forbidden, i.e. final value of S will be non-shifting.  It will be
 the maximal non-shifting subset, since we were removing only forbidden
 elements.
+(S 永不增长，所以 S 中不属于 visited 的元素数量在每次迭代中至少减少一。当循环终止时，S 中剩余的所有挂载都属于 visited。容易看出，在每次迭代开始时，S 中剩余的任何挂载都不会被 visited 的任何元素所禁止。换句话说，S 中剩余的任何挂载都不会被禁止，即 S 的最终值是非移位的。它将是最大非移位子集，因为我们移除的只是被禁止的元素。)
 
 	There are two difficulties in implementing the above in linear
 time, both due to the fact that Trim() might need to remove more than one
@@ -209,8 +248,10 @@ That would be trivial if we never removed more than one element at a time
 (linked list, with list_for_each_entry_safe for iterator), but we may
 need to remove more than one entry, possibly including the ones we have
 already visited.
+	(在按线性时间实现上述算法时有两个困难，都源于 Trim() 可能需要移除不止一个元素这一事实。Trim() 的朴素实现容易撞上一长串挂载，其中每个都挂载在父挂载的根之上。那条链中没有任何东西被禁止，所以不会从中移除任何东西。我们需要识别这样的链，并在后续调用 Trim() 时避免再次遍历它们，否则我们最终会得到按 S 中元素数量呈平方级的最坏情况时间。另一个困难在于实现外层循环——我们需要遍历一个不断收缩的集合的所有元素。如果我们每次移除的元素从不超过一个(链表，用 list_for_each_entry_safe 做迭代器)，那将是轻而易举的，但我们可能需要移除多个条目，其中还可能包括我们已经访问过的那些。)
 
 	Let's start with naive algorithm for Trim():
+	(我们从 Trim() 的朴素算法开始：)
 
 Trim_one(m)
 	found = false
@@ -231,13 +272,16 @@ Trim_ancestors(m)
 
 If m belongs to S, Trim_one(m) will replace S with Trim(S, m).
 Proof:
+(如果 m 属于 S，Trim_one(m) 将用 Trim(S, m) 替换 S。 证明：)
 	Consider the chains excluding elements from Trim(S, m).  The last
 two elements in such chain are m and some child of m that does not belong
 to S.  If m has no such children, Trim(S, m) is equal to S.
+	(考虑把元素从 Trim(S, m) 中排除的那些链。这样的链中最后两个元素是 m 和某个不属于 S 的 m 的子挂载。如果 m 没有这样的子挂载，Trim(S, m) 就等于 S。)
 	m itself is removed if and only if the chain has exactly two
 elements, i.e. when the last element does not overmount the root of m.
 In other words, that happens when m has a child not in S that does not
 overmount the root of m.
+	(m 自身被移除，当且仅当该链恰好有两个元素，即当最后一个元素不覆盖挂载 m 的根时。换句话说，这发生在 m 有一个不在 S 中、且不覆盖 m 之根的子挂载时。)
 	All other elements to remove will be ancestors of m, such that
 the entire descent chain from them to m is contained in S.  Let
 (x_0, x_1, ..., x_k = m) be the longest such chain.  x_i needs to be
@@ -245,17 +289,20 @@ removed if and only if x_{i+1} does not overmount its root.  It's easy
 to see that Trim_ancestors(m) will iterate through that chain from
 x_k to x_1 and that it will remove exactly the elements that need to be
 removed.
+	(所有其他要移除的元素都将是 m 的祖先，使得从它们到 m 的整条下降链都包含在 S 中。设 (x_0, x_1, ..., x_k = m) 是最长的这样的链。x_i 需要被移除，当且仅当 x_{i+1} 不覆盖它的根。容易看出 Trim_ancestors(m) 将沿着那条链从 x_k 迭代到 x_1，并且它移除的恰好就是需要移除的那些元素。)
 
 	Note that if the loop in Trim_ancestors() walks into an already
 visited element, we are guaranteed that remaining iterations will see
 only elements that had already been visited and remove none of them.
 That's the weakness that makes it vulnerable to long chains of full
 overmounts.
+	(注意，如果 Trim_ancestors() 中的循环走进一个已经被访问过的元素，我们可以保证其余迭代只会看到已经被访问过的元素，并且不会移除它们中的任何一个。这正是使它容易受整条完整覆盖挂载长链影响的弱点。)
 
 	It's easy to deal with, if we can afford setting marks on
 elements of S; we would mark all elements already visited by
 Trim_ancestors() and have it bail out as soon as it sees an already
 marked element.
+	(如果我们能负担得起在 S 的元素上设置标记，这就容易处理：我们可以把所有已被 Trim_ancestors() 访问过的元素都打上标记，并让它在一看到已标记的元素时就立即退出。)
 
 	The problems with iterating through the set can be dealt with in
 several ways, depending upon the representation we choose for our set.
@@ -265,6 +312,7 @@ forbid anything nor be forbidden by anything - all their descendents
 belong to S, so they can not occur anywhere in any excluding chain.
 In other words, the elements of that subset will remain in S until
 the end and Trim_one(S, m) is a no-op for all m from that subset.
+	(遍历集合的问题可以用几种方法来处理，取决于我们为集合选择的表示方式。一个有用的观察是：我们手头有一个 S 中的封闭子集——传给 propagate_umount() 的原始集合。它的元素既不能禁止任何东西，也不会被任何东西禁止——它们的所有后代都属于 S，所以它们不可能出现在任何排除链的任何位置。换句话说，该子集的元素会一直留在 S 中直到最后，并且对该子集中的所有 m 而言 Trim_one(S, m) 都是空操作。)
 
 	That suggests keeping S as a disjoint union of a closed set U
 ('will be unmounted, no matter what') and the set of all elements of
@@ -275,8 +323,10 @@ all of them).  Then we could have Trim_ancestors() only remove the mark,
 leaving the elements on the list.  Then Trim_one() would never remove
 anything other than its argument from the containing list, allowing to
 use list_for_each_entry_safe() as iterator.
+	(这提示我们把 S 保持为一个封闭集合 U('无论如何都会被卸载')与 S 中所有不属于 U 的元素组成的集合的不相交并集。后一个集合('候选')就是我们需要遍历的全部。让我们把它表示为一个循环列表的子集，由所有被标记为候选的列表元素组成(最初——全部都标记)。这样我们可以让 Trim_ancestors() 只移除标记，而把元素留在列表上。这样 Trim_one() 就绝不会从所属列表中移除其参数之外的任何东西，从而允许使用 list_for_each_entry_safe() 作为迭代器。)
 
 	Assuming that representation we get the following:
+	(假设采用那种表示方式，我们得到如下：)
 
 	list_for_each_entry_safe(m, ..., Candidates, ...)
 		Trim_one(m)
@@ -317,44 +367,57 @@ an ancestor of argument of Trim_one() and since U is closed, the argument
 of Trim_one() would also have to belong to U.  But Trim_one() is never
 called for elements of U.  In other words, p belongs to S if and only
 if it belongs to candidates.
+	(Trim_ancestors() 中循环的终止条件是正确的，因为该循环绝不会遇到属于 U 的 p——p 总是 Trim_one() 参数的祖先，而且由于 U 是封闭的，Trim_one() 的参数也必须属于 U。但 Trim_one() 从不为 U 的元素调用。换句话说，p 属于 S 当且仅当它属于候选。)
 
 	Time complexity:
+	(时间复杂度：)
 * we get no more than O(#S) calls of Trim_one()
+  (Trim_one() 的调用次数不超过 O(#S) 次)
 * the loop over children in Trim_one() never looks at the same child
 twice through all the calls.
+  (Trim_one() 中对子挂载的循环，在所有调用中从不查看同一个子挂载两次)
 * iterations of that loop for children in S are no more than O(#S)
 in the worst case
+  (该循环对属于 S 的子挂载的迭代，在最坏情况下不超过 O(#S))
 * at most two children that are not elements of S are considered per
 call of Trim_one().
+  (每次 Trim_one() 调用至多考虑两个不属于 S 的子挂载。)
 * the loop in Trim_ancestors() sets its mark once per iteration and
 no element of S has is set more than once.
+  (Trim_ancestors() 中的循环每次迭代设置一次它的标记，且 S 中没有任何元素的标记被设置超过一次。)
 
 	In the end we may have some elements excluded from S by
 Trim_ancestors() still stuck on the list.  We could do a separate
 loop removing them from the list (also no worse than O(#S) time),
 but it's easier to leave that until the next phase - there we will
 iterate through the candidates anyway.
+	(最后，可能有一些已被 Trim_ancestors() 从 S 中排除的元素仍滞留在列表上。我们可以用一个单独的循环把它们从列表中移除(时间也不会差于 O(#S))，但更简单的做法是把它留到下一阶段——反正那里我们要遍历候选。)
 
 	The caller has already removed all elements of U from their parents'
 lists of children, which means that checking if child belongs to S is
 equivalent to checking if it's marked as a candidate; we'll never see
 the elements of U in the loop over children in Trim_one().
+	(调用者已经把 U 的所有元素从其父挂载的子挂载列表中移除，这意味着检查某个子挂载是否属于 S 等价于检查它是否被标记为候选；在 Trim_one() 的子挂载循环中我们绝不会看到 U 的元素。)
 
 	What's more, if we see that children(m) is empty and m is not
 locked, we can immediately move m into the committed subset (remove
 from the parent's list of children, etc.).  That's one fewer mount we'll
 have to look into when we check the list of children of its parent *and*
 when we get to building the non-revealing subset.
+	(此外，如果我们看到 children(m) 为空且 m 未被锁定，我们可以立即把 m 移入已提交子集(从父挂载的子挂载列表中移除，等等)。这样，当我们检查其父挂载的子挂载列表时，以及当我们开始构建非暴露子集时，需要考察的挂载就少了一个。)
 
 		Maximal non-revealing subsets
+		(最大非暴露子集)
 
 If S is not a non-revealing subset, there is a locked element x in S
 such that parent of x is not in S.
+(如果 S 不是非暴露子集，那么 S 中存在一个被锁定的元素 x，其父挂载不在 S 中。)
 
 Obviously, no non-revealing subset of S may contain x.  Removing such
 elements one by one will obviously end with the maximal non-revealing
 subset (possibly empty one).  Note that removal of an element will
 require removal of all its locked children, etc.
+(显然，S 的任何非暴露子集都不能包含 x。把这样的元素逐个移除，显然会以最大非暴露子集(可能是空的)告终。注意，移除一个元素将需要移除它所有被锁定的子挂载，等等。)
 
 If the set had been non-shifting, it will remain non-shifting after
 such removals.
@@ -365,6 +428,7 @@ an element not in S - {x}.  Since S is non-shifting, everything in
 that subtree must belong to S.  But that means that this subtree must
 contain x somewhere *and* that parent of x either belongs that subtree
 or is equal to m.  Either way it must belong to S.  Contradiction.
+(如果该集合原本是非移位的，在这样的移除之后它仍将保持非移位。 证明：假设 S 是非移位的，x 是 S 中一个被锁定的元素，x 的父挂载不在 S 中，而 S - {x} 不是非移位的。那么存在 S - {x} 中的一个元素 m 和一棵严格挂载在 m 内部的子树，使得 m 包含一个不在 S - {x} 中的元素。由于 S 是非移位的，该子树中的一切都必须属于 S。但那意味着该子树必定在某处包含 x，*且* x 的父挂载要么属于该子树、要么等于 m。无论哪种情况，它都必须属于 S。矛盾。)
 
 // same representation as for finding maximal non-shifting subsets:
 // S is a disjoint union of a non-revealing set U (the ones we are committed
@@ -397,13 +461,17 @@ handle_locked(m)
 		m = parent(m)
 
 Let (x_0, ..., x_n = m) be the maximal chain of descent of m within S.
+(设 (x_0, ..., x_n = m) 是 m 在 S 内的最大下降链。)
 * If it contains some elements of U, let x_k be the last one of those.
 Then union of U with {x_{k+1}, ..., x_n} is obviously non-revealing.
+  (如果它包含 U 的某些元素，设 x_k 是其中最后一个。那么 U 与 {x_{k+1}, ..., x_n} 的并显然是非暴露的。)
 * otherwise if all its elements are locked, then none of {x_0, ..., x_n}
 may be elements of a non-revealing subset of S.
+  (否则，如果它的所有元素都被锁定，那么 {x_0, ..., x_n} 中的任何一个都不能成为 S 的非暴露子集的元素。)
 * otherwise let x_k be the first unlocked element of the chain.  Then none
 of {x_0, ..., x_{k-1}} may be an element of a non-revealing subset of
 S and union of U and {x_k, ..., x_n} is non-revealing.
+  (否则，设 x_k 是链中第一个未锁定的元素。那么 {x_0, ..., x_{k-1}} 中的任何一个都不能成为 S 的非暴露子集的元素，且 U 与 {x_k, ..., x_n} 的并是非暴露的。)
 
 handle_locked(m) finds which of these cases applies and adjusts Candidates
 and U accordingly.  U remains non-revealing, union of Candidates and
@@ -411,36 +479,49 @@ U still contains any non-revealing subset of S and after the call of
 handle_locked(m) m is guaranteed to be not in Candidates list.  So having
 it called for each element of S would suffice to empty Candidates,
 leaving U the maximal non-revealing subset of S.
+(handle_locked(m) 找出适用的是哪一种情况，并相应地调整 Candidates 和 U。U 保持非暴露，Candidates 与 U 的并仍然包含 S 的任何非暴露子集，并且在调用 handle_locked(m) 之后可以保证 m 不在 Candidates 列表中。所以对 S 的每个元素都调用它就足以清空 Candidates，使 U 成为 S 的最大非暴露子集。)
 
 However, handle_locked(m) is a no-op when m belongs to U, so it's enough
 to have it called for elements of Candidates list until none remain.
+(不过，当 m 属于 U 时 handle_locked(m) 是空操作，所以只需对 Candidates 列表的元素调用它，直到一个不剩即可。)
 
 Time complexity: number of calls of handle_locked() is limited by
 #Candidates, each iteration of the first loop in handle_locked() removes
 an element from the list, so their total number of executions is also
 limited by #Candidates; number of iterations in the second loop is no
 greater than the number of iterations of the first loop.
+(时间复杂度：handle_locked() 的调用次数受 #Candidates 限制；handle_locked() 中第一个循环的每次迭代都会从列表中移除一个元素，所以它们的总执行次数也受 #Candidates 限制；第二个循环中的迭代次数不超过第一个循环的迭代次数。)
 
 
 		Reparenting
+		(重新指定父挂载)
 
 After we'd calculated the final set, we still need to deal with
 reparenting - if an element of the final set has a child not in it,
 we need to reparent such child.
+(在我们计算出最终集合之后，仍需要处理重新指定父挂载——如果最终集合的某个元素有一个不在其中的子挂载，我们需要为这样的子挂载重新指定父挂载。)
 
 Such children can only be root-overmounting (otherwise the set wouldn't
 be non-shifting) and their parents can not belong to the original set,
 since the original is guaranteed to be closed.
+(这样的子挂载只能是覆盖根的挂载(否则集合就不会是非移位的)，而且它们的父挂载不可能属于原始集合，因为原始集合保证是封闭的。)
 
 
 		Putting all of that together
+		(把这一切合在一起)
 
 The plan is to
+(计划是：)
 	* find all candidates
+	  (找出所有候选)
 	* trim down to maximal non-shifting subset
+	  (缩减到最大非移位子集)
 	* trim down to maximal non-revealing subset
+	  (缩减到最大非暴露子集)
 	* reparent anything that needs to be reparented
+	  (为所有需要重新指定父挂载的东西重新指定父挂载)
 	* return the resulting set to the caller
+	  (把结果集合返回给调用者)
 
 For the 2nd and 3rd steps we want to separate the set into growing
 non-revealing subset, initially containing the original set ("U" in
@@ -449,20 +530,26 @@ terms of the pseudocode above) and everything we are still not sure about
 the extra candidates separated from the stuff already in the original set.
 For the 4th step we would like the additions to U separate from the
 original set.
+(对于第 2 和第 3 步，我们希望把集合分成一个不断增长的非暴露子集(最初包含原始集合，即上面伪代码术语中的"U")和我们尚不确定的一切("候选")。这意味着对于第 1 步的输出，我们希望把额外的候选与已在原始集合中的东西分开。对于第 4 步，我们希望加入 U 的东西与原始集合分开。)
 
 So let's go for
+(所以我们采用：)
 	* original set ("set").  Linkage via mnt_list
+	  (原始集合("set")。通过 mnt_list 链接)
 	* undecided candidates ("candidates").  Subset of a list,
 consisting of all its elements marked with a new flag (T_UMOUNT_CANDIDATE).
 Initially all elements of the list will be marked that way; in the
 end the list will become empty and no mounts will remain marked with
 that flag.
+	  (未决候选("candidates")。一个列表的子集，由其中所有被新标志(T_UMOUNT_CANDIDATE)标记的元素组成。最初列表的所有元素都将以此方式标记；最终列表将变空，且不再有任何挂载带有该标志。)
 	* Reuse T_MARKED for "has been already seen by trim_ancestors()".
+	  (复用 T_MARKED 来表示"已被 trim_ancestors() 看到过"。)
 	* anything in U that hadn't been in the original set - elements of
 candidates will gradually be either discarded or moved there.  In other
 words, it's the candidates we have already decided to unmount.	Its role
 is reasonably close to the old "to_umount", so let's use that name.
 Linkage via mnt_list.
+	  (U 中原本不属于原始集合的东西——候选的元素将逐渐被丢弃或移到那里。换句话说，它是我们已经决定卸载的那些候选。它的角色与旧的"to_umount"相当接近，所以我们使用那个名字。通过 mnt_list 链接。)
 
 For gather_candidates() we'll need to maintain both candidates (S -
 set) and intersection of S with set.  Use T_UMOUNT_CANDIDATE for
@@ -472,6 +559,7 @@ all elements of the original set.  That gives a cheap way to check
 if element belongs to S (in gather_candidates) and to candidates
 itself (at later stages).  Call that predicate is_candidate(); it would
 be m->mnt_t_flags & T_UMOUNT_CANDIDATE.
+(对于 gather_candidates()，我们需要同时维护候选(S - set)以及 S 与 set 的交集。对我们遇到的所有元素使用 T_UMOUNT_CANDIDATE，并把尚未在原始集合中的那些放入候选列表。完成之后，从原始集合的所有元素上剥掉该标志。这提供了一种廉价的方法来检查元素是否属于 S(在 gather_candidates 中)以及是否属于候选本身(在后续阶段)。把这个谓词称为 is_candidate()；它就是 m->mnt_t_flags & T_UMOUNT_CANDIDATE。)
 
 All elements of the original set are marked with MNT_UMOUNT and we'll
 need the same for elements added when joining the contents of to_umount
@@ -479,6 +567,8 @@ to set in the end.  Let's set MNT_UMOUNT at the time we add an element
 to to_umount; that's close to what the old 'umount_one' is doing, so
 let's keep that name.  It also gives us another predicate we need -
 "belongs to union of set and to_umount"; will_be_unmounted() for now.
+(原始集合的所有元素都标有 MNT_UMOUNT，而且最后把 to_umount 的内容并入 set 时所添加的元素也需要同样的标志。让我们在把元素加入 to_umount 时设置 MNT_UMOUNT；这与旧的 'umount_one' 所做的很接近，所以我们保留那个名字。它还给了我们所需的另一个谓词——"属于 set 与 to_umount 的并"；暂时称之为 will_be_unmounted()。)
 
 Removals from the candidates list should strip both T_MARKED and
 T_UMOUNT_CANDIDATE; call it remove_from_candidates_list().
+(从候选列表中移除时应当同时剥掉 T_MARKED 和 T_UMOUNT_CANDIDATE；称之为 remove_from_candidates_list()。)

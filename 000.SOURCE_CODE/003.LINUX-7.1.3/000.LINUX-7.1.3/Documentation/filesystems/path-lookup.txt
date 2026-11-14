@@ -1,4 +1,5 @@
 Path walking and name lookup locking
+(路径遍历与名称查找加锁)
 ====================================
 
 Path resolution is the finding a dentry corresponding to a path name string, by
@@ -8,9 +9,11 @@ with the first component of the pathname (eg. root or cwd) with a known dentry,
 then finding the child of that dentry, which is named the next component in the
 path string. Then repeating the lookup from the child dentry and finding its
 child with the next element, and so on.
+(路径解析(path resolution)是通过执行路径遍历(path walk)来找到与路径名字符串对应的 dentry。通常，对于每次 open()、stat() 等，路径名都会被解析。路径通过遍历命名空间树来解析：从一个已知 dentry 的路径名第一个组件(例如根或 cwd)开始，然后找到该 dentry 的子项——它由路径字符串中的下一个组件命名。然后从该子 dentry 重复查找，用下一个元素找到它的子项，依此类推。)
 
 Since it is a frequent operation for workloads like multiuser environments and
 web servers, it is important to optimize this code.
+(对于像多用户环境和 web 服务器这样的工作负载，这是一个频繁操作，因此优化这段代码很重要。)
 
 Path walking synchronisation history:
 Prior to 2.5.10, dcache_lock was acquired in d_lookup (dcache hash lookup) and
@@ -21,6 +24,7 @@ decreases the number of acquisition of dcache_lock. However it also increases
 the lock hold time significantly and affects performance in large SMP machines.
 Since 2.5.62 kernel, dcache has been using a new locking model that uses RCU to
 make dcache look-up lock-free.
+(路径遍历同步的历史：在 2.5.10 之前，dcache_lock 在 d_lookup(dcache 哈希查找)中被获取，因而在路径查找期间的每个组件上都会获取。从 2.5.10 起，fast-walk 算法改变了这一点：在开始时持有 dcache_lock，并尽可能多地遍历已缓存的路径组件 dentry。这显著减少了 dcache_lock 的获取次数，但也显著增加了锁的持有时间，并影响大型 SMP 机器的性能。从 2.5.62 内核起，dcache 开始使用一种新的加锁模型，利用 RCU 使 dcache 查找无锁。)
 
 All the above algorithms required taking a lock and reference count on the
 dentry that was looked up, so that may be used as the basis for walking the
@@ -30,19 +34,23 @@ slows things down. It is not scalable because many parallel applications that
 are path-walk intensive tend to do path lookups starting from a common dentry
 (usually, the root "/" or current working directory). So contention on these
 common path elements causes lock and cacheline queueing.
+(上述所有算法都要求对被查找的 dentry 获取锁和引用计数，以便将其用作遍历下一个路径元素的基础。这既低效又不可扩展。说它低效，是因为每个 dentry 元素所需的锁和原子操作会拖慢速度。说它不可扩展，是因为许多路径遍历密集的并行应用往往从同一个公共 dentry(通常是根"/"或当前工作目录)开始做路径查找。因此对这些公共路径元素的争用会导致锁和缓存行排队。)
 
 Since 2.6.38, RCU is used to make a significant part of the entire path walk
 (including dcache look-up) completely "store-free" (so, no locks, atomics, or
 even stores into cachelines of common dentries). This is known as "rcu-walk"
 path walking.
+(自 2.6.38 起，RCU 被用来使整个路径遍历的很大一部分(包括 dcache 查找)完全"无存储"(store-free)(即不加锁、无原子操作，甚至不向公共 dentry 的缓存行写入)。这被称为"rcu-walk"路径遍历。)
 
 Path walking overview
+(路径遍历概览)
 =====================
 
 A name string specifies a start (root directory, cwd, fd-relative) and a
 sequence of elements (directory entry names), which together refer to a path in
 the namespace. A path is represented as a (dentry, vfsmount) tuple. The name
 elements are sub-strings, separated by '/'.
+(名称字符串指定一个起点(根目录、cwd、相对于 fd)和一个元素序列(目录项名称)，它们共同指代命名空间中的一条路径。路径表示为一个 (dentry, vfsmount) 元组。名称元素是子字符串，由'/'分隔。)
 
 Name lookups will want to find a particular path that a name string refers to
 (usually the final element, or parent of final element). This is done by taking
@@ -51,9 +59,11 @@ current->fs->cwd or current->fs->root) as the first parent of the lookup. Then
 iteratively for each subsequent name element, look up the child of the current
 parent with the given name and if it is not the desired entry, make it the
 parent for the next lookup.
+(名称查找想要找到名称字符串所指的特定路径(通常是最后一个元素，或最后一个元素的父项)。做法是：把名称起点所给出的路径(我们事先知道——例如 current->fs->cwd 或 current->fs->root)作为查找的第一个父项。然后对每个后续名称元素迭代：用给定名称查找当前父项的子项，如果它不是想要的条目，就把它作为下一次查找的父项。)
 
 A parent, of course, must be a directory, and we must have appropriate
 permissions on the parent inode to be able to walk into it.
+(当然，父项必须是目录，并且我们必须在父 inode 上具有适当的权限才能走进去。)
 
 Turning the child into a parent for the next lookup requires more checks and
 procedures. Symlinks essentially substitute the symlink name for the target
@@ -62,46 +72,62 @@ must be followed into (thus changing the vfsmount that subsequent path elements
 refer to), switching from the mount point path to the root of the particular
 mounted vfsmount. These behaviours are variously modified depending on the
 exact path walking flags.
+(把子项变成下一次查找的父项需要更多的检查和过程。符号链接实质上是把名称字符串中的符号链接名称替换为目标名称，并需要一些递归的路径遍历。挂载点必须跟随进入(从而改变后续路径元素所引用的 vfsmount)，从挂载点路径切换到特定被挂载 vfsmount 的根。这些行为会根据具体的路径遍历标志而以不同方式修改。)
 
 Path walking then must, broadly, do several particular things:
+(那么，大致来说，路径遍历必须做以下几件特定的事情：)
 - find the start point of the walk;
+  (找到遍历的起点；)
 - perform permissions and validity checks on inodes;
+  (对 inode 执行权限和有效性检查；)
 - perform dcache hash name lookups on (parent, name element) tuples;
+  (对 (parent, name element) 元组执行 dcache 哈希名称查找；)
 - traverse mount points;
+  (穿越挂载点；)
 - traverse symlinks;
+  (穿越符号链接；)
 - lookup and create missing parts of the path on demand.
+  (按需查找并创建路径中缺失的部分。)
 
 Safe store-free look-up of dcache hash table
+(dcache 哈希表的无存储安全查找)
 ============================================
 
 Dcache name lookup
+(dcache 名称查找)
 ------------------
 In order to lookup a dcache (parent, name) tuple, we take a hash on the tuple
 and use that to select a bucket in the dcache-hash table. The list of entries
 in that bucket is then walked, and we do a full comparison of each entry
 against our (parent, name) tuple.
+(为了查找 dcache 的 (parent, name) 元组，我们对该元组取哈希，并用它选择 dcache 哈希表中的一个桶。然后遍历该桶中的条目列表，并将每个条目与我们的 (parent, name) 元组做完整比较。)
 
 The hash lists are RCU protected, so list walking is not serialised with
 concurrent updates (insertion, deletion from the hash). This is a standard RCU
 list application with the exception of renames, which will be covered below.
+(哈希链表受 RCU 保护，因此链表遍历不会与并发更新(插入、从哈希中删除)串行化。这是一个标准的 RCU 链表应用，唯一例外是重命名，将在下面讨论。)
 
 Parent and name members of a dentry, as well as its membership in the dcache
 hash, and its inode are protected by the per-dentry d_lock spinlock. A
 reference is taken on the dentry (while the fields are verified under d_lock),
 and this stabilises its d_inode pointer and actual inode. This gives a stable
 point to perform the next step of our path walk against.
+(dentry 的父项和名称成员，以及它在 dcache 哈希中的成员关系和它的 inode，都由每 dentry 的 d_lock 自旋锁保护。会在该 dentry 上获取一个引用(同时在 d_lock 下验证各字段)，这稳定了它的 d_inode 指针和实际 inode。这为路径遍历的下一步提供了一个稳定的立足点。)
 
 These members are also protected by d_seq seqlock, although this offers
 read-only protection and no durability of results, so care must be taken when
 using d_seq for synchronisation (see seqcount based lookups, below).
+(这些成员也受 d_seq 顺序锁保护，不过这只提供只读保护且结果不具持久性，所以在使用 d_seq 做同步时必须小心(参见下面基于 seqcount 的查找)。)
 
 Renames
+(重命名)
 -------
 Back to the rename case. In usual RCU protected lists, the only operations that
 will happen to an object is insertion, and then eventually removal from the
 list. The object will not be reused until an RCU grace period is complete.
 This ensures the RCU list traversal primitives can run over the object without
 problems (see RCU documentation for how this works).
+(回到重命名的情况。在通常受 RCU 保护的链表中，对象上只会发生两种操作：插入，以及最终从链表中移除。在一个 RCU 宽限期完成之前，对象不会被复用。这确保 RCU 链表遍历原语可以毫无问题地遍历该对象(工作原理参见 RCU 文档)。)
 
 However when a dentry is renamed, its hash value can change, requiring it to be
 moved to a new hash list. Allocating and inserting a new alias would be
@@ -109,16 +135,19 @@ expensive and also problematic for directory dentries. Latency would be far to
 high to wait for a grace period after removing the dentry and before inserting
 it in the new hash bucket. So what is done is to insert the dentry into the
 new list immediately.
+(然而，当 dentry 被重命名时，它的哈希值可能改变，需要把它移动到新的哈希链表。分配并插入一个新别名代价高昂，而且对目录 dentry 来说也有问题。在移除 dentry 之后、将其插入新哈希桶之前等待宽限期，延迟会太高。所以实际做法是立即把 dentry 插入新链表。)
 
 However, when the dentry's list pointers are updated to point to objects in the
 new list before waiting for a grace period, this can result in a concurrent RCU
 lookup of the old list veering off into the new (incorrect) list and missing
 the remaining dentries on the list.
+(然而，当在等待宽限期之前就把 dentry 的链表指针更新为指向新链表中的对象时，可能导致对旧链表的并发 RCU 查找偏离到新(不正确)的链表上，从而错过该链表上剩余的 dentry。)
 
 There is no fundamental problem with walking down the wrong list, because the
 dentry comparisons will never match. However it is fatal to miss a matching
 dentry. So a seqlock is used to detect when a rename has occurred, and so the
 lookup can be retried.
+(走错链表并没有根本性的问题，因为 dentry 比较永远匹配不上。但错过匹配的 dentry 是致命的。所以使用顺序锁来检测何时发生了重命名，从而可以重试查找。)
 
          1      2      3
         +---+  +---+  +---+
@@ -128,6 +157,7 @@ head <--+-P |<-+-P |<-+-P |
 
 Rename of dentry 2 may require it deleted from the above list, and inserted
 into a new list. Deleting 2 gives the following list.
+(对 dentry 2 的重命名可能需要把它从上面的链表中删除，并插入一个新链表。删除 2 后得到如下链表。)
 
          1             3
         +---+         +---+     (don't worry, the longer pointers do not
@@ -144,8 +174,10 @@ This is a standard RCU-list deletion, which leaves the deleted object's
 pointers intact, so a concurrent list walker that is currently looking at
 object 2 will correctly continue to object 3 when it is time to traverse the
 next object.
+(这是一种标准的 RCU 链表删除，被删除对象的指针保持原样，因此当前正在查看对象 2 的并发链表遍历者在该遍历下一个对象时会正确地继续走到对象 3。)
 
 However, when inserting object 2 onto a new list, we end up with this:
+(然而，当把对象 2 插入一个新链表时，我们最终得到这样：)
 
          1             3
         +---+         +---+
@@ -161,23 +193,28 @@ head <--+-P |<--------+-P |
 Because we didn't wait for a grace period, there may be a concurrent lookup
 still at 2. Now when it follows 2's 'next' pointer, it will walk off into
 another list without ever having checked object 3.
+(因为我们没有等待宽限期，可能仍有一个并发查找停留在 2 上。此时当它跟随 2 的'next'指针时，就会走进另一条链表，而从未检查过对象 3。)
 
 A related, but distinctly different, issue is that of rename atomicity versus
 lookup operations. If a file is renamed from 'A' to 'B', a lookup must only
 find either 'A' or 'B'. So if a lookup of 'A' returns NULL, a subsequent lookup
 of 'B' must succeed (note the reverse is not true).
+(一个相关但明显不同的问题是重命名原子性与查找操作之间的关系。如果一个文件从'A'重命名为'B'，查找必须只能找到'A'或'B'之一。所以如果对'A'的查找返回 NULL，随后对'B'的查找必须成功(注意反之不然)。)
 
 Between deleting the dentry from the old hash list, and inserting it on the new
 hash list, a lookup may find neither 'A' nor 'B' matching the dentry. The same
 rename seqlock is also used to cover this race in much the same way, by
 retrying a negative lookup result if a rename was in progress.
+(在把 dentry 从旧哈希链表删除之后、把它插入新哈希链表之前，查找可能发现'A'和'B'都不匹配该 dentry。同一个重命名顺序锁也以大体相同的方式用于覆盖这个竞争：如果重命名正在进行中，就重试否定的查找结果。)
 
 Seqcount based lookups
+(基于 seqcount 的查找)
 ----------------------
 In refcount based dcache lookups, d_lock is used to serialise access to
 the dentry, stabilising it while comparing its name and parent and then
 taking a reference count (the reference count then gives a stable place to
 start the next part of the path walk from).
+(在基于引用计数的 dcache 查找中，d_lock 用于串行化对 dentry 的访问，在比较其名称和父项期间使其保持稳定，然后获取引用计数(该引用计数随后为路径遍历的下一部分提供一个稳定的起点)。)
 
 As explained above, we would like to do path walking without taking locks or
 reference counts on intermediate dentries along the path. To do this, a per
@@ -187,26 +224,32 @@ the next part of the path walk. When loading the coherent snapshot under d_seq,
 care must be taken to load the members up-front, and use those pointers rather
 than reloading from the dentry later on (otherwise we'd have interesting things
 like d_inode going NULL underneath us, if the name was unlinked).
+(如上所述，我们希望在做路径遍历时不对路径上的中间 dentry 获取锁或引用计数。为此，使用每 dentry 的顺序锁(d_seq)来获取该 dentry 外观的"一致快照"(它的名称、父项和 inode)。该快照随后用于开始路径遍历的下一部分。在 d_seq 下加载一致快照时，必须注意预先加载各成员，并使用这些指针，而不是稍后从 dentry 重新加载(否则，如果名称已被解除链接，我们会遇到诸如 d_inode 在我们脚下变为 NULL 之类的有趣现象)。)
 
 Also important is to avoid performing any destructive operations (pretty much:
 no non-atomic stores to shared data), and to recheck the seqcount when we are
 "done" with the operation. Retry or abort if the seqcount does not match.
 Avoiding destructive or changing operations means we can easily unwind from
 failure.
+(同样重要的是避免执行任何破坏性操作(大致来说：不向共享数据做非原子存储)，并在操作"完成"时重新检查 seqcount。如果 seqcount 不匹配则重试或中止。避免破坏性或更改性操作意味着我们可以从失败中轻松回退。)
 
 What this means is that a caller, provided they are holding RCU lock to
 protect the dentry object from disappearing, can perform a seqcount based
 lookup which does not increment the refcount on the dentry or write to
 it in any way. This returned dentry can be used for subsequent operations,
 provided that d_seq is rechecked after that operation is complete.
+(这意味着，只要调用者持有 RCU 锁以保护 dentry 对象不消失，就可以执行基于 seqcount 的查找，该查找不递增 dentry 上的引用计数，也不以任何方式写入它。返回的 dentry 可用于后续操作，前提是在该操作完成后重新检查 d_seq。)
 
 Inodes are also rcu freed, so the seqcount lookup dentry's inode may also be
 queried for permissions.
+(inode 也通过 RCU 释放，因此 seqcount 查找所得 dentry 的 inode 也可以被查询权限。)
 
 With this two parts of the puzzle, we can do path lookups without taking
 locks or refcounts on dentry elements.
+(有了拼图的这两个部分，我们就可以在做路径查找时不对 dentry 元素获取锁或引用计数。)
 
 RCU-walk path walking design
+(RCU-walk 路径遍历设计)
 ============================
 
 Path walking code now has two distinct modes, ref-walk and rcu-walk. ref-walk
@@ -218,15 +261,18 @@ lookups, and can perform lookup of intermediate elements without any stores to
 shared data in the dentry or inode. rcu-walk can not be applied to all cases,
 eg. if the filesystem must sleep or perform non trivial operations, rcu-walk
 must be switched to ref-walk mode.
+(路径遍历代码现在有两种截然不同的模式：ref-walk 和 rcu-walk。ref-walk 是执行 dcache 查找的传统[*]方式，使用 d_lock 串行化对 dentry 的并发修改并获取其引用计数。ref-walk 简单直白，在路径遍历操作每个 dentry 时可以睡眠、获取锁等。rcu-walk 使用基于 seqcount 的 dentry 查找，可以在不向 dentry 或 inode 中的共享数据做任何存储的情况下查找中间元素。rcu-walk 并不适用于所有情况，例如，如果文件系统必须睡眠或执行非平凡操作，就必须切换到 ref-walk 模式。)
 
 [*] RCU is still used for the dentry hash lookup in ref-walk, but not the full
     path walk.
+    (在 ref-walk 中，RCU 仍用于 dentry 哈希查找，但不用于完整的路径遍历。)
 
 Where ref-walk uses a stable, refcounted ``parent'' to walk the remaining
 path string, rcu-walk uses a d_seq protected snapshot. When looking up a
 child of this parent snapshot, we open d_seq critical section on the child
 before closing d_seq critical section on the parent. This gives an interlocking
 ladder of snapshots to walk down.
+(ref-walk 使用稳定且带引用计数的``parent''来遍历剩余路径字符串，而 rcu-walk 使用受 d_seq 保护的快照。在查找这个父快照的子项时，我们先在子项上打开 d_seq 临界区，然后再关闭父项上的 d_seq 临界区。这给出一个相互扣合的快照梯子供我们走下去。)
 
 
      proc 101
@@ -241,6 +287,7 @@ So when vi wants to open("/home/npiggin/test.c", O_RDWR), then it will
 start from current->fs->root, which is a pinned dentry. Alternatively,
 "./test.c" would start from cwd; both names refer to the same path in
 the context of proc101.
+(所以当 vi 想要 open("/home/npiggin/test.c", O_RDWR) 时，它将从 current->fs->root(一个被钉住的 dentry)开始。或者，"./test.c"会从 cwd 开始；在 proc101 的上下文中，两个名称指代同一路径。)
 
      dentry 0
     +---------------------+   rcu-walk begins here, we note d_seq, check the
@@ -273,6 +320,7 @@ the context of proc101.
 Taking a refcount on a dentry from rcu-walk mode, by taking its d_lock,
 re-checking its d_seq, and then incrementing its refcount is called
 "dropping rcu" or dropping from rcu-walk into ref-walk mode.
+(在 rcu-walk 模式下获取一个 dentry 上的引用计数——获取它的 d_lock、重新检查它的 d_seq、然后递增它的引用计数——被称为"dropping rcu"，即从 rcu-walk 降级到 ref-walk 模式。)
 
 It is, in some sense, a bit of a house of cards. If the seqcount check of the
 parent snapshot fails, the house comes down, because we had closed the d_seq
@@ -280,61 +328,84 @@ section on the grandparent, so we have nothing left to stand on. In that case,
 the path walk must be fully restarted (which we do in ref-walk mode, to avoid
 live locks). It is costly to have a full restart, but fortunately they are
 quite rare.
+(从某种意义上说，这有点像纸牌屋。如果父快照的 seqcount 检查失败，整座房子就会塌下来，因为我们已经关闭了祖父母(父项的父项)上的 d_seq 区段，所以再没有什么可立足的了。在这种情况下，路径遍历必须完全重启(我们在 ref-walk 模式下重启，以避免活锁)。完全重启代价高昂，但幸运的是这种情况相当罕见。)
 
 When we reach a point where sleeping is required, or a filesystem callout
 requires ref-walk, then instead of restarting the walk, we attempt to drop rcu
 at the last known good dentry we have. Avoiding a full restart in ref-walk in
 these cases is fundamental for performance and scalability because blocking
 operations such as creates and unlinks are not uncommon.
+(当我们到达需要睡眠的地方，或文件系统回调需要 ref-walk 时，我们不是重启遍历，而是尝试在我们拥有的最后一个已知良好的 dentry 处降级 rcu。在这些情况下避免 ref-walk 的完全重启对性能和可扩展性至关重要，因为诸如创建和解除链接之类的阻塞操作并不少见。)
 
 The detailed design for rcu-walk is like this:
+(rcu-walk 的详细设计如下：)
 * LOOKUP_RCU is set in nd->flags, which distinguishes rcu-walk from ref-walk.
+  (LOOKUP_RCU 设置在 nd->flags 中，用于区分 rcu-walk 与 ref-walk。)
 * Take the RCU lock for the entire path walk, starting with the acquiring
   of the starting path (eg. root/cwd/fd-path). So now dentry refcounts are
   not required for dentry persistence.
+  (在整个路径遍历期间持有 RCU 锁，从获取起始路径(例如 root/cwd/fd 路径)开始。因此现在 dentry 的持久存在不再需要 dentry 引用计数。)
 * synchronize_rcu is called when unregistering a filesystem, so we can
   access d_ops and i_ops during rcu-walk.
+  (注销文件系统时会调用 synchronize_rcu，因此我们可以在 rcu-walk 期间访问 d_ops 和 i_ops。)
 * Similarly take the vfsmount lock for the entire path walk. So now mnt
   refcounts are not required for persistence. Also we are free to perform mount
   lookups, and to assume dentry mount points and mount roots are stable up and
   down the path.
+  (类似地，在整个路径遍历期间持有 vfsmount 锁。因此现在 mnt 引用计数对持久存在不再是必需的。我们还可以自由地执行挂载查找，并假设路径上下各处的 dentry 挂载点和挂载根是稳定的。)
 * Have a per-dentry seqlock to protect the dentry name, parent, and inode,
   so we can load this tuple atomically, and also check whether any of its
   members have changed.
+  (拥有一个每 dentry 顺序锁来保护 dentry 的名称、父项和 inode，这样我们就可以原子地加载这个三元组，并检查其成员是否发生了变化。)
 * Dentry lookups (based on parent, candidate string tuple) recheck the parent
   sequence after the child is found in case anything changed in the parent
   during the path walk.
+  (dentry 查找(基于 parent、候选字符串元组)在找到子项后重新检查父项序列，以防路径遍历期间父项中发生了任何变化。)
 * inode is also RCU protected so we can load d_inode and use the inode for
   limited things.
+  (inode 也受 RCU 保护，因此我们可以加载 d_inode 并将 inode 用于有限用途。)
 * i_mode, i_uid, i_gid can be tested for exec permissions during path walk.
+  (在路径遍历期间可以测试 i_mode、i_uid、i_gid 的执行权限。)
 * i_op can be loaded.
+  (可以加载 i_op。)
 * When the destination dentry is reached, drop rcu there (ie. take d_lock,
   verify d_seq, increment refcount).
+  (到达目标 dentry 时，在那里降级 rcu(即获取 d_lock、验证 d_seq、递增引用计数)。)
 * If seqlock verification fails anywhere along the path, do a full restart
   of the path lookup in ref-walk mode. -ECHILD tends to be used (for want of
   a better errno) to signal an rcu-walk failure.
+  (如果在路径沿途任何地方顺序锁验证失败，则在 ref-walk 模式下完全重启路径查找。-ECHILD 往往被用(因为找不到更好的 errno)来表示 rcu-walk 失败。)
 
 The cases where rcu-walk cannot continue are:
+(rcu-walk 无法继续的情况有：)
 * NULL dentry (ie. any uncached path element)
+  (NULL dentry(即任何未缓存的路径元素))
 * Following links
+  (跟随链接)
 
 It may be possible eventually to make following links rcu-walk aware.
+(最终有可能让跟随链接也能感知 rcu-walk。)
 
 Uncached path elements will always require dropping to ref-walk mode, at the
 very least because i_mutex needs to be grabbed, and objects allocated.
+(未缓存的路径元素总是需要降级到 ref-walk 模式，至少因为需要获取 i_mutex 并分配对象。)
 
 Final note:
+(最后说明：)
 "store-free" path walking is not strictly store free. We take vfsmount lock
 and refcounts (both of which can be made per-cpu), and we also store to the
 stack (which is essentially CPU-local), and we also have to take locks and
 refcount on final dentry.
+("无存储"路径遍历并非严格的无存储。我们要获取 vfsmount 锁和引用计数(两者都可以做成每 CPU 的)，我们还要向栈写入(栈本质上是 CPU 本地的)，而且我们还必须在最后的 dentry 上获取锁和引用计数。)
 
 The point is that shared data, where practically possible, is not locked
 or stored into. The result is massive improvements in performance and
 scalability of path resolution.
+(关键是：在切实可行的范围内，共享数据不加锁、不写入。其结果是路径解析的性能和可扩展性得到巨大提升。)
 
 
 Interesting statistics
+(有趣的统计数字)
 ======================
 
 The following table gives rcu lookup statistics for a few simple workloads
@@ -344,6 +415,7 @@ again. Other cases are successful rcu-drops that are required before the final
 element, nodentry for missing dentry, revalidate for filesystem revalidate
 routine requiring rcu drop, permission for permission check requiring drop,
 and link for symlink traversal requiring drop.
+(下表给出了几个简单工作负载(2s12c24t Westmere，debian 非图形系统)的 rcu 查找统计。"Ungraceful"是指因 d_seq 失败而失败、需要重新进行整个路径查找的降级 rcu 尝试。其他各项是成功的 rcu 降级：最后一项元素之前所必需的降级；nodentry 表示缺少 dentry；revalidate 表示文件系统重新验证例程要求降级；permission 表示权限检查要求降级；link 表示符号链接遍历要求降级。)
 
      rcu-lookups     restart  nodentry          link  revalidate  permission
 bootup     47121           0      4624          1010       10283        7852
@@ -356,6 +428,7 @@ What this shows is that failed rcu-walk lookups, ie. ones that are restarted
 entirely with ref-walk, are quite rare. Even the "vfstest" case which
 specifically has concurrent renames/mkdir/rmdir/ creat/unlink/etc to exercise
 such races is not showing a huge amount of restarts.
+(这表明失败的 rcu-walk 查找——即完全用 ref-walk 重启的那些——相当罕见。即使是"vfstest"用例——它特意包含并发的重命名/mkdir/rmdir/creat/unlink 等操作来激发此类竞争——也没有显示出大量的重启。)
 
 Dropping from rcu-walk to ref-walk mean that we have encountered a dentry where
 the reference count needs to be taken for some reason. This is either because
@@ -363,6 +436,7 @@ we have reached the target of the path walk, or because we have encountered a
 condition that can't be resolved in rcu-walk mode.  Ideally, we drop rcu-walk
 only when we have reached the target dentry, so the other statistics show where
 this does not happen.
+(从 rcu-walk 降级到 ref-walk 意味着我们遇到了一个因某种原因需要获取引用计数的 dentry。这要么是因为我们已经到达路径遍历的目标，要么是因为我们遇到了无法在 rcu-walk 模式下解决的情况。理想情况下，我们只在到达目标 dentry 时才降级 rcu-walk，因此其他统计项显示了未能如此发生的地方。)
 
 Note that a graceful drop from rcu-walk mode due to something such as the
 dentry not existing (which can be common) is not necessarily a failure of
@@ -370,13 +444,17 @@ rcu-walk scheme, because some elements of the path may have been walked in
 rcu-walk mode. The further we get from common path elements (such as cwd or
 root), the less contended the dentry is likely to be. The closer we are to
 common path elements, the more likely they will exist in dentry cache.
+(注意，由于诸如 dentry 不存在之类的原因(这可能很常见)而从 rcu-walk 模式优雅降级，并不一定是 rcu-walk 方案的失败，因为路径的某些元素可能已经以 rcu-walk 模式遍历过了。我们离公共路径元素(例如 cwd 或根)越远，该 dentry 的争用可能就越少。我们离公共路径元素越近，它们就越可能存在于 dentry 缓存中。)
 
 
 Papers and other documentation on dcache locking
+(关于 dcache 加锁的论文和其他文档)
 ================================================
 
 1. Scaling dcache with RCU (https://linuxjournal.com/article.php?sid=7124).
+   (用 RCU 扩展 dcache。)
 
 2. http://lse.sourceforge.net/locking/dcache/dcache.html
 
 3. path-lookup.rst in this directory.
+   (本目录中的 path-lookup.rst。)

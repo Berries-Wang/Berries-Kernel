@@ -1,54 +1,70 @@
 =============================
 NFSv4.1 Server Implementation
 =============================
+(NFSv4.1 服务器实现)
 
 Server support for minorversion 1 can be controlled using the
 /proc/fs/nfsd/versions control file.  The string output returned
 by reading this file will contain either "+4.1" or "-4.1"
 correspondingly.
+(可以通过 /proc/fs/nfsd/versions 控制文件来控制服务器对次版本 1 的支持。读取该文件返回的字符串输出将相应地包含 "+4.1" 或 "-4.1"。)
 
 Currently, server support for minorversion 1 is enabled by default.
 It can be disabled at run time by writing the string "-4.1" to
 the /proc/fs/nfsd/versions control file.  Note that to write this
 control file, the nfsd service must be taken down.  You can use rpc.nfsd
 for this; see rpc.nfsd(8).
+(目前，服务器对次版本 1 的支持默认是启用的。可以在运行时通过向 /proc/fs/nfsd/versions 控制文件写入字符串 "-4.1" 来禁用它。注意，要写这个控制文件，必须先停掉 nfsd 服务。可以使用 rpc.nfsd 来完成；参见 rpc.nfsd(8)。)
 
 (Warning: older servers will interpret "+4.1" and "-4.1" as "+4" and
 "-4", respectively.  Therefore, code meant to work on both new and old
 kernels must turn 4.1 on or off *before* turning support for version 4
 on or off; rpc.nfsd does this correctly.)
+((警告：较老的服务器会把 "+4.1" 和 "-4.1" 分别解释为 "+4" 和 "-4"。因此，打算同时在新旧内核上工作的代码必须在开启或关闭版本 4 支持*之前*先开启或关闭 4.1；rpc.nfsd 正确地做到了这一点。))
 
 The NFSv4 minorversion 1 (NFSv4.1) implementation in nfsd is based
 on RFC 5661.
+(nfsd 中的 NFSv4 次版本 1(NFSv4.1)实现基于 RFC 5661。)
 
 From the many new features in NFSv4.1 the current implementation
 focuses on the mandatory-to-implement NFSv4.1 Sessions, providing
 "exactly once" semantics and better control and throttling of the
 resources allocated for each client.
+(在 NFSv4.1 的众多新特性中，当前实现聚焦于必须实现的 NFSv4.1 会话(Sessions)，提供"恰好一次"(exactly once)语义，以及对为每个客户端分配的资源的更好控制和节流。)
 
 The table below, taken from the NFSv4.1 document, lists
 the operations that are mandatory to implement (REQ), optional
 (OPT), and NFSv4.0 operations that are required not to implement (MNI)
 in minor version 1.  The first column indicates the operations that
 are not supported yet by the linux server implementation.
+(下表取自 NFSv4.1 文档，列出了在次版本 1 中必须实现(REQ)、可选(OPT)、以及要求不得实现的 NFSv4.0 操作(MNI)。第一列指示 Linux 服务器实现尚未支持的操作。)
 
 The OPTIONAL features identified and their abbreviations are as follows:
+(所标识的可选(OPTIONAL)特性及其缩写如下：)
 
 - **pNFS**	Parallel NFS
+                (并行 NFS)
 - **FDELG**	File Delegations
+                (文件委托)
 - **DDELG**	Directory Delegations
+                (目录委托)
 
 The following abbreviations indicate the linux server implementation status.
+(以下缩写指示 Linux 服务器的实现状态。)
 
 - **I**	Implemented NFSv4.1 operations.
+        (已实现的 NFSv4.1 操作。)
 - **NS**	Not Supported.
+                (不支持。)
 - **NS\***	Unimplemented optional feature.
+                (未实现的可选特性。)
 
 Operations
+(操作)
 ==========
 
 +-----------------------+----------------------+---------------------+---------------------------+----------------+
-| Implementation status | Operation            | REQ,REC, OPT or NMI | Feature (REQ, REC or OPT) | Definition     |
+| Implementation status (实现状态) | Operation (操作)            | REQ,REC, OPT or NMI (REQ、REC、OPT 或 NMI) | Feature (REQ, REC or OPT) (特性(REQ, REC 或 OPT)) | Definition (定义)     |
 +=======================+======================+=====================+===========================+================+
 |                       | ACCESS               | REQ                 |                           | Section 18.1   |
 +-----------------------+----------------------+---------------------+---------------------------+----------------+
@@ -171,9 +187,10 @@ Operations
 
 
 Callback Operations
+(回调操作)
 ===================
 +-----------------------+-------------------------+---------------------+---------------------------+---------------+
-| Implementation status | Operation               | REQ,REC, OPT or NMI | Feature (REQ, REC or OPT) | Definition    |
+| Implementation status (实现状态) | Operation (操作)               | REQ,REC, OPT or NMI (REQ、REC、OPT 或 NMI) | Feature (REQ, REC or OPT) (特性(REQ, REC 或 OPT)) | Definition (定义)    |
 +=======================+=========================+=====================+===========================+===============+
 |                       | CB_GETATTR              | OPT                 | FDELG (REQ)               | Section 20.1  |
 +-----------------------+-------------------------+---------------------+---------------------------+---------------+
@@ -220,37 +237,46 @@ Callback Operations
 
 
 Implementation notes:
+(实现说明)
 =====================
 
 SSV:
   The spec claims this is mandatory, but we don't actually know of any
   implementations, so we're ignoring it for now.  The server returns
   NFS4ERR_ENCR_ALG_UNSUPP on EXCHANGE_ID, which should be future-proof.
+  (规范声称这是强制的，但我们实际上并不知道有任何实现，所以我们目前忽略它。服务器在 EXCHANGE_ID 上返回 NFS4ERR_ENCR_ALG_UNSUPP，这应当足以面向未来。)
 
 GSS on the backchannel:
   Again, theoretically required but not widely implemented (in
   particular, the current Linux client doesn't request it).  We return
   NFS4ERR_ENCR_ALG_UNSUPP on CREATE_SESSION.
+  (回溯通道(backchannel)上的 GSS：同样，理论上是必需的，但并未被广泛实现(特别是当前的 Linux 客户端不会请求它)。我们在 CREATE_SESSION 上返回 NFS4ERR_ENCR_ALG_UNSUPP。)
 
 DELEGPURGE:
   mandatory only for servers that support CLAIM_DELEGATE_PREV and/or
   CLAIM_DELEG_PREV_FH (which allows clients to keep delegations that
   persist across client reboots).  Thus we need not implement this for
   now.
+  (仅对支持 CLAIM_DELEGATE_PREV 和/或 CLAIM_DELEG_PREV_FH 的服务器来说是强制的(它允许客户端保留能够跨客户端重启而存续的委托)。因此我们目前无需实现它。)
 
 EXCHANGE_ID:
   implementation ids are ignored
+  (实现 ID 会被忽略)
 
 CREATE_SESSION:
   backchannel attributes are ignored
+  (回溯通道属性会被忽略)
 
 SEQUENCE:
   no support for dynamic slot table renegotiation (optional)
+  (不支持动态槽位表重新协商(可选))
 
 Nonstandard compound limitations:
   No support for a sessions fore channel RPC compound that requires both a
   ca_maxrequestsize request and a ca_maxresponsesize reply, so we may
   fail to live up to the promise we made in CREATE_SESSION fore channel
   negotiation.
+  (不支持那种同时需要 ca_maxrequestsize 大小的请求和 ca_maxresponsesize 大小的应答的会话 fore channel RPC compound，因此我们可能无法兑现我们在 CREATE_SESSION fore channel 协商中所作出的承诺。)
 
 See also http://wiki.linux-nfs.org/wiki/index.php/Server_4.0_and_4.1_issues.
+(另请参见 http://wiki.linux-nfs.org/wiki/index.php/Server_4.0_and_4.1_issues。)
