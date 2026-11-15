@@ -4,7 +4,10 @@
 J1939 Documentation
 ===================
 
+(J1939 文档)
+
 Overview / What Is J1939
+(概述 / 什么是 J1939)
 ========================
 
 SAE J1939 defines a higher layer protocol on CAN. It implements a more
@@ -14,22 +17,29 @@ J1939 on the application level, like MilCAN A, NMEA2000, and especially
 ISO-11783 (ISOBUS). This last one specifies the so-called ETP (Extended
 Transport Protocol), which has been included in this implementation. This
 results in a maximum packet size of ((2 ^ 24) - 1) * 7 bytes == 111 MiB.
+(SAE J1939 在 CAN 之上定义了一个更高层的协议。它实现了更为复杂的寻址方案，并将最大数据包大小扩展到 8 字节以上。存在若干派生规范，它们在应用层与原始 J1939 有所差异，例如 MilCAN A、NMEA2000，尤其是 ISO-11783 (ISOBUS)。其中最后这一规范定义了所谓的 ETP (Extended Transport Protocol，扩展传输协议)，本实现已将其包含在内。这使得最大数据包大小可达 ((2 ^ 24) - 1) * 7 字节 == 111 MiB。)
 
 Specifications used
+(所用规范)
 -------------------
 
 * SAE J1939-21 : data link layer
+  (SAE J1939-21：数据链路层)
 * SAE J1939-81 : network management
+  (SAE J1939-81：网络管理)
 * ISO 11783-6  : Virtual Terminal (Extended Transport Protocol)
+  (ISO 11783-6：虚拟终端 (扩展传输协议))
 
 .. _j1939-motivation:
 
 Motivation
+(动机)
 ==========
 
 Given the fact there's something like SocketCAN with an API similar to BSD
 sockets, we found some reasons to justify a kernel implementation for the
 addressing and transport methods used by J1939.
+(鉴于已有类似 SocketCAN 这样提供类 BSD 套接字 API 的框架，我们有理由认为，在内核中实现 J1939 所使用的寻址与传输方法是正当的。)
 
 * **Addressing:** when a process on an ECU communicates via J1939, it should
   not necessarily know its source address. Although, at least one process per
@@ -38,12 +48,14 @@ addressing and transport methods used by J1939.
   cooperating for the same ECU, are not duplicated. This way of working is
   closely related to the UNIX concept, where programs do just one thing and do
   it well.
+  (**寻址**：当 ECU 上的某个进程通过 J1939 通信时，它不一定需要知道自己的源地址。不过，每个 ECU 至少应有一个进程知道该源地址，其他进程应能复用这个地址。这样，为同一个 ECU 协同工作的不同进程就不必重复配置地址参数。这种工作方式与 UNIX 的理念密切相关：程序只做一件事，并把它做好。)
 
 * **Dynamic addressing:** Address Claiming in J1939 is time critical.
   Furthermore, data transport should be handled properly during the address
   negotiation. Putting this functionality in the kernel eliminates it as a
   requirement for _every_ user space process that communicates via J1939. This
   results in a consistent J1939 bus with proper addressing.
+  (**动态寻址**：J1939 中的地址声明 (Address Claiming) 对时间非常敏感。此外，在地址协商期间还必须妥善处理数据传输。把这一功能放入内核后，_每个_通过 J1939 通信的用户态进程都不再需要自行实现它。这使得 J1939 总线拥有一致的、规范的寻址。)
 
 * **Transport:** both TP & ETP reuse some PGNs to relay big packets over them.
   Different processes may thus use the same TP & ETP PGNs without actually
@@ -51,10 +63,12 @@ addressing and transport methods used by J1939.
   (synchronized) between different processes. The kernel solves this problem
   properly and eliminates the serialization (synchronization) as a requirement
   for _every_ user space process that communicates via J1939.
+  (**传输**：TP 与 ETP 都会复用某些 PGN 来中继大数据包。因此，不同进程可能在不知情的情况下使用相同的 TP 与 ETP PGN。各个 TP 与 ETP 会话_必须_在不同进程之间串行化 (同步)。内核妥善解决了这一问题，使得_每个_通过 J1939 通信的用户态进程都不再需要自行实现串行化 (同步)。)
 
 J1939 defines some other features (relaying, gateway, fast packet transport,
 ...). In-kernel code for these would not contribute to protocol stability.
 Therefore, these parts are left to user space.
+(J1939 还定义了一些其他特性 (中继、网关、快速数据包传输等)。为这些功能编写内核代码无助于协议的稳定性，因此这些部分留给用户态实现。)
 
 The J1939 sockets operate on CAN network devices (see SocketCAN). Any J1939
 user space library operating on CAN raw sockets will still operate properly.
@@ -62,11 +76,14 @@ Since such a library does not communicate with the in-kernel implementation, car
 must be taken that these two do not interfere. In practice, this means they
 cannot share ECU addresses. A single ECU (or virtual ECU) address is used by
 the library exclusively, or by the in-kernel system exclusively.
+(J1939 套接字工作在 CAN 网络设备之上 (参见 SocketCAN)。任何基于 CAN 原始套接字工作的 J1939 用户态库仍能正常运行。由于这类库不会与内核内实现进行通信，因此必须注意二者不得相互干扰。实际上，这意味着它们不能共享 ECU 地址：一个 ECU (或虚拟 ECU) 地址要么由用户态库独占使用，要么由内核内系统独占使用。)
 
 J1939 concepts
+(J1939 概念)
 ==============
 
 Data Sent to the J1939 Stack
+(发送到 J1939 协议栈的数据)
 ----------------------------
 
 The data buffers sent to the J1939 stack from user space are not CAN frames
@@ -74,133 +91,165 @@ themselves. Instead, they are payloads that the J1939 stack converts into
 proper CAN frames based on the size of the buffer and the type of transfer. The
 size of the buffer influences how the stack processes the data and determines
 the internal code path used for the transfer.
+(从用户态发送到 J1939 协议栈的数据缓冲区本身并不是 CAN 帧，而是有效载荷；J1939 协议栈会根据缓冲区大小和传输类型将其转换为正确的 CAN 帧。缓冲区的大小会影响协议栈处理数据的方式，并决定该传输所使用的内部代码路径。)
 
 **Handling of Different Buffer Sizes:**
+(**不同缓冲区大小的处理方式：**)
 
 - **Buffers with a size of 8 bytes or less:**
+  (**大小为 8 字节或更小的缓冲区：**)
 
   - These are handled as simple sessions internally within the stack.
+    (在协议栈内部，它们被作为简单会话处理。)
 
   - The stack converts the buffer directly into a single CAN frame without
     fragmentation.
+    (协议栈将缓冲区直接转换为单个 CAN 帧，无需分片。)
 
   - This type of transfer does not require an actual client (receiver) on the
     receiving side.
+    (这种传输类型不需要接收侧存在实际的客户端 (接收方)。)
 
 - **Buffers up to 1785 bytes:**
+  (**最大 1785 字节的缓冲区：**)
 
   - These are automatically handled as J1939 Transport Protocol (TP) transfers.
+    (它们会被自动作为 J1939 传输协议 (TP) 传输来处理。)
 
   - Internally, the stack splits the buffer into multiple 8-byte CAN frames.
+    (协议栈在内部把缓冲区拆分为多个 8 字节的 CAN 帧。)
 
   - TP transfers can be unicast or broadcast.
+    (TP 传输可以是单播或广播。)
 
   - **Broadcast TP:** Does not require a receiver on the other side and can be
     used in broadcast scenarios.
+    (**广播 TP**：不需要对端有接收方，可用于广播场景。)
 
   - **Unicast TP:** Requires an active receiver (client) on the other side to
     acknowledge the transfer.
+    (**单播 TP**：需要对端存在活动的接收方 (客户端) 来确认传输。)
 
 - **Buffers from 1786 bytes up to 111 MiB:**
+  (**1786 字节至 111 MiB 的缓冲区：**)
 
   - These are handled as ISO 11783 Extended Transport Protocol (ETP) transfers.
+    (它们会被作为 ISO 11783 扩展传输协议 (ETP) 传输来处理。)
 
   - ETP transfers are used for larger payloads and are split into multiple CAN
     frames internally.
+    (ETP 传输用于更大的有效载荷，并会在内部分拆为多个 CAN 帧。)
 
   - **ETP transfers (unicast):** Require a receiver on the other side to
     process the incoming data and acknowledge each step of the transfer.
+    (**ETP 传输 (单播)**：需要对端有接收方来处理收到的数据，并确认传输的每一步。)
 
   - ETP transfers cannot be broadcast like TP transfers, and always require a
     receiver for operation.
+    (ETP 传输不能像 TP 传输那样广播，且始终需要有接收方才能工作。)
 
 **Non-Blocking Operation with `MSG_DONTWAIT`:**
+(**配合 `MSG_DONTWAIT` 的非阻塞操作：**)
 
 The J1939 stack supports non-blocking operation when used in combination with
 the `MSG_DONTWAIT` flag. In this mode, the stack attempts to take as much data
 as the available memory for the socket allows. It returns the amount of data
 that was successfully taken, and it is the responsibility of user space to
 monitor this value and handle partial transfers.
+(J1939 协议栈在与 `MSG_DONTWAIT` 标志配合使用时支持非阻塞操作。在这种模式下，协议栈会尽可能多地接收数据，上限为该套接字的可用内存所允许的量。它返回成功接收的数据量，用户态需负责监视该值并处理部分传输的情况。)
 
 - If the stack cannot take the entire buffer, it returns the number of bytes
   successfully taken, and user space should handle the remainder.
+  (如果协议栈无法接收整个缓冲区，它会返回成功接收的字节数，剩余部分应由用户态处理。)
 
 - **Error handling:** When using `MSG_DONTWAIT`, the user must rely on the
   error queue to detect transfer errors. See the **SO_J1939_ERRQUEUE** section
   for details on how to subscribe to error notifications. Without the error
   queue, there is no other way for user space to be notified of transfer errors
   during non-blocking operations.
+  (**错误处理**：使用 `MSG_DONTWAIT` 时，用户必须依靠错误队列来检测传输错误。有关如何订阅错误通知的详细信息，请参阅 **SO_J1939_ERRQUEUE** 一节。如果没有错误队列，在非阻塞操作期间用户态就没有其他途径获知传输错误。)
 
 **Behavior and Requirements:**
+(**行为与要求：**)
 
 - **Simple transfers (<= 8 bytes):** Do not require a receiver on the other
   side, making them easy to send without needing address claiming or
   coordination with a destination.
+  (**简单传输 (<= 8 字节)**：不需要对端有接收方，因而无需地址声明或与目标进行协调即可轻松发送。)
 
 - **Unicast TP/ETP:** Requires a receiver on the other side to complete the
   transfer. The receiver must acknowledge the transfer for the session to
   proceed successfully.
+  (**单播 TP/ETP**：需要对端有接收方才能完成传输。接收方必须对传输进行确认，会话才能成功进行。)
 
 - **Broadcast TP:** Allows sending data without a receiver, but only works for
   TP transfers. ETP cannot be broadcast and always needs a receiving client.
+  (**广播 TP**：允许在没有接收方的情况下发送数据，但仅适用于 TP 传输。ETP 无法广播，始终需要有接收客户端。)
 
 These different behaviors depend heavily on the size of the buffer provided to
 the stack, and the appropriate transport mechanism (TP or ETP) is selected
 based on the payload size. The stack automatically manages the fragmentation
 and reassembly of large payloads and ensures that the correct CAN frames are
 generated and transmitted for each session.
+(这些不同的行为在很大程度上取决于提供给协议栈的缓冲区大小，协议栈会根据有效载荷大小选择合适的传输机制 (TP 或 ETP)。协议栈会自动管理大数据载荷的分片与重组，并确保为每个会话生成并传输正确的 CAN 帧。)
 
 PGN
+(PGN)
 ---
 
 The J1939 protocol uses the 29-bit CAN identifier with the following structure:
+(J1939 协议使用具有如下结构的 29 位 CAN 标识符：)
 
   ============  ==============  ====================
-  29 bit CAN-ID
+  29 bit CAN-ID (29 位 CAN 标识符)
   --------------------------------------------------
-  Bit positions within the CAN-ID
+  Bit positions within the CAN-ID (CAN 标识符内的位位置)
   --------------------------------------------------
   28 ... 26     25 ... 8        7 ... 0
   ============  ==============  ====================
   Priority      PGN             SA (Source Address)
+  (优先级)      (参数组编号)    (源地址)
   ============  ==============  ====================
 
 The PGN (Parameter Group Number) is a number to identify a packet. The PGN
 is composed as follows:
+(PGN (Parameter Group Number，参数组编号) 是用于标识数据包的编号。PGN 的构成如下：)
 
   ============  ==============  =================  =================
-  PGN
+  PGN (参数组编号)
   ------------------------------------------------------------------
-  Bit positions within the CAN-ID
+  Bit positions within the CAN-ID (CAN 标识符内的位位置)
   ------------------------------------------------------------------
   25            24              23 ... 16          15 ... 8
   ============  ==============  =================  =================
   R (Reserved)  DP (Data Page)  PF (PDU Format)    PS (PDU Specific)
+  (保留)        (数据页)        (PDU 格式)         (PDU 特定)
   ============  ==============  =================  =================
 
 In J1939-21 distinction is made between PDU1 format (where PF < 240) and PDU2
 format (where PF >= 240). Furthermore, when using the PDU2 format, the PS-field
 contains a so-called Group Extension, which is part of the PGN. When using PDU2
 format, the Group Extension is set in the PS-field.
+(在 J1939-21 中，区分 PDU1 格式 (PF < 240) 和 PDU2 格式 (PF >= 240)。此外，使用 PDU2 格式时，PS 字段包含所谓的组扩展 (Group Extension)，它是 PGN 的一部分。使用 PDU2 格式时，组扩展被设置在 PS 字段中。)
 
   ==============  ========================
-  PDU1 Format (specific) (peer to peer)
+  PDU1 Format (specific) (peer to peer) (PDU1 格式 (特定) (点对点))
   ----------------------------------------
-  Bit positions within the CAN-ID
+  Bit positions within the CAN-ID (CAN 标识符内的位位置)
   ----------------------------------------
   23 ... 16       15 ... 8
   ==============  ========================
-  00h ... EFh     DA (Destination address)
+  00h ... EFh     DA (Destination address) (目标地址)
   ==============  ========================
 
   ==============  ========================
-  PDU2 Format (global) (broadcast)
+  PDU2 Format (global) (broadcast) (PDU2 格式 (全局) (广播))
   ----------------------------------------
-  Bit positions within the CAN-ID
+  Bit positions within the CAN-ID (CAN 标识符内的位位置)
   ----------------------------------------
   23 ... 16       15 ... 8
   ==============  ========================
-  F0h ... FFh     GE (Group Extension)
+  F0h ... FFh     GE (Group Extension) (组扩展)
   ==============  ========================
 
 On the other hand, when using PDU1 format, the PS-field contains a so-called
@@ -208,53 +257,69 @@ Destination Address, which is _not_ part of the PGN. When communicating a PGN
 from user space to kernel (or vice versa) and PDU1 format is used, the PS-field
 of the PGN shall be set to zero. The Destination Address shall be set
 elsewhere.
+(另一方面，使用 PDU1 格式时，PS 字段包含所谓的目标地址 (Destination Address)，它并非 PGN 的一部分。在用户态与内核之间传递 PGN 时 (无论哪个方向)，若使用 PDU1 格式，则 PGN 的 PS 字段应置为零。目标地址应在其他地方设置。)
 
 Regarding PGN mapping to 29-bit CAN identifier, the Destination Address shall
 be get/set from/to the appropriate bits of the identifier by the kernel.
+(关于 PGN 到 29 位 CAN 标识符的映射，目标地址由内核从标识符的相应位中读取/写入。)
 
 
 Addressing
+(寻址)
 ----------
 
 Both static and dynamic addressing methods can be used.
+(静态寻址与动态寻址两种方法均可使用。)
 
 For static addresses, no extra checks are made by the kernel and provided
 addresses are considered right. This responsibility is for the OEM or system
 integrator.
+(对于静态地址，内核不做额外检查，所提供的地址被视为正确。这一责任由 OEM 或系统集成商承担。)
 
 For dynamic addressing, so-called Address Claiming, extra support is foreseen
 in the kernel. In J1939 any ECU is known by its 64-bit NAME. At the moment of
 a successful address claim, the kernel keeps track of both NAME and source
 address being claimed. This serves as a base for filter schemes. By default,
 packets with a destination that is not locally will be rejected.
+(对于动态寻址，即所谓的地址声明 (Address Claiming)，内核提供了额外的支持。在 J1939 中，每个 ECU 都通过其 64 位 NAME 来标识。在地址声明成功的那一刻，内核会同时记录被声明的 NAME 和源地址。这可作为过滤方案的基础。默认情况下，目的地不在本地的数据包将被拒绝。)
 
 Mixed mode packets (from a static to a dynamic address or vice versa) are
 allowed. The BSD sockets define separate API calls for getting/setting the
 local & remote address and are applicable for J1939 sockets.
+(混合模式的数据包 (从静态地址到动态地址，或反之) 是允许的。BSD 套接字为获取/设置本地与远程地址定义了独立的 API 调用，这些调用同样适用于 J1939 套接字。)
 
 Filtering
+(过滤)
 ---------
 
 J1939 defines white list filters per socket that a user can set in order to
 receive a subset of the J1939 traffic. Filtering can be based on:
+(J1939 为每个套接字定义了白名单过滤器，用户可以设置这些过滤器以接收 J1939 流量的一个子集。过滤可以基于：)
 
 * SA
+  (SA (源地址))
 * SOURCE_NAME
+  (SOURCE_NAME (源名称))
 * PGN
+  (PGN (参数组编号))
 
 When multiple filters are in place for a single socket, and a packet comes in
 that matches several of those filters, the packet is only received once for
 that socket.
+(当单个套接字上设置了多个过滤器，且到来的数据包匹配其中多个过滤器时，该数据包对于该套接字只会被接收一次。)
 
 How to Use J1939
+(如何使用 J1939)
 ================
 
 API Calls
+(API 调用)
 ---------
 
 On CAN, you first need to open a socket for communicating over a CAN network.
 To use J1939, ``#include <linux/can/j1939.h>``. From there, ``<linux/can.h>`` will be
 included too. To open a socket, use:
+(在 CAN 上，首先需要打开一个套接字才能通过 CAN 网络进行通信。要使用 J1939，需包含 ``#include <linux/can/j1939.h>`` 。其中也会包含 ``<linux/can.h>`` 。打开套接字的方法如下：)
 
 .. code-block:: C
 
@@ -264,6 +329,7 @@ J1939 does use ``SOCK_DGRAM`` sockets. In the J1939 specification, connections a
 mentioned in the context of transport protocol sessions. These still deliver
 packets to the other end (using several CAN packets). ``SOCK_STREAM`` is not
 supported.
+(J1939 使用的是 ``SOCK_DGRAM`` 套接字。在 J1939 规范中，连接是在传输协议会话的语境下提到的。这类会话仍会把数据包传递到另一端 (使用若干个 CAN 数据包)。不支持 ``SOCK_STREAM`` 。)
 
 After the successful creation of the socket, you would normally use the ``bind(2)``
 and/or ``connect(2)`` system call to bind the socket to a CAN interface. After
@@ -271,16 +337,20 @@ binding and/or connecting the socket, you can ``read(2)`` and ``write(2)`` from/
 socket or use ``send(2)``, ``sendto(2)``, ``sendmsg(2)`` and the ``recv*()`` counterpart
 operations on the socket as usual. There are also J1939 specific socket options
 described below.
+(成功创建套接字之后，通常使用 ``bind(2)`` 和/或 ``connect(2)`` 系统调用将套接字绑定到 CAN 接口。绑定和/或连接套接字之后，就可以照常在套接字上进行 ``read(2)`` 和 ``write(2)`` ，或使用 ``send(2)`` 、 ``sendto(2)`` 、 ``sendmsg(2)`` 以及对应的 ``recv*()`` 操作。此外还有 J1939 特有的套接字选项，如下所述。)
 
 In order to send data, a ``bind(2)`` must have been successful. ``bind(2)`` assigns a
 local address to a socket.
+(要发送数据，必须已成功执行 ``bind(2)`` 。 ``bind(2)`` 为套接字分配一个本地地址。)
 
 Different from CAN is that the payload data is just the data that get sends,
 without its header info. The header info is derived from the sockaddr supplied
 to ``bind(2)``, ``connect(2)``, ``sendto(2)`` and ``recvfrom(2)``. A ``write(2)`` with size 4 will
 result in a packet with 4 bytes.
+(与 CAN 不同的是，载荷数据就是实际发送的数据，不含头部信息。头部信息由提供给 ``bind(2)`` 、 ``connect(2)`` 、 ``sendto(2)`` 和 ``recvfrom(2)`` 的 sockaddr 推导得出。大小为 4 字节的 ``write(2)`` 会产生一个 4 字节的数据包。)
 
 The sockaddr structure has extensions for use with J1939 as specified below:
+(sockaddr 结构体为配合 J1939 使用而做了如下扩展：)
 
 .. code-block:: C
 
@@ -303,13 +373,17 @@ The sockaddr structure has extensions for use with J1939 as specified below:
       }
 
 ``can_family`` & ``can_ifindex`` serve the same purpose as for other SocketCAN sockets.
+(``can_family`` 与 ``can_ifindex`` 的作用与其他 SocketCAN 套接字相同。)
 
 ``can_addr.j1939.pgn`` specifies the PGN (max 0x3ffff). Individual bits are
 specified above.
+(``can_addr.j1939.pgn`` 指定 PGN (最大 0x3ffff)。各个位的含义已在上面说明。)
 
 ``can_addr.j1939.name`` contains the 64-bit J1939 NAME.
+(``can_addr.j1939.name`` 包含 64 位的 J1939 NAME。)
 
 ``can_addr.j1939.addr`` contains the address.
+(``can_addr.j1939.addr`` 包含地址。)
 
 The ``bind(2)`` system call assigns the local address, i.e. the source address when
 sending packages. If a PGN during ``bind(2)`` is set, it's used as a RX filter.
@@ -318,31 +392,40 @@ it is used as a receive filter, too. It will match the destination NAME or ADDR
 of the incoming packet. The NAME filter will work only if appropriate Address
 Claiming for this name was done on the CAN bus and registered/cached by the
 kernel.
+(``bind(2)`` 系统调用分配本地地址，即发送数据包时使用的源地址。如果在 ``bind(2)`` 时设置了 PGN，它将被用作 RX 过滤器，即只接收 PGN 匹配的数据包。如果设置了 ADDR 或 NAME，它也被用作接收过滤器，会匹配到来数据包的目的 NAME 或 ADDR。NAME 过滤器只有在该 NAME 已在 CAN 总线上完成相应的地址声明、并由内核注册/缓存的情况下才能生效。)
 
 On the other hand ``connect(2)`` assigns the remote address, i.e. the destination
 address. The PGN from ``connect(2)`` is used as the default PGN when sending
 packets. If ADDR or NAME is set it will be used as the default destination ADDR
 or NAME. Further a set ADDR or NAME during ``connect(2)`` is used as a receive
 filter. It will match the source NAME or ADDR of the incoming packet.
+(另一方面， ``connect(2)`` 分配远程地址，即目的地址。 ``connect(2)`` 设置的 PGN 在发送数据包时用作默认 PGN。如果设置了 ADDR 或 NAME，它将被用作默认的目的 ADDR 或 NAME。此外， ``connect(2)`` 期间设置的 ADDR 或 NAME 还会被用作接收过滤器，匹配到来数据包的源 NAME 或 ADDR。)
 
 Both ``write(2)`` and ``send(2)`` will send a packet with local address from ``bind(2)`` and the
 remote address from ``connect(2)``. Use ``sendto(2)`` to overwrite the destination
 address.
+(``write(2)`` 和 ``send(2)`` 发送的数据包使用来自 ``bind(2)`` 的本地地址和来自 ``connect(2)`` 的远程地址。可使用 ``sendto(2)`` 覆盖目的地址。)
 
 If ``can_addr.j1939.name`` is set (!= 0) the NAME is looked up by the kernel and
 the corresponding ADDR is used. If ``can_addr.j1939.name`` is not set (== 0),
 ``can_addr.j1939.addr`` is used.
+(如果设置了 ``can_addr.j1939.name`` (!= 0)，内核会查找该 NAME 并使用对应的 ADDR。如果未设置 ``can_addr.j1939.name`` (== 0)，则使用 ``can_addr.j1939.addr`` 。)
 
 When creating a socket, reasonable defaults are set. Some options can be
 modified with ``setsockopt(2)`` & ``getsockopt(2)``.
+(创建套接字时会设置合理的默认值。部分选项可通过 ``setsockopt(2)`` 与 ``getsockopt(2)`` 修改。)
 
 RX path related options:
+(与 RX 路径相关的选项：)
 
 - ``SO_J1939_FILTER`` - configure array of filters
+  (``SO_J1939_FILTER`` - 配置过滤器数组)
 - ``SO_J1939_PROMISC`` - disable filters set by ``bind(2)`` and ``connect(2)``
+  (``SO_J1939_PROMISC`` - 禁用由 ``bind(2)`` 和 ``connect(2)`` 设置的过滤器)
 
 By default no broadcast packets can be send or received. To enable sending or
 receiving broadcast packets use the socket option ``SO_BROADCAST``:
+(默认情况下不能发送或接收广播数据包。要启用广播数据包的发送或接收，请使用套接字选项 ``SO_BROADCAST`` ：)
 
 .. code-block:: C
 
@@ -350,6 +433,7 @@ receiving broadcast packets use the socket option ``SO_BROADCAST``:
      setsockopt(sock, SOL_SOCKET, SO_BROADCAST, &value, sizeof(value));
 
 The following diagram illustrates the RX path:
+(下图说明了 RX 路径：)
 
 .. code::
 
@@ -383,17 +467,23 @@ The following diagram illustrates the RX path:
      +---------------------------+
 
 TX path related options:
+(与 TX 路径相关的选项：)
 ``SO_J1939_SEND_PRIO`` - change default send priority for the socket
+(``SO_J1939_SEND_PRIO`` - 更改套接字的默认发送优先级)
 
 Message Flags during send() and Related System Calls
+(send() 及相关系统调用期间的消息标志)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ``send(2)``, ``sendto(2)`` and ``sendmsg(2)`` take a 'flags' argument. Currently
 supported flags are:
+(``send(2)`` 、 ``sendto(2)`` 和 ``sendmsg(2)`` 接受一个 'flags' 参数。当前支持的标志有：)
 
 * ``MSG_DONTWAIT``, i.e. non-blocking operation.
+  (``MSG_DONTWAIT``，即非阻塞操作。)
 
 recvmsg(2)
+(recvmsg(2))
 ^^^^^^^^^^
 
 In most cases ``recvmsg(2)`` is needed if you want to extract more information than
@@ -403,6 +493,7 @@ the msghdr in the ``recvmsg(2)`` call. They can be extracted using ``cmsg(3)`` m
 with ``cmsg_level == SOL_J1939 && cmsg_type == SCM_J1939_DEST_ADDR``,
 ``SCM_J1939_DEST_NAME`` or ``SCM_J1939_PRIO``. The returned data is a ``uint8_t`` for
 ``priority`` and ``dst_addr``, and ``uint64_t`` for ``dst_name``.
+(在大多数情况下，如果想提取 ``recvfrom(2)`` 无法提供的更多信息，就需要使用 ``recvmsg(2)`` ，例如数据包优先级和时间戳。目标地址、名称和数据包优先级 (如适用) 会附着在 ``recvmsg(2)`` 调用的 msghdr 上。可以使用 ``cmsg(3)`` 宏提取它们，条件是 ``cmsg_level == SOL_J1939 && cmsg_type == SCM_J1939_DEST_ADDR`` 、 ``SCM_J1939_DEST_NAME`` 或 ``SCM_J1939_PRIO`` 。返回的数据中， ``priority`` 和 ``dst_addr`` 是 ``uint8_t`` ， ``dst_name`` 是 ``uint64_t`` 。)
 
 .. code-block:: C
 
@@ -423,12 +514,15 @@ with ``cmsg_level == SOL_J1939 && cmsg_type == SCM_J1939_DEST_ADDR``,
 	}
 
 setsockopt(2)
+(setsockopt(2))
 ^^^^^^^^^^^^^
 
 The ``setsockopt(2)`` function is used to configure various socket-level
 options for J1939 communication. The following options are supported:
+(``setsockopt(2)`` 函数用于配置 J1939 通信的各种套接字级选项。支持以下选项：)
 
 ``SO_J1939_FILTER``
+(``SO_J1939_FILTER``)
 ~~~~~~~~~~~~~~~~~~~
 
 The ``SO_J1939_FILTER`` option is essential when the default behavior of
@@ -437,34 +531,44 @@ default, ``bind(2)`` and ``connect(2)`` allow a socket to be associated with a
 single unicast or broadcast address. However, there are scenarios where finer
 control over the incoming messages is required, such as filtering by Parameter
 Group Number (PGN) rather than by addresses.
+(当 ``bind(2)`` 和 ``connect(2)`` 的默认行为无法满足特定用例时， ``SO_J1939_FILTER`` 选项就至关重要。默认情况下， ``bind(2)`` 和 ``connect(2)`` 只允许套接字关联到单个单播或广播地址。然而，有些场景需要对到来的消息进行更精细的控制，例如按参数组编号 (PGN) 而不是按地址进行过滤。)
 
 For example, in a system where multiple types of J1939 messages are being
 transmitted, a process might only be interested in a subset of those messages,
 such as specific PGNs, and not want to receive all messages destined for its
 address or broadcast to the bus.
+(例如，在一个传输多种类型 J1939 消息的系统中，进程可能只对其中一部分消息感兴趣 (如特定的 PGN)，而不希望接收所有发送到其地址或广播到总线上的消息。)
 
 By applying the ``SO_J1939_FILTER`` option, you can filter messages based on:
+(通过应用 ``SO_J1939_FILTER`` 选项，可以基于以下条件过滤消息：)
 
 - **Source Address (SA)**: Filter messages coming from specific source
   addresses.
+  (**源地址 (SA)**：过滤来自特定源地址的消息。)
 
 - **Source Name**: Filter messages coming from ECUs with specific NAME
   identifiers.
+  (**源名称**：过滤来自具有特定 NAME 标识符的 ECU 的消息。)
 
 - **Parameter Group Number (PGN)**: Focus on receiving messages with specific
   PGNs, filtering out irrelevant ones.
+  (**参数组编号 (PGN)**：专注于接收具有特定 PGN 的消息，过滤掉无关的消息。)
 
 This filtering mechanism is particularly useful when:
+(以下情况下，这种过滤机制尤其有用：)
 
 - You want to receive a subset of messages based on their PGNs, even if the
   address is the same.
+  (希望根据 PGN 接收消息的一个子集，即使地址相同。)
 
 - You need to handle both broadcast and unicast messages but only care about
   certain message types or parameters.
+  (需要同时处理广播和单播消息，但只关心特定的消息类型或参数。)
 
 - The ``bind(2)`` and ``connect(2)`` functions only allow binding to a single
   address, which might not be sufficient if the process needs to handle multiple
   PGNs but does not want to open multiple sockets.
+  ( ``bind(2)`` 和 ``connect(2)`` 函数只允许绑定到单个地址；如果进程需要处理多个 PGN 却又不想打开多个套接字，这可能不够用。)
 
 To remove existing filters, you can pass ``optval == NULL`` or ``optlen == 0``
 to ``setsockopt(2)``. This will clear all currently set filters. If you want to
@@ -472,8 +576,10 @@ to ``setsockopt(2)``. This will clear all currently set filters. If you want to
 ``setsockopt(2)``, as the new filter set will **replace** the old one entirely.
 This behavior ensures that any previous filter configuration is discarded and
 only the new set is applied.
+(要移除现有的过滤器，可以向 ``setsockopt(2)`` 传入 ``optval == NULL`` 或 ``optlen == 0`` 。这将清除当前已设置的所有过滤器。如果想更新过滤器集合，必须把更新后的过滤器集合传给 ``setsockopt(2)`` ，因为新的过滤器集合会完全替换旧集合。这一行为确保任何先前的过滤器配置都被丢弃，只应用新的过滤器集合。)
 
 Example of removing all filters:
+(移除所有过滤器的示例：)
 
 .. code-block:: c
 
@@ -483,14 +589,18 @@ Example of removing all filters:
 applied using ``SO_J1939_FILTER`` is defined by ``J1939_FILTER_MAX``, which is
 set to 512. This means you can configure up to 512 individual filters to match
 your specific filtering needs.
+(**过滤器最大数量**：使用 ``SO_J1939_FILTER`` 可应用的过滤器最大数量由 ``J1939_FILTER_MAX`` 定义，其值为 512。也就是说，最多可以配置 512 个单独的过滤器来满足特定的过滤需求。)
 
 Practical use case: **Monitoring Address Claiming**
+(实际用例：**监视地址声明**)
 
 One practical use case is monitoring the J1939 address claiming process by
 filtering for specific PGNs related to address claiming. This allows a process
 to monitor and handle address claims without processing unrelated messages.
+(一个实际用例是通过过滤与地址声明相关的特定 PGN 来监视 J1939 地址声明过程。这使进程能够监视并处理地址声明，而无需处理无关的消息。)
 
 Example:
+(示例：)
 
 .. code-block:: c
 
@@ -513,8 +623,10 @@ address claiming: ``J1939_PGN_ADDRESS_CLAIMED``, ``J1939_PGN_REQUEST``, and
 ``J1939_PGN_ADDRESS_COMMANDED``. This is particularly useful in scenarios where
 you want to monitor and process address claims without being overwhelmed by
 other traffic on the J1939 network.
+(在这个示例中，套接字只会接收与地址声明相关的 PGN 的消息： ``J1939_PGN_ADDRESS_CLAIMED`` 、 ``J1939_PGN_REQUEST`` 和 ``J1939_PGN_ADDRESS_COMMANDED`` 。这在想要监视并处理地址声明、又不想被 J1939 网络上的其他流量淹没的场景中特别有用。)
 
 ``SO_J1939_PROMISC``
+(``SO_J1939_PROMISC``)
 ~~~~~~~~~~~~~~~~~~~~
 
 The ``SO_J1939_PROMISC`` option enables socket-level promiscuous mode. When
@@ -522,6 +634,7 @@ this option is enabled, the socket will receive all J1939 traffic, regardless
 of any filters set by ``bind()`` or ``connect()``. This is analogous to
 enabling promiscuous mode for an Ethernet interface, where all traffic on the
 network segment is captured.
+( ``SO_J1939_PROMISC`` 选项启用套接字级的混杂 (promiscuous) 模式。启用该选项后，无论 ``bind()`` 或 ``connect()`` 设置了什么过滤器，套接字都会接收所有 J1939 流量。这类似于在以太网接口上启用混杂模式，此时网段上的所有流量都会被捕获。)
 
 However, **`SO_J1939_FILTER` has a higher priority** compared to
 ``SO_J1939_PROMISC``. This means that even in promiscuous mode, you can reduce
@@ -529,15 +642,19 @@ the number of packets received by applying specific filters with
 `SO_J1939_FILTER`. The filters will limit which packets are passed to the
 socket, allowing for more refined traffic selection while promiscuous mode is
 active.
+(不过，与 ``SO_J1939_PROMISC`` 相比， **`SO_J1939_FILTER` 具有更高的优先级**。这意味着即使在混杂模式下，也可以通过应用 `SO_J1939_FILTER` 中的特定过滤器来减少接收到的数据包数量。过滤器会限制哪些数据包被传递给套接字，从而在混杂模式激活时实现更精细的流量筛选。)
 
 The acceptable value size for this option is ``sizeof(int)``, and the value is
 only differentiated between `0` and non-zero. A value of `0` disables
 promiscuous mode, while any non-zero value enables it.
+(该选项可接受的值大小为 ``sizeof(int)`` ，且只区分 `0` 与非零。值为 `0` 时禁用混杂模式，任何非零值都会启用它。)
 
 This combination can be useful for debugging or monitoring specific types of
 traffic while still capturing a broad set of messages.
+(这种组合可用于调试或监视特定类型的流量，同时仍能捕获大量消息。)
 
 Example:
+(示例：)
 
 .. code-block:: c
 
@@ -547,14 +664,17 @@ Example:
 In this example, setting ``value`` to any non-zero value (e.g., `1`) enables
 promiscuous mode, allowing the socket to receive all J1939 traffic on the
 network.
+(在这个示例中，将 ``value`` 设置为任何非零值 (如 `1`) 会启用混杂模式，使套接字能够接收网络上的所有 J1939 流量。)
 
 ``SO_BROADCAST``
+(``SO_BROADCAST``)
 ~~~~~~~~~~~~~~~~
 
 The ``SO_BROADCAST`` option enables the sending and receiving of broadcast
 messages. By default, broadcast messages are disabled for J1939 sockets. When
 this option is enabled, the socket will be allowed to send and receive
 broadcast packets on the J1939 network.
+( ``SO_BROADCAST`` 选项启用广播消息的发送与接收。默认情况下，J1939 套接字的广播消息是禁用的。启用该选项后，套接字将被允许在 J1939 网络上发送和接收广播数据包。)
 
 Due to the nature of the CAN bus as a shared medium, all messages transmitted
 on the bus are visible to all participants. In the context of J1939,
@@ -562,13 +682,16 @@ broadcasting refers to using a specific destination address field, where the
 destination address is set to a value that indicates the message is intended
 for all participants (usually a global address such as 0xFF). Enabling the
 broadcast option allows the socket to send and receive such broadcast messages.
+(由于 CAN 总线是共享介质的特性，总线上传输的所有消息对所有参与者都是可见的。在 J1939 的语境中，广播是指使用一个特定的目标地址字段，该目标地址被设置为一个表明消息面向所有参与者的值 (通常是 0xFF 这样的全局地址)。启用广播选项后，套接字即可发送和接收这类广播消息。)
 
 The acceptable value size for this option is ``sizeof(int)``, and the value is
 only differentiated between `0` and non-zero. A value of `0` disables the
 ability to send and receive broadcast messages, while any non-zero value
 enables it.
+(该选项可接受的值大小为 ``sizeof(int)`` ，且只区分 `0` 与非零。值为 `0` 时禁用广播消息的发送与接收，任何非零值都会启用它。)
 
 Example:
+(示例：)
 
 .. code-block:: c
 
@@ -577,8 +700,10 @@ Example:
 
 In this example, setting ``value`` to any non-zero value (e.g., `1`) enables
 the socket to send and receive broadcast messages.
+(在这个示例中，将 ``value`` 设置为任何非零值 (如 `1`) 会使套接字能够发送和接收广播消息。)
 
 ``SO_J1939_SEND_PRIO``
+(``SO_J1939_SEND_PRIO``)
 ~~~~~~~~~~~~~~~~~~~~~~
 
 The ``SO_J1939_SEND_PRIO`` option sets the priority of outgoing J1939 messages
@@ -586,17 +711,21 @@ for the socket. In J1939, messages can have different priorities, and lower
 numerical values indicate higher priority. This option allows the user to
 control the priority of messages sent from the socket by adjusting the priority
 bits in the CAN identifier.
+( ``SO_J1939_SEND_PRIO`` 选项设置该套接字发出的 J1939 消息的优先级。在 J1939 中，消息可以有不同的优先级，数值越小优先级越高。该选项通过调整 CAN 标识符中的优先级位，让用户控制从套接字发出的消息的优先级。)
 
 The acceptable value **size** for this option is ``sizeof(int)``, and the value
 is expected to be in the range of 0 to 7, where `0` is the highest priority,
 and `7` is the lowest. By default, the priority is set to `6` if this option is
 not explicitly configured.
+(该选项可接受的值大小为 ``sizeof(int)`` ，取值预期在 0 到 7 之间，其中 `0` 为最高优先级，`7` 为最低。如果未显式配置该选项，默认优先级为 `6` 。)
 
 Note that the priority values `0` and `1` can only be set if the process has
 the `CAP_NET_ADMIN` capability. These are reserved for high-priority traffic
 and require administrative privileges.
+(注意，只有进程拥有 `CAP_NET_ADMIN` 能力时才能设置优先级值 `0` 和 `1`。这些值保留给高优先级流量使用，需要管理员权限。)
 
 Example:
+(示例：)
 
 .. code-block:: c
 
@@ -605,8 +734,10 @@ Example:
 
 In this example, the priority is set to `3`, meaning the outgoing messages will
 be sent with a moderate priority level.
+(在这个示例中，优先级被设置为 `3` ，意味着发出的消息将以中等优先级发送。)
 
 ``SO_J1939_ERRQUEUE``
+(``SO_J1939_ERRQUEUE``)
 ~~~~~~~~~~~~~~~~~~~~~
 
 The ``SO_J1939_ERRQUEUE`` option enables the socket to receive error messages
@@ -614,43 +745,55 @@ from the error queue, providing diagnostic information about transmission
 failures, protocol violations, or other issues that occur during J1939
 communication. Once this option is set, user space is required to handle
 ``MSG_ERRQUEUE`` messages.
+( ``SO_J1939_ERRQUEUE`` 选项使套接字能够从错误队列接收错误消息，提供关于传输失败、协议违规或 J1939 通信期间出现的其他问题的诊断信息。一旦设置了该选项，用户态就必须处理 ``MSG_ERRQUEUE`` 消息。)
 
 Setting ``SO_J1939_ERRQUEUE`` to ``0`` will purge any currently present error
 messages in the error queue. When enabled, error messages can be retrieved
 using the ``recvmsg(2)`` system call.
+(将 ``SO_J1939_ERRQUEUE`` 设置为 ``0`` 会清除错误队列中当前存在的所有错误消息。启用后，可以使用 ``recvmsg(2)`` 系统调用取回错误消息。)
 
 When subscribing to the error queue, the following error events can be
 accessed:
+(订阅错误队列后，可以访问以下错误事件：)
 
 - **``J1939_EE_INFO_TX_ABORT``**: Transmission abort errors.
+  (**``J1939_EE_INFO_TX_ABORT``**：发送中止错误。)
 - **``J1939_EE_INFO_RX_RTS``**: Reception of RTS (Request to Send) control
   frames.
+  (**``J1939_EE_INFO_RX_RTS``**：收到 RTS (Request to Send) 控制帧。)
 - **``J1939_EE_INFO_RX_DPO``**: Reception of data packets with Data Page Offset
   (DPO).
+  (**``J1939_EE_INFO_RX_DPO``**：收到带数据页偏移 (DPO) 的数据包。)
 - **``J1939_EE_INFO_RX_ABORT``**: Reception abort errors.
+  (**``J1939_EE_INFO_RX_ABORT``**：接收中止错误。)
 
 The error queue can be used to correlate errors with specific message transfer
 sessions using the session ID (``tskey``). The session ID is assigned via the
 ``SOF_TIMESTAMPING_OPT_ID`` flag, which is set by enabling the
 ``SO_TIMESTAMPING`` option.
+(可以使用会话 ID (``tskey``) 通过错误队列把错误与特定的消息传输会话关联起来。会话 ID 通过 ``SOF_TIMESTAMPING_OPT_ID`` 标志分配，该标志在启用 ``SO_TIMESTAMPING`` 选项时设置。)
 
 If ``SO_J1939_ERRQUEUE`` is activated, the user is required to pull messages
 from the error queue, meaning that using plain ``recv(2)`` is not sufficient
 anymore. The user must use ``recvmsg(2)`` with appropriate flags to handle
 error messages. Failure to do so can result in the socket becoming blocked with
 unprocessed error messages in the queue.
+(如果激活了 ``SO_J1939_ERRQUEUE``，用户就必须从错误队列中取出消息，也就是说仅使用普通的 ``recv(2)`` 已不再足够。用户必须使用带适当标志的 ``recvmsg(2)`` 来处理错误消息。否则，队列中未处理的错误消息可能导致套接字被阻塞。)
 
 It is **recommended** that ``SO_J1939_ERRQUEUE`` be used in combination with
 ``SO_TIMESTAMPING`` in most cases. This enables proper error handling along
 with session tracking and timestamping, providing a more detailed analysis of
 message transfers and errors.
+(**建议**：在大多数情况下将 ``SO_J1939_ERRQUEUE`` 与 ``SO_TIMESTAMPING`` 结合使用。这样可以实现正确的错误处理，并同时进行会话跟踪与时间戳记录，从而对消息传输和错误进行更详细的分析。)
 
 The acceptable value **size** for this option is ``sizeof(int)``, and the value
 is only differentiated between ``0`` and non-zero. A value of ``0`` disables
 error queue reception and purges any existing error messages, while any
 non-zero value enables it.
+(该选项可接受的值大小为 ``sizeof(int)`` ，且只区分 ``0`` 与非零。值为 ``0`` 时禁用错误队列接收并清除所有已存在的错误消息，任何非零值都会启用它。)
 
 Example:
+(示例：)
 
 .. code-block:: c
 
@@ -669,11 +812,14 @@ combining ``SO_J1939_ERRQUEUE`` with ``SO_TIMESTAMPING`` (with
 ``SOF_TIMESTAMPING_OPT_ID`` and ``SOF_TIMESTAMPING_OPT_CMSG`` enabled), the
 user can track message transfers, retrieve precise timestamps, and correlate
 errors with specific sessions.
+(启用后，可以使用 ``recvmsg(2)`` 取回错误消息。通过将 ``SO_J1939_ERRQUEUE`` 与 ``SO_TIMESTAMPING`` 结合使用 (启用 ``SOF_TIMESTAMPING_OPT_ID`` 和 ``SOF_TIMESTAMPING_OPT_CMSG``)，用户可以跟踪消息传输、获取精确的时间戳，并将错误与特定会话关联起来。)
 
 For more information on enabling timestamps and session tracking, refer to the
 `SO_TIMESTAMPING` section.
+(有关启用时间戳与会话跟踪的更多信息，请参阅 `SO_TIMESTAMPING` 一节。)
 
 ``SO_TIMESTAMPING``
+(``SO_TIMESTAMPING``)
 ~~~~~~~~~~~~~~~~~~~
 
 The ``SO_TIMESTAMPING`` option allows the socket to receive timestamps for
@@ -681,6 +827,7 @@ various events related to message transmissions and receptions in J1939. This
 option is often used in combination with ``SO_J1939_ERRQUEUE`` to provide
 detailed diagnostic information, session tracking, and precise timing data for
 message transfers.
+( ``SO_TIMESTAMPING`` 选项使套接字能够接收 J1939 中与消息发送和接收相关的各类事件的时间戳。该选项常与 ``SO_J1939_ERRQUEUE`` 结合使用，以提供详细的诊断信息、会话跟踪以及消息传输的精确时序数据。)
 
 In J1939, all payloads provided by user space, regardless of size, are
 processed by the kernel as **sessions**. This includes both single-frame
@@ -690,124 +837,157 @@ single-frame messages, the kernel creates a session to manage the transmission
 and reception. The concept of sessions allows the kernel to manage various
 aspects of the protocol, such as reassembling multi-frame messages and tracking
 the status of transmissions.
+(在 J1939 中，用户态提供的所有有效载荷无论大小，都会由内核作为 **会话 (session)** 来处理。这既包括单帧消息 (最多 8 字节)，也包括传输协议 (TP) 和扩展传输协议 (ETP) 等多帧协议。即使是小的单帧消息，内核也会创建一个会话来管理其发送与接收。会话的概念使内核能够管理协议的各个方面，例如重组多帧消息和跟踪传输状态。)
 
 When receiving extended error messages from the error queue, the error
 information is delivered through a `struct sock_extended_err`, accessible via
 the control message (``cmsg``) retrieved using the ``recvmsg(2)`` system call.
+(从错误队列接收扩展错误消息时，错误信息通过 `struct sock_extended_err` 传递，可经由 ``recvmsg(2)`` 系统调用取回的控制消息 (``cmsg``) 访问。)
 
 There are two typical origins for the extended error messages in J1939:
+(J1939 中扩展错误消息有两种典型来源：)
 
 1. ``serr->ee_origin == SO_EE_ORIGIN_TIMESTAMPING``:
+   (1. ``serr->ee_origin == SO_EE_ORIGIN_TIMESTAMPING``：)
 
    In this case, the `serr->ee_info` field will contain one of the following
    timestamp types:
+   (在这种情况下， `serr->ee_info` 字段将包含以下时间戳类型之一：)
 
    - ``SCM_TSTAMP_SCHED``: This timestamp is valid for Extended Transport
      Protocol (ETP) transfers and simple transfers (8 bytes or less). It
      indicates when a message or set of frames has been scheduled for
      transmission.
+     ( ``SCM_TSTAMP_SCHED``：该时间戳对扩展传输协议 (ETP) 传输和简单传输 (8 字节或更少) 有效。它表示消息或一组帧被排定进行传输的时间。)
 
      - For simple transfers (8 bytes or less), it marks the point when the
        message is queued and ready to be sent onto the CAN bus.
+       (对于简单传输 (8 字节或更少)，它标记消息入队并准备发送到 CAN 总线的时间点。)
 
      - For ETP transfers, it is sent after receiving a CTS (Clear to Send)
        frame on the sender side, indicating that a new set of frames has been
        scheduled for transmission.
+       (对于 ETP 传输，它在发送侧收到 CTS (Clear to Send) 帧之后产生，表示一组新的帧已被排定进行传输。)
 
      - The Transport Protocol (TP) case is currently not implemented for this
        timestamp.
+       (传输协议 (TP) 的情况目前未实现该时间戳。)
 
      - On the receiver side, the counterpart to this event for ETP is
        represented by the ``J1939_EE_INFO_RX_DPO`` message, which indicates the
        reception of a Data Page Offset (DPO) control frame.
+       (在接收侧，ETP 对应这一事件的是 ``J1939_EE_INFO_RX_DPO`` 消息，表示收到了数据页偏移 (DPO) 控制帧。)
 
    - ``SCM_TSTAMP_ACK``: This timestamp indicates the acknowledgment of the
      message or session.
+     ( ``SCM_TSTAMP_ACK``：该时间戳表示消息或会话已得到确认。)
 
      - For simple transfers (8 bytes or less), it marks when the message has
        been sent and an echo confirmation has been received from the CAN
        controller, indicating that the frame was transmitted onto the bus.
+       (对于简单传输 (8 字节或更少)，它标记消息已发送、且已从 CAN 控制器收到回显确认的时间，表明该帧已被传输到总线上。)
 
      - For multi-frame transfers (TP or ETP), it signifies that the entire
        session has been acknowledged, typically after receiving the End of
        Message Acknowledgment (EOMA) packet.
+       (对于多帧传输 (TP 或 ETP)，它表示整个会话已得到确认，通常是在收到消息结束确认 (End of Message Acknowledgment，EOMA) 数据包之后。)
 
 2. ``serr->ee_origin == SO_EE_ORIGIN_LOCAL``:
+   (2. ``serr->ee_origin == SO_EE_ORIGIN_LOCAL``：)
 
    In this case, the `serr->ee_info` field will contain one of the following
    J1939 stack-specific message types:
+   (在这种情况下， `serr->ee_info` 字段将包含以下 J1939 协议栈特有的消息类型之一：)
 
    - ``J1939_EE_INFO_TX_ABORT``: This message indicates that the transmission
      of a message or session was aborted. The cause of the abort can come from
      various sources:
+     ( ``J1939_EE_INFO_TX_ABORT``：该消息表示消息或会话的传输被中止。中止的原因可能有多种：)
 
      - **CAN stack failure**: The J1939 stack was unable to pass the frame to
        the CAN framework for transmission.
+       (**CAN 栈故障**：J1939 协议栈无法将帧传递给 CAN 框架进行传输。)
 
      - **Echo failure**: The J1939 stack did not receive an echo confirmation
        from the CAN controller, meaning the frame may not have been successfully
        transmitted to the CAN bus.
+       (**回显失败**：J1939 协议栈未从 CAN 控制器收到回显确认，这意味着该帧可能未成功传输到 CAN 总线。)
 
      - **Protocol-level issues**: For multi-frame transfers (TP/ETP), this
        could include protocol-related errors, such as an abort signaled by the
        receiver or a timeout at the protocol level, which causes the session to
        terminate prematurely.
+       (**协议层问题**：对于多帧传输 (TP/ETP)，这可能包括协议相关错误，例如接收方发出中止信号或协议层超时，导致会话提前终止。)
 
      - The corresponding error code is stored in ``serr->ee_data``
        (``session->err`` on kernel side), providing additional details about
        the specific reason for the abort.
+       (相应的错误代码存储在 ``serr->ee_data`` 中 (内核侧为 ``session->err``)，提供了关于中止具体原因的更多细节。)
 
    - ``J1939_EE_INFO_RX_RTS``: This message indicates that the J1939 stack has
      received a Request to Send (RTS) control frame, signaling the start of a
      multi-frame transfer using the Transport Protocol (TP) or Extended
      Transport Protocol (ETP).
+     ( ``J1939_EE_INFO_RX_RTS``：该消息表示 J1939 协议栈已收到 Request to Send (RTS) 控制帧，标志着使用传输协议 (TP) 或扩展传输协议 (ETP) 的多帧传输开始。)
 
      - It informs the receiver that the sender is ready to transmit a
        multi-frame message and includes details about the total message size
        and the number of frames to be sent.
+       (它告知接收方发送方已准备好发送多帧消息，并包含消息总大小和待发送帧数等细节。)
 
      - Statistics such as ``J1939_NLA_TOTAL_SIZE``, ``J1939_NLA_PGN``,
        ``J1939_NLA_SRC_NAME``, and ``J1939_NLA_DEST_NAME`` are provided along
        with the ``J1939_EE_INFO_RX_RTS`` message, giving detailed information
        about the incoming transfer.
+       ( ``J1939_NLA_TOTAL_SIZE`` 、 ``J1939_NLA_PGN`` 、 ``J1939_NLA_SRC_NAME`` 和 ``J1939_NLA_DEST_NAME`` 等统计信息随 ``J1939_EE_INFO_RX_RTS`` 消息一起提供，给出到来传输的详细信息。)
 
    - ``J1939_EE_INFO_RX_DPO``: This message indicates that the J1939 stack has
      received a Data Page Offset (DPO) control frame, which is part of the
      Extended Transport Protocol (ETP).
+     ( ``J1939_EE_INFO_RX_DPO``：该消息表示 J1939 协议栈已收到数据页偏移 (DPO) 控制帧，该帧属于扩展传输协议 (ETP)。)
 
      - The DPO frame signals the continuation of an ETP multi-frame message by
        indicating the offset position in the data being transferred. It helps
        the receiver manage large data sets by identifying which portion of the
        message is being received.
+       (DPO 帧通过指示所传输数据中的偏移位置来表示 ETP 多帧消息的延续。它通过标识正在接收消息的哪一部分，帮助接收方管理大数据集。)
 
      - It is typically paired with a corresponding ``SCM_TSTAMP_SCHED`` event
        on the sender side, which indicates when the next set of frames is
        scheduled for transmission.
+       (它通常与发送侧对应的 ``SCM_TSTAMP_SCHED`` 事件配对，该事件表示下一组帧被排定进行传输的时间。)
 
      - This event includes statistics such as ``J1939_NLA_BYTES_ACKED``, which
        tracks the number of bytes acknowledged up to that point in the session.
+       (该事件包含 ``J1939_NLA_BYTES_ACKED`` 等统计信息，记录会话进行到该时间点为止已确认的字节数。)
 
    - ``J1939_EE_INFO_RX_ABORT``: This message indicates that the reception of a
      multi-frame message (Transport Protocol or Extended Transport Protocol) has
      been aborted.
+     ( ``J1939_EE_INFO_RX_ABORT``：该消息表示多帧消息 (传输协议或扩展传输协议) 的接收已被中止。)
 
      - The abort can be triggered by protocol-level errors such as timeouts, an
        unexpected frame, or a specific abort request from the sender.
+       (中止可能由协议层错误触发，例如超时、意外帧，或来自发送方的特定中止请求。)
 
      - This message signals that the receiver cannot continue processing the
        transfer, and the session is terminated.
+       (该消息表示接收方无法继续处理该传输，会话被终止。)
 
      - The corresponding error code is stored in ``serr->ee_data``
        (``session->err`` on kernel side ), providing further details about the
        reason for the abort, such as protocol violations or timeouts.
+       (相应的错误代码存储在 ``serr->ee_data`` 中 (内核侧为 ``session->err`` )，提供关于中止原因的更多细节，例如协议违规或超时。)
 
      - After receiving this message, the receiver discards the partially received
        frames, and the multi-frame session is considered incomplete.
+       (收到该消息后，接收方会丢弃已部分接收的帧，该多帧会话被视为不完整。)
 
 In both cases, if ``SOF_TIMESTAMPING_OPT_ID`` is enabled, ``serr->ee_data``
 will be set to the session’s unique identifier (``session->tskey``). This
 allows user space to track message transfers by their session identifier across
 multiple frames or stages.
+(在这两种情况下，如果启用了 ``SOF_TIMESTAMPING_OPT_ID`` ， ``serr->ee_data`` 都会被设置为该会话的唯一标识符 (``session->tskey``)。这使用户态能够通过会话标识符跨多个帧或阶段跟踪消息传输。)
 
 In all other cases, ``serr->ee_errno`` will be set to ``ENOMSG``, except for
 the ``J1939_EE_INFO_TX_ABORT`` and ``J1939_EE_INFO_RX_ABORT`` cases, where the
@@ -816,50 +996,68 @@ protocol-specific errors are converted to standard kernel error values and
 stored in ``session->err``. These error values are unified across system calls
 and ``serr->ee_errno``.  Some of the known error values are described in the
 `Error Codes in the J1939 Stack` section.
+(在所有其他情况下， ``serr->ee_errno`` 都会被设置为 ``ENOMSG`` ，但 ``J1939_EE_INFO_TX_ABORT`` 和 ``J1939_EE_INFO_RX_ABORT`` 两种情况除外——这两种情况下内核会把 ``serr->ee_data`` 设置为存储在 ``session->err`` 中的错误。所有协议特定的错误都会被转换为标准的内核错误值并存储在 ``session->err`` 中。这些错误值在各系统调用与 ``serr->ee_errno`` 之间是统一的。一些已知的错误值在 `Error Codes in the J1939 Stack` 一节中描述。)
 
 When the `J1939_EE_INFO_RX_RTS` message is provided, it will include the
 following statistics for multi-frame messages (TP and ETP):
+(当提供 `J1939_EE_INFO_RX_RTS` 消息时，它会附带针对多帧消息 (TP 和 ETP) 的以下统计信息：)
 
   - ``J1939_NLA_TOTAL_SIZE``: Total size of the message in the session.
+    ( ``J1939_NLA_TOTAL_SIZE``：会话中消息的总大小。)
   - ``J1939_NLA_PGN``: Parameter Group Number (PGN) identifying the message type.
+    ( ``J1939_NLA_PGN``：标识消息类型的参数组编号 (PGN)。)
   - ``J1939_NLA_SRC_NAME``: 64-bit name of the source ECU.
+    ( ``J1939_NLA_SRC_NAME``：源 ECU 的 64 位名称。)
   - ``J1939_NLA_DEST_NAME``: 64-bit name of the destination ECU.
+    ( ``J1939_NLA_DEST_NAME``：目标 ECU 的 64 位名称。)
   - ``J1939_NLA_SRC_ADDR``: 8-bit source address of the sending ECU.
+    ( ``J1939_NLA_SRC_ADDR``：发送 ECU 的 8 位源地址。)
   - ``J1939_NLA_DEST_ADDR``: 8-bit destination address of the receiving ECU.
+    ( ``J1939_NLA_DEST_ADDR``：接收 ECU 的 8 位目标地址。)
 
 - For other messages (including single-frame messages), only the following
   statistic is included:
+  (对于其他消息 (包括单帧消息)，只包含以下统计信息：)
 
   - ``J1939_NLA_BYTES_ACKED``: Number of bytes successfully acknowledged in the
     session.
+    ( ``J1939_NLA_BYTES_ACKED``：会话中成功确认的字节数。)
 
 The key flags for ``SO_TIMESTAMPING`` include:
+( ``SO_TIMESTAMPING`` 的关键标志包括：)
 
 - ``SOF_TIMESTAMPING_OPT_ID``: Enables the use of a unique session identifier
   (``tskey``) for each transfer. This identifier helps track message transfers
   and errors as distinct sessions in user space. When this option is enabled,
   ``serr->ee_data`` will be set to ``session->tskey``.
+  ( ``SOF_TIMESTAMPING_OPT_ID``：为每次传输启用唯一的会话标识符 (``tskey``)。该标识符有助于在用户态中把消息传输和错误作为独立会话进行跟踪。启用该选项后， ``serr->ee_data`` 将被设置为 ``session->tskey`` 。)
 
 - ``SOF_TIMESTAMPING_OPT_CMSG``: Sends timestamp information through control
   messages (``struct scm_timestamping``), allowing the application to retrieve
   timestamps alongside the data.
+  ( ``SOF_TIMESTAMPING_OPT_CMSG``：通过控制消息 (``struct scm_timestamping``) 发送时间戳信息，使应用程序能够在获取数据的同时获取时间戳。)
 
 - ``SOF_TIMESTAMPING_TX_SCHED``: Provides the timestamp for when a message is
   scheduled for transmission (``SCM_TSTAMP_SCHED``).
+  ( ``SOF_TIMESTAMPING_TX_SCHED``：提供消息被排定进行传输时的时间戳 (``SCM_TSTAMP_SCHED``)。)
 
 - ``SOF_TIMESTAMPING_TX_ACK``: Provides the timestamp for when a message
   transmission is fully acknowledged (``SCM_TSTAMP_ACK``).
+  ( ``SOF_TIMESTAMPING_TX_ACK``：提供消息传输被完全确认时的时间戳 (``SCM_TSTAMP_ACK``)。)
 
 - ``SOF_TIMESTAMPING_RX_SOFTWARE``: Provides timestamps for reception-related
   events (e.g., ``J1939_EE_INFO_RX_RTS``, ``J1939_EE_INFO_RX_DPO``,
   ``J1939_EE_INFO_RX_ABORT``).
+  ( ``SOF_TIMESTAMPING_RX_SOFTWARE``：为接收相关事件提供时间戳 (例如 ``J1939_EE_INFO_RX_RTS`` 、 ``J1939_EE_INFO_RX_DPO`` 、 ``J1939_EE_INFO_RX_ABORT``)。)
 
 These flags enable detailed monitoring of message lifecycles, including
 transmission scheduling, acknowledgments, reception timestamps, and gathering
 detailed statistics about the communication session, especially for multi-frame
 payloads like TP and ETP.
+(这些标志支持对消息生命周期进行详细监视，包括传输调度、确认、接收时间戳，以及收集通信会话的详细统计信息，对于 TP 和 ETP 这类多帧载荷尤其有用。)
 
 Example:
+(示例：)
 
 .. code-block:: c
 
@@ -876,6 +1074,7 @@ Example:
 
 
 Dynamic Addressing
+(动态寻址)
 ------------------
 
 Distinction has to be made between using the claimed address and doing an
@@ -883,12 +1082,15 @@ address claim. To use an already claimed address, one has to fill in the
 ``j1939.name`` member and provide it to ``bind(2)``. If the name had claimed an address
 earlier, all further messages being sent will use that address. And the
 ``j1939.addr`` member will be ignored.
+(必须区分"使用已声明的地址"与"执行地址声明"这两种操作。要使用一个已被声明过的地址，需要填写 ``j1939.name`` 成员并将其提供给 ``bind(2)`` 。如果该名称之前已声明过地址，之后发送的所有消息都会使用该地址，而 ``j1939.addr`` 成员将被忽略。)
 
 An exception on this is PGN 0x0ee00. This is the "Address Claim/Cannot Claim
 Address" message and the kernel will use the ``j1939.addr`` member for that PGN if
 necessary.
+(对此，PGN 0x0ee00 是个例外。这是"Address Claim/Cannot Claim Address" (地址声明/无法声明地址) 消息，必要时内核会为该 PGN 使用 ``j1939.addr`` 成员。)
 
 To claim an address following code example can be used:
+(要声明一个地址，可以使用以下代码示例：)
 
 .. code-block:: C
 
@@ -943,6 +1145,7 @@ If no-one else contests the address claim within 250ms after transmission, the
 kernel marks the NAME-SA assignment as valid. The valid assignment will be kept
 among other valid NAME-SA assignments. From that point, any socket bound to the
 NAME can send packets.
+(如果在传输后的 250ms 内没有其他节点对该地址声明提出异议，内核会把 NAME-SA 分配标记为有效。该有效分配将与其他有效的 NAME-SA 分配一起保存。从那一刻起，任何绑定到该 NAME 的套接字都可以发送数据包。)
 
 If another ECU claims the address, the kernel will mark the NAME-SA expired.
 No socket bound to the NAME can send packets (other than address claims). To
@@ -950,19 +1153,25 @@ claim another address, some socket bound to NAME, must ``bind(2)`` again, but wi
 only ``j1939.addr`` changed to the new SA, and must then send a valid address claim
 packet. This restarts the state machine in the kernel (and any other
 participant on the bus) for this NAME.
+(如果另一个 ECU 声明了该地址，内核会把该 NAME-SA 标记为过期。此时绑定到该 NAME 的套接字都不能发送数据包 (地址声明除外)。要声明另一个地址，绑定到该 NAME 的某个套接字必须重新执行 ``bind(2)`` ，但仅将 ``j1939.addr`` 更改为新的 SA，然后必须发送一个有效的地址声明数据包。这会为该 NAME 重启内核 (以及总线上的任何其他参与者) 中的状态机。)
 
 ``can-utils`` also include the ``j1939acd`` tool, so it can be used as code example or as
 default Address Claiming daemon.
+( ``can-utils`` 还包含 ``j1939acd`` 工具，因此它既可以用作代码示例，也可以用作默认的地址声明守护进程。)
 
 Send Examples
+(发送示例)
 -------------
 
 Static Addressing
+(静态寻址)
 ^^^^^^^^^^^^^^^^^
 
 This example will send a PGN (0x12300) from SA 0x20 to DA 0x30.
+(这个示例将从 SA 0x20 向 DA 0x30 发送一个 PGN (0x12300)。)
 
 Bind:
+(绑定：)
 
 .. code-block:: C
 
@@ -980,8 +1189,10 @@ Bind:
 
 Now, the socket 'sock' is bound to the SA 0x20. Since no ``connect(2)`` was called,
 at this point we can use only ``sendto(2)`` or ``sendmsg(2)``.
+(现在，套接字 'sock' 已绑定到 SA 0x20。由于没有调用 ``connect(2)``，此时只能使用 ``sendto(2)`` 或 ``sendmsg(2)``。)
 
 Send:
+(发送：)
 
 .. code-block:: C
 
@@ -998,138 +1209,187 @@ Send:
 
 
 Error Codes in the J1939 Stack
+(J1939 协议栈中的错误码)
 ------------------------------
 
 This section lists all potential kernel error codes that can be exposed to user
 space when interacting with the J1939 stack. It includes both standard error
 codes and those derived from protocol-specific abort codes.
+(本节列出了在与 J1939 协议栈交互时可能暴露给用户态的所有内核错误码。其中既包括标准错误码，也包括由协议特有的中止码派生而来的错误码。)
 
 - ``EAGAIN``: Operation would block; retry may succeed. One common reason is
   that an active TP or ETP session exists, and an attempt was made to start a
   new overlapping TP or ETP session between the same peers.
+  ( ``EAGAIN``：操作会阻塞；重试可能会成功。一个常见原因是已存在活动的 TP 或 ETP 会话，而又尝试在相同对端之间启动一个新的重叠 TP 或 ETP 会话。)
 
 - ``ENETDOWN``: Network is down. This occurs when the CAN interface is switched
   to the "down" state.
+  ( ``ENETDOWN``：网络已关闭。当 CAN 接口被切换到 "down" 状态时会发生此错误。)
 
 - ``ENOBUFS``: No buffer space available. This error occurs when the CAN
   interface's transmit (TX) queue is full, and no more messages can be queued.
+  ( ``ENOBUFS``：没有可用的缓冲区空间。当 CAN 接口的发送 (TX) 队列已满、无法再排队更多消息时，会发生此错误。)
 
 - ``EOVERFLOW``: Value too large for defined data type. In J1939, this can
   happen if the requested data lies outside of the queued buffer. For example,
   if a CTS (Clear to Send) requests an offset not available in the kernel buffer
   because user space did not provide enough data.
+  ( ``EOVERFLOW``：值超出定义的数据类型范围。在 J1939 中，如果所请求的数据位于已排队缓冲区之外，就可能发生此错误。例如，CTS (Clear to Send) 请求的偏移量在内核缓冲区中不存在，因为用户态没有提供足够的数据。)
 
 - ``EBUSY``: Device or resource is busy. For example, this occurs if an
   identical session is already active and the stack is unable to recover from
   the condition.
+  ( ``EBUSY``：设备或资源忙。例如，当一个完全相同的会话已经处于活动状态、且协议栈无法从该状态恢复时，就会发生此错误。)
 
 - ``EACCES``: Permission denied. This error can occur, for example, when
   attempting to send broadcast messages, but the socket is not configured with
   ``SO_BROADCAST``.
+  ( ``EACCES``：权限被拒绝。例如，当尝试发送广播消息、但套接字未配置 ``SO_BROADCAST`` 时，就可能发生此错误。)
 
 - ``EADDRNOTAVAIL``: Address not available. This error occurs in cases such as:
+  ( ``EADDRNOTAVAIL``：地址不可用。此错误发生在诸如以下的情况中：)
 
   - When attempting to use ``getsockname(2)`` to retrieve the peer's address,
     but the socket is not connected.
+    (当尝试使用 ``getsockname(2)`` 获取对端地址、但套接字未连接时。)
 
   - When trying to send data to or from a NAME, but address claiming for the
     NAME was not performed or detected by the stack.
+    (当尝试通过某个 NAME 发送或接收数据、但该 NAME 的地址声明未执行或未被协议栈检测到时。)
 
 - ``EBADFD``: File descriptor in bad state. This error can occur if:
+  ( ``EBADFD``：文件描述符处于错误状态。以下情况可能发生此错误：)
 
   - Attempting to send data to an unbound socket.
+    (尝试向未绑定的套接字发送数据。)
 
   - The socket is bound but has no source name, and the source address is
     ``J1939_NO_ADDR``.
+    (套接字已绑定但没有源名称，且源地址为 ``J1939_NO_ADDR`` 。)
 
   - The ``can_ifindex`` is incorrect.
+    ( ``can_ifindex`` 不正确。)
 
 - ``EFAULT``: Bad address. Occurs mostly when the stack can't copy from or to a
   sockptr, when there is insufficient data from user space, or when the buffer
   provided by user space is not large enough for the requested data.
+  ( ``EFAULT``：地址错误。主要发生在协议栈无法在 sockptr 之间进行复制、用户态数据不足、或用户态提供的缓冲区不足以容纳所请求的数据时。)
 
 - ``EINTR``: A signal occurred before any data was transmitted; see ``signal(7)``.
+  ( ``EINTR``：在传输任何数据之前发生了信号；参见 ``signal(7)`` 。)
 
 - ``EINVAL``: Invalid argument passed. For example:
+  ( ``EINVAL``：传入了无效参数。例如：)
 
   - ``msg->msg_namelen`` is less than ``J1939_MIN_NAMELEN``.
+    ( ``msg->msg_namelen`` 小于 ``J1939_MIN_NAMELEN`` 。)
 
   - ``addr->can_family`` is not equal to ``AF_CAN``.
+    ( ``addr->can_family`` 不等于 ``AF_CAN`` 。)
 
   - An incorrect PGN was provided.
+    (提供了不正确的 PGN。)
 
 - ``ENODEV``: No such device. This happens when the CAN network device cannot
   be found for the provided ``can_ifindex`` or if ``can_ifindex`` is 0.
+  ( ``ENODEV``：设备不存在。当找不到所提供 ``can_ifindex`` 对应的 CAN 网络设备、或 ``can_ifindex`` 为 0 时，会发生这种情况。)
 
 - ``ENOMEM``: Out of memory. Typically related to issues with memory allocation
   in the stack.
+  ( ``ENOMEM``：内存不足。通常与协议栈中的内存分配问题有关。)
 
 - ``ENOPROTOOPT``: Protocol not available. This can occur when using
   ``getsockopt(2)`` or ``setsockopt(2)`` if the requested socket option is not
   available.
+  ( ``ENOPROTOOPT``：协议不可用。当使用 ``getsockopt(2)`` 或 ``setsockopt(2)`` 时，如果所请求的套接字选项不可用，就可能发生此错误。)
 
 - ``EDESTADDRREQ``: Destination address required. This error occurs:
+  ( ``EDESTADDRREQ``：需要目标地址。此错误发生在以下情况：)
 
   - In the case of ``connect(2)``, if the ``struct sockaddr *uaddr`` is ``NULL``.
+    (对于 ``connect(2)``，如果 ``struct sockaddr *uaddr`` 为 ``NULL`` 。)
 
   - In the case of ``send*(2)``, if there is an attempt to send an ETP message
     to a broadcast address.
+    (对于 ``send*(2)``，如果尝试向广播地址发送 ETP 消息。)
 
 - ``EDOM``: Argument out of domain. This error may happen if attempting to send
   a TP or ETP message to a PGN that is reserved for control PGNs for TP or ETP
   operations.
+  ( ``EDOM``：参数超出定义域。当尝试向保留给 TP 或 ETP 操作的控制 PGN 发送 TP 或 ETP 消息时，可能发生此错误。)
 
 - ``EIO``: I/O error. This can occur if the amount of data provided to the
   socket for a TP or ETP session does not match the announced amount of data for
   the session.
+  ( ``EIO``：I/O 错误。当为 TP 或 ETP 会话提供给套接字的数据量与该会话所宣告的数据量不一致时，就可能发生此错误。)
 
 - ``ENOENT``: No such file or directory. This can happen when the stack
   attempts to transfer CTS or EOMA but cannot find a matching receiving socket
   anymore.
+  ( ``ENOENT``：没有这样的文件或目录。当协议栈尝试传输 CTS 或 EOMA、但再也找不到匹配的接收套接字时，就可能发生这种情况。)
 
 - ``ENOIOCTLCMD``: No ioctls are available for the socket layer.
+  ( ``ENOIOCTLCMD``：套接字层没有可用的 ioctl。)
 
 - ``EPERM``: Operation not permitted. For example, this can occur if a
   requested action requires ``CAP_NET_ADMIN`` privileges.
+  ( ``EPERM``：操作不被允许。例如，当所请求的操作需要 ``CAP_NET_ADMIN`` 权限时，就可能发生此错误。)
 
 - ``ENETUNREACH``: Network unreachable. Most likely, this occurs when frames
   cannot be transmitted to the CAN bus.
+  ( ``ENETUNREACH``：网络不可达。最可能的情况是帧无法传输到 CAN 总线上。)
 
 - ``ETIME``: Timer expired. This can happen if a timeout occurs while
   attempting to send a simple message, for example, when an echo message from
   the controller is not received.
+  ( ``ETIME``：定时器超时。例如，在尝试发送简单消息时发生超时 (比如未收到来自控制器的回显消息) 时，就可能发生这种情况。)
 
 - ``EPROTO``: Protocol error.
+  ( ``EPROTO``：协议错误。)
 
   - Used for various protocol-level errors in J1939, including:
+    (用于 J1939 中的各种协议层错误，包括：)
 
     - Duplicate sequence number.
+      (序列号重复。)
 
     - Unexpected EDPO or ECTS packet.
+      (意外的 EDPO 或 ECTS 数据包。)
 
     - Invalid PGN or offset in EDPO/ECTS.
+      (EDPO/ECTS 中的 PGN 或偏移量无效。)
 
     - Number of EDPO packets exceeded CTS allowance.
+      (EDPO 数据包数量超过了 CTS 允许的数量。)
 
     - Any other protocol-level error.
+      (任何其他协议层错误。)
 
 - ``EMSGSIZE``: Message too long.
+  ( ``EMSGSIZE``：消息过长。)
 
 - ``ENOMSG``: No message available.
+  ( ``ENOMSG``：没有可用的消息。)
 
 - ``EALREADY``: The ECU is already engaged in one or more connection-managed
   sessions and cannot support another.
+  ( ``EALREADY``：ECU 已经处于一个或多个连接管理会话中，无法再支持另一个。)
 
 - ``EHOSTUNREACH``: A timeout occurred, and the session was aborted.
+  ( ``EHOSTUNREACH``：发生超时，会话被中止。)
 
 - ``EBADMSG``: CTS (Clear to Send) messages were received during an active data
   transfer, causing an abort.
+  ( ``EBADMSG``：在活动的数据传输期间收到了 CTS (Clear to Send) 消息，导致中止。)
 
 - ``ENOTRECOVERABLE``: The maximum retransmission request limit was reached,
   and the session cannot recover.
+  ( ``ENOTRECOVERABLE``：达到了最大重传请求次数上限，会话无法恢复。)
 
 - ``ENOTCONN``: An unexpected data transfer packet was received.
+  ( ``ENOTCONN``：收到了意外的数据传输数据包。)
 
 - ``EILSEQ``: A bad sequence number was received, and the software could not
   recover.
+  ( ``EILSEQ``：收到了错误的序列号，软件无法恢复。)
 
