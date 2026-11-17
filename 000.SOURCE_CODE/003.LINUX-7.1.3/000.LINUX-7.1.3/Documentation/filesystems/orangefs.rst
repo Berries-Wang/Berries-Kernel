@@ -35,29 +35,25 @@ Orangefs features include:
     (无状态)
 
 
-Mailing List Archives
-(邮件列表归档)
-=====================
+Mailing List Archives(邮件列表归档)
+===================================
 
 http://lists.orangefs.org/pipermail/devel_lists.orangefs.org/
 
 
-Mailing List Submissions
-(邮件列表提交)
-========================
+Mailing List Submissions(邮件列表提交)
+======================================
 
 devel@lists.orangefs.org
 
 
-Documentation
-(文档)
-=============
+Documentation(文档)
+===================
 
 http://www.orangefs.org/documentation/
 
-Running ORANGEFS On a Single Server
-(在单一服务器上运行 ORANGEFS)
-===================================
+Running ORANGEFS On a Single Server(在单一服务器上运行 ORANGEFS)
+================================================================
 
 OrangeFS is usually run in large installations with multiple servers and
 clients, but a complete filesystem can be run on a single machine for
@@ -109,9 +105,8 @@ Mount the filesystem::
 
     mount -t pvfs2 tcp://localhost:3334/orangefs /pvfsmnt
 
-Userspace Filesystem Source
-(用户空间文件系统源代码)
-===========================
+Userspace Filesystem Source(用户空间文件系统源代码)
+===================================================
 
 http://www.orangefs.org/download
 
@@ -120,9 +115,8 @@ upstream version of the kernel client.
 (2.9.3 之前的 Orangefs 版本与上游版本的内核客户端不兼容。)
 
 
-Building ORANGEFS on a Single Server
-(在单一服务器上构建 ORANGEFS)
-====================================
+Building ORANGEFS on a Single Server(在单一服务器上构建 ORANGEFS)
+=================================================================
 
 Where OrangeFS cannot be installed from distribution packages, it may be
 built from source.
@@ -189,9 +183,8 @@ Mount your filesystem::
     mount -t pvfs2 tcp://`hostname`:3334/orangefs /pvfsmnt
 
 
-Running xfstests
-(运行 xfstests)
-================
+Running xfstests(运行 xfstests)
+===============================
 
 It is useful to use a scratch filesystem with xfstests.  This can be
 done with only one server.
@@ -227,9 +220,8 @@ Then xfstests can be run::
     ./check -pvfs2
 
 
-Options
-(选项)
-=======
+Options(选项)
+=============
 
 The following mount options are accepted:
 (接受以下挂载选项：)
@@ -252,9 +244,8 @@ The following mount options are accepted:
     (从 “本” 内核的角度启用 posix 锁。默认的 file_operations 锁定动作是返回 ENOSYS。如果文件系统以 -o local_lock 挂载，则启用 posix 锁定。分布式锁定正在为未来开发中。)
 
 
-Debugging
-(调试)
-=========
+Debugging(调试)
+===============
 
 If you want the debug (GOSSIP) statements in a particular
 source file (inode.c for example) go to syslog::
@@ -283,9 +274,8 @@ Get a list of all debugging keywords::
   cat /sys/kernel/debug/orangefs/debug-help
 
 
-Protocol between Kernel Module and Userspace
-(内核模块与用户空间之间的协议)
-============================================
+Protocol between Kernel Module and Userspace(内核模块与用户空间之间的协议)
+==========================================================================
 
 Orangefs is a user space filesystem and an associated kernel module.
 We'll just refer to the user space part of Orangefs as "userspace"
@@ -302,9 +292,8 @@ can read from and write to. Userspace can also manipulate the
 kernel module through the pseudo device with ioctl.
 (内核模块实现了一个伪设备，用户空间可以从中读取和向其写入。用户空间还可以通过该伪设备使用 ioctl 来操作内核模块。)
 
-The Bufmap
-(Bufmap)
-----------
+The Bufmap(Bufmap)
+------------------
 
 At startup userspace allocates two page-size-aligned (posix_memalign)
 mlocked memory buffers, one is used for IO and one is used for readdir
@@ -381,9 +370,8 @@ then contains:
     update.
     (readdir_index_lock - 一个自旋锁，用于在更新期间保护 readdir_index_array。)
 
-Operations
-(操作)
-----------
+Operations(操作)
+----------------
 
 The kernel module builds an "op" (struct orangefs_kernel_op_s) when it
 needs to communicate with userspace. Part of the op contains the "upcall"

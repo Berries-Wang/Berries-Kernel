@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-====
-L2TP
-====
-
-(L2TP (第二层隧道协议))
+===========================
+L2TP(L2TP (第二层隧道协议))
+===========================
 
 Layer 2 Tunneling Protocol (L2TP) allows L2 frames to be tunneled over
 an IP network.
@@ -17,9 +15,8 @@ which may be useful to kernel developers and maintainers.
 (本文档介绍内核的 L2TP 子系统。它为想要使用 L2TP 子系统的应用程序开发者记录了内核
 API，并提供一些关于内部实现的技术细节，这些内容可能对内核开发者和维护者有所帮助。)
 
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 The kernel's L2TP subsystem implements the datapath for L2TPv2 and
 L2TPv3. L2TPv2 is carried over UDP. L2TPv3 is carried over UDP or
@@ -69,16 +66,14 @@ like this:
        obtained from the peer using the control protocol messages.
        (使用通过控制协议消息从对端获取的信息，在内核中创建会话上下文。)
 
-L2TP APIs
-(L2TP API)
-=========
+L2TP APIs(L2TP API)
+===================
 
 This section documents each userspace API of the L2TP subsystem.
 (本节介绍 L2TP 子系统的各个用户空间 API。)
 
-Tunnel Sockets
-(隧道套接字)
---------------
+Tunnel Sockets(隧道套接字)
+--------------------------
 
 L2TPv2 always uses UDP. L2TPv3 may use UDP or IP encapsulation.
 (L2TPv2 总是使用 UDP。L2TPv3 可以使用 UDP 或 IP 封装。)
@@ -126,9 +121,8 @@ An L2TP tunnel and all of its sessions are automatically closed when
 its tunnel socket is closed.
 (当隧道套接字关闭时，L2TP 隧道及其所有会话会自动关闭。)
 
-Netlink API
-(Netlink API)
------------
+Netlink API(Netlink API)
+------------------------
 
 L2TP applications use netlink to manage L2TP tunnel and session
 instances in the kernel. The L2TP netlink API is defined in
@@ -420,9 +414,8 @@ Sample userspace code using libmnl_:
 
         mnl_attr_put_u32(nlh, L2TP_ATTR_CONN_ID, tid);
 
-PPPoL2TP Session Socket API
-(PPPoL2TP 会话套接字 API)
----------------------------
+PPPoL2TP Session Socket API(PPPoL2TP 会话套接字 API)
+----------------------------------------------------
 
 For PPP session types, a PPPoL2TP socket must be opened and connected
 to the L2TP session.
@@ -641,9 +634,8 @@ PPP channel with other types of PPP channels, such as PPPoE.
 See more details for the PPP side in ppp_generic.rst.
 (PPP 一侧的更多细节见 ppp_generic.rst。)
 
-Old L2TPv2-only API
-(旧版仅 L2TPv2 的 API)
--------------------
+Old L2TPv2-only API(旧版仅 L2TPv2 的 API)
+-----------------------------------------
 
 When L2TP was first added to the Linux kernel in 2.6.23, it
 implemented only L2TPv2 and did not include a netlink API. Instead,
@@ -679,9 +671,8 @@ session, then create a PPPoL2TP socket for the session.
 (此 API 仍然受支持，但不鼓励使用。相反，新的 L2TPv2 应用程序应使用 netlink 先创建
 隧道和会话，然后为该会话创建一个 PPPoL2TP 套接字。)
 
-Unmanaged L2TPv3 tunnels
-(非托管 L2TPv3 隧道)
-------------------------
+Unmanaged L2TPv3 tunnels(非托管 L2TPv3 隧道)
+--------------------------------------------
 
 The kernel L2TP subsystem also supports static (unmanaged) L2TPv3
 tunnels. Unmanaged tunnels have no userspace tunnel socket, and
@@ -699,9 +690,8 @@ l2tp help`` for more information.
 ``L2TP_CMD_TUNNEL_CREATE`` netlink 请求中发送的参数进行配置。 ``iproute2`` 的
 ``ip`` 工具提供了管理静态 L2TPv3 隧道的命令；执行 ``ip l2tp help`` 以了解更多信息。)
 
-Debugging
-(调试)
----------
+Debugging(调试)
+---------------
 
 The L2TP subsystem offers a range of debugging interfaces through the
 debugfs filesystem.
@@ -740,16 +730,14 @@ tunnels and sessions only. Its use is discouraged.
 (最后，还提供了 /proc/net/pppol2tp 以向后兼容原始的 pppol2tp 代码。它只列出关于
 L2TPv2 隧道和会话的信息。不鼓励使用它。)
 
-Internal Implementation
-(内部实现)
-=======================
+Internal Implementation(内部实现)
+=================================
 
 This section is for kernel developers and maintainers.
 (本节面向内核开发者和维护者。)
 
-Sockets
-(套接字)
--------
+Sockets(套接字)
+---------------
 
 UDP sockets are implemented by the networking core. When an L2TP
 tunnel is created using a UDP socket, the socket is set up as an
@@ -766,9 +754,8 @@ L2TPIP sockets are implemented in `net/l2tp/l2tp_ip.c`_ and
 `net/l2tp/l2tp_ip6.c`_.
 (L2TPIP 套接字实现于 `net/l2tp/l2tp_ip.c`_ 和 `net/l2tp/l2tp_ip6.c`_ 中。)
 
-Tunnels
-(隧道)
--------
+Tunnels(隧道)
+-------------
 
 The kernel keeps a struct l2tp_tunnel context per L2TP tunnel. The
 l2tp_tunnel is always associated with a UDP or L2TP/IP socket and
@@ -811,9 +798,8 @@ L2TP 隧道及其所有会话必须被关闭并销毁。由于隧道上下文持
 操作。首先关闭所有会话。每个会话释放其对隧道的引用。当隧道引用计数降为零时，隧道释放
 其对套接字的引用。)
 
-Sessions
-(会话)
---------
+Sessions(会话)
+--------------
 
 The kernel keeps a struct l2tp_session context for each session.  Each
 session has private data which is used for data specific to the
@@ -862,9 +848,8 @@ is used.
 支持。在查找 L2TPv3 会话时，列表项可能链接到多个具有该会话 ID 的会话，此时使用与
 给定 sk (隧道) 匹配的会话。)
 
-PPP
-(PPP)
----
+PPP(PPP)
+--------
 
 `net/l2tp/l2tp_ppp.c`_ implements the PPPoL2TP socket family. Each PPP
 session has a PPPoL2TP socket.
@@ -895,9 +880,8 @@ references it.
 一个正处于关闭过程中的会话的情况。PPP 会话持有对其关联套接字的引用，以确保在会话
 引用该套接字期间套接字保持存在。)
 
-Ethernet
-(以太网)
---------
+Ethernet(以太网)
+----------------
 
 `net/l2tp/l2tp_eth.c`_ implements L2TPv3 Ethernet pseudowires. It
 manages a netdev for each session.
@@ -909,13 +893,11 @@ Ethernet sessions do not have an associated socket.
 (L2TP 以太网会话通过 netlink 请求创建和销毁，或者在隧道被销毁时随之销毁。与 PPP
 会话不同，以太网会话没有关联的套接字。)
 
-Miscellaneous
-(杂项)
-=============
+Miscellaneous(杂项)
+===================
 
-RFCs
-(RFC)
-----
+RFCs(RFC)
+---------
 
 The kernel code implements the datapath features specified in the
 following RFCs:
@@ -927,9 +909,8 @@ RFC3931 L2TPv3          https://tools.ietf.org/html/rfc3931
 RFC4719 L2TPv3 Ethernet https://tools.ietf.org/html/rfc4719
 ======= =============== ===================================
 
-Implementations
-(实现)
----------------
+Implementations(实现)
+---------------------
 
 A number of open source applications use the L2TP kernel subsystem:
 (许多开源应用程序使用 L2TP 内核子系统：)
@@ -941,9 +922,8 @@ tunneldigger https://github.com/wlanslovenija/tunneldigger
 xl2tpd       https://github.com/xelerance/xl2tpd
 ============ ==============================================
 
-Limitations
-(局限性)
------------
+Limitations(局限性)
+-------------------
 
 The current implementation has a number of limitations:
 (当前实现有一些局限性：)
@@ -965,9 +945,8 @@ The current implementation has a number of limitations:
      ``l2tpethN`` 和 ``l2tpethN``:M 对更好。为此添加了 netlink 属性
      ``L2TP_ATTR_VLAN_ID`` ，但它从未被实现。)
 
-Testing
-(测试)
--------
+Testing(测试)
+-------------
 
 Unmanaged L2TPv3 Ethernet features are tested by the kernel's built-in
 selftests. See `tools/testing/selftests/net/l2tp.sh`_.

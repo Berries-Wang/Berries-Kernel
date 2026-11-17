@@ -1,10 +1,8 @@
-Reexporting NFS filesystems
-(重新导出 NFS 文件系统)
-===========================
+Reexporting NFS filesystems(重新导出 NFS 文件系统)
+==================================================
 
-Overview
-(概述)
---------
+Overview(概述)
+--------------
 
 It is possible to reexport an NFS filesystem over NFS.  However, this
 feature comes with a number of limitations.  Before trying it, we
@@ -15,9 +13,8 @@ your purposes.
 A discussion of current known limitations follows.
 (下文讨论目前已知的限制。)
 
-"fsid=" required, crossmnt broken
-(要求使用 "fsid="，crossmnt 已失效)
----------------------------------
+"fsid=" required, crossmnt broken(要求使用 "fsid="，crossmnt 已失效)
+--------------------------------------------------------------------
 
 We require the "fsid=" export option on any reexport of an NFS
 filesystem.  You can use "uuidgen -r" to generate a unique argument.
@@ -29,9 +26,8 @@ filesystems mounted under the exported filesystem, you'll need to export
 them explicitly, assigning each its own unique "fsid= option.
 ("crossmnt" 导出不会传播 "fsid="，因此它不允许继续遍历进入更深层的 nfs 文件系统；如果你想导出挂载在被导出文件系统之下的 nfs 文件系统，就需要显式地导出它们，并为每个文件系统分配各自唯一的 "fsid=" 选项。)
 
-Reboot recovery
-(重启恢复)
----------------
+Reboot recovery(重启恢复)
+-------------------------
 
 The NFS protocol's normal reboot recovery mechanisms don't work for the
 case when the reexport server reboots because the source server has not
@@ -43,9 +39,8 @@ not allowed to get file locks or delegations from a reexport server, any
 attempts will fail with operation not supported.
 (NFS 协议的正常重启恢复机制不适用于再导出服务器重启而源服务器未重启的情况，因为此时源服务器不处于宽限期(grace period)内。由于源服务器不在宽限期内，它无法提供任何保证，确保文件在锁丢失之后到尝试恢复锁之前不会被更改。同样的情况也适用于委托(delegation)及其关联的任何锁。不允许客户端从再导出服务器获取文件锁或委托，任何此类尝试都会以"操作不受支持"而失败。)
 
-Filehandle limits
-(文件句柄限制)
------------------
+Filehandle limits(文件句柄限制)
+-------------------------------
 
 If the original server uses an X byte filehandle for a given object, the
 reexport server's filehandle for the reexported object will be X+22
@@ -127,9 +122,8 @@ the source code and comments; see in particular:
         - fs/nfsd/nfsfh.c:set_version_and_fsid_type
         - fs/nfs/export.c:nfs_encode_fh
 
-Open DENY bits ignored
-(Open DENY 位被忽略)
-----------------------
+Open DENY bits ignored(Open DENY 位被忽略)
+------------------------------------------
 
 NFS since NFSv4 supports ALLOW and DENY bits taken from Windows, which
 allow you, for example, to open a file in a mode which forbids other

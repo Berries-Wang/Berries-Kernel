@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==================================
-relay interface (formerly relayfs)
-==================================
-
-(relay 接口(前身为 relayfs))
+==============================================================
+relay interface (formerly relayfs)(relay 接口(前身为 relayfs))
+==============================================================
 
 The relay interface provides a means for kernel applications to
 efficiently log and transfer large quantities of data from the kernel
@@ -35,9 +33,8 @@ details of the function parameters are documented along with the
 functions in the relay interface code - please see that for details.
 (本文档概述 relay 接口 API。函数参数的细节在 relay 接口代码中与函数一起说明——详情请参阅代码本身。)
 
-Semantics
-(语义)
-=========
+Semantics(语义)
+===============
 
 Each relay channel has one buffer per CPU; each buffer has one or more
 sub-buffers.  Messages are written to the first sub-buffer until it is
@@ -81,9 +78,8 @@ approach; the example code attempts to make the tradeoff between the
 two approaches as small as possible.
 (relay 接口的一个主要目标是提供一种向用户空间传递内核数据的低开销机制。read() 接口易于使用，但不如 mmap() 方式高效；示例代码尽力使两种方式之间的取舍代价尽可能小。)
 
-klog and relay-apps example code
-(klog 与 relay-apps 示例代码)
-================================
+klog and relay-apps example code(klog 与 relay-apps 示例代码)
+=============================================================
 
 The relay interface itself is ready to use, but to make things easier,
 a couple of simple utility functions and a set of examples are provided.
@@ -124,9 +120,8 @@ klog and the relay-apps examples can be found in the relay-apps
 tarball on http://relayfs.sourceforge.net
 (klog 与 relay-apps 示例可在 http://relayfs.sourceforge.net 上的 relay-apps 压缩包中找到。)
 
-The relay interface user space API
-(relay 接口用户空间 API)
-==================================
+The relay interface user space API(relay 接口用户空间 API)
+==========================================================
 
 The relay interface implements basic file operations for user space
 access to relay channel buffer data.  Here are the file operations
@@ -180,9 +175,8 @@ host filesystem must be mounted.  For example::
 	(内核客户端创建或使用通道时不需要挂载宿主文件系统——只有当用户空间应用程序需要访问缓冲区数据时才需要挂载。)
 
 
-The relay interface kernel API
-(relay 接口内核 API)
-==============================
+The relay interface kernel API(relay 接口内核 API)
+==================================================
 
 Here's a summary of the API the relay interface provides to in-kernel clients:
 (以下是 relay 接口提供给内核内客户端的 API 摘要：)
@@ -230,9 +224,8 @@ TBD(curr. line MT:/API/)
   (辅助函数:)
 
 
-Creating a channel
-(创建通道)
-------------------
+Creating a channel(创建通道)
+----------------------------
 
 relay_open() is used to create a channel, along with its per-cpu
 channel buffers.  Each channel buffer will have an associated file
@@ -350,9 +343,8 @@ user-defined data with a channel, and is immediately available
 buf->chan->private_data.
 (传入 relay_open() 的 private_data 允许客户端将用户自定义数据与通道关联起来，并且可以通过 chan->private_data 或 buf->chan->private_data 立即访问(包括在 create_buf_file() 中)。)
 
-Channel 'modes'
-(通道"模式")
----------------
+Channel 'modes'(通道"模式")
+---------------------------
 
 relay channels can be used in either of two modes - 'overwrite' or
 'no-overwrite'.  The mode is entirely determined by the implementation
@@ -470,9 +462,8 @@ the client should check the value of the prev_subbuf pointer before
 writing into the previous sub-buffer.
 (可以在每个 sub-buffer 的开头通过在 subbuf_start() 回调内调用 subbuf_start_reserve() 辅助函数来保留头部信息。这块保留区可用于存储客户端想要的任何信息。在上面的示例中，每个 sub-buffer 中都保留了空间来存储该 sub-buffer 的填充计数。填充值是在 subbuf_start() 实现中为前一个 sub-buffer 填写的；前一个 sub-buffer 的填充值连同指向前一个 sub-buffer 的指针一起传入 subbuf_start() 回调，因为填充值直到 sub-buffer 被填满才可知。通道打开时也会对第一个 sub-buffer 调用 subbuf_start() 回调，给客户端一个在其中保留空间的机会。此时传入回调的前一个 sub-buffer 指针将为 NULL，因此客户端在写入前一个 sub-buffer 之前应检查 prev_subbuf 指针的值。)
 
-Writing to a channel
-(向通道写入)
---------------------
+Writing to a channel(向通道写入)
+--------------------------------
 
 Kernel clients write data into the current cpu's channel buffer using
 relay_write() or __relay_write().  relay_write() is the main logging
@@ -503,9 +494,8 @@ at all - it's up to the client to provide the appropriate
 synchronization when using relay_reserve().
 (relay_reserve() 用于在通道缓冲区中保留一个稍后可写入的槽位。这通常用于需要直接写入通道缓冲区、而不必事先把数据暂存在临时缓冲区中的应用程序。由于实际写入可能不会在保留槽位后立即发生，使用 relay_reserve() 的应用程序可以记录实际写入的字节数，保存在 sub-buffer 本身保留的空间中，或作为一个单独的数组。关于如何做到这一点，参见 relay-apps 压缩包(http://relayfs.sourceforge.net)中的"reserve"示例。由于写入由客户端控制并与保留相分离，relay_reserve() 完全不保护缓冲区——使用 relay_reserve() 时，由客户端提供适当的同步。)
 
-Closing a channel
-(关闭通道)
------------------
+Closing a channel(关闭通道)
+---------------------------
 
 The client calls relay_close() when it's finished using the channel.
 The channel and its associated buffers are destroyed when there are no
@@ -515,9 +505,8 @@ to finalize and process the last sub-buffers before the channel is
 closed.
 (客户端在使用完通道后调用 relay_close()。当不再有任何对通道缓冲区的引用时，通道及其关联的缓冲区被销毁。relay_flush() 强制在所有通道缓冲区上进行一次 sub-buffer 切换，可用于在通道关闭前定稿并处理最后的 sub-buffer。)
 
-Misc
-(杂项)
-----
+Misc(杂项)
+----------
 
 Some applications may want to keep a channel around and reuse it
 rather than open and close a new channel for each use.  relay_reset()
@@ -536,9 +525,8 @@ the channel.
 (最后，还有几个可用于不同用途的工具回调。每当通道缓冲区从用户空间被 mmap 时会调用 buf_mapped()，取消映射时调用 buf_unmapped()。客户端可以利用这一通知在内核应用程序内触发动作，例如启用/禁用向通道记录日志。)
 
 
-Resources
-(资源)
-=========
+Resources(资源)
+===============
 
 For news, example code, mailing list, etc. see the relay interface homepage:
 (新闻、示例代码、邮件列表等请参见 relay 接口主页:)
@@ -546,9 +534,8 @@ For news, example code, mailing list, etc. see the relay interface homepage:
     http://relayfs.sourceforge.net
 
 
-Credits
-(致谢)
-=======
+Credits(致谢)
+=============
 
 The ideas and specs for the relay interface came about as a result of
 discussions on tracing involving the following:

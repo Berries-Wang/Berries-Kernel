@@ -1,19 +1,16 @@
 .. SPDX-License-Identifier: GPL-2.0+
 
-========================================================
-Linux Driver for the Pensando(R) Ethernet adapter family
-========================================================
-
-(Pensando(R) 以太网适配器系列的 Linux 驱动程序)
+=======================================================================================================
+Linux Driver for the Pensando(R) Ethernet adapter family(Pensando(R) 以太网适配器系列的 Linux 驱动程序)
+=======================================================================================================
 
 Pensando Linux Ethernet driver.
 Copyright(c) 2019 Pensando Systems, Inc
 (Pensando Linux 以太网驱动程序。
 版权所有(c) 2019 Pensando Systems, Inc)
 
-Contents
-(目录)
-========
+Contents(目录)
+==============
 
 - Identifying the Adapter
   (识别适配器)
@@ -28,9 +25,8 @@ Contents
 - Support
   (支持)
 
-Identifying the Adapter
-(识别适配器)
-=======================
+Identifying the Adapter(识别适配器)
+===================================
 
 To find if one or more Pensando PCI Ethernet devices are installed on the
 host, check for the PCI devices::
@@ -81,9 +77,8 @@ on the devlink dev info data.
 (有关 devlink dev info 数据的更多信息，请参阅
 Documentation/networking/devlink/ionic.rst。)
 
-Enabling the driver
-(启用驱动程序)
-===================
+Enabling the driver(启用驱动程序)
+=================================
 
 The driver is enabled via the standard kernel configuration system,
 using the make command::
@@ -100,20 +95,17 @@ The driver is located in the menu structure at:
         -> Pensando devices
           -> Pensando Ethernet IONIC Support
 
-Configuring the Driver
-(配置驱动程序)
-======================
+Configuring the Driver(配置驱动程序)
+====================================
 
-MTU
-(MTU)
----
+MTU(MTU)
+--------
 
 Jumbo frame support is available with a maximum size of 9194 bytes.
 (支持巨型帧，最大尺寸为 9194 字节。)
 
-Interrupt coalescing
-(中断合并)
---------------------
+Interrupt coalescing(中断合并)
+------------------------------
 
 Interrupt coalescing can be configured by changing the rx-usecs value with
 the "ethtool -C" command.  The rx-usecs range is 0-190.  The tx-usecs value
@@ -122,9 +114,8 @@ reflects the rx-usecs value as they are tied together on the same interrupt.
 取值范围为 0-190。tx-usecs 值与 rx-usecs 值绑定在同一个中断上，因此二者
 保持一致。)
 
-SR-IOV
-(SR-IOV)
-------
+SR-IOV(SR-IOV)
+--------------
 
 Minimal SR-IOV support is currently offered and can be enabled by setting
 the sysfs 'sriov_numvfs' value, if supported by your particular firmware
@@ -132,18 +123,16 @@ configuration.
 (目前仅提供最基本的 SR-IOV 支持：如果您的特定固件配置支持，可以通过
 设置 sysfs 的 'sriov_numvfs' 值来启用。)
 
-XDP
-(XDP)
----
+XDP(XDP)
+--------
 
 Support for XDP includes the basics, plus Jumbo frames, Redirect and
 ndo_xmit.  There is no current support for zero-copy sockets or HW offload.
 (XDP 支持包括基本功能，外加巨型帧、重定向（Redirect）和 ndo_xmit。目前
 不支持零拷贝套接字或硬件卸载。)
 
-RDMA Support via Auxiliary Device
-(通过辅助设备支持 RDMA)
-=================================
+RDMA Support via Auxiliary Device(通过辅助设备支持 RDMA)
+========================================================
 
 The ionic driver supports RDMA (Remote Direct Memory Access) functionality
 through the Linux auxiliary device framework when advertised by the firmware.
@@ -155,13 +144,11 @@ driver to bind and provide InfiniBand/RoCE functionality.
 如果受支持，以太网驱动程序会创建一个辅助设备，允许 RDMA 驱动程序绑定
 其上并提供 InfiniBand/RoCE 功能。)
 
-Statistics
-(统计信息)
-==========
+Statistics(统计信息)
+====================
 
-Basic hardware stats
-(基本硬件统计)
---------------------
+Basic hardware stats(基本硬件统计)
+----------------------------------
 
 The commands ``netstat -i``, ``ip -s link show``, and ``ifconfig`` show
 a limited set of statistics taken directly from firmware.  For example::
@@ -176,9 +163,8 @@ a limited set of statistics taken directly from firmware.  For example::
       TX: bytes  packets  errors  dropped carrier collsns
       1384       18       0       0       0       0
 
-ethtool -S
-(ethtool -S)
-----------
+ethtool -S(ethtool -S)
+----------------------
 
 The statistics shown from the ``ethtool -S`` command includes a combination of
 driver counters and firmware counters, including port and queue specific values.
@@ -343,9 +329,8 @@ Firmware port specific::
      frames_tx_truncated: 0
 
 
-Support
-(支持)
-=======
+Support(支持)
+=============
 
 For general Linux networking support, please use the netdev mailing
 list, which is monitored by Pensando personnel::

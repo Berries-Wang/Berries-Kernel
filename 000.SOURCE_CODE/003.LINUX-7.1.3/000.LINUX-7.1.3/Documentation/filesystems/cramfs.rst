@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===========================================
-Cramfs - cram a filesystem onto a small ROM
-===========================================
-
-(Cramfs——把一个文件系统塞进一个小 ROM)
+=================================================================================
+Cramfs - cram a filesystem onto a small ROM(Cramfs——把一个文件系统塞进一个小 ROM)
+=================================================================================
 
 cramfs is designed to be simple and small, and to compress things well.
 (cramfs 的设计目标是简单、小巧，并具有良好的压缩效果。)
@@ -21,9 +19,8 @@ create the disk image with the "mkcramfs" utility.
 (你无法写入 cramfs 文件系统(使它可压缩且紧凑的同时，也让它_非常_难以即时更新)，因此你必须使用 "mkcramfs" 工具来创建磁盘映像。)
 
 
-Usage Notes
-(使用注意事项)
------------
+Usage Notes(使用注意事项)
+-------------------------
 
 File sizes are limited to less than 16MB.
 (文件大小被限制在 16MB 以内。)
@@ -61,9 +58,8 @@ mind the filesystem becoming unreadable to future kernels.
 (目前，cramfs 必须在相同字节序的体系结构上写入和读取，并且只能由 PAGE_SIZE == 4096 的内核读取。至少后者是一个缺陷，但尚未决定什么是最佳的修复方案。眼下，如果你使用更大的页，你可以直接修改 mkcramfs.c 中的 #define，只要你不在乎该文件系统在未来内核中变得不可读。)
 
 
-Memory Mapped cramfs image
-(内存映射的 cramfs 映像)
---------------------------
+Memory Mapped cramfs image(内存映射的 cramfs 映像)
+--------------------------------------------------
 
 The CRAMFS_MTD Kconfig option adds support for loading data directly from
 a physical linear memory range (usually non volatile memory like Flash)
@@ -99,9 +95,8 @@ something like "root=mtd:fs_partition" on the kernel command line.
 (要以此作为根文件系统来引导内核，只需在内核命令行上指定类似 "root=mtd:fs_partition" 的内容即可。)
 
 
-Tools
-(工具)
------
+Tools(工具)
+-----------
 
 A version of mkcramfs that can take advantage of the latest capabilities
 described above can be found here:
@@ -110,9 +105,8 @@ described above can be found here:
 https://github.com/npitre/cramfs-tools
 
 
-For /usr/share/magic
-(用于 /usr/share/magic)
---------------------
+For /usr/share/magic(用于 /usr/share/magic)
+-------------------------------------------
 
 =====	=======================	=======================
 0	ulelong	0x28cd3d45	Linux cramfs offset 0(偏移 0 处的 Linux cramfs)
@@ -138,9 +132,8 @@ For /usr/share/magic
 =====	=======================	=======================
 
 
-Hacker Notes
-(Hacker 注记)
-------------
+Hacker Notes(Hacker 注记)
+-------------------------
 
 See fs/cramfs/README for filesystem layout and implementation notes.
 (文件系统布局和实现说明请参见 fs/cramfs/README。)

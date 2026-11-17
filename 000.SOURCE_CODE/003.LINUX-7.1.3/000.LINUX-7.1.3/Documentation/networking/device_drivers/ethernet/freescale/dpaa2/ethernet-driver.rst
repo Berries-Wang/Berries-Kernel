@@ -1,11 +1,9 @@
 .. SPDX-License-Identifier: GPL-2.0
 .. include:: <isonum.txt>
 
-===============================
-DPAA2 Ethernet driver
-===============================
-
-(DPAA2 以太网驱动)
+=======================================
+DPAA2 Ethernet driver(DPAA2 以太网驱动)
+=======================================
 
 :Copyright: |copy| 2017-2018 NXP
 
@@ -14,18 +12,16 @@ DPAA2 Ethernet driver
 This file provides documentation for the Freescale DPAA2 Ethernet driver.
 (本文件提供 Freescale DPAA2 以太网驱动的文档。)
 
-Supported Platforms
-(支持的平台)
-===================
+Supported Platforms(支持的平台)
+===============================
 
 This driver provides networking support for Freescale DPAA2 SoCs, e.g.
 LS2080A, LS2088A, LS1088A.
 (本驱动为 Freescale DPAA2 SoC 提供网络支持，例如 LS2080A、LS2088A、LS1088A。)
 
 
-Architecture Overview
-(架构概览)
-=====================
+Architecture Overview(架构概览)
+===============================
 
 Unlike regular NICs, in the DPAA2 architecture there is no single hardware block
 representing network interfaces; instead, several separate hardware resources
@@ -60,7 +56,6 @@ object and uses Buffer Pools (DPBPs), I/O Portals (DPIOs) and Concentrators
 (每个 Linux 网络设备都构建在一个数据路径网络接口 (DPNI) 对象之上，并使用缓冲池 (DPBP)、I/O 门户 (DPIO) 和集中器 (DPCON)。)
 
 Configuration interface::
-(配置接口：)
 
                  -----------------------
                 | DPAA2 Ethernet Driver |
@@ -85,6 +80,8 @@ Configuration interface::
          | DPBP |       | DPNI |          | DPCON |
           ------         ------            -------
 
+(配置接口：)
+
 The DPNIs are network interfaces without a direct one-on-one mapping to PHYs.
 DPBPs represent hardware buffer pools. Packet I/O is performed in the context
 of DPCON objects, using DPIO portals for managing and communicating with the
@@ -92,7 +89,6 @@ hardware resources.
 (DPNI 是没有与 PHY 直接一一对应关系的网络接口。DPBP 代表硬件缓冲池。数据包 I/O 在 DPCON 对象的上下文中执行，使用 DPIO 门户来管理和与硬件资源通信。)
 
 Datapath (I/O) interface::
-(数据路径 (I/O) 接口：)
 
          -----------------------------------------------
         |           DPAA2 Ethernet Driver               |
@@ -122,6 +118,8 @@ Datapath (I/O) interface::
           ----------------------         |      -------------
                    =======================
                                 Channel
+
+(数据路径 (I/O) 接口：)
 
 Datapath I/O (DPIO) portals provide enqueue and dequeue services, data
 availability notifications and buffer pool management. DPIOs are shared between
@@ -180,9 +178,8 @@ managed by MC and completely transparent to the Ethernet driver.
           ===========             ==================      | PHY |
                                                            -----
 
-Creating a Network Interface
-(创建网络接口)
-============================
+Creating a Network Interface(创建网络接口)
+==========================================
 
 A net device is created for each DPNI object probed on the MC bus. Each DPNI has
 a number of properties which determine the network interface configuration
@@ -196,9 +193,8 @@ dynamically at runtime, via the DPAA2 objects APIs.
 (DPNI 对象（以及网络接口所需的其他 DPAA2 对象）可以通过两种方式之一添加到 MC 总线上的容器中：静态方式，通过 MC 在启动时解析的数据路径布局二进制文件 (DPL)；或者动态方式，在运行时通过 DPAA2 对象 API 创建。)
 
 
-Features & Offloads
-(特性与卸载)
-===================
+Features & Offloads(特性与卸载)
+===============================
 
 Hardware checksum offloading is supported for TCP and UDP over IPv4/6 frames.
 The checksum offloads can be independently configured on RX and TX through

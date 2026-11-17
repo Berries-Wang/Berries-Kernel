@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===============================================
-PPE Ethernet Driver for Qualcomm IPQ SoC Family
-===============================================
-
-(Qualcomm IPQ SoC 系列的 PPE 以太网驱动)
+=======================================================================================
+PPE Ethernet Driver for Qualcomm IPQ SoC Family(Qualcomm IPQ SoC 系列的 PPE 以太网驱动)
+=======================================================================================
 
 Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
 (版权所有 (c) Qualcomm Technologies, Inc. 及/或其子公司。)
@@ -13,25 +11,23 @@ Author: Lei Wei <quic_leiwei@quicinc.com>
 (作者: Lei Wei <quic_leiwei@quicinc.com>)
 
 
-Contents
-(目录)
-========
+Contents(目录)
+==============
 
-- `PPE Overview`_
+- `PPE Overview(PPE 概述)`_
   (PPE 概述)
-- `PPE Driver Overview`_
+- `PPE Driver Overview(PPE 驱动概述)`_
   (PPE 驱动概述)
-- `PPE Driver Supported SoCs`_
+- `PPE Driver Supported SoCs(PPE 驱动支持的 SoC)`_
   (PPE 驱动支持的 SoC)
-- `Enabling the Driver`_
+- `Enabling the Driver(启用该驱动)`_
   (启用该驱动)
-- `Debugging`_
+- `Debugging(调试)`_
   (调试)
 
 
-PPE Overview
-(PPE 概述)
-============
+PPE Overview(PPE 概述)
+======================
 
 IPQ (Qualcomm Internet Processor) SoC (System-on-Chip) series is Qualcomm's series of
 networking SoC for Wi-Fi access points. The PPE (Packet Process Engine) is the Ethernet
@@ -42,8 +38,6 @@ packet process engine in the IPQ SoC.
 Below is a simplified hardware diagram of IPQ9574 SoC which includes the PPE engine and
 other blocks which are in the SoC but outside the PPE engine. These blocks work together
 to enable the Ethernet for the IPQ SoC::
-(下面是 IPQ9574 SoC 的简化硬件框图，其中包含 PPE 引擎以及位于 SoC 中但在 PPE 引擎之外的其他模块。这些模块
-协同工作，为 IPQ SoC 提供以太网功能：)
 
                +------+ +------+ +------+ +------+ +------+  +------+ start +-------+
                |netdev| |netdev| |netdev| |netdev| |netdev|  |netdev|<------|PHYLINK|
@@ -86,6 +80,9 @@ to enable the Ethernet for the IPQ SoC::
                   |                                                     |
                   |                       MDIO bus                      |
                   +-----------------------------------------------------+
+
+(下面是 IPQ9574 SoC 的简化硬件框图，其中包含 PPE 引擎以及位于 SoC 中但在 PPE 引擎之外的其他模块。这些模块
+协同工作，为 IPQ SoC 提供以太网功能：)
 
 The CMN (Common) PLL, NSSCC (Networking Sub System Clock Controller) and GCC (Global
 Clock Controller) blocks are in the SoC and act as clock providers.
@@ -174,9 +171,8 @@ the connected PHYs, and the port link states. This is also illustrated in above 
 之间的连通性以及端口链路状态。上面的框图也展示了这一点。)
 
 
-PPE Driver Overview
-(PPE 驱动概述)
-===================
+PPE Driver Overview(PPE 驱动概述)
+=================================
 PPE driver is Ethernet driver for the Qualcomm IPQ SoC. It is a single platform driver
 which includes the PPE part and Ethernet DMA part. The PPE part initializes and drives the
 various blocks in PPE switch core such as BM/QM/L2 blocks and the PPE MACs. The EDMA part
@@ -212,9 +208,8 @@ CPU code counters and queue counters.
 (ppe_debugfs.c 提供 PPE 统计计数器，如 PPE 端口 Rx/Tx 计数器、CPU code 计数器和队列计数器。)
 
 
-PPE Driver Supported SoCs
-(PPE 驱动支持的 SoC)
-=========================
+PPE Driver Supported SoCs(PPE 驱动支持的 SoC)
+=============================================
 
 The PPE driver supports the following IPQ SoC:
 (PPE 驱动支持以下 IPQ SoC：)
@@ -223,9 +218,8 @@ The PPE driver supports the following IPQ SoC:
   (IPQ9574)
 
 
-Enabling the Driver
-(启用该驱动)
-===================
+Enabling the Driver(启用该驱动)
+===============================
 
 The driver is located in the menu structure at::
 (该驱动位于如下菜单结构中：)
@@ -245,9 +239,8 @@ module.
 (PPE 驱动在功能上依赖 CMN PLL 和 NSSCC 时钟控制器驱动。请在安装 PPE 驱动模块之前，确保依赖模块已经安装。)
 
 
-Debugging
-(调试)
-=========
+Debugging(调试)
+===============
 
 The PPE hardware counters can be accessed using debugfs interface from the
 ``/sys/kernel/debug/ppe/`` directory.

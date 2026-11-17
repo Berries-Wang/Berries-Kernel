@@ -1,8 +1,7 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-About this Book
-(关于本书)
-===============
+About this Book(关于本书)
+=========================
 
 This document attempts to describe the on-disk format for ext4
 filesystems. The same general ideas should apply to ext2/3 filesystems
@@ -18,15 +17,13 @@ undoubtedly plenty of lore that might not be reflected in freshly
 created demonstration filesystems.
 (**注意**：这是一项进行中的工作，基于作者(djwong)在手工剖析文件系统时所做的笔记。数据结构定义截至 Linux 4.18 和 e2fsprogs-1.44 应为最新。欢迎所有评论和更正，因为毫无疑问有大量背景知识可能不会反映在新创建的演示文件系统中。)
 
-License
-(许可证)
--------
+License(许可证)
+---------------
 This book is licensed under the terms of the GNU Public License, v2.
 (本书按照 GNU Public License v2 的条款授权。)
 
-Terminology
-(术语)
------------
+Terminology(术语)
+-----------------
 
 ext4 divides a storage device into an array of logical blocks both to
 reduce bookkeeping overhead and to increase throughput by forcing larger
@@ -44,9 +41,8 @@ in the super block, and ``inode`` refers to fields in an inode table
 entry.
 (在 ``preformatted text`` 块中被引用时，``sb`` 指超级块中的字段，``inode`` 指 inode 表条目中的字段。)
 
-Other References
-(其他参考资料)
-----------------
+Other References(其他参考资料)
+------------------------------
 
 Also see https://www.nongnu.org/ext2-doc/ for quite a collection of
 information about ext2/3. Here's another old reference:

@@ -1,15 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-============
-Devlink Trap
-============
+================================
+Devlink Trap(Devlink Trap(陷阱))
+================================
 
-(Devlink Trap(陷阱))
-
-Background
-==========
-
-(背景)
+Background(背景)
+================
 
 Devices capable of offloading the kernel's datapath and perform functions such
 as bridging and routing must also be able to send specific packets to the
@@ -40,10 +36,8 @@ is called "packet trapping".
 (将特定数据包送往内核进行处理这一基本能力称为 "数据包陷阱"
 (packet trapping)。)
 
-Overview
-========
-
-(概述)
+Overview(概述)
+==============
 
 The ``devlink-trap`` mechanism allows capable device drivers to register their
 supported packet traps with ``devlink`` and report trapped packets to
@@ -65,7 +59,6 @@ otherwise be invisible.
 的数据包丢弃情况。)
 
 The following diagram provides a general overview of ``devlink-trap``::
-(下图给出了 ``devlink-trap`` 的总体概览：)
 
                                     Netlink event: Packet w/ metadata
                                                    Or a summary of recent drops
@@ -105,14 +98,13 @@ The following diagram provides a general overview of ``devlink-trap``::
                                |      |
                                | ASIC |
                                |      |
+                               (下图给出了 ``devlink-trap`` 的总体概览：)
                                +------+
 
 .. _Trap-Types:
 
-Trap Types
-==========
-
-(陷阱类型)
+Trap Types(陷阱类型)
+====================
 
 The ``devlink-trap`` mechanism supports the following packet trap types:
 (``devlink-trap`` 机制支持以下数据包陷阱类型：)
@@ -146,10 +138,8 @@ The ``devlink-trap`` mechanism supports the following packet trap types:
 
 .. _Trap-Actions:
 
-Trap Actions
-============
-
-(陷阱动作)
+Trap Actions(陷阱动作)
+======================
 
 The ``devlink-trap`` mechanism supports the following packet trap actions:
 (``devlink-trap`` 机制支持以下数据包陷阱动作：)
@@ -163,10 +153,8 @@ The ``devlink-trap`` mechanism supports the following packet trap actions:
     sent to the CPU.
     (``mirror``：数据包由底层设备转发，同时一份副本被送往 CPU。)
 
-Generic Packet Traps
-====================
-
-(通用数据包陷阱)
+Generic Packet Traps(通用数据包陷阱)
+====================================
 
 Generic packet traps are used to describe traps that trap well-defined packets
 or packets that are trapped due to well-defined conditions (e.g., TTL error).
@@ -689,10 +677,8 @@ be added to the following table:
        锁定端口收到、且其 {SMAC, VID} 不对应指向该端口的 FDB 表项的
        数据包)
 
-Driver-specific Packet Traps
-============================
-
-(驱动特定的数据包陷阱)
+Driver-specific Packet Traps(驱动特定的数据包陷阱)
+==================================================
 
 Device drivers can register driver-specific packet traps, but these must be
 clearly documented. Such traps can correspond to device-specific exceptions and
@@ -709,10 +695,8 @@ drivers:
 
 .. _Generic-Packet-Trap-Groups:
 
-Generic Packet Trap Groups
-==========================
-
-(通用数据包陷阱组)
+Generic Packet Trap Groups(通用数据包陷阱组)
+============================================
 
 Generic packet trap groups are used to aggregate logically related packet
 traps. These groups allow the user to batch operations such as setting the trap
@@ -844,10 +828,8 @@ narrow. The description of these groups must be added to the following table:
        (包含 IEEE 802.1X 中规定的 "局域网可扩展认证协议" (EAPOL) 数据包
        的数据包陷阱)
 
-Packet Trap Policers
-====================
-
-(数据包陷阱策略器)
+Packet Trap Policers(数据包陷阱策略器)
+======================================
 
 As previously explained, the underlying device can trap certain packets to the
 CPU for processing. In most cases, the underlying device is capable of handling
@@ -884,10 +866,8 @@ configured policy was violated.
 (如果可能，设备驱动应当实现一个回调，允许用户空间获取因违反策略器所配置
 的策略而被其丢弃的数据包数量。)
 
-Testing
-=======
-
-(测试)
+Testing(测试)
+=============
 
 See ``tools/testing/selftests/drivers/net/netdevsim/devlink_trap.sh`` for a
 test covering the core infrastructure. Test cases should be added for any new

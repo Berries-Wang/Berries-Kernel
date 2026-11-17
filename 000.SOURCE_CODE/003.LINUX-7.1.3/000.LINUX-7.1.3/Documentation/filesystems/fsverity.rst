@@ -2,15 +2,12 @@
 
 .. _fsverity:
 
-=======================================================
-fs-verity: read-only file-based authenticity protection
-=======================================================
+============================================================================================
+fs-verity: read-only file-based authenticity protection(fs-verity：面向只读文件的真实性保护)
+============================================================================================
 
-(fs-verity：面向只读文件的真实性保护)
-
-Introduction
-(引言)
-============
+Introduction(引言)
+==================
 
 fs-verity (``fs/verity/``) is a support layer that filesystems can
 hook into to support transparent integrity and authenticity protection
@@ -43,9 +40,8 @@ subject to the caveat that reads which would violate the hash will
 fail at runtime.
 (fs-verity 本质上是一种以恒定时间对文件进行哈希的方法，但附带一个限制：违反哈希的读取在运行时会失败。)
 
-Use cases
-(使用场景)
-=========
+Use cases(使用场景)
+===================
 
 By itself, fs-verity only provides integrity protection, i.e.
 detection of accidental (non-malicious) corruption.
@@ -91,7 +87,7 @@ authenticating fs-verity file hashes include:
   from a read-only partition that uses dm-verity) and that wants to
   authenticate applications before loading them.  In these cases, this
   trusted userspace code can authenticate a file's contents by
-  retrieving its fs-verity digest using `FS_IOC_MEASURE_VERITY`_, then
+  retrieving its fs-verity digest using `FS_IOC_MEASURE_VERITY(获取度量值)`_, then
   verifying a signature of it using any userspace cryptographic
   library that supports digital signatures.
   (受信任的用户空间代码。通常，访问文件的用户空间代码可以被信任来对文件进行认证。例如，考虑一个想在使用数据文件之前对其进行认证的应用程序，或者一个作为操作系统一部分的应用程序加载器(它本身已通过其他方式认证，例如从使用 dm-verity 的只读分区加载)，并且想在加载应用程序之前对其进行认证。在这些情况下，受信任的用户空间代码可以通过使用 FS_IOC_MEASURE_VERITY 获取文件的 fs-verity 摘要，然后使用任何支持数字签名的用户空间加密库验证其签名，来认证文件的内容。)
@@ -114,17 +110,14 @@ authenticating fs-verity file hashes include:
   modes, please refer to :doc:`IPE admin guide </admin-guide/LSM/ipe>`.
   (完整性策略执行(Integrity Policy Enforcement，IPE)。IPE 支持基于文件的不可变安全属性来强制执行访问控制决策，包括受 fs-verity 内置签名保护的文件。"IPE 策略"特别允许使用属性 fsverity_digest(通过 verity 摘要标识文件)和 fsverity_signature(授权带有已验证 fs-verity 内置签名的文件)来对 fs-verity 文件进行授权。有关配置 IPE 策略及了解其运行模式的详细信息，请参阅 IPE 管理指南。)
 
-- Trusted userspace code in combination with `Built-in signature
-  verification`_.  This approach should be used only with great care.
+- Trusted userspace code in combination with `Built-in signature verification(内置签名验证)`_.  This approach should be used only with great care.
   (受信任的用户空间代码与"内置签名验证"相结合。这种方法只应在非常谨慎的情况下使用。)
 
-User API
-(用户 API)
-========
+User API(用户 API)
+==================
 
-FS_IOC_ENABLE_VERITY
-(启用 fs-verity)
---------------------
+FS_IOC_ENABLE_VERITY(启用 fs-verity)
+------------------------------------
 
 The FS_IOC_ENABLE_VERITY ioctl enables fs-verity on a file.  It takes
 in a pointer to a struct fsverity_enable_arg, defined as
@@ -173,7 +166,7 @@ the file.  It must be initialized as follows:
   (sig_size 是内置签名(builtin signature)的字节大小；如果未提供内置签名则为 0。目前内置签名(多少有些随意地)被限制为 16128 字节。)
 - ``sig_ptr``  is the pointer to the builtin signature, or NULL if no
   builtin signature is provided.  A builtin signature is only needed
-  if the `Built-in signature verification`_ feature is being used.  It
+  if the `Built-in signature verification(内置签名验证)`_ feature is being used.  It
   is not needed for IMA appraisal, and it is not needed if the file
   signature is being handled entirely in userspace.
   (sig_ptr 是指向内置签名的指针；如果未提供内置签名则为 NULL。只有在使用"内置签名验证"特性时才需要内置签名。IMA 评估不需要它；如果文件签名完全在用户空间处理，也不需要它。)
@@ -239,7 +232,7 @@ FS_IOC_ENABLE_VERITY can fail with the following errors:
 - ``EOPNOTSUPP``: the kernel was not configured with fs-verity
   support; or the filesystem superblock has not had the 'verity'
   feature enabled on it; or the filesystem does not support fs-verity
-  on this file.  (See `Filesystem support`_.)
+  on this file.  (See `Filesystem support(文件系统支持)`_.)
   (内核未配置 fs-verity 支持；或者文件系统超级块未启用 'verity' 特性；或者该文件系统不支持在此文件上使用 fs-verity。(参见"文件系统支持"一节。))
 - ``EPERM``: the file is append-only; or, a builtin signature is
   required and one was not provided.
@@ -251,9 +244,8 @@ FS_IOC_ENABLE_VERITY can fail with the following errors:
   reference held by a writable memory map.
   (有人以写方式打开了该文件。这可能是调用者自己的文件描述符、另一个打开的文件描述符，或者可写内存映射持有的文件引用。)
 
-FS_IOC_MEASURE_VERITY
-(获取度量值)
----------------------
+FS_IOC_MEASURE_VERITY(获取度量值)
+---------------------------------
 
 The FS_IOC_MEASURE_VERITY ioctl retrieves the digest of a verity file.
 The fs-verity file digest is a cryptographic digest that identifies
@@ -303,15 +295,14 @@ FS_IOC_MEASURE_VERITY can fail with the following errors:
   (该类型的文件系统未实现 fs-verity。)
 - ``EOPNOTSUPP``: the kernel was not configured with fs-verity
   support, or the filesystem superblock has not had the 'verity'
-  feature enabled on it.  (See `Filesystem support`_.)
+  feature enabled on it.  (See `Filesystem support(文件系统支持)`_.)
   (内核未配置 fs-verity 支持，或者文件系统超级块未启用 'verity' 特性。(参见"文件系统支持"一节。))
 - ``EOVERFLOW``: the digest is longer than the specified
   ``digest_size`` bytes.  Try providing a larger buffer.
   (摘要长于指定的 digest_size 字节。请尝试提供更大的缓冲。)
 
-FS_IOC_READ_VERITY_METADATA
-(读取 verity 元数据)
----------------------------
+FS_IOC_READ_VERITY_METADATA(读取 verity 元数据)
+-----------------------------------------------
 
 The FS_IOC_READ_VERITY_METADATA ioctl reads verity metadata from a
 verity file.  This ioctl is available since Linux v5.12.
@@ -358,16 +349,15 @@ This ioctl takes in a pointer to the following structure::
   Merkle tree.  The blocks are returned in order from the root level
   to the leaf level.  Within each level, the blocks are returned in
   the same order that their hashes are themselves hashed.
-  See `Merkle tree`_ for more information.
+  See `Merkle tree(Merkle 树)`_ for more information.
   (FS_VERITY_METADATA_TYPE_MERKLE_TREE 读取 Merkle 树的块。这些块按从根层级到叶层级的顺序返回。在每个层级内，块按其哈希自身被哈希时的相同顺序返回。更多信息参见"Merkle 树"一节。)
 
 - ``FS_VERITY_METADATA_TYPE_DESCRIPTOR`` reads the fs-verity
-  descriptor.  See `fs-verity descriptor`_.
+  descriptor.  See `fs-verity descriptor(fs-verity 描述符)`_.
   (FS_VERITY_METADATA_TYPE_DESCRIPTOR 读取 fs-verity 描述符。参见"fs-verity 描述符"一节。)
 
 - ``FS_VERITY_METADATA_TYPE_SIGNATURE`` reads the builtin signature
-  which was passed to FS_IOC_ENABLE_VERITY, if any.  See `Built-in
-  signature verification`_.
+  which was passed to FS_IOC_ENABLE_VERITY, if any.  See `Built-in signature verification(内置签名验证)`_.
   (FS_VERITY_METADATA_TYPE_SIGNATURE 读取传递给 FS_IOC_ENABLE_VERITY 的内置签名(如果有的话)。参见"内置签名验证"一节。)
 
 The semantics are similar to those of ``pread()``.  ``offset``
@@ -382,7 +372,7 @@ example if the ioctl is interrupted.
 
 The metadata returned by FS_IOC_READ_VERITY_METADATA isn't guaranteed
 to be authenticated against the file digest that would be returned by
-`FS_IOC_MEASURE_VERITY`_, as the metadata is expected to be used to
+`FS_IOC_MEASURE_VERITY(获取度量值)`_, as the metadata is expected to be used to
 implement fs-verity compatible verification anyway (though absent a
 malicious disk, the metadata will indeed match).  E.g. to implement
 this ioctl, the filesystem is allowed to just read the Merkle tree
@@ -408,12 +398,11 @@ FS_IOC_READ_VERITY_METADATA can fail with the following errors:
   (该类型的文件系统未实现 fs-verity，或者该文件系统尚未实现此 ioctl。)
 - ``EOPNOTSUPP``: the kernel was not configured with fs-verity
   support, or the filesystem superblock has not had the 'verity'
-  feature enabled on it.  (See `Filesystem support`_.)
+  feature enabled on it.  (See `Filesystem support(文件系统支持)`_.)
   (内核未配置 fs-verity 支持，或者文件系统超级块未启用 'verity' 特性。(参见"文件系统支持"一节。))
 
-FS_IOC_GETFLAGS
-(获取 inode 标志)
----------------
+FS_IOC_GETFLAGS(获取 inode 标志)
+--------------------------------
 
 The existing ioctl FS_IOC_GETFLAGS (which isn't specific to fs-verity)
 can also be used to check whether a file has fs-verity enabled or not.
@@ -424,9 +413,8 @@ The verity flag is not settable via FS_IOC_SETFLAGS.  You must use
 FS_IOC_ENABLE_VERITY instead, since parameters must be provided.
 (verity 标志不能通过 FS_IOC_SETFLAGS 设置。必须改用 FS_IOC_ENABLE_VERITY，因为必须提供参数。)
 
-statx
-(statx 系统调用)
------
+statx(statx 系统调用)
+---------------------
 
 Since Linux v5.5, the statx() system call sets STATX_ATTR_VERITY if
 the file has fs-verity enabled.  This can perform better than
@@ -434,9 +422,8 @@ FS_IOC_GETFLAGS and FS_IOC_MEASURE_VERITY because it doesn't require
 opening the file, and opening verity files can be expensive.
 (自 Linux v5.5 起，如果文件启用了 fs-verity，statx() 系统调用会设置 STATX_ATTR_VERITY。这可能比 FS_IOC_GETFLAGS 和 FS_IOC_MEASURE_VERITY 性能更好，因为它不需要打开文件，而打开 verity 文件的开销可能很大。)
 
-FS_IOC_FSGETXATTR
-(获取文件系统扩展属性)
------------------
+FS_IOC_FSGETXATTR(获取文件系统扩展属性)
+---------------------------------------
 
 Since Linux v7.0, the FS_IOC_FSGETXATTR ioctl sets FS_XFLAG_VERITY (0x00020000)
 in the returned flags when the file has verity enabled. Note that this attribute
@@ -444,9 +431,8 @@ cannot be set with FS_IOC_FSSETXATTR as enabling verity requires input
 parameters. See FS_IOC_ENABLE_VERITY.
 (自 Linux v7.0 起，当文件启用了 verity 时，FS_IOC_FSGETXATTR ioctl 会在返回的标志中设置 FS_XFLAG_VERITY (0x00020000)。注意，该属性不能通过 FS_IOC_FSSETXATTR 设置，因为启用 verity 需要输入参数。参见 FS_IOC_ENABLE_VERITY。)
 
-file_getattr
-(file_getattr 系统调用)
-------------
+file_getattr(file_getattr 系统调用)
+-----------------------------------
 
 Since Linux v7.0, the file_getattr() syscall sets FS_XFLAG_VERITY (0x00020000)
 in the returned flags when the file has verity enabled. Note that this attribute
@@ -456,9 +442,8 @@ See FS_IOC_ENABLE_VERITY.
 
 .. _accessing_verity_files:
 
-Accessing verity files
-(访问 verity 文件)
-======================
+Accessing verity files(访问 verity 文件)
+========================================
 
 Applications can transparently access a verity file just like a
 non-verity one, with the following exceptions:
@@ -486,7 +471,7 @@ non-verity one, with the following exceptions:
 
 - If the sysctl "fs.verity.require_signatures" is set to 1 and the
   file is not signed by a key in the ".fs-verity" keyring, then
-  opening the file will fail.  See `Built-in signature verification`_.
+  opening the file will fail.  See `Built-in signature verification(内置签名验证)`_.
   (如果 sysctl "fs.verity.require_signatures" 被设为 1，且文件不是由 ".fs-verity" 密钥环中的密钥签名的，那么打开该文件将失败。参见"内置签名验证"一节。)
 
 Direct access to the Merkle tree is not supported.  Therefore, if a
@@ -495,9 +480,8 @@ its "verity"-ness.  fs-verity is primarily meant for files like
 executables that are managed by a package manager.
 (不支持直接访问 Merkle 树。因此，如果 verity 文件被复制，或者被备份后再恢复，它将失去其"verity"属性。fs-verity 主要面向像可执行文件那样由包管理器管理的文件。)
 
-File digest computation
-(文件摘要的计算)
-=======================
+File digest computation(文件摘要的计算)
+=======================================
 
 This section describes how fs-verity hashes the file contents using a
 Merkle tree to produce the digest which cryptographically identifies
@@ -511,9 +495,8 @@ compute fs-verity file digests itself, e.g. in order to sign files.
 
 .. _fsverity_merkle_tree:
 
-Merkle tree
-(Merkle 树)
------------
+Merkle tree(Merkle 树)
+----------------------
 
 The file contents is divided into blocks, where the block size is
 configurable but is usually 4096 bytes.  The end of the last block is
@@ -556,9 +539,8 @@ significant, making the space overhead proportionally more.
 
 .. _fsverity_descriptor:
 
-fs-verity descriptor
-(fs-verity 描述符)
---------------------
+fs-verity descriptor(fs-verity 描述符)
+--------------------------------------
 
 By itself, the Merkle tree root hash is ambiguous.  For example, it
 can't a distinguish a large file from a small second file whose data
@@ -583,9 +565,8 @@ root hash as well as other fields such as the file size::
             __u8 __reserved[144];   /* must be 0's */
     };
 
-Built-in signature verification
-(内置签名验证)
-===============================
+Built-in signature verification(内置签名验证)
+=============================================
 
 CONFIG_FS_VERITY_BUILTIN_SIGNATURES=y adds supports for in-kernel
 verification of fs-verity builtin signatures.
@@ -606,7 +587,7 @@ Enabling this option adds the following:
    the add_key() system call.
    (在启动时，内核创建一个名为 ".fs-verity" 的密钥环。root 用户可以使用 add_key() 系统调用向该密钥环添加受信任的 X.509 证书。)
 
-2. `FS_IOC_ENABLE_VERITY`_ accepts a pointer to a PKCS#7 formatted
+2. `FS_IOC_ENABLE_VERITY(启用 fs-verity)`_ accepts a pointer to a PKCS#7 formatted
    detached signature in DER format of the file's fs-verity digest.
    On success, the ioctl persists the signature alongside the Merkle
    tree.  Then, any time the file is opened, the kernel verifies the
@@ -636,7 +617,7 @@ is the fs-verity file digest in the following format::
 
 That's it.  It should be emphasized again that fs-verity builtin
 signatures are not the only way to do signatures with fs-verity.  See
-`Use cases`_ for an overview of ways in which fs-verity can be used.
+`Use cases(使用场景)`_ for an overview of ways in which fs-verity can be used.
 fs-verity builtin signatures have some major limitations that should
 be carefully considered before using them:
 (就这些。需要再次强调的是，fs-verity 内置签名并不是使用 fs-verity 进行签名的唯一方式。fs-verity 可使用方式的概述参见"使用场景"一节。fs-verity 内置签名有一些重大局限性，在使用之前应仔细考虑：)
@@ -715,9 +696,8 @@ be carefully considered before using them:
   here.  IMA appraisal does use X.509.
   (注意：支持 fs-verity 的 IMA 评估并不使用 PKCS#7 作为其签名，因此部分避免了这里讨论的问题。不过 IMA 评估确实使用 X.509。)
 
-Filesystem support
-(文件系统支持)
-==================
+Filesystem support(文件系统支持)
+================================
 
 fs-verity is supported by several filesystems, described below.  The
 CONFIG_FS_VERITY kconfig option must be enabled to use fs-verity on
@@ -731,12 +711,11 @@ methods to read and write the verity metadata to a filesystem-specific
 location, including the Merkle tree blocks and
 ``fsverity_descriptor``.  Filesystems must also call functions in
 ``fs/verity/`` at certain times, such as when a file is opened or when
-pages have been read into the pagecache.  (See `Verifying data`_.)
+pages have been read into the pagecache.  (See `Verifying data(验证数据)`_.)
 (include/linux/fsverity.h 声明了 fs/verity/ 支持层与文件系统之间的接口。简言之，文件系统必须提供一个 fsverity_operations 结构，其中包含将 verity 元数据(包括 Merkle 树块和 fsverity_descriptor)读写到文件系统特定位置的方法。文件系统还必须在特定时机调用 fs/verity/ 中的函数，例如在文件被打开时或页被读入页缓存时。(参见"验证数据"一节。))
 
-ext4
-(ext4 文件系统)
-----
+ext4(ext4 文件系统)
+-------------------
 
 ext4 supports fs-verity since Linux v5.4 and e2fsprogs v1.45.2.
 (ext4 自 Linux v5.4 和 e2fsprogs v1.45.2 起支持 fs-verity。)
@@ -754,7 +733,7 @@ mounted when its block size was equal to the system page size
 (最初，带有 "verity" 特性的 ext4 文件系统只有在其块大小等于系统页大小(通常为 4096 字节)时才能被挂载。在 Linux v6.3 中，这一限制被移除。)
 
 ext4 sets the EXT4_VERITY_FL on-disk inode flag on verity files.  It
-can only be set by `FS_IOC_ENABLE_VERITY`_, and it cannot be cleared.
+can only be set by `FS_IOC_ENABLE_VERITY(启用 fs-verity)`_, and it cannot be cleared.
 (ext4 在 verity 文件上设置 EXT4_VERITY_FL 磁盘上 inode 标志。它只能由 FS_IOC_ENABLE_VERITY 设置，并且不能被清除。)
 
 ext4 also supports encryption, which can be used simultaneously with
@@ -778,9 +757,8 @@ when the file is, since it contains hashes of the plaintext data.
 ext4 only allows verity on extent-based files.
 (ext4 只允许在基于 extent 的文件上使用 verity。)
 
-f2fs
-(f2fs 文件系统)
-----
+f2fs(f2fs 文件系统)
+-------------------
 
 f2fs supports fs-verity since Linux v5.4 and f2fs-tools v1.11.0.
 (f2fs 自 Linux v5.4 和 f2fs-tools v1.11.0 起支持 fs-verity。)
@@ -790,7 +768,7 @@ been formatted with ``-O verity``.
 (要在 f2fs 文件系统上创建 verity 文件，该文件系统必须在格式化时带有 -O verity。)
 
 f2fs sets the FADVISE_VERITY_BIT on-disk inode flag on verity files.
-It can only be set by `FS_IOC_ENABLE_VERITY`_, and it cannot be
+It can only be set by `FS_IOC_ENABLE_VERITY(启用 fs-verity)`_, and it cannot be
 cleared.
 (f2fs 在 verity 文件上设置 FADVISE_VERITY_BIT 磁盘上 inode 标志。它只能由 FS_IOC_ENABLE_VERITY 设置，并且不能被清除。)
 
@@ -805,22 +783,19 @@ f2fs doesn't support enabling verity on files that currently have
 atomic or volatile writes pending.
 (f2fs 不支持在当前有原子写(atomic write)或易失写(volatile write)未决的文件上启用 verity。)
 
-btrfs
-(btrfs 文件系统)
------
+btrfs(btrfs 文件系统)
+---------------------
 
 btrfs supports fs-verity since Linux v5.15.  Verity-enabled inodes are
 marked with a RO_COMPAT inode flag, and the verity metadata is stored
 in separate btree items.
 (btrfs 自 Linux v5.15 起支持 fs-verity。启用了 verity 的 inode 用一个 RO_COMPAT inode 标志标记，verity 元数据存储在单独的 btree 项中。)
 
-Implementation details
-(实现细节)
-======================
+Implementation details(实现细节)
+================================
 
-Verifying data
-(验证数据)
---------------
+Verifying data(验证数据)
+------------------------
 
 fs-verity ensures that all reads of a verity file's data are verified,
 regardless of which syscall is used to do the read (e.g. mmap(),
@@ -829,9 +804,8 @@ later read (unless the later read can return cached data that was
 already verified).  Below, we describe how filesystems implement this.
 (fs-verity 确保 verity 文件数据的所有读取都被验证，无论使用哪个系统调用来读取(例如 mmap()、read()、pread())，也无论是第一次读取还是之后的读取(除非之后的读取可以返回已经验证过的缓存数据)。下面我们描述文件系统如何实现这一点。)
 
-Pagecache
-(页缓存)
-~~~~~~~~~
+Pagecache(页缓存)
+~~~~~~~~~~~~~~~~~
 
 For filesystems using Linux's pagecache, the ``->read_folio()`` and
 ``->readahead()`` methods must be modified to verify folios before
@@ -869,9 +843,8 @@ bottom level of the tree will already be cached and checked from
 reading a previous data block.  However, random reads perform worse.
 (这项优化(也被 dm-verity 使用)带来了出色的顺序读取性能。这是因为通常情况下(例如对于 4K 块和 SHA-256，128 次中有 127 次)，树最底层的哈希块在读取前一个数据块时就已经被缓存并检查过了。不过，随机读取的性能较差。)
 
-Block device based filesystems
-(基于块设备的文件系统)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Block device based filesystems(基于块设备的文件系统)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Block device based filesystems (e.g. ext4 and f2fs) in Linux also use
 the pagecache, so the above subsection applies too.  However, they
@@ -913,9 +886,8 @@ Filesystems also disable direct I/O on verity files, since otherwise
 direct I/O would bypass fs-verity.
 (文件系统还会在 verity 文件上禁用直接 I/O，否则直接 I/O 会绕过 fs-verity。)
 
-Userspace utility
-(用户空间工具)
-=================
+Userspace utility(用户空间工具)
+===============================
 
 This document focuses on the kernel, but a userspace utility for
 fs-verity can be found at:
@@ -927,9 +899,8 @@ See the README.md file in the fsverity-utils source tree for details,
 including examples of setting up fs-verity protected files.
 (详情(包括设置 fs-verity 保护文件的示例)请参见 fsverity-utils 源码树中的 README.md 文件。)
 
-Tests
-(测试)
-=====
+Tests(测试)
+===========
 
 To test fs-verity, use xfstests.  For example, using `kvm-xfstests
 <https://github.com/tytso/xfstests-bld/blob/master/Documentation/kvm-quickstart.md>`_::
@@ -937,9 +908,8 @@ To test fs-verity, use xfstests.  For example, using `kvm-xfstests
 
     kvm-xfstests -c ext4,f2fs,btrfs -g verity
 
-FAQ
-(常见问题)
-===
+FAQ(常见问题)
+=============
 
 This section answers frequently asked questions about fs-verity that
 weren't already directly answered in other parts of this document.
@@ -969,13 +939,13 @@ weren't already directly answered in other parts of this document.
     (鉴于攻击者可以直接修改存储在磁盘上的 Merkle 树中的哈希，fs-verity 难道不是没用吗？)
 :A: To verify the authenticity of an fs-verity file you must verify
     the authenticity of the "fs-verity file digest", which
-    incorporates the root hash of the Merkle tree.  See `Use cases`_.
+    incorporates the root hash of the Merkle tree.  See `Use cases(使用场景)`_.
     (要验证 fs-verity 文件的真实性，你必须验证"fs-verity 文件摘要"的真实性，它包含了 Merkle 树的根哈希。参见"使用场景"一节。)
 
 :Q: Isn't fs-verity useless because the attacker can just replace a
     verity file with a non-verity one?
     (鉴于攻击者可以直接用一个非 verity 文件替换 verity 文件，fs-verity 难道不是没用吗？)
-:A: See `Use cases`_.  In the initial use case, it's really trusted
+:A: See `Use cases(使用场景)`_.  In the initial use case, it's really trusted
     userspace code that authenticates the files; fs-verity is just a
     tool to do this job efficiently and securely.  The trusted
     userspace code will consider non-verity files to be inauthentic.

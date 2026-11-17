@@ -1,15 +1,12 @@
 .. SPDX-License-Identifier: GPL-2.0
 .. include:: <isonum.txt>
 
-============================
-Linux Phonet protocol family
-============================
+=================================================
+Linux Phonet protocol family(Linux Phonet 协议族)
+=================================================
 
-(Linux Phonet 协议族)
-
-Introduction
-(简介)
-------------
+Introduction(简介)
+------------------
 
 Phonet is a packet protocol used by Nokia cellular modems for both IPC
 and RPC. With the Linux Phonet socket family, Linux host processes can
@@ -33,9 +30,8 @@ depending on the device, such as:
     (某些 TI OMAP 处理器上的 SSI 总线。)
 
 
-Packets format
-(数据包格式)
---------------
+Packets format(数据包格式)
+--------------------------
 
 Phonet packets have a common header as follows::
 (Phonet 数据包具有如下所示的公共报头：)
@@ -66,9 +62,8 @@ own 6-bit address.
 (调制解调器的地址编号始终为零。所有其他设备都拥有自己的 6 位地址。)
 
 
-Link layer
-(链路层)
-----------
+Link layer(链路层)
+------------------
 
 Phonet links are always point-to-point links. The link layer header
 consists of a single Phonet media type byte. It uniquely identifies the
@@ -94,9 +89,8 @@ only the (default) Linux FIFO qdisc should be used with them.
 (注意，不允许 Phonet 接口对数据包重新排序，因此只能对它们使用（默认的）Linux FIFO qdisc。)
 
 
-Network layer
-(网络层)
--------------
+Network layer(网络层)
+---------------------
 
 The Phonet socket address family maps the Phonet packet header::
 (Phonet 套接字地址族对 Phonet 数据包报头进行映射：)
@@ -114,9 +108,8 @@ It is ignored by bind() and getsockname().
 (resource 字段仅在发送和接收时使用；bind() 和 getsockname() 会忽略它。)
 
 
-Low-level datagram protocol
-(低层数据报协议)
----------------------------
+Low-level datagram protocol(低层数据报协议)
+-------------------------------------------
 
 Applications can send Phonet messages using the Phonet datagram socket
 protocol from the PF_PHONET family. Each socket is bound to one of the
@@ -145,9 +138,8 @@ not seem useful with Phonet usages (could be added easily).
 (此协议遵循 SOCK_DGRAM 无连接语义。不过，connect() 和 getpeername() 不受支持，因为它们对 Phonet 的用途似乎没什么用处（很容易添加）。)
 
 
-Resource subscription
-(资源订阅)
----------------------
+Resource subscription(资源订阅)
+-------------------------------
 
 A Phonet datagram socket can be subscribed to any number of 8-bits
 Phonet resources, as follow::
@@ -165,9 +157,8 @@ resource at a time. If not, ioctl() will return EBUSY.
 (注意，任何给定的资源在同一时间最多只能被一个套接字订阅。否则 ioctl() 将返回 EBUSY。)
 
 
-Phonet Pipe protocol
-(Phonet 管道协议)
---------------------
+Phonet Pipe protocol(Phonet 管道协议)
+-------------------------------------
 
 The Phonet Pipe protocol is a simple sequenced packets protocol
 with end-to-end congestion control. It uses the passive listening
@@ -268,9 +259,8 @@ The pipe protocol provides two socket options at the SOL_PNPIPE level:
       (是一个只读整数值。它包含管道的底层标识符（"pipe handle"）。它只对已经连接或正在连接的套接字描述符才有定义。)
 
 
-Authors
-(作者)
--------
+Authors(作者)
+-------------
 
 Linux Phonet was initially written by Sakari Ailus.
 (Linux Phonet 最初由 Sakari Ailus 编写。)

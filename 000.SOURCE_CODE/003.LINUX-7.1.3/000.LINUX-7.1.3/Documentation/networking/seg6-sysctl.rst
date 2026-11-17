@@ -1,16 +1,12 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-====================
-Seg6 Sysfs variables
-====================
-
-(Seg6 Sysfs 变量)
+=====================================
+Seg6 Sysfs variables(Seg6 Sysfs 变量)
+=====================================
 
 
-/proc/sys/net/conf/<iface>/seg6_* variables:
-============================================
-
-(/proc/sys/net/conf/<iface>/seg6_* 变量)
+/proc/sys/net/conf/<iface>/seg6_* variables:(/proc/sys/net/conf/<iface>/seg6_* 变量)
+====================================================================================
 
 seg6_enabled - BOOL
 (seg6_enabled - BOOL(布尔值))
@@ -40,10 +36,8 @@ seg6_require_hmac - INTEGER
 	Default is 0.
 	(默认值为 0。)
 
-/proc/sys/net/ipv6/seg6_* variables:
-====================================
-
-(/proc/sys/net/ipv6/seg6_* 变量)
+/proc/sys/net/ipv6/seg6_* variables:(/proc/sys/net/ipv6/seg6_* 变量)
+====================================================================
 
 seg6_flowlabel - INTEGER
 (seg6_flowlabel - INTEGER(整数))

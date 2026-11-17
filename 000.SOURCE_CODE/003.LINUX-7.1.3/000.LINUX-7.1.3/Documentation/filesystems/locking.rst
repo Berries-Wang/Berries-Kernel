@@ -1,8 +1,6 @@
-=======
-Locking
-=======
-
-(锁定)
+=============
+Locking(锁定)
+=============
 
 The text below describes the locking rules for VFS-related methods.
 It is (believed to be) up-to-date. *Please*, if you change anything in
@@ -16,9 +14,8 @@ be able to use diff(1).
 Thing currently missing here: socket operations. Alexey?
 (本文目前缺失的内容：套接字操作。Alexey？)
 
-dentry_operations
-(dentry 操作)
-=================
+dentry_operations(dentry 操作)
+==============================
 
 prototypes::
 
@@ -64,9 +61,8 @@ d_unalias_trylock  yes		no		no 		no
 d_unalias_unlock   yes		no		no 		no
 ================== ===========	========	==============	========
 
-inode_operations
-(inode 操作)
-================
+inode_operations(inode 操作)
+============================
 
 prototypes::
 
@@ -153,9 +149,8 @@ See Documentation/filesystems/directory-locking.rst for more detailed discussion
 of the locking scheme for directory operations.
 (有关目录操作锁定方案的更详细讨论，请参见 Documentation/filesystems/directory-locking.rst。)
 
-xattr_handler operations
-(xattr_handler 操作)
-========================
+xattr_handler operations(xattr_handler 操作)
+============================================
 
 prototypes::
 
@@ -183,9 +178,8 @@ get:		no
 set:		exclusive
 =====		==============
 
-super_operations
-(超级块操作)
-================
+super_operations(超级块操作)
+============================
 
 prototypes::
 
@@ -249,9 +243,8 @@ writes to quota files with quotas on). For other details about locking
 see also dquot_operations section.
 (配额代码保证 ->quota_read() 和 ->quota_write() 函数(通过 dqio_sem)是唯一对配额文件进行操作的两个函数(除非管理员真的想搞砸某些事情，在配额开启时写入配额文件)。有关锁定的其他细节，另请参见 dquot_operations 一节。)
 
-file_system_type
-(文件系统类型)
-================
+file_system_type(文件系统类型)
+==============================
 
 prototypes::
 
@@ -272,9 +265,8 @@ kill_sb		yes
 unlocks and drops the reference.
 (->kill_sb() 获取一个处于写锁定状态的超级块，在其上执行全部关闭工作，然后解锁并释放引用。)
 
-address_space_operations
-(address_space 操作)
-========================
+address_space_operations(address_space 操作)
+============================================
 prototypes::
 
 	int (*read_folio)(struct file *, struct folio *);
@@ -414,9 +406,8 @@ path after ->swap_activate() returned success.
 ->swap_rw will be called for swap IO if SWP_FS_OPS was set by ->swap_activate().
 (如果 ->swap_activate() 设置了 SWP_FS_OPS，交换 IO 将会调用 ->swap_rw。)
 
-file_lock_operations
-(file_lock 操作)
-====================
+file_lock_operations(file_lock 操作)
+====================================
 
 prototypes::
 
@@ -442,9 +433,8 @@ fl_release_private:	maybe		maybe[1]_
    so fl_release_private called on a lease should not block.
    (->fl_release_private 对于 flock 锁或 POSIX 锁目前允许阻塞。然而，租约(lease)仍然可以在持有 i_lock 的情况下被释放，因此对租约调用的 fl_release_private 不应阻塞。)
 
-lock_manager_operations
-(锁管理器操作)
-=======================
+lock_manager_operations(锁管理器操作)
+=====================================
 
 prototypes::
 
@@ -476,9 +466,8 @@ lm_open_conflict	yes		no			no
 lm_breaker_timedout     yes             no                      no
 ======================	=============	=================	=========
 
-buffer_head
-(缓冲区头)
-===========
+buffer_head(缓冲区头)
+=====================
 
 prototypes::
 
@@ -495,9 +484,8 @@ highmem, fs/buffer.c, and fs/ntfs/aops.c are providing these. Block devices
 call this method upon the IO completion.
 (从中断中调用。换句话说，这里需要极其小心。bh 已被锁定，但这就是我们在这里拥有的全部保证。目前只有 RAID1、highmem、fs/buffer.c 和 fs/ntfs/aops.c 提供这些方法。块设备在 IO 完成时调用此方法。)
 
-block_device_operations
-(块设备操作)
-=======================
+block_device_operations(块设备操作)
+===================================
 prototypes::
 
 	int (*open) (struct block_device *, fmode_t);
@@ -533,9 +521,8 @@ held.
 (swap_slot_free_notify 在持有 swap_lock、有时还持有页锁的情况下被调用。)
 
 
-file_operations
-(文件操作)
-===============
+file_operations(文件操作)
+=========================
 
 prototypes::
 
@@ -638,9 +625,8 @@ operation, the filesystem must take mapping->invalidate_lock to coordinate
 with ->page_mkwrite.
 (->copy_file_range 和 ->remap_file_range 实现需要在操作运行期间针对文件数据的修改进行串行化。对于通过 write(2) 及类似操作进行的修改阻塞，可以使用 inode->i_rwsem。为了在操作期间通过内存映射阻塞对文件内容的更改，文件系统必须获取 mapping->invalidate_lock 以与 ->page_mkwrite 协调。)
 
-dquot_operations
-(dquot 操作)
-================
+dquot_operations(dquot 操作)
+============================
 
 prototypes::
 
@@ -676,9 +662,8 @@ operations.
 More details about quota locking can be found in fs/dquot.c.
 (有关配额锁定的更多细节可在 fs/dquot.c 中找到。)
 
-vm_operations_struct
-(vm_operations_struct 操作)
-====================
+vm_operations_struct(vm_operations_struct 操作)
+===============================================
 
 prototypes::
 

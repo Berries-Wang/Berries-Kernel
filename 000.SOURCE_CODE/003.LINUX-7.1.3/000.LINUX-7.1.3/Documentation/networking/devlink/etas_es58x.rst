@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==========================
-etas_es58x devlink support
-==========================
-
-(etas_es58x devlink 支持)
+===================================================
+etas_es58x devlink support(etas_es58x devlink 支持)
+===================================================
 
 This document describes the devlink features implemented by the
 ``etas_es58x`` device driver.
 (本文档描述 ``etas_es58x`` 设备驱动所实现的 devlink 功能。)
 
-Info versions
-=============
-(Info 版本)
+Info versions(Info 版本)
+========================
 
 The ``etas_es58x`` driver reports the following versions
 (``etas_es58x`` 驱动报告以下版本)

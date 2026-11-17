@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=====================
-MPTCP Sysfs variables
-=====================
+=======================================
+MPTCP Sysfs variables(MPTCP Sysfs 变量)
+=======================================
 
-(MPTCP Sysfs 变量)
-
-/proc/sys/net/mptcp/* Variables
-(/proc/sys/net/mptcp/* 变量)
-===============================
+/proc/sys/net/mptcp/* Variables(/proc/sys/net/mptcp/* 变量)
+===========================================================
 
 add_addr_timeout - INTEGER (seconds)
 	Set the maximum value of timeout after which an ADD_ADDR control message

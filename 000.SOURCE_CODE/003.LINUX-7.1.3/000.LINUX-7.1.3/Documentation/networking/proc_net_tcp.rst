@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-============================================
-The proc/net/tcp and proc/net/tcp6 variables
-============================================
-
-(/proc/net/tcp 和 /proc/net/tcp6 变量)
+==================================================================================
+The proc/net/tcp and proc/net/tcp6 variables(/proc/net/tcp 和 /proc/net/tcp6 变量)
+==================================================================================
 
 This document describes the interfaces /proc/net/tcp and /proc/net/tcp6.
 Note that these interfaces are deprecated in favor of tcp_diag.

@@ -1,11 +1,9 @@
 .. SPDX-License-Identifier: GPL-2.0
 
 
-==============================
-The Second Extended Filesystem
-==============================
-
-(第二扩展文件系统)
+================================================
+The Second Extended Filesystem(第二扩展文件系统)
+================================================
 
 ext2 was originally released in January 1993.  Written by R\'emy Card,
 Theodore Ts'o and Stephen Tweedie, it was a major rewrite of the
@@ -14,9 +12,8 @@ filesystem in use by Linux.  There are also implementations available
 for NetBSD, FreeBSD, the GNU HURD, Windows 95/98/NT, OS/2 and RISC OS.
 (ext2 最初于 1993 年 1 月发布。由 R\'emy Card、Theodore Ts'o 和 Stephen Tweedie 编写，它是对扩展文件系统(Extended Filesystem)的一次重大重写。目前它仍然(2001 年 4 月)是 Linux 使用中最主要的文件系统。NetBSD、FreeBSD、GNU HURD、Windows 95/98/NT、OS/2 和 RISC OS 也有可用的实现。)
 
-Options
-(选项)
-=======
+Options(选项)
+=============
 
 Most defaults are determined by the filesystem superblock, and can be
 set using tune2fs(8). Kernel-determined defaults are indicated by (*).
@@ -75,9 +72,8 @@ noquota option ls silently ignored by ext2.
 (noquota 选项被 ext2 静默忽略。)
 
 
-Specification
-(规格说明)
-=============
+Specification(规格说明)
+=======================
 
 ext2 shares many properties with traditional Unix filesystems.  It has
 the concepts of blocks, inodes and directories.  It has space in the
@@ -88,9 +84,8 @@ features (such as journalling) to be added in a maximally compatible
 manner.
 (ext2 与传统 Unix 文件系统共享许多特性。它具有块、inode 和目录的概念。它在规格说明中为访问控制列表(ACL)、片段(fragment)、反删除和压缩保留了空间，尽管这些尚未实现(其中一些可以作为单独的补丁获得)。还有一个版本机制，允许以最大程度兼容的方式添加新特性(例如日志)。)
 
-Blocks
-(块)
-------
+Blocks(块)
+----------
 
 The space in the device or file is split up into blocks.  These are
 a fixed size, of 1024, 2048 or 4096 bytes (8192 bytes on Alpha systems),
@@ -99,9 +94,8 @@ less wasted space per file, but require slightly more accounting overhead,
 and also impose other limits on the size of files and the filesystem.
 (设备或文件中的空间被划分成块。这些块具有固定大小，为 1024、2048 或 4096 字节(在 Alpha 系统上为 8192 字节)，这是在创建文件系统时决定的。较小的块意味着每个文件浪费的空间更少，但需要稍微多一点的记账开销，并且还对文件和文件系统的大小施加了其他限制。)
 
-Block Groups
-(块组)
-------------
+Block Groups(块组)
+------------------
 
 Blocks are clustered into block groups in order to reduce fragmentation
 and minimise the amount of head seeking when reading a large amount
@@ -119,9 +113,8 @@ blocks.  The block allocation algorithm attempts to allocate data blocks
 in the same block group as the inode which contains them.
 (每个块组中位图之后的块被指定为该块组的 inode 表，其余的是数据块。块分配算法尝试在与包含它们的 inode 相同的块组中分配数据块。)
 
-The Superblock
-(超级块)
---------------
+The Superblock(超级块)
+----------------------
 
 The superblock contains all the information about the configuration of
 the filing system.  The primary copy of the superblock is stored at an
@@ -154,9 +147,8 @@ on the disc in little endian format, so a filesystem is portable between
 machines without having to know what machine it was created on.
 (超级块中的所有字段(与所有其他 ext2 结构一样)都以小端格式存储在磁盘上，因此文件系统可以在机器之间移植，而不必知道它是在什么机器上创建的。)
 
-Inodes
-(inode)
-------
+Inodes(inode)
+-------------
 
 The inode (index node) is a fundamental concept in the ext2 filesystem.
 Each object in the filesystem is represented by an inode.  The inode
@@ -196,9 +188,8 @@ dumpable, no-atime, indexed directories, and data-journaling.  Not all
 of these are supported yet.
 (flags 字段包含一些标准 chmod 标志未涵盖的 ext2 特有标志。这些标志可以用 lsattr 列出，并用 chattr 命令更改，并允许按文件设置特定的文件系统行为。有用于安全删除、不可删除、压缩、同步更新、不可变、仅追加、可转储、无 atime、索引目录和数据日志的标志。这些标志并非全部都已得到支持。)
 
-Directories
-(目录)
------------
+Directories(目录)
+-----------------
 
 A directory is a filesystem object and has an inode just like a file.
 It is a specially formatted file containing records which associate
@@ -222,9 +213,8 @@ The current implementation never removes empty directory blocks once they
 have been allocated to hold more files.
 (当前的实现一旦为容纳更多文件而分配了目录块，就从不移除空的目录块。)
 
-Special files
-(特殊文件)
--------------
+Special files(特殊文件)
+-----------------------
 
 Symbolic links are also filesystem objects with inodes.  They deserve
 special mention because the data for them is stored within the inode
@@ -239,9 +229,8 @@ them.  Instead, their device number is stored in the inode, again reusing
 the fields which would be used to point to the data blocks.
 (字符设备和块设备永远不会被分配数据块。相反，它们的设备号存储在 inode 中，同样复用了原本用于指向数据块的字段。)
 
-Reserved Space
-(保留空间)
---------------
+Reserved Space(保留空间)
+------------------------
 
 In ext2, there is a mechanism for reserving a certain number of blocks
 for a particular user (normally the super-user).  This is intended to
@@ -251,9 +240,8 @@ quotas).  It also keeps the filesystem from filling up entirely which
 helps combat fragmentation.
 (在 ext2 中，有一种为特定用户(通常是超级用户)保留一定数量块的机制。这是为了让系统即使在非特权用户填满了他们可用的所有空间时也能继续运行(这与文件系统配额无关)。它还防止文件系统被完全填满，这有助于对抗碎片化。)
 
-Filesystem check
-(文件系统检查)
-----------------
+Filesystem check(文件系统检查)
+------------------------------
 
 At boot time, most systems run a consistency check (e2fsck) on their
 filesystems.  The superblock of the ext2 filesystem contains several
@@ -264,9 +252,8 @@ count has been exceeded or if the maximum time between checks has been
 exceeded.
 (在启动时，大多数系统会对它们的文件系统运行一致性检查(e2fsck)。ext2 文件系统的超级块包含几个字段，用于指示 fsck 是否真的应该运行(因为如果文件系统很大，在启动时检查它可能需要很长时间)。如果文件系统未被干净地卸载、超过了最大挂载次数或超过了检查之间的最大时间间隔，fsck 将会运行。)
 
-Feature Compatibility
-(特性兼容性)
----------------------
+Feature Compatibility(特性兼容性)
+---------------------------------
 
 The compatibility feature mechanism used in ext2 is sophisticated.
 It safely allows features to be added to the filesystem, without
@@ -328,9 +315,8 @@ update to the latest e2fsck.  This also means that anyone adding feature
 flags to ext2 also needs to update e2fsck to verify these features.
 (对于 e2fsck 来说，它需要比内核更严格地处理这些标志。如果它不理解任何 COMPAT、RO_COMPAT 或 INCOMPAT 标志，它将拒绝检查该文件系统，因为它无法验证给定的特性是否有效。让 e2fsck 在带有未知特性的文件系统上成功通过，会给用户一种虚假的安全感。拒绝检查带有未知特性的文件系统是促使用户更新到最新 e2fsck 的好动力。这也意味着任何向 ext2 添加特性标志的人还需要更新 e2fsck 以验证这些特性。)
 
-Metadata
-(元数据)
---------
+Metadata(元数据)
+----------------
 
 It is frequently claimed that the ext2 implementation of writing
 asynchronous metadata is faster than the ffs synchronous metadata
@@ -353,9 +339,8 @@ the first and last are not ext2 specific but do force the metadata to
 be written synchronously.  See also Journaling below.
 (第一种和最后一种不是 ext2 特有的，但它们确实会强制元数据被同步写入。另请参见下面的 Journaling 一节。)
 
-Limitations
-(限制)
------------
+Limitations(限制)
+-----------------
 
 There are various limits imposed by the on-disk layout of ext2.  Other
 limits are imposed by the current implementation of the kernel code.
@@ -404,9 +389,8 @@ have to be 8 character filenames, even then we are fairly close to
 running out of unique filenames.
 (单个目录中文件数的(无意义的)绝对上限(由文件大小决定，现实中的限制显然要小得多)超过 130 万亿个文件。本来还可以更高，只是 4 字符的名称不足以构成唯一的目录项，所以必须使用 8 字符的文件名，即便如此我们也已相当接近用尽唯一的文件名了。)
 
-Journaling
-(日志)
-----------
+Journaling(日志)
+----------------
 
 A journaling extension to the ext2 code has been developed by Stephen
 Tweedie.  It avoids the risks of metadata corruption and the need to
@@ -431,9 +415,8 @@ Check Documentation/filesystems/ext4/ if you want to read more about
 ext4 and journaling.
 (当对文件系统进行更改时(例如重命名一个文件)，它们会被存储在日志中的一个事务里，并且在崩溃发生时可以是完整的或不完整的。如果事务在崩溃发生时是完整的(或者在系统不崩溃的正常情况下)，则该事务中的任何块都保证代表一个有效的文件系统状态，并被复制进文件系统。如果事务在崩溃发生时不完整，则无法保证该事务中块的连贯性，因此它们会被丢弃(这意味着它们所代表的任何文件系统更改也将丢失)。如果你想阅读更多关于 ext4 和日志的内容，请查看 Documentation/filesystems/ext4/。)
 
-References
-(参考资料)
-==========
+References(参考资料)
+====================
 
 =======================	===============================================
 The kernel source	file:/usr/src/linux/fs/ext2/ (内核源码)

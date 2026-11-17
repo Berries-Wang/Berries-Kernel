@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-======================================
-Macintosh HFSPlus Filesystem for Linux
-======================================
-
-(Linux 的 Macintosh HFSPlus 文件系统)
+===========================================================================
+Macintosh HFSPlus Filesystem for Linux(Linux 的 Macintosh HFSPlus 文件系统)
+===========================================================================
 
 HFSPlus is a filesystem first introduced in MacOS 8.1.
 HFSPlus has several extensions to HFS, including 32-bit allocation
@@ -12,9 +10,8 @@ blocks, 255-character unicode filenames, and file sizes of 2^63 bytes.
 (HFSPlus 是最早在 MacOS 8.1 中引入的文件系统。HFSPlus 对 HFS 进行了多项扩展，包括 32 位分配块、255 字符的 Unicode 文件名以及 2^63 字节的文件大小。)
 
 
-Mount options
-(挂载选项)
-=============
+Mount options(挂载选项)
+=======================
 
 When mounting an HFSPlus filesystem, the following options are accepted:
 (挂载 HFSPlus 文件系统时，接受以下选项：)
@@ -67,9 +64,8 @@ When mounting an HFSPlus filesystem, the following options are accepted:
 	(显示文件名时使用的编码。)
 
 
-References
-(参考文献)
-==========
+References(参考文献)
+====================
 
 kernel source:		<file:fs/hfsplus>
 (内核源代码:		<file:fs/hfsplus>)

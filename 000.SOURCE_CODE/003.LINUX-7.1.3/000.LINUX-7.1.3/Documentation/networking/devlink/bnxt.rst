@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-====================
-bnxt devlink support
-====================
-
-(bnxt devlink 支持)
+=======================================
+bnxt devlink support(bnxt devlink 支持)
+=======================================
 
 This document describes the devlink features implemented by the ``bnxt``
 device driver.
 (本文档描述 ``bnxt`` 设备驱动所实现的 devlink 功能。)
 
-Parameters
-==========
-(参数)
+Parameters(参数)
+================
 
 .. list-table:: Generic parameters implemented
 
@@ -50,9 +47,8 @@ parameters.
        incoming packets.
        (设备中将启用通用路由封装 (GRE) 版本检查。若禁用，设备将跳过对传入数据包的版本检查。)
 
-Info versions
-=============
-(Info 版本)
+Info versions(Info 版本)
+========================
 
 The ``bnxt_en`` driver reports the following versions
 (``bnxt_en`` 驱动报告以下版本)

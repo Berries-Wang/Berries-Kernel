@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==============================
-The QorIQ DPAA Ethernet Driver
-==============================
-
-(QorIQ DPAA 以太网驱动)
+=====================================================
+The QorIQ DPAA Ethernet Driver(QorIQ DPAA 以太网驱动)
+=====================================================
 
 Authors:
 (作者：)
@@ -28,9 +26,8 @@ Authors:
 	- Debugging
 	  (调试)
 
-DPAA Ethernet Overview
-(DPAA 以太网概述)
-======================
+DPAA Ethernet Overview(DPAA 以太网概述)
+=======================================
 
 DPAA stands for Data Path Acceleration Architecture and it is a
 set of networking acceleration IPs that are available on several
@@ -53,7 +50,6 @@ following drivers in the Linux kernel:
    (队列管理器 (QMan)、缓冲区管理器 (BMan))
 
 A simplified view of the dpaa_eth interfaces mapped to FMan MACs::
-(dpaa_eth 接口与 FMan MAC 映射关系的简化视图：)
 
   dpaa_eth       /eth0\     ...       /ethN\
   driver        |      |             |      |
@@ -69,8 +65,9 @@ A simplified view of the dpaa_eth interfaces mapped to FMan MACs::
       FMan HW blocks: MURAM, MACs, Ports, SP
   ---------------------------------------------------------
 
+(dpaa_eth 接口与 FMan MAC 映射关系的简化视图：)
+
 The dpaa_eth relation to the QMan, BMan and FMan::
-(dpaa_eth 与 QMan、BMan 和 FMan 的关系：)
 
 	      ________________________________
   dpaa_eth   /            eth0                \
@@ -85,6 +82,8 @@ The dpaa_eth relation to the QMan, BMan and FMan::
 	    |        FMan QMI         |         |
 	    | FMan HW       FMan BMI  | BMan HW |
 	      -----------------------   --------
+
+(dpaa_eth 与 QMan、BMan 和 FMan 的关系：)
 
 where the acronyms used above (and in the code) are:
 (上文（及代码中）所用缩写的含义如下：)
@@ -108,9 +107,8 @@ tgec 		ten gigabit Ethernet controller (10 Gbps) (万兆以太网控制器（10 
 memac 		multirate Ethernet MAC (10/100/1000/10000) (多速率以太网 MAC（10/100/1000/10000）)
 =============== ===========================================================
 
-DPAA Ethernet Supported SoCs
-(DPAA 以太网支持的 SoC)
-============================
+DPAA Ethernet Supported SoCs(DPAA 以太网支持的 SoC)
+===================================================
 
 The DPAA drivers enable the Ethernet controllers present on the following SoCs:
 (DPAA 驱动为以下 SoC 上存在的以太网控制器提供支持：)
@@ -136,9 +134,8 @@ ARM
 - LS1043A
 - LS1046A
 
-Configuring DPAA Ethernet in your kernel
-(在内核中配置 DPAA 以太网)
-========================================
+Configuring DPAA Ethernet in your kernel(在内核中配置 DPAA 以太网)
+==================================================================
 
 To enable the DPAA Ethernet driver, the following Kconfig options are required::
 (要启用 DPAA 以太网驱动，需要以下 Kconfig 选项：)
@@ -157,9 +154,8 @@ To enable the DPAA Ethernet driver, the following Kconfig options are required::
   CONFIG_REALTEK_PHY=y
   CONFIG_AQUANTIA_PHY=y
 
-DPAA Ethernet Frame Processing
-(DPAA 以太网帧处理)
-==============================
+DPAA Ethernet Frame Processing(DPAA 以太网帧处理)
+=================================================
 
 On Rx, buffers for the incoming frames are retrieved from the buffers found
 in the dedicated interface buffer pool. The driver initializes and seeds these
@@ -173,9 +169,8 @@ before transmission that points to the skb. When the buffer returns to the
 driver on a confirmation FQ, the skb can be correctly consumed.
 (在发送方向上，所有已发送的帧都会通过发送确认帧队列返回给驱动。驱动随后负责释放缓冲区。为了正确做到这一点，在发送之前会向缓冲区添加一个指向 skb 的反向指针。当缓冲区通过确认 FQ 返回驱动时，就可以正确地消费该 skb。)
 
-DPAA Ethernet Features
-(DPAA 以太网特性)
-======================
+DPAA Ethernet Features(DPAA 以太网特性)
+=======================================
 
 Currently the DPAA Ethernet driver enables the basic features required for
 a Linux Ethernet driver. The support for advanced features will be added
@@ -214,9 +209,8 @@ classes as follows:
   tc qdisc add dev <int> root handle 1: \
 	 mqprio num_tc 4 map 0 0 0 0 1 1 1 1 2 2 2 2 3 3 3 3 hw 1
 
-DPAA IRQ Affinity and Receive Side Scaling
-(DPAA 中断亲和性与接收侧扩展)
-==========================================
+DPAA IRQ Affinity and Receive Side Scaling(DPAA 中断亲和性与接收侧扩展)
+=======================================================================
 
 Traffic coming on the DPAA Rx queues or on the DPAA Tx confirmation
 queues is seen by the CPU as ingress traffic on a certain portal.
@@ -285,9 +279,8 @@ rx-hashing (without ethtool reporting it as off as that depends on the
 NETIF_F_RXHASH feature flag).
 (请注意，接收哈希依赖于该接口的 rx-flow-hash 处于开启状态——关闭 rx-flow-hash 也会禁用 rx-hashing（ethtool 不会将其报告为 off，因为那取决于 NETIF_F_RXHASH 特性标志）。)
 
-Debugging
-(调试)
-=========
+Debugging(调试)
+===============
 
 The following statistics are exported for each interface through ethtool:
 (以下统计信息通过 ethtool 针对每个接口导出：)

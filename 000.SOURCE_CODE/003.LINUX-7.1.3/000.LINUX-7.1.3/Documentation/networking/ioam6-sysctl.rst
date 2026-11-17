@@ -1,16 +1,12 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=====================
-IOAM6 Sysfs variables
-=====================
-
-(IOAM6 Sysfs 变量)
+=======================================
+IOAM6 Sysfs variables(IOAM6 Sysfs 变量)
+=======================================
 
 
-/proc/sys/net/conf/<iface>/ioam6_* variables:
-=============================================
-
-(/proc/sys/net/conf/<iface>/ioam6_* 变量)
+/proc/sys/net/conf/<iface>/ioam6_* variables:(/proc/sys/net/conf/<iface>/ioam6_* 变量)
+======================================================================================
 
 ioam6_enabled - BOOL
 (ioam6_enabled - BOOL(布尔值))

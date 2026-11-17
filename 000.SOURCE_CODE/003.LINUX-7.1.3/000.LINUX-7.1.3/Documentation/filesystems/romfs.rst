@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=======================
-ROMFS - ROM File System
-=======================
-
-(ROMFS - ROM 文件系统)
+=============================================
+ROMFS - ROM File System(ROMFS - ROM 文件系统)
+=============================================
 
 This is a quite dumb, read only filesystem, mainly for initial RAM
 disks of installation disks.  It has grown up by the need of having

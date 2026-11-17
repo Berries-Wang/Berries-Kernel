@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-======================
-RxRPC Network Protocol
-======================
-
-(RxRPC 网络协议)
+======================================
+RxRPC Network Protocol(RxRPC 网络协议)
+======================================
 
 The RxRPC protocol driver provides a reliable two-phase transport on top of UDP
 that can be used to perform RxRPC remote operations.  This is done over sockets
@@ -48,18 +46,14 @@ Contents of this document:
      (可配置参数。)
 
 
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 RxRPC is a two-layer protocol.  There is a session layer which provides
 reliable virtual connections using UDP over IPv4 (or IPv6) as the transport
 layer, but implements a real network protocol; and there's the presentation
 layer which renders structured data to binary blobs and back again using XDR
 (as does SunRPC)::
-(RxRPC 是一个两层协议。会话层使用基于 IPv4 (或 IPv6) 的 UDP 作为传输层来提供可靠的虚
-拟连接，但它本身实现为一个真正的网络协议；表示层则使用 XDR 将结构化数据渲染为二进制
-数据块或反向转换 (与 SunRPC 相同)：)
 
 		+-------------+
 		| Application |
@@ -71,6 +65,9 @@ layer which renders structured data to binary blobs and back again using XDR
 		|     UDP     |		Transport
 		+-------------+
 
+(RxRPC 是一个两层协议。会话层使用基于 IPv4 (或 IPv6) 的 UDP 作为传输层来提供可靠的虚
+拟连接，但它本身实现为一个真正的网络协议；表示层则使用 XDR 将结构化数据渲染为二进制
+数据块或反向转换 (与 SunRPC 相同)：)
 
 AF_RXRPC provides:
 (AF_RXRPC 提供：)
@@ -121,9 +118,8 @@ that has both kernel (filesystem) and userspace (utility) components.
 空间 (工具) 组件。)
 
 
-RxRPC Protocol Summary
-(RxRPC 协议概要)
-======================
+RxRPC Protocol Summary(RxRPC 协议概要)
+======================================
 
 An overview of the RxRPC protocol:
 (RxRPC 协议概览：)
@@ -229,9 +225,8 @@ An overview of the RxRPC protocol:
      (在调用完成之前的任何时刻，任一端都可以中止该调用。)
 
 
-AF_RXRPC Driver Model
-(AF_RXRPC 驱动程序模型)
-=====================
+AF_RXRPC Driver Model(AF_RXRPC 驱动程序模型)
+============================================
 
 About the AF_RXRPC driver:
 (关于 AF_RXRPC 驱动程序：)
@@ -460,9 +455,8 @@ Notes on recvmsg:
      则会设置 MSG_MORE 标志。)
 
 
-Control Messages
-(控制消息)
-================
+Control Messages(控制消息)
+==========================
 
 AF_RXRPC makes use of control messages in sendmsg() and recvmsg() to multiplex
 calls, to invoke certain actions and to report certain conditions.  These are:
@@ -618,9 +612,8 @@ RXRPC_SUPPORTED_CMSG socket option (see below).
 RXRPC_SUPPORTED_CMSG 套接字选项查询它 (见下文)。)
 
 
-Socket Options
-(套接字选项)
-==============
+Socket Options(套接字选项)
+==========================
 
 AF_RXRPC sockets support a few socket options at the SOL_RXRPC level:
 (AF_RXRPC 套接字在 SOL_RXRPC 层级支持一些套接字选项：)
@@ -693,9 +686,8 @@ AF_RXRPC sockets support a few socket options at the SOL_RXRPC level:
      (这是一个只读选项，它向缓冲区写入一个 int，指示所支持的最高控制消息类型。)
 
 
-Security
-(安全性)
-========
+Security(安全性)
+================
 
 Currently, only the kerberos 4 equivalent protocol has been implemented
 (security index 2 - rxkad).  This requires the rxkad module to be loaded and,
@@ -750,9 +742,8 @@ be found at:
 	http://people.redhat.com/~dhowells/rxrpc/listen.c
 
 
-Example Client Usage
-(客户端使用示例)
-====================
+Example Client Usage(客户端使用示例)
+====================================
 
 A client would issue an operation by:
 (客户端按如下方式发起一个操作：)
@@ -878,9 +869,8 @@ probe is concluded).
 (在探测结束之前，发往同一目的地的后续调用会被阻塞)。)
 
 
-Example Server Usage
-(服务器使用示例)
-====================
+Example Server Usage(服务器使用示例)
+====================================
 
 A server would be set up to accept operations in the following manner:
 (服务器按如下方式进行设置以接受操作：)
@@ -1047,9 +1037,8 @@ determine the call affected.
 recvmsg() 上的控制消息来确定受影响的调用。)
 
 
-AF_RXRPC Kernel Interface
-(AF_RXRPC 内核接口)
-=========================
+AF_RXRPC Kernel Interface(AF_RXRPC 内核接口)
+============================================
 
 The AF_RXRPC module also provides an interface for use by in-kernel utilities
 such as the AFS filesystem.  This permits such a utility to:
@@ -1459,9 +1448,8 @@ The kernel interface functions are as follows:
      (它指定此套接字上的调用所需的最低安全级别。)
 
 
-Configurable Parameters
-(可配置参数)
-=======================
+Configurable Parameters(可配置参数)
+===================================
 
 The RxRPC protocol driver has a number of configurable parameters that can be
 adjusted through sysctls in /proc/net/rxrpc/:
@@ -1565,9 +1553,8 @@ adjusted through sysctls in /proc/net/rxrpc/:
      4 字节头加上任意数量的数据。无论如何，巨型数据包的大小不得超过 rxrpc_rx_mtu。)
 
 
-API Function Reference
-(API 函数参考)
-======================
+API Function Reference(API 函数参考)
+====================================
 
 .. kernel-doc:: net/rxrpc/af_rxrpc.c
 .. kernel-doc:: net/rxrpc/call_object.c

@@ -1,8 +1,7 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-Checksums
-(校验和)
----------
+Checksums(校验和)
+-----------------
 
 Starting in early 2012, metadata checksums were added to all major ext4
 and jbd2 data structures. The associated feature flag is metadata_csum.

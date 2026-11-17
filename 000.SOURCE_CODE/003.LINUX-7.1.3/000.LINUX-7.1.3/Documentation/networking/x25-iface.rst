@@ -1,8 +1,7 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-X.25 Device Driver Interface
-(X.25 设备驱动接口)
-============================
+X.25 Device Driver Interface(X.25 设备驱动接口)
+===============================================
 
 Version 1.1
 
@@ -26,9 +25,8 @@ the rest of the skbuff, if any more information does exist.
 (所有消息都保存在 sk_buff 中，就像要通过 LAPB 链路发送的真实数据一样。如果还存在更多信息，skbuff 的第一个字节指示 skbuff 其余部分的含义。)
 
 
-Packet Layer to Device Driver
-(分组层到设备驱动)
------------------------------
+Packet Layer to Device Driver(分组层到设备驱动)
+-----------------------------------------------
 
 First Byte = 0x00 (X25_IFACE_DATA)
 (第一字节 = 0x00 (X25_IFACE_DATA))
@@ -59,9 +57,8 @@ LAPB parameters. To be defined.
 (LAPB 参数。待定义。)
 
 
-Device Driver to Packet Layer
-(设备驱动到分组层)
------------------------------
+Device Driver to Packet Layer(设备驱动到分组层)
+-----------------------------------------------
 
 First Byte = 0x00 (X25_IFACE_DATA)
 (第一字节 = 0x00 (X25_IFACE_DATA))
@@ -91,9 +88,8 @@ LAPB parameters. To be defined.
 (LAPB 参数。待定义。)
 
 
-Requirements for the device driver
-(对设备驱动的要求)
-----------------------------------
+Requirements for the device driver(对设备驱动的要求)
+----------------------------------------------------
 
 Packets should not be reordered or dropped when delivering between the
 Packet Layer and the device driver.

@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=========================================
-How to use packet injection with mac80211
-=========================================
-
-(如何在 mac80211 中使用数据包注入)
+===========================================================================
+How to use packet injection with mac80211(如何在 mac80211 中使用数据包注入)
+===========================================================================
 
 mac80211 now allows arbitrary packets to be injected down any Monitor Mode
 interface from userland.  The packet you inject needs to be composed in the

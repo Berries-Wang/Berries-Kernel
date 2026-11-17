@@ -1,15 +1,12 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=====================================
-Scaling in the Linux Networking Stack
-=====================================
-
-(Linux 网络协议栈中的扩展)
+===============================================================
+Scaling in the Linux Networking Stack(Linux 网络协议栈中的扩展)
+===============================================================
 
 
-Introduction
-(引言)
-============
+Introduction(引言)
+==================
 
 This document describes a set of complementary techniques in the Linux
 networking stack to increase parallelism and improve performance for
@@ -32,9 +29,8 @@ The following technologies are described:
   (XPS：发送数据包引导)
 
 
-RSS: Receive Side Scaling
-(RSS：接收端扩展)
-=========================
+RSS: Receive Side Scaling(RSS：接收端扩展)
+==========================================
 
 Contemporary NICs support multiple receive and transmit descriptor queues
 (multi-queue). On reception, a NIC can send different packets to different
@@ -114,9 +110,8 @@ Web 服务器 TCP 端口 80 的数据包可以被定向到自己的接收队列�
 (n-tuple) 过滤器可以通过 ethtool 配置 (--config-ntuple)。)
 
 
-RSS Configuration
-(RSS 配置)
------------------
+RSS Configuration(RSS 配置)
+---------------------------
 
 The driver for a multi-queue capable NIC typically provides a kernel
 module parameter for specifying the number of hardware queues to
@@ -144,9 +139,8 @@ relative weights.
 为不同队列赋予不同的相对权重。)
 
 
-RSS IRQ Configuration
-(RSS 中断配置)
-~~~~~~~~~~~~~~~~~~~~~
+RSS IRQ Configuration(RSS 中断配置)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Each receive queue has a separate IRQ associated with it. The NIC triggers
 this to notify a CPU when new packets arrive on the given queue. The
@@ -169,9 +163,8 @@ Documentation/core-api/irq/irq-affinity.rst。一些系统会运行 irqbalance�
 这是一个动态优化 IRQ 分配的守护进程，因而可能会覆盖任何手动设置。)
 
 
-Suggested Configuration
-(推荐配置)
-~~~~~~~~~~~~~~~~~~~~~~~
+Suggested Configuration(推荐配置)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 RSS should be enabled when latency is a concern or whenever receive
 interrupt processing forms a bottleneck. Spreading load between CPUs
@@ -198,9 +191,8 @@ in the system.
 处理器上，每个超线程都表现为一个独立的 CPU。对于中断处理而言，初步测试
 显示 HT 没有带来收益，因此应将队列数量限制为系统中的 CPU 核心数。)
 
-Dedicated RSS contexts
-(专用 RSS 上下文)
-~~~~~~~~~~~~~~~~~~~~~~
+Dedicated RSS contexts(专用 RSS 上下文)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Modern NICs support creating multiple co-existing RSS configurations
 which are selected based on explicit matching rules. This can be very
@@ -251,9 +243,8 @@ When done, remove the context and the rule::
   # ethtool -X eth0 context 1 delete
 
 
-RPS: Receive Packet Steering
-(RPS：接收数据包引导)
-============================
+RPS: Receive Packet Steering(RPS：接收数据包引导)
+=================================================
 
 Receive Packet Steering (RPS) is logically a software implementation of
 RSS. Being in software, it is necessarily called later in the datapath.
@@ -317,9 +308,8 @@ IPI。IPI 唤醒远端 CPU 上的积压处理，随后所有排队的数据包�
 向上处理。)
 
 
-RPS Configuration
-(RPS 配置)
------------------
+RPS Configuration(RPS 配置)
+---------------------------
 
 RPS requires a kernel compiled with the CONFIG_RPS kconfig symbol (on
 by default for SMP). Even when compiled in, RPS remains disabled until
@@ -340,9 +330,8 @@ the bitmap.
 如何把 CPU 分配到位图中。)
 
 
-Suggested Configuration
-(推荐配置)
-~~~~~~~~~~~~~~~~~~~~~~~
+Suggested Configuration(推荐配置)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For a single queue device, a typical RPS configuration would be to set
 the rps_cpus to the CPUs in the same memory domain of the interrupting
@@ -365,9 +354,8 @@ RPS 可能是多余的、没有必要的。如果硬件队列数量少于 CPU �
 可能会有帮助。)
 
 
-RPS Flow Limit
-(RPS 流限制)
---------------
+RPS Flow Limit(RPS 流限制)
+--------------------------
 
 RPS scales kernel receive processing across CPUs without introducing
 reordering. The trade-off to sending all packets from the same flow
@@ -406,9 +394,8 @@ even large flows maintain connectivity.
 连接：即使是大流也保持连通性。)
 
 
-Interface
-(接口)
-~~~~~~~~~
+Interface(接口)
+~~~~~~~~~~~~~~~
 
 Flow limit is compiled in by default (CONFIG_NET_FLOW_LIMIT), but not
 turned on. It is implemented for each CPU independently (to avoid lock
@@ -440,9 +427,8 @@ it does not update active tables.
 (该值只在新表分配时被读取。修改它不会更新已处于活动状态的表。)
 
 
-Suggested Configuration
-(推荐配置)
-~~~~~~~~~~~~~~~~~~~~~~~
+Suggested Configuration(推荐配置)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Flow limit is useful on systems with many concurrent connections,
 where a single connection taking up 50% of a CPU indicates a problem.
@@ -461,9 +447,8 @@ performed well in experiments.
 表现良好。)
 
 
-RFS: Receive Flow Steering
-(RFS：接收流引导)
-==========================
+RFS: Receive Flow Steering(RFS：接收流引导)
+===========================================
 
 While RPS steers packets solely based on hash, and thus generally
 provides good load distribution, it does not take into account
@@ -572,9 +557,8 @@ CPU.
 完的数据包可能比即将在新 CPU 上处理的数据包更晚到达。)
 
 
-RFS Configuration
-(RFS 配置)
------------------
+RFS Configuration(RFS 配置)
+---------------------------
 
 RFS is only available if the kconfig symbol CONFIG_RPS is enabled (on
 by default for SMP). The functionality remains disabled until explicitly
@@ -590,9 +574,8 @@ The number of entries in the per-queue flow table are set through::
   /sys/class/net/<dev>/queues/rx-<n>/rps_flow_cnt
 
 
-Suggested Configuration
-(推荐配置)
-~~~~~~~~~~~~~~~~~~~~~~~
+Suggested Configuration(推荐配置)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Both of these need to be set before RFS is enabled for a receive queue.
 Values for both are rounded up to the nearest power of two. The
@@ -626,9 +609,8 @@ rps_sock_flow_entries / N，其中 N 为队列数。例如，若 rps_sock_flow_e
 8192。)
 
 
-Accelerated RFS
-(加速 RFS)
-===============
+Accelerated RFS(加速 RFS)
+=========================
 
 Accelerated RFS is to RFS what RSS is to RPS: a hardware-accelerated load
 balancing mechanism that uses soft state to steer flows based on where
@@ -672,9 +654,8 @@ cpu_rmap ("CPU 亲和性反向映射") 中的函数来填充该映射。另外�
 队列。)
 
 
-Accelerated RFS Configuration
-(加速 RFS 配置)
------------------------------
+Accelerated RFS Configuration(加速 RFS 配置)
+--------------------------------------------
 
 Accelerated RFS is only available if the kernel is compiled with
 CONFIG_RFS_ACCEL and support is provided by the NIC device and driver.
@@ -688,18 +669,16 @@ configuration should be necessary.
 额外的配置。)
 
 
-Suggested Configuration
-(推荐配置)
-~~~~~~~~~~~~~~~~~~~~~~~
+Suggested Configuration(推荐配置)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This technique should be enabled whenever one wants to use RFS and the
 NIC supports hardware acceleration.
 (只要想使用 RFS 且网卡支持硬件加速，就应启用该技术。)
 
 
-XPS: Transmit Packet Steering
-(XPS：发送数据包引导)
-=============================
+XPS: Transmit Packet Steering(XPS：发送数据包引导)
+==================================================
 
 Transmit Packet Steering is a mechanism for intelligently selecting
 which transmit queue to use when transmitting a packet on a multi-queue
@@ -803,9 +782,8 @@ acknowledged.
 不会有产生乱序数据包的风险。传输层负责恰当地设置 ooo_okay。例如，TCP
 会在一条连接的所有数据都被确认后设置该标志。)
 
-XPS Configuration
-(XPS 配置)
------------------
+XPS Configuration(XPS 配置)
+---------------------------
 
 XPS is only available if the kconfig symbol CONFIG_XPS is enabled (on by
 default for SMP). If compiled in, it is driver dependent whether, and
@@ -826,9 +804,8 @@ For selection based on receive-queues map::
   /sys/class/net/<dev>/queues/tx-<n>/xps_rxqs
 
 
-Suggested Configuration
-(推荐配置)
-~~~~~~~~~~~~~~~~~~~~~~~
+Suggested Configuration(推荐配置)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For a network device with a single transmission queue, XPS configuration
 has no effect, since there is no choice in this case. In a multi-queue
@@ -853,9 +830,8 @@ queue is selected based on the CPUs map.
 映射。如果用户对接收队列映射的配置不适用，则基于 CPU 映射选择发送队列。)
 
 
-Per TX Queue rate limitation
-(每发送队列速率限制)
-============================
+Per TX Queue rate limitation(每发送队列速率限制)
+================================================
 
 These are rate-limitation mechanisms implemented by HW, where currently
 a max-rate attribute is supported, by setting a Mbps value to::
@@ -868,9 +844,8 @@ A value of zero means disabled, and this is the default.
 (值为零表示禁用，这也是默认值。)
 
 
-Further Information
-(更多信息)
-===================
+Further Information(更多信息)
+=============================
 
 RPS and RFS were introduced in kernel 2.6.35. XPS was incorporated into
 2.6.38. Original patches were submitted by Tom Herbert

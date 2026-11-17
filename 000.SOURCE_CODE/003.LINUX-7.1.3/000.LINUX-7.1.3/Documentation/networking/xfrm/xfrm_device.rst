@@ -1,19 +1,16 @@
 .. SPDX-License-Identifier: GPL-2.0
 .. _xfrm_device:
 
-===============================================
-XFRM device - offloading the IPsec computations
-===============================================
-
-(XFRM 设备——卸载 IPsec 计算)
+===========================================================================
+XFRM device - offloading the IPsec computations(XFRM 设备——卸载 IPsec 计算)
+===========================================================================
 
 Shannon Nelson <shannon.nelson@oracle.com>
 Leon Romanovsky <leonro@nvidia.com>
 
 
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 IPsec is a useful feature for securing network traffic, but the
 computational cost is high: a 10Gbps link can easily be brought down
@@ -81,9 +78,8 @@ Yes, that's ugly, but that's what shell scripts and/or libreswan are for.
 
 
 
-Callbacks to implement
-(需要实现的回调)
-======================
+Callbacks to implement(需要实现的回调)
+======================================
 
 ::
 
@@ -117,9 +113,8 @@ NETIF_F_HW_ESP_TX_CSUM will signal the availability of the offload.
 
 
 
-Flow
-(流程)
-====
+Flow(流程)
+==========
 
 At probe time and before the call to register_netdev(), the driver should
 set up local data structures and XFRM callbacks, and set the feature bits.

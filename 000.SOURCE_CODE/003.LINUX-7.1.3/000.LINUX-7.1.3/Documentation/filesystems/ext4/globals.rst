@@ -1,8 +1,7 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-Global Structures
-(全局结构)
-=================
+Global Structures(全局结构)
+===========================
 
 The filesystem is sharded into a number of block groups, each of which
 have static metadata at fixed locations.

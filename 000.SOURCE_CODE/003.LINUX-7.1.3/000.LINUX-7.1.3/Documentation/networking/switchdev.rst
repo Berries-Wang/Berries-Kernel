@@ -2,11 +2,9 @@
 .. include:: <isonum.txt>
 .. _switchdev:
 
-===============================================
-Ethernet switch device driver model (switchdev)
-===============================================
-
-(以太网交换机设备驱动模型 (switchdev))
+=====================================================================================
+Ethernet switch device driver model (switchdev)(以太网交换机设备驱动模型 (switchdev))
+=====================================================================================
 
 Copyright |copy| 2014 Jiri Pirko <jiri@resnulli.us>
 (版权所有 |copy| 2014 Jiri Pirko <jiri@resnulli.us>)
@@ -72,9 +70,8 @@ switchdev 模型的组成部分。使用 SR-IOV 或软交换机 (如 OVS) 的其
 				    Fig 1.
 
 
-Include Files
-(包含文件)
--------------
+Include Files(包含文件)
+-----------------------
 
 ::
 
@@ -82,9 +79,8 @@ Include Files
     #include <net/switchdev.h>
 
 
-Configuration
-(配置)
--------------
+Configuration(配置)
+-------------------
 
 Use "depends NET_SWITCHDEV" in driver's Kconfig to ensure switchdev model
 support is built for driver.
@@ -92,9 +88,8 @@ support is built for driver.
 switchdev 模型支持。)
 
 
-Switch Ports
-(交换机端口)
-------------
+Switch Ports(交换机端口)
+------------------------
 
 On switchdev driver initialization, the driver will allocate and register a
 struct net_device (using register_netdev()) for each enumerated physical switch
@@ -124,9 +119,8 @@ device.
 (交换机管理端口不在 switchdev 驱动模型的范围之内。通常，管理端口不参与
 已卸载的数据平面，并且管理端口设备上加载的是不同的驱动，例如网卡驱动。)
 
-Switch ID
-(交换机 ID)
-^^^^^^^^^
+Switch ID(交换机 ID)
+^^^^^^^^^^^^^^^^^^^^
 
 The switchdev driver must implement the net_device operation
 ndo_get_port_parent_id for each port netdev, returning the same physical ID for
@@ -141,9 +135,8 @@ The switch ID is used to locate ports on a switch and to know if aggregated
 ports belong to the same switch.
 (交换机 ID 用于定位交换机上的端口，并判断聚合端口是否属于同一台交换机。)
 
-Port Netdev Naming
-(端口 netdev 命名)
-^^^^^^^^^^^^^^^^^^
+Port Netdev Naming(端口 netdev 命名)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Udev rules should be used for port netdev naming, using some unique attribute
 of the port as a key, for example the port MAC address or the port PHYS name.
@@ -174,9 +167,8 @@ would be sub-port 0 on port 1 on switch 1.
 ID，Z 是子端口名称或 ID。例如，sw1p1s0 表示交换机 1 的端口 1 上的子端口
 0。)
 
-Port Features
-(端口特性)
-^^^^^^^^^^^^^
+Port Features(端口特性)
+^^^^^^^^^^^^^^^^^^^^^^^
 
 dev->netns_immutable
 
@@ -192,9 +184,8 @@ traffic from a port in one namespace to another port in another namespace.
 的隔离。这意味着硬件不能把流量从一个命名空间中的端口转发到另一个命名
 空间中的端口。)
 
-Port Topology
-(端口拓扑)
-^^^^^^^^^^^^^
+Port Topology(端口拓扑)
+^^^^^^^^^^^^^^^^^^^^^^^
 
 The port netdevs representing the physical switch ports can be organized into
 higher-level switching constructs.  The default construct is a standalone
@@ -223,9 +214,8 @@ registering for netdevice events and acting on NETDEV_CHANGEUPPER.
 注册 netdevice 事件并对 NETDEV_CHANGEUPPER 作出响应，来跟踪这类变动，
 从而了解端口在整个拓扑中的位置。)
 
-L2 Forwarding Offload
-(L2 转发卸载)
----------------------
+L2 Forwarding Offload(L2 转发卸载)
+----------------------------------
 
 The idea is to offload the L2 data forwarding (switching) path from the kernel
 to the switchdev device by mirroring bridge FDB entries down to the device.  An
@@ -246,9 +236,8 @@ To offloading L2 bridging, the switchdev driver/device should support:
 	- VLAN flooding of multicast/broadcast and unknown unicast packets
 	  (对组播/广播和未知单播数据包的 VLAN 泛洪)
 
-Static FDB Entries
-(静态 FDB 表项)
-^^^^^^^^^^^^^^^^^^
+Static FDB Entries(静态 FDB 表项)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 A driver which implements the ``ndo_fdb_add``, ``ndo_fdb_del`` and
 ``ndo_fdb_dump`` operations is able to support the command below, which adds a
@@ -311,9 +300,8 @@ VLAN 支持，请打开 VLAN 过滤：)
 
 	echo 1 >/sys/class/net/<bridge>/bridge/vlan_filtering
 
-Notification of Learned/Forgotten Source MAC/VLANs
-(学习/遗忘源 MAC/VLAN 的通知)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Notification of Learned/Forgotten Source MAC/VLANs(学习/遗忘源 MAC/VLAN 的通知)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The switch device will learn/forget source MAC address/VLAN on ingress packets
 and notify the switch driver of the mac/vlan/port tuples.  The switch driver,
@@ -372,9 +360,8 @@ switchdev_port_attr_set for SWITCHDEV_ATTR_PORT_ID_{PRE}_BRIDGE_FLAGS.
 (为支持学习，驱动要实现 switchdev 操作 switchdev_port_attr_set，对应
 SWITCHDEV_ATTR_PORT_ID_{PRE}_BRIDGE_FLAGS。)
 
-FDB Ageing
-(FDB 老化)
-^^^^^^^^^^
+FDB Ageing(FDB 老化)
+^^^^^^^^^^^^^^^^^^^^
 
 The bridge will skip ageing FDB entries marked with NTF_EXT_LEARNED and it is
 the responsibility of the port driver/device to age out these entries.  If the
@@ -402,9 +389,8 @@ call_switchdev_notifiers(SWITCHDEV_FDB_ADD, ...) 来刷新该 FDB 表项。该
 速率，例如每秒不超过一次。(最近使用时间可通过 bridge -s fdb 选项
 查看)。)
 
-STP State Change on Port
-(端口上的 STP 状态变化)
-^^^^^^^^^^^^^^^^^^^^^^^^
+STP State Change on Port(端口上的 STP 状态变化)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Internally or with a third-party STP protocol implementation (e.g. mstpd), the
 bridge driver maintains the STP state for ports, and will notify the switch
@@ -430,9 +416,8 @@ VLANs on the port.
 (注意，STP BPDU 是未打标签的，且 STP 状态适用于端口上的所有 VLAN，因此
 数据包过滤器应在端口上未打标签和已打标签的 VLAN 之间一致地应用。)
 
-Flooding L2 domain
-(L2 域泛洪)
-^^^^^^^^^^^^^^^^^^
+Flooding L2 domain(L2 域泛洪)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For a given L2 VLAN domain, the switch device should flood multicast/broadcast
 and unknown unicast packets to all ports in domain, if allowed by port's
@@ -467,9 +452,8 @@ certain netdevs from flooding unicast traffic for which there is no FDB entry.
 (如果设备支持，泛洪控制可以卸载到设备上，防止某些 netdev 泛洪没有对应
 FDB 表项的单播流量。)
 
-IGMP Snooping
-(IGMP 侦听)
-^^^^^^^^^^^^^
+IGMP Snooping(IGMP 侦听)
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 In order to support IGMP snooping, the port netdevs should trap to the bridge
 driver all IGMP join and leave messages.
@@ -482,9 +466,8 @@ traffic groups only to the configured ports.
 netdev，无论该变化是静态配置的还是动态加入/离开。硬件实现应当把所有已
 注册的组播流量组只转发到已配置的端口。)
 
-L3 Routing Offload
-(L3 路由卸载)
-------------------
+L3 Routing Offload(L3 路由卸载)
+-------------------------------
 
 Offloading L3 routing requires that device be programmed with FIB entries from
 the kernel, with the device doing the FIB lookup and forwarding.  The device
@@ -555,9 +538,8 @@ The "offload" flag is set in case at least one device offloads the FIB entry.
 XXX: add/mod/del IPv6 FIB API
 (XXX: 待补充 IPv6 FIB 的增/改/删 API)
 
-Nexthop Resolution
-(下一跳解析)
-^^^^^^^^^^^^^^^^^^
+Nexthop Resolution(下一跳解析)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The FIB entry's nexthop list contains the nexthop tuple (gateway, dev), but for
 the switch device to forward the packet with the correct dst mac address, the
@@ -580,17 +562,15 @@ to know when arp_tbl neighbor entries are purged from the port.
 更新。随着 arp_tbl 的更新，设备可以被编程为使用已解析的下一跳。驱动
 实现 ndo_neigh_destroy 以了解 arp_tbl 邻居表项何时从端口被清除。)
 
-Device driver expected behavior
-(设备驱动预期行为)
--------------------------------
+Device driver expected behavior(设备驱动预期行为)
+-------------------------------------------------
 
 Below is a set of defined behavior that switchdev enabled network devices must
 adhere to.
 (下面是一组已定义的行为，启用 switchdev 的网络设备必须遵守。)
 
-Configuration-less state
-(免配置状态)
-^^^^^^^^^^^^^^^^^^^^^^^^
+Configuration-less state(免配置状态)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Upon driver bring up, the network devices must be fully operational, and the
 backing driver must configure the network device such that it is possible to
@@ -630,9 +610,8 @@ not present in the filter(s)).
 (如果设备实现了例如 VLAN 过滤，那么把接口置于混杂模式后应当能够接收
 所有 VLAN 标签 (包括过滤器中不存在的那些)。)
 
-Bridged switch ports
-(桥接的交换机端口)
-^^^^^^^^^^^^^^^^^^^^
+Bridged switch ports(桥接的交换机端口)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 When a switchdev enabled network device is added as a bridge member, it should
 not disrupt any functionality of non-bridged network devices and they
@@ -642,9 +621,8 @@ configuration knobs below, the expected behavior is documented.
 设备的任何功能，这些设备应继续表现得像普通网络设备一样。根据下文的网桥
 配置开关，预期行为已有说明。)
 
-Bridge VLAN filtering
-(网桥 VLAN 过滤)
-^^^^^^^^^^^^^^^^^^^^^
+Bridge VLAN filtering(网桥 VLAN 过滤)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The Linux bridge allows the configuration of a VLAN filtering mode (statically,
 at device creation time, and dynamically, during run time) which must be
@@ -769,9 +747,8 @@ forwarding decision.
 的端口成员关系进行转发。当网桥禁用了 VLAN 过滤时，PVID 的有无不应影响
 数据包转发决定。)
 
-Bridge IGMP snooping
-(网桥 IGMP 侦听)
-^^^^^^^^^^^^^^^^^^^^
+Bridge IGMP snooping(网桥 IGMP 侦听)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The Linux bridge allows the configuration of IGMP snooping (statically, at
 interface creation time, or dynamically, during runtime) which must be observed

@@ -2,11 +2,9 @@
 
 .. _devlink_port:
 
-============
-Devlink Port
-============
-
-(Devlink 端口)
+==========================
+Devlink Port(Devlink 端口)
+==========================
 
 ``devlink-port`` is a port that exists on the device. It has a logically
 separate ingress/egress point of the device. A devlink port can be any one
@@ -77,9 +75,8 @@ Devlink port can have a different type based on the link layer described below.
        type automatically.
        (当驱动程序应自动检测端口类型时，由用户指定此类型。)
 
-PCI controllers
-(PCI 控制器)
----------------
+PCI controllers(PCI 控制器)
+---------------------------
 
 In most cases a PCI device has only one controller. A controller consists of
 potentially multiple physical, virtual functions and subfunctions. A function
@@ -98,7 +95,6 @@ An eswitch is on the PCI device which supports ports of multiple controllers.
 eswitch 位于支持多个控制器端口的 PCI 设备上。)
 
 An example view of a system with two controllers::
-(具有两个控制器的系统示例视图：)
 
                  ---------------------------------------------------------
                  |                                                       |
@@ -130,6 +126,7 @@ An example view of a system with two controllers::
                  |                                                       |
                  |  local controller_num=0 (eswitch)                     |
                  ---------------------------------------------------------
+(具有两个控制器的系统示例视图：)
 
 In the above example, the external controller (identified by controller number = 1)
 doesn't have the eswitch. Local controller (identified by controller number = 0)
@@ -139,9 +136,8 @@ devlink ports for both the controllers.
 (controller number = 0) 拥有 eswitch。本地控制器上的 Devlink 实例为两个控制器
 都持有 eswitch devlink 端口。)
 
-Function configuration
-(功能配置)
-======================
+Function configuration(功能配置)
+================================
 
 Users can configure one or more function attributes before enumerating the PCI
 function. Usually it means, user should configure function attribute
@@ -186,13 +182,11 @@ using `devlink port function set max_io_eqs` command.
 (用户还可以使用 `devlink port function set max_io_eqs` 命令设置功能的最大
 IO 事件队列数。)
 
-Function attributes
-(功能属性)
-===================
+Function attributes(功能属性)
+=============================
 
-MAC address setup
-(MAC 地址设置)
------------------
+MAC address setup(MAC 地址设置)
+-------------------------------
 
 The configured MAC address of the PCI VF/SF will be used by netdevice and rdma
 device created for the PCI VF/SF.
@@ -235,9 +229,8 @@ device created for the PCI VF/SF.
       function:
         hw_addr 00:00:00:00:88:88
 
-RoCE capability setup
-(RoCE 能力设置)
----------------------
+RoCE capability setup(RoCE 能力设置)
+------------------------------------
 
 Not all PCI VFs/SFs require RoCE capability.
 (并非所有 PCI VF/SF 都需要 RoCE 能力。)
@@ -273,9 +266,8 @@ VF/SF driver cannot override it.
         function:
             hw_addr 00:00:00:00:00:00 roce disable
 
-migratable capability setup
-(可迁移能力设置)
----------------------------
+migratable capability setup(可迁移能力设置)
+-------------------------------------------
 
 Live migration is the process of transferring a live virtual machine
 from one physical host to another without disrupting its normal
@@ -334,9 +326,8 @@ Perform live migration.
 启动虚拟机。
 执行实时迁移。)
 
-IPsec crypto capability setup
-(IPsec 加密能力设置)
------------------------------
+IPsec crypto capability setup(IPsec 加密能力设置)
+-------------------------------------------------
 
 When user enables IPsec crypto capability for a VF, user application can offload
 XFRM state crypto operation (Encrypt/Decrypt) to this VF.
@@ -366,9 +357,8 @@ processed in software by the kernel.
         function:
             hw_addr 00:00:00:00:00:00 ipsec_crypto enabled
 
-IPsec packet capability setup
-(IPsec 数据包能力设置)
------------------------------
+IPsec packet capability setup(IPsec 数据包能力设置)
+---------------------------------------------------
 
 When user enables IPsec packet capability for a VF, user application can offload
 XFRM state and policy crypto operation (Encrypt/Decrypt) to this VF, as well as
@@ -399,9 +389,8 @@ policy is processed in software by the kernel.
         function:
             hw_addr 00:00:00:00:00:00 ipsec_packet enabled
 
-Maximum IO events queues setup
-(最大 IO 事件队列设置)
-------------------------------
+Maximum IO events queues setup(最大 IO 事件队列设置)
+----------------------------------------------------
 
 When user sets maximum number of IO event queues for a SF or
 a VF, such function driver is limited to consume only enforced
@@ -439,9 +428,8 @@ rxq) 以及 RDMA 队列对 (QP)。例如，netdevice 通道数和 RDMA 设备完
         function:
             hw_addr 00:00:00:00:00:00 ipsec_packet disabled max_io_eqs 32
 
-Subfunction
-(子功能)
-============
+Subfunction(子功能)
+===================
 
 Subfunction is a lightweight function that has a parent PCI function on which
 it is deployed. Subfunction is created and deployed in unit of 1. Unlike
@@ -465,9 +453,8 @@ Subfunction management is done using devlink port user interface.
 User performs setup on the subfunction management device.
 (子功能管理通过 devlink 端口用户界面完成。用户在子功能管理设备上执行设置。)
 
-(1) Create
-((1) 创建)
-----------
+(1) Create((1) 创建)
+--------------------
 
 A subfunction is created using a devlink port interface. A user adds the
 subfunction by adding a devlink port of subfunction flavour. The devlink
@@ -480,9 +467,8 @@ devlink 端口来添加子功能。devlink 内核代码向下调用子功能管�
 (devlink ops)，要求它创建一个子功能 devlink 端口。驱动程序随后实例化该
 子功能端口以及任何相关联的对象，例如健康报告器和 representor 网络设备。)
 
-(2) Configure
-((2) 配置)
--------------
+(2) Configure((2) 配置)
+-----------------------
 
 A subfunction devlink port is created but it is not active yet. That means the
 entities are created on devlink side, the e-switch port representor is created,
@@ -495,9 +481,8 @@ e-switch 端口 representor 已创建，但子功能设备本身尚未创建。�
 e-switch 端口 representor 进行设置，例如将其加入网桥、添加 TC 规则等。在
 子功能处于未激活状态时，用户也可以配置子功能的硬件地址 (如 MAC 地址)。)
 
-(3) Deploy
-((3) 部署)
-----------
+(3) Deploy((3) 部署)
+--------------------
 
 Once a subfunction is configured, user must activate it to use it. Upon
 activation, subfunction management driver asks the subfunction management
@@ -509,9 +494,8 @@ At this point a matching subfunction driver binds to the subfunction's auxiliary
 :ref:`Documentation/driver-api/auxiliary_bus.rst <auxiliary_bus>` 上。
 此时，匹配的子功能驱动程序会绑定到该子功能的辅助 (auxiliary) 设备。)
 
-Rate object management
-(速率对象管理)
-======================
+Rate object management(速率对象管理)
+====================================
 
 Devlink provides API to manage tx rates of single devlink port or a group.
 This is done through rate objects, which can be one of the two types:
@@ -644,9 +628,8 @@ may export nodes/leafs and their child-parent relationships.
 (驱动程序实现可以同时支持或仅支持这两种速率对象类型及其参数的设置方法。
 此外，驱动程序实现还可以导出节点/叶子节点及其父子关系。)
 
-Terms and Definitions
-(术语和定义)
-=====================
+Terms and Definitions(术语和定义)
+=================================
 
 .. list-table:: Terms and Definitions
    :widths: 22 90

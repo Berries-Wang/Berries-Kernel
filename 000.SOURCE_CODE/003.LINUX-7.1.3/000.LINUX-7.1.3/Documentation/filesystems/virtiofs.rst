@@ -2,18 +2,15 @@
 
 .. _virtiofs_index:
 
-===================================================
-virtiofs: virtio-fs host<->guest shared file system
-===================================================
-
-(virtiofs: virtio-fs 主机<->客户机共享文件系统)
+==================================================================================================
+virtiofs: virtio-fs host<->guest shared file system(virtiofs: virtio-fs 主机<->客户机共享文件系统)
+==================================================================================================
 
 - Copyright (C) 2019 Red Hat, Inc.
 (版权所有 (C) 2019 Red Hat, Inc.)
 
-Introduction
-(简介)
-============
+Introduction(简介)
+==================
 The virtiofs file system for Linux implements a driver for the paravirtualized
 VIRTIO "virtio-fs" device for guest<->host file system sharing.  It allows a
 guest to mount a directory that has been exported on the host.
@@ -36,9 +33,8 @@ guest and host to increase performance and provide semantics that are not
 possible with network file systems.
 (此外，virtio-fs 设备利用客户机与主机共处一地的优势来提高性能，并提供网络文件系统无法实现的语义。)
 
-Usage
-(用法)
-=====
+Usage(用法)
+===========
 Mount file system with tag ``myfs`` on ``/mnt``:
 (将带有标签 ``myfs`` 的文件系统挂载到 ``/mnt``：)
 
@@ -50,17 +46,15 @@ Please see https://virtio-fs.gitlab.io/ for details on how to configure QEMU
 and the virtiofsd daemon.
 (有关如何配置 QEMU 和 virtiofsd 守护进程的详细信息，请参见 https://virtio-fs.gitlab.io/。)
 
-Mount options
-(挂载选项)
--------------
+Mount options(挂载选项)
+-----------------------
 
 virtiofs supports general VFS mount options, for example, remount,
 ro, rw, context, etc. It also supports FUSE mount options.
 (virtiofs 支持通用的 VFS 挂载选项，例如 remount、ro、rw、context 等。它还支持 FUSE 挂载选项。)
 
-atime behavior
-(atime 行为)
-^^^^^^^^^^^^^^
+atime behavior(atime 行为)
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The atime-related mount options, for example, noatime, strictatime,
 are ignored. The atime behavior for virtiofs is the same as the
@@ -68,9 +62,8 @@ underlying filesystem of the directory that has been exported
 on the host.
 (与 atime 相关的挂载选项(例如 noatime、strictatime)会被忽略。virtiofs 的 atime 行为与主机上所导出目录的底层文件系统相同。)
 
-Internals
-(内部实现)
-=========
+Internals(内部实现)
+===================
 Since the virtio-fs device uses the FUSE protocol for file system requests, the
 virtiofs file system for Linux is integrated closely with the FUSE file system
 client.  The guest acts as the FUSE client while the host acts as the FUSE

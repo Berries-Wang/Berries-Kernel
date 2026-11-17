@@ -4,11 +4,9 @@
 
 .. _iosm_driver_doc:
 
-===========================================
-IOSM Driver for Intel M.2 PCIe based Modems
-===========================================
-
-(面向基于 Intel M.2 PCIe 的调制解调器的 IOSM 驱动)
+=============================================================================================
+IOSM Driver for Intel M.2 PCIe based Modems(面向基于 Intel M.2 PCIe 的调制解调器的 IOSM 驱动)
+=============================================================================================
 
 The IOSM (IPC over Shared Memory) driver is a WWAN PCIe host driver developed
 for linux or chrome platform for data exchange over PCIe interface between
@@ -21,9 +19,8 @@ Chrome 平台开发的 WWAN PCIe 主机驱动，用于在主机平台与 Intel M
 前端应用 (例如 Modem Manager) 都可以轻松地管理 MBIM 接口，以启用面向 WWAN
 的数据通信。)
 
-Basic usage
-(基本用法)
-===========
+Basic usage(基本用法)
+=====================
 
 MBIM functions are inactive when unmanaged. The IOSM driver only provides a
 userspace interface MBIM "WWAN PORT" representing MBIM control channel and does
@@ -54,22 +51,19 @@ MBIM IP session:
 - configure IP network interface
   (配置 IP 网络接口)
 
-Management application development
-(管理应用开发)
-==================================
+Management application development(管理应用开发)
+================================================
 
 The driver and userspace interfaces are described below. The MBIM protocol is
 described in [1] Mobile Broadband Interface Model v1.0 Errata-1.
 (驱动与用户空间接口在下面描述。MBIM 协议在 [1] Mobile Broadband Interface
 Model v1.0 Errata-1 中描述。)
 
-MBIM control channel userspace ABI
-(MBIM 控制信道用户空间 ABI)
-----------------------------------
+MBIM control channel userspace ABI(MBIM 控制信道用户空间 ABI)
+-------------------------------------------------------------
 
-/dev/wwan0mbim0 character device
-(/dev/wwan0mbim0 字符设备)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/dev/wwan0mbim0 character device(/dev/wwan0mbim0 字符设备)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The driver exposes an MBIM interface to the MBIM function by implementing
 MBIM WWAN Port. The userspace end of the control channel pipe is a
@@ -79,9 +73,8 @@ MBIM protocol communication.
 的用户空间端是 /dev/wwan0mbim0 字符设备。应用应使用此接口进行 MBIM 协议
 通信。)
 
-Fragmentation
-(分片)
-~~~~~~~~~~~~~
+Fragmentation(分片)
+~~~~~~~~~~~~~~~~~~~
 
 The userspace application is responsible for all control message fragmentation
 and defragmentation as per MBIM specification.
@@ -99,13 +92,11 @@ The management application must accept control messages of up the negotiated
 control message size.
 (管理应用必须接受最大不超过协商控制消息大小的控制消息。)
 
-MBIM data channel userspace ABI
-(MBIM 数据信道用户空间 ABI)
--------------------------------
+MBIM data channel userspace ABI(MBIM 数据信道用户空间 ABI)
+----------------------------------------------------------
 
-wwan0-X network device
-(wwan0-X 网络设备)
-~~~~~~~~~~~~~~~~~~~~~~
+wwan0-X network device(wwan0-X 网络设备)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The IOSM driver exposes IP link interface "wwan0-X" of type "wwan" for IP
 traffic. Iproute network utility is used for creating "wwan0-X" network
 interface and for associating it with MBIM IP session. The Driver supports
@@ -128,9 +119,8 @@ The driver will automatically map the "wwan0-1" network device to MBIM IP
 session 1.
 (驱动会自动把 "wwan0-1" 网络设备映射到 MBIM IP 会话 1。)
 
-References
-(参考资料)
-==========
+References(参考资料)
+====================
 
 [1] "MBIM (Mobile Broadband Interface Model) Errata-1"
       - https://www.usb.org/document-library/

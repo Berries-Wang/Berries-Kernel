@@ -12,9 +12,8 @@ returns a list of extents.
 (fiemap ioctl 是用户空间获取文件 extent 映射的一种高效方法。fiemap 不采用逐块映射(如 bmap)，而是返回一个 extent 列表。)
 
 
-Request Basics
-(请求基础)
---------------
+Request Basics(请求基础)
+------------------------
 
 A fiemap request is encoded within struct fiemap:
 (fiemap 请求被编码在 struct fiemap 中：)
@@ -64,9 +63,8 @@ FIEMAP_FLAG_CACHE
   This flag requests caching of the extents.
   (此标志请求对 extent 进行缓存。)
 
-Extent Mapping
-(extent 映射)
---------------
+Extent Mapping(extent 映射)
+---------------------------
 
 Extent information is returned within the embedded fm_extents array
 which userspace must allocate along with the fiemap structure. The
@@ -193,9 +191,8 @@ FIEMAP_EXTENT_SHARED
   This flag is set to request that space be shared with other files.
   (设置此标志表示请求与其他文件共享空间。)
 
-VFS -> File System Implementation
-(VFS -> 文件系统实现)
----------------------------------
+VFS -> File System Implementation(VFS -> 文件系统实现)
+------------------------------------------------------
 
 File systems wishing to support fiemap must implement a ->fiemap callback on
 their inode_operations structure. The fs ->fiemap call is responsible for

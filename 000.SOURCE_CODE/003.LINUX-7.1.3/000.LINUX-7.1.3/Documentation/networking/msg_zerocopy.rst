@@ -5,9 +5,8 @@ MSG_ZEROCOPY
 
 (MSG_ZEROCOPY)
 
-Intro
-(简介)
-=====
+Intro(简介)
+===========
 
 The MSG_ZEROCOPY flag enables copy avoidance for socket send calls.
 The feature is currently implemented for TCP, UDP and VSOCK (with
@@ -15,9 +14,8 @@ virtio transport) sockets.
 (MSG_ZEROCOPY 标志为套接字发送调用启用免拷贝 (copy avoidance)。该特性目前为 TCP、UDP 和 VSOCK（使用 virtio 传输）套接字实现。)
 
 
-Opportunity and Caveats
-(机遇与注意事项)
------------------------
+Opportunity and Caveats(机遇与注意事项)
+---------------------------------------
 
 Copying large buffers between user process and kernel can be
 expensive. Linux supports various interfaces that eschew copying,
@@ -45,9 +43,8 @@ trivial as just passing the flag, then.
 (当可以安全修改数据时，内核会返回一个通知。因此，把现有应用改造为 MSG_ZEROCOPY 并不总是像只传个标志那样简单。)
 
 
-More Info
-(更多信息)
----------
+More Info(更多信息)
+-------------------
 
 Much of this document was derived from a longer paper presented at
 netdev 2.1. For more in-depth information see that paper and talk,
@@ -71,17 +68,15 @@ the excellent reporting over at LWN.net or read the original code.
     https://lore.kernel.org/netdev/20170803202945.70750-1-willemdebruijn.kernel@gmail.com
 
 
-Interface
-(接口)
-=========
+Interface(接口)
+===============
 
 Passing the MSG_ZEROCOPY flag is the most obvious step to enable copy
 avoidance, but not the only one.
 (传递 MSG_ZEROCOPY 标志是启用免拷贝最显而易见的一步，但不是唯一一步。)
 
-Socket Setup
-(套接字设置)
-------------
+Socket Setup(套接字设置)
+------------------------
 
 The kernel is permissive when applications pass undefined flags to the
 send system call. By default it simply ignores these. To avoid enabling
@@ -94,9 +89,8 @@ this flag, a process must first signal intent by setting a socket option:
 	if (setsockopt(fd, SOL_SOCKET, SO_ZEROCOPY, &one, sizeof(one)))
 		error(1, errno, "setsockopt zerocopy");
 
-Transmission
-(发送)
-------------
+Transmission(发送)
+------------------
 
 The change to send (or sendto, sendmsg, sendmmsg) itself is trivial.
 Pass the new flag.
@@ -112,9 +106,8 @@ locked pages.
 (零拷贝失败时会返回 -1 且 errno 为 ENOBUFS。当套接字超出其 optmem 限制，或用户超出锁定页面的 ulimit 时会发生这种情况。)
 
 
-Mixing copy avoidance and copying
-(混合使用免拷贝与拷贝)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Mixing copy avoidance and copying(混合使用免拷贝与拷贝)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Many workloads have a mixture of large and small buffers. Because copy
 avoidance is more expensive than copying for small packets, the
@@ -123,9 +116,8 @@ with those without.
 (许多工作负载同时有大缓冲区和小缓冲区。由于对小数据包而言免拷贝比拷贝更昂贵，该特性被实现为一个标志。带标志的调用与不带标志的调用混用是安全的。)
 
 
-Notifications
-(通知)
--------------
+Notifications(通知)
+-------------------
 
 The kernel has to notify the process when it is safe to reuse a
 previously passed buffer. It queues completion notifications on the
@@ -141,9 +133,8 @@ UINT_MAX calls.
 (通知本身是一个简单的标量值。每个套接字维护一个内部的无符号 32 位计数器。每个带 MSG_ZEROCOPY 且成功发送数据的 send 调用都会使该计数器递增。失败时或以零长度调用时不递增。该计数器统计的是系统调用次数，而不是字节数。它在 UINT_MAX 次调用后回绕。)
 
 
-Notification Reception
-(通知的接收)
-~~~~~~~~~~~~~~~~~~~~~~
+Notification Reception(通知的接收)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The below snippet demonstrates the API. In the simplest case, each
 send syscall is followed by a poll and recvmsg on the error queue.
@@ -180,9 +171,8 @@ a zero error code, however, to not block send and recv calls.
 (通知可以与套接字上的其他操作乱序处理。排队了错误的套接字通常会阻塞其他操作，直到该错误被读取。而零拷贝通知的错误码为零，因此不会阻塞 send 和 recv 调用。)
 
 
-Notification Batching
-(通知批处理)
-~~~~~~~~~~~~~~~~~~~~~
+Notification Batching(通知批处理)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Multiple outstanding packets can be read at once using the recvmmsg
 call. This is often not needed. In each message the kernel returns not
@@ -206,9 +196,8 @@ may arrive out of order on retransmission and socket teardown.
 (有序送达是常见情形，但并不保证。在重传和套接字拆除时，通知可能乱序到达。)
 
 
-Notification Parsing
-(通知解析)
-~~~~~~~~~~~~~~~~~~~~
+Notification Parsing(通知解析)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The below snippet demonstrates how to parse the control message: the
 read_notification() call in the previous snippet. A notification
@@ -249,9 +238,8 @@ undefined, bar for ee_code, as discussed below.
 	printf("completed: %u..%u\n", serr->ee_info, serr->ee_data);
 
 
-Deferred copies
-(延迟拷贝)
-~~~~~~~~~~~~~~~
+Deferred copies(延迟拷贝)
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Passing flag MSG_ZEROCOPY is a hint to the kernel to apply copy
 avoidance, and a contract that the kernel will queue a completion
@@ -281,13 +269,11 @@ subsequent requests on the same socket.
 (如果数据已不在缓存中，延迟拷贝可能比在系统调用中立即拷贝更昂贵。进程还会白白承担通知处理成本。因此，当数据是通过拷贝完成时，内核会在返回时通过在 ee_code 字段中设置 SO_EE_CODE_ZEROCOPY_COPIED 标志来告知。进程可以利用这一信号，停止在同一套接字的后续请求中传递 MSG_ZEROCOPY 标志。)
 
 
-Implementation
-(实现)
-==============
+Implementation(实现)
+====================
 
-Loopback
-(环回)
---------
+Loopback(环回)
+--------------
 
 For TCP and UDP:
 Data sent to local sockets can be queued indefinitely if the receive
@@ -301,9 +287,8 @@ For VSOCK:
 Data path sent to local sockets is the same as for non-local sockets.
 (对于 VSOCK：发送到本地套接字的数据路径与非本地套接字相同。)
 
-Testing
-(测试)
-=======
+Testing(测试)
+=============
 
 More realistic example code can be found in the kernel source under
 tools/testing/selftests/net/msg_zerocopy.c.

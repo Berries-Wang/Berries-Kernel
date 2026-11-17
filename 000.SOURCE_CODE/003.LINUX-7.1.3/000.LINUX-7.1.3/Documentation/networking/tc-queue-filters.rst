@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=========================
-TC queue based filtering
-=========================
-
-(基于 TC 队列的过滤)
+============================================
+TC queue based filtering(基于 TC 队列的过滤)
+============================================
 
 TC can be used for directing traffic to either a set of queues or
 to a single queue on both the transmit and receive side.

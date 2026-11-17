@@ -6,16 +6,14 @@ spu_create
 
 (spu_create)
 
-Name
-(名称)
-====
+Name(名称)
+==========
        spu_create - create a new spu context
        (spu_create - 创建一个新的 SPU 上下文)
 
 
-Synopsis
-(概要)
-========
+Synopsis(概要)
+==============
 
        ::
 
@@ -24,9 +22,8 @@ Synopsis
 
          int spu_create(const char *pathname, int flags, mode_t mode);
 
-Description
-(描述)
-===========
+Description(描述)
+=================
        The  spu_create  system call is used on PowerPC machines that implement
        the Cell Broadband Engine Architecture in order to  access  Synergistic
        Processor  Units (SPUs). It creates a new logical context for an SPU in
@@ -62,18 +59,16 @@ Description
        (mode 参数指定在 spufs 中创建新目录时所使用的权限。mode 会先用用户的 umask(2) 值进行修改，然后同时用于该目录以及其中包含的文件。文件权限会再屏蔽掉 mode 的一些位，因为它们通常只支持读或写访问。完整的 mode 取值列表请参见 stat(2)。)
 
 
-Return Value
-(返回值)
-============
+Return Value(返回值)
+====================
        spu_create  returns a new file descriptor. It may return -1 to indicate
        an error condition and set errno to  one  of  the  error  codes  listed
        below.
        (spu_create 返回一个新的文件描述符。它可能返回 -1 以指示错误情况，并将 errno 设置为下面列出的错误码之一。)
 
 
-Errors
-(错误)
-======
+Errors(错误)
+============
        EACCES
               The  current  user does not have write access on the spufs mount
               point.
@@ -124,9 +119,8 @@ Errors
 
 
 
-Notes
-(注)
-=====
+Notes(注)
+=========
        spu_create  is  meant  to  be used from libraries that implement a more
        abstract interface to SPUs, not to be used from  regular  applications.
        See  http://www.bsc.es/projects/deepcomputing/linuxoncell/ for the rec-
@@ -134,35 +128,30 @@ Notes
        (spu_create 旨在由为 SPU 实现了更抽象接口的库来使用，而不是供常规应用程序使用。推荐的库请参见 http://www.bsc.es/projects/deepcomputing/linuxoncell/。)
 
 
-Files
-(文件)
-=====
+Files(文件)
+===========
        pathname must point to a location beneath the mount point of spufs.  By
        convention, it gets mounted in /spu.
        (pathname 必须指向 spufs 挂载点之下的某个位置。按照惯例，它被挂载在 /spu。)
 
 
-Conforming to
-(遵循标准)
-=============
+Conforming to(遵循标准)
+=======================
        This call is Linux specific and only implemented by the ppc64
        architecture. Programs using this system call are not portable.
        (该调用是 Linux 特有的，仅由 ppc64 架构实现。使用该系统调用的程序不具备可移植性。)
 
 
-Bugs
-(缺陷)
-====
+Bugs(缺陷)
+==========
        The code does not yet fully implement all features lined out here.
        (该代码尚未完全实现这里列出的所有功能。)
 
 
-Author
-(作者)
-======
+Author(作者)
+============
        Arnd Bergmann <arndb@de.ibm.com>
 
-See Also
-(另请参阅)
-========
+See Also(另请参阅)
+==================
        capabilities(7), close(2), spu_run(2), spufs(7)

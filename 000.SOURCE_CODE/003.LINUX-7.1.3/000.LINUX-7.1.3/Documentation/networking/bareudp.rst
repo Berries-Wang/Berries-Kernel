@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-========================================
-Bare UDP Tunnelling Module Documentation
-========================================
-
-(Bare UDP 隧道模块文档)
+===============================================================
+Bare UDP Tunnelling Module Documentation(Bare UDP 隧道模块文档)
+===============================================================
 
 There are various L3 encapsulation standards using UDP being discussed to
 leverage the UDP based load balancing capability of different networks.
@@ -15,9 +13,8 @@ The Bareudp tunnel module provides a generic L3 encapsulation support for
 tunnelling different L3 protocols like MPLS, IP, NSH etc. inside a UDP tunnel.
 (Bareudp 隧道模块提供通用的 L3 封装支持，可在 UDP 隧道内封装 MPLS、IP、NSH 等不同的 L3 协议。)
 
-Special Handling
-----------------
-(特殊处理)
+Special Handling(特殊处理)
+--------------------------
 
 The bareudp device supports special handling for MPLS & IP as they can have
 multiple ethertypes.
@@ -30,9 +27,8 @@ MPLS 协议可以具有 ethertype ETH_P_MPLS_UC(单播)和 ETH_P_MPLS_MC(组播)
 IP 协议可以具有 ethertype ETH_P_IP(v4)和 ETH_P_IPV6(v6)。
 这种特殊处理只能通过一个名为 multiproto 模式的标志针对 ethertype ETH_P_IP 和 ETH_P_MPLS_UC 启用。)
 
-Usage
-------
-(用法)
+Usage(用法)
+-----------
 
 1) Device creation & deletion
    (创建与删除设备)

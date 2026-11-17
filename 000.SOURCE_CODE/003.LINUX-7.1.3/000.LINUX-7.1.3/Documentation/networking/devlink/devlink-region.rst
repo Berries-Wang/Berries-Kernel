@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==============
-Devlink Region
-==============
-
-(devlink 区域)
+============================
+Devlink Region(devlink 区域)
+============================
 
 ``devlink`` regions enable access to driver defined address regions using
 devlink.
@@ -50,9 +48,8 @@ structure. User space can request a direct read by using the
 id.
 (区域可以选择允许在不创建快照的情况下直接读取其内容。直接读取请求不是原子的。特别是，大小为 256 字节或更大的读取请求会被拆分成多个块。如果需要原子访问，请使用快照。希望为区域启用此功能的驱动应在 ``devlink_region_ops`` 结构中实现 ``.read`` 回调。用户空间可以通过使用 ``DEVLINK_ATTR_REGION_DIRECT`` 属性(而不是指定快照 id)来请求直接读取。)
 
-example usage
--------------
-(用法示例)
+example usage(用法示例)
+-----------------------
 
 .. code:: shell
 

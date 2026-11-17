@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0+
 
-============================================================
-Linux Base Virtual Function Driver for Intel(R) 10G Ethernet
-============================================================
-
-(Intel(R) 10G 以太网的 Linux 基础虚拟功能驱动)
+==========================================================================================================
+Linux Base Virtual Function Driver for Intel(R) 10G Ethernet(Intel(R) 10G 以太网的 Linux 基础虚拟功能驱动)
+==========================================================================================================
 
 Intel 10 Gigabit Virtual Function Linux driver.
 (Intel 万兆虚拟功能 Linux 驱动。)
 Copyright(c) 1999-2018 Intel Corporation.
 
-Contents
-========
-(目录)
+Contents(目录)
+==============
 
 - Identifying Your Adapter
   (识别你的适配器)
@@ -31,9 +28,8 @@ with Linux.
 (有关硬件要求的问题，请参考随 Intel 适配器提供的文档。所列出的所有硬件要求均适用于 Linux 环境。)
 
 
-Identifying Your Adapter
-========================
-(识别你的适配器)
+Identifying Your Adapter(识别你的适配器)
+========================================
 
 The driver is compatible with devices based on the following:
 (该驱动与基于以下产品的设备兼容：)
@@ -51,9 +47,8 @@ network drivers, refer to the Intel Support website:
 https://www.intel.com/support
 (有关如何识别你的适配器的信息以及最新的 Intel 网络驱动，请参阅 Intel 支持网站：https://www.intel.com/support)
 
-Known Issues/Troubleshooting
-============================
-(已知问题/故障排查)
+Known Issues/Troubleshooting(已知问题/故障排查)
+===============================================
 
 SR-IOV requires the correct platform and OS support.
 (SR-IOV 需要正确的平台和操作系统支持。)
@@ -70,9 +65,8 @@ VLANs: There is a limit of a total of 64 shared VLANs to 1 or more VFs.
 (VLAN：共享给一个或多个 VF 的 VLAN 总数上限为 64 个。)
 
 
-Support
-=======
-(支持)
+Support(支持)
+=============
 
 For general information, go to the Intel support website at:
 https://www.intel.com/support/

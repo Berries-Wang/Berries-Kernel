@@ -1,18 +1,14 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=====================
-Softnet Driver Issues
-=====================
+===========================================
+Softnet Driver Issues(softnet 驱动相关问题)
+===========================================
 
-(softnet 驱动相关问题)
+Probing guidelines(探测指南)
+============================
 
-Probing guidelines
-(探测指南)
-==================
-
-Address validation
-(地址校验)
-------------------
+Address validation(地址校验)
+----------------------------
 
 Any hardware layer address you obtain for your device should
 be verified.  For example, for ethernet check it with
@@ -20,13 +16,11 @@ linux/etherdevice.h:is_valid_ether_addr()
 (你为设备获得的任何硬件层地址都应当经过校验。例如，对于以太网，使用
 linux/etherdevice.h:is_valid_ether_addr() 来检查)
 
-Close/stop guidelines
-(关闭/停止指南)
-=====================
+Close/stop guidelines(关闭/停止指南)
+====================================
 
-Quiescence
-(静止状态)
-----------
+Quiescence(静止状态)
+--------------------
 
 After the ndo_stop routine has been called, the hardware must
 not receive or transmit any data.  All in flight packets must
@@ -35,21 +29,18 @@ any reset commands.
 (在 ndo_stop 例程被调用之后，硬件不得接收或发送任何数据。所有在途的
 数据包都必须被中止。如有必要，轮询或等待任何复位命令完成。)
 
-Auto-close
-(自动关闭)
-----------
+Auto-close(自动关闭)
+--------------------
 
 The ndo_stop routine will be called by unregister_netdevice
 if device is still UP.
 (如果设备仍处于 UP 状态，unregister_netdevice 会调用 ndo_stop 例程。)
 
-Transmit path guidelines
-(发送路径指南)
-========================
+Transmit path guidelines(发送路径指南)
+======================================
 
-Stop queues in advance
-(提前停止队列)
-----------------------
+Stop queues in advance(提前停止队列)
+------------------------------------
 
 The ndo_start_xmit method must not return NETDEV_TX_BUSY under
 any normal circumstances.  It is considered a hard error unless
@@ -116,24 +107,21 @@ And then at the end of your TX reclamation event handling:
 	netif_txq_completed_wake(txq, cmpl_pkts, cmpl_bytes,
 				 drv_tx_avail(dr), 2 * MAX_SKB_FRAGS);
 
-Lockless queue stop / wake helper macros
-(无锁队列停止/唤醒辅助宏)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Lockless queue stop / wake helper macros(无锁队列停止/唤醒辅助宏)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. kernel-doc:: include/net/netdev_queues.h
    :doc: Lockless queue stopping / waking helpers.
 
-No exclusive ownership
-(无独占所有权)
-----------------------
+No exclusive ownership(无独占所有权)
+------------------------------------
 
 An ndo_start_xmit method must not modify the shared parts of a
 cloned SKB.
 (ndo_start_xmit 方法不得修改已克隆 SKB 的共享部分。)
 
-Timely completions
-(及时完成)
-------------------
+Timely completions(及时完成)
+----------------------------
 
 Do not forget that once you return NETDEV_TX_OK from your
 ndo_start_xmit method, it is your driver's responsibility to free

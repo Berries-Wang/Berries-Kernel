@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==================
-ISO9660 Filesystem
-==================
-
-(ISO9660 文件系统)
+====================================
+ISO9660 Filesystem(ISO9660 文件系统)
+====================================
 
 Mount options that are the same as for msdos and vfat partitions.
 (与 msdos 和 vfat 分区相同的挂载选项。)

@@ -6,9 +6,8 @@ Devlink DPIPE
 
 (Devlink DPIPE)
 
-Background
-(背景)
-==========
+Background(背景)
+================
 
 While performing the hardware offloading process, much of the hardware
 specifics cannot be presented. These details are useful for debugging, and
@@ -48,9 +47,8 @@ easier; additionally, the information can be useful when debugging
 performance issues.
 (在很多情况下，仅凭内核的转储来分析系统故障可能并不足够。把这些数据与底层硬件的补充信息相结合，可以使调试更加容易；此外，这些信息在调试性能问题时也很有用。)
 
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 The ``devlink-dpipe`` interface closes this gap. The hardware's pipeline is
 modeled as a graph of match/action tables. Each table represents a specific
@@ -74,9 +72,8 @@ in a chain (which may affect the data path latency). In response to a new TC
 filter new tables should be created describing those regions.
 (例如，用三态内容寻址存储器 (TCAM) 实现访问控制列表 (ACL) 相当常见。TCAM 存储器可以划分为多个 TCAM 区域 (region)。复杂的 TC 过滤器可以拥有多条规则，具有不同的优先级和不同的查找键。另一方面，硬件 TCAM 区域具有预定义的查找键。使用 TCAM 引擎卸载 TC 过滤器规则可能导致多个 TCAM 区域以链式方式互连（这可能影响数据路径时延）。为了响应新的 TC 过滤器，应当创建描述这些区域的新表。)
 
-Model
-(模型)
-=====
+Model(模型)
+===========
 
 The ``DPIPE`` model introduces several objects:
 (``DPIPE`` 模型引入了几个对象：)
@@ -119,9 +116,8 @@ userspace:
   * ``counters_set``: Enable or disable counters on a table.
     (``counters_set``：启用或禁用一个表上的计数器。)
 
-Table
-(表)
------
+Table(表)
+---------
 
 The driver should implement the following operations for each table:
 (驱动应为每个表实现以下操作：)
@@ -136,9 +132,8 @@ The driver should implement the following operations for each table:
     disabled.
     (``counters_set_update``：在启用或禁用计数器时与硬件同步。)
 
-Header/Field
-(头/字段)
-------------
+Header/Field(头/字段)
+---------------------
 
 In a similar way to P4 headers and fields are used to describe a table's
 behavior. There is a slight difference between the standard protocol headers
@@ -156,9 +151,8 @@ different Virtual Routing and Forwarding (VRF) tables can be mapped to
 internal routing table indexes.
 (为了提供进一步的可见性，一些 ASIC 元数据字段可以映射到内核对象。例如，内部路由器接口索引可以直接映射到网络设备的 ifindex。不同虚拟路由转发 (VRF) 表所使用的 FIB 表索引可以映射到内部路由表索引。)
 
-Match
-(匹配)
------
+Match(匹配)
+-----------
 
 Matches are kept primitive and close to hardware operation. Match types like
 LPM are not supported due to the fact that this is exactly a process we wish
@@ -178,9 +172,8 @@ specified in order to distinguish multiple headers of the same type in a
 packet (tunneling).
 (应指定头和字段的 id 以标识特定字段。此外，还应指定头索引，以区分同一数据包中同一类型的多个头（隧道场景）。)
 
-Action
-(动作)
-------
+Action(动作)
+------------
 
 Similar to match, the actions are kept primitive and close to hardware
 operation. For example:
@@ -195,9 +188,8 @@ operation. For example:
   * ``pop_header``: Remove a header.
     (``pop_header``：移除一个头。)
 
-Entry
-(表项)
------
+Entry(表项)
+-----------
 
 Entries of a specific table can be dumped on demand. Each eentry is
 identified with an index and its properties are described by a list of
@@ -205,9 +197,8 @@ match/action values and specific counter. By dumping the tables content the
 interactions between tables can be resolved.
 (特定表的表项可以按需转储。每个 eentry（表项）由一个索引标识，其属性由一组匹配/动作值和特定的计数器描述。通过转储表的内容，可以解析出各表之间的交互。)
 
-Abstraction Example
-(抽象示例)
-===================
+Abstraction Example(抽象示例)
+=============================
 
 The following is an example of the abstraction model of the L3 part of
 Mellanox Spectrum ASIC. The blocks are described in the order they appear in
@@ -215,9 +206,8 @@ the pipeline. The table sizes in the following examples are not real
 hardware sizes and are provided for demonstration purposes.
 (以下是以 Mellanox Spectrum ASIC 的 L3 部分为例的抽象模型。各模块按其在管线中出现的顺序描述。下例中的表大小并非真实的硬件大小，仅用于演示。)
 
-LPM
-(LPM)
----
+LPM(LPM)
+--------
 
 The LPM algorithm can be implemented as a list of hash tables. Each hash
 table contains routes with the same prefix length. The root of the list is
@@ -246,9 +236,8 @@ The ``meta.lpm_prefix`` field is used to connect two LPM tables.
                 meta.lpm_prefix: set },
     }
 
-Local Host
-(本地主机)
-----------
+Local Host(本地主机)
+--------------------
 
 In the case of local routes the LPM lookup already resolves the egress
 router interface (RIF), yet the exact MAC address is not known. The local
@@ -266,9 +255,8 @@ destination IP address as a key. The result is the MAC address.
       action: { ethernet.daddr: set }
     }
 
-Adjacency
-(邻接)
----------
+Adjacency(邻接)
+---------------
 
 In case of remote routes this table does the ECMP. The LPM lookup results in
 ECMP group size and index that serves as a global offset into this table.
@@ -289,9 +277,8 @@ point to the same adjacency group.
                 meta.erif: set }
     }
 
-ERIF
-(ERIF)
-----
+ERIF(ERIF)
+----------
 
 In case the egress RIF and destination MAC have been resolved by previous
 tables this table does multiple operations like TTL decrease and MTU check.

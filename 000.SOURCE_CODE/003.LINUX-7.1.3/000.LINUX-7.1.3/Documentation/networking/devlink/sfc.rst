@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===================
-sfc devlink support
-===================
-
-(sfc devlink 支持)
+=====================================
+sfc devlink support(sfc devlink 支持)
+=====================================
 
 This document describes the devlink features implemented by the ``sfc``
 device driver for the ef10 and ef100 devices.
 (本文档描述 ``sfc`` 设备驱动针对 ef10 和 ef100 设备所实现的 devlink 功能。)
 
-Info versions
-=============
-(Info 版本)
+Info versions(Info 版本)
+========================
 
 The ``sfc`` driver reports the following versions
 (``sfc`` 驱动报告以下版本)
@@ -77,9 +74,8 @@ The ``sfc`` driver reports the following versions
      - UEFI driver version (No UNDI support).
        (UEFI 驱动版本(不支持 UNDI)。)
 
-Flash Update
-============
-(Flash 更新)
+Flash Update(Flash 更新)
+========================
 
 The ``sfc`` driver implements support for flash update using the
 ``devlink-flash`` interface. It supports updating the device flash using a

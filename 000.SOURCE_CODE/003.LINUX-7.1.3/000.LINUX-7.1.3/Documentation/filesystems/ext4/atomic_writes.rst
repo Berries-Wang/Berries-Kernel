@@ -1,13 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 .. _atomic_writes:
 
-Atomic Block Writes
-(原子块写)
--------------------------
+Atomic Block Writes(原子块写)
+-----------------------------
 
-Introduction
-(引言)
-~~~~~~~~~~~~
+Introduction(引言)
+~~~~~~~~~~~~~~~~~~
 
 Atomic (untorn) block writes ensure that either the entire write is committed
 to disk or none of it is. This prevents "torn writes" during power loss or
@@ -31,9 +29,8 @@ supports hardware atomic writes. This is supported in the following two ways:
    based on the underlying device’s supported atomic write unit limits.
    (使用 bigalloc 的多 FS 块原子写：EXT4 现在还支持使用一种称为 bigalloc 的特性进行跨越多个文件系统块的原子写。原子写单元的最小和最大大小由文件系统块大小和簇大小决定，并基于底层设备所支持的原子写单元限制。)
 
-Requirements
-(要求)
-~~~~~~~~~~~~
+Requirements(要求)
+~~~~~~~~~~~~~~~~~~
 
 Basic requirements for atomic writes in ext4:
 (ext4 中原子写的基本要求：)
@@ -60,9 +57,8 @@ atomic writes on ext4 are only supported if underlying storage device supports
 it.
 (注意：EXT4 不支持基于软件或 COW 的原子写，这意味着只有当底层存储设备支持原子写时，ext4 上的原子写才受支持。)
 
-Multi-fsblock Implementation Details
-(多 FS 块实现细节)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Multi-fsblock Implementation Details(多 FS 块实现细节)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The bigalloc feature changes ext4 to allocate in units of multiple filesystem
 blocks, also known as clusters. With bigalloc each bit within block bitmap
@@ -131,9 +127,8 @@ from any possible torn writes.
 Only after this step, the actual data write operation is performed by the iomap.
 (为了防止这种撕裂写，ext4 会在 ``ext4_iomap_alloc`` 中通过 ``ext4_map_blocks_atomic()`` 主动为整个请求区域分配单个连续的 extent。如果是在混合映射之上进行分配，EXT4 还会强制提交当前的日志事务。这确保该范围内任何待处理的元数据更新(例如未写入到已写入 extent 的转换)在执行实际写 I/O 之前与文件数据块处于一致状态。如果提交失败，则必须中止整个 I/O，以防止任何可能的撕裂写。只有在此步骤之后，iomap 才执行实际的数据写操作。)
 
-Handling Split Extents Across Leaf Blocks
-(处理跨叶块的拆分 extent)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Handling Split Extents Across Leaf Blocks(处理跨叶块的拆分 extent)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 There can be a special edge case where we have logically and physically
 contiguous extents stored in separate leaf nodes of the on-disk extent tree.
@@ -164,9 +159,8 @@ atomic writes are typically constrained to small sizes
 (目前为了保持效率，只额外查询一个叶块，因为原子写通常被限制在小尺寸(例如 [blocksize, clustersize])。)
 
 
-Handling Journal transactions
-(处理日志事务)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Handling Journal transactions(处理日志事务)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To support multi-fsblock atomic writes, we ensure enough journal credits are
 reserved during:
@@ -183,13 +177,11 @@ reserved during:
     only required to handle a split extent across leaf blocks.
     (在 ``->end_io()`` 调用期间，我们确保为进行未写入到已写入的转换启动单个事务。该转换循环主要是为了处理跨叶块的拆分 extent。)
 
-How to
-(如何操作)
-~~~~~~
+How to(如何操作)
+~~~~~~~~~~~~~~~~
 
-Creating Filesystems with Atomic Write Support
-(创建支持原子写的文件系统)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Creating Filesystems with Atomic Write Support(创建支持原子写的文件系统)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 First check the atomic write units supported by block device.
 See :ref:`atomic_write_bdev_support` for more details.
@@ -217,9 +209,8 @@ Where ``-b`` specifies the block size, ``-C`` specifies the cluster size in byte
 and ``-O bigalloc`` enables the bigalloc feature.
 (其中 ``-b`` 指定块大小，``-C`` 以字节为单位指定簇大小，而 ``-O bigalloc`` 启用 bigalloc 特性。)
 
-Application Interface
-(应用接口)
-^^^^^^^^^^^^^^^^^^^^^
+Application Interface(应用接口)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Applications can use the ``pwritev2()`` system call with the ``RWF_ATOMIC`` flag
 to perform atomic writes:
@@ -253,9 +244,8 @@ writes are supported.
 
 .. _atomic_write_bdev_support:
 
-Hardware Support
-(硬件支持)
-~~~~~~~~~~~~~~~~
+Hardware Support(硬件支持)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The underlying storage device must support atomic write operations.
 Modern NVMe and SCSI devices often provide this capability.
@@ -271,9 +261,8 @@ Nonzero values for these attributes indicate that the device supports
 atomic writes.
 (这些属性的非零值表明该设备支持原子写。)
 
-See Also
-(另请参阅)
-~~~~~~~~
+See Also(另请参阅)
+~~~~~~~~~~~~~~~~~~
 
 * :doc:`bigalloc` - Documentation on the bigalloc feature
   (:doc:`bigalloc` - 关于 bigalloc 特性的文档)

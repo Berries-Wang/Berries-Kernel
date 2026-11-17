@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=====================================
-The Linux kernel GTP tunneling module
-=====================================
-
-(Linux 内核 GTP 隧道模块)
+==============================================================
+The Linux kernel GTP tunneling module(Linux 内核 GTP 隧道模块)
+==============================================================
 
 Documentation by
 		 Harald Welte <laforge@gnumonks.org> and
@@ -16,9 +14,8 @@ In 'drivers/net/gtp.c' you are finding a kernel-level implementation
 of a GTP tunnel endpoint.
 (在 'drivers/net/gtp.c' 中可以找到 GTP 隧道端点的内核级实现。)
 
-What is GTP
-(什么是 GTP)
-===========
+What is GTP(什么是 GTP)
+=======================
 
 GTP is the Generic Tunnel Protocol, which is a 3GPP protocol used for
 tunneling User-IP payload between a mobile station (phone, modem)
@@ -60,9 +57,8 @@ A direct PDF link to v13.6.0 is provided for convenience below:
 http://www.etsi.org/deliver/etsi_ts/129000_129099/129060/13.06.00_60/ts_129060v130600p.pdf
 (为方便起见，下面提供 v13.6.0 的 PDF 直接链接：)
 
-The Linux GTP tunnelling module
-(Linux GTP 隧道模块)
-===============================
+The Linux GTP tunnelling module(Linux GTP 隧道模块)
+===================================================
 
 The module implements the function of a tunnel endpoint, i.e. it is
 able to decapsulate tunneled IP packets in the uplink originated by
@@ -97,9 +93,8 @@ The official homepage of the module is at
 https://osmocom.org/projects/linux-kernel-gtp-u/wiki
 (该模块的官方主页位于 https://osmocom.org/projects/linux-kernel-gtp-u/wiki 。)
 
-Userspace Programs with Linux Kernel GTP-U support
-(支持 Linux 内核 GTP-U 的用户空间程序)
-==================================================
+Userspace Programs with Linux Kernel GTP-U support(支持 Linux 内核 GTP-U 的用户空间程序)
+========================================================================================
 
 At the time of this writing, there are at least two Free Software
 implementations that implement GTP-C and can use the netlink interface
@@ -114,9 +109,8 @@ to make use of the Linux kernel GTP-U support:
   (ergw(用 Erlang 编写的 GGSN + P-GW)：)
   https://github.com/travelping/ergw
 
-Userspace Library / Command Line Utilities
-(用户空间库 / 命令行工具)
-==========================================
+Userspace Library / Command Line Utilities(用户空间库 / 命令行工具)
+===================================================================
 
 There is a userspace library called 'libgtpnl' which is based on
 libmnl and which implements a C-language API towards the netlink
@@ -125,9 +119,8 @@ interface provided by the Kernel GTP module:
 
 http://git.osmocom.org/libgtpnl/
 
-Protocol Versions
-(协议版本)
-=================
+Protocol Versions(协议版本)
+===========================
 
 There are two different versions of GTP-U: v0 [GSM TS 09.60] and v1
 [3GPP TS 29.281].  Both are implemented in the Kernel GTP module.
@@ -145,9 +138,8 @@ responsibility of the control plane implementation in userspace to
 implement that.
 (GTP-C 有三个版本：v0、v1 和 v2。由于内核不实现 GTP-C，我们无需为此担心。实现它是用户空间中控制面实现的责任。)
 
-IPv6
-(IPv6)
-====
+IPv6(IPv6)
+==========
 
 The 3GPP specifications indicate either IPv4 or IPv6 can be used both
 on the inner (user) IP layer, or on the outer (transport) layer.
@@ -158,9 +150,8 @@ the User IP payload, nor for the outer IP layer.  Patches or other
 Contributions to fix this are most welcome!
 (遗憾的是，内核模块目前对用户 IP 载荷和外层 IP 层都不支持 IPv6。非常欢迎修复此问题的补丁或其他贡献！)
 
-Mailing List
-(邮件列表)
-============
+Mailing List(邮件列表)
+======================
 
 If you have questions regarding how to use the Kernel GTP module from
 your own software, or want to contribute to the code, please use the
@@ -170,18 +161,16 @@ interface for managing your subscription is at
 https://lists.osmocom.org/mailman/listinfo/osmocom-net-gprs
 (如果你对如何在自研软件中使用内核 GTP 模块有疑问，或想为代码做贡献，请使用 osmocom-net-grps 邮件列表进行相关讨论。该列表的地址为 osmocom-net-gprs@lists.osmocom.org，管理订阅的 mailman 界面位于 https://lists.osmocom.org/mailman/listinfo/osmocom-net-gprs 。)
 
-Issue Tracker
-(问题跟踪系统)
-=============
+Issue Tracker(问题跟踪系统)
+===========================
 
 The Osmocom project maintains an issue tracker for the Kernel GTP-U
 module at
 https://osmocom.org/projects/linux-kernel-gtp-u/issues
 (Osmocom 项目在 https://osmocom.org/projects/linux-kernel-gtp-u/issues 为内核 GTP-U 模块维护着一个问题跟踪系统。)
 
-History / Acknowledgements
-(历史 / 致谢)
-==========================
+History / Acknowledgements(历史 / 致谢)
+=======================================
 
 The Module was originally created in 2012 by Harald Welte, but never
 completed.  Pablo came in to finish the mess Harald left behind.  But
@@ -193,13 +182,11 @@ extended it with new features and finally pushed all of us to get it
 mainline, where it was merged in 4.7.0.
 (2015 年，Andreas Schultz 挺身而出，修复了大量更多的缺陷，为其扩展了新特性，并最终推动我们所有人将其送入主线，于 4.7.0 中合并。)
 
-Architectural Details
-(架构细节)
-=====================
+Architectural Details(架构细节)
+===============================
 
-Local GTP-U entity and tunnel identification
-(本地 GTP-U 实体与隧道标识)
---------------------------------------------
+Local GTP-U entity and tunnel identification(本地 GTP-U 实体与隧道标识)
+-----------------------------------------------------------------------
 
 GTP-U uses UDP for transporting PDU's. The receiving UDP port is 2152
 for GTPv1-U and 3386 for GTPv0-U.
@@ -250,9 +237,8 @@ Therefore, the receiving side identifies tunnels exclusively based on
 TEIDs, not based on the source IP!
 (因此，接收侧完全基于 TEID 来识别隧道，而不基于源 IP！)
 
-APN vs. Network Device
-(APN 与网络设备)
-======================
+APN vs. Network Device(APN 与网络设备)
+======================================
 
 The GTP-U driver creates a Linux network device for each Gi/SGi
 interface.

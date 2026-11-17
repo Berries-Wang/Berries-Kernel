@@ -1,19 +1,16 @@
 .. SPDX-License-Identifier: GPL-2.0+
 
-==========================================================
-Linux Base Driver for Intel(R) Ethernet Network Connection
-==========================================================
-
-(Intel(R) 以太网网络连接的 Linux 基础驱动)
+====================================================================================================
+Linux Base Driver for Intel(R) Ethernet Network Connection(Intel(R) 以太网网络连接的 Linux 基础驱动)
+====================================================================================================
 
 Intel Gigabit Linux driver.
 Copyright(c) 1999-2018 Intel Corporation.
 (Intel 千兆 Linux 驱动。
 版权所有 (c) 1999-2018 Intel Corporation。)
 
-Contents
-(目录)
-========
+Contents(目录)
+==============
 
 - Identifying Your Adapter
   (识别你的适配器)
@@ -25,9 +22,8 @@ Contents
   (支持)
 
 
-Identifying Your Adapter
-(识别你的适配器)
-========================
+Identifying Your Adapter(识别你的适配器)
+========================================
 
 For information on how to identify your adapter, and for the latest Intel
 network drivers, refer to the Intel Support website:
@@ -36,9 +32,8 @@ https://www.intel.com/support
 https://www.intel.com/support)
 
 
-Command Line Parameters
-(命令行参数)
-========================
+Command Line Parameters(命令行参数)
+===================================
 
 If the driver is built as a module, the following optional parameters are used
 by entering them on the command line with the modprobe command using this
@@ -61,9 +56,8 @@ NOTE: A descriptor describes a data buffer and attributes related to the data
 buffer. This information is accessed by the hardware.
 (注意：描述符 (descriptor) 描述一个数据缓冲区及与该缓冲区相关的属性。硬件会访问这些信息。)
 
-max_vfs
-(max_vfs)
--------
+max_vfs(max_vfs)
+----------------
 :Valid Range: 0-7
 (有效范围: 0-7)
 
@@ -114,9 +108,8 @@ VLAN 过滤器之前先移除旧的 VLAN 过滤器。例如：)
     ip link set eth0 vf 0 vlan 0	// Delete vlan 100
     ip link set eth0 vf 0 vlan 200	// set a new vlan 200 for VF 0
 
-Debug
-(Debug)
------
+Debug(Debug)
+------------
 :Valid Range: 0-16 (0=none,...,16=all)
 (有效范围: 0-16 (0=无,...,16=全部))
 :Default Value: 0
@@ -126,13 +119,11 @@ This parameter adjusts the level debug messages displayed in the system logs.
 (该参数调整系统日志中显示的调试消息级别。)
 
 
-Additional Features and Configurations
-(其他特性与配置)
-======================================
+Additional Features and Configurations(其他特性与配置)
+======================================================
 
-Jumbo Frames
-(巨型帧)
-------------
+Jumbo Frames(巨型帧)
+--------------------
 Jumbo Frames support is enabled by changing the Maximum Transmission Unit (MTU)
 to a value larger than the default value of 1500.
 (通过把最大传输单元 (MTU) 更改为大于默认值 1500 的数值来启用巨型帧 (Jumbo Frames) 支持。)
@@ -167,9 +158,8 @@ poor performance or loss of link.
 (注意：不支持在 10 或 100 Mbps 下使用巨型帧，这可能导致性能不佳或链路丢失。)
 
 
-ethtool
-(ethtool)
--------
+ethtool(ethtool)
+----------------
 The driver utilizes the ethtool interface for driver configuration and
 diagnostics, as well as displaying statistical information. The latest ethtool
 version is required for this functionality. Download it at:
@@ -178,9 +168,8 @@ version is required for this functionality. Download it at:
 https://www.kernel.org/pub/software/network/ethtool/
 
 
-Enabling Wake on LAN (WoL)
-(启用局域网唤醒 (WoL))
---------------------------
+Enabling Wake on LAN (WoL)(启用局域网唤醒 (WoL))
+------------------------------------------------
 WoL is configured through the ethtool utility.
 (WoL 通过 ethtool 工具进行配置。)
 
@@ -196,9 +185,8 @@ Wake On LAN is not supported for the following device:
 - Intel(R) Gigabit VT Quad Port Server Adapter)
 
 
-Multiqueue
-(多队列)
-----------
+Multiqueue(多队列)
+------------------
 In this mode, a separate MSI-X vector is allocated for each queue and one for
 "other" interrupts such as link status change and errors. All interrupts are
 throttled via interrupt moderation. Interrupt moderation must be used to avoid
@@ -220,9 +208,8 @@ and multiqueue mode or vice-versa.
 (注意：在某些内核上，需要在单队列模式与多队列模式之间切换（或反向切换）时重启系统。)
 
 
-MAC and VLAN anti-spoofing feature
-(MAC 与 VLAN 防欺骗特性)
-----------------------------------
+MAC and VLAN anti-spoofing feature(MAC 与 VLAN 防欺骗特性)
+----------------------------------------------------------
 When a malicious driver attempts to send a spoofed packet, it is dropped by the
 hardware and not transmitted.
 (当恶意驱动试图发送伪造的数据包时，硬件会将其丢弃，不予发送。)
@@ -237,9 +224,8 @@ spoofing
 在 VF(n) 上检测到欺骗事件 (Spoof event(s) detected on VF(n))，其中 n = 试图进行欺骗的 VF)
 
 
-Setting MAC Address, VLAN and Rate Limit Using IProute2 Tool
-(使用 IProute2 工具设置 MAC 地址、VLAN 和速率限制)
-------------------------------------------------------------
+Setting MAC Address, VLAN and Rate Limit Using IProute2 Tool(使用 IProute2 工具设置 MAC 地址、VLAN 和速率限制)
+--------------------------------------------------------------------------------------------------------------
 You can set a MAC address of a Virtual Function (VF), a default VLAN and the
 rate limit using the IProute2 tool. Download the latest version of the
 IProute2 tool from Sourceforge if your version does not have all the features
@@ -247,9 +233,8 @@ you require.
 (可以使用 IProute2 工具设置虚拟功能 (VF) 的 MAC 地址、默认 VLAN 以及速率限制。如果你所用的版本不具备所需
 的全部功能，请从 Sourceforge 下载最新版本的 IProute2 工具。)
 
-Credit Based Shaper (Qav Mode)
-(基于信用的整形器 (Qav 模式))
-------------------------------
+Credit Based Shaper (Qav Mode)(基于信用的整形器 (Qav 模式))
+-----------------------------------------------------------
 When enabling the CBS qdisc in the hardware offload mode, traffic shaping using
 the CBS (described in the IEEE 802.1Q-2018 Section 8.6.8.2 and discussed in the
 Annex L) algorithm will run in the i210 controller, so it's more accurate and
@@ -275,9 +260,8 @@ NOTE: This feature is exclusive to i210 models.
 (注意：此特性为 i210 型号独有。)
 
 
-Support
-(支持)
-=======
+Support(支持)
+=============
 For general information, go to the Intel support website at:
 https://www.intel.com/support/
 (一般信息请访问 Intel 支持网站：

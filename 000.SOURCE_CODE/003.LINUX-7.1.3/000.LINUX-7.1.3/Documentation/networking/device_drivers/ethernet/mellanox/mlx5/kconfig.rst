@@ -1,11 +1,9 @@
 .. SPDX-License-Identifier: GPL-2.0 OR Linux-OpenIB
 .. include:: <isonum.txt>
 
-=======================================
-Enabling the driver and kconfig options
-=======================================
-
-(启用驱动与 kconfig 选项)
+================================================================
+Enabling the driver and kconfig options(启用驱动与 kconfig 选项)
+================================================================
 
 :Copyright: |copy| 2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 

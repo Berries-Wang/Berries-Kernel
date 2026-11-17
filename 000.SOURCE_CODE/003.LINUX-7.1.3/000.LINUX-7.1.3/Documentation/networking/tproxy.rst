@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=========================
-Transparent proxy support
-=========================
-
-(透明代理支持)
+=======================================
+Transparent proxy support(透明代理支持)
+=======================================
 
 This feature adds Linux 2.2-like transparent proxy support to current kernels.
 To use it, enable the socket match and the TPROXY target in your kernel config.
@@ -16,9 +14,8 @@ You will need policy routing too, so be sure to enable that as well.
 From Linux 4.18 transparent proxy support is also available in nf_tables.
 (从 Linux 4.18 起，nf_tables 中也提供了透明代理支持。)
 
-1. Making non-local sockets work
-(1. 让非本地套接字工作)
-================================
+1. Making non-local sockets work(1. 让非本地套接字工作)
+=======================================================
 
 The idea is that you identify packets with destination address matching a local
 socket on your box, set the packet mark to a certain value::
@@ -68,9 +65,8 @@ http://people.netfilter.org/hidden/tproxy/netcat-ip_transparent-support.patch
 http://people.netfilter.org/hidden/tproxy/netcat-ip_transparent-support.patch)
 
 
-2. Redirecting traffic
-(2. 重定向流量)
-======================
+2. Redirecting traffic(2. 重定向流量)
+=====================================
 
 Transparent proxying often involves "intercepting" traffic on a router. This is
 usually done with the iptables REDIRECT target; however, there are serious
@@ -110,9 +106,8 @@ nf_tables implementation.
 https://git.breakpoint.cc/cgit/fw/tcprdr.git/
 该工具由 Florian Westphal 编写，在 nf_tables 实现期间曾被用于测试。)
 
-3. Iptables and nf_tables extensions
-(3. Iptables 与 nf_tables 扩展)
-====================================
+3. Iptables and nf_tables extensions(3. Iptables 与 nf_tables 扩展)
+===================================================================
 
 To use tproxy you'll need to have the following modules compiled for iptables:
 (要使用 tproxy，你需要为 iptables 编译以下模块：)
@@ -126,9 +121,8 @@ Or the floowing modules for nf_tables:
  - NFT_SOCKET
  - NFT_TPROXY
 
-4. Application support
-(4. 应用程序支持)
-======================
+4. Application support(4. 应用程序支持)
+=======================================
 
 4.1. Squid
 ----------

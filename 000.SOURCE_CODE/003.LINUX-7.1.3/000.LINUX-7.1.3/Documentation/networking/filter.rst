@@ -2,15 +2,12 @@
 
 .. _networking-filter:
 
-=======================================================
-Linux Socket Filtering aka Berkeley Packet Filter (BPF)
-=======================================================
+=======================================================================================================
+Linux Socket Filtering aka Berkeley Packet Filter (BPF)(Linux 套接字过滤，又称伯克利数据包过滤器 (BPF))
+=======================================================================================================
 
-(Linux 套接字过滤，又称伯克利数据包过滤器 (BPF))
-
-Notice
-(注意事项)
-------
+Notice(注意事项)
+----------------
 
 This file used to document the eBPF format and mechanisms even when not
 related to socket filtering.  The ../bpf/index.rst has more details
@@ -18,9 +15,8 @@ on eBPF.
 (本文件过去曾在与套接字过滤无关的情况下记录 eBPF 格式及其机制。
 ../bpf/index.rst 中有关于 eBPF 的更多细节。)
 
-Introduction
-(简介)
-------------
+Introduction(简介)
+------------------
 
 Linux Socket Filtering (LSF) is derived from the Berkeley Packet Filter.
 Though there are some distinct differences between the BSD and Linux
@@ -102,9 +98,8 @@ CA, USA, 2-2. [http://www.tcpdump.org/papers/bpf-usenix93.pdf]
 (USENIX'93)。USENIX Association，Berkeley, CA, USA，2-2。
 [http://www.tcpdump.org/papers/bpf-usenix93.pdf])
 
-Structure
-(结构)
----------
+Structure(结构)
+---------------
 
 User space applications include <linux/filter.h> which contains the
 following relevant structures::
@@ -133,9 +128,8 @@ follow-up example) is being passed to the kernel through setsockopt(2).
 (对于套接字过滤，指向该结构的指针(如下面示例所示)会通过 setsockopt(2)
 传递给内核。)
 
-Example
-(示例)
--------
+Example(示例)
+-------------
 
 ::
 
@@ -239,9 +233,8 @@ libpcap 编译器干净地实现；或 iv) 特定的过滤代码需要采用与 
 返回码)。此外，BPF JIT 的实现者可能希望手工编写测试用例，因而也需要对
 BPF 代码的低层访问能力。)
 
-BPF engine and instruction set
-(BPF 引擎与指令集)
-------------------------------
+BPF engine and instruction set(BPF 引擎与指令集)
+------------------------------------------------
 
 Under tools/bpf/ there's a small helper tool called bpf_asm which can
 be used to write low-level filters for example scenarios mentioned in the
@@ -641,9 +634,8 @@ bpf passes:1 fails:9
   Exits bpf_dbg.
   (退出 bpf_dbg。)
 
-JIT compiler
-(JIT 编译器)
-------------
+JIT compiler(JIT 编译器)
+------------------------
 
 The Linux kernel has a built-in BPF JIT compiler for x86_64, SPARC,
 PowerPC, ARM, ARM64, MIPS, RISC-V, s390, and ARC and can be enabled through
@@ -765,9 +757,8 @@ toolchain for developing and testing the kernel's JIT compiler.
 (对于 BPF JIT 开发者来说，bpf_jit_disasm、bpf_asm 和 bpf_dbg 组成了一套
 实用的工具链，可用于开发和测试内核的 JIT 编译器。)
 
-BPF kernel internals
-(BPF 内核内部机制)
---------------------
+BPF kernel internals(BPF 内核内部机制)
+--------------------------------------
 
 Internally, for the kernel interpreter, a different instruction set
 format with similar underlying principles from BPF described in previous
@@ -824,9 +815,8 @@ from eBPF instruction set.
 s390x、powerpc64、sparc64、arm32、riscv64、riscv32、loongarch64、arc 则
 从 eBPF 指令集执行 JIT 编译。)
 
-Testing
-(测试)
--------
+Testing(测试)
+-------------
 
 Next to the BPF toolchain, the kernel also ships a test module that contains
 various test cases for classic and eBPF that can be executed against
@@ -845,18 +835,16 @@ including timings in nsec can be found in the kernel log (dmesg).
 运行测试套件。各测试用例的结果(包括以纳秒计的耗时)可在内核日志 (dmesg)
 中找到。)
 
-Misc
-(其他)
-----
+Misc(其他)
+----------
 
 Also trinity, the Linux syscall fuzzer, has built-in support for BPF and
 SECCOMP-BPF kernel fuzzing.
 (此外，Linux 系统调用模糊测试工具 trinity 也内置了对 BPF 和 SECCOMP-BPF
 内核模糊测试的支持。)
 
-Written by
-(作者)
-----------
+Written by(作者)
+----------------
 
 The document was written in the hope that it is found useful and in order
 to give potential BPF hackers or security auditors a better overview of

@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-======
-AF_XDP
-======
+==================================================
+AF_XDP(AF_XDP，针对高性能数据包处理而优化的地址族)
+==================================================
 
-(AF_XDP，针对高性能数据包处理而优化的地址族)
-
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 AF_XDP is an address family that is optimized for high performance
 packet processing.
@@ -133,9 +130,8 @@ SKB 与通用 XDP 支持配合使用，并把数据拷贝到用户空间。这�
 都有效的回退模式。另一方面，如果驱动程序支持 XDP，AF_XDP 代码就会利用它来
 提供更好的性能，但数据仍然要拷贝到用户空间。)
 
-Concepts
-(基本概念)
-========
+Concepts(基本概念)
+==================
 
 In order to use an AF_XDP socket, a number of associated objects need
 to be setup. These objects and their options are explained in the
@@ -158,9 +154,8 @@ http://vger.kernel.org/lpc_net2018_talks/lpc18_paper_af_xdp_perf-v2.pdf。
 "Accelerating networking with AF_XDP"，可在 https://lwn.net/Articles/750845/
 找到。)
 
-UMEM
-(UMEM 内存区域)
-----
+UMEM(UMEM 内存区域)
+-------------------
 
 UMEM is a region of virtual contiguous memory, divided into
 equal-sized frames. An UMEM is associated to a netdev and a specific
@@ -189,9 +184,8 @@ user-space application.
 (UMEM 有两个单生产者/单消费者环，用于在内核与用户空间应用程序之间转移 UMEM
 帧的所有权。)
 
-Rings
-(环)
------
+Rings(环)
+---------
 
 There are a four different kind of rings: FILL, COMPLETION, RX and
 TX. All rings are single-producer/single-consumer, so the user-space
@@ -228,9 +222,8 @@ XDP_UMEM_PGOFF_COMPLETION_RING) 映射到用户空间。)
 The size of the rings need to be of size power of two.
 (环的大小必须是 2 的幂。)
 
-UMEM Fill Ring
-(UMEM FILL 环)
-~~~~~~~~~~~~~~
+UMEM Fill Ring(UMEM FILL 环)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The FILL ring is used to transfer ownership of UMEM frames from
 user-space to kernel-space. The UMEM addrs are passed in the ring. As
@@ -255,9 +248,8 @@ chunks mode, then the incoming addr will be left untouched.
 块模式运行，传入的 addr 将保持原样。)
 
 
-UMEM Completion Ring
-(UMEM COMPLETION 环)
-~~~~~~~~~~~~~~~~~~~~
+UMEM Completion Ring(UMEM COMPLETION 环)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The COMPLETION Ring is used transfer ownership of UMEM frames from
 kernel-space to user-space. Just like the FILL ring, UMEM indices are
@@ -273,9 +265,8 @@ The user application consumes UMEM addrs from this ring.
 (用户应用程序从该环消费 UMEM addr。)
 
 
-RX Ring
-(RX 环)
-~~~~~~~
+RX Ring(RX 环)
+~~~~~~~~~~~~~~
 
 The RX ring is the receiving side of a socket. Each entry in the ring
 is a struct xdp_desc descriptor. The descriptor contains UMEM offset
@@ -291,9 +282,8 @@ The user application consumes struct xdp_desc descriptors from this
 ring.
 (用户应用程序从该环消费 struct xdp_desc 描述符。)
 
-TX Ring
-(TX 环)
-~~~~~~~
+TX Ring(TX 环)
+~~~~~~~~~~~~~~
 
 The TX ring is used to send frames. The struct xdp_desc descriptor is
 filled (index, length and offset) and passed into the ring.
@@ -308,9 +298,8 @@ The user application produces struct xdp_desc descriptors to this
 ring.
 (用户应用程序向该环生产 struct xdp_desc 描述符。)
 
-Libbpf
-(Libbpf 库)
-======
+Libbpf(Libbpf 库)
+=================
 
 Libbpf is a helper library for eBPF and XDP that makes using these
 technologies a lot simpler. It also contains specific helper functions
@@ -327,9 +316,8 @@ We recommend that you use this library unless you have become a power
 user. It will make your program a lot simpler.
 (我们建议您使用这个库，除非您已经成为高级用户。它会让您的程序简单得多。)
 
-XSKMAP / BPF_MAP_TYPE_XSKMAP
-(XSKMAP / BPF_MAP_TYPE_XSKMAP，XSK 套接字映射)
-============================
+XSKMAP / BPF_MAP_TYPE_XSKMAP(XSKMAP / BPF_MAP_TYPE_XSKMAP，XSK 套接字映射)
+==========================================================================
 
 On XDP side there is a BPF map type BPF_MAP_TYPE_XSKMAP (XSKMAP) that
 is used in conjunction with bpf_redirect_map() to pass the ingress
@@ -352,17 +340,15 @@ application (samples/bpf/) in for an example.
 eth0 和队列 17 执行的 XDP 程序才能成功地把数据传给该套接字。示例请参考示例
 应用程序 (samples/bpf/)。)
 
-Configuration Flags and Socket Options
-(配置标志与套接字选项)
-======================================
+Configuration Flags and Socket Options(配置标志与套接字选项)
+============================================================
 
 These are the various configuration flags that can be used to control
 and monitor the behavior of AF_XDP sockets.
 (以下是可用于控制和监视 AF_XDP 套接字行为的各种配置标志。)
 
-XDP_COPY and XDP_ZEROCOPY bind flags
-(XDP_COPY 与 XDP_ZEROCOPY 绑定标志)
-------------------------------------
+XDP_COPY and XDP_ZEROCOPY bind flags(XDP_COPY 与 XDP_ZEROCOPY 绑定标志)
+-----------------------------------------------------------------------
 
 When you bind to a socket, the kernel will first try to use zero-copy
 copy. If zero-copy is not supported, it will fall back on using copy
@@ -378,9 +364,8 @@ socket into zero-copy mode or fail.
 无法使用拷贝模式，bind 调用将报错失败。相反，XDP_ZEROCOPY 标志会强制该套接字
 进入零拷贝模式，否则失败。)
 
-XDP_SHARED_UMEM bind flag
-(XDP_SHARED_UMEM 绑定标志)
--------------------------
+XDP_SHARED_UMEM bind flag(XDP_SHARED_UMEM 绑定标志)
+---------------------------------------------------
 
 This flag enables you to bind multiple sockets to the same UMEM. It
 works on the same queue id, between queue ids and between
@@ -509,9 +494,8 @@ devices at the same time.
 (注意，UMEM 可以同时在相同队列号和设备的套接字之间、同一设备的不同队列之间
 以及不同设备之间共享。)
 
-XDP_USE_NEED_WAKEUP bind flag
-(XDP_USE_NEED_WAKEUP 绑定标志)
------------------------------
+XDP_USE_NEED_WAKEUP bind flag(XDP_USE_NEED_WAKEUP 绑定标志)
+-----------------------------------------------------------
 
 This option adds support for a new flag called need_wakeup that is
 present in the FILL ring and the TX ring, the rings for which user
@@ -569,9 +553,8 @@ syscalls needed for the TX path.
 驱动程序运行在同一个核心上时；即使应用程序与内核驱动程序使用不同的核心，它
 也能减少 TX 路径所需的系统调用次数。)
 
-XDP_{RX|TX|UMEM_FILL|UMEM_COMPLETION}_RING setsockopts
-(XDP_{RX|TX|UMEM_FILL|UMEM_COMPLETION}_RING setsockopt 选项)
-------------------------------------------------------
+XDP_{RX|TX|UMEM_FILL|UMEM_COMPLETION}_RING setsockopts(XDP_{RX|TX|UMEM_FILL|UMEM_COMPLETION}_RING setsockopt 选项)
+------------------------------------------------------------------------------------------------------------------
 
 These setsockopts sets the number of descriptors that the RX, TX,
 FILL, and COMPLETION rings respectively should have. It is mandatory
@@ -608,9 +591,8 @@ negatively impact performance.
 (如果您创建仅 Tx 的套接字，我们建议不要往 FILL 环放任何数据包。否则，驱动程序
 可能以为您将要接收数据，而实际上并不会，这会对性能产生负面影响。)
 
-XDP_UMEM_REG setsockopt
-(XDP_UMEM_REG setsockopt 选项)
------------------------
+XDP_UMEM_REG setsockopt(XDP_UMEM_REG setsockopt 选项)
+-----------------------------------------------------
 
 This setsockopt registers a UMEM to a socket. This is the area that
 contain all the buffers that packet can reside in. The call takes a
@@ -635,9 +617,8 @@ be dealt with in separate sections for each UMEM flag.
 为 N 字节，则意味着数据包将从缓冲区内偏移 N 字节处开始，前 N 字节留给应用
 程序使用。最后一个选项是 flags 字段，将在每个 UMEM 标志各自的章节中分别介绍。)
 
-SO_BINDTODEVICE setsockopt
-(SO_BINDTODEVICE setsockopt 选项)
---------------------------
+SO_BINDTODEVICE setsockopt(SO_BINDTODEVICE setsockopt 选项)
+-----------------------------------------------------------
 
 This is a generic SOL_SOCKET option that can be used to tie AF_XDP
 socket to a particular network interface.  It is useful when a socket
@@ -648,9 +629,8 @@ to a different interface.  Updating the value requires CAP_NET_RAW.
 当套接字由特权进程创建并传递给非特权进程时非常有用。一旦设置了该选项，内核将
 拒绝把该套接字绑定到其他接口的尝试。更新该值需要 CAP_NET_RAW 权限。)
 
-XDP_MAX_TX_SKB_BUDGET setsockopt
-(XDP_MAX_TX_SKB_BUDGET setsockopt 选项)
---------------------------------
+XDP_MAX_TX_SKB_BUDGET setsockopt(XDP_MAX_TX_SKB_BUDGET setsockopt 选项)
+-----------------------------------------------------------------------
 
 This setsockopt sets the maximum number of descriptors that can be handled
 and passed to the driver at one send syscall. It is applied in the copy
@@ -661,9 +641,8 @@ Allowed range is [32, xs->tx->nentries].
 上限。它应用于拷贝模式，允许应用程序调整每套接字的最大迭代次数，以获得更高的
 吞吐量和更低的 send 系统调用频率。允许范围为 [32, xs->tx->nentries]。)
 
-XDP_STATISTICS getsockopt
-(XDP_STATISTICS getsockopt 选项)
--------------------------
+XDP_STATISTICS getsockopt(XDP_STATISTICS getsockopt 选项)
+---------------------------------------------------------
 
 Gets drop statistics of a socket that can be useful for debug
 purposes. The supported statistics are shown below:
@@ -677,18 +656,16 @@ purposes. The supported statistics are shown below:
        __u64 tx_invalid_descs; /* Dropped due to invalid descriptor */
    };
 
-XDP_OPTIONS getsockopt
-(XDP_OPTIONS getsockopt 选项)
-----------------------
+XDP_OPTIONS getsockopt(XDP_OPTIONS getsockopt 选项)
+---------------------------------------------------
 
 Gets options from an XDP socket. The only one supported so far is
 XDP_OPTIONS_ZEROCOPY which tells you if zero-copy is on or not.
 (从 XDP 套接字获取选项。目前唯一受支持的是 XDP_OPTIONS_ZEROCOPY，它告诉您
 零拷贝是否开启。)
 
-Multi-Buffer Support
-(多缓冲支持)
-====================
+Multi-Buffer Support(多缓冲支持)
+================================
 
 With multi-buffer support, programs using AF_XDP sockets can receive
 and transmit packets consisting of multiple buffers both in copy and
@@ -812,9 +789,8 @@ An example program each for Rx and Tx multi-buffer support can be found
 later in this document.
 (Rx 和 Tx 多缓冲支持各自的示例程序见本文档后面的内容。)
 
-Usage
-(用法)
------
+Usage(用法)
+-----------
 
 In order to use AF_XDP sockets two parts are needed. The user-space
 application and the XDP program. For a complete setup and usage example,
@@ -898,9 +874,8 @@ But please use the libbpf functions as they are optimized and ready to
 use. Will make your life easier.
 (但请使用 libbpf 的函数，它们经过优化且开箱即用，会让您的生活更轻松。)
 
-Usage Multi-Buffer Rx
-(多缓冲 Rx 的用法)
----------------------
+Usage Multi-Buffer Rx(多缓冲 Rx 的用法)
+---------------------------------------
 
 Here is a simple Rx path pseudo-code example (using libxdp interfaces
 for simplicity). Error paths have been excluded to keep it short:
@@ -941,9 +916,8 @@ for simplicity). Error paths have been excluded to keep it short:
         xsk_ring_cons__release(&xsk->rx, rcvd);
     }
 
-Usage Multi-Buffer Tx
-(多缓冲 Tx 的用法)
----------------------
+Usage Multi-Buffer Tx(多缓冲 Tx 的用法)
+---------------------------------------
 
 Here is an example Tx path pseudo-code (using libxdp interfaces for
 simplicity) ignoring that the umem is finite in size, and that we
@@ -995,9 +969,8 @@ points to a valid location in the umem.
         xsk_ring_prod__submit(&xsk->tx, i);
     }
 
-Probing for Multi-Buffer Support
-(探测多缓冲支持)
---------------------------------
+Probing for Multi-Buffer Support(探测多缓冲支持)
+------------------------------------------------
 
 To discover if a driver supports multi-buffer AF_XDP in SKB or DRV
 mode, use the XDP_FEATURES feature of netlink in linux/netdev.h to
@@ -1038,9 +1011,8 @@ look at tools/testing/selftests/bpf/xskxceiver.c.
 (有关如何在 libbpf 中使用这些接口的示例，请参阅
 tools/testing/selftests/bpf/xskxceiver.c。)
 
-Multi-Buffer Support for Zero-Copy Drivers
-(零拷贝驱动程序的多缓冲支持)
-------------------------------------------
+Multi-Buffer Support for Zero-Copy Drivers(零拷贝驱动程序的多缓冲支持)
+----------------------------------------------------------------------
 
 Zero-copy drivers usually use the batched APIs for Rx and Tx
 processing. Note that the Tx batch API guarantees that it will provide
@@ -1050,9 +1022,8 @@ to facilitate extending a zero-copy driver with multi-buffer support.
 提供的一批 Tx 描述符会以完整的数据包结尾。这是为了便于为零拷贝驱动程序扩展
 多缓冲支持。)
 
-Sample application
-(示例应用程序)
-==================
+Sample application(示例应用程序)
+================================
 
 There is a xdpsock benchmarking/test application that can be found at
 https://github.com/xdp-project/bpf-examples/tree/main/AF_XDP-example
@@ -1088,9 +1059,8 @@ code in tools/testing/selftests/bpf/xsk.[ch].
 的原始 uapi 究竟如何用于实现更高级的功能，请查看 tools/testing/selftests/bpf/
 xsk.[ch] 中的 libbpf 代码。)
 
-FAQ
-(常见问题解答)
-=======
+FAQ(常见问题解答)
+=================
 
 Q: I am not seeing any traffic on the socket. What am I doing wrong?
 (Q：我在套接字上看不到任何流量。我做错了什么？)
@@ -1173,9 +1143,8 @@ A: Care has to be taken not to feed the same buffer in the UMEM into
    或不同 netdev (通过 XDP_SHARED_UMEM 标志绑定) 的 FILL 环也会导致同样的
    问题。)
 
-Credits
-(致谢)
-=======
+Credits(致谢)
+=============
 
 - Björn Töpel (AF_XDP core)
   (AF_XDP 核心)

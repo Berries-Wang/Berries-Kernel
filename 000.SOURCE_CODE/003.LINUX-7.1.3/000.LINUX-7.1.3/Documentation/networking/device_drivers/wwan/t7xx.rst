@@ -4,11 +4,9 @@
 
 .. _t7xx_driver_doc:
 
-============================================
-t7xx driver for MTK PCIe based T700 5G modem
-============================================
-
-(用于基于 MTK PCIe 的 T700 5G 调制解调器的 t7xx 驱动)
+=================================================================================================
+t7xx driver for MTK PCIe based T700 5G modem(用于基于 MTK PCIe 的 T700 5G 调制解调器的 t7xx 驱动)
+=================================================================================================
 
 The t7xx driver is a WWAN PCIe host driver developed for linux or Chrome OS
 platforms for data exchange over PCIe interface between Host platform &
@@ -22,9 +20,8 @@ to interact with the MediaTek's modem via AT commands.
 (该驱动暴露一个符合 MBIM 协议 [1] 的接口。任何前端应用（例如 Modem Manager）都可以轻松管理该 MBIM 接口，
 以实现面向 WWAN 的数据通信。该驱动还提供了一个通过 AT 命令与联发科调制解调器交互的接口。)
 
-Basic usage
-(基本用法)
-===========
+Basic usage(基本用法)
+=====================
 
 MBIM & AT functions are inactive when unmanaged. The t7xx driver provides
 WWAN port userspace interfaces representing MBIM & AT control channels and does
@@ -61,16 +58,14 @@ command and receive response:
 - open the AT control channel using a UART tool or a special user tool
   (使用 UART 工具或专用用户工具打开 AT 控制信道)
 
-Sysfs
-(sysfs)
-=====
+Sysfs(sysfs)
+============
 
 The driver provides sysfs interfaces to userspace.
 (该驱动向用户空间提供 sysfs 接口。)
 
-t7xx_mode
-(t7xx_mode)
----------
+t7xx_mode(t7xx_mode)
+--------------------
 The sysfs interface provides userspace with access to the device mode, this
 interface supports read and write operations.
 (该 sysfs 接口为用户空间提供对设备模式的访问，支持读和写操作。)
@@ -103,9 +98,8 @@ Write from userspace to set the device mode.
 ::
   $ echo fastboot_switching > /sys/bus/pci/devices/${bdf}/t7xx_mode
 
-t7xx_debug_ports
-(t7xx_debug_ports)
-----------------
+t7xx_debug_ports(t7xx_debug_ports)
+----------------------------------
 The sysfs interface provides userspace with access to enable/disable the debug
 ports, this interface supports read and write operations.
 (该 sysfs 接口为用户空间提供启用/禁用调试端口的访问，支持读和写操作。)
@@ -133,21 +127,18 @@ Write from userspace to set the debug ports status.
 ::
   $ echo 1 > /sys/bus/pci/devices/${bdf}/t7xx_debug_ports
 
-Management application development
-(管理应用开发)
-==================================
+Management application development(管理应用开发)
+================================================
 
 The driver and userspace interfaces are described below. The MBIM protocol is
 described in [1] Mobile Broadband Interface Model v1.0 Errata-1.
 (下文描述驱动与用户空间接口。MBIM 协议在 [1] Mobile Broadband Interface Model v1.0 Errata-1 中描述。)
 
-MBIM control channel userspace ABI
-(MBIM 控制信道用户空间 ABI)
-----------------------------------
+MBIM control channel userspace ABI(MBIM 控制信道用户空间 ABI)
+-------------------------------------------------------------
 
-/dev/wwan0mbim0 character device
-(/dev/wwan0mbim0 字符设备)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/dev/wwan0mbim0 character device(/dev/wwan0mbim0 字符设备)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The driver exposes an MBIM interface to the MBIM function by implementing
 MBIM WWAN Port. The userspace end of the control channel pipe is a
 /dev/wwan0mbim0 character device. Application shall use this interface for
@@ -155,34 +146,29 @@ MBIM protocol communication.
 (该驱动通过实现 MBIM WWAN Port，向 MBIM 功能暴露一个 MBIM 接口。控制信道管道的用户空间端是 /dev/wwan0mbim0
 字符设备。应用应使用此接口进行 MBIM 协议通信。)
 
-Fragmentation
-(分片)
-~~~~~~~~~~~~~
+Fragmentation(分片)
+~~~~~~~~~~~~~~~~~~~
 The userspace application is responsible for all control message fragmentation
 and defragmentation as per MBIM specification.
 (用户空间应用负责按照 MBIM 规范完成所有控制消息的分片与重组。)
 
-/dev/wwan0mbim0 write()
-(/dev/wwan0mbim0 write())
-~~~~~~~~~~~~~~~~~~~~~~~
+/dev/wwan0mbim0 write()(/dev/wwan0mbim0 write())
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The MBIM control messages from the management application must not exceed the
 negotiated control message size.
 (来自管理应用的 MBIM 控制消息不得超过协商的控制消息大小。)
 
-/dev/wwan0mbim0 read()
-(/dev/wwan0mbim0 read())
-~~~~~~~~~~~~~~~~~~~~~~
+/dev/wwan0mbim0 read()(/dev/wwan0mbim0 read())
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The management application must accept control messages of up the negotiated
 control message size.
 (管理应用必须能够接受最大至协商控制消息大小的控制消息。)
 
-MBIM data channel userspace ABI
-(MBIM 数据信道用户空间 ABI)
--------------------------------
+MBIM data channel userspace ABI(MBIM 数据信道用户空间 ABI)
+----------------------------------------------------------
 
-wwan0-X network device
-(wwan0-X 网络设备)
-~~~~~~~~~~~~~~~~~~~~~~
+wwan0-X network device(wwan0-X 网络设备)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The t7xx driver exposes IP link interface "wwan0-X" of type "wwan" for IP
 traffic. Iproute network utility is used for creating "wwan0-X" network
 interface and for associating it with MBIM IP session.
@@ -202,26 +188,22 @@ The driver will automatically map the "wwan0-1" network device to MBIM IP
 session 1.
 (驱动会自动将 "wwan0-1" 网络设备映射到 MBIM IP 会话 1。)
 
-AT port userspace ABI
-(AT 端口用户空间 ABI)
-----------------------------------
+AT port userspace ABI(AT 端口用户空间 ABI)
+------------------------------------------
 
-/dev/wwan0at0 character device
-(/dev/wwan0at0 字符设备)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/dev/wwan0at0 character device(/dev/wwan0at0 字符设备)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The driver exposes an AT port by implementing AT WWAN Port.
 The userspace end of the control port is a /dev/wwan0at0 character
 device. Application shall use this interface to issue AT commands.
 (该驱动通过实现 AT WWAN Port 暴露一个 AT 端口。控制端口的用户空间端是 /dev/wwan0at0 字符设备。应用应使用
 此接口下发 AT 命令。)
 
-fastboot port userspace ABI
-(fastboot 端口用户空间 ABI)
----------------------------
+fastboot port userspace ABI(fastboot 端口用户空间 ABI)
+------------------------------------------------------
 
-/dev/wwan0fastboot0 character device
-(/dev/wwan0fastboot0 字符设备)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/dev/wwan0fastboot0 character device(/dev/wwan0fastboot0 字符设备)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The driver exposes a fastboot protocol interface by implementing
 fastboot WWAN Port. The userspace end of the fastboot channel pipe is a
 /dev/wwan0fastboot0 character device. Application shall use this interface for
@@ -235,26 +217,22 @@ mode.
 (请注意，需要重新加载驱动才能导出 /dev/wwan0fastboot0 端口，因为设备在进入 ``fastboot_switching`` 模式后需
 要一次冷复位。)
 
-ADB port userspace ABI
-(ADB 端口用户空间 ABI)
-----------------------
+ADB port userspace ABI(ADB 端口用户空间 ABI)
+--------------------------------------------
 
-/dev/wwan0adb0 character device
-(/dev/wwan0adb0 字符设备)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/dev/wwan0adb0 character device(/dev/wwan0adb0 字符设备)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The driver exposes a ADB protocol interface by implementing ADB WWAN Port.
 The userspace end of the ADB channel pipe is a /dev/wwan0adb0 character device.
 Application shall use this interface for ADB protocol communication.
 (该驱动通过实现 ADB WWAN Port 暴露一个 ADB 协议接口。ADB 信道管道的用户空间端是 /dev/wwan0adb0 字符设备。
 应用应使用此接口进行 ADB 协议通信。)
 
-MIPC port userspace ABI
-(MIPC 端口用户空间 ABI)
------------------------
+MIPC port userspace ABI(MIPC 端口用户空间 ABI)
+----------------------------------------------
 
-/dev/wwan0mipc0 character device
-(/dev/wwan0mipc0 字符设备)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/dev/wwan0mipc0 character device(/dev/wwan0mipc0 字符设备)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The driver exposes a diagnostic interface by implementing MIPC (Modem
 Information Process Center) WWAN Port. The userspace end of the MIPC channel
 pipe is a /dev/wwan0mipc0 character device.
@@ -265,9 +243,8 @@ Application shall use this interface for MTK modem diagnostic communication.
 The MediaTek's T700 modem supports the 3GPP TS 27.007 [4] specification.
 (联发科 T700 调制解调器支持 3GPP TS 27.007 [4] 规范。)
 
-References
-(参考资料)
-==========
+References(参考资料)
+====================
 
 [1] *MBIM (Mobile Broadband Interface Model) Errata-1*
 ([1] MBIM（移动宽带接口模型）勘误-1)

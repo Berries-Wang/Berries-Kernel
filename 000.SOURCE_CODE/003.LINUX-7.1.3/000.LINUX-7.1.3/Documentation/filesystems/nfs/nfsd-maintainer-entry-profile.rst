@@ -1,6 +1,5 @@
-NFSD Maintainer Entry Profile
-(NFSD 维护者条目概况)
-=============================
+NFSD Maintainer Entry Profile(NFSD 维护者条目概况)
+==================================================
 
 A Maintainer Entry Profile supplements the top-level process
 documents (found in Documentation/process/) with customs that are
@@ -10,9 +9,8 @@ A maintainer may use these profiles to look across subsystems for
 opportunities to converge on best common practices.
 (维护者条目概况(Maintainer Entry Profile)是对顶层流程文档(位于 Documentation/process/)的补充，增加了特定于某个子系统及其维护者的惯例。贡献者可以使用本文档来设定预期并避免常见错误。维护者可以使用这些概况来纵观各子系统，寻找向最佳通用实践收敛的机会。)
 
-Overview
-(概述)
---------
+Overview(概述)
+--------------
 The Network File System (NFS) is a standardized family of network
 protocols that enable access to files across a set of network-
 connected peer hosts. Applications on NFS clients access files that
@@ -27,9 +25,8 @@ on most of the file system types native to Linux, including xfs,
 ext4, btrfs, and tmpfs.
 (NFSD 指的是 Linux 内核中包含的 NFS 服务器实现。内核中的 NFS 服务器可以快速访问存储在该服务器本地文件系统中的文件。NFSD 可以共享存储在大多数 Linux 原生文件系统类型上的文件，包括 xfs、ext4、btrfs 和 tmpfs。)
 
-Mailing list
-(邮件列表)
-------------
+Mailing list(邮件列表)
+----------------------
 The linux-nfs@vger.kernel.org mailing list is a public list. Its
 purpose is to enable collaboration among developers working on the
 Linux NFS stack, both client and server. It is not a place for
@@ -42,9 +39,8 @@ The linux-nfs mailing list is archived on `lore.kernel.org <https://lore.kernel.
 The Linux NFS community does not have any chat room.
 (Linux NFS 社区没有任何聊天室。)
 
-Reporting bugs
-(报告缺陷)
---------------
+Reporting bugs(报告缺陷)
+------------------------
 If you experience an NFSD-related bug on a distribution-built
 kernel, please start by working with your Linux distributor.
 (如果您在发行版构建的内核上遇到与 NFSD 相关的缺陷，请先与您的 Linux 发行版提供商协作解决。)
@@ -69,13 +65,11 @@ with those components to linux-nfs@vger.kernel.org. You might be
 directed to move the report to a specific bug tracker.
 (与 NFSD 相关的用户空间软件(例如 mountd 或 exportfs 命令)包含在 nfs-utils 软件包中。这些组件的问题请报告到 linux-nfs@vger.kernel.org。你可能会被指引将报告转移到某个特定的缺陷跟踪系统。)
 
-Contributor's Guide
-(贡献者指南)
--------------------
+Contributor's Guide(贡献者指南)
+-------------------------------
 
-Standards compliance
-(标准符合性)
-~~~~~~~~~~~~~~~~~~~~
+Standards compliance(标准符合性)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The priority is for NFSD to interoperate fully with the Linux NFS
 client. We also test against other popular NFS client implementa-
 tions regularly at NFS bake-a-thon events (also known as plug-
@@ -105,9 +99,8 @@ errnos) to clients of NFSD. A proper NFS status code is always
 required in NFS protocol replies.
 (必须始终注意避免把本地错误码(即 errno)泄露给 NFSD 的客户端。NFS 协议应答中必须始终使用恰当的 NFS 状态码。)
 
-NFSD administrative interfaces
-(NFSD 管理接口)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+NFSD administrative interfaces(NFSD 管理接口)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 NFSD administrative interfaces include:
 (NFSD 管理接口包括：)
 
@@ -157,9 +150,8 @@ long term user space feature, it can be added to NFSD's menagerie of
 experimental settings which reside under /sys/kernel/debug/nfsd/ .
 (如果确实需要新的设置，请首先考虑把它加入 NFSD netlink 协议。或者，如果它不需要成为可靠的长期用户空间特性，则可以把它加进 NFSD 那些位于 /sys/kernel/debug/nfsd/ 之下的实验性设置之中。)
 
-Field observability
-(现场可观测性)
-~~~~~~~~~~~~~~~~~~~
+Field observability(现场可观测性)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 NFSD employs several different mechanisms for observing operation,
 including counters, printks, WARNings, and static trace points. Each
 have their strengths and weaknesses. Contributors should select the
@@ -197,9 +189,8 @@ most appropriate tool for their task.
   down).
   (动态跟踪(例如 kprobes 或 eBPF)非常灵活，但不能在某些环境中使用(例如内核被完全锁定(lockdown)时)。)
 
-Testing
-(测试)
-~~~~~~~
+Testing(测试)
+~~~~~~~~~~~~~
 The kdevops project
 (kdevops 项目)
 
@@ -212,9 +203,8 @@ use these tools without kdevops, or contributors should install and
 use kdevops themselves to verify their patches before submission.
 (其中包含若干 NFS 专用工作流，以及社区标准的 fstests 套件。这些工作流基于 ltp 和 fio 等开源测试工具。鼓励贡献者在不用 kdevops 的情况下使用这些工具，或者由贡献者自行安装并使用 kdevops，在提交之前验证自己的补丁。)
 
-Coding style
-(编码风格)
-~~~~~~~~~~~~
+Coding style(编码风格)
+~~~~~~~~~~~~~~~~~~~~~~
 Follow the coding style preferences described in
 (遵循以下文档中描述的编码风格偏好)
 
@@ -249,9 +239,8 @@ with the following exceptions:
   named with ``nfsd4M_`` where M is the minor version.
   (专用于某一 NFSv4 次版本的新函数名可以用 ``nfsd4M_`` 命名，其中 M 是次版本号。)
 
-Patch preparation
-(补丁准备)
-~~~~~~~~~~~~~~~~~
+Patch preparation(补丁准备)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Read and follow all guidelines in
 (阅读并遵循以下文档中的所有准则)
 
@@ -308,9 +297,8 @@ Don't add "Cc: stable" unless you are absolutely sure the patch
 needs to go to stable during the initial submission process.
 (NFSD 维护者更愿意在针对补丁提交进行公开讨论之后，自行添加 stable 标注。贡献者可以建议 stable 标注，但请注意，许多版本管理工具会在你发布补丁时自动添加此类 stable Cc。除非你完全确定在初始提交流程中该补丁需要进入 stable，否则不要添加 "Cc: stable"。)
 
-Patch submission
-(补丁提交)
-~~~~~~~~~~~~~~~~
+Patch submission(补丁提交)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 Patches to NFSD are submitted via the kernel's email-based review
 process that is common to most other kernel subsystems.
 (针对 NFSD 的补丁通过内核基于电子邮件的审阅流程提交，该流程为大多数其他内核子系统所通用。)
@@ -407,9 +395,8 @@ maintainers and reviewers, therefore, are always the less scalable
 resource. Be kind to your friendly neighborhood maintainer.
 (请记住，子系统维护者和审阅者只有寥寥数人，而贡献来源却可能很多。因此，维护者和审阅者始终是更难扩展的那一类资源。请善待你身边友好的维护者。)
 
-Patch Acceptance
-(补丁接受)
-~~~~~~~~~~~~~~~~
+Patch Acceptance(补丁接受)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 There isn't a formal review process for NFSD, but we like to see
 at least two Reviewed-by: notices for patches that are more than
 simple clean-ups. Reviews are done in public on
@@ -472,9 +459,8 @@ immediate action (either application to -rc or LTS backport) is
 needed.
 (提交紧急补丁时，请明确说明需要立即采取行动(或是应用到 -rc，或是 LTS 回移)。)
 
-Sensitive patch submissions and bug reports
-(敏感的补丁提交与缺陷报告)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Sensitive patch submissions and bug reports(敏感的补丁提交与缺陷报告)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CVEs are generated by specific members of the Linux kernel community
 and several external entities. The Linux NFS community does not emit
 or assign CVEs. CVEs are assigned after an issue and its fix are
@@ -501,9 +487,8 @@ review, security-sensitive patches should be posted to linux-nfs@
 for the usual public review, archiving, and test period.
 (从未在任何邮件列表上出现、却带有 Reported-by: 或 Fixes: 标签就被合并的补丁，会被关注安全的人员视为可疑。我们鼓励：在任何私下审阅之后，安全敏感的补丁应发布到 linux-nfs@，以进行例行的公开审阅、归档和测试期。)
 
-LLM-generated submissions
-(LLM 生成的提交)
-~~~~~~~~~~~~~~~~~~~~~~~~~
+LLM-generated submissions(LLM 生成的提交)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The Linux kernel community as a whole is still exploring the new
 world of LLM-generated code. The NFSD maintainers will entertain
 submission of patches that are partially or wholly generated by
@@ -542,9 +527,8 @@ As always, please avoid reposting series revisions more than once
 every 24 hours.
 (与往常一样，请避免在 24 小时内多次重新发布系列修订。)
 
-Clean-up patches
-(清理类补丁)
-~~~~~~~~~~~~~~~~
+Clean-up patches(清理类补丁)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The NFSD maintainers discourage patches which perform simple clean-
 ups, which are not in the context of other work. For example:
 (NFSD 维护者不鼓励那些脱离其他工作背景、单纯执行简单清理的补丁。例如：)
@@ -563,9 +547,8 @@ comes at a greater cost than the value of such clean-ups.
 Conversely, spelling and grammar fixes are encouraged.
 (相反，拼写和语法修正则受到鼓励。)
 
-Stable and LTS support
-(stable 与 LTS 支持)
-----------------------
+Stable and LTS support(stable 与 LTS 支持)
+------------------------------------------
 Upstream NFSD continuous integration testing runs against LTS trees
 whenever they are updated.
 (每当 LTS 树更新时，上游 NFSD 持续集成测试都会针对它们运行。)
@@ -574,18 +557,16 @@ Please indicate when a patch containing a fix needs to be considered
 for LTS kernels, either via a Fixes: tag or explicit mention.
 (当包含修复的补丁需要被考虑用于 LTS 内核时，请通过 Fixes: 标签或明确说明来加以指示。)
 
-Feature requests
-(功能请求)
-----------------
+Feature requests(功能请求)
+--------------------------
 There is no one way to make an official feature request, but
 discussion about the request should eventually make its way to
 the linux-nfs@vger.kernel.org mailing list for public review by
 the community.
 (提出正式的功能请求并无唯一途径，但关于该请求的讨论最终应当进入 linux-nfs@vger.kernel.org 邮件列表，以供社区公开审阅。)
 
-Subsystem boundaries
-(子系统边界)
-~~~~~~~~~~~~~~~~~~~~
+Subsystem boundaries(子系统边界)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 NFSD itself is not much more than a protocol engine. This means its
 primary responsibility is to translate the NFS protocol into API
 calls in the Linux kernel. For example, NFSD is not responsible for
@@ -599,9 +580,8 @@ that usually means NFSD cannot provide that feature without
 substantial development work in other areas of the kernel.
 (如果 NFSD 所依赖的子系统没有实现某个特定特性，那么即使标准 NFS 协议支持该特性，通常也意味着：若不在内核的其他领域进行大量开发工作，NFSD 就无法提供该特性。)
 
-Specificity
-(具体明确)
-~~~~~~~~~~~
+Specificity(具体明确)
+~~~~~~~~~~~~~~~~~~~~~
 Feature requests can come from anywhere, and thus can often be
 nebulous. A requester might not understand what a "use case" or
 "user story" is. These descriptive paradigms are often used by
@@ -615,9 +595,8 @@ overwhelmed, we won't be afraid of saying "no" politely to
 underspecified requests.
 (为了防止贡献者和维护者不堪重负，对于表述不充分的请求，我们会不怕礼貌地说"不"。)
 
-Community roles and their authority
-(社区角色及其职权)
------------------------------------
+Community roles and their authority(社区角色及其职权)
+-----------------------------------------------------
 The purpose of Linux subsystem communities is to provide expertise
 and active stewardship of a narrow set of source files in the Linux
 kernel. This can include managing user space tooling as well.

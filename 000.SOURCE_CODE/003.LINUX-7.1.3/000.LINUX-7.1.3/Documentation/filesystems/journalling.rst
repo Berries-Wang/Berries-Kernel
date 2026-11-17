@@ -1,14 +1,11 @@
-The Linux Journalling API
-(Linux 日志 API)
-=========================
+The Linux Journalling API(Linux 日志 API)
+=========================================
 
-Overview
-(概述)
---------
+Overview(概述)
+--------------
 
-Details
-(细节)
-~~~~~~~
+Details(细节)
+~~~~~~~~~~~~~
 
 The journalling layer is easy to use. You need to first of all create a
 journal_t data structure. There are two calls to do this dependent on
@@ -149,9 +146,8 @@ if you allow unprivileged userspace to trigger codepaths containing
 these calls.
 (如果你允许非特权的用户空间触发包含这些调用的代码路径，由此带来的滥用和 DOS 攻击机会应当是显而易见的。)
 
-Fast commits
-(快速提交)
-~~~~~~~~~~~~
+Fast commits(快速提交)
+~~~~~~~~~~~~~~~~~~~~~~
 
 JBD2 to also allows you to perform file-system specific delta commits known as
 fast commits. In order to use fast commits, you will need to set following
@@ -187,18 +183,16 @@ of fast commits, please refer to the top level comments in
 fs/ext4/fast_commit.c.
 (目前，只有 Ext4 实现了快速提交。关于其快速提交实现的细节，请参阅 fs/ext4/fast_commit.c 顶层的注释。)
 
-Summary
-(小结)
-~~~~~~~
+Summary(小结)
+~~~~~~~~~~~~~
 
 Using the journal is a matter of wrapping the different context changes,
 being each mount, each modification (transaction) and each changed
 buffer to tell the journalling layer about them.
 (使用日志就是把各种不同的上下文变更——每次挂载、每次修改(事务)以及每个被修改的缓冲——包装起来，把这些情况告知日志层。)
 
-Data Types
-(数据类型)
-----------
+Data Types(数据类型)
+--------------------
 
 The journalling layer uses typedefs to 'hide' the concrete definitions
 of the structures used. As a client of the JBD2 layer you can just rely
@@ -206,24 +200,21 @@ on the using the pointer as a magic cookie of some sort. Obviously the
 hiding is not enforced as this is 'C'.
 (日志层使用 typedef 来"隐藏"所用结构体的具体定义。作为 JBD2 层的客户端，你可以只把这些指针当作某种魔法令牌来依赖。显然，这种隐藏并没有被强制执行，因为这是 'C' 语言。)
 
-Structures
-(结构体)
-~~~~~~~~~~
+Structures(结构体)
+~~~~~~~~~~~~~~~~~~
 
 .. kernel-doc:: include/linux/jbd2.h
    :internal:
 
-Functions
-(函数)
----------
+Functions(函数)
+---------------
 
 The functions here are split into two groups those that affect a journal
 as a whole, and those which are used to manage transactions
 (这里的函数被分成两组：那些影响日志整体行为的函数，以及那些用于管理事务的函数)
 
-Journal Level
-(日志级别)
-~~~~~~~~~~~~~
+Journal Level(日志级别)
+~~~~~~~~~~~~~~~~~~~~~~~
 
 .. kernel-doc:: fs/jbd2/journal.c
    :export:
@@ -231,15 +222,13 @@ Journal Level
 .. kernel-doc:: fs/jbd2/recovery.c
    :internal:
 
-Transaction Level
-(事务级别)
-~~~~~~~~~~~~~~~~~~
+Transaction Level(事务级别)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. kernel-doc:: fs/jbd2/transaction.c
 
-See also
-(另请参阅)
---------
+See also(另请参阅)
+------------------
 
 `Journaling the Linux ext2fs Filesystem, LinuxExpo 98, Stephen
 Tweedie <http://kernel.org/pub/linux/kernel/people/sct/ext3/journal-design.ps.gz>`__

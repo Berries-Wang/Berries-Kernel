@@ -76,9 +76,8 @@ ARCnet 2.10 ALPHA 开始，Tomasz 全新改进的 RFC1051 支持已被包含进�
 
 .. _arcnet-netdev:
 
-Where do I discuss these drivers?
-(我在哪里讨论这些驱动？)
----------------------------------
+Where do I discuss these drivers?(我在哪里讨论这些驱动？)
+---------------------------------------------------------
 
 ARCnet discussions take place on netdev. Simply send your email to
 netdev@vger.kernel.org and make sure to Cc: maintainer listed in
@@ -87,9 +86,8 @@ netdev@vger.kernel.org and make sure to Cc: maintainer listed in
 并确保抄送 Documentation/process/maintainers.rst 中 "ARCNET NETWORK LAYER"
 标题下所列的维护者。)
 
-Other Drivers and Info
-(其他驱动与信息)
-----------------------
+Other Drivers and Info(其他驱动与信息)
+--------------------------------------
 
 You can try my ARCNET page on the World Wide Web at:
 (可以在万维网上访问我的 ARCNET 页面：)
@@ -127,9 +125,8 @@ access.
 在我的网页上获取；如果你不能访问万维网，也可以通过电子邮件获取。)
 
 
-Installing the Driver
-(安装驱动)
----------------------
+Installing the Driver(安装驱动)
+-------------------------------
 
 All you will need to do in order to install the driver is::
 (要安装这个驱动，你所需要做的就是：)
@@ -247,9 +244,8 @@ If you load the chipset support as a module, the options are::
  shmem=<shmem> irq=<irq> node=<node_ID> device=<name>
 
 
-Loadable Module Support
-(可加载模块支持)
------------------------
+Loadable Module Support(可加载模块支持)
+---------------------------------------
 
 Configure and rebuild Linux.  When asked, answer 'm' to "Generic ARCnet
 support" and to support for your ARCnet chipset if you want to use the
@@ -283,9 +279,8 @@ For example::
 	insmod com20020.o io=0x2e0 device=eth1
 
 
-Using the Driver
-(使用驱动)
-----------------
+Using the Driver(使用驱动)
+--------------------------
 
 If you build your kernel with ARCnet COM90xx support included, it should
 probe for your card automatically when you boot. If you use a different
@@ -309,9 +304,8 @@ is DIFFERENT.
 不是"真正的"以太网，设备名称是不一样的。)
 
 
-Multiple Cards in One Computer
-(一台计算机中的多块卡)
-------------------------------
+Multiple Cards in One Computer(一台计算机中的多块卡)
+----------------------------------------------------
 
 Linux has pretty good support for this now, but since I've been busy, the
 ARCnet driver has somewhat suffered in this respect. COM90xx support, if
@@ -339,9 +333,8 @@ The ARCnet drivers will now sort out their names automatically.
 (ARCnet 驱动现在会自动理清它们的名称。)
 
 
-How do I get it to work with...?
-(如何让它与……协同工作？)
---------------------------------
+How do I get it to work with...?(如何让它与……协同工作？)
+--------------------------------------------------------
 
 NFS:
 (NFS：)
@@ -457,9 +450,8 @@ NetBSD/AmiTCP:
 	"Multiprotocol ARCnet"。) 较新版本的 NetBSD 显然支持 RFC1201。)
 
 
-Using Multiprotocol ARCnet
-(使用多协议 ARCnet)
---------------------------
+Using Multiprotocol ARCnet(使用多协议 ARCnet)
+---------------------------------------------
 
 The ARCnet driver v2.10 ALPHA supports three protocols, each on its own
 "virtual network device":
@@ -737,9 +729,8 @@ can set up your network then:
 
 
 
-It works: what now?
-(它能工作了：接下来做什么？)
--------------------
+It works: what now?(它能工作了：接下来做什么？)
+-----------------------------------------------
 
 Send mail following :ref:`arcnet-netdev`. Describe your setup, preferably
 including driver version, kernel version, ARCnet card model, CPU type, number
@@ -748,9 +739,8 @@ of systems on your network, and list of software in use.
 内核版本、ARCnet 卡型号、CPU 类型、网络上的系统数量以及所使用软件的
 清单。)
 
-It doesn't work: what now?
-(它不工作：接下来做什么？)
---------------------------
+It doesn't work: what now?(它不工作：接下来做什么？)
+----------------------------------------------------
 
 Do the same as above, but also include the output of the ifconfig and route
 commands, as well as any pertinent log entries (ie. anything that starts
@@ -830,9 +820,8 @@ E-mail me about your problem.
 (如果你不理解这些，那么反正你可能也不想弄明白。就你的问题给我发邮件吧。)
 
 
-I want to send money: what now?
-(我想寄钱：接下来做什么？)
--------------------------------
+I want to send money: what now?(我想寄钱：接下来做什么？)
+---------------------------------------------------------
 
 Go take a nap or something.  You'll feel better in the morning.
 (去打个盹或做点别的什么吧。早上你会感觉好一些。)

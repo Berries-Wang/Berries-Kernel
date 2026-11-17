@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=======================================
-stmmac (synopsys dwmac) devlink support
-=======================================
-
-(stmmac (synopsys dwmac) devlink 支持)
+=============================================================================
+stmmac (synopsys dwmac) devlink support(stmmac (synopsys dwmac) devlink 支持)
+=============================================================================
 
 This document describes the devlink features implemented by the ``stmmac``
 device driver.
 (本文档描述 ``stmmac`` 设备驱动所实现的 devlink 功能。)
 
-Parameters
-==========
-(参数)
+Parameters(参数)
+================
 
 The ``stmmac`` driver implements the following driver-specific parameters.
 (``stmmac`` 驱动实现以下驱动特定参数。)

@@ -1,8 +1,6 @@
-===================================================
-Scalable Vector Extension support for AArch64 Linux
-===================================================
-
-(AArch64 Linux 的可伸缩向量扩展支持)
+=======================================================================================
+Scalable Vector Extension support for AArch64 Linux(AArch64 Linux 的可伸缩向量扩展支持)
+=======================================================================================
 
 Author: Dave Martin <Dave.Martin@arm.com>
 (作者: Dave Martin <Dave.Martin@arm.com>)
@@ -26,9 +24,8 @@ model features for SVE is included in Appendix A.
 (本文档不旨在描述 SVE 架构或编程模型。为帮助理解，附录 A 中包含了 SVE 相关编程模型特性的最小描述。)
 
 
-1.  General
-(1. 概述)
------------
+1.  General(1. 概述)
+--------------------
 
 * SVE registers Z0..Z31, P0..P15 and FFR and the current vector length VL, are
   tracked per-thread.
@@ -107,9 +104,8 @@ model features for SVE is included in Appendix A.
   (注意，在大端系统上，这会导致与 FPSIMD V 寄存器不同的字节序，后者存储为单个主机字节序的 128 位值，寄存器的位[(127 - 8 * i): (120 - 8 * i)]编码在字节偏移 i 处。(struct fpsimd_context, struct user_fpsimd_state)。)
 
 
-2.  Vector length terminology
-(2. 向量长度术语)
------------------------------
+2.  Vector length terminology(2. 向量长度术语)
+----------------------------------------------
 
 The size of an SVE vector (Z) register is referred to as the "vector length".
 (SVE 向量(Z)寄存器的大小称为"向量长度"。)
@@ -134,9 +130,8 @@ the SVE instruction set architecture.
 (在底层粒度很重要的情况下使用 VQ 约定，例如在数据结构定义中。在大多数其他情况下，使用 VL 约定。这与 SVE 指令集架构中"VL"伪寄存器的含义一致。)
 
 
-3.  System call behaviour
-(3. 系统调用行为)
--------------------------
+3.  System call behaviour(3. 系统调用行为)
+------------------------------------------
 
 * On syscall, V0..V31 are preserved (as without SVE).  Thus, bits [127:0] of
   Z0..Z31 are preserved.  All other bits of Z0..Z31, and all of P0..P15 and FFR
@@ -159,9 +154,8 @@ the SVE instruction set architecture.
   (特别是，在从 fork() 或 clone() 返回时，父进程和新子进程或线程共享相同的 SVE 配置，与调用前父进程的配置匹配。)
 
 
-4.  Signal handling
-(4. 信号处理)
--------------------
+4.  Signal handling(4. 信号处理)
+--------------------------------
 
 * A new signal frame record sve_context encodes the SVE registers on signal
   delivery. [1]
@@ -206,9 +200,8 @@ the SVE instruction set architecture.
   (如果 SVE 上下文太大无法放入 sigcontext.__reserved[]，则在栈上分配额外空间，在 __reserved[] 中写入一个 extra_context 记录来引用此空间。然后 sve_context 被写入额外空间。有关此机制的更多细节，请参考[1]。)
 
 
-5.  Signal return
-(5. 信号返回)
------------------
+5.  Signal return(5. 信号返回)
+------------------------------
 
 When returning from a signal handler:
 (当从信号处理程序返回时：)
@@ -241,9 +234,8 @@ When returning from a signal handler:
   (允许通过设置或清除 SVE_SIG_FLAG_SM 标志来进入或离开流式模式，但应用程序应注意确保在此操作时 sve_context.vl 和任何寄存器数据适合新模式下的向量长度。)
 
 
-6.  prctl extensions
-(6. prctl 扩展)
---------------------
+6.  prctl extensions(6. prctl 扩展)
+-----------------------------------
 
 Some new prctl() calls are added to allow programs to manage the SVE vector
 length:
@@ -356,9 +348,8 @@ prctl(PR_SVE_GET_VL)
 	EINVAL: SVE 不支持。)
 
 
-7.  ptrace extensions
-(7. ptrace 扩展)
----------------------
+7.  ptrace extensions(7. ptrace 扩展)
+-------------------------------------
 
 * New regsets NT_ARM_SVE and NT_ARM_SSVE are defined for use with
   PTRACE_GETREGSET and PTRACE_SETREGSET. NT_ARM_SSVE describes the
@@ -521,9 +512,8 @@ The regset data starts with struct user_sve_header, containing:
   (写入部分、不完整的有效载荷的效果是未指定的。)
 
 
-8.  ELF coredump extensions
-(8. ELF 核心转储扩展)
----------------------------
+8.  ELF coredump extensions(8. ELF 核心转储扩展)
+------------------------------------------------
 
 * NT_ARM_SVE and NT_ARM_SSVE notes will be added to each coredump for
   each thread of the dumped process.  The contents will be equivalent to the
@@ -531,9 +521,8 @@ The regset data starts with struct user_sve_header, containing:
   type were executed for each thread when the coredump was generated.
   (将为转储进程的每个线程向每个核心转储添加 NT_ARM_SVE 和 NT_ARM_SSVE 注释。其内容等效于在生成核心转储时对每个线程执行相应类型的 PTRACE_GETREGSET 所读取的数据。)
 
-9.  System runtime configuration
-(9. 系统运行时配置)
---------------------------------
+9.  System runtime configuration(9. 系统运行时配置)
+---------------------------------------------------
 
 * To mitigate the ABI impact of expansion of the signal frame, a policy
   mechanism is provided for administrators, distro maintainers and developers
@@ -575,9 +564,8 @@ The regset data starts with struct user_sve_header, containing:
   of any existing process or thread that does not make an execve() call.
   (修改系统默认向量长度不会影响任何不进行 execve() 调用的现有进程或线程的向量长度。)
 
-10.  Perf extensions
-(10. Perf 扩展)
---------------------------------
+10.  Perf extensions(10. Perf 扩展)
+-----------------------------------
 
 * The arm64 specific DWARF standard [5] added the VG (Vector Granule) register
   at index 46. This register is used for DWARF unwinding when variable length
@@ -600,9 +588,8 @@ The regset data starts with struct user_sve_header, containing:
   settings, the event will fail to open.
   (如果系统不支持 SVE，在使用这些设置调用 perf_event_open 时，事件将无法打开。)
 
-Appendix A.  SVE programmer's model (informative)
-(附录 A. SVE 编程模型(信息性))
-=================================================
+Appendix A.  SVE programmer's model (informative)(附录 A. SVE 编程模型(信息性))
+===============================================================================
 
 This section provides a minimal description of the additions made by SVE to the
 ARMv8-A programmer's model that are relevant to this document.
@@ -612,9 +599,8 @@ Note: This section is for information only and not intended to be complete or
 to replace any architectural specification.
 (注意: 本节仅供参考，不旨在完整或替代任何架构规范。)
 
-A.1.  Registers
-(寄存器)
----------------
+A.1.  Registers(寄存器)
+-----------------------
 
 In A64 state, SVE adds the following:
 (在 A64 状态下，SVE 添加了以下内容：)
@@ -692,9 +678,8 @@ In A64 state, SVE adds the following:
     FPCR 包含被调用者保存和调用者保存位。详情请参见[4]。)
 
 
-A.2.  Procedure call standard
-(过程调用标准)
------------------------------
+A.2.  Procedure call standard(过程调用标准)
+-------------------------------------------
 
 The ARMv8-A base procedure call standard is extended as follows with respect to
 the additional SVE register state:
@@ -711,9 +696,8 @@ the additional SVE register state:
   (这是因为这些位映射到 V8..V15，而 V8..V15 在基础过程调用标准中是调用者保存的。)
 
 
-Appendix B.  ARMv8-A FP/SIMD programmer's model
-(附录 B. ARMv8-A FP/SIMD 编程模型)
-===============================================
+Appendix B.  ARMv8-A FP/SIMD programmer's model(附录 B. ARMv8-A FP/SIMD 编程模型)
+=================================================================================
 
 Note: This section is for information only and not intended to be complete or
 to replace any architectural specification.
@@ -760,9 +744,8 @@ ARMv8-A defines the following floating-point / SIMD register state:
     FPCR 包含被调用者保存和调用者保存位的混合。)
 
 
-References
-(参考文献)
-==========
+References(参考文献)
+====================
 
 [1] arch/arm64/include/uapi/asm/sigcontext.h
     AArch64 Linux signal ABI definitions

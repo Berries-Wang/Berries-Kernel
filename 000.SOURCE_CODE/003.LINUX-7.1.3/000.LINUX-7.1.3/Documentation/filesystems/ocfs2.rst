@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-================
-OCFS2 filesystem
-================
-
-(OCFS2 文件系统)
+================================
+OCFS2 filesystem(OCFS2 文件系统)
+================================
 
 OCFS2 is a general purpose extent based shared disk cluster file
 system with many similarities to ext3. It supports 64 bit inode
@@ -24,9 +22,8 @@ OCFS2 mailing lists: https://subspace.kernel.org/lists.linux.dev.html
 All code copyright 2005 Oracle except when otherwise noted.
 (除另有注明外，所有代码版权归 2005 Oracle 所有。)
 
-Credits
-(致谢)
-=======
+Credits(致谢)
+=============
 
 Lots of code taken from ext3 and other projects.
 (大量代码取自 ext3 及其他项目。)
@@ -43,9 +40,8 @@ Authors in alphabetical order:
 - Manish Singh  <manish.singh@oracle.com>
 - Tiger Yang    <tiger.yang@oracle.com>
 
-Caveats
-(注意事项)
-=======
+Caveats(注意事项)
+=================
 Features which OCFS2 does not support yet:
 (OCFS2 尚不支持的功能：)
 
@@ -54,9 +50,8 @@ Features which OCFS2 does not support yet:
 	- Distributed Caching (F_SETLEASE/F_GETLEASE/break_lease)
 	  (分布式缓存(F_SETLEASE/F_GETLEASE/break_lease))
 
-Mount options
-(挂载选项)
-=============
+Mount options(挂载选项)
+=======================
 
 OCFS2 supports the following mount options:
 (OCFS2 支持以下挂载选项：)

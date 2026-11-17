@@ -1,8 +1,7 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-Block and inode Bitmaps
-(块与 inode 位图)
------------------------
+Block and inode Bitmaps(块与 inode 位图)
+----------------------------------------
 
 The data block bitmap tracks the usage of data blocks within the block
 group.

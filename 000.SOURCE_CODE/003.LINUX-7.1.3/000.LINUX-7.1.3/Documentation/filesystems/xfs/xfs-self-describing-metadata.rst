@@ -1,15 +1,12 @@
 .. SPDX-License-Identifier: GPL-2.0
 .. _xfs_self_describing_metadata:
 
-============================
-XFS Self Describing Metadata
-============================
+==============================================
+XFS Self Describing Metadata(XFS 自描述元数据)
+==============================================
 
-(XFS 自描述元数据)
-
-Introduction
-(引言)
-============
+Introduction(引言)
+==================
 
 The largest scalability problem facing XFS is not one of algorithmic
 scalability, but of verification of the filesystem structure. Scalabilty of the
@@ -44,9 +41,8 @@ required for basic forensic analysis of the filesystem structure.
 (然而，如果我们将文件系统扩展到 1PB，现在就有 10 倍的元数据需要分析，于是分析工作会膨胀到数周/数月的取证工作。大部分分析工作缓慢而乏味，因此分析量越大，原因就越有可能淹没在噪声之中。所以，支持 PB 级文件系统的首要关注点是尽量减少对文件系统结构进行基本取证分析所需的时间和精力。)
 
 
-Self Describing Metadata
-(自描述元数据)
-========================
+Self Describing Metadata(自描述元数据)
+======================================
 
 One of the problems with the current metadata format is that apart from the
 magic number in the metadata block, we have no other way of identifying what it
@@ -166,9 +162,8 @@ modification occurred between the corruption being written and when it was
 detected.
 (为了提供这种"写入时间戳"，每个元数据块中都会写入其最近一次被修改所在事务的日志序列号(LSN)。这个数字在文件系统的生命周期内会一直递增，唯一会将其重置的操作是在文件系统上运行 xfs_repair。此外，借助 LSN，我们可以判断损坏的元数据是否都属于同一个日志检查点(log checkpoint)，从而对磁盘上第一个和最后一个损坏元数据实例之间发生了多少修改有所了解，并进一步了解从损坏被写入到被发现之间发生了多少修改。)
 
-Runtime Validation
-(运行时验证)
-==================
+Runtime Validation(运行时验证)
+==============================
 
 Validation of self-describing metadata takes place at runtime in two places:
 (自描述元数据的验证在运行时发生在两个地方：)
@@ -215,9 +210,8 @@ error occurs during this process, the buffer is again marked with a EFSCORRUPTED
 error for the higher layers to catch.
 (写验证与读验证相反——首先对对象进行广泛验证，如果没有问题，我们随后根据对对象的最后一次修改更新 LSN。之后，我们计算 CRC 并将其插入对象。完成这些之后，写 IO 才被允许继续。如果在此过程中发生任何错误，该缓冲会再次被标记上 EFSCORRUPTED 错误，供更高层捕获。)
 
-Structures
-(结构)
-==========
+Structures(结构)
+================
 
 A typical on-disk structure needs to contain the following information::
 (一个典型的磁盘上(on-disk)结构需要包含以下信息：)
@@ -368,9 +362,8 @@ update the LSN field (when it was last modified) and calculate the CRC on the
 metadata. Once this is done, we can issue the IO.
 (这会在我们进一步操作之前验证元数据的内部结构，检测元数据在内存中被修改期间发生的损坏。如果元数据验证通过且 CRC 已启用，我们随后更新 LSN 字段(即最后一次修改的时间)并计算元数据的 CRC。完成之后，我们就可以发出 IO。)
 
-Inodes and Dquots
-(inode 和 dquot)
-=================
+Inodes and Dquots(inode 和 dquot)
+=================================
 
 Inodes and dquots are special snowflakes. They have per-object CRC and
 self-identifiers, but they are packed so that there are multiple objects per

@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=====================
-mlxsw devlink support
-=====================
-
-(mlxsw devlink 支持)
+=========================================
+mlxsw devlink support(mlxsw devlink 支持)
+=========================================
 
 This document describes the devlink features implemented by the ``mlxsw``
 device driver.
 (本文档描述 ``mlxsw`` 设备驱动所实现的 devlink 特性。)
 
-Parameters
-(参数)
-==========
+Parameters(参数)
+================
 
 .. list-table:: Generic parameters implemented
 
@@ -46,9 +43,8 @@ parameters.
 The ``mlxsw`` driver supports reloading via ``DEVLINK_CMD_RELOAD``
 (``mlxsw`` 驱动支持通过 ``DEVLINK_CMD_RELOAD`` 进行重载)
 
-Info versions
-(信息版本)
-=============
+Info versions(信息版本)
+=======================
 
 The ``mlxsw`` driver reports the following versions
 (``mlxsw`` 驱动报告以下版本)
@@ -72,9 +68,8 @@ The ``mlxsw`` driver reports the following versions
      - Three digit firmware version
        (三位数字的固件版本)
 
-Line card auxiliary device info versions
-(线卡辅助设备信息版本)
-========================================
+Line card auxiliary device info versions(线卡辅助设备信息版本)
+==============================================================
 
 The ``mlxsw`` driver reports the following versions for line card auxiliary device
 (``mlxsw`` 驱动为线卡辅助设备报告以下版本)
@@ -102,9 +97,8 @@ The ``mlxsw`` driver reports the following versions for line card auxiliary devi
      - Three digit firmware version of line card device
        (线卡设备的三位数字固件版本)
 
-Driver-specific Traps
-(驱动特定陷阱)
-=====================
+Driver-specific Traps(驱动特定陷阱)
+===================================
 
 .. list-table:: List of Driver-specific Traps Registered by ``mlxsw``
    :widths: 5 5 90

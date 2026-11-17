@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: (GPL-2.0 OR BSD-3-Clause)
 
-====================
-ISO 15765-2 (ISO-TP)
-====================
+===============================================
+ISO 15765-2 (ISO-TP)(ISO 15765-2 (ISO-TP) 协议)
+===============================================
 
-(ISO 15765-2 (ISO-TP) 协议)
-
-Overview
-(总览)
-========
+Overview(总览)
+==============
 
 ISO 15765-2, also known as ISO-TP, is a transport protocol specifically defined
 for diagnostic communication on CAN. It is widely used in the automotive
@@ -22,17 +19,15 @@ CAN network using SAE J1939 as data link layer (however, this is not a
 requirement).
 (ISO-TP 既可用于基于 CAN CC (即经典 CAN) 的网络，也可用于基于 CAN FD (可变速率 CAN) 的网络。它还被设计为可与使用 SAE J1939 作为数据链路层的 CAN 网络兼容 (但这并非强制要求)。)
 
-Specifications used
-(所用规范)
--------------------
+Specifications used(所用规范)
+-----------------------------
 
 * ISO 15765-2:2024 : Road vehicles - Diagnostic communication over Controller
   Area Network (DoCAN). Part 2: Transport protocol and network layer services.
   (ISO 15765-2:2024：道路车辆 — 控制器局域网 (DoCAN) 上的诊断通信。第 2 部分：传输协议和网络层服务。)
 
-Addressing
-(寻址)
-----------
+Addressing(寻址)
+----------------
 
 In its simplest form, ISO-TP is based on two kinds of addressing modes for the
 nodes connected to the same network:
@@ -62,9 +57,8 @@ Three different addressing formats can be employed:
   additional byte is the same.
   ("mixed"：每个地址由一个 CAN ID 加上 CAN 负载的第一个字节表示；两个地址之间的 CAN ID 不同，但附加的字节相同。)
 
-Transport protocol and associated frame types
-(传输协议及相关帧类型)
----------------------------------------------
+Transport protocol and associated frame types(传输协议及相关帧类型)
+-------------------------------------------------------------------
 
 When transmitting data using the ISO-TP protocol, the payload can either fit
 inside one single CAN message or not, also considering the overhead the protocol
@@ -81,18 +75,16 @@ confirmation from the receiver which should then send another Flow Control
 frame to inform the sender about its availability to receive more data.
 (使用 ISO-TP 协议传输数据时，考虑到协议本身产生的开销以及可选的扩展寻址，负载要么能放进单个 CAN 消息，要么放不进去。在前一种情况下，数据通过所谓的单帧 (Single Frame，SF) 一次性发送。在后一种情况下，ISO-TP 定义了一种多帧协议：发送方 (通过首帧 First Frame，FF) 给出要传输的 PDU 长度，并请求一个流控帧 (Flow Control，FC)，该帧提供宏数据块支持的最大尺寸 (``blocksize``) 以及组成该块的各条 CAN 消息之间的最小间隔时间 (``stmin``)。收到这些信息后，发送方开始发送包含数据负载片段的帧 (称为连续帧 Consecutive Frame，CF)，每发送完一个 ``blocksize`` 大小的块就停下来等待接收方确认，接收方随后应再发送一个流控帧，告知发送方它是否有能力接收更多数据。)
 
-How to Use ISO-TP
-(如何使用 ISO-TP)
-=================
+How to Use ISO-TP(如何使用 ISO-TP)
+==================================
 
 As with others CAN protocols, the ISO-TP stack support is built into the
 Linux network subsystem for the CAN bus, aka. Linux-CAN or SocketCAN, and
 thus follows the same socket API.
 (与其他 CAN 协议一样，ISO-TP 协议栈支持内置于 CAN 总线的 Linux 网络子系统 (即 Linux-CAN 或 SocketCAN) 之中，因此遵循相同的套接字 API。)
 
-Creation and basic usage of an ISO-TP socket
-(ISO-TP 套接字的创建与基本用法)
---------------------------------------------
+Creation and basic usage of an ISO-TP socket(ISO-TP 套接字的创建与基本用法)
+---------------------------------------------------------------------------
 
 To use the ISO-TP stack, ``#include <linux/can/isotp.h>`` shall be used. A
 socket can then be created using the ``PF_CAN`` protocol family, the
@@ -153,17 +145,15 @@ as specified below:
 * ``can_addr.tp.tx_id`` specifies the transmit (TX) CAN ID
   (``can_addr.tp.tx_id`` 指定发送 (TX) CAN ID)
 
-ISO-TP socket options
-(ISO-TP 套接字选项)
----------------------
+ISO-TP socket options(ISO-TP 套接字选项)
+----------------------------------------
 
 When creating an ISO-TP socket, reasonable defaults are set. Some options can
 be modified with ``setsockopt(2)`` and/or read back with ``getsockopt(2)``.
 (创建 ISO-TP 套接字时会设置合理的默认值。部分选项可通过 ``setsockopt(2)`` 修改，和/或通过 ``getsockopt(2)`` 读回。)
 
-General options
-(通用选项)
-~~~~~~~~~~~~~~~
+General options(通用选项)
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 General socket options can be passed using the ``CAN_ISOTP_OPTS`` optname:
 (通用套接字选项可通过 ``CAN_ISOTP_OPTS`` 选项名传递：)
@@ -275,9 +265,8 @@ where the ``can_isotp_options`` structure has the following contents:
   the ``CAN_ISOTP_RX_EXT_ADDR`` flag is specified.
   (``rx_ext_address``：接收路径的扩展寻址字节，在指定 ``CAN_ISOTP_RX_EXT_ADDR`` 标志时使用。)
 
-Flow Control options
-(流控选项)
-~~~~~~~~~~~~~~~~~~~~
+Flow Control options(流控选项)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Flow Control (FC) options can be passed using the ``CAN_ISOTP_RECV_FC`` optname
 to provide the communication parameters for receiving ISO-TP PDUs.
@@ -315,9 +304,8 @@ where the ``can_isotp_fc_options`` structure has the following contents:
 * ``wftmax``: maximum number of wait frames provided in flow control frames.
   (``wftmax``：流控帧中提供的最大等待帧数量。)
 
-Link Layer options
-(链路层选项)
-~~~~~~~~~~~~~~~~~~
+Link Layer options(链路层选项)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Link Layer (LL) options can be passed using the ``CAN_ISOTP_LL_OPTS`` optname:
 (链路层 (LL) 选项可通过 ``CAN_ISOTP_LL_OPTS`` 选项名传递：)
@@ -351,9 +339,8 @@ where the ``can_isotp_ll_options`` structure has the following contents:
   Only applies to CAN FD traffic (i.e.: ``mtu = CANFD_MTU``).
   (``tx_flags``：帧创建时写入 ``struct canfd_frame.flags`` 的标志。仅适用于 CAN FD 通信 (即 ``mtu = CANFD_MTU``)。)
 
-Transmission stmin
-(发送 stmin)
-~~~~~~~~~~~~~~~~~~
+Transmission stmin(发送 stmin)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The transmission minimum separation time (stmin) can be forced using the
 ``CAN_ISOTP_TX_STMIN`` optname and providing an stmin value in microseconds as
@@ -366,9 +353,8 @@ flow control frames:
     uint32_t stmin;
     ret = setsockopt(s, SOL_CAN_ISOTP, CAN_ISOTP_TX_STMIN, &stmin, sizeof(stmin));
 
-Reception stmin
-(接收 stmin)
-~~~~~~~~~~~~~~~
+Reception stmin(接收 stmin)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The reception minimum separation time (stmin) can be forced using the
 ``CAN_ISOTP_RX_STMIN`` optname and providing an stmin value in microseconds as
@@ -381,9 +367,8 @@ differ less than this value will be ignored:
     uint32_t stmin;
     ret = setsockopt(s, SOL_CAN_ISOTP, CAN_ISOTP_RX_STMIN, &stmin, sizeof(stmin));
 
-Multi-frame transport support
-(多帧传输支持)
------------------------------
+Multi-frame transport support(多帧传输支持)
+-------------------------------------------
 
 The ISO-TP stack contained inside the Linux kernel supports the multi-frame
 transport mechanism defined by the standard, with the following constraints:
@@ -402,16 +387,14 @@ transport mechanism defined by the standard, with the following constraints:
   received or not is decided when the First Frame is received.
   (不支持发送 "wait frames" (等待帧)：PDU 能否被完整接收，在收到首帧时即已决定。)
 
-Errors
-(错误)
-------
+Errors(错误)
+------------
 
 Following errors are reported to userspace:
 (以下错误会上报给用户态：)
 
-RX path errors
-(RX 路径错误)
-~~~~~~~~~~~~~~
+RX path errors(RX 路径错误)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ============ ===============================================================
 -ETIMEDOUT   timeout of data reception (数据接收超时)
@@ -419,9 +402,8 @@ RX path errors
 -EBADMSG     data reception with wrong padding (数据接收时填充错误)
 ============ ===============================================================
 
-TX path errors
-(TX 路径错误)
-~~~~~~~~~~~~~~
+TX path errors(TX 路径错误)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ========== =================================================================
 -ECOMM     flow control reception timeout (流控帧接收超时)
@@ -429,13 +411,11 @@ TX path errors
 -EBADMSG   flow control reception with wrong layout/padding (流控帧接收时布局/填充错误)
 ========== =================================================================
 
-Examples
-(示例)
-========
+Examples(示例)
+==============
 
-Basic node example
-(基础节点示例)
-------------------
+Basic node example(基础节点示例)
+--------------------------------
 
 Following example implements a node using "normal" physical addressing, with
 RX ID equal to 0x18DAF142 and a TX ID equal to 0x18DA42F1. All options are left
@@ -463,9 +443,8 @@ to their default.
 
   /* Data can now be received using read(s, ...) and sent using write(s, ...) */
 
-Additional examples
-(更多示例)
--------------------
+Additional examples(更多示例)
+-----------------------------
 
 More complete (and complex) examples can be found inside the ``isotp*`` userland
 tools, distributed as part of the ``can-utils`` utilities at:

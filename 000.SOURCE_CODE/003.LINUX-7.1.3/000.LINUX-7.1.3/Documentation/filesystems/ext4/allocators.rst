@@ -1,8 +1,7 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-Block and Inode Allocation Policy
-(块与 inode 分配策略)
----------------------------------
+Block and Inode Allocation Policy(块与 inode 分配策略)
+------------------------------------------------------
 
 ext4 recognizes (better than ext3, anyway) that data locality is
 generally a desirably quality of a filesystem. On a spinning disk,

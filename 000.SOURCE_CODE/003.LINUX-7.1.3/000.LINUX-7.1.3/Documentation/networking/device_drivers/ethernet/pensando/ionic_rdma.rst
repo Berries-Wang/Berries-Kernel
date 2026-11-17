@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0+
 
-===========================================================
-RDMA Driver for the AMD Pensando(R) Ethernet adapter family
-===========================================================
-
-(AMD Pensando(R) 以太网适配器系列的 RDMA 驱动)
+=========================================================================================================
+RDMA Driver for the AMD Pensando(R) Ethernet adapter family(AMD Pensando(R) 以太网适配器系列的 RDMA 驱动)
+=========================================================================================================
 
 AMD Pensando RDMA driver.
 (AMD Pensando RDMA 驱动。)
 Copyright (C) 2018-2025, Advanced Micro Devices, Inc.
 
-Overview
-========
-(概述)
+Overview(概述)
+==============
 
 The ionic_rdma driver provides Remote Direct Memory Access functionality
 for AMD Pensando DSC (Distributed Services Card) devices. This driver
@@ -25,17 +22,15 @@ initialization and creates auxiliary devices that the ionic_rdma driver
 binds to, establishing the RDMA data path and control interfaces.
 (ionic 以太网驱动在设备初始化期间检测 RDMA 能力，并创建供 ionic_rdma 驱动绑定的辅助设备，从而建立 RDMA 数据通路和控制接口。)
 
-Identifying the Adapter
-=======================
-(识别适配器)
+Identifying the Adapter(识别适配器)
+===================================
 
 See Documentation/networking/device_drivers/ethernet/pensando/ionic.rst
 for more information on identifying the adapter.
 (有关识别适配器的更多信息，参见 Documentation/networking/device_drivers/ethernet/pensando/ionic.rst)
 
-Enabling the driver
-===================
-(启用驱动)
+Enabling the driver(启用驱动)
+=============================
 
 The ionic_rdma driver depends on the ionic ethernet driver.
 See Documentation/networking/device_drivers/ethernet/pensando/ionic.rst
@@ -55,9 +50,8 @@ The driver is located in the menu structure at:
     -> InfiniBand support
       -> AMD Pensando DSC RDMA/RoCE Support
 
-Support
-=======
-(支持)
+Support(支持)
+=============
 
 For general Linux RDMA support, please use the RDMA mailing
 list, which is monitored by AMD Pensando personnel::

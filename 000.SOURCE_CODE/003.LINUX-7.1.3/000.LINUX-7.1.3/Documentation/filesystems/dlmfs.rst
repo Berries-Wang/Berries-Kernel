@@ -24,9 +24,8 @@ dlmfs is built with OCFS2 as it requires most of its infrastructure.
 All code copyright 2005 Oracle except when otherwise noted.
 (除另有说明外，所有代码版权归 2005 Oracle 所有。)
 
-Credits
-(致谢)
-=======
+Credits(致谢)
+=============
 
 Some code taken from ramfs which is Copyright |copy| 2000 Linus Torvalds
 and Transmeta Corp.
@@ -34,22 +33,19 @@ and Transmeta Corp.
 
 Mark Fasheh <mark.fasheh@oracle.com>
 
-Caveats
-(注意事项)
-=======
+Caveats(注意事项)
+=================
 - Right now it only works with the OCFS2 DLM, though support for other
   DLM implementations should not be a major issue.
   (目前它只能与 OCFS2 DLM 一起工作，不过对其他 DLM 实现的支持应该不会是主要问题。)
 
-Mount options
-(挂载选项)
-=============
+Mount options(挂载选项)
+=======================
 None
 (无)
 
-Usage
-(用法)
-=====
+Usage(用法)
+===========
 
 If you're just interested in OCFS2, then please see ocfs2.rst. The
 rest of this document will be geared towards those who want to use
@@ -57,9 +53,8 @@ dlmfs for easy to setup and easy to use clustered locking in
 userspace.
 (如果你只对 OCFS2 感兴趣，请参阅 ocfs2.rst。本文档的其余部分面向那些希望使用 dlmfs 来获得易于设置、易于使用的用户空间集群锁的人。)
 
-Setup
-(设置)
-=====
+Setup(设置)
+===========
 
 dlmfs requires that the OCFS2 cluster infrastructure be in
 place. Please download ocfs2-tools from the above url and configure a
@@ -82,9 +77,8 @@ Once you're heartbeating, DLM lock 'domains' can be easily created /
 destroyed and locks within them accessed.
 (一旦心跳开始运行，DLM 锁“域”就可以被轻松地创建/销毁，并且可以访问其中的锁。)
 
-Locking
-(锁定)
-=====
+Locking(锁定)
+=============
 
 Users may access dlmfs via standard file system calls, or they can use
 'libo2dlm' (distributed with ocfs2-tools) which abstracts the file
@@ -171,9 +165,8 @@ Once written, an LVB will be visible to other nodes who obtain Read
 Only or higher level locks on the resource.
 (一旦写入，LVB 将对在资源上获得只读或更高级别锁的其他节点可见。)
 
-See Also
-(另请参阅)
-========
+See Also(另请参阅)
+==================
 http://opendlm.sourceforge.net/cvsmirror/opendlm/docs/dlmbook_final.pdf
 
 For more information on the VMS distributed locking API.

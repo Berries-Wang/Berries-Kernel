@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-====================
-Thin-streams and TCP
-====================
-
-(细流 (Thin-streams) 与 TCP)
+================================================
+Thin-streams and TCP(细流 (Thin-streams) 与 TCP)
+================================================
 
 A wide range of Internet-based services that use reliable transport
 protocols display what we call thin-stream properties. This means
@@ -51,9 +49,8 @@ tcp_thin_linear_timeouts and tcp_thin_dupack sysctls. Both
 modifications are turned off by default.
 (由于这些机制面向时间敏感的应用，应用必须使用 TCP_THIN_LINEAR_TIMEOUTS 和 TCP_THIN_DUPACK 这两个 IOCTL，或使用 tcp_thin_linear_timeouts 和 tcp_thin_dupack 这两个 sysctl 来显式激活它们。这两项修改默认都是关闭的。)
 
-References
-==========
-(参考文献)
+References(参考文献)
+====================
 
 More information on the modifications, as well as a wide range of
 experimental data can be found here:

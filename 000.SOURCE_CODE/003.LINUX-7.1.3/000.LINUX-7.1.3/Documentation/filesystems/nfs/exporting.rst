@@ -1,12 +1,10 @@
 :orphan:
 
-Making Filesystems Exportable
-(使文件系统可导出)
-=============================
+Making Filesystems Exportable(使文件系统可导出)
+===============================================
 
-Overview
-(概述)
---------
+Overview(概述)
+--------------
 
 All filesystem operations require a dentry (or two) as a starting
 point.  Local applications have a reference-counted hold on suitable
@@ -33,9 +31,8 @@ and dentries will be termed "exportable".
 
 
 
-Dcache Issues
-(dcache 问题)
--------------
+Dcache Issues(dcache 问题)
+--------------------------
 
 The dcache normally contains a proper prefix of any given filesystem
 tree.  This means that if any filesystem object is in the dcache, then
@@ -114,9 +111,8 @@ c. Helper routines to allocate anonymous dentries, and to help attach
       convention of ->lookup.
       (d_splice_alias(inode, dentry) 会把一个新 dentry 引入树中；在合适的情况下，要么使用传入的 dentry，要么使用给定 inode 的既有别名(例如由 d_obtain_alias 创建的匿名 dentry)。当使用传入的 dentry 时它返回 NULL，遵循 ->lookup 的调用约定。)
 
-Filesystem Issues
-(文件系统方面的问题)
------------------
+Filesystem Issues(文件系统方面的问题)
+-------------------------------------
 
 For a filesystem to be exportable it must:
 (文件系统要可导出，必须做到以下几点：)
@@ -162,9 +158,8 @@ indicates the decode_fh how much of the filehandle is valid, and how
 it should be interpreted.
 (文件句柄片段由一个包含 1 个或多个 4 字节字的数组以及一个单字节的"type"组成。decode_fh 例程不应依赖于传递给它的所声明大小。该大小可能比 encode_fh 生成的原始文件句柄更大，在这种情况下它会被 nul 填充过。相反，encode_fh 例程应当选择一个"type"，向 decode_fh 表明文件句柄中有多少内容是有效的，以及应当如何解释它。)
 
-Export Operations Flags
-(导出操作标志)
------------------------
+Export Operations Flags(导出操作标志)
+-------------------------------------
 In addition to the operation vector pointers, struct export_operations also
 contains a "flags" field that allows the filesystem to communicate to nfsd
 that it may want to do things differently when dealing with it. The
@@ -249,9 +244,8 @@ following flags are defined:
     waiting for writeback when closing such files.
     (在大多数文件系统上，文件关闭之后 inode 可能仍处于回写过程中。NFSD 依靠客户端活动或本地回刷线程来处理回写。某些文件系统(例如 NFS)会在最后一次关闭时刷新 inode 的所有脏数据。以这种方式运作的导出应设置 EXPORT_OP_FLUSH_ON_CLOSE，以便 NFSD 知道在关闭此类文件时跳过等待回写。)
 
-Signed Filehandles
-(带签名的文件句柄)
-------------------
+Signed Filehandles(带签名的文件句柄)
+------------------------------------
 
 To protect against filehandle guessing attacks, the Linux NFS server can be
 configured to sign filehandles with a Message Authentication Code (MAC).
@@ -275,9 +269,8 @@ not confidentiality. The contents of the filehandle remain visible to
 the client; they simply cannot be forged or modified.
 (注意，对文件句柄签名提供的是完整性和真实性，而非机密性。文件句柄的内容对客户端仍然可见；只是无法伪造或修改它们。)
 
-Configuration
-(配置)
-~~~~~~~~~~~~~
+Configuration(配置)
+~~~~~~~~~~~~~~~~~~~
 
 To enable signed filehandles, the administrator must provide a signing
 key to the kernel and enable the "sign_fh" export option.
@@ -303,9 +296,8 @@ key to the kernel and enable the "sign_fh" export option.
      (Default) Disables signing.
      ((默认)禁用签名。)
 
-Key Management and Rotation
-(密钥管理与轮换)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Key Management and Rotation(密钥管理与轮换)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The security of this mechanism relies entirely on the secrecy of the
 signing key.
@@ -329,9 +321,8 @@ Safe Rotation:
   operation that immediately invalidates all previous signatures.
   (安全轮换：目前没有"平滑"轮换密钥的机制(即同时维护多个有效密钥)。更换密钥是一个原子操作，会立即使所有先前的签名失效。)
 
-Transitioning Exports
-(导出项的切换)
-~~~~~~~~~~~~~~~~~~~~~
+Transitioning Exports(导出项的切换)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When adding or removing the "sign_fh" flag from an active export, the
 following behaviors should be expected:

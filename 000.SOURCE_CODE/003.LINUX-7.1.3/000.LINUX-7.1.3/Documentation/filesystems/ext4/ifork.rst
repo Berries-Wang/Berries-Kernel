@@ -1,8 +1,7 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-The Contents of inode.i_block
-(inode.i_block 的内容)
-------------------------------
+The Contents of inode.i_block(inode.i_block 的内容)
+---------------------------------------------------
 
 Depending on the type of file an inode describes, the 60 bytes of
 storage in ``inode.i_block`` can be used in different ways. In general,
@@ -10,18 +9,16 @@ regular files and directories will use it for file block indexing
 information, and special files will use it for special purposes.
 (根据 inode 所描述的文件类型，``inode.i_block`` 中的 60 字节存储空间可以以不同的方式使用。一般来说，常规文件和目录会将其用于文件块索引信息，而特殊文件会将其用于特殊用途。)
 
-Symbolic Links
-(符号链接)
-~~~~~~~~~~~~~~
+Symbolic Links(符号链接)
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 The target of a symbolic link will be stored in this field if the target
 string is less than 60 bytes long. Otherwise, either extents or block
 maps will be used to allocate data blocks to store the link target.
 (如果符号链接的目标字符串长度小于 60 字节，链接目标将存储在此字段中。否则，将使用 extent 或块映射来分配数据块以存储链接目标。)
 
-Direct/Indirect Block Addressing
-(直接/间接块寻址)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Direct/Indirect Block Addressing(直接/间接块寻址)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In ext2/3, file block numbers were mapped to logical block numbers by
 means of an (up to) three level 1-1 block map. To find the logical block
@@ -48,9 +45,8 @@ Notice also that a file using this mapping scheme cannot be placed
 higher than 2^32 blocks.
 (还要注意，使用这种映射方案的文件不能被放置在高于 2^32 块的位置。)
 
-Extent Tree
-(extent 树)
-~~~~~~~~~~~
+Extent Tree(extent 树)
+~~~~~~~~~~~~~~~~~~~~~~
 
 In ext4, the file to logical block map has been replaced with an extent
 tree. Under the old scheme, allocating a contiguous run of 1,000 blocks
@@ -231,9 +227,8 @@ including) the checksum itself.
      - Checksum of the extent block, crc32c(uuid+inum+igeneration+extentblock)
        (extent 块的校验和，crc32c(uuid+inum+igeneration+extentblock))
 
-Inline Data
-(内联数据)
-~~~~~~~~~~~
+Inline Data(内联数据)
+~~~~~~~~~~~~~~~~~~~~~
 
 If the inline data feature is enabled for the filesystem and the flag is
 set for the inode, it is possible that the first 60 bytes of the file

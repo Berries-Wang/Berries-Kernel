@@ -1,11 +1,9 @@
 .. SPDX-License-Identifier: GPL-2.0
 .. include:: <isonum.txt>
 
-=====================================================
-User Interface for Resource Control feature (resctrl)
-=====================================================
-
-(资源控制功能 (resctrl) 的用户接口)
+========================================================================================
+User Interface for Resource Control feature (resctrl)(资源控制功能 (resctrl) 的用户接口)
+========================================================================================
 
 :Copyright: |copy| 2016 Intel Corporation
 :Authors: - Fenghua Yu <fenghua.yu@intel.com>
@@ -82,9 +80,8 @@ For more details on the behavior of the interface during monitoring
 and allocation, see the "Resource alloc and monitor groups" section.
 (只要分配或监控二者有其一部存在，挂载就会成功，但只会创建系统支持的文件和目录。关于监控与分配期间接口行为的更多细节，参见 "Resource alloc and monitor groups" 一节。)
 
-Info directory
-(信息目录)
-==============
+Info directory(信息目录)
+========================
 
 The 'info' directory contains information about the enabled
 resources. Each resource has its own subdirectory. The subdirectory
@@ -623,9 +620,8 @@ conveyed in the error returns from file operations. E.g.
 	# cat info/last_cmd_status
 	mask f7 has non-consecutive 1-bits
 
-Resource alloc and monitor groups
-(资源分配与监控组)
-=================================
+Resource alloc and monitor groups(资源分配与监控组)
+===================================================
 
 Resource groups are represented as directories in the resctrl file
 system.  The default group is the root directory which, immediately
@@ -881,9 +877,8 @@ When the "mba_MBps" mount option is used all CTRL_MON groups will also contain:
 	event.
 	(读取此文件显示哪个内存带宽事件被用作软件反馈环路的输入，该环路使内存带宽保持在方案文件中指定的值以下。写入 /sys/fs/resctrl/info/L3_MON/mon_features 中所列受支持内存带宽事件之一的名称即可更改输入事件。)
 
-Resource allocation rules
-(资源分配规则)
--------------------------
+Resource allocation rules(资源分配规则)
+---------------------------------------
 
 When a task is running the following rules define which resources are
 available to it:
@@ -901,9 +896,8 @@ available to it:
 3) Otherwise the schemata for the default group is used.
    (3. 否则使用默认组的方案。)
 
-Resource monitoring rules
-(资源监控规则)
--------------------------
+Resource monitoring rules(资源监控规则)
+---------------------------------------
 1) If a task is a member of a MON group, or non-default CTRL_MON group
    then RDT events for the task will be reported in that group.
    (1. 如果任务是 MON 组或非默认 CTRL_MON 组的成员，则该任务的 RDT 事件将报告在该组中。)
@@ -918,9 +912,8 @@ Resource monitoring rules
    (3. 否则，该任务的 RDT 事件将报告在根级别的 "mon_data" 组中。)
 
 
-Notes on cache occupancy monitoring and control
-(关于缓存占用监控与控制的说明)
-===============================================
+Notes on cache occupancy monitoring and control(关于缓存占用监控与控制的说明)
+=============================================================================
 When moving a task from one group to another you should remember that
 this only affects *new* cache allocations by the task. E.g. you may have
 a task in a monitor group showing 3 MB of cache occupancy. If you move
@@ -947,9 +940,8 @@ a "CTRL_MON" directory may fail if we run out of either CLOSID or RMID
 and creation of "MON" group may fail if we run out of RMIDs.
 (硬件使用 CLOSid(服务类 ID)和 RMID(资源监控 ID)分别标识控制组和监控组。每个资源组根据组的类型映射到这些 ID。CLOSid 和 RMID 的数量受硬件限制，因此如果 CLOSID 或 RMID 耗尽，创建 "CTRL_MON" 目录可能失败；如果 RMID 耗尽，创建 "MON" 组可能失败。)
 
-max_threshold_occupancy - generic concepts
-(max_threshold_occupancy - 一般概念)
-------------------------------------------
+max_threshold_occupancy - generic concepts(max_threshold_occupancy - 一般概念)
+------------------------------------------------------------------------------
 
 Note that an RMID once freed may not be immediately available for use as
 the RMID is still tagged the cache lines of the previous user of RMID.
@@ -970,17 +962,15 @@ to attempt to create an empty monitor group to force an update. Output may
 only be produced if creation of a control or monitor group fails.
 (mon_llc_occupancy_limbo 跟踪点给出尚未立即可供分配的一部分 RMID 的精确占用(以字节为单位)。不能指望它每秒都产生输出，可能需要尝试创建一个空的监控组来强制更新。只有在控制组或监控组创建失败时才可能产生输出。)
 
-Schemata files - general concepts
-(方案文件 - 一般概念)
----------------------------------
+Schemata files - general concepts(方案文件 - 一般概念)
+------------------------------------------------------
 Each line in the file describes one resource. The line starts with
 the name of the resource, followed by specific values to be applied
 in each of the instances of that resource on the system.
 (文件中的每一行描述一个资源。行以资源名称开头，后跟要应用到系统上该资源每个实例的具体值。)
 
-Cache IDs
-(缓存 ID)
----------
+Cache IDs(缓存 ID)
+------------------
 On current generation systems there is one L3 cache per socket and L2
 caches are generally just shared by the hyperthreads on a core, but this
 isn't an architectural requirement. We could have multiple separate L3
@@ -992,9 +982,8 @@ contiguous sequence, there may be gaps).  To find the ID for each logical
 CPU look in /sys/devices/system/cpu/cpu*/cache/index*/id
 (在当前一代系统上，每个插槽有一个 L3 缓存，L2 缓存通常仅由一个核心上的超线程共享，但这不是架构要求。一个插槽上可能有多个独立的 L3 缓存，多个核心可能共享一个 L2 缓存。因此我们不使用"插槽"或"核心"来定义共享某资源的逻辑 CPU 集合，而是使用"缓存 ID"。在给定的缓存级别上，它是整个系统中唯一的编号(但不保证是连续序列，可能有间隙)。每个逻辑 CPU 的 ID 可在 /sys/devices/system/cpu/cpu*/cache/index*/id 中查找。)
 
-Cache Bit Masks (CBM)
-(缓存位掩码 (CBM))
----------------------
+Cache Bit Masks (CBM)(缓存位掩码 (CBM))
+---------------------------------------
 For cache resources we describe the portion of the cache that is available
 for allocation using a bitmask. The maximum value of the mask is defined
 by each cpu model (and may be different for different cache levels). It
@@ -1008,9 +997,8 @@ each bit represents 5% of the capacity of the cache. You could partition
 the cache into four equal parts with masks: 0x1f, 0x3e0, 0x7c00, 0xf8000.
 (对于缓存资源，我们使用位掩码描述可供分配的缓存部分。掩码的最大值由每个 CPU 型号定义(不同缓存级别可能不同)。它可以通过 CPUID 查到，也在 resctrl 文件系统的 "info" 目录中 "info/{resource}/cbm_mask" 提供。某些 Intel 硬件要求这些掩码的所有 '1' 位位于一个连续块中。因此 0x3、0x6 和 0xC 是置两位的合法 4 位掩码，而 0x5、0x9 和 0xA 则不是。是否支持非连续的 1 值请查看 /sys/fs/resctrl/info/{resource}/sparse_masks。在使用 20 位掩码的系统上，每位代表缓存容量的 5%。你可以用掩码 0x1f、0x3e0、0x7c00、0xf8000 将缓存划分为四个相等的部分。)
 
-Notes on Sub-NUMA Cluster mode
-(关于子 NUMA 集群模式的说明)
-==============================
+Notes on Sub-NUMA Cluster mode(关于子 NUMA 集群模式的说明)
+==========================================================
 When SNC mode is enabled, Linux may load balance tasks between Sub-NUMA
 nodes much more readily than between regular NUMA nodes since the CPUs
 on Sub-NUMA nodes share the same L3 cache and the system may report
@@ -1036,9 +1024,8 @@ allocation masks each bit normally represents 10MB. With SNC mode enabled
 with two SNC nodes per L3 cache, each bit only represents 5MB.
 (L3 缓存分配位图也适用于所有 SNC 节点。但请注意，每位所代表的 L3 缓存数量要除以每个 L3 缓存的 SNC 节点数。例如，在具有 10 位分配掩码的系统上，100MB 缓存的每位通常代表 10MB。启用 SNC 模式且每个 L3 缓存有两个 SNC 节点时，每位仅代表 5MB。)
 
-Memory bandwidth Allocation and monitoring
-(内存带宽分配与监控)
-==========================================
+Memory bandwidth Allocation and monitoring(内存带宽分配与监控)
+==============================================================
 
 For Memory bandwidth resource, by default the user controls the resource
 by indicating the percentage of total memory bandwidth.
@@ -1107,17 +1094,15 @@ a mount option 'mba_MBps'. The schemata format is specified in the below
 sections.
 (默认情况下，方案采用带宽百分比；而用户可以使用挂载选项 'mba_MBps' 切换到 "MBA 软件控制器"模式。方案格式在下文各节中说明。)
 
-L3 schemata file details (code and data prioritization disabled)
-(L3 方案文件详情 (代码与数据优先化已禁用))
-----------------------------------------------------------------
+L3 schemata file details (code and data prioritization disabled)(L3 方案文件详情 (代码与数据优先化已禁用))
+----------------------------------------------------------------------------------------------------------
 With CDP disabled the L3 schemata format is::
 (禁用 CDP 时，L3 方案格式为：)
 
 	L3:<cache_id0>=<cbm>;<cache_id1>=<cbm>;...
 
-L3 schemata file details (CDP enabled via mount option to resctrl)
-(L3 方案文件详情 (通过 resctrl 挂载选项启用 CDP))
-------------------------------------------------------------------
+L3 schemata file details (CDP enabled via mount option to resctrl)(L3 方案文件详情 (通过 resctrl 挂载选项启用 CDP))
+-------------------------------------------------------------------------------------------------------------------
 When CDP is enabled L3 control is split into two separate resources
 so you can specify independent masks for code and data like this::
 (启用 CDP 后，L3 控制被拆分为两个独立的资源，因此可以像这样为代码和数据指定独立的掩码：)
@@ -1125,9 +1110,8 @@ so you can specify independent masks for code and data like this::
 	L3DATA:<cache_id0>=<cbm>;<cache_id1>=<cbm>;...
 	L3CODE:<cache_id0>=<cbm>;<cache_id1>=<cbm>;...
 
-L2 schemata file details
-(L2 方案文件详情)
-------------------------
+L2 schemata file details(L2 方案文件详情)
+-----------------------------------------
 CDP is supported at L2 using the 'cdpl2' mount option. The schemata
 format is either::
 (在 L2 上使用 'cdpl2' 挂载选项支持 CDP。方案格式为以下之一：)
@@ -1141,9 +1125,8 @@ or
 	L2CODE:<cache_id0>=<cbm>;<cache_id1>=<cbm>;...
 
 
-Memory bandwidth Allocation (default mode)
-(内存带宽分配 (默认模式))
-------------------------------------------
+Memory bandwidth Allocation (default mode)(内存带宽分配 (默认模式))
+-------------------------------------------------------------------
 
 Memory b/w domain is L3 cache.
 (内存带宽域是 L3 缓存。)
@@ -1151,9 +1134,8 @@ Memory b/w domain is L3 cache.
 
 	MB:<cache_id0>=bandwidth0;<cache_id1>=bandwidth1;...
 
-Memory bandwidth Allocation specified in MiBps
-(以 MiBps 指定的内存带宽分配)
-----------------------------------------------
+Memory bandwidth Allocation specified in MiBps(以 MiBps 指定的内存带宽分配)
+---------------------------------------------------------------------------
 
 Memory bandwidth domain is L3 cache.
 (内存带宽域是 L3 缓存。)
@@ -1161,9 +1143,8 @@ Memory bandwidth domain is L3 cache.
 
 	MB:<cache_id0>=bw_MiBps0;<cache_id1>=bw_MiBps1;...
 
-Slow Memory Bandwidth Allocation (SMBA)
-(慢速内存带宽分配 (SMBA))
----------------------------------------
+Slow Memory Bandwidth Allocation (SMBA)(慢速内存带宽分配 (SMBA))
+----------------------------------------------------------------
 AMD hardware supports Slow Memory Bandwidth Allocation (SMBA).
 CXL.memory is the only supported "slow" memory device. With the
 support of SMBA, the hardware enables bandwidth allocation on
@@ -1184,9 +1165,8 @@ is formatted as:
 
 	SMBA:<cache_id0>=bandwidth0;<cache_id1>=bandwidth1;...
 
-Reading/writing the schemata file
-(读写方案文件)
----------------------------------
+Reading/writing the schemata file(读写方案文件)
+-----------------------------------------------
 Reading the schemata file will show the state of all resources
 on all domains. When writing you only need to specify those values
 which you wish to change.  E.g.
@@ -1201,9 +1181,8 @@ which you wish to change.  E.g.
   L3DATA:0=fffff;1=fffff;2=3c0;3=fffff
   L3CODE:0=fffff;1=fffff;2=fffff;3=fffff
 
-Reading/writing the schemata file (on AMD systems)
-(读写方案文件 (在 AMD 系统上))
---------------------------------------------------
+Reading/writing the schemata file (on AMD systems)(读写方案文件 (在 AMD 系统上))
+--------------------------------------------------------------------------------
 Reading the schemata file will show the current bandwidth limit on all
 domains. The allocated resources are in multiples of one eighth GB/s.
 When writing to the file, you need to specify what cache id you wish to
@@ -1224,9 +1203,8 @@ For example, to allocate 2GB/s limit on the first cache id:
     MB:0=2048;1=  16;2=2048;3=2048
     L3:0=ffff;1=ffff;2=ffff;3=ffff
 
-Reading/writing the schemata file (on AMD systems) with SMBA feature
-(读写方案文件 (在 AMD 系统上，含 SMBA 特性))
---------------------------------------------------------------------
+Reading/writing the schemata file (on AMD systems) with SMBA feature(读写方案文件 (在 AMD 系统上，含 SMBA 特性))
+----------------------------------------------------------------------------------------------------------------
 Reading and writing the schemata file is the same as without SMBA in
 above section.
 (方案文件的读写与上一节中没有 SMBA 时相同。)
@@ -1247,9 +1225,8 @@ For example, to allocate 8GB/s limit on the first cache id:
       MB:0=2048;1=2048;2=2048;3=2048
       L3:0=ffff;1=ffff;2=ffff;3=ffff
 
-Cache Pseudo-Locking
-(缓存伪锁定)
-====================
+Cache Pseudo-Locking(缓存伪锁定)
+================================
 CAT enables a user to specify the amount of cache space that an
 application can fill. Cache pseudo-locking builds on the fact that a
 CPU can still read and write data pre-allocated outside its current
@@ -1324,9 +1301,8 @@ Pseudo-locking is accomplished in two stages:
    pseudo-locked memory into its address space.
    (2. 在第二阶段，用户空间应用程序将伪锁定内存映射(mmap())到其地址空间中。)
 
-Cache Pseudo-Locking Interface
-(缓存伪锁定接口)
-------------------------------
+Cache Pseudo-Locking Interface(缓存伪锁定接口)
+----------------------------------------------
 A pseudo-locked region is created using the resctrl interface as follows:
 (使用 resctrl 接口按如下方式创建伪锁定区域：)
 
@@ -1349,9 +1325,8 @@ by user space in order to obtain access to the pseudo-locked memory region.
 An example of cache pseudo-locked region creation and usage can be found below.
 (下面可以找到缓存伪锁定区域创建和使用的示例。)
 
-Cache Pseudo-Locking Debugging Interface
-(缓存伪锁定调试接口)
-----------------------------------------
+Cache Pseudo-Locking Debugging Interface(缓存伪锁定调试接口)
+------------------------------------------------------------
 The pseudo-locking debugging interface is enabled by default (if
 CONFIG_DEBUG_FS is enabled) and can be found in /sys/kernel/debug/resctrl.
 (伪锁定调试接口默认启用(如果 CONFIG_DEBUG_FS 已启用)，位于 /sys/kernel/debug/resctrl。)
@@ -1401,9 +1376,8 @@ All measurements are recorded with the tracing infrastructure. This requires
 the relevant tracepoints to be enabled before the measurement is triggered.
 (所有测量都通过跟踪基础设施记录。这要求在触发测量之前启用相关跟踪点。)
 
-Example of latency debugging interface
-(延迟调试接口示例)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Example of latency debugging interface(延迟调试接口示例)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 In this example a pseudo-locked region named "newlock" was created. Here is
 how we can measure the latency in cycles of reading from this region and
 visualize this data with a histogram that is available if CONFIG_HIST_TRIGGERS
@@ -1437,9 +1411,8 @@ is set::
       Entries: 9
     Dropped: 0
 
-Example of cache hits/misses debugging
-(缓存命中/未命中调试示例)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Example of cache hits/misses debugging(缓存命中/未命中调试示例)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 In this example a pseudo-locked region named "newlock" was created on the L2
 cache of a platform. Here is how we can obtain details of the cache hits
 and misses using the platform's precision counters.
@@ -1464,9 +1437,8 @@ and misses using the platform's precision counters.
   pseudo_lock_mea-1672  [002] ....  3132.860500: pseudo_lock_l2: hits=4097 miss=0
 
 
-Examples for RDT allocation usage
-(RDT 分配使用示例)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Examples for RDT allocation usage(RDT 分配使用示例)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1) Example 1
    (1. 示例 1)
@@ -1697,9 +1669,8 @@ A resource group cannot be forced to overlap with an exclusive resource group::
   # cat info/last_cmd_status
   overlaps with exclusive group
 
-Example of Cache Pseudo-Locking
-(缓存伪锁定示例)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Example of Cache Pseudo-Locking(缓存伪锁定示例)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Lock portion of L2 cache from cache id 1 using CBM 0x3. Pseudo-locked
 region is exposed at /dev/pseudo_lock/newlock that can be provided to
 application for argument to mmap().
@@ -1807,9 +1778,8 @@ exposing the pseudo-locked region will exist::
     exit(EXIT_SUCCESS);
   }
 
-Locking between applications
-(应用程序之间的锁定)
-----------------------------
+Locking between applications(应用程序之间的锁定)
+------------------------------------------------
 
 Certain operations on the resctrl filesystem, composed of read/writes
 to/from multiple files, must be atomic.
@@ -1942,21 +1912,18 @@ Example with C::
     resctrl_release_lock(fd);
   }
 
-Examples for RDT Monitoring along with allocation usage
-(RDT 监控与分配配合使用的示例)
-=======================================================
-Reading monitored data
-(读取监控数据)
-----------------------
+Examples for RDT Monitoring along with allocation usage(RDT 监控与分配配合使用的示例)
+=====================================================================================
+Reading monitored data(读取监控数据)
+------------------------------------
 Reading an event file (for ex: mon_data/mon_L3_00/llc_occupancy) would
 show the current snapshot of LLC occupancy of the corresponding MON
 group or CTRL_MON group.
 (读取事件文件(例如 mon_data/mon_L3_00/llc_occupancy)将显示相应 MON 组或 CTRL_MON 组的 LLC 占用当前快照。)
 
 
-Example 1 (Monitor CTRL_MON group and subset of tasks in CTRL_MON group)
-(示例 1 (监控 CTRL_MON 组及 CTRL_MON 组中任务的子集))
-------------------------------------------------------------------------
+Example 1 (Monitor CTRL_MON group and subset of tasks in CTRL_MON group)(示例 1 (监控 CTRL_MON 组及 CTRL_MON 组中任务的子集))
+-----------------------------------------------------------------------------------------------------------------------------
 On a two socket machine (one L3 cache per socket) with just four bits
 for cache bit masks::
 (在一台双插槽机器(每个插槽一个 L3 缓存)上，缓存位掩码只有 4 位：)
@@ -2005,9 +1972,8 @@ The parent ctrl_mon group shows the aggregated data.
   # cat /sys/fs/resctrl/p1/mon_data/mon_l3_00/llc_occupancy
   31234000
 
-Example 2 (Monitor a task from its creation)
-(示例 2 (从创建起监控任务))
---------------------------------------------
+Example 2 (Monitor a task from its creation)(示例 2 (从创建起监控任务))
+-----------------------------------------------------------------------
 On a two socket machine (one L3 cache per socket)::
 (在一台双插槽机器(每个插槽一个 L3 缓存)上：)
 
@@ -2029,9 +1995,8 @@ Fetch the data::
   # cat /sys/fs/resctrl/p1/mon_data/mon_l3_00/llc_occupancy
   31789000
 
-Example 3 (Monitor without CAT support or before creating CAT groups)
-(示例 3 (无 CAT 支持时或创建 CAT 组之前进行监控))
----------------------------------------------------------------------
+Example 3 (Monitor without CAT support or before creating CAT groups)(示例 3 (无 CAT 支持时或创建 CAT 组之前进行监控))
+----------------------------------------------------------------------------------------------------------------------
 
 Assume a system like HSW has only CQM and no CAT support. In this case
 the resctrl will still mount but cannot create CTRL_MON directories.
@@ -2068,9 +2033,8 @@ domain(socket) 0.
   32789
 
 
-Example 4 (Monitor real time tasks)
-(示例 4 (监控实时任务))
------------------------------------
+Example 4 (Monitor real time tasks)(示例 4 (监控实时任务))
+----------------------------------------------------------
 
 A single socket system which has real time tasks running on cores 4-7
 and non real time tasks on other cpus. We want to monitor the cache
@@ -2094,9 +2058,8 @@ View the llc occupancy snapshot::
   11234000
 
 
-Examples on working with mbm_assign_mode
-(使用 mbm_assign_mode 的示例)
-========================================
+Examples on working with mbm_assign_mode(使用 mbm_assign_mode 的示例)
+=====================================================================
 
 a. Check if MBM counter assignment mode is supported.
    (a. 检查是否支持 MBM 计数器分配模式。)
@@ -2227,13 +2190,11 @@ m. Unmount the resctrl filesystem.
 
   # umount /sys/fs/resctrl/
 
-Intel RDT Errata
-(Intel RDT 勘误)
-================
+Intel RDT Errata(Intel RDT 勘误)
+================================
 
-Intel MBM Counters May Report System Memory Bandwidth Incorrectly
-(Intel MBM 计数器可能不正确地报告系统内存带宽)
------------------------------------------------------------------
+Intel MBM Counters May Report System Memory Bandwidth Incorrectly(Intel MBM 计数器可能不正确地报告系统内存带宽)
+---------------------------------------------------------------------------------------------------------------
 
 Errata SKX99 for Skylake server and BDF102 for Broadwell server.
 (Skylake 服务器的勘误 SKX99 与 Broadwell 服务器的勘误 BDF102。)

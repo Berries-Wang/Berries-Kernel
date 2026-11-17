@@ -8,9 +8,8 @@ Intel Gigabit Linux driver.
 Copyright(c) 2008-2018 Intel Corporation.
 (Intel 千兆位 Linux 驱动。版权所有 (c) 2008-2018 Intel Corporation。)
 
-Contents
-(目录)
-========
+Contents(目录)
+==============
 
 - Identifying Your Adapter
   (识别你的适配器)
@@ -22,9 +21,8 @@ Contents
   (支持)
 
 
-Identifying Your Adapter
-(识别你的适配器)
-========================
+Identifying Your Adapter(识别你的适配器)
+========================================
 
 For information on how to identify your adapter, and for the latest Intel
 network drivers, refer to the Intel Support website:
@@ -32,9 +30,8 @@ network drivers, refer to the Intel Support website:
 https://www.intel.com/support
 
 
-Command Line Parameters
-(命令行参数)
-=======================
+Command Line Parameters(命令行参数)
+===================================
 
 If the driver is built as a module, the following optional parameters are used
 by entering them on the command line with the modprobe command using this
@@ -59,9 +56,8 @@ NOTE: A descriptor describes a data buffer and attributes related to the data
 buffer. This information is accessed by the hardware.
 (注意：描述符 (descriptor) 描述一个数据缓冲区以及与该数据缓冲区相关的属性。硬件会访问这些信息。)
 
-InterruptThrottleRate
-(中断节流率)
----------------------
+InterruptThrottleRate(中断节流率)
+---------------------------------
 
 :Valid Range: 0,1,3,4,100-100000
   (有效范围：0,1,3,4,100-100000)
@@ -142,9 +138,8 @@ transmit absolute delays does not force the controller to generate more
 interrupts than what the Interrupt Throttle Rate allows.
 (注意：InterruptThrottleRate 的优先级高于 TxAbsIntDelay 和 RxAbsIntDelay 参数。换言之，把接收和/或发送绝对延迟调到最小，并不会迫使控制器产生超过中断节流率所允许数量的中断。)
 
-RxIntDelay
-(接收中断延迟)
-----------
+RxIntDelay(接收中断延迟)
+------------------------
 
 :Valid Range: 0-65535 (0=off)
   (有效范围：0-65535 (0=off))
@@ -166,9 +161,8 @@ controller is automatically reset, restoring the network connection. To
 eliminate the potential for the hang ensure that RxIntDelay is set to 0.
 (注意：当把 RxIntDelay 设为非 0 值时，适配器在某些网络条件下可能会挂起 (停止发送)。如果发生这种情况，系统事件日志中会记录一条 NETDEV WATCHDOG 消息。此外，控制器会自动复位，恢复网络连接。要消除挂起的可能，请确保将 RxIntDelay 设为 0。)
 
-RxAbsIntDelay
-(接收绝对延迟)
--------------
+RxAbsIntDelay(接收绝对延迟)
+---------------------------
 
 :Valid Range: 0-65535 (0=off)
   (有效范围：0-65535 (0=off))
@@ -182,9 +176,8 @@ which is useful only if RxIntDelay is non-zero. Proper tuning, along with
 RxIntDelay, may improve traffic throughput in specific network conditions.
 (此值以 1.024 微秒为单位，限制接收中断产生前的延迟。此值确保在收到初始数据包之后的设定时间内会产生中断，仅在 RxIntDelay 非零时才有用。与 RxIntDelay 一起进行恰当调优，可能会在特定网络条件下改善流量吞吐量。)
 
-TxIntDelay
-(发送中断延迟)
-----------
+TxIntDelay(发送中断延迟)
+------------------------
 
 :Valid Range: 0-65535 (0=off)
   (有效范围：0-65535 (0=off))
@@ -198,9 +191,8 @@ dropped transmits, this value may be set too high causing the driver to run
 out of available transmit descriptors.
 (此值以 1.024 微秒为单位延迟发送中断的产生。若针对特定网络流量进行恰当调优，减少发送中断可以提高 CPU 效率。如果系统报告发送丢弃，则此值可能设置得过高，导致驱动程序的可用发送描述符耗尽。)
 
-TxAbsIntDelay
-(发送绝对延迟)
--------------
+TxAbsIntDelay(发送绝对延迟)
+---------------------------
 
 :Valid Range: 0-65535 (0=off)
   (有效范围：0-65535 (0=off))
@@ -214,9 +206,8 @@ the wire within the set amount of time. Proper tuning, along with TxIntDelay,
 may improve traffic throughput in specific network conditions.
 (此值以 1.024 微秒为单位，限制发送中断产生前的延迟。仅在 TxIntDelay 非零时才有用。它确保在初始数据包发送到线路之后的设定时间内会产生中断。与 TxIntDelay 一起进行恰当调优，可能会在特定网络条件下改善流量吞吐量。)
 
-copybreak
-(拷贝阈值)
----------
+copybreak(拷贝阈值)
+-------------------
 
 :Valid Range: 0-xxxxxxx (0=off)
   (有效范围：0-xxxxxxx (0=off))
@@ -235,9 +226,8 @@ To use copybreak, type::
 
     modprobe e1000e.ko copybreak=128
 
-SmartPowerDownEnable
-(智能断电使能)
---------------------
+SmartPowerDownEnable(智能断电使能)
+----------------------------------
 
 :Valid Range: 0,1
   (有效范围：0,1)
@@ -248,9 +238,8 @@ Allows the PHY to turn off in lower power states. The user can turn off this
 parameter in supported chipsets.
 (允许 PHY 在较低电源状态下关闭。在支持的芯片组上，用户可以关闭此参数。)
 
-KumeranLockLoss
-(Kumeran 锁丢失)
----------------
+KumeranLockLoss(Kumeran 锁丢失)
+-------------------------------
 
 :Valid Range: 0,1
   (有效范围：0,1)
@@ -261,9 +250,8 @@ This workaround skips resetting the PHY at shutdown for the initial silicon
 releases of ICH8 systems.
 (对于 ICH8 系统的早期硅片版本，此变通方法在关机时跳过 PHY 复位。)
 
-IntMode
-(中断模式)
--------
+IntMode(中断模式)
+-----------------
 
 :Valid Range: 0-2
   (有效范围：0-2)
@@ -292,9 +280,8 @@ This command will show different values for each type of interrupt::
 
   cat /proc/interrupts
 
-CrcStripping
-(CRC 剥除)
-------------
+CrcStripping(CRC 剥除)
+----------------------
 
 :Valid Range: 0,1
   (有效范围：0,1)
@@ -306,9 +293,8 @@ you have a machine with a BMC enabled but cannot receive IPMI traffic after
 loading or enabling the driver, try disabling this feature.
 (在把接收到的数据包上交网络协议栈之前剥除其 CRC。如果你的机器启用了 BMC，但在加载或启用驱动程序后无法接收 IPMI 流量，请尝试禁用此特性。)
 
-WriteProtectNVM
-(NVM 写保护)
----------------
+WriteProtectNVM(NVM 写保护)
+---------------------------
 
 :Valid Range: 0,1
   (有效范围：0,1)
@@ -327,9 +313,8 @@ parameter at 1 when the driver loads) it cannot be unlocked except via power
 cycle.
 (注意：通过把该参数设为零来启用 NVM 写入时，必须对机器进行断电重启 (完全关机后再开机)。NVM 一旦被锁定 (驱动程序加载时参数为 1)，除非断电重启，否则无法解锁。)
 
-Debug
-(调试)
------
+Debug(调试)
+-----------
 
 :Valid Range: 0-16 (0=none,...,16=all)
   (有效范围：0-16 (0=无,...,16=全部))
@@ -340,13 +325,11 @@ This parameter adjusts the level of debug messages displayed in the system logs.
 (此参数调整系统日志中显示的调试消息的级别。)
 
 
-Additional Features and Configurations
-(其他特性与配置)
-======================================
+Additional Features and Configurations(其他特性与配置)
+======================================================
 
-Jumbo Frames
-(巨型帧)
-------------
+Jumbo Frames(巨型帧)
+--------------------
 
 Jumbo Frames support is enabled by changing the Maximum Transmission Unit (MTU)
 to a value larger than the default value of 1500.
@@ -431,9 +414,8 @@ MACSec is enabled on the system.
 (注意：如果系统上启用了 MACSec，则无法在基于 82579 的网络设备上配置巨型帧。)
 
 
-ethtool
-(ethtool)
--------
+ethtool(ethtool)
+----------------
 
 The driver utilizes the ethtool interface for driver configuration and
 diagnostics, as well as displaying statistical information. The latest ethtool
@@ -447,9 +429,8 @@ it is necessary to add a few seconds between tests when working with ethtool.
 (注意：在某些部件 (例如 82578) 上验证启用/禁用测试时，使用 ethtool 操作需要在两次测试之间间隔几秒钟。)
 
 
-Speed and Duplex Configuration
-(速度与双工配置)
-------------------------------
+Speed and Duplex Configuration(速度与双工配置)
+----------------------------------------------
 
 In addressing speed and duplex configuration issues, you need to distinguish
 between copper-based adapters and fiber-based adapters.
@@ -484,9 +465,8 @@ operate only in full duplex and only at their native speed.
 (不过，使用光纤连接的 Intel(R) 以太网网络适配器不会尝试与其链路伙伴自动协商，因为这类适配器只能以全双工方式、以其原生速度工作。)
 
 
-Enabling Wake on LAN (WoL)
-(启用 Wake on LAN (WoL))
---------------------------
+Enabling Wake on LAN (WoL)(启用 Wake on LAN (WoL))
+--------------------------------------------------
 
 WoL is configured through the ethtool utility.
 (WoL 通过 ethtool 工具进行配置。)
@@ -513,9 +493,8 @@ NOTE: Wake on LAN is only supported on port A for the following devices:
   (Intel(R) Gigabit PT 四端口服务器 ExpressModule)
 
 
-Support
-(支持)
-=======
+Support(支持)
+=============
 
 For general information, go to the Intel support website at:
 https://www.intel.com/support/

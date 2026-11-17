@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==========
-Netconsole
-==========
-
-(网络控制台 (Netconsole))
+===================================
+Netconsole(网络控制台 (Netconsole))
+===================================
 
 
 started by Ingo Molnar <mingo@redhat.com>, 2001.09.17
@@ -28,9 +26,8 @@ Userdata append support by Matthew Wood <thepacketgeek@gmail.com>, Jan 22 2024
 Sysdata append support by Breno Leitao <leitao@debian.org>, Jan 15 2025
 (系统数据追加支持由 Breno Leitao <leitao@debian.org> 于 2025 年 1 月 15 日添加)
 
-Introduction:
-(简介：)
-=============
+Introduction:(简介：)
+=====================
 
 This module logs kernel printk messages over UDP allowing debugging of
 problem where disk logging fails and serial consoles are impractical.
@@ -46,9 +43,8 @@ process.
 初始化之后立即初始化，并尽快拉起指定的接口。虽然这无法捕获早期的内核
 崩溃 (panic)，但可以捕获启动过程的大部分内容。)
 
-Sender and receiver configuration:
-(发送端与接收端配置：)
-==================================
+Sender and receiver configuration:(发送端与接收端配置：)
+========================================================
 
 It takes a string configuration parameter "netconsole" in the
 following format::
@@ -130,9 +126,8 @@ for example:
 
    socat udp-recv:<port> -
 
-Dynamic reconfiguration:
-(动态重配置：)
-========================
+Dynamic reconfiguration:(动态重配置：)
+======================================
 
 Dynamic reconfigurability is a useful addition to netconsole that enables
 remote logging targets to be dynamically added, removed, or have their
@@ -242,9 +237,8 @@ You can modify these targets in runtime by creating the following targets::
  cat cmdline1/remote_ip
  10.0.0.3
 
-Append User Data
-(追加用户数据)
-----------------
+Append User Data(追加用户数据)
+------------------------------
 
 Custom user data can be appended to the end of messages with netconsole
 dynamic configuration enabled. User data entries can be modified without
@@ -321,9 +315,8 @@ Delete `userdata` entries with `rmdir`::
    It is recommended to not write user data values with newlines.
    (建议不要写入带有换行符的用户数据值。)
 
-Task name auto population in userdata
-(在 userdata 中自动填充任务名)
--------------------------------------
+Task name auto population in userdata(在 userdata 中自动填充任务名)
+-------------------------------------------------------------------
 
 Inside the netconsole configfs hierarchy, there is a file called
 `taskname_enabled` under the `userdata` directory. This file is used to enable
@@ -360,9 +353,8 @@ In this example, the message was generated while "echo" was the current
 scheduled process.
 (在这个例子中，消息生成时当前调度的进程是 "echo"。)
 
-Kernel release auto population in userdata
-(在 userdata 中自动填充内核版本号)
-------------------------------------------
+Kernel release auto population in userdata(在 userdata 中自动填充内核版本号)
+----------------------------------------------------------------------------
 
 Within the netconsole configfs hierarchy, there is a file named `release_enabled`
 located in the `userdata` directory. This file controls the kernel release
@@ -393,9 +385,8 @@ Example::
    版本信息是追加到 userdata 字典中，而不是包含在消息头中。)
 
 
-CPU number auto population in userdata
-(在 userdata 中自动填充 CPU 编号)
---------------------------------------
+CPU number auto population in userdata(在 userdata 中自动填充 CPU 编号)
+-----------------------------------------------------------------------
 
 Inside the netconsole configfs hierarchy, there is a file called
 `cpu_nr` under the `userdata` directory. This file is used to enable or disable
@@ -449,9 +440,8 @@ In this example, the message was sent by CPU 42.
       cpu=42    # kernel-populated value
 
 
-Message ID auto population in userdata
-(在 userdata 中自动填充消息 ID)
---------------------------------------
+Message ID auto population in userdata(在 userdata 中自动填充消息 ID)
+---------------------------------------------------------------------
 
 Within the netconsole configfs hierarchy, there is a file named `msgid_enabled`
 located in the `userdata` directory. This file controls the message ID
@@ -495,9 +485,8 @@ Example::
    msgid=2
 
 
-Extended console:
-(扩展控制台：)
-=================
+Extended console:(扩展控制台：)
+===============================
 
 If '+' is prefixed to the configuration line or "extended" config file
 is set to 1, extended console support is enabled. An example boot
@@ -541,9 +530,8 @@ chunk, the 2nd chunk." may be split as follows::
  6,416,1758426,-,ncfrag=0/31;the first chunk,
  6,416,1758426,-,ncfrag=16/31; the 2nd chunk.
 
-Miscellaneous notes:
-(杂项说明：)
-====================
+Miscellaneous notes:(杂项说明：)
+================================
 
 .. Warning::
 

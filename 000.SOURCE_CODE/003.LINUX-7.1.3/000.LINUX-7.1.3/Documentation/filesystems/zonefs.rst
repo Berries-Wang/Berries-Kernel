@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-================================================
-ZoneFS - Zone filesystem for Zoned block devices
-================================================
+=============================================================================================================
+ZoneFS - Zone filesystem for Zoned block devices(ZoneFS - 面向分区块设备(zoned block device)的 Zone 文件系统)
+=============================================================================================================
 
-(ZoneFS - 面向分区块设备(zoned block device)的 Zone 文件系统)
-
-Introduction
-(简介)
-============
+Introduction(简介)
+==================
 
 zonefs is a very simple file system exposing each zone of a zoned block device
 as a file. Unlike a regular POSIX-compliant file system with native zoned block
@@ -32,9 +29,8 @@ amount of changes needed in the application as well as introducing support for
 different application programming languages.
 (因此，zonefs 本质上更接近原始块设备访问接口，而不是功能完备的 POSIX 文件系统。zonefs 的目标是：通过用更丰富的文件 API 取代原始块设备文件访问，简化应用程序中对分区块设备支持的实现，避免依赖对开发者来说可能较为晦涩的直接块设备文件 ioctl。这一方式的一个例子是在分区块设备上实现 LSM(日志结构合并)树结构(如 RocksDB 和 LevelDB 中所用的那样)：允许把 SSTable 像在常规文件系统中一样存储在一个区域文件里，而不是作为整个磁盘的一段扇区范围。引入"一个文件即一个区域"这一更高层的抽象，有助于减少应用程序所需的改动量，也有助于引入对不同应用编程语言的支持。)
 
-Zoned block devices
-(分区块设备)
--------------------
+Zoned block devices(分区块设备)
+-------------------------------
 
 Zoned storage devices belong to a class of storage devices with an address
 space that is divided into zones. A zone is a group of consecutive LBAs and all
@@ -65,9 +61,8 @@ The NVMe Zoned NameSpace (ZNS) is a technical proposal of the NVMe standard
 committee aiming at adding a zoned storage interface to the NVMe protocol.
 (固态硬盘(SSD)存储设备也可以实现分区接口，例如为了减少垃圾收集导致的内部写放大。NVMe Zoned NameSpace(ZNS)是 NVMe 标准委员会的一项技术提案，旨在为 NVMe 协议增加分区存储接口。)
 
-Zonefs Overview
-(Zonefs 概述)
-===============
+Zonefs Overview(Zonefs 概述)
+============================
 
 Zonefs exposes the zones of a zoned block device as files. The files
 representing zones are grouped by zone type, which are themselves represented
@@ -76,9 +71,8 @@ provided by the device and so does not require any complex on-disk metadata
 structure.
 (Zonefs 把分区块设备的区域暴露为文件。表示区域的文件按区域类型分组，区域类型本身又由子目录表示。这一文件结构完全使用设备提供的区域信息构建，因此不需要任何复杂的磁盘元数据结构。)
 
-On-disk metadata
-(磁盘元数据)
-----------------
+On-disk metadata(磁盘元数据)
+----------------------------
 
 zonefs on-disk metadata is reduced to an immutable super block which
 persistently stores a magic number and optional feature flags and values. On
@@ -95,9 +89,8 @@ tool always "finishes" the zone, that is, it transitions the zone to a full
 state to make it read-only, preventing any data write.
 (超级块总是写在磁盘的 0 号扇区。存储超级块的设备第一个区域永远不会被 zonefs 暴露为区域文件。如果包含超级块的区域是顺序区域，mkzonefs 格式化工具总是会"完成"(finish)该区域，也就是把区域转换为满状态使其只读，阻止任何数据写入。)
 
-Zone type sub-directories
-(区域类型子目录)
--------------------------
+Zone type sub-directories(区域类型子目录)
+-----------------------------------------
 
 Files representing zones of the same type are grouped together under the same
 sub-directory automatically created on mount.
@@ -123,9 +116,8 @@ obtained with the stat() or fstat() system calls, indicates the number of files
 existing under the directory.
 (通过 stat() 或 fstat() 系统调用获得的 struct stat 的 st_size 字段所指示的目录大小，表示该目录下存在的文件数量。)
 
-Zone files
-(区域文件)
-----------
+Zone files(区域文件)
+--------------------
 
 Zone files are named using the number of the zone they represent within the set
 of zones of a particular type. That is, both the "cnv" and "seq" directories
@@ -146,9 +138,8 @@ The number of blocks of a file as reported by stat() and fstat() indicates the
 capacity of the zone file, or in other words, the maximum file size.
 (stat() 和 fstat() 报告的文件块数表示区域文件的容量，或者换句话说，即最大文件大小。)
 
-Conventional zone files
-(常规区域文件)
------------------------
+Conventional zone files(常规区域文件)
+-------------------------------------
 
 The size of conventional zone files is fixed to the size of the zone they
 represent. Conventional zone files cannot be truncated.
@@ -159,9 +150,8 @@ buffered I/Os, direct I/Os, memory mapped I/Os (mmap), etc. There are no I/O
 constraint for these files beyond the file size limit mentioned above.
 (这些文件可以使用任何类型的 I/O 操作进行随机读写：缓冲 I/O、直接 I/O、内存映射 I/O(mmap)等。除上述文件大小限制外，这些文件没有任何 I/O 约束。)
 
-Sequential zone files
-(顺序写区域文件)
----------------------
+Sequential zone files(顺序写区域文件)
+-------------------------------------
 
 The size of sequential zone files grouped in the "seq" sub-directory represents
 the file's zone write pointer position relative to the zone start sector.
@@ -195,9 +185,8 @@ the zone, or up to the zone capacity, in which case the file's zone is
 transitioned to the FULL state (finish zone operation).
 (顺序区域文件只允许截断到 0(此时区域被重置，把文件区域的写指针位置回卷到区域起点)，或截断到区域容量(此时文件区域转换为 FULL 状态，即 finish zone 操作)。)
 
-Format options
-(格式化选项)
---------------
+Format options(格式化选项)
+--------------------------
 
 Several optional features of zonefs can be enabled at format time.
 (zonefs 的若干可选特性可以在格式化时启用。)
@@ -211,9 +200,8 @@ Several optional features of zonefs can be enabled at format time.
 * File access permissions: the default 640 access permissions can be changed.
   (文件访问权限：默认的 640 访问权限可以更改。)
 
-IO error handling
-(IO 错误处理)
------------------
+IO error handling(IO 错误处理)
+------------------------------
 
 Zoned block devices may fail I/O requests for reasons similar to regular block
 devices, e.g. due to bad sectors. However, in addition to such known I/O
@@ -366,18 +354,16 @@ Further notes:
   the zone file access permissions as noted in the table above.
   (repair 挂载选项只触发最小的 I/O 错误恢复动作集合，即对处于良好状态的区域进行文件大小修正。设备指示为只读或离线的区域仍然会像上表所述那样导致区域文件访问权限的变化。)
 
-Mount options
-(挂载选项)
--------------
+Mount options(挂载选项)
+-----------------------
 
 zonefs defines several mount options:
 (zonefs 定义了若干挂载选项:)
 * errors=<behavior>
 * explicit-open
 
-"errors=<behavior>" option
-("errors=<behavior>" 选项)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+"errors=<behavior>" option("errors=<behavior>" 选项)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The "errors=<behavior>" option mount option allows the user to specify zonefs
 behavior in response to I/O errors, inode size inconsistencies or zone
@@ -402,9 +388,8 @@ read-only zone discovered at run-time, as indicated in the previous section.
 The size of the zone file is left unchanged from its last updated value.
 (每种行为定义的运行时 I/O 错误动作已在上一节详述。挂载时发生的 I/O 错误会导致挂载操作失败。只读区域的处理在挂载时和运行时也有所不同。如果在挂载时发现只读区域，该区域总是按与离线区域相同的方式处理，即禁用所有访问并把区域文件大小设为 0。这是必需的，因为 ZBC 和 ZAC 标准把只读区域的写指针定义为无效，使得无法得知已写入该区域的数据量。而对于运行时发现的只读区域，如上一节所述，区域文件的大小保持其最近更新的值不变。)
 
-"explicit-open" option
-("explicit-open" 选项)
-~~~~~~~~~~~~~~~~~~~~~~
+"explicit-open" option("explicit-open" 选项)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A zoned block device (e.g. an NVMe Zoned Namespace device) may have limits on
 the number of zones that can be active, that is, zones that are in the
@@ -423,9 +408,8 @@ to the device on the last close() of a zone file if the zone is not full nor
 empty.
 (为避免这些潜在错误，"explicit-open" 挂载选项强制在文件首次以写方式打开时使用打开区域命令把区域激活。如果打开区域命令成功，应用程序随后就能得到保证：写请求可以被处理。反之，"explicit-open" 挂载选项也会导致：当区域既不满也不空时，在区域文件最后一次 close() 时向设备发出关闭区域命令。)
 
-Runtime sysfs attributes
-(运行时 sysfs 属性)
-------------------------
+Runtime sysfs attributes(运行时 sysfs 属性)
+-------------------------------------------
 
 zonefs defines several sysfs attributes for mounted devices.  All attributes
 are user readable and can be found in the directory /sys/fs/zonefs/<dev>/,
@@ -468,9 +452,8 @@ The attributes defined are as follows.
   option.
   (**nr_active_seq_files**: 该属性报告当前处于活动状态的顺序区域文件数量。如果 *max_active_seq_files* 不为 0，那么无论是否使用 *explicit-open* 挂载选项，*nr_active_seq_files* 的值都永远不会超过 *nr_active_seq_files* 的值。)
 
-Zonefs User Space Tools
-(Zonefs 用户空间工具)
-=======================
+Zonefs User Space Tools(Zonefs 用户空间工具)
+============================================
 
 The mkzonefs tool is used to format zoned block devices for use with zonefs.
 This tool is available on Github at:
@@ -482,9 +465,8 @@ zonefs-tools also includes a test suite which can be run against any zoned
 block device, including null_blk block device created with zoned mode.
 (zonefs-tools 还包含一个测试套件，可以针对任何分区块设备运行，包括以 zoned 模式创建的 null_blk 块设备。)
 
-Examples
-(示例)
---------
+Examples(示例)
+--------------
 
 The following formats a 15TB host-managed SMR HDD with 256 MB zones
 with the conventional zones aggregation feature enabled::

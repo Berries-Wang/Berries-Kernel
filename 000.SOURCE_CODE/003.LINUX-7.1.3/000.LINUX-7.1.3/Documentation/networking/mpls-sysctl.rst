@@ -1,15 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-====================
-MPLS Sysfs variables
-====================
+=====================================
+MPLS Sysfs variables(MPLS Sysfs 变量)
+=====================================
 
-(MPLS Sysfs 变量)
-
-/proc/sys/net/mpls/* Variables:
-===============================
-
-(/proc/sys/net/mpls/* 变量)
+/proc/sys/net/mpls/* Variables:(/proc/sys/net/mpls/* 变量)
+==========================================================
 
 platform_labels - INTEGER
 (platform_labels - INTEGER(整数))

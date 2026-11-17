@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=======================================
-DSA switch configuration from userspace
-=======================================
-
-(从用户空间配置 DSA 交换机)
+==================================================================
+DSA switch configuration from userspace(从用户空间配置 DSA 交换机)
+==================================================================
 
 The DSA switch configuration is not integrated into the main userspace
 network configuration suites by now and has to be performed manually.
@@ -13,10 +11,8 @@ network configuration suites by now and has to be performed manually.
 
 .. _dsa-config-showcases:
 
-Configuration showcases
------------------------
-
-(配置示例)
+Configuration showcases(配置示例)
+---------------------------------
 
 To configure a DSA switch a couple of commands need to be executed. In this
 documentation some common configuration scenarios are handled as showcases:
@@ -134,10 +130,8 @@ The configured IPs and networks are:
 
 .. _dsa-tagged-configuration:
 
-Configuration with tagging support
-----------------------------------
-
-(基于打标签支持的配置)
+Configuration with tagging support(基于打标签支持的配置)
+--------------------------------------------------------
 
 The tagging based configuration is desired and supported by the majority of
 DSA switches. These switches are capable to tag incoming and outgoing traffic
@@ -224,10 +218,8 @@ without using a VLAN based configuration.
 
 .. _dsa-vlan-configuration:
 
-Configuration without tagging support
--------------------------------------
-
-(无打标签支持时的配置)
+Configuration without tagging support(无打标签支持时的配置)
+-----------------------------------------------------------
 
 A minority of switches are not capable to use a taging protocol
 (DSA_TAG_PROTO_NONE). These switches can be configured by a VLAN based
@@ -370,9 +362,8 @@ configuration.
     # bring up the bridge devices
     ip link set br0 up
 
-Forwarding database (FDB) management
-(转发数据库 (FDB) 管理)
-------------------------------------
+Forwarding database (FDB) management(转发数据库 (FDB) 管理)
+-----------------------------------------------------------
 
 The existing DSA switches do not have the necessary hardware support to keep
 the software FDB of the bridge in sync with the hardware tables, so the two
@@ -460,9 +451,8 @@ flags when working with bridge FDB entries on DSA switch interfaces.
 (因此，建议脚本编写者在处理 DSA 交换机接口上的网桥 FDB 表项时，使用
 ``master static`` 这组标志。)
 
-Affinity of user ports to CPU ports
-(用户端口与 CPU 端口的亲和性)
------------------------------------
+Affinity of user ports to CPU ports(用户端口与 CPU 端口的亲和性)
+----------------------------------------------------------------
 
 Typically, DSA switches are attached to the host via a single Ethernet
 interface, but in cases where the switch chip is discrete, the hardware design

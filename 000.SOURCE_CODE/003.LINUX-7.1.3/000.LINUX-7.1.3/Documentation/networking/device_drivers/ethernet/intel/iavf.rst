@@ -1,19 +1,16 @@
 .. SPDX-License-Identifier: GPL-2.0+
 
-=================================================================
-Linux Base Driver for Intel(R) Ethernet Adaptive Virtual Function
-=================================================================
-
-(Intel(R) Ethernet Adaptive Virtual Function 的 Linux 基础驱动程序)
+====================================================================================================================================
+Linux Base Driver for Intel(R) Ethernet Adaptive Virtual Function(Intel(R) Ethernet Adaptive Virtual Function 的 Linux 基础驱动程序)
+====================================================================================================================================
 
 Intel Ethernet Adaptive Virtual Function Linux driver.
 Copyright(c) 2013-2018 Intel Corporation.
 (Intel Ethernet Adaptive Virtual Function Linux 驱动程序。
 版权所有(c) 2013-2018 Intel Corporation。)
 
-Contents
-(目录)
-========
+Contents(目录)
+==============
 
 - Overview
   (概述)
@@ -26,9 +23,8 @@ Contents
 - Support
   (支持)
 
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 This file describes the iavf Linux Base Driver. This driver was formerly
 called i40evf.
@@ -45,9 +41,8 @@ iavf 驱动程序要求启用 CONFIG_PCI_MSI。)
 The guest OS loading the iavf driver must support MSI-X interrupts.
 (加载 iavf 驱动程序的客户操作系统必须支持 MSI-X 中断。)
 
-Identifying Your Adapter
-(识别您的适配器)
-========================
+Identifying Your Adapter(识别您的适配器)
+========================================
 
 The driver in this kernel is compatible with devices based on the following:
  * Intel(R) XL710 X710 Virtual Function
@@ -70,13 +65,11 @@ https://www.intel.com/support
 程序，请参阅 Intel 支持网站：https://www.intel.com/support)
 
 
-Additional Features and Configurations
-(其他特性与配置)
-======================================
+Additional Features and Configurations(其他特性与配置)
+======================================================
 
-Viewing Link Messages
-(查看链路消息)
----------------------
+Viewing Link Messages(查看链路消息)
+-----------------------------------
 Link messages will not be displayed to the console if the distribution is
 restricting system messages. In order to see network driver link messages on
 your console, set dmesg to eight by entering the following::
@@ -89,9 +82,8 @@ NOTE:
   This setting is not saved across reboots.
   (注意：该设置在重启后不会保留。)
 
-ethtool
-(ethtool 工具)
--------
+ethtool(ethtool 工具)
+---------------------
 The driver utilizes the ethtool interface for driver configuration and
 diagnostics, as well as displaying statistical information. The latest ethtool
 version is required for this functionality. Download it at:
@@ -100,9 +92,8 @@ https://www.kernel.org/pub/software/network/ethtool/
 需要最新版本的 ethtool。可从以下地址下载：
 https://www.kernel.org/pub/software/network/ethtool/)
 
-Setting VLAN Tag Stripping
-(设置 VLAN 标签剥离)
---------------------------
+Setting VLAN Tag Stripping(设置 VLAN 标签剥离)
+----------------------------------------------
 If you have applications that require Virtual Functions (VFs) to receive
 packets with VLAN tags, you can disable VLAN tag stripping for the VF. The
 Physical Function (PF) processes requests issued from the VF to enable or
@@ -125,9 +116,8 @@ or alternatively::
 
     # ethtool --offload <if_name> rxvlan on/off
 
-Adaptive Virtual Function
-(自适应虚拟功能)
--------------------------
+Adaptive Virtual Function(自适应虚拟功能)
+-----------------------------------------
 Adaptive Virtual Function (AVF) allows the virtual function driver, or VF, to
 adapt to changing feature sets of the physical function driver (PF) with which
 it is associated. This allows system administrators to update a PF without
@@ -175,9 +165,8 @@ which the AVF is associated. The following are base mode features:
 - HW mailbox is used for VF to PF communications (including on Windows)
   (硬件邮箱用于 VF 与 PF 之间的通信（包括在 Windows 上）)
 
-IEEE 802.1ad (QinQ) Support
-(IEEE 802.1ad（QinQ）支持)
----------------------------
+IEEE 802.1ad (QinQ) Support(IEEE 802.1ad（QinQ）支持)
+-----------------------------------------------------
 The IEEE 802.1ad standard, informally known as QinQ, allows for multiple VLAN
 IDs within a single Ethernet frame. VLAN IDs are sometimes referred to as
 "tags," and multiple VLAN IDs are thus referred to as a "tag stack." Tag stacks
@@ -203,9 +192,8 @@ NOTES:
   (注意：802.1ad（QinQ）数据包不支持接收校验和卸载、云过滤器以及 VLAN
   加速。)
 
-Application Device Queues (ADq)
-(应用设备队列（ADq）)
--------------------------------
+Application Device Queues (ADq)(应用设备队列（ADq）)
+----------------------------------------------------
 Application Device Queues (ADq) allows you to dedicate one or more queues to a
 specific application. This can reduce latency for the specified application,
 and allow Tx traffic to be rate limited per application. Follow the steps below
@@ -339,13 +327,11 @@ NOTES:
    一个 VSI 列表。)
 
 
-Known Issues/Troubleshooting
-(已知问题/故障排除)
-============================
+Known Issues/Troubleshooting(已知问题/故障排除)
+===============================================
 
-Bonding fails with VFs bound to an Intel(R) Ethernet Controller 700 series device
----------------------------------------------------------------------------------
-(将 VF 绑定到 Intel(R) 以太网控制器 700 系列设备时绑定失败)
+Bonding fails with VFs bound to an Intel(R) Ethernet Controller 700 series device(将 VF 绑定到 Intel(R) 以太网控制器 700 系列设备时绑定失败)
+--------------------------------------------------------------------------------------------------------------------------------------------
 
 If you bind Virtual Functions (VFs) to an Intel(R) Ethernet Controller 700
 series based device, the VF slaves may fail when they become the active slave.
@@ -361,9 +347,8 @@ PF（物理功能）设置的，那么在添加从属接口或更改 active-back
 相同的 MAC 地址，此时 Linux 绑定会失败。如果 VF 的 MAC 地址不是由 PF
 设置的，则不会出现此问题。)
 
-Traffic Is Not Being Passed Between VM and Client
--------------------------------------------------
-(虚拟机与客户端之间无法传递流量)
+Traffic Is Not Being Passed Between VM and Client(虚拟机与客户端之间无法传递流量)
+---------------------------------------------------------------------------------
 
 You may not be able to pass traffic between a client system and a
 Virtual Machine (VM) running on a separate host if the Virtual Function
@@ -380,9 +365,8 @@ section "MAC and VLAN anti-spoofing feature" in this readme document.
 文档中的 "VLAN Tag Packet Steering" 一节；有关设置欺骗检查，请参阅本
 自述文档中的 "MAC and VLAN anti-spoofing feature" 一节。)
 
-Do not unload port driver if VF with active VM is bound to it
--------------------------------------------------------------
-(绑定了运行中虚拟机的 VF 时不要卸载端口驱动程序)
+Do not unload port driver if VF with active VM is bound to it(绑定了运行中虚拟机的 VF 时不要卸载端口驱动程序)
+-------------------------------------------------------------------------------------------------------------
 
 Do not unload a port's driver if a Virtual Function (VF) with an active Virtual
 Machine (VM) is bound to it. Doing so will cause the port to appear to hang.
@@ -391,9 +375,8 @@ Once the VM shuts down, or otherwise releases the VF, the command will complete.
 卸载该端口的驱动程序；否则该端口看起来会像挂起一样。只有当 VM 关闭或以
 其他方式释放该 VF 后，命令才会完成。)
 
-Using four traffic classes fails
---------------------------------
-(使用四个流量类会失败)
+Using four traffic classes fails(使用四个流量类会失败)
+------------------------------------------------------
 
 Do not try to reserve more than three traffic classes in the iavf driver. Doing
 so will fail to set any traffic classes and will cause the driver to write
@@ -402,9 +385,8 @@ errors to stdout. Use a maximum of three queues to avoid this issue.
 流量类，并导致驱动程序向 stdout 写入错误信息。最多使用三个队列即可避免
 此问题。)
 
-Multiple log error messages on iavf driver removal
---------------------------------------------------
-(卸载 iavf 驱动程序时出现多条日志错误消息)
+Multiple log error messages on iavf driver removal(卸载 iavf 驱动程序时出现多条日志错误消息)
+--------------------------------------------------------------------------------------------
 
 If you have several VFs and you remove the iavf driver, several instances of
 the following log errors are written to the log::
@@ -415,9 +397,8 @@ the following log errors are written to the log::
     Unable to send the message to VF 2 aq_err 12
     ARQ Overflow Error detected
 
-Virtual machine does not get link
----------------------------------
-(虚拟机无法获得链路)
+Virtual machine does not get link(虚拟机无法获得链路)
+-----------------------------------------------------
 
 If the virtual machine has more than one virtual port assigned to it, and those
 virtual ports are bound to different physical ports, you may not get link on
@@ -432,9 +413,8 @@ run the command more than once to get link on all virtual ports.
 (其中 <PF> 是主机中的 PF 接口，例如 p5p1。您可能需要多次运行该命令，
 才能在所有虚拟端口上获得链路。)
 
-MAC address of Virtual Function changes unexpectedly
-----------------------------------------------------
-(虚拟功能的 MAC 地址意外变化)
+MAC address of Virtual Function changes unexpectedly(虚拟功能的 MAC 地址意外变化)
+---------------------------------------------------------------------------------
 
 If a Virtual Function's MAC address is not assigned in the host, then the VF
 (virtual function) driver will use a random MAC address. This random MAC
@@ -446,9 +426,8 @@ a VF driver reload.
 您可以在主机中分配一个静态 MAC 地址，这样即使 VF 驱动程序重新加载，该
 静态 MAC 地址也会保留下来。)
 
-Driver Buffer Overflow Fix
---------------------------
-(驱动程序缓冲区溢出修复)
+Driver Buffer Overflow Fix(驱动程序缓冲区溢出修复)
+--------------------------------------------------
 
 The fix to resolve CVE-2016-8105, referenced in Intel SA-00069
 https://www.intel.com/content/www/us/en/security-center/advisory/intel-sa-00069.html
@@ -457,9 +436,8 @@ is included in this and future versions of the driver.
 https://www.intel.com/content/www/us/en/security-center/advisory/intel-sa-00069.html）
 已包含在本版本及后续版本的驱动程序中。)
 
-Multiple Interfaces on Same Ethernet Broadcast Network
-------------------------------------------------------
-(同一以太网广播网络上的多个接口)
+Multiple Interfaces on Same Ethernet Broadcast Network(同一以太网广播网络上的多个接口)
+--------------------------------------------------------------------------------------
 
 Due to the default ARP behavior on Linux, it is not possible to have one system
 on two IP networks in the same Ethernet broadcast domain (non-partitioned
@@ -489,9 +467,8 @@ Another alternative is to install the interfaces in separate broadcast domains
 (另一种做法是把各接口安装在不同的广播域中（使用不同的交换机，或使用
 按 VLAN 分区的交换机）。)
 
-Rx Page Allocation Errors
--------------------------
-(Rx 页面分配错误)
+Rx Page Allocation Errors(Rx 页面分配错误)
+------------------------------------------
 
 'Page allocation failure. order:0' errors may occur under stress.
 This is caused by the way the Linux kernel reports this stressed condition.
@@ -499,9 +476,8 @@ This is caused by the way the Linux kernel reports this stressed condition.
 这是由 Linux 内核报告这种高压力状况的方式所致。)
 
 
-Support
-=======
-(支持)
+Support(支持)
+=============
 
 For general information, go to the Intel support website at:
 https://support.intel.com

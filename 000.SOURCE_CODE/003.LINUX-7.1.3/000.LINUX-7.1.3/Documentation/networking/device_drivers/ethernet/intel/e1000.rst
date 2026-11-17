@@ -1,19 +1,16 @@
 .. SPDX-License-Identifier: GPL-2.0+
 
-==========================================================
-Linux Base Driver for Intel(R) Ethernet Network Connection
-==========================================================
-
-(Intel(R) 以太网网络连接的 Linux 基础驱动)
+====================================================================================================
+Linux Base Driver for Intel(R) Ethernet Network Connection(Intel(R) 以太网网络连接的 Linux 基础驱动)
+====================================================================================================
 
 Intel Gigabit Linux driver.
 Copyright(c) 1999 - 2013 Intel Corporation.
 (Intel 千兆位 Linux 驱动。
 版权所有 (c) 1999 - 2013 Intel Corporation。)
 
-Contents
-(目录)
-========
+Contents(目录)
+==============
 
 - Identifying Your Adapter
   (识别你的网卡)
@@ -26,9 +23,8 @@ Contents
 - Support
   (支持)
 
-Identifying Your Adapter
-(识别你的网卡)
-========================
+Identifying Your Adapter(识别你的网卡)
+======================================
 
 For more information on how to identify your adapter, go to the Adapter &
 Driver ID Guide at:
@@ -45,9 +41,8 @@ networking link on the left to search for your adapter:
 
     http://support.intel.com/support/go/network/adapter/home.htm
 
-Command Line Parameters
-(命令行参数)
-=======================
+Command Line Parameters(命令行参数)
+===================================
 
 The default value for each parameter is generally the recommended setting,
 unless otherwise noted.
@@ -70,9 +65,8 @@ NOTES:
         TxAbsIntDelay 参数的更多信息，请参阅以下应用说明：
         http://www.intel.com/design/network/applnots/ap450.htm)
 
-AutoNeg
-(自动协商)
--------
+AutoNeg(自动协商)
+-----------------
 
 (Supported only on adapters with copper connections)
 (仅支持带有铜缆连接的网卡。)
@@ -96,9 +90,8 @@ NOTE:
        (有关 AutoNeg 参数的更多信息，请参阅本 readme 中的 Speed and Duplex
        （速度与双工）一节。)
 
-Duplex
-(双工)
-------
+Duplex(双工)
+------------
 
 (Supported only on adapters with copper connections)
 (仅支持带有铜缆连接的网卡。)
@@ -117,9 +110,8 @@ duplex.
 为自动协商，网卡会自动检测正确的双工模式。如果链路伙伴被强制指定（全双工或半
 双工），Duplex 默认为半双工。)
 
-FlowControl
-(流量控制)
------------
+FlowControl(流量控制)
+---------------------
 
 :Valid Range:   0-3 (0=none, 1=Rx only, 2=Tx only, 3=Rx&Tx)
                 (有效范围：0-3（0=无，1=仅 Rx，2=仅 Tx，3=Rx 与 Tx）)
@@ -130,9 +122,8 @@ This parameter controls the automatic generation(Tx) and response(Rx)
 to Ethernet PAUSE frames.
 (该参数控制对以太网 PAUSE 帧的自动生成（Tx）与响应（Rx）。)
 
-InterruptThrottleRate
-(中断节流率)
----------------------
+InterruptThrottleRate(中断节流率)
+---------------------------------
 
 (not supported on Intel(R) 82542, 82543 or 82544-based adapters)
 (基于 Intel(R) 82542、82543 或 82544 的网卡不支持该参数。)
@@ -280,9 +271,8 @@ NOTE:
        工作，是一个不错的起点，但最优值因平台而异。如果不关心 CPU 占用率，可
        使用 RX_POLLING (NAPI) 和默认驱动设置。)
 
-RxDescriptors
-(接收描述符数量)
--------------
+RxDescriptors(接收描述符数量)
+-----------------------------
 
 :Valid Range:
  - 48-256 for 82542 and 82543-based adapters
@@ -316,9 +306,8 @@ NOTE:
        允许的情况下，若请求更多数量的接收描述符可能被拒绝，此时请使用较小的
        数值。)
 
-RxIntDelay
-(接收中断延迟)
-----------
+RxIntDelay(接收中断延迟)
+------------------------
 
 :Valid Range:   0-65535 (0=off)
                 (有效范围：0-65535（0=关闭）)
@@ -351,9 +340,8 @@ CAUTION:
           消息。此外，控制器会被自动复位，恢复网络连接。为避免挂起的可能，
           请确保将 RxIntDelay 设置为 0。)
 
-RxAbsIntDelay
-(接收绝对中断延迟)
--------------
+RxAbsIntDelay(接收绝对中断延迟)
+-------------------------------
 
 (This parameter is supported only on 82540, 82545 and later adapters.)
 (该参数仅在 82540、82545 及更高版本的网卡上受支持。)
@@ -373,9 +361,8 @@ conditions.
 用，它确保在收到初始数据包后的设定时间内会产生一次中断。与 RxIntDelay 配合
 恰当调优，可在特定网络条件下改善流量吞吐量。)
 
-Speed
-(速度)
------
+Speed(速度)
+-----------
 
 (This parameter is supported only on adapters with copper connections.)
 (该参数仅支持带有铜缆连接的网卡。)
@@ -393,9 +380,8 @@ speed.  Duplex should also be set when Speed is set to either 10 or 100.
 将其设为 0，且链路伙伴设置为自动协商，网卡将自动检测正确的速度。当 Speed 设置
 为 10 或 100 时，还应设置 Duplex。)
 
-TxDescriptors
-(发送描述符数量)
--------------
+TxDescriptors(发送描述符数量)
+-----------------------------
 
 :Valid Range:
   - 48-256 for 82542 and 82543-based adapters
@@ -421,9 +407,8 @@ NOTE:
        (在系统资源允许的情况下，请求更多数量的发送描述符可能被拒绝。此时请
        使用较小的数值。)
 
-TxIntDelay
-(发送中断延迟)
-----------
+TxIntDelay(发送中断延迟)
+------------------------
 
 :Valid Range:   0-65535 (0=off)
                 (有效范围：0-65535（0=关闭）)
@@ -439,9 +424,8 @@ causing the driver to run out of available transmit descriptors.
 减少发送中断可以提高 CPU 效率。如果系统报告发送丢包，说明该值可能设置得过高，
 导致驱动程序耗尽可用的发送描述符。)
 
-TxAbsIntDelay
-(发送绝对中断延迟)
--------------
+TxAbsIntDelay(发送绝对中断延迟)
+-------------------------------
 
 (This parameter is supported only on 82540, 82545 and later adapters.)
 (该参数仅在 82540、82545 及更高版本的网卡上受支持。)
@@ -461,9 +445,8 @@ network conditions.
 用，它确保在初始数据包被发送到线路上之后的设定时间内会产生一次中断。与
 TxIntDelay 配合恰当调优，可在特定网络条件下改善流量吞吐量。)
 
-XsumRX
-(接收校验和卸载)
-------
+XsumRX(接收校验和卸载)
+----------------------
 
 (This parameter is NOT supported on the 82542-based adapter.)
 (基于 82542 的网卡不支持该参数。)
@@ -478,9 +461,8 @@ offload for received packets (both UDP and TCP) to the adapter hardware.
 (值为 '1' 表示驱动程序应当为接收到的数据包（UDP 和 TCP 均可）启用 IP 校验和
 卸载，交由网卡硬件处理。)
 
-Copybreak
-(复制阈值)
----------
+Copybreak(复制阈值)
+-------------------
 
 :Valid Range:   0-xxxxxxx (0=off)
                 (有效范围：0-xxxxxxx（0=关闭）)
@@ -502,9 +484,8 @@ it is also available during runtime at
 不是 1,1,1 之类的形式），并且在运行时也可以通过
 /sys/module/e1000/parameters/copybreak 进行设置。)
 
-SmartPowerDownEnable
-(智能断电使能)
---------------------
+SmartPowerDownEnable(智能断电使能)
+----------------------------------
 
 :Valid Range: 0-1
               (有效范围：0-1)
@@ -515,9 +496,8 @@ Allows PHY to turn off in lower power states. The user can turn off
 this parameter in supported chipsets.
 (允许 PHY 在低功耗状态下关闭。在支持的芯片组上，用户可以禁用该参数。)
 
-Speed and Duplex Configuration
-(速度与双工配置)
-==============================
+Speed and Duplex Configuration(速度与双工配置)
+==============================================
 
 Three keywords are used to control the speed and duplex configuration.
 These keywords are Speed, Duplex, and AutoNeg.
@@ -589,13 +569,11 @@ previously mentioned to force the adapter to the same speed and duplex.
 (如果链路伙伴被强制指定为特定的速度和双工，则不应使用该参数；而应使用前文提到的
 Speed 和 Duplex 参数，把网卡强制为相同的速度和双工。)
 
-Additional Configurations
-(其他配置)
-=========================
+Additional Configurations(其他配置)
+===================================
 
-Jumbo Frames
-(巨型帧)
-------------
+Jumbo Frames(巨型帧)
+--------------------
 
   Jumbo Frames support is enabled by changing the MTU to a value larger than
   the default of 1500.  Use the ifconfig command to increase the MTU size.
@@ -646,9 +624,8 @@ Notes:
      Intel(R) PRO/1000 Gigabit Server Adapter
      Intel(R) PRO/1000 PM Network Connection
 
-ethtool
-(ethtool 工具)
--------
+ethtool(ethtool 工具)
+---------------------
 
   The driver utilizes the ethtool interface for driver configuration and
   diagnostics, as well as displaying statistical information.  The ethtool
@@ -661,9 +638,8 @@ ethtool
   (ethtool 的最新版本可从
   https://www.kernel.org/pub/software/network/ethtool/ 获取。)
 
-Enabling Wake on LAN (WoL)
-(启用局域网唤醒 (WoL))
---------------------------
+Enabling Wake on LAN (WoL)(启用局域网唤醒 (WoL))
+------------------------------------------------
 
   WoL is configured through the ethtool utility.
   (WoL 通过 ethtool 工具进行配置。)
@@ -674,9 +650,8 @@ Enabling Wake on LAN (WoL)
   (WoL 将在系统下一次关机或重启时启用。对于本版本的驱动，要启用 WoL，必须在
   关机或重启系统时已加载 e1000 驱动。)
 
-Support
-(支持)
-=======
+Support(支持)
+=============
 
 For general information, go to the Intel support website at:
 http://support.intel.com

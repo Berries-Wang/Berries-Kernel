@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=================
-Ethernet Bridging
-=================
+=============================
+Ethernet Bridging(以太网桥接)
+=============================
 
-(以太网桥接)
-
-Introduction
-(简介)
-============
+Introduction(简介)
+==================
 
 The IEEE 802.1Q-2022 (Bridges and Bridged Networks) standard defines the
 operation of bridges in computer networks. A bridge, in the context of this
@@ -18,9 +15,8 @@ model. The purpose of a bridge is to filter and forward frames between
 different segments based on the destination MAC (Media Access Control) address.
 (IEEE 802.1Q-2022 (网桥与桥接网络) 标准定义了计算机网络中网桥的工作方式。在该标准的语境中，网桥是连接两个或更多网段、工作在 OSI (开放系统互连) 模型数据链路层 (第 2 层) 的设备。网桥的目的是根据目的 MAC (媒体访问控制) 地址在不同网段之间过滤和转发帧。)
 
-Bridge kAPI
-(网桥内核态 API (kAPI))
-===========
+Bridge kAPI(网桥内核态 API (kAPI))
+==================================
 
 Here are some core structures of bridge code. Note that the kAPI is *unstable*,
 and can be changed at any time.
@@ -29,39 +25,34 @@ and can be changed at any time.
 .. kernel-doc:: net/bridge/br_private.h
    :identifiers: net_bridge_vlan
 
-Bridge uAPI
-(网桥用户态 API (uAPI))
-===========
+Bridge uAPI(网桥用户态 API (uAPI))
+==================================
 
 Modern Linux bridge uAPI is accessed via Netlink interface. You can find
 below files where the bridge and bridge port netlink attributes are defined.
 (现代 Linux 网桥的用户态 API (uAPI) 通过 Netlink 接口访问。你可以在下面列出的文件中找到网桥和网桥端口 netlink 属性的定义。)
 
-Bridge netlink attributes
-(网桥 netlink 属性)
--------------------------
+Bridge netlink attributes(网桥 netlink 属性)
+--------------------------------------------
 
 .. kernel-doc:: include/uapi/linux/if_link.h
    :doc: Bridge enum definition
 
-Bridge port netlink attributes
-(网桥端口 netlink 属性)
-------------------------------
+Bridge port netlink attributes(网桥端口 netlink 属性)
+-----------------------------------------------------
 
 .. kernel-doc:: include/uapi/linux/if_link.h
    :doc: Bridge port enum definition
 
-Bridge sysfs
-(网桥 sysfs)
-------------
+Bridge sysfs(网桥 sysfs)
+------------------------
 
 The sysfs interface is deprecated and should not be extended if new
 options are added.
 (sysfs 接口已被弃用，不应在添加新选项时对其进行扩展。)
 
-STP
-(生成树协议 (STP))
-===
+STP(生成树协议 (STP))
+=====================
 
 The STP (Spanning Tree Protocol) implementation in the Linux bridge driver
 is a critical feature that helps prevent loops and broadcast storms in
@@ -83,9 +74,8 @@ IEEE 802.1Q (Bridges and Bridged Networks) or IEEE 802.1AC (MAC Service
 Definition). 802.1D has been officially withdrawn in 2022.
 (802.1D-2004 移除了最初的生成树协议，转而纳入快速生成树协议 (RSTP)。到 2014 年，IEEE 802.1D 定义的所有功能都已被并入 IEEE 802.1Q (网桥与桥接网络) 或 IEEE 802.1AC (MAC 服务定义)。802.1D 已于 2022 年被正式撤销。)
 
-Bridge Ports and STP States
-(网桥端口与 STP 状态)
----------------------------
+Bridge Ports and STP States(网桥端口与 STP 状态)
+------------------------------------------------
 
 In the context of STP, bridge ports can be in one of the following states:
 (在 STP 的语境中，网桥端口可以处于以下几种状态之一：)
@@ -107,9 +97,8 @@ In the context of STP, bridge ports can be in one of the following states:
     in the STP process. The data frames forwarding are also disabled.
     (Disabled (禁用)：端口被管理性禁用，不参与 STP 过程。数据帧转发也被禁用。)
 
-Root Bridge and Convergence
-(根网桥与收敛)
----------------------------
+Root Bridge and Convergence(根网桥与收敛)
+-----------------------------------------
 
 In the context of networking and Ethernet bridging in Linux, the root bridge
 is a designated switch in a bridged network that serves as a reference point
@@ -176,9 +165,8 @@ influence network performance, path selection and which bridge becomes the
 Root Bridge.
 (正确配置 STP 参数 (例如网桥优先级) 可以影响网络性能、路径选择以及哪个网桥成为根网桥。)
 
-User space STP helper
-(用户态 STP 辅助程序)
----------------------
+User space STP helper(用户态 STP 辅助程序)
+------------------------------------------
 
 The user space STP helper *bridge-stp* is a program to control whether to use
 user mode spanning tree. The ``/sbin/bridge-stp <bridge> <start|stop>`` is
@@ -188,9 +176,8 @@ stp_state <0|1>``).  The kernel enables user_stp mode if that command returns
 0, or enables kernel_stp mode if that command returns any other value.
 (用户态 STP 辅助程序 *bridge-stp* 是一个用于控制是否使用用户态生成树的程序。当在网桥上启用/禁用 STP 时 (通过 ``brctl stp <bridge> <on|off>`` 或 ``ip link set <bridge> type bridge stp_state <0|1>`` )，内核会调用 ``/sbin/bridge-stp <bridge> <start|stop>`` 。如果该命令返回 0，内核启用 user_stp 模式；如果返回任何其他值，则启用 kernel_stp 模式。)
 
-STP mode selection
-(STP 模式选择)
-------------------
+STP mode selection(STP 模式选择)
+--------------------------------
 
 The ``IFLA_BR_STP_MODE`` bridge attribute allows explicit control over how
 STP operates when enabled, bypassing the ``/sbin/bridge-stp`` helper
@@ -215,9 +202,8 @@ Example::
 The mode can only be changed while STP is disabled.
 (只能在 STP 被禁用时更改模式。)
 
-VLAN
-(虚拟局域网 (VLAN))
-====
+VLAN(虚拟局域网 (VLAN))
+=======================
 
 A LAN (Local Area Network) is a network that covers a small geographic area,
 typically within a single building or a campus. LANs are used to connect
@@ -249,9 +235,8 @@ it will start forwarding frames to appropriate destinations based on their
 destination MAC address and VLAN tag (both must match).
 (网桥上的 VLAN 过滤 (VLAN filtering) 默认是禁用的。在网桥上启用 VLAN 过滤之后，它将开始根据目的 MAC 地址和 VLAN 标签 (两者必须都匹配) 把帧转发到相应的目的地。)
 
-Multicast
-(组播)
-=========
+Multicast(组播)
+===============
 
 The Linux bridge driver has multicast support allowing it to process Internet
 Group Management Protocol (IGMP) or Multicast Listener Discovery (MLD)
@@ -259,9 +244,8 @@ messages, and to efficiently forward multicast data packets. The bridge
 driver supports IGMPv2/IGMPv3 and MLDv1/MLDv2.
 (Linux 网桥驱动程序支持组播，能够处理 Internet 组管理协议 (IGMP) 或组播侦听发现 (MLD) 消息，并高效地转发组播数据包。该网桥驱动程序支持 IGMPv2/IGMPv3 和 MLDv1/MLDv2。)
 
-Multicast snooping
-(组播侦听 (snooping))
-------------------
+Multicast snooping(组播侦听 (snooping))
+---------------------------------------
 
 Multicast snooping is a networking technology that allows network switches
 to intelligently manage multicast traffic within a local area network (LAN).
@@ -282,9 +266,8 @@ default. It maintains a Multicast forwarding database (MDB) which keeps track
 of port and group relationships.
 (Linux 网桥设备创建时默认启用组播侦听。它维护一个组播转发数据库 (MDB)，用于跟踪端口和组的关系。)
 
-IGMPv3/MLDv2 EHT support
-(IGMPv3/MLDv2 EHT 支持)
-------------------------
+IGMPv3/MLDv2 EHT support(IGMPv3/MLDv2 EHT 支持)
+-----------------------------------------------
 
 The Linux bridge supports IGMPv3/MLDv2 EHT (Explicit Host Tracking), which
 was added by `474ddb37fa3a ("net: bridge: multicast: add EHT allow/block handling")
@@ -305,9 +288,8 @@ is thus bound only by the packet transmission latencies in the multiaccess
 network and the processing time in the device.
 (从主机想要离开到设备停止转发流量之间的时长称为 IGMP 离开延迟。配置了 IGMPv3 或 MLDv2 以及显式跟踪的设备，如果最后一个请求从设备接收流量的主机表示不再想接收流量，就可以立即停止转发流量。因此，离开延迟仅受多路访问网络中数据包传输延迟和设备处理时间的限制。)
 
-Other multicast features
-(其他组播特性)
-------------------------
+Other multicast features(其他组播特性)
+--------------------------------------
 
 The Linux bridge also supports `per-VLAN multicast snooping
 <https://lore.kernel.org/netdev/20210719170637.435541-1-razor@blackwall.org/>`_,
@@ -316,9 +298,8 @@ which is disabled by default but can be enabled. And `Multicast Router Discovery
 which help identify the location of multicast routers.
 (Linux 网桥还支持 per-VLAN 组播侦听 (默认禁用，但可以启用)，以及组播路由器发现 (Multicast Router Discovery)，后者有助于识别组播路由器的位置。)
 
-Switchdev
-(Switchdev)
-=========
+Switchdev(Switchdev)
+====================
 
 Linux Bridge Switchdev is a feature in the Linux kernel that extends the
 capabilities of the traditional Linux bridge to work more efficiently with
@@ -338,9 +319,8 @@ kernel.
 Please see the :ref:`switchdev` document for more details.
 (更多细节请参阅 :ref:`switchdev` 文档。)
 
-Netfilter
-(Netfilter)
-==========
+Netfilter(Netfilter)
+====================
 
 The bridge netfilter module is a legacy feature that allows to filter bridged
 packets with iptables and ip6tables. Its use is discouraged. Users should
@@ -382,9 +362,8 @@ ip(6)tables to filter packets forwarded by the bridge, or NAT bridged
 traffic. For pure link layer filtering, this module isn't needed.
 (因此，只有当用户出于某种原因需要使用 ip(6)tables 过滤由网桥转发的数据包，或对被桥接的流量做 NAT 时，才需要 br_netfilter。对于纯链路层过滤，不需要这个模块。)
 
-Other Features
-(其他特性)
-==============
+Other Features(其他特性)
+========================
 
 The Linux bridge also supports `IEEE 802.11 Proxy ARP
 <https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=958501163ddd6ea22a98f94fa0e7ce6d4734e5c4>`_,
@@ -398,31 +377,27 @@ and `MAC Authentication Bypass (MAB)
 <https://lore.kernel.org/netdev/20221101193922.2125323-2-idosch@nvidia.com/>`_.
 (Linux 网桥还支持 IEEE 802.11 代理 ARP、媒体冗余协议 (MRP)、媒体冗余协议 (MRP) LC 模式、IEEE 802.1X 端口认证以及 MAC 认证旁路 (MAB)。)
 
-FAQ
-(常见问题解答)
-===
+FAQ(常见问题解答)
+=================
 
-What does a bridge do?
-(网桥的作用是什么？)
-----------------------
+What does a bridge do?(网桥的作用是什么？)
+------------------------------------------
 
 A bridge transparently forwards traffic between multiple network interfaces.
 In plain English this means that a bridge connects two or more physical
 Ethernet networks, to form one larger (logical) Ethernet network.
 (网桥在多个网络接口之间透明地转发流量。用通俗的话说，网桥把两个或更多物理以太网网络连接起来，形成一个更大的 (逻辑) 以太网网络。)
 
-Is it L3 protocol independent?
-(它与第 3 层协议无关吗？)
-------------------------------
+Is it L3 protocol independent?(它与第 3 层协议无关吗？)
+-------------------------------------------------------
 
 Yes. The bridge sees all frames, but it *uses* only L2 headers/information.
 As such, the bridging functionality is protocol independent, and there should
 be no trouble forwarding IPX, NetBEUI, IP, IPv6, etc.
 (是。网桥能看到所有帧，但它只 *使用* L2 头部/信息。因此，桥接功能与协议无关，转发 IPX、NetBEUI、IP、IPv6 等都不应有问题。)
 
-Contact Info
-(联系信息)
-============
+Contact Info(联系信息)
+======================
 
 The code is currently maintained by Roopa Prabhu <roopa@nvidia.com> and
 Nikolay Aleksandrov <razor@blackwall.org>. Bridge bugs and enhancements
@@ -433,9 +408,8 @@ bridge@lists.linux.dev.
 The list is open to anyone interested: http://vger.kernel.org/vger-lists.html#netdev
 (该列表向所有感兴趣的人开放： http://vger.kernel.org/vger-lists.html#netdev 。)
 
-External Links
-(外部链接)
-==============
+External Links(外部链接)
+========================
 
 The old Documentation for Linux bridging is on:
 https://wiki.linuxfoundation.org/networking/bridge

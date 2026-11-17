@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===========================================
-Mounting root file system via SMB (cifs.ko)
-===========================================
-
-(通过 SMB 挂载根文件系统(cifs.ko))
+=============================================================================
+Mounting root file system via SMB (cifs.ko)(通过 SMB 挂载根文件系统(cifs.ko))
+=============================================================================
 
 Written 2019 by Paulo Alcantara <palcantara@suse.de>
 (2019 年由 Paulo Alcantara <palcantara@suse.de> 编写)
@@ -41,9 +39,8 @@ default will change once the SMB3 POSIX extensions are fully
 implemented.
 (因此，CIFS 根目前默认使用 SMB1，但仍可以通过 'vers=' 挂载选项更改所使用的版本。一旦 SMB3 POSIX 扩展完全实现，此默认值将会改变。)
 
-Server configuration
-(服务器配置)
-====================
+Server configuration(服务器配置)
+================================
 
 To enable SMB1+UNIX extensions you will need to set these global
 settings in Samba smb.conf::
@@ -53,9 +50,8 @@ settings in Samba smb.conf::
     server min protocol = NT1
     unix extension = yes        # default
 
-Kernel command line
-(内核命令行)
-===================
+Kernel command line(内核命令行)
+===============================
 
 ::
 
@@ -88,9 +84,8 @@ options
 	Optional mount options. For more information, see mount.cifs(8).
 	(可选的挂载选项。更多信息请参见 mount.cifs(8)。)
 
-Examples
-(示例)
-========
+Examples(示例)
+==============
 
 Export root file system as a Samba share in smb.conf file::
 (在 smb.conf 文件中将根文件系统导出为 Samba 共享：)

@@ -1,8 +1,6 @@
-============================
-Kernel NFS Server Statistics
-============================
-
-(内核 NFS 服务器统计信息)
+=====================================================
+Kernel NFS Server Statistics(内核 NFS 服务器统计信息)
+=====================================================
 
 :Authors: Greg Banks <gnb@sgi.com> - 26 Mar 2009
 (作者: Greg Banks <gnb@sgi.com> - 2009年3月26日)
@@ -25,9 +23,8 @@ by parsing routines.  All other lines contain a sequence of fields
 separated by whitespace.
 (这里描述的所有文件都格式化为一系列文本行，以换行符 '\n' 分隔。以井号 '#' 开头的行是面向人类的注释，解析例程应将其忽略。所有其他行包含一系列以空白分隔的字段。)
 
-/proc/fs/nfsd/pool_stats
-(/proc/fs/nfsd/pool_stats)
-========================
+/proc/fs/nfsd/pool_stats(/proc/fs/nfsd/pool_stats)
+==================================================
 
 This file is available in kernels from 2.6.30 onwards, if the
 /proc/fs/nfsd filesystem is mounted (it almost always should be).
@@ -140,9 +137,8 @@ counted, but can be inferred from the other counters thus::
 	packets-deferred = packets-arrived - ( sockets-enqueued + threads-woken )
 
 
-More
-(更多)
-====
+More(更多)
+==========
 
 Descriptions of the other statistics file should go here.
 (对其他统计文件的描述应放在这里。)

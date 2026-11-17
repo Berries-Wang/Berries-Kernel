@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=============================
-Overview of Amiga Filesystems
-=============================
-
-(Amiga 文件系统概览)
+=================================================
+Overview of Amiga Filesystems(Amiga 文件系统概览)
+=================================================
 
 Not all varieties of the Amiga filesystems are supported for reading and
 writing. The Amiga currently knows six different filesystems:
@@ -43,9 +41,8 @@ The muFS (multi user File System) equivalents of the above file systems
 are supported, too.
 (上述文件系统的 muFS(多用户文件系统)等价形式也受支持。)
 
-Mount options for the AFFS
-(AFFS 的挂载选项)
-==========================
+Mount options for the AFFS(AFFS 的挂载选项)
+===========================================
 
 protect
 		If this option is set, the protection bits cannot be altered.
@@ -120,9 +117,8 @@ volume=name
 		(See below.)
 		(当在 AFFS 分区上创建带绝对路径的符号链接时，name 将被前置为卷名。默认 = ""(空字符串)。(见下文。))
 
-Handling of the Users/Groups and protection flags
-(用户/组与保护位的处理)
-=================================================
+Handling of the Users/Groups and protection flags(用户/组与保护位的处理)
+========================================================================
 
 Amiga -> Linux:
 (Amiga -> Linux：)
@@ -181,9 +177,8 @@ Newly created files and directories will get the user and group ID
 of the current user and a mode according to the umask.
 (新建的文件和目录将获得当前用户的用户 ID 和组 ID，以及根据 umask 得到的模式。)
 
-Symbolic links
-(符号链接)
-==============
+Symbolic links(符号链接)
+========================
 
 Although the Amiga and Linux file systems resemble each other, there
 are some, not always subtle, differences. One of them becomes apparent
@@ -206,9 +201,8 @@ might be "User", "WB" and "Graphics", the mount points /amiga/User,
 "/amiga/User/sc/include/dos/dos.h".
 (示例：你把所有 Amiga 分区挂载到 /amiga/<volume> 之下(其中 <volume> 是卷的名称)，并且在挂载所有 AFFS 分区时给出选项 "prefix=/amiga/"。(它们可能是 "User"、"WB" 和 "Graphics"，即挂载点 /amiga/User、/amiga/WB 和 /amiga/Graphics)。指向 "User:sc/include/dos/dos.h" 的符号链接将被解析为 "/amiga/User/sc/include/dos/dos.h"。)
 
-Examples
-(示例)
-========
+Examples(示例)
+==============
 
 Command line::
 (命令行：)
@@ -221,9 +215,8 @@ Command line::
 
     /dev/sdb5	/amiga/Workbench    affs    noauto,user,exec,verbose 0 0
 
-IMPORTANT NOTE
-(重要说明)
-==============
+IMPORTANT NOTE(重要说明)
+========================
 
 If you boot Windows 95 (don't know about 3.x, 98 and NT) while you
 have an Amiga harddisk connected to your PC, it will overwrite
@@ -248,9 +241,8 @@ DO AT YOUR OWN RISK::
   dd if=/dev/zero of=rdb.fixed bs=1 seek=220 count=4
   dd if=rdb.fixed of=/dev/<disk>
 
-Bugs, Restrictions, Caveats
-(缺陷、限制与注意事项)
-===========================
+Bugs, Restrictions, Caveats(缺陷、限制与注意事项)
+=================================================
 
 Quite a few things may not work as advertised. Not everything is
 tested, though several hundred MB have been read and written using

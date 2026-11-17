@@ -1,12 +1,9 @@
-=======================
-Direct Access for files
-=======================
+=====================================
+Direct Access for files(文件直接访问)
+=====================================
 
-(文件直接访问)
-
-Motivation
-(动机)
-----------
+Motivation(动机)
+----------------
 
 The page cache is usually used to buffer reads and writes to files.
 It is also used to provide the pages which are mapped into userspace
@@ -20,9 +17,8 @@ For file mappings, the storage device is mapped directly into userspace.
 (对于类内存型的块设备，页缓存页将是原始存储的多余副本。`DAX`(直接访问)代码通过直接对存储设备执行读取和写入来消除这个多余的副本。对于文件映射，存储设备被直接映射到用户空间。)
 
 
-Usage
-(用法)
------
+Usage(用法)
+-----------
 
 If you have a block device which supports `DAX`, you can make a filesystem
 on it as usual.  The `DAX` code currently only supports files with a block
@@ -34,9 +30,8 @@ Currently 5 filesystems support `DAX`: ext2, ext4, xfs, virtiofs and erofs.
 Enabling `DAX` on them is different.
 (目前有 5 个文件系统支持 `DAX`：ext2、ext4、xfs、virtiofs 和 erofs。在它们上启用 `DAX` 的方式各不相同。)
 
-Enabling DAX on ext2 and erofs
-(在 ext2 和 erofs 上启用 DAX)
-------------------------------
+Enabling DAX on ext2 and erofs(在 ext2 和 erofs 上启用 DAX)
+-----------------------------------------------------------
 
 When mounting the filesystem, use the ``-o dax`` option on the command line or
 add 'dax' to the options in ``/etc/fstab``.  This works to enable `DAX` on all files
@@ -44,13 +39,11 @@ within the filesystem.  It is equivalent to the ``-o dax=always`` behavior below
 (挂载文件系统时，在命令行上使用 ``-o dax`` 选项，或者在 ``/etc/fstab`` 的选项中添加 'dax'。这样可以对文件系统内的所有文件启用 `DAX`。它等同于下述 ``-o dax=always`` 的行为。)
 
 
-Enabling DAX on xfs and ext4
-(在 xfs 和 ext4 上启用 DAX)
-----------------------------
+Enabling DAX on xfs and ext4(在 xfs 和 ext4 上启用 DAX)
+-------------------------------------------------------
 
-Summary
-(摘要)
--------
+Summary(摘要)
+-------------
 
  1. There exists an in-kernel file access mode flag `S_DAX` that corresponds to
     the statx flag `STATX_ATTR_DAX`.  See the manpage for statx(2) for details
@@ -121,9 +114,8 @@ Summary
     (在通过切换持久标志 `FS_XFLAG_DAX` 来更改 `S_DAX` 策略时，对现有普通文件的更改要等到所有进程都关闭这些文件之后才会生效。)
 
 
-Details
-(详细信息)
--------
+Details(详细信息)
+-----------------
 
 There are 2 per-file dax flags.  One is a persistent inode setting (`FS_XFLAG_DAX`)
 and the other is a volatile flag indicating the active state of the feature
@@ -207,9 +199,8 @@ overridden with a mount option.
 (即使底层介质不支持 dax 和/或文件系统被挂载选项覆盖，`FS_XFLAG_DAX` 标志(显式设置或通过继承)也照样会被设置。)
 
 
-Enabling DAX on virtiofs
-(在 virtiofs 上启用 DAX)
-----------------------------
+Enabling DAX on virtiofs(在 virtiofs 上启用 DAX)
+------------------------------------------------
 The semantic of DAX on virtiofs is basically equal to that on ext4 and xfs,
 except that when '-o dax=inode' is specified, virtiofs client derives the hint
 whether DAX shall be enabled or not from virtiofs server through FUSE protocol,
@@ -226,9 +217,8 @@ check the statx flag `STATX_ATTR_DAX` to see if DAX is enabled for this file.
 (在客户机内设置或清除持久标志 `FS_XFLAG_DAX` 仍然是受支持的，但此后并不保证相应文件一定会启用或禁用 DAX。客户机内的用户仍需要调用 statx(2) 并检查 statx 标志 `STATX_ATTR_DAX`，以查看该文件是否启用了 DAX。)
 
 
-Implementation Tips for Block Driver Writers
-(块驱动程序编写者的实现提示)
---------------------------------------------
+Implementation Tips for Block Driver Writers(块驱动程序编写者的实现提示)
+------------------------------------------------------------------------
 
 To support `DAX` in your block driver, implement the 'direct_access'
 block device operation.  It is used to translate the sector number
@@ -257,9 +247,8 @@ These block devices may be used for inspiration:
   (pmem：NVDIMM 持久内存驱动程序)
 
 
-Implementation Tips for Filesystem Writers
-(文件系统编写者的实现提示)
-------------------------------------------
+Implementation Tips for Filesystem Writers(文件系统编写者的实现提示)
+--------------------------------------------------------------------
 
 Filesystem support consists of:
 (文件系统支持包括以下内容：)
@@ -307,9 +296,8 @@ These filesystems may be used for inspiration:
   (ext4：参见 Documentation/filesystems/ext4/)
 
 
-Handling Media Errors
-(处理介质错误)
----------------------
+Handling Media Errors(处理介质错误)
+-----------------------------------
 
 The libnvdimm subsystem stores a record of known media error locations for
 each pmem block device (in gendisk->badblocks). If we fault at such location,
@@ -345,9 +333,8 @@ the driver).
 (这是让 `DAX` 文件系统在存在介质错误的情况下仍能继续运行的两种基本途径。将来可以在其之上构建更健壮的错误恢复机制，例如，涉及块层通过 DM 提供的冗余/镜像，或者另外在文件系统层提供。这些机制将不得不依赖上述两条原则，即错误清除既可以由驱动程序通过发送 IO 来完成，也可以通过清零(同样通过驱动程序)来完成。)
 
 
-Shortcomings
-(缺点)
-------------
+Shortcomings(缺点)
+------------------
 
 Even if the kernel or its modules are stored on a filesystem that supports
 `DAX` on a block device that supports `DAX`, they will still be copied into RAM.

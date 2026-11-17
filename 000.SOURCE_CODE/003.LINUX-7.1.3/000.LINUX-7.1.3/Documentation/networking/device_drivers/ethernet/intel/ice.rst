@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0+
 
-=================================================================
-Linux Base Driver for the Intel(R) Ethernet Controller 800 Series
-=================================================================
-
-(Intel(R) 以太网控制器 800 系列的 Linux 基础驱动程序)
+======================================================================================================================
+Linux Base Driver for the Intel(R) Ethernet Controller 800 Series(Intel(R) 以太网控制器 800 系列的 Linux 基础驱动程序)
+======================================================================================================================
 
 Intel ice Linux driver.
 (Intel ice Linux 驱动程序。)
 Copyright(c) 2018-2021 Intel Corporation.
 
-Contents
-(目录)
-========
+Contents(目录)
+==============
 
 - Overview
   (概述)
@@ -44,9 +41,8 @@ XDP is blocked for frame sizes larger than 3KB.
 将被禁用。)
 
 
-Identifying Your Adapter
-(识别你的适配器)
-========================
+Identifying Your Adapter(识别你的适配器)
+========================================
 For information on how to identify your adapter, and for the latest Intel
 network drivers, refer to the Intel Support website:
 https://www.intel.com/support
@@ -54,13 +50,11 @@ https://www.intel.com/support
 https://www.intel.com/support)
 
 
-Important Notes
-(重要说明)
-===============
+Important Notes(重要说明)
+=========================
 
-Packet drops may occur under receive stress
-(接收压力下可能出现丢包)
--------------------------------------------
+Packet drops may occur under receive stress(接收压力下可能出现丢包)
+-------------------------------------------------------------------
 Devices based on the Intel(R) Ethernet Controller 800 Series are designed to
 tolerate a limited amount of system latency during PCIe and DMA transactions.
 If these transactions take longer than the tolerated latency, it can impact the
@@ -90,9 +84,8 @@ the situation:
    负载获得更好的标准设置。)
 
 
-Configuring SR-IOV for improved network security
-(配置 SR-IOV 以增强网络安全性)
-------------------------------------------------
+Configuring SR-IOV for improved network security(配置 SR-IOV 以增强网络安全性)
+------------------------------------------------------------------------------
 In a virtualized environment, on Intel(R) Ethernet Network Adapters that
 support SR-IOV, the virtual function (VF) may be subject to malicious behavior.
 Software-generated layer two frames, like IEEE 802.3x (link flow control), IEEE
@@ -114,9 +107,8 @@ README for configuration instructions.
 Ports" 一节。)
 
 
-Do not unload port driver if VF with active VM is bound to it
-(若有活动虚拟机的 VF 绑定在端口上，请勿卸载端口驱动程序)
--------------------------------------------------------------
+Do not unload port driver if VF with active VM is bound to it(若有活动虚拟机的 VF 绑定在端口上，请勿卸载端口驱动程序)
+---------------------------------------------------------------------------------------------------------------------
 Do not unload a port's driver if a Virtual Function (VF) with an active Virtual
 Machine (VM) is bound to it. Doing so will cause the port to appear to hang.
 Once the VM shuts down, or otherwise releases the VF, the command will
@@ -126,13 +118,11 @@ complete.
 成。)
 
 
-Additional Features and Configurations
-(附加功能与配置)
-======================================
+Additional Features and Configurations(附加功能与配置)
+======================================================
 
-ethtool
-(ethtool)
--------
+ethtool(ethtool)
+----------------
 The driver utilizes the ethtool interface for driver configuration and
 diagnostics, as well as displaying statistical information. The latest ethtool
 version is required for this functionality. Download it at:
@@ -151,9 +141,8 @@ rx_bytes as "X", then ethtool (hardware statistics) will display rx_bytes as
 Netdev (软件统计) 显示的 rx_bytes 为 "X"，则 ethtool (硬件统计) 显示的 rx_bytes 将为
 "X+40" (4 字节 CRC x 10 个数据包)。)
 
-ethtool reset
-(ethtool 复位)
--------------
+ethtool reset(ethtool 复位)
+---------------------------
 The driver supports 3 types of resets:
 (此驱动程序支持 3 种复位类型：)
 
@@ -193,9 +182,8 @@ In switchdev mode you can reset a VF using port representor:
   # ethtool --reset <repr> irq dma filter offload
 
 
-Viewing Link Messages
-(查看链路消息)
----------------------
+Viewing Link Messages(查看链路消息)
+-----------------------------------
 Link messages will not be displayed to the console if the distribution is
 restricting system messages. In order to see network driver link messages on
 your console, set dmesg to eight by entering the following::
@@ -208,9 +196,8 @@ NOTE: This setting is not saved across reboots.
 (注意：此设置在重启后不会保存。)
 
 
-Dynamic Device Personalization
-(动态设备个性化)
-------------------------------
+Dynamic Device Personalization(动态设备个性化)
+----------------------------------------------
 Dynamic Device Personalization (DDP) allows you to change the packet processing
 pipeline of a device by applying a profile package to the device at runtime.
 Profiles can be used to, for example, add support for new protocols, change
@@ -315,9 +302,8 @@ of the default DDP package file (ice.pkg).
 (注意：设备专用 DDP 包文件的存在会覆盖默认 DDP 包文件 (ice.pkg) 的加载。)
 
 
-Intel(R) Ethernet Flow Director
-(Intel(R) 以太网 Flow Director)
--------------------------------
+Intel(R) Ethernet Flow Director(Intel(R) 以太网 Flow Director)
+--------------------------------------------------------------
 The Intel Ethernet Flow Director performs the following tasks:
 (Intel Ethernet Flow Director 执行以下任务：)
 
@@ -358,9 +344,8 @@ changing the input set (for that flow type).
 器。)
 
 
-Flow Director Filters
-(Flow Director 过滤器)
----------------------
+Flow Director Filters(Flow Director 过滤器)
+-------------------------------------------
 Flow Director filters are used to direct traffic that matches specified
 characteristics. They are enabled through ethtool's ntuple interface. To enable
 or disable the Intel Ethernet Flow Director and these filters::
@@ -475,9 +460,8 @@ partial mask fields are not supported.
 (ice 驱动程序不支持匹配字段的子部分，因此不支持部分掩码字段。)
 
 
-Flex Byte Flow Director Filters
-(Flex Byte Flow Director 过滤器)
--------------------------------
+Flex Byte Flow Director Filters(Flex Byte Flow Director 过滤器)
+---------------------------------------------------------------
 The driver also supports matching user-defined data within the packet payload.
 This flexible data is specified using the "user-def" field of the ethtool
 command in the following way:
@@ -535,9 +519,8 @@ same offset but match against different data.
 不过，灵活数据不属于输入集，多个过滤器可以使用相同的偏移量，但匹配不同的数据。)
 
 
-RSS Hash Flow
-(RSS 哈希流)
--------------
+RSS Hash Flow(RSS 哈希流)
+-------------------------
 Allows you to set the hash bytes per flow type and any combination of one or
 more options for Receive Side Scaling (RSS) hash byte configuration.
 (允许你为每种流类型设置哈希字节，以及为接收侧扩展 (RSS) 哈希字节配置设置一个或多个选
@@ -572,9 +555,8 @@ more options for Receive Side Scaling (RSS) hash byte configuration.
     e     Hash on GTP Packet on TEID (4bytes) of the Rx packet.
 
 
-Accelerated Receive Flow Steering (aRFS)
-(加速接收流导向 (aRFS))
-----------------------------------------
+Accelerated Receive Flow Steering (aRFS)(加速接收流导向 (aRFS))
+---------------------------------------------------------------
 Devices based on the Intel(R) Ethernet Controller 800 Series support
 Accelerated Receive Flow Steering (aRFS) on the PF. aRFS is a load-balancing
 mechanism that allows you to direct packets to the same CPU where an
@@ -681,9 +663,8 @@ Example Use Case:
    # netperf -H <Host IPv4 Address> -t TCP_STREAM
 
 
-Enabling Virtual Functions (VFs)
-(启用虚拟功能 (VF))
---------------------------------
+Enabling Virtual Functions (VFs)(启用虚拟功能 (VF))
+---------------------------------------------------
 Use sysfs to enable virtual functions (VF).
 (使用 sysfs 启用虚拟功能 (VF)。)
 
@@ -710,9 +691,8 @@ vice versa. To enforce this, the driver checks for this mutual exclusion.
 了强制实施这一点，驱动程序会检查这种互斥关系。)
 
 
-Displaying VF Statistics on the PF
-(在 PF 上显示 VF 统计信息)
-----------------------------------
+Displaying VF Statistics on the PF(在 PF 上显示 VF 统计信息)
+------------------------------------------------------------
 Use the following command to display the statistics for the PF and its VFs::
 (使用以下命令显示 PF 及其 VF 的统计信息：)
 
@@ -729,9 +709,8 @@ of the possible VFs, and it will show zero for all unconfigured VFs.
 个统计信息块，并对所有未配置的 VF 显示零。)
 
 
-Configuring VLAN Tagging on SR-IOV Enabled Adapter Ports
-(在启用了 SR-IOV 的适配器端口上配置 VLAN 打标)
---------------------------------------------------------
+Configuring VLAN Tagging on SR-IOV Enabled Adapter Ports(在启用了 SR-IOV 的适配器端口上配置 VLAN 打标)
+------------------------------------------------------------------------------------------------------
 To configure VLAN tagging for the ports on an SR-IOV enabled adapter, use the
 following command. The VLAN configuration should be done before the VF driver
 is loaded or the VM is booted. The VF is not aware of the VLAN tag being
@@ -751,9 +730,8 @@ For example, the following will configure PF eth0 and the first VF on VLAN 10::
   # ip link set dev eth0 vf 0 vlan 10
 
 
-Enabling a VF link if the port is disconnected
-(端口断开时启用 VF 链路)
-----------------------------------------------
+Enabling a VF link if the port is disconnected(端口断开时启用 VF 链路)
+----------------------------------------------------------------------
 If the physical function (PF) link is down, you can force link up (from the
 host PF) on any virtual functions (VF) bound to the PF.
 (如果物理功能 (PF) 的链路断开，你可以 (从主机的 PF 侧) 强制将绑定到该 PF 的任何虚拟
@@ -768,9 +746,8 @@ Note: If the command does not work, it may not be supported by your system.
 (注意：如果该命令不起作用，可能是你的系统不支持此功能。)
 
 
-Setting the MAC Address for a VF
-(为 VF 设置 MAC 地址)
---------------------------------
+Setting the MAC Address for a VF(为 VF 设置 MAC 地址)
+-----------------------------------------------------
 To change the MAC address for the specified VF::
 (要更改指定 VF 的 MAC 地址：)
 
@@ -792,9 +769,8 @@ attempted in the VM, it will trigger MDD events.
 项安全特性。VM 并不知道这一限制，因此如果在 VM 中尝试这样做，将触发 MDD 事件。)
 
 
-Trusted VFs and VF Promiscuous Mode
-(受信任的 VF 与 VF 混杂模式)
------------------------------------
+Trusted VFs and VF Promiscuous Mode(受信任的 VF 与 VF 混杂模式)
+---------------------------------------------------------------
 This feature allows you to designate a particular VF as trusted and allows that
 trusted VF to request selective promiscuous mode on the Physical Function (PF).
 (此特性允许你将特定的 VF 指定为受信任的，并允许该受信任的 VF 在物理功能 (PF) 上请求
@@ -864,9 +840,8 @@ example is that the VF will get all traffic that is tagged with VLAN 100.
 例中，结果将是 VF 会接收到所有打有 VLAN 100 标签的流量。)
 
 
-Malicious Driver Detection (MDD) for VFs
-(VF 的恶意驱动检测 (MDD))
-----------------------------------------
+Malicious Driver Detection (MDD) for VFs(VF 的恶意驱动检测 (MDD))
+-----------------------------------------------------------------
 Some Intel Ethernet devices use Malicious Driver Detection (MDD) to detect
 malicious traffic from the VF and disable Tx/Rx queues or drop the offending
 packet until a VF driver reset occurs. You can view MDD messages in the PF's
@@ -895,9 +870,8 @@ To enable or disable automatic VF resets, use the following command::
   # ethtool --set-priv-flags <ethX> mdd-auto-reset-vf on|off
 
 
-MAC and VLAN Anti-Spoofing Feature for VFs
-(VF 的 MAC 和 VLAN 防欺骗特性)
-------------------------------------------
+MAC and VLAN Anti-Spoofing Feature for VFs(VF 的 MAC 和 VLAN 防欺骗特性)
+------------------------------------------------------------------------
 When a malicious driver on a Virtual Function (VF) interface attempts to send a
 spoofed packet, it is dropped by the hardware and not transmitted.
 (当虚拟功能 (VF) 接口上的恶意驱动程序试图发送欺骗性数据包时，该数据包会被硬件丢弃而不
@@ -909,9 +883,8 @@ NOTE: This feature can be disabled for a specific VF::
   # ip link set <ethX> vf <vf id> spoofchk {off|on}
 
 
-Jumbo Frames
-(巨型帧)
-------------
+Jumbo Frames(巨型帧)
+--------------------
 Jumbo Frames support is enabled by changing the Maximum Transmission Unit (MTU)
 to a value larger than the default value of 1500.
 (通过将最大传输单元 (MTU) 更改为大于默认值 1500 的数值，即可启用巨型帧支持。)
@@ -949,9 +922,8 @@ enabling flow control may mitigate the issue.
 降，启用流控制可能会缓解此问题。)
 
 
-Speed and Duplex Configuration
-(速度和双工配置)
-------------------------------
+Speed and Duplex Configuration(速度和双工配置)
+----------------------------------------------
 In addressing speed and duplex configuration issues, you need to distinguish
 between copper-based adapters and fiber-based adapters.
 (在处理速度和双工配置问题时，需要区分基于铜缆的适配器和基于光纤的适配器。)
@@ -996,9 +968,8 @@ switch.
 下降，甚至可能无法工作。)
 
 
-Data Center Bridging (DCB)
-(数据中心桥接 (DCB))
---------------------------
+Data Center Bridging (DCB)(数据中心桥接 (DCB))
+----------------------------------------------
 NOTE: The kernel assumes that TC0 is available, and will disable Priority Flow
 Control (PFC) on the device if TC0 is not available. To fix this, ensure TC0 is
 enabled when setting up DCB on your switch.
@@ -1071,9 +1042,8 @@ NOTE:
   (不支持将 iSCSI 与 DCB 配合使用。)
 
 
-FW-LLDP (Firmware Link Layer Discovery Protocol)
-(FW-LLDP (固件链路层发现协议))
-------------------------------------------------
+FW-LLDP (Firmware Link Layer Discovery Protocol)(FW-LLDP (固件链路层发现协议))
+------------------------------------------------------------------------------
 Use ethtool to change FW-LLDP settings. The FW-LLDP setting is per port and
 persists across boots.
 (使用 ethtool 更改 FW-LLDP 设置。FW-LLDP 设置是按端口生效的，并在重启后保持。)
@@ -1100,9 +1070,8 @@ OS.
 设置为禁用，则无法从操作系统启用它。)
 
 
-Flow Control
-(流控制)
-------------
+Flow Control(流控制)
+--------------------
 Ethernet Flow Control (IEEE 802.3x) can be configured with ethtool to enable
 receiving and transmitting pause frames for ice. When transmit is enabled,
 pause frames are generated when the receive packet buffer crosses a predefined
@@ -1155,9 +1124,8 @@ NOTE:
    # ethtool -A <ethX> rx on tx on
 
 
-NAPI
-(NAPI)
-----
+NAPI(NAPI)
+----------
 
 This driver supports NAPI (Rx polling mode).
 (此驱动程序支持 NAPI (接收轮询模式)。)
@@ -1165,9 +1133,8 @@ This driver supports NAPI (Rx polling mode).
 See :ref:`Documentation/networking/napi.rst <napi>` for more information.
 (更多信息参见 :ref:`Documentation/networking/napi.rst <napi>`。)
 
-MACVLAN
-(MACVLAN)
--------
+MACVLAN(MACVLAN)
+----------------
 This driver supports MACVLAN. Kernel support for MACVLAN can be tested by
 checking if the MACVLAN driver is loaded. You can run 'lsmod | grep macvlan' to
 see if the MACVLAN driver is loaded or run 'modprobe macvlan' to try to load
@@ -1185,9 +1152,8 @@ NOTE:
   MAC 地址。)
 
 
-IEEE 802.1ad (QinQ) Support
-(IEEE 802.1ad (QinQ) 支持)
----------------------------
+IEEE 802.1ad (QinQ) Support(IEEE 802.1ad (QinQ) 支持)
+-----------------------------------------------------
 The IEEE 802.1ad standard, informally known as QinQ, allows for multiple VLAN
 IDs within a single Ethernet frame. VLAN IDs are sometimes referred to as
 "tags," and multiple VLAN IDs are thus referred to as a "tag stack." Tag stacks
@@ -1241,9 +1207,8 @@ The following are examples of how to configure 802.1ad (QinQ)::
   Where "24" and "371" are example VLAN IDs.
 
 
-Tunnel/Overlay Stateless Offloads
-(隧道/覆盖层无状态卸载)
----------------------------------
+Tunnel/Overlay Stateless Offloads(隧道/覆盖层无状态卸载)
+--------------------------------------------------------
 Supported tunnels and overlays include VXLAN, GENEVE, and others depending on
 hardware and software configuration. Stateless offloads are enabled by default.
 (支持的隧道和覆盖层包括 VXLAN、GENEVE 等，具体取决于硬件和软件配置。无状态卸载默认启
@@ -1255,9 +1220,8 @@ To view the current state of all offloads::
   # ethtool -k <ethX>
 
 
-UDP Segmentation Offload
-(UDP 分段卸载)
-------------------------
+UDP Segmentation Offload(UDP 分段卸载)
+--------------------------------------
 Allows the adapter to offload transmit segmentation of UDP packets with
 payloads up to 64K into valid Ethernet frames. Because the adapter hardware is
 able to complete data segmentation much faster than operating system software,
@@ -1278,9 +1242,8 @@ To enable/disable UDP Segmentation Offload, issue the following command::
 
   # ethtool -K <ethX> tx-udp-segmentation [off|on]
 
-PTP pin interface
-(PTP 引脚接口)
------------------
+PTP pin interface(PTP 引脚接口)
+-------------------------------
 All adapters support standard PTP pin interface. SDPs (Software Definable Pin)
 are single ended pins with both periodic output and external timestamp
 supported. There are also specific differential input/output pins (TIME_SYNC,
@@ -1300,9 +1263,8 @@ DPLL output pins have to be manually configured.
 输入信号，需要正确配置 DPLL。输出信号只在 DPLL 上可见，要将其送到板卡的 SMA/U.FL 引
 脚，必须手动配置 DPLL 输出引脚。)
 
-GNSS module
-(GNSS 模块)
------------
+GNSS module(GNSS 模块)
+----------------------
 Requires kernel compiled with CONFIG_GNSS=y or CONFIG_GNSS=m.
 Allows user to read messages from the GNSS hardware module and write supported
 commands. If the module is physically present, a GNSS device is spawned:
@@ -1316,18 +1278,16 @@ refer to the hardware GNSS module documentation for configuration details.
 始字节。配置细节请参阅硬件 GNSS 模块的文档。)
 
 
-Firmware (FW) logging
-(固件 (FW) 日志)
----------------------
+Firmware (FW) logging(固件 (FW) 日志)
+-------------------------------------
 The driver supports FW logging via the debugfs interface on PF 0 only. The FW
 running on the NIC must support FW logging; if the FW doesn't support FW logging
 the 'fwlog' file will not get created in the ice debugfs directory.
 (此驱动程序仅通过 PF 0 上的 debugfs 接口支持 FW 日志。NIC 上运行的 FW 必须支持 FW 日
 志；如果 FW 不支持 FW 日志，将不会在 ice 的 debugfs 目录中创建 'fwlog' 文件。)
 
-Module configuration
-(模块配置)
-~~~~~~~~~~~~~~~~~~~~
+Module configuration(模块配置)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Firmware logging is configured on a per module basis. Each module can be set to
 a value independent of the other modules (unless the module 'all' is specified).
 The modules will be instantiated under the 'fwlog/modules' directory.
@@ -1396,9 +1356,8 @@ specified log_level or to read the log_level of all of the modules.
 (名称 'all' 比较特殊，它允许用户将所有模块设置为指定的 log_level，或读取所有模块的
 log_level。)
 
-Example usage to configure the modules
-(配置模块的示例用法)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Example usage to configure the modules(配置模块的示例用法)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To set a single module to 'verbose'::
 (要将单个模块设置为 'verbose'：)
@@ -1427,9 +1386,8 @@ To read the log_level of all the modules::
 
   # cat /sys/kernel/debug/ice/0000\:18\:00.0/fwlog/modules/all
 
-Enabling FW log
-(启用 FW 日志)
-~~~~~~~~~~~~~~~
+Enabling FW log(启用 FW 日志)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Configuring the modules indicates to the FW that the configured modules should
 generate events that the driver is interested in, but it **does not** send the
 events to the driver until the enable message is sent to the FW. To do this
@@ -1441,9 +1399,8 @@ is::
 
   # echo 1 > /sys/kernel/debug/ice/0000\:18\:00.0/fwlog/enable
 
-Retrieving FW log data
-(获取 FW 日志数据)
-~~~~~~~~~~~~~~~~~~~~~~
+Retrieving FW log data(获取 FW 日志数据)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The FW log data can be retrieved by reading from 'fwlog/data'. The user can
 write any value to 'fwlog/data' to clear the data. The data can only be cleared
 when FW logging is disabled. The FW log data is a binary file that is sent to
@@ -1462,9 +1419,8 @@ An example to clear the data is::
 
   # echo 0 > /sys/kernel/debug/ice/0000\:18\:00.0/fwlog/data
 
-Changing how often the log events are sent to the driver
-(更改日志事件发送到驱动程序的频率)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Changing how often the log events are sent to the driver(更改日志事件发送到驱动程序的频率)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The driver receives FW log data from the Admin Receive Queue (ARQ). The
 frequency that the FW sends the ARQ events can be configured by writing to
 'fwlog/nr_messages'. The range is 1-128 (1 means push every log message, 128
@@ -1478,9 +1434,8 @@ AQ 命令缓冲区满时才推送)。建议值为 10。用户可以通过读取 
 
   # echo 50 > /sys/kernel/debug/ice/0000\:18\:00.0/fwlog/nr_messages
 
-Configuring the amount of memory used to store FW log data
-(配置用于存储 FW 日志数据的内存量)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Configuring the amount of memory used to store FW log data(配置用于存储 FW 日志数据的内存量)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The driver stores FW log data within the driver. The default size of the memory
 used to store the data is 1MB. Some use cases may require more or less data so
 the user can change the amount of memory that is allocated for FW log data.
@@ -1495,9 +1450,8 @@ value. An example of changing the value is::
   # echo 128K > /sys/kernel/debug/ice/0000\:18\:00.0/fwlog/log_size
 
 
-Performance Optimization
-(性能优化)
-========================
+Performance Optimization(性能优化)
+==================================
 Driver defaults are meant to fit a wide variety of workloads, but if further
 optimization is required, we recommend experimenting with the following
 settings.
@@ -1505,9 +1459,8 @@ settings.
 试验。)
 
 
-Rx Descriptor Ring Size
-(Rx 描述符环形队列大小)
------------------------
+Rx Descriptor Ring Size(Rx 描述符环形队列大小)
+----------------------------------------------
 To reduce the number of Rx packet discards, increase the number of Rx
 descriptors for each Rx ring using ethtool.
 (要减少接收数据包的丢弃数量，可以使用 ethtool 增加每个 Rx 环的 Rx 描述符数量。)
@@ -1531,9 +1484,8 @@ descriptors for each Rx ring using ethtool.
   (这可以为 CPU 处理描述符时产生延迟的问题提供临时缓冲。)
 
 
-Interrupt Rate Limiting
-(中断速率限制)
------------------------
+Interrupt Rate Limiting(中断速率限制)
+-------------------------------------
 This driver supports an adaptive interrupt throttle rate (ITR) mechanism that
 is tuned for general workloads. The user can customize the interrupt rate
 control for specific workloads, via ethtool, adjusting the number of
@@ -1620,9 +1572,8 @@ Bounding interrupt rates using rx-usecs-high:
     rx-usecs 5 tx-usecs 5
 
 
-Virtualized Environments
-(虚拟化环境)
-------------------------
+Virtualized Environments(虚拟化环境)
+------------------------------------
 In addition to the other suggestions in this section, the following may be
 helpful to optimize performance in VMs.
 (除了本节中的其他建议之外，以下措施也可能有助于优化虚拟机中的性能。)
@@ -1641,9 +1592,8 @@ helpful to optimize performance in VMs.
     # ethtool -L <virt_interface> rx <max> tx <max>
 
 
-Support
-(支持)
-=======
+Support(支持)
+=============
 For general information, go to the Intel support website at:
 https://www.intel.com/support/
 (一般信息请访问 Intel 支持网站：https://www.intel.com/support/)
@@ -1655,9 +1605,8 @@ to intel-wired-lan@lists.osuosl.org.
 的具体信息通过电子邮件发送至 intel-wired-lan@lists.osuosl.org。)
 
 
-Trademarks
-(商标)
-==========
+Trademarks(商标)
+================
 Intel is a trademark or registered trademark of Intel Corporation or its
 subsidiaries in the United States and/or other countries.
 (Intel 是 Intel Corporation 或其子公司在美国和/或其他国家/地区的商标或注册商标。)

@@ -1,35 +1,31 @@
 .. SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
 .. include:: <isonum.txt>
 
-===========================================
-Network Flow Processor (NFP) Kernel Drivers
-===========================================
-
-(网络流处理器 (NFP) 内核驱动程序)
+============================================================================
+Network Flow Processor (NFP) Kernel Drivers(网络流处理器 (NFP) 内核驱动程序)
+============================================================================
 
 :Copyright: |copy| 2019, Netronome Systems, Inc.
   (版权：|copy| 2019, Netronome Systems, Inc.)
 :Copyright: |copy| 2022, Corigine, Inc.
   (版权：|copy| 2022, Corigine, Inc.)
 
-Contents
-(目录)
-========
+Contents(目录)
+==============
 
-- `Overview`_
+- `Overview(总览)`_
   (总览)
-- `Acquiring Firmware`_
+- `Acquiring Firmware(获取固件)`_
   (获取固件)
-- `Devlink Info`_
+- `Devlink Info(Devlink 信息)`_
   (Devlink 信息)
-- `Configure Device`_
+- `Configure Device(配置设备)`_
   (配置设备)
-- `Statistics`_
+- `Statistics(统计)`_
   (统计)
 
-Overview
-(总览)
-========
+Overview(总览)
+==============
 
 This driver supports Netronome and Corigine's line of Network Flow Processor
 devices, including the NFP3800, NFP4000, NFP5000, and NFP6000 models, which
@@ -37,9 +33,8 @@ are also incorporated in the companies' family of Agilio SmartNICs. The SR-IOV
 physical and virtual functions for these devices are supported by the driver.
 (此驱动程序支持 Netronome 和 Corigine 的网络流处理器 (Network Flow Processor) 设备系列，包括 NFP3800、NFP4000、NFP5000 和 NFP6000 型号，这些型号也集成在两家公司的 Agilio SmartNIC 产品家族中。该驱动程序支持这些设备的 SR-IOV 物理功能和虚拟功能。)
 
-Acquiring Firmware
-(获取固件)
-==================
+Acquiring Firmware(获取固件)
+============================
 
 The NFP3800, NFP4000 and NFP6000 devices require application specific firmware
 to function. Application firmware can be located either on the host file system
@@ -59,9 +54,8 @@ A more comprehensive list of firmware can be downloaded from the
 `Corigine Support site <https://www.corigine.com/DPUDownload.html>`_.
 (更全面的固件列表可从 Corigine 支持站点下载。)
 
-Firmware in NVRAM
-(NVRAM 中的固件)
------------------
+Firmware in NVRAM(NVRAM 中的固件)
+---------------------------------
 
 Recent versions of management firmware supports loading application
 firmware from flash when the host driver gets probed. The firmware loading
@@ -77,9 +71,8 @@ card and media configuration to flash.
 Available storage space in flash depends on the card being used.
 (闪存的可用存储空间取决于所使用的卡。)
 
-Dealing with multiple projects
-(处理多个项目)
-------------------------------
+Dealing with multiple projects(处理多个项目)
+--------------------------------------------
 
 NFP hardware is fully programmable therefore there can be different
 firmware images targeting different applications.
@@ -118,9 +111,8 @@ is system loading wrong driver or firmware on boot, but when driver is
 later reloaded manually everything works correctly.
 (更改固件文件后，可能需要重新生成 initramfs 镜像。initramfs 包含系统启动所需的驱动程序和固件文件。请参阅所用发行版的文档，了解如何更新 initramfs。initramfs 过期的一个明显迹象是系统在启动时加载了错误的驱动程序或固件，但之后手动重新加载驱动程序时一切工作正常。)
 
-Selecting firmware per device
-(按设备选择固件)
------------------------------
+Selecting firmware per device(按设备选择固件)
+---------------------------------------------
 
 Most commonly all cards on the system use the same type of firmware.
 If you want to load a specific firmware image for a specific card, you
@@ -143,9 +135,8 @@ in initramfs, you will have to refer to documentation of appropriate tools
 to find out how to include them.
 (注意，`serial-*` 和 `pci-*` 文件不会被自动包含到 initramfs 中，你需要参阅相应工具的文档，了解如何包含它们。)
 
-Running firmware version
-(运行中的固件版本)
-------------------------
+Running firmware version(运行中的固件版本)
+------------------------------------------
 
 The version of the loaded firmware for a particular <netdev> interface,
 (e.g. enp4s0), or an interface's port <netdev port> (e.g. enp4s0np0) can
@@ -154,9 +145,8 @@ be displayed with the ethtool command::
 
   $ ethtool -i <netdev>
 
-Firmware loading policy
-(固件加载策略)
------------------------
+Firmware loading policy(固件加载策略)
+-------------------------------------
 
 Firmware loading policy is controlled via three HWinfo parameters
 stored as key value pairs in the device flash:
@@ -191,9 +181,8 @@ abi_drv_load_ifc
     This variable is not currently user configurable.
     (定义允许在该设备上加载 FW 的 PF 设备列表。此变量目前不可由用户配置。)
 
-Devlink Info
-(Devlink 信息)
-============
+Devlink Info(Devlink 信息)
+==========================
 
 The devlink info command displays the running and stored firmware versions
 on the device, serial number and board information.
@@ -223,16 +212,14 @@ Devlink info command example (replace PCI address)::
             fw.cpld 0x0
             chip.init AMDA-2001-1003  1003000111
 
-Configure Device
-(配置设备)
-================
+Configure Device(配置设备)
+==========================
 
 This section explains how to use Agilio SmartNICs running basic NIC firmware.
 (本节介绍如何使用运行基本 NIC 固件的 Agilio SmartNIC。)
 
-Configure interface link-speed
-(配置接口链路速度)
-------------------------------
+Configure interface link-speed(配置接口链路速度)
+------------------------------------------------
 
 The following steps explains how to change between 10G mode and 25G mode on
 Agilio CX 2x25GbE cards. The changing of port speed must be done in order,
@@ -262,9 +249,8 @@ Reload driver for changes to take effect::
 
   $ rmmod nfp; modprobe nfp
 
-Configure interface Maximum Transmission Unit (MTU)
-(配置接口最大传输单元 (MTU))
----------------------------------------------------
+Configure interface Maximum Transmission Unit (MTU)(配置接口最大传输单元 (MTU))
+-------------------------------------------------------------------------------
 
 The MTU of interfaces can temporarily be set using the iproute2, ip link or
 ifconfig tools. Note that this change will not persist. Setting this via
@@ -288,9 +274,8 @@ the SmartNIC and the kernel then the user should also ensure that the PF MTU
 is appropriately set to avoid unexpected drops on this path.
 (在处理巨型帧或使用隧道时，由用户或编排层负责设置适当的 MTU 值。例如，如果从虚拟机 (VM) 发送的数据包要在卡上进行封装并从物理端口发出，那么 VF 的 MTU 应设得低于物理端口的 MTU，以顾及额外头部所增加的字节数。如果预期部署中 SmartNIC 与内核之间存在回退 (fallback) 流量，用户还应确保 PF 的 MTU 设置得当，以避免在此路径上出现意外的丢包。)
 
-Configure Forward Error Correction (FEC) modes
-(配置前向纠错 (FEC) 模式)
-----------------------------------------------
+Configure Forward Error Correction (FEC) modes(配置前向纠错 (FEC) 模式)
+-----------------------------------------------------------------------
 
 Agilio SmartNICs support FEC mode configuration, e.g. Auto, Firecode Base-R,
 ReedSolomon and Off modes. Each physical port's FEC mode can be set
@@ -306,15 +291,14 @@ The currently configured FEC mode can be viewed using::
   $ ethtool --show-fec <netdev>
 
 To force the FEC mode for a particular port, auto-negotiation must be disabled
-(see the `Auto-negotiation`_ section). An example of how to set the FEC mode
+(see the `Auto-negotiation(自协商)`_ section). An example of how to set the FEC mode
 to Reed-Solomon is::
-(要为特定端口强制指定 FEC 模式，必须先禁用自协商 (参见 `Auto-negotiation`_ 一节)。下面是把 FEC 模式设为 Reed-Solomon 的示例：)
+(要为特定端口强制指定 FEC 模式，必须先禁用自协商 (参见 `Auto-negotiation(自协商)`_ 一节)。下面是把 FEC 模式设为 Reed-Solomon 的示例：)
 
   $ ethtool --set-fec <netdev> encoding rs
 
-Auto-negotiation
-(自协商)
-----------------
+Auto-negotiation(自协商)
+------------------------
 
 To change auto-negotiation settings, the link must first be put down. After the
 link is down, auto-negotiation can be enabled or disabled using::
@@ -322,9 +306,8 @@ link is down, auto-negotiation can be enabled or disabled using::
 
   ethtool -s <netdev> autoneg <on|off>
 
-Statistics
-(统计)
-==========
+Statistics(统计)
+================
 
 Following device statistics are available through the ``ethtool -S`` interface:
 (通过 ``ethtool -S`` 接口可以查看以下设备统计信息：)

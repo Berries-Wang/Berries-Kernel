@@ -6,9 +6,8 @@ NET_FAILOVER
 
 (NET_FAILOVER)
 
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 The net_failover driver provides an automated failover mechanism via APIs
 to create and destroy a failover master netdev and manages a primary and
@@ -31,9 +30,8 @@ direct attached VF by failing over to the paravirtual datapath when the VF
 is unplugged.
 (半虚拟化驱动可以用它来启用另一条低延迟数据路径。当 VF 被拔出时，通过故障切换到半虚拟化数据路径，它还支持由 hypervisor 控制的、带直连 VF 的虚拟机的实时迁移。)
 
-virtio-net accelerated datapath: STANDBY mode
-(virtio-net 加速数据路径：STANDBY 模式)
-=============================================
+virtio-net accelerated datapath: STANDBY mode(virtio-net 加速数据路径：STANDBY 模式)
+====================================================================================
 
 net_failover enables hypervisor controlled accelerated datapath to virtio-net
 enabled VMs in a transparent manner with no/minimal guest userspace changes.
@@ -125,9 +123,8 @@ Debian cloud images::
            log "Skipping configuration generation for $INTERFACE"
 
 
-Live Migration of a VM with SR-IOV VF & virtio-net in STANDBY mode
-(STANDBY 模式下带 SR-IOV VF 与 virtio-net 的虚拟机实时迁移)
-==================================================================
+Live Migration of a VM with SR-IOV VF & virtio-net in STANDBY mode(STANDBY 模式下带 SR-IOV VF 与 virtio-net 的虚拟机实时迁移)
+=============================================================================================================================
 
 net_failover also enables hypervisor controlled live migration to be supported
 with VMs that have direct attached SR-IOV VF devices by automatic failover to

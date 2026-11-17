@@ -1,11 +1,9 @@
 .. SPDX-License-Identifier: GPL-2.0
 .. include:: <isonum.txt>
 
-===============================
-Marvell(Aquantia) AQtion Driver
-===============================
-
-(Marvell(Aquantia) AQtion 驱动程序)
+==================================================================
+Marvell(Aquantia) AQtion Driver(Marvell(Aquantia) AQtion 驱动程序)
+==================================================================
 
 For the aQuantia Multi-Gigabit PCI Express Family of Ethernet Adapters
 (适用于 aQuantia Multi-Gigabit PCI Express 系列以太网适配器)
@@ -20,30 +18,26 @@ For the aQuantia Multi-Gigabit PCI Express Family of Ethernet Adapters
     - Support
     - License
 
-Identifying Your Adapter
-(识别你的适配器)
-========================
+Identifying Your Adapter(识别你的适配器)
+========================================
 
 The driver in this release is compatible with AQC-100, AQC-107, AQC-108
 based ethernet adapters.
 (本版本中的驱动程序兼容基于 AQC-100、AQC-107、AQC-108 的以太网适配器。)
 
 
-SFP+ Devices (for AQC-100 based adapters)
-(SFP+ 设备 (适用于基于 AQC-100 的适配器))
------------------------------------------
+SFP+ Devices (for AQC-100 based adapters)(SFP+ 设备 (适用于基于 AQC-100 的适配器))
+----------------------------------------------------------------------------------
 
 This release tested with passive Direct Attach Cables (DAC) and SFP+/LC
 Optical Transceiver.
 (本版本已使用无源直连电缆 (DAC) 和 SFP+/LC 光收发器完成测试。)
 
-Configuration
-(配置)
-=============
+Configuration(配置)
+===================
 
-Viewing Link Messages
-(查看链路消息)
----------------------
+Viewing Link Messages(查看链路消息)
+-----------------------------------
 
   Link messages will not be displayed to the console if the distribution is
   restricting system messages. In order to see network driver link messages on
@@ -57,9 +51,8 @@ Viewing Link Messages
      This setting is not saved across reboots.
      (此设置在重启后不会保留。)
 
-Jumbo Frames
-------------
-(巨型帧)
+Jumbo Frames(巨型帧)
+--------------------
 
   The driver supports Jumbo Frames for all adapters. Jumbo Frames support is
   enabled by changing the MTU to a value larger than the default of 1500.
@@ -69,9 +62,8 @@ Jumbo Frames
 
 	ip link set mtu 16000 dev enp1s0
 
-ethtool
--------
-(ethtool 工具)
+ethtool(ethtool 工具)
+---------------------
 
   The driver utilizes the ethtool interface for driver configuration and
   diagnostics, as well as displaying statistical information. The latest
@@ -85,13 +77,11 @@ NAPI
   NAPI (Rx polling mode) is supported in the atlantic driver.
   (atlantic 驱动程序支持 NAPI (Rx 轮询模式)。)
 
-Supported ethtool options
-(支持的 ethtool 选项)
-=========================
+Supported ethtool options(支持的 ethtool 选项)
+==============================================
 
-Viewing adapter settings
-(查看适配器设置)
-------------------------
+Viewing adapter settings(查看适配器设置)
+----------------------------------------
 
  ::
 
@@ -138,9 +128,8 @@ Viewing adapter settings
 
 	ethtool -s eth0 autoneg off speed 2500
 
-Viewing adapter information
-(查看适配器信息)
----------------------------
+Viewing adapter information(查看适配器信息)
+-------------------------------------------
 
  ::
 
@@ -161,9 +150,8 @@ Viewing adapter information
   supports-priv-flags: no
 
 
-Viewing Ethernet adapter statistics
-(查看以太网适配器统计信息)
------------------------------------
+Viewing Ethernet adapter statistics(查看以太网适配器统计信息)
+-------------------------------------------------------------
 
  ::
 
@@ -216,9 +204,8 @@ Viewing Ethernet adapter statistics
      Queue[3] InLroPackets: 0
      Queue[3] InErrors: 0
 
-Interrupt coalescing support
-(中断合并支持)
-----------------------------
+Interrupt coalescing support(中断合并支持)
+------------------------------------------
 
  ITR mode, TX/RX coalescing timings could be viewed with::
  (可以使用以下命令查看 ITR 模式以及 TX/RX 合并时序：)
@@ -235,9 +222,8 @@ Interrupt coalescing support
 
     ethtool -C <ethX> tx-usecs 0 rx-usecs 0 tx-max-frames 1 tx-max-frames 1
 
-Wake on LAN support
-(局域网唤醒 (WOL) 支持)
--------------------
+Wake on LAN support(局域网唤醒 (WOL) 支持)
+------------------------------------------
 
  WOL support by magic packet::
  (通过魔术数据包 (magic packet) 支持 WOL：)
@@ -249,9 +235,8 @@ Wake on LAN support
 
     ethtool -s <ethX> wol d
 
-Set and check the driver message level
-(设置和检查驱动程序消息级别)
---------------------------------------
+Set and check the driver message level(设置和检查驱动程序消息级别)
+------------------------------------------------------------------
 
  Set message level
  (设置消息级别)
@@ -295,9 +280,8 @@ Set and check the driver message level
 
     ethtool -s <ethX> msglvl 0
 
-RX flow rules (ntuple filters)
-(RX 流规则 (ntuple 过滤器))
-------------------------------
+RX flow rules (ntuple filters)(RX 流规则 (ntuple 过滤器))
+---------------------------------------------------------
 
  There are separate rules supported, that applies in that order:
  (支持多种相互独立的规则，按以下顺序应用：)
@@ -424,9 +408,8 @@ RX flow rules (ntuple filters)
  appropriate queue. RX filters is supported on all kernels 2.6.30 and later.
  (Rx 过滤器是加载过滤器表的接口，该表将所有流引导到队列 0，除非使用 "action" 指定了其他队列。在这种情况下，任何匹配过滤条件的流都会被引导到相应的队列。所有 2.6.30 及更高版本的内核都支持 RX 过滤器。)
 
-RSS for UDP
-(UDP 的 RSS)
------------
+RSS for UDP(UDP 的 RSS)
+-----------------------
 
  Currently, NIC does not support RSS for fragmented IP packets, which leads to
  incorrect working of RSS for fragmented UDP traffic. To disable RSS for UDP the
@@ -438,9 +421,8 @@ RSS for UDP
 
     ethtool -N eth0 flow-type udp4 action 0 loc 32
 
-UDP GSO hardware offload
-(UDP GSO 硬件卸载)
-------------------------
+UDP GSO hardware offload(UDP GSO 硬件卸载)
+------------------------------------------
 
  UDP GSO allows to boost UDP tx rates by offloading UDP headers allocation
  into hardware. A special userspace socket option is required for this,
@@ -458,9 +440,8 @@ UDP GSO hardware offload
 
     ethtool -K eth0 tx-udp-segmentation on
 
-Private flags (testing)
-(私有标志 (测试))
------------------------
+Private flags (testing)(私有标志 (测试))
+----------------------------------------
 
  Atlantic driver supports private flags for hardware custom features::
  (Atlantic 驱动程序支持用于硬件自定义功能的私有标志：)
@@ -491,16 +472,14 @@ Private flags (testing)
  (PHYExternalLoopback: PHY 外部环回 (使用环回以太网电缆)。)
 
 
-Command Line Parameters
-(命令行参数)
-=======================
+Command Line Parameters(命令行参数)
+===================================
 
 The following command line parameters are available on atlantic driver:
 (atlantic 驱动程序提供以下命令行参数：)
 
-aq_itr -Interrupt throttling mode
-(aq_itr - 中断节流模式)
----------------------------------
+aq_itr -Interrupt throttling mode(aq_itr - 中断节流模式)
+--------------------------------------------------------
 
 Accepted values: 0, 1, 0xFFFF
 (取值：0、1、0xFFFF)
@@ -515,9 +494,8 @@ Default value: 0xFFFF
 	 interrupt throttling settings based on link speed. (自动节流模式。驱动程序将根据链路速率选择最佳的 RX 和 TX 中断节流设置。)
 ======   ==============================================================
 
-aq_itr_tx - TX interrupt throttle rate
-(aq_itr_tx - TX 中断节流速率)
---------------------------------------
+aq_itr_tx - TX interrupt throttle rate(aq_itr_tx - TX 中断节流速率)
+-------------------------------------------------------------------
 
 Accepted values: 0 - 0x1FF
 (取值：0 - 0x1FF)
@@ -529,9 +507,8 @@ TX side throttling in microseconds. Adapter will setup maximum interrupt delay
 to this value. Minimum interrupt delay will be a half of this value
 (TX 侧节流，单位为微秒。适配器会将最大中断延迟设置为此值。最小中断延迟为该值的一半)
 
-aq_itr_rx - RX interrupt throttle rate
-(aq_itr_rx - RX 中断节流速率)
---------------------------------------
+aq_itr_rx - RX interrupt throttle rate(aq_itr_rx - RX 中断节流速率)
+-------------------------------------------------------------------
 
 Accepted values: 0 - 0x1FF
 (取值：0 - 0x1FF)
@@ -548,17 +525,15 @@ to this value. Minimum interrupt delay will be a half of this value
    ITR settings could be changed in runtime by ethtool -c means (see below)
    (ITR 设置可以在运行时通过 ethtool -c 进行更改 (见下文))
 
-Config file parameters
-(配置文件参数)
-======================
+Config file parameters(配置文件参数)
+====================================
 
 For some fine tuning and performance optimizations,
 some parameters can be changed in the {source_dir}/aq_cfg.h file.
 (要进行一些微调和性能优化，可以在 {source_dir}/aq_cfg.h 文件中更改某些参数。)
 
-AQ_CFG_RX_PAGEORDER
-(AQ_CFG_RX_PAGEORDER)
--------------------
+AQ_CFG_RX_PAGEORDER(AQ_CFG_RX_PAGEORDER)
+----------------------------------------
 
 Default value: 0
 (默认值：0)
@@ -571,9 +546,8 @@ AQ_CFG_RX_FRAME_MAX.
 Increasing pageorder makes page reuse better (actual on iommu enabled systems).
 (增大 pageorder 可以改善页复用 (在启用 iommu 的系统上尤为实用)。)
 
-AQ_CFG_RX_REFILL_THRES
-(AQ_CFG_RX_REFILL_THRES)
-----------------------
+AQ_CFG_RX_REFILL_THRES(AQ_CFG_RX_REFILL_THRES)
+----------------------------------------------
 
 Default value: 32
 (默认值：32)
@@ -583,9 +557,8 @@ specified number of free descriptors is observed. Larger values may help
 better page reuse but may lead to packet drops as well.
 (RX 补充阈值。在观察到指定数量的空闲描述符之前，RX 路径不会补充已释放的描述符。较大的值可能有助于更好的页复用，但也可能导致丢包。)
 
-AQ_CFG_VECS_DEF
-(AQ_CFG_VECS_DEF)
----------------
+AQ_CFG_VECS_DEF(AQ_CFG_VECS_DEF)
+--------------------------------
 
 Number of queues
 (队列数量)
@@ -599,9 +572,8 @@ Default value: 8
 Notice this value will be capped by the number of cores available on the system.
 (注意，此值将受系统上可用核心数的限制。)
 
-AQ_CFG_IS_RSS_DEF
-(AQ_CFG_IS_RSS_DEF)
------------------
+AQ_CFG_IS_RSS_DEF(AQ_CFG_IS_RSS_DEF)
+------------------------------------
 
 Enable/disable Receive Side Scaling
 (启用/禁用接收侧扩展 (Receive Side Scaling))
@@ -621,9 +593,8 @@ Valid values
 Default value: 1
 (默认值：1)
 
-AQ_CFG_NUM_RSS_QUEUES_DEF
-(AQ_CFG_NUM_RSS_QUEUES_DEF)
--------------------------
+AQ_CFG_NUM_RSS_QUEUES_DEF(AQ_CFG_NUM_RSS_QUEUES_DEF)
+----------------------------------------------------
 
 Number of queues for Receive Side Scaling
 (用于接收侧扩展的队列数量)
@@ -634,9 +605,8 @@ Valid Range: 0 - 8 (up to AQ_CFG_VECS_DEF)
 Default value: AQ_CFG_VECS_DEF
 (默认值：AQ_CFG_VECS_DEF)
 
-AQ_CFG_IS_LRO_DEF
-(AQ_CFG_IS_LRO_DEF)
------------------
+AQ_CFG_IS_LRO_DEF(AQ_CFG_IS_LRO_DEF)
+------------------------------------
 
 Enable/disable Large Receive Offload
 (启用/禁用大接收卸载 (Large Receive Offload))
@@ -660,9 +630,8 @@ Valid values
 Default value: 1
 (默认值：1)
 
-AQ_CFG_TX_CLEAN_BUDGET
-(AQ_CFG_TX_CLEAN_BUDGET)
-----------------------
+AQ_CFG_TX_CLEAN_BUDGET(AQ_CFG_TX_CLEAN_BUDGET)
+----------------------------------------------
 
 Maximum descriptors to cleanup on TX at once.
 (一次在 TX 上清理的最大描述符数量。)
@@ -673,18 +642,16 @@ Default value: 256
 After the aq_cfg.h file changed the driver must be rebuilt to take effect.
 (修改 aq_cfg.h 文件后，必须重新构建驱动程序才能生效。)
 
-Support
-(支持)
-=======
+Support(支持)
+=============
 
 If an issue is identified with the released source code on the supported
 kernel with a supported adapter, email the specific information related
 to the issue to aqn_support@marvell.com
 (如果在受支持的内核上使用受支持的适配器时发现已发布源代码的问题，请将与该问题相关的具体信息通过电子邮件发送至 aqn_support@marvell.com)
 
-License
-(许可证)
-=======
+License(许可证)
+===============
 
 aQuantia Corporation Network Driver
 (aQuantia 公司网络驱动程序)

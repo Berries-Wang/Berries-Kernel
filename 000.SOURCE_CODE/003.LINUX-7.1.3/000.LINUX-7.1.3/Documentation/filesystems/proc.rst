@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-====================
-The /proc Filesystem
-====================
-
-(/proc 文件系统)
+====================================
+The /proc Filesystem(/proc 文件系统)
+====================================
 
 =====================  =======================================  ================
 /proc/sys              Terrehon Bowden <terrehon@pacbell.net>,  October 7 1999
@@ -89,13 +87,11 @@ fixes/update part 1.1  Stefani Seibold <stefani@seibold.net>    June 9 2009
   5	Filesystem behavior
         (5  文件系统行为)
 
-Preface
-(前言)
-=======
+Preface(前言)
+=============
 
-0.1 Introduction/Credits
-(0.1 引言/致谢)
-------------------------
+0.1 Introduction/Credits(0.1 引言/致谢)
+---------------------------------------
 
 We'd like  to  thank Alan Cox, Rik van Riel, and Alexey Kuznetsov and a lot of
 other people for help compiling this documentation. We'd also like to extend a
@@ -110,22 +106,19 @@ https://www.kernel.org/doc/html/latest/filesystems/proc.html
 (本文档的最新版本可在线获取：
 https://www.kernel.org/doc/html/latest/filesystems/proc.html)
 
-0.2 Legal Stuff
-(0.2 法律事项)
----------------
+0.2 Legal Stuff(0.2 法律事项)
+-----------------------------
 
 We don't  guarantee  the  correctness  of this document, and if you come to us
 complaining about  how  you  screwed  up  your  system  because  of  incorrect
 documentation, we won't feel responsible...
 (我们不保证本文档的正确性，如果你因为不正确的文档搞砸了自己的系统而来向我们抱怨，我们不会感到负责任……)
 
-Chapter 1: Collecting System Information
-(第 1 章：收集系统信息)
-========================================
+Chapter 1: Collecting System Information(第 1 章：收集系统信息)
+===============================================================
 
-In This Chapter
-(本章内容)
----------------
+In This Chapter(本章内容)
+-------------------------
 * Investigating  the  properties  of  the  pseudo  file  system  /proc and its
   ability to provide information on the running Linux system
   (研究伪文件系统 /proc 的属性及其提供运行中 Linux 系统信息的能力)
@@ -146,9 +139,8 @@ First, we'll  take  a  look  at the read-only parts of /proc. In Chapter 2, we
 show you how you can use /proc/sys to change settings.
 (首先，我们来看 /proc 的只读部分。在第 2 章中，我们将向你展示如何使用 /proc/sys 更改设置。)
 
-1.1 Process-Specific Subdirectories
-(1.1 进程相关的子目录)
------------------------------------
+1.1 Process-Specific Subdirectories(1.1 进程相关的子目录)
+---------------------------------------------------------
 
 The directory  /proc  contains  (among other things) one subdirectory for each
 process running on the system, which is named after the process ID (PID).
@@ -829,9 +821,8 @@ configurations, "mapmax" might corresponds to the average number of mappings
 per page in such a larger allocation instead.
 (注意，某些内核配置不会精确跟踪属于较大分配(例如 THP)的页被映射的次数。在这些配置中，"mapmax" 可能对应的是这种较大分配中每页的平均映射次数。)
 
-1.2 Kernel data
-(1.2 内核数据)
----------------
+1.2 Kernel data(1.2 内核数据)
+-----------------------------
 
 Similar to  the  process entries, the kernel data files give information about
 the running kernel. The files used to obtain this information are contained in
@@ -1572,9 +1563,8 @@ Provides counts of softirq handlers serviced since boot time, for each CPU.
     HRTIMER:         0          0          0          0
 	RCU:      1678       1769       2178       2250
 
-1.3 Networking info in /proc/net
-(1.3 /proc/net 中的网络信息)
---------------------------------
+1.3 Networking info in /proc/net(1.3 /proc/net 中的网络信息)
+------------------------------------------------------------
 
 The subdirectory  /proc/net  follows  the  usual  pattern. Table 1-8 shows the
 additional values  you  get  for  IP  version 6 if you configure the kernel to
@@ -1658,9 +1648,8 @@ current slaves of the bond, the link status of the slaves, and how
 many times the slaves link has failed.
 (此外，每个 Channel Bond(绑定)接口都有自己的目录。例如，bond0 设备会有一个名为 /proc/net/bond0/ 的目录。它将包含特定于该绑定的信息，例如该绑定当前的 slave(从属接口)、各 slave 的链路状态，以及 slave 链路失败的次数。)
 
-1.4 SCSI info
-(1.4 SCSI 信息)
--------------
+1.4 SCSI info(1.4 SCSI 信息)
+----------------------------
 
 If you have a SCSI or ATA host adapter in your system, you'll find a
 subdirectory named after the driver for this adapter in /proc/scsi.
@@ -1724,9 +1713,8 @@ AHA-2940 SCSI adapter::
     Total transfers 0 (0 reads and 0 writes)
 
 
-1.5 Parallel port info in /proc/parport
-(1.5 /proc/parport 中的并行端口信息)
----------------------------------------
+1.5 Parallel port info in /proc/parport(1.5 /proc/parport 中的并行端口信息)
+---------------------------------------------------------------------------
 
 The directory  /proc/parport  contains information about the parallel ports of
 your system.  It  has  one  subdirectory  for  each port, named after the port
@@ -1753,9 +1741,8 @@ These directories contain the four files shown in Table 1-10.
            number or none). (parport 用于该端口的 IRQ。它位于单独的文件中，以便你可以通过写入新值(IRQ 号或 none)来修改它。)
  ========= ====================================================================
 
-1.6 TTY info in /proc/tty
-(1.6 /proc/tty 中的 TTY 信息)
--------------------------
+1.6 TTY info in /proc/tty(1.6 /proc/tty 中的 TTY 信息)
+------------------------------------------------------
 
 Information about  the  available  and actually used tty's can be found in the
 directory /proc/tty. You'll find  entries  for drivers and line disciplines in
@@ -1792,9 +1779,8 @@ To see  which  tty's  are  currently in use, you can simply look into the file
   unknown              /dev/tty        4    1-63 console
 
 
-1.7 Miscellaneous kernel statistics in /proc/stat
-(1.7 /proc/stat 中的杂项内核统计信息)
--------------------------------------------------
+1.7 Miscellaneous kernel statistics in /proc/stat(1.7 /proc/stat 中的杂项内核统计信息)
+--------------------------------------------------------------------------------------
 
 Various pieces   of  information about  kernel activity  are  available in the
 /proc/stat file.  All  of  the numbers reported  in  this file are  aggregates
@@ -1891,9 +1877,8 @@ softirq.
 ("softirq" 行给出自启动以来处理的各类可能系统软中断的计数。第一列是处理的全部软中断的总数；其后的每一列是该特定软中断的总数。)
 
 
-1.8 Ext4 file system parameters
-(1.8 Ext4 文件系统参数)
--------------------------------
+1.8 Ext4 file system parameters(1.8 Ext4 文件系统参数)
+------------------------------------------------------
 
 Information about mounted ext4 file systems can be found in
 /proc/fs/ext4.  Each mounted filesystem will have a directory in
@@ -1910,9 +1895,8 @@ directory are shown in Table 1-12, below.
  mb_groups       details of multiblock allocator buddy cache of free blocks (空闲块多块分配器伙伴缓存(buddy cache)的详细信息)
  ==============  ==========================================================
 
-1.9 /proc/consoles
-(1.9 /proc/consoles)
--------------------
+1.9 /proc/consoles(1.9 /proc/consoles)
+--------------------------------------
 Shows registered system console lines.
 (显示已注册的系统控制台行。)
 
@@ -1948,9 +1932,8 @@ The columns are:
 |                    | colon (设备的主设备号和次设备号，以冒号分隔)          |
 +--------------------+-------------------------------------------------------+
 
-Summary
-(小结)
--------
+Summary(小结)
+-------------
 
 The /proc file system serves information about the running system. It not only
 allows access to process data but also allows you to request the kernel status
@@ -1961,13 +1944,11 @@ The directory  structure  of /proc reflects the types of information and makes
 it easy, if not obvious, where to look for specific data.
 (/proc 的目录结构反映了信息的类型，即使不能让人一目了然，也能让人容易知道去哪里查找特定的数据。)
 
-Chapter 2: Modifying System Parameters
-(第 2 章：修改系统参数)
-======================================
+Chapter 2: Modifying System Parameters(第 2 章：修改系统参数)
+=============================================================
 
-In This Chapter
-(本章内容)
----------------
+In This Chapter(本章内容)
+-------------------------
 
 * Modifying kernel parameters by writing into files found in /proc/sys
   (通过写入 /proc/sys 下的文件来修改内核参数)
@@ -2007,9 +1988,8 @@ Please see: Documentation/admin-guide/sysctl/ directory for descriptions of
 these entries.
 (这些条目的说明请参见 Documentation/admin-guide/sysctl/ 目录。)
 
-Summary
-(小结)
--------
+Summary(小结)
+-------------
 
 Certain aspects  of  kernel  behavior  can be modified at runtime, without the
 need to  recompile  the kernel, or even to reboot the system. The files in the
@@ -2019,13 +1999,11 @@ of the kernel.
 (内核行为的某些方面可以在运行时修改，无需重新编译内核，甚至无需重启系统。/proc/sys 树中的文件不仅可以读取，还可以修改。你可以使用 echo 命令向这些文件写入值，从而更改内核的默认设置。)
 
 
-Chapter 3: Per-process Parameters
-(第 3 章：进程相关参数)
-=================================
+Chapter 3: Per-process Parameters(第 3 章：进程相关参数)
+========================================================
 
-3.1 /proc/<pid>/oom_adj & /proc/<pid>/oom_score_adj- Adjust the oom-killer score
-(3.1 /proc/<pid>/oom_adj 与 /proc/<pid>/oom_score_adj - 调整 oom-killer 分数)
---------------------------------------------------------------------------------
+3.1 /proc/<pid>/oom_adj & /proc/<pid>/oom_score_adj- Adjust the oom-killer score(3.1 /proc/<pid>/oom_adj 与 /proc/<pid>/oom_score_adj - 调整 oom-killer 分数)
+-------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 These files can be used to adjust the badness heuristic used to select which
 process gets killed in out of memory (oom) conditions.
@@ -2080,9 +2058,8 @@ requires CAP_SYS_RESOURCE.
 (/proc/<pid>/oom_score_adj 的值可以降低，但不能低于由具有 CAP_SYS_RESOURCE 的进程最后一次设置的值。要把该值降得更低则需要 CAP_SYS_RESOURCE。)
 
 
-3.2 /proc/<pid>/oom_score - Display current oom-killer score
-(3.2 /proc/<pid>/oom_score - 显示当前 oom-killer 分数)
--------------------------------------------------------------
+3.2 /proc/<pid>/oom_score - Display current oom-killer score(3.2 /proc/<pid>/oom_score - 显示当前 oom-killer 分数)
+------------------------------------------------------------------------------------------------------------------
 
 This file can be used to check the current score used by the oom-killer for
 any given <pid>. Use it together with /proc/<pid>/oom_score_adj to tune which
@@ -2094,16 +2071,14 @@ effectively in range [0,2000].
 (请注意，导出的值包含 oom_score_adj，因此它实际处于 [0,2000] 范围内。)
 
 
-3.3  /proc/<pid>/io - Display the IO accounting fields
-(3.3 /proc/<pid>/io - 显示 IO 统计字段)
--------------------------------------------------------
+3.3  /proc/<pid>/io - Display the IO accounting fields(3.3 /proc/<pid>/io - 显示 IO 统计字段)
+---------------------------------------------------------------------------------------------
 
 This file contains IO statistics for each running process.
 (该文件包含每个正在运行的进程的 IO 统计信息。)
 
-Example
-(示例)
-~~~~~~~
+Example(示例)
+~~~~~~~~~~~~~
 
 ::
 
@@ -2120,9 +2095,8 @@ Example
     cancelled_write_bytes: 0
 
 
-Description
-(描述)
-~~~~~~~~~~~
+Description(描述)
+~~~~~~~~~~~~~~~~~
 
 rchar
 ^^^^^
@@ -2217,9 +2191,8 @@ More information about this can be found within the taskstats documentation in
 Documentation/accounting.
 (关于此内容的更多信息可以在 Documentation/accounting 中的 taskstats 文档里找到。)
 
-3.4 /proc/<pid>/coredump_filter - Core dump filtering settings
-(3.4 /proc/<pid>/coredump_filter - 核心转储过滤设置)
----------------------------------------------------------------
+3.4 /proc/<pid>/coredump_filter - Core dump filtering settings(3.4 /proc/<pid>/coredump_filter - 核心转储过滤设置)
+------------------------------------------------------------------------------------------------------------------
 When a process is dumped, all anonymous memory is written to a core file as
 long as the size of the core file isn't limited. But sometimes we don't want
 to dump some memory segments, for example, huge shared memory or DAX.
@@ -2283,9 +2256,8 @@ For example::
   $ echo 0x7 > /proc/self/coredump_filter
   $ ./some_program
 
-3.5	/proc/<pid>/mountinfo - Information about mounts
-(3.5 /proc/<pid>/mountinfo - 挂载信息)
---------------------------------------------------------
+3.5	/proc/<pid>/mountinfo - Information about mounts(3.5 /proc/<pid>/mountinfo - 挂载信息)
+----------------------------------------------------------------------------------------------
 
 This file contains lines of the form::
 (该文件包含如下形式的行：)
@@ -2312,7 +2284,7 @@ possible optional fields are:
 ================  ==============================================================
 shared:X          mount is shared in peer group X (挂载在对等组 X 中共享)
 master:X          mount is slave to peer group X (挂载是对等组 X 的从属(slave))
-propagate_from:X  mount is slave and receives propagation from peer group X [#]_ (挂载是从属并从对等组 X 接收传播 [#]_)
+propagate_from:X  mount is slave and receives propagation from peer group X [#]_ (挂载是从属并从对等组 X 接收传播)
 unbindable        mount is unbindable (挂载不可绑定(unbindable))
 ================  ==============================================================
 
@@ -2329,9 +2301,8 @@ For more information on mount propagation see:
   Documentation/filesystems/sharedsubtree.rst)
 
 
-3.6	/proc/<pid>/comm  & /proc/<pid>/task/<tid>/comm
-(3.6 /proc/<pid>/comm 与 /proc/<pid>/task/<tid>/comm)
---------------------------------------------------------
+3.6	/proc/<pid>/comm  & /proc/<pid>/task/<tid>/comm(3.6 /proc/<pid>/comm 与 /proc/<pid>/task/<tid>/comm)
+------------------------------------------------------------------------------------------------------------
 These files provide a method to access a task's comm value. It also allows for
 a task to set its own or one of its thread siblings comm value. The comm value
 is limited in size compared to the cmdline value, so writing anything longer
@@ -2340,9 +2311,8 @@ terminator) will result in a truncated comm value.
 (这些文件提供访问任务 comm 值的方法。它还允许任务设置自身或其某个线程兄弟的 comm 值。与 cmdline 值相比，comm 值的大小受限，因此写入任何超过内核 TASK_COMM_LEN(当前为 16 个字符，包括 NUL 终止符)的内容都会导致 comm 值被截断。)
 
 
-3.7	/proc/<pid>/task/<tid>/children - Information about task children
-(3.7 /proc/<pid>/task/<tid>/children - 任务子进程的信息)
--------------------------------------------------------------------------
+3.7	/proc/<pid>/task/<tid>/children - Information about task children(3.7 /proc/<pid>/task/<tid>/children - 任务子进程的信息)
+---------------------------------------------------------------------------------------------------------------------------------
 This file provides a fast way to retrieve first level children pids
 of a task pointed by <pid>/<tid> pair. The format is a space separated
 stream of pids.
@@ -2361,9 +2331,8 @@ if precise results are needed.
 (由于此接口旨在快速且开销低，它不保证提供精确的结果，某些子进程可能会被跳过，尤其是当它们在我们打印其 pid 之后立即退出时。因此，如果需要精确的结果，需要停止或冻结被检查的进程。)
 
 
-3.8	/proc/<pid>/fdinfo/<fd> - Information about opened file
-(3.8 /proc/<pid>/fdinfo/<fd> - 已打开文件的信息)
----------------------------------------------------------------
+3.8	/proc/<pid>/fdinfo/<fd> - Information about opened file(3.8 /proc/<pid>/fdinfo/<fd> - 已打开文件的信息)
+---------------------------------------------------------------------------------------------------------------
 This file provides information associated with an opened file. The regular
 files have at least four fields -- 'pos', 'flags', 'mnt_id' and 'ino'.
 The 'pos' represents the current offset of the opened file in decimal
@@ -2390,9 +2359,8 @@ The files such as eventfd, fsnotify, signalfd, epoll among the regular pos/flags
 pair provide additional information particular to the objects they represent.
 (诸如 eventfd、fsnotify、signalfd、epoll 之类的文件，在常规的 pos/flags 对之外，还会提供它们所代表对象特有的附加信息。)
 
-Eventfd files
-(Eventfd 文件)
-~~~~~~~~~~~~~
+Eventfd files(Eventfd 文件)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -2405,9 +2373,8 @@ Eventfd files
 where 'eventfd-count' is hex value of a counter.
 (其中 'eventfd-count' 是计数器的十六进制值。)
 
-Signalfd files
-(Signalfd 文件)
-~~~~~~~~~~~~~~
+Signalfd files(Signalfd 文件)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -2421,9 +2388,8 @@ where 'sigmask' is hex value of the signal mask associated
 with a file.
 (其中 'sigmask' 是与文件关联的信号掩码的十六进制值。)
 
-Epoll files
-(Epoll 文件)
-~~~~~~~~~~~
+Epoll files(Epoll 文件)
+~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -2443,9 +2409,8 @@ The 'pos' is current offset of the target file in decimal form
 where target file resides, all in hex format.
 ('pos' 是目标文件当前的偏移量，以十进制形式表示[参见 lseek(2)]；'ino' 和 'sdev' 是目标文件所在处的 inode 和设备编号，均以十六进制格式表示。)
 
-Fsnotify files
-(Fsnotify 文件)
-~~~~~~~~~~~~~~
+Fsnotify files(Fsnotify 文件)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 For inotify files the format is the following::
 (对于 inotify 文件，格式如下：)
 
@@ -2499,9 +2464,8 @@ While the first three lines are mandatory and always printed, the rest is
 optional and may be omitted if no marks created yet.
 (前三行是必需的并且总是会打印，其余部分是可选的，如果尚未创建任何标记则可能被省略。)
 
-Timerfd files
-(Timerfd 文件)
-~~~~~~~~~~~~~
+Timerfd files(Timerfd 文件)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -2524,9 +2488,8 @@ with TIMER_ABSTIME option which will be shown in 'settime flags', but 'it_value'
 still exhibits timer's remaining time.
 (其中 'clockid' 是时钟类型；'ticks' 是已经发生的定时器到期次数[详情参见 timerfd_create(2)]。'settime flags' 是设置定时器时使用的八进制形式的标志[详情参见 timerfd_settime(2)]。'it_value' 是距离定时器到期的剩余时间。'it_interval' 是定时器的间隔。注意，定时器可能以 TIMER_ABSTIME 选项设置，这会显示在 'settime flags' 中，但 'it_value' 仍显示定时器的剩余时间。)
 
-DMA Buffer files
-(DMA 缓冲文件)
-~~~~~~~~~~~~~~~~
+DMA Buffer files(DMA 缓冲文件)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -2542,9 +2505,8 @@ where 'size' is the size of the DMA buffer in bytes. 'count' is the file count o
 the DMA buffer file. 'exp_name' is the name of the DMA buffer exporter.
 (其中 'size' 是 DMA 缓冲的大小，以字节计。'count' 是 DMA 缓冲文件的文件计数。'exp_name' 是 DMA 缓冲导出器(exporter)的名称。)
 
-VFIO Device files
-(VFIO 设备文件)
-~~~~~~~~~~~~~~~~~
+VFIO Device files(VFIO 设备文件)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -2558,9 +2520,8 @@ where 'vfio-device-syspath' is the sysfs path corresponding to the VFIO device
 file.
 (其中 'vfio-device-syspath' 是与该 VFIO 设备文件对应的 sysfs 路径。)
 
-3.9	/proc/<pid>/map_files - Information about memory mapped files
-(3.9 /proc/<pid>/map_files - 内存映射文件的信息)
----------------------------------------------------------------------
+3.9	/proc/<pid>/map_files - Information about memory mapped files(3.9 /proc/<pid>/map_files - 内存映射文件的信息)
+---------------------------------------------------------------------------------------------------------------------
 This directory contains symbolic links which represent memory mapped files
 the process is maintaining.  Example output::
 (该目录包含代表进程正在维护的内存映射文件的符号链接。输出示例：)
@@ -2584,9 +2545,8 @@ comparing their inode numbers to figure out which anonymous memory areas
 are actually shared.
 (map_files 的主要目的是以快速的方式检索一组内存映射文件，而不是解析 /proc/<pid>/maps 或 /proc/<pid>/smaps，后两者包含多得多的记录。同时，可以从两个进程的列表中 open(2) 各自的映射，并比较它们的 inode 编号，从而弄清哪些匿名内存区域是实际共享的。)
 
-3.10	/proc/<pid>/timerslack_ns - Task timerslack value
-(3.10 /proc/<pid>/timerslack_ns - 任务的 timerslack 值)
----------------------------------------------------------
+3.10	/proc/<pid>/timerslack_ns - Task timerslack value(3.10 /proc/<pid>/timerslack_ns - 任务的 timerslack 值)
+----------------------------------------------------------------------------------------------------------------
 This file provides the value of the task's timerslack value in nanoseconds.
 This value specifies an amount of time that normal timers may be deferred
 in order to coalesce timers and avoid unnecessary wakeups.
@@ -2606,9 +2566,8 @@ An application setting the value must have PTRACE_MODE_ATTACH_FSCREDS level
 permissions on the task specified to change its timerslack_ns value.
 (设置该值的应用程序必须对指定任务具有 PTRACE_MODE_ATTACH_FSCREDS 级别的权限，才能更改其 timerslack_ns 值。)
 
-3.11	/proc/<pid>/patch_state - Livepatch patch operation state
-(3.11 /proc/<pid>/patch_state - Livepatch 补丁操作状态)
------------------------------------------------------------------
+3.11	/proc/<pid>/patch_state - Livepatch patch operation state(3.11 /proc/<pid>/patch_state - Livepatch 补丁操作状态)
+------------------------------------------------------------------------------------------------------------------------
 When CONFIG_LIVEPATCH is enabled, this file displays the value of the
 patch state for the task.
 (当启用 CONFIG_LIVEPATCH 时，该文件显示任务的补丁状态值。)
@@ -2628,29 +2587,25 @@ patched.  If the patch is being disabled, then the task hasn't been
 unpatched yet.
 (值 '1' 表示有补丁处于过渡状态且任务已打补丁。如果该补丁正在被启用，则该任务已经被打上补丁。如果该补丁正在被禁用，则该任务尚未被取消补丁。)
 
-3.12 /proc/<pid>/arch_status - task architecture specific status
-(3.12 /proc/<pid>/arch_status - 任务架构特定的状态)
--------------------------------------------------------------------
+3.12 /proc/<pid>/arch_status - task architecture specific status(3.12 /proc/<pid>/arch_status - 任务架构特定的状态)
+-------------------------------------------------------------------------------------------------------------------
 When CONFIG_PROC_PID_ARCH_STATUS is enabled, this file displays the
 architecture specific status of the task.
 (当启用 CONFIG_PROC_PID_ARCH_STATUS 时，该文件显示任务架构特定的状态。)
 
-Example
-(示例)
-~~~~~~~
+Example(示例)
+~~~~~~~~~~~~~
 
 ::
 
  $ cat /proc/6753/arch_status
  AVX512_elapsed_ms:      8
 
-Description
-(描述)
-~~~~~~~~~~~
+Description(描述)
+~~~~~~~~~~~~~~~~~
 
-x86 specific entries
-(x86 特定条目)
-~~~~~~~~~~~~~~~~~~~~~
+x86 specific entries(x86 特定条目)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 AVX512_elapsed_ms
 ^^^^^^^^^^^^^^^^^^
@@ -2683,9 +2638,8 @@ AVX512_elapsed_ms
   scheduling scenario, it also could be a false negative mentioned above.
   (特殊值 '-1' 表示未记录到 AVX512 使用情况，因此该任务不太可能是 AVX512 使用者；但取决于工作负载和调度场景，它也可能是上文提到的假阴性(false negative)。)
 
-3.13 /proc/<pid>/fd - List of symlinks to open files
-(3.13 /proc/<pid>/fd - 打开文件的符号链接列表)
--------------------------------------------------------
+3.13 /proc/<pid>/fd - List of symlinks to open files(3.13 /proc/<pid>/fd - 打开文件的符号链接列表)
+--------------------------------------------------------------------------------------------------
 This directory contains symbolic links which represent open files
 the process is maintaining.  Example output::
 (该目录包含代表进程正在维护的打开文件的符号链接。输出示例：)
@@ -2696,21 +2650,17 @@ the process is maintaining.  Example output::
   lrwx------ 1 root root 64 Sep 20 17:53 11 -> 'socket:[12540]'
   lrwx------ 1 root root 64 Sep 20 17:53 12 -> 'socket:[12542]'
 
-The number of open files for the process is stored in 'size' member
-of stat() output for /proc/<pid>/fd for fast access.
-(该进程打开文件的数量存储在 /proc/<pid>/fd 的 stat() 输出的 'size' 成员中，以便快速访问。)
--------------------------------------------------------
+The number of open files for the process is stored in 'size' member of stat() output for /proc/<pid>/fd for fast access.(该进程打开文件的数量存储在 /proc/<pid>/fd 的 stat() 输出的 'size' 成员中，以便快速访问。)
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-3.14 /proc/<pid>/ksm_stat - Information about the process's ksm status
-(3.14 /proc/<pid>/ksm_stat - 进程 ksm 状态的信息)
-----------------------------------------------------------------------
+3.14 /proc/<pid>/ksm_stat - Information about the process's ksm status(3.14 /proc/<pid>/ksm_stat - 进程 ksm 状态的信息)
+-----------------------------------------------------------------------------------------------------------------------
 When CONFIG_KSM is enabled, each process has this file which displays
 the information of ksm merging status.
 (当启用 CONFIG_KSM 时，每个进程都有此文件，它显示 ksm 合并状态的信息。)
 
-Example
-(示例)
-~~~~~~~
+Example(示例)
+~~~~~~~~~~~~~
 
 ::
 
@@ -2722,9 +2672,8 @@ Example
     ksm_merge_any: no
     ksm_mergeable: no
 
-Description
-(描述)
-~~~~~~~~~~~
+Description(描述)
+~~~~~~~~~~~~~~~~~
 
 ksm_rmap_items
 ^^^^^^^^^^^^^^
@@ -2781,13 +2730,11 @@ Documentation/admin-guide/mm/ksm.rst.
 (关于 KSM 的更多信息可在 Documentation/admin-guide/mm/ksm.rst 中找到。)
 
 
-Chapter 4: Configuring procfs
-(第 4 章：配置 procfs)
-=============================
+Chapter 4: Configuring procfs(第 4 章：配置 procfs)
+===================================================
 
-4.1	Mount options
-(4.1 挂载选项)
----------------------
+4.1	Mount options(4.1 挂载选项)
+-----------------------------------
 
 The following mount options are supported:
 (支持以下挂载选项：)
@@ -2843,9 +2790,8 @@ namespace of an existing procfs instance cannot be modified (attempting to do
 so will give an `-EBUSY` error).
 (pidns= 指定一个 pid 命名空间(可以是诸如 `/proc/$pid/ns/pid` 之类的字符串路径，或者在使用 `FSCONFIG_SET_FD` 时的文件描述符)，procfs 实例在转换 pid 时将使用它。默认情况下，procfs 将使用调用进程当前活动的 pid 命名空间。注意，已存在的 procfs 实例的 pid 命名空间不能被修改(尝试这样做会得到 `-EBUSY` 错误)。)
 
-Chapter 5: Filesystem behavior
-(第 5 章：文件系统行为)
-==============================
+Chapter 5: Filesystem behavior(第 5 章：文件系统行为)
+=====================================================
 
 Originally, before the advent of pid namespace, procfs was a global file
 system. It means that there was only one procfs instance in the system.

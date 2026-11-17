@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==============================================
-Netdev private dataroom for 6lowpan interfaces
-==============================================
-
-(6lowpan 接口的 netdev 私有数据区)
+================================================================================
+Netdev private dataroom for 6lowpan interfaces(6lowpan 接口的 netdev 私有数据区)
+================================================================================
 
 All 6lowpan able net devices, means all interfaces with ARPHRD_6LOWPAN,
 must have "struct lowpan_priv" placed at beginning of netdev_priv.

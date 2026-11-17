@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==========================================
-Broadcom RoboSwitch Ethernet switch driver
-==========================================
-
-(Broadcom RoboSwitch 以太网交换机驱动)
+================================================================================
+Broadcom RoboSwitch Ethernet switch driver(Broadcom RoboSwitch 以太网交换机驱动)
+================================================================================
 
 The Broadcom RoboSwitch Ethernet switch family is used in quite a range of
 xDSL router, cable modems and other multimedia devices.
@@ -14,9 +12,8 @@ The actual implementation supports the devices BCM5325E, BCM5365, BCM539x,
 BCM53115 and BCM53125 as well as BCM63XX.
 (当前实现支持 BCM5325E、BCM5365、BCM539x、BCM53115 和 BCM53125 等器件，以及 BCM63XX。)
 
-Implementation details
-(实现细节)
-======================
+Implementation details(实现细节)
+================================
 
 The driver is located in ``drivers/net/dsa/b53/`` and is implemented as a
 DSA driver; see ``Documentation/networking/dsa/dsa.rst`` for details on the
@@ -38,9 +35,8 @@ The interface names and example network configuration are used according the
 configuration described in the :ref:`dsa-config-showcases`.
 (接口名称和示例网络配置遵循 :ref:`dsa-config-showcases` 中描述的配置。)
 
-Configuration with tagging support
-(支持打标签的配置)
-----------------------------------
+Configuration with tagging support(支持打标签的配置)
+----------------------------------------------------
 
 The tagging based configuration is desired. It is not specific to the b53
 DSA driver and will work like all DSA drivers which supports tagging.
@@ -49,9 +45,8 @@ DSA driver and will work like all DSA drivers which supports tagging.
 See :ref:`dsa-tagged-configuration`.
 (参见 :ref:`dsa-tagged-configuration`。)
 
-Configuration without tagging support
-(不支持打标签的配置)
--------------------------------------
+Configuration without tagging support(不支持打标签的配置)
+---------------------------------------------------------
 
 Older models (5325, 5365) support a different tag format that is not supported
 yet. 539x and 531x5 require managed mode and some special handling, which is
@@ -73,9 +68,8 @@ single port and gateway configuration, while there is no need to add an extra
 VLAN configuration in the bridge showcase.
 (与 :ref:`dsa-vlan-configuration` 中描述的配置不同，在单端口 (single port) 和网关 (gateway) 配置中，必须从用户接口配置中移除默认的 VLAN 1；而在网桥 (bridge) 示例配置中则无需添加额外的 VLAN 配置。)
 
-single port
-(单端口)
-~~~~~~~~~~~
+single port(单端口)
+~~~~~~~~~~~~~~~~~~~
 
 The configuration can only be set up via VLAN tagging and bridge setup.
 By default packages are tagged with vid 1:
@@ -125,9 +119,8 @@ By default packages are tagged with vid 1:
   ip link set br0 up
 
 
-bridge
-(网桥)
-~~~~~~
+bridge(网桥)
+~~~~~~~~~~~~
 
 .. code-block:: sh
 
@@ -161,9 +154,8 @@ bridge
   # bring up the bridge
   ip link set dev br0 up
 
-gateway
-(网关)
-~~~~~~~
+gateway(网关)
+~~~~~~~~~~~~~
 
 .. code-block:: sh
 

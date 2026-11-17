@@ -1,8 +1,6 @@
-=================
-The UCAN Protocol
-=================
-
-(UCAN 协议)
+============================
+The UCAN Protocol(UCAN 协议)
+============================
 
 UCAN is the protocol used by the microcontroller-based USB-CAN
 adapter that is integrated on System-on-Modules from Theobroma Systems
@@ -21,9 +19,8 @@ All structures mentioned in this document are defined in
 ``drivers/net/can/usb/ucan.c``.
 (本文档中提到的所有结构体均定义在 ``drivers/net/can/usb/ucan.c`` 中。)
 
-USB Endpoints
-(USB 端点)
-=============
+USB Endpoints(USB 端点)
+=======================
 
 UCAN devices use three USB endpoints:
 (UCAN 设备使用三个 USB 端点：)
@@ -47,9 +44,8 @@ OUT endpoint
   (驱动程序通过该 out 端点发送 CAN 数据帧。)
 
 
-CONTROL Messages
-(CONTROL 消息)
-================
+CONTROL Messages(CONTROL 消息)
+==============================
 
 UCAN devices are configured using vendor requests on the control pipe.
 (UCAN 设备通过控制管道上的厂商请求（vendor requests）进行配置。)
@@ -65,9 +61,8 @@ The driver uses ``ucan_ctrl_command_in/out`` and
 (驱动程序使用 ``ucan_ctrl_command_in/out`` 和 ``ucan_device_request_in``
 向设备传递命令。)
 
-Setup Packet
-(建立包 Setup Packet)
-------------
+Setup Packet(建立包 Setup Packet)
+---------------------------------
 
 =================  =====================================================
 ``bmRequestType``  Direction | Vendor | (Interface or Device) (方向 | 厂商 | 接口或设备)
@@ -80,21 +75,18 @@ Setup Packet
                      semantics are used. (主机到设备：要发送的字节数；设备到主机：可接收的最大字节数。如果设备发送的数据较少，则遵循常见的 ZLP 语义。)
 =================  =====================================================
 
-Error Handling
-(错误处理)
---------------
+Error Handling(错误处理)
+------------------------
 
 The device indicates failed control commands by stalling the
 pipe.
 (设备通过停顿（stall）控制管道来指示控制命令失败。)
 
-Device Commands
-(设备命令)
----------------
+Device Commands(设备命令)
+-------------------------
 
-UCAN_DEVICE_GET_FW_STRING
-(UCAN_DEVICE_GET_FW_STRING，获取固件字符串)
-~~~~~~~~~~~~~~~~~~~~~~~~~
+UCAN_DEVICE_GET_FW_STRING(UCAN_DEVICE_GET_FW_STRING，获取固件字符串)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *Dev2Host; optional*
 (Dev2Host；可选)
@@ -103,13 +95,11 @@ Request the device firmware string.
 (请求设备固件字符串。)
 
 
-Interface Commands
-(接口命令)
-------------------
+Interface Commands(接口命令)
+----------------------------
 
-UCAN_COMMAND_START
-(UCAN_COMMAND_START，启动)
-~~~~~~~~~~~~~~~~~~
+UCAN_COMMAND_START(UCAN_COMMAND_START，启动)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *Host2Dev; mandatory*
 (Host2Dev；强制)
@@ -126,9 +116,8 @@ Payload Format
 mode  or mask of ``UCAN_MODE_*`` (UCAN_MODE_* 值的按位或组合)
 ====  ============================
 
-UCAN_COMMAND_STOP
-(UCAN_COMMAND_STOP，停止)
-~~~~~~~~~~~~~~~~~~
+UCAN_COMMAND_STOP(UCAN_COMMAND_STOP，停止)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *Host2Dev; mandatory*
 (Host2Dev；强制)
@@ -142,9 +131,8 @@ Payload Format
   *empty*
   (空。)
 
-UCAN_COMMAND_RESET
-(UCAN_COMMAND_RESET，复位)
-~~~~~~~~~~~~~~~~~~
+UCAN_COMMAND_RESET(UCAN_COMMAND_RESET，复位)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *Host2Dev; mandatory*
 (Host2Dev；强制)
@@ -158,9 +146,8 @@ Payload Format
   *empty*
   (空。)
 
-UCAN_COMMAND_GET
-(UCAN_COMMAND_GET，获取)
-~~~~~~~~~~~~~~~~
+UCAN_COMMAND_GET(UCAN_COMMAND_GET，获取)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *Host2Dev; mandatory*
 (Host2Dev；强制)
@@ -168,9 +155,8 @@ UCAN_COMMAND_GET
 Get Information from the Device
 (从设备获取信息。)
 
-Subcommands
-(子命令)
-^^^^^^^^^^^
+Subcommands(子命令)
+^^^^^^^^^^^^^^^^^^^
 
 UCAN_COMMAND_GET_INFO
 (UCAN_COMMAND_GET_INFO，获取信息)
@@ -206,9 +192,8 @@ UCAN_COMMAND_GET_PROTOCOL_VERSION
           protocol version 1
           (注意：未实现该命令的设备使用旧的协议版本 1。)
 
-UCAN_COMMAND_SET_BITTIMING
-(UCAN_COMMAND_SET_BITTIMING，设置位时序)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+UCAN_COMMAND_SET_BITTIMING(UCAN_COMMAND_SET_BITTIMING，设置位时序)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *Host2Dev; mandatory*
 (Host2Dev；强制)
@@ -224,9 +209,8 @@ Payload Format
 
   ``ucan_ctl_payload_t.cmd_set_bittiming``.
 
-UCAN_SLEEP/WAKE
-(UCAN_SLEEP/WAKE，睡眠/唤醒)
-~~~~~~~~~~~~~~~
+UCAN_SLEEP/WAKE(UCAN_SLEEP/WAKE，睡眠/唤醒)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *Host2Dev; optional*
 (Host2Dev；可选)
@@ -234,9 +218,8 @@ UCAN_SLEEP/WAKE
 Configure sleep and wake modes. Not yet supported by the driver.
 (配置睡眠与唤醒模式。驱动程序尚未支持该命令。)
 
-UCAN_FILTER
-(UCAN_FILTER，过滤器)
-~~~~~~~~~~~
+UCAN_FILTER(UCAN_FILTER，过滤器)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 *Host2Dev; optional*
 (Host2Dev；可选)
@@ -244,9 +227,8 @@ UCAN_FILTER
 Setup hardware CAN filters. Not yet supported by the driver.
 (设置硬件 CAN 过滤器。驱动程序尚未支持该命令。)
 
-Allowed interface commands
-(允许的接口命令)
---------------------------
+Allowed interface commands(允许的接口命令)
+------------------------------------------
 
 ==================  ===================  ==================
 Legal Device State  Command (命令)       New Device State (新状态)
@@ -259,9 +241,8 @@ started (启动)      RESTART (重新启动)   started (启动)
 any (任意)          GET (获取)           *no change* (无变化)
 ==================  ===================  ==================
 
-IN Message Format
-(IN 消息格式)
-=================
+IN Message Format(IN 消息格式)
+==============================
 
 A data packet on the USB IN endpoint contains one or more
 ``ucan_message_in`` values. If multiple messages are batched in a USB
@@ -274,9 +255,8 @@ against the actual data size).
 
 .. _can_ucan_in_message_len:
 
-``len`` field
-(``len`` 字段)
--------------
+``len`` field(``len`` 字段)
+---------------------------
 
 Each ``ucan_message_in`` must be aligned to a 4-byte boundary (relative
 to the start of the start of the data buffer). That means that there
@@ -299,16 +279,14 @@ may be padding bytes between multiple ``ucan_message_in`` values:
     +----------------------------+
                 [...]
 
-``type`` field
-(``type`` 字段)
---------------
+``type`` field(``type`` 字段)
+-----------------------------
 
 The ``type`` field specifies the type of the message.
 (``type`` 字段指定消息的类型。)
 
-UCAN_IN_RX
-(UCAN_IN_RX，接收)
-~~~~~~~~~~
+UCAN_IN_RX(UCAN_IN_RX，接收)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``subtype``
 (子类型)
@@ -319,9 +297,8 @@ UCAN_IN_RX
 Data received from the CAN bus (ID + payload).
 (从 CAN 总线接收到的数据（ID + 有效载荷）。)
 
-UCAN_IN_TX_COMPLETE
-(UCAN_IN_TX_COMPLETE，发送完成)
-~~~~~~~~~~~~~~~~~~~
+UCAN_IN_TX_COMPLETE(UCAN_IN_TX_COMPLETE，发送完成)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``subtype``
 (子类型)
@@ -342,9 +319,8 @@ are reserved and set to zero.
 标志位指示发送结果，其中第 0 位被置位表示发送成功。其余所有位均保留
 并置为 0。)
 
-Flow Control
-(流控)
-------------
+Flow Control(流控)
+------------------
 
 When receiving CAN messages there is no flow control on the USB
 buffer. The driver has to handle inbound message quickly enough to
@@ -356,9 +332,8 @@ reported by sending corresponding error frames (see
 来报告该情况（参见 :ref:`can_ucan_error_handling`）。)
 
 
-OUT Message Format
-(OUT 消息格式)
-==================
+OUT Message Format(OUT 消息格式)
+================================
 
 A data packet on the USB OUT endpoint contains one or more ``struct
 ucan_message_out`` values. If multiple messages are batched into one
@@ -387,18 +362,16 @@ same as described in :ref:`can_ucan_in_message_len`.
     +----------------------------+
                 [...]
 
-``type`` field
-(``type`` 字段)
---------------
+``type`` field(``type`` 字段)
+-----------------------------
 
 In protocol version 3 only ``UCAN_OUT_TX`` is defined, others are used
 only by legacy devices (protocol version 1).
 (在协议版本 3 中仅定义了 ``UCAN_OUT_TX``，其余类型仅由旧版设备
 （协议版本 1）使用。)
 
-UCAN_OUT_TX
-(UCAN_OUT_TX，发送)
-~~~~~~~~~~~
+UCAN_OUT_TX(UCAN_OUT_TX，发送)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``subtype``
 (子类型)
@@ -409,9 +382,8 @@ UCAN_OUT_TX
 Transmit a CAN frame. (parameters: ``id``, ``data``)
 (发送一个 CAN 帧。参数：``id``、``data``。)
 
-Flow Control
-(流控)
-------------
+Flow Control(流控)
+------------------
 
 When the device outbound buffers are full it starts sending *NAKs* on
 the *OUT* pipe until more buffers are available. The driver stops the
@@ -422,9 +394,8 @@ queue when a certain threshold of out packets are incomplete.
 
 .. _can_ucan_error_handling:
 
-CAN Error Handling
-(CAN 错误处理)
-==================
+CAN Error Handling(CAN 错误处理)
+================================
 
 If error reporting is turned on the device encodes errors into CAN
 error frames (see ``uapi/linux/can/error.h``) and sends it using the
@@ -442,9 +413,8 @@ user space is done by the driver.
 信息。因此，设备总是在设置了 ``UCAN_MODE_BERR_REPORT`` 的情况下启动。
 针对用户空间对这些消息的过滤由驱动程序完成。)
 
-Bus OFF
-(总线关闭)
--------
+Bus OFF(总线关闭)
+-----------------
 
 - The device does not recover from bus of automatically.
   (设备不会自动从总线关闭状态中恢复。)
@@ -463,9 +433,8 @@ Bus OFF
   (在总线关闭期间，来自主机的发送请求会被立即完成，且成功位保持未置位
   状态。)
 
-Example Conversation
-(示例交互流程)
-====================
+Example Conversation(示例交互流程)
+==================================
 
 #) Device is connected to USB
    (设备连接到 USB。)

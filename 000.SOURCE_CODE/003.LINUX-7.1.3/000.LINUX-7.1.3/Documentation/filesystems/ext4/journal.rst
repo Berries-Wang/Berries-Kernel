@@ -1,8 +1,7 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-Journal (jbd2)
-(日志 (jbd2))
---------------
+Journal (jbd2)(日志 (jbd2))
+---------------------------
 
 Introduced in ext3, the ext4 filesystem employs a journal to protect the
 filesystem against metadata inconsistencies in the case of a system crash. Up
@@ -64,9 +63,8 @@ The maximum size of a journal embedded in an ext4 filesystem is 2^32
 blocks. jbd2 itself does not seem to care.
 (内嵌于 ext4 文件系统中的日志的最大大小是 2^32 个块。jbd2 本身似乎并不关心这一点。)
 
-Layout
-(布局)
-~~~~~~
+Layout(布局)
+~~~~~~~~~~~~
 
 Generally speaking, the journal has this format:
 (一般来说，日志具有如下格式：)
@@ -93,9 +91,8 @@ commit. If there is no commit record (or the checksums don't match), the
 transaction will be discarded during replay.
 (注意，事务要么以一个描述符和一些数据开始，要么以一个块撤销列表开始。已完成的事务总是以一次提交结束。如果没有提交记录(或者校验和不匹配)，该事务将在重放期间被丢弃。)
 
-External Journal
-(外部日志)
-~~~~~~~~~~~~~~~~
+External Journal(外部日志)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Optionally, an ext4 filesystem can be created with an external journal
 device (as opposed to an internal journal, which uses a reserved inode).
@@ -128,9 +125,8 @@ superblock.
        (一个事务)
      -
 
-Block Header
-(块头部)
-~~~~~~~~~~~~
+Block Header(块头部)
+~~~~~~~~~~~~~~~~~~~~
 
 Every block in the journal starts with a common 12-byte header
 ``struct journal_header_s``:
@@ -197,9 +193,8 @@ The journal block type can be any one of:
        journal to skip writing blocks that were subsequently rewritten.
        (块撤销记录。通过让日志跳过写入随后已被重写的块，这可以加快恢复速度。)
 
-Super Block
-(超级块)
-~~~~~~~~~~~
+Super Block(超级块)
+~~~~~~~~~~~~~~~~~~~
 
 The super block for the journal is much simpler as compared to ext4's.
 The key data kept within are size of the journal, and where to find the
@@ -431,9 +426,8 @@ most likely choices.
    * - 4
      - CRC32C
 
-Descriptor Block
-(描述符块)
-~~~~~~~~~~~~~~~~
+Descriptor Block(描述符块)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The descriptor block contains an array of journal block tags that
 describe the final locations of the data blocks that follow in the
@@ -642,9 +636,8 @@ JBD2_FEATURE_INCOMPAT_CSUM_V3 are set, the end of the block is a
        to zero.
        (日志 UUID + 描述符块的校验和，计算时此字段置零。)
 
-Data Block
-(数据块)
-~~~~~~~~~~
+Data Block(数据块)
+~~~~~~~~~~~~~~~~~~
 
 In general, the data blocks being written to disk through the journal
 are written verbatim into the journal file after the descriptor block.
@@ -653,9 +646,8 @@ number then those four bytes are replaced with zeroes and the “escaped”
 flag is set in the descriptor block tag.
 (一般来说，通过日志写入磁盘的数据块会在描述符块之后被原封不动地写入日志文件。但是，如果该块的前四个字节与 jbd2 魔数相同，那么这四个字节会被替换为零，并在描述符块标签中设置“转义(escaped)”标志。)
 
-Revocation Block
-(撤销块)
-~~~~~~~~~~~~~~~~
+Revocation Block(撤销块)
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 A revocation block is used to prevent replay of a block in an earlier
 transaction. This is used to mark blocks that were journalled at one
@@ -733,9 +725,8 @@ block is a ``struct jbd2_journal_revoke_tail``, which has this format:
      - Checksum of the journal UUID + revocation block
        (日志 UUID + 撤销块的校验和)
 
-Commit Block
-(提交块)
-~~~~~~~~~~~~
+Commit Block(提交块)
+~~~~~~~~~~~~~~~~~~~~
 
 The commit block is a sentry that indicates that a transaction has been
 completely written to the journal. Once this commit block reaches the
@@ -801,9 +792,8 @@ bytes long (but uses a full block):
      - Nanoseconds component of the above timestamp.
        (上述时间戳的纳秒部分。)
 
-Fast commits
-(快速提交)
-~~~~~~~~~~~~
+Fast commits(快速提交)
+~~~~~~~~~~~~~~~~~~~~~~
 
 Fast commit area is organized as a log of tag length values. Each TLV has
 a ``struct ext4_fc_tl`` in the beginning which stores the tag and the length
@@ -879,9 +869,8 @@ Here is the list of supported tags and their meanings:
        represents the end of
        (存储该提交的 TID，以及此标签所标志其结束的那次快速提交的 CRC)
 
-Fast Commit Replay Idempotence
-(快速提交重放的幂等性)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Fast Commit Replay Idempotence(快速提交重放的幂等性)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Fast commits tags are idempotent in nature provided the recovery code follows
 certain rules. The guiding principle that the commit path follows while
@@ -948,8 +937,7 @@ into a series of idempotent outcomes, fast commits ensured idempotence during
 the replay.
 (如果我们在 (3) 之后崩溃，文件 A 将链接到 inode 11。在第二次重放期间，我们会移除文件 A(inode 11)。但我们会重新创建它并使其指向 inode 11。我们找不到 B，所以只需跳过那一步。此时，inode 11 的引用计数是不可靠的，但这会被最后一个 inode 11 标签的重放所修复。因此，通过把一个非幂等的过程转换为一系列幂等的结果，快速提交保证了重放期间的幂等性。)
 
-Journal Checkpoint
-(日志检查点)
+Journal Checkpoint(日志检查点)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Checkpointing the journal ensures all transactions and their associated buffers

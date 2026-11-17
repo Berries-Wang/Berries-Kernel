@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=================
-Automount Support
-=================
-
-(自动挂载支持)
+===============================
+Automount Support(自动挂载支持)
+===============================
 
 
 Support is available for filesystems that wish to do automounting
@@ -15,9 +13,8 @@ also be requested by userspace.
 (支持希望提供自动挂载(automounting)支持的文件系统(例如可以在 fs/afs/ 中找到的 kAFS 和位于 fs/nfs/ 的 NFS)。该设施包括允许执行内核内挂载以及请求挂载点降级。后者也可以由用户空间请求。)
 
 
-In-Kernel Automounting
-(内核内自动挂载)
-======================
+In-Kernel Automounting(内核内自动挂载)
+======================================
 
 See section "Mount Traps" of  Documentation/filesystems/autofs.rst
 (参见 Documentation/filesystems/autofs.rst 的 "Mount Traps" 一节)
@@ -43,9 +40,8 @@ And then if you look in the mountpoint catalogue, you'll see something like::
 	#afsdoc. /afs/cambridge.redhat.com/afsdoc afs rw 0 0
 
 
-Automatic Mountpoint Expiry
-(挂载点自动过期)
-===========================
+Automatic Mountpoint Expiry(挂载点自动过期)
+===========================================
 
 Automatic expiration of mountpoints is easy, provided you've mounted the
 mountpoint to be expired in the automounting procedure outlined separately.
@@ -94,9 +90,8 @@ same expiration list.
 (如果一个命名空间被复制，其中包含的所有挂载点都将被复制，并且在过期列表上的那些挂载点的副本将被添加到同一个过期列表中。)
 
 
-Userspace Driven Expiry
-(用户空间驱动的过期)
-=======================
+Userspace Driven Expiry(用户空间驱动的过期)
+===========================================
 
 As an alternative, it is possible for userspace to request expiry of any
 mountpoint (though some will be rejected - the current process's idea of the

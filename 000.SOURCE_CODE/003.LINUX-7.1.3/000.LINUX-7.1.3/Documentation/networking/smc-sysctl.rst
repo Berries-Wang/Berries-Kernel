@@ -6,9 +6,8 @@ SMC Sysctl
 
 (SMC Sysctl)
 
-/proc/sys/net/smc/* Variables
-(/proc/sys/net/smc/* 变量)
-=============================
+/proc/sys/net/smc/* Variables(/proc/sys/net/smc/* 变量)
+=======================================================
 
 autocorking_size - INTEGER
 	Setting SMC auto corking size:

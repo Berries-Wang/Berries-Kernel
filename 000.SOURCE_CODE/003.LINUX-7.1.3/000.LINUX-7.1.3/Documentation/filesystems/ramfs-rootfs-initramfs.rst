@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===========================
-Ramfs, rootfs and initramfs
-===========================
-
-(ramfs、rootfs 和 initramfs)
+=======================================================
+Ramfs, rootfs and initramfs(ramfs、rootfs 和 initramfs)
+=======================================================
 
 October 17, 2005
 (2005年10月17日)
@@ -12,9 +10,8 @@ October 17, 2005
 :Author: Rob Landley <rob@landley.net>
 (作者: Rob Landley <rob@landley.net>)
 
-What is ramfs?
-(什么是 ramfs？)
---------------
+What is ramfs?(什么是 ramfs？)
+------------------------------
 
 Ramfs is a very simple filesystem that exports Linux's disk caching
 mechanisms (the page cache and dentry cache) as a dynamically resizable
@@ -44,9 +41,8 @@ an optional component removable via menuconfig, since there would be negligible
 space savings.
 (实现 ramfs 所需的代码量非常小，因为所有工作都由现有的 Linux 缓存基础设施完成。基本上，你就是在把磁盘缓存作为文件系统来挂载。正因如此，ramfs 不是一个可以通过 menuconfig 移除的可选组件，因为这样做节省的空间微乎其微。)
 
-ramfs and ramdisk:
-(ramfs 与 ramdisk：)
-------------------
+ramfs and ramdisk:(ramfs 与 ramdisk：)
+--------------------------------------
 
 The older "ram disk" mechanism created a synthetic block device out of
 an area of RAM and used it as backing store for a filesystem.  This block
@@ -72,9 +68,8 @@ synthetic block devices, now from files instead of from chunks of memory.
 See losetup (8) for details.
 (ramdisk 半过时的另一个原因是，回环(loopback)设备的引入提供了一种更灵活、更方便的创建合成块设备的方式，如今是从文件而不是从内存块创建。详情参见 losetup (8)。)
 
-ramfs and tmpfs:
-(ramfs 与 tmpfs：)
-----------------
+ramfs and tmpfs:(ramfs 与 tmpfs：)
+----------------------------------
 
 One downside of ramfs is you can keep writing data into it until you fill
 up all memory, and the VM can't free it because the VM thinks that files
@@ -88,9 +83,8 @@ to write the data to swap space.  Normal users can be allowed write access to
 tmpfs mounts.  See Documentation/filesystems/tmpfs.rst for more information.
 (为了增加大小限制以及把数据写入交换空间的能力，人们创建了一个名为 tmpfs 的 ramfs 衍生品。可以允许普通用户对 tmpfs 挂载拥有写权限。更多信息参见 Documentation/filesystems/tmpfs.rst。)
 
-What is rootfs?
-(什么是 rootfs？)
----------------
+What is rootfs?(什么是 rootfs？)
+--------------------------------
 
 Rootfs is a special instance of ramfs (or tmpfs, if that's enabled), which is
 always present in Linux systems.  The kernel uses an immutable empty filesystem
@@ -108,9 +102,8 @@ default.  To force ramfs, add "rootfstype=ramfs" to the kernel command
 line.
 (如果启用了 CONFIG_TMPFS，rootfs 默认将使用 tmpfs 而不是 ramfs。要强制使用 ramfs，请向内核命令行添加 "rootfstype=ramfs"。)
 
-What is initramfs?
-(什么是 initramfs？)
-------------------
+What is initramfs?(什么是 initramfs？)
+--------------------------------------
 
 All 2.6 Linux kernels contain a gzipped "cpio" format archive, which is
 extracted into rootfs when the kernel boots up.  After extracting, the kernel
@@ -158,9 +151,8 @@ All this differs from the old initrd in several ways:
     This is the preferred method for switching root filesystems.
     (这是切换根文件系统的首选方法。)
 
-Populating initramfs:
-(填充 initramfs：)
----------------------
+Populating initramfs:(填充 initramfs：)
+---------------------------------------
 
 The 2.6 kernel build process always creates a gzipped cpio format initramfs
 archive and links it into the resulting kernel binary.  By default, this
@@ -255,9 +247,8 @@ use in place of the above config file::
    The above script gets them in the right order.
    (cpio 的 man 手册页包含一些糟糕的建议，如果你照做，会破坏你的 initramfs 归档。它说："生成文件名列表的典型方法是使用 find 命令；你应当给 find 传递 -depth 选项，以尽量减少目录不可写或不可搜索带来的权限问题。"在创建 initramfs.cpio.gz 镜像时不要这样做，它不会起作用。Linux 内核的 cpio 解包器不会在尚不存在的目录中创建文件，因此目录表项必须放在进入这些目录的文件之前。上面的脚本把它们排成了正确的顺序。)
 
-External initramfs images:
-(外部 initramfs 镜像：)
---------------------------
+External initramfs images:(外部 initramfs 镜像：)
+-------------------------------------------------
 
 If the kernel has initrd support enabled, an external cpio.gz archive can also
 be passed into a 2.6 kernel in place of an initrd.  In this case, the kernel
@@ -277,9 +268,8 @@ the built-in initramfs archive.  Some distributors also prefer to customize
 a single kernel image with task-specific initramfs images, without recompiling.
 (它也可以用来补充内核内置的 initramfs 镜像。外部归档中的文件会覆盖内置 initramfs 归档中任何与之冲突的文件。一些发行版厂商还喜欢单独用一个内核镜像配合针对特定任务的 initramfs 镜像进行定制，而无需重新编译。)
 
-Contents of initramfs:
-(initramfs 的内容：)
-----------------------
+Contents of initramfs:(initramfs 的内容：)
+------------------------------------------
 
 An initramfs archive is a complete self-contained root filesystem for Linux.
 If you don't already understand what shared libraries, devices, and paths
@@ -332,9 +322,8 @@ When debugging a normal root filesystem, it's nice to be able to boot with
 just as useful.
 (在调试普通根文件系统时，能够用 "init=/bin/sh" 启动是很有用的。initramfs 中的等价物是 "rdinit=/bin/sh"，它同样有用。)
 
-Why cpio rather than tar?
-(为什么用 cpio 而不是 tar？)
--------------------------
+Why cpio rather than tar?(为什么用 cpio 而不是 tar？)
+-----------------------------------------------------
 
 This decision was made back in December, 2001.  The discussion started here:
 (这个决定是在 2001 年 12 月做出的。讨论从这里开始：)
@@ -399,9 +388,8 @@ the above threads) is:
    and, most importantly, designed and implemented the initramfs code.
    (而且，最重要的是，设计并实现了 initramfs 代码。)
 
-Future directions:
-(未来的方向：)
-------------------
+Future directions:(未来的方向：)
+--------------------------------
 
 Today (2.6.16), initramfs is always compiled in, but not always used.  The
 kernel falls back to legacy boot code that is reached only if initramfs does

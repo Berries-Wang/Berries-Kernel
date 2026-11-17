@@ -1,19 +1,16 @@
 .. SPDX-License-Identifier: GPL-2.0+
 
-==============================================================
-Linux Driver for the Synopsys(R) Ethernet Controllers "stmmac"
-==============================================================
-
-(Synopsys(R) 以太网控制器 "stmmac" 的 Linux 驱动)
+===============================================================================================================
+Linux Driver for the Synopsys(R) Ethernet Controllers "stmmac"(Synopsys(R) 以太网控制器 "stmmac" 的 Linux 驱动)
+===============================================================================================================
 
 Authors: Giuseppe Cavallaro <peppe.cavallaro@st.com>,
 Alexandre Torgue <alexandre.torgue@st.com>, Jose Abreu <joabreu@synopsys.com>
 (作者：Giuseppe Cavallaro <peppe.cavallaro@st.com>、Alexandre Torgue
 <alexandre.torgue@st.com>、Jose Abreu <joabreu@synopsys.com>)
 
-Contents
-(目录)
-========
+Contents(目录)
+==============
 
 - In This Release
   (本版本简介)
@@ -30,9 +27,8 @@ Contents
 - Support
   (支持)
 
-In This Release
-(本版本简介)
-===============
+In This Release(本版本简介)
+===========================
 
 This file describes the stmmac Linux Driver for all the Synopsys(R) Ethernet
 Controllers.
@@ -87,9 +83,8 @@ to use with Linux.
 (有关硬件要求的问题，请参考随你的以太网适配器提供的文档。所列的所有硬件要求均
 适用于 Linux。)
 
-Feature List
-(特性列表)
-============
+Feature List(特性列表)
+======================
 
 The following features are available in this driver:
 (此驱动提供以下特性：)
@@ -156,9 +151,8 @@ The following features are available in this driver:
  - Selftests using Ethtool
    (使用 Ethtool 的自测)
 
-Kernel Configuration
-(内核配置)
-====================
+Kernel Configuration(内核配置)
+==============================
 
 The kernel configuration option is ``CONFIG_STMMAC_ETH``:
 (内核配置选项是 ``CONFIG_STMMAC_ETH`` ：)
@@ -168,9 +162,8 @@ The kernel configuration option is ``CONFIG_STMMAC_ETH``:
  - ``CONFIG_STMMAC_PCI``: is to enable the pci driver.
    (``CONFIG_STMMAC_PCI`` ：用于启用 PCI 驱动。)
 
-Command Line Parameters
-(命令行参数)
-=======================
+Command Line Parameters(命令行参数)
+===================================
 
 If the driver is built as a module the following optional parameters are used
 by entering them on the command line with the modprobe command using this
@@ -189,9 +182,8 @@ The default value for each parameter is generally the recommended setting,
 unless otherwise noted.
 (每个参数的默认值通常就是推荐设置，除非另有说明。)
 
-watchdog
-(watchdog (看门狗))
---------
+watchdog(watchdog (看门狗))
+---------------------------
 :Valid Range: 5000-None
 :Default Value: 5000
 (有效范围：5000-无限制；默认值：5000)
@@ -199,9 +191,8 @@ watchdog
 This parameter overrides the transmit timeout in milliseconds.
 (此参数覆盖以毫秒计的发送超时。)
 
-debug
-(debug (调试))
------
+debug(debug (调试))
+-------------------
 :Valid Range: 0-16 (0=none,...,16=all)
 :Default Value: 0
 (有效范围：0-16 (0=无，...，16=全部)；默认值：0)
@@ -210,9 +201,8 @@ This parameter adjusts the level of debug messages displayed in the system
 logs.
 (此参数调整系统日志中显示的调试消息级别。)
 
-phyaddr
-(phyaddr (PHY 地址))
--------
+phyaddr(phyaddr (PHY 地址))
+---------------------------
 :Valid Range: 0-31
 :Default Value: -1
 (有效范围：0-31；默认值：-1)
@@ -220,9 +210,8 @@ phyaddr
 This parameter overrides the physical address of the PHY device.
 (此参数覆盖 PHY 设备的物理地址。)
 
-flow_ctrl
-(flow_ctrl (流控制))
----------
+flow_ctrl(flow_ctrl (流控制))
+-----------------------------
 :Valid Range: 0-3 (0=off,1=rx,2=tx,3=rx/tx)
 :Default Value: 3
 (有效范围：0-3 (0=关，1=rx，2=tx，3=rx/tx)；默认值：3)
@@ -230,9 +219,8 @@ flow_ctrl
 This parameter changes the default Flow Control ability.
 (此参数更改默认的流控制能力。)
 
-pause
-(pause (暂停时间))
------
+pause(pause (暂停时间))
+-----------------------
 :Valid Range: 0-65535
 :Default Value: 65535
 (有效范围：0-65535；默认值：65535)
@@ -240,9 +228,8 @@ pause
 This parameter changes the default Flow Control Pause time.
 (此参数更改默认的流控制暂停时间。)
 
-tc
-(tc (阈值控制))
---
+tc(tc (阈值控制))
+-----------------
 :Valid Range: 64-256
 :Default Value: 64
 (有效范围：64-256；默认值：64)
@@ -250,9 +237,8 @@ tc
 This parameter changes the default HW FIFO Threshold control value.
 (此参数更改默认的硬件 FIFO 阈值控制值。)
 
-buf_sz
-(buf_sz (缓冲区大小))
-------
+buf_sz(buf_sz (缓冲区大小))
+---------------------------
 :Valid Range: 1536-16384
 :Default Value: 1536
 (有效范围：1536-16384；默认值：1536)
@@ -260,9 +246,8 @@ buf_sz
 This parameter changes the default RX DMA packet buffer size.
 (此参数更改默认的 RX DMA 数据包缓冲区大小。)
 
-eee_timer
-(eee_timer (EEE 定时器))
----------
+eee_timer(eee_timer (EEE 定时器))
+---------------------------------
 :Valid Range: 0-None
 :Default Value: 1000
 (有效范围：0-无限制；默认值：1000)
@@ -270,9 +255,8 @@ eee_timer
 This parameter changes the default LPI TX Expiration time in milliseconds.
 (此参数更改默认的 LPI TX 过期时间 (以毫秒计)。)
 
-chain_mode
-(chain_mode (链模式))
-----------
+chain_mode(chain_mode (链模式))
+-------------------------------
 :Valid Range: 0-1 (0=off,1=on)
 :Default Value: 0
 (有效范围：0-1 (0=关，1=开)；默认值：0)
@@ -281,13 +265,11 @@ This parameter changes the default mode of operation from Ring Mode to
 Chain Mode.
 (此参数将默认的工作模式从环 (Ring) 模式更改为链 (Chain) 模式。)
 
-Driver Information and Notes
-(驱动信息与说明)
-============================
+Driver Information and Notes(驱动信息与说明)
+============================================
 
-Transmit Process
-(发送流程)
-----------------
+Transmit Process(发送流程)
+--------------------------
 
 The xmit method is invoked when the kernel needs to transmit a packet; it sets
 the descriptors in the ring and informs the DMA engine that there is a packet
@@ -306,9 +288,8 @@ Once the controller has finished transmitting the packet, timer will be
 scheduled to release the transmit resources.
 (控制器完成数据包发送后，会调度一个定时器来释放发送资源。)
 
-Receive Process
-(接收流程)
----------------
+Receive Process(接收流程)
+-------------------------
 
 When one or more packets are received, an interrupt happens. The interrupts
 are not queued, so the driver has to scan all the descriptors in the ring
@@ -326,9 +307,8 @@ The incoming packets are stored, by the DMA, in a list of pre-allocated socket
 buffers in order to avoid the memcpy (zero-copy).
 (为了避免 memcpy (零拷贝)，DMA 会将到达的数据包存储在预分配的套接字缓冲区列表中。)
 
-Interrupt Mitigation
-(中断缓解)
---------------------
+Interrupt Mitigation(中断缓解)
+------------------------------
 
 The driver is able to mitigate the number of its DMA interrupts using NAPI for
 the reception on chips older than the 3.50. New chips have an HW RX Watchdog
@@ -339,18 +319,16 @@ used for this mitigation.
 Mitigation parameters can be tuned by ethtool.
 (缓解参数可以通过 ethtool 调整。)
 
-WoL
-(WoL (网络唤醒))
----
+WoL(WoL (网络唤醒))
+-------------------
 
 Wake up on Lan feature through Magic and Unicast frames are supported for the
 GMAC, GMAC4/5 and XGMAC core.
 (GMAC、GMAC4/5 和 XGMAC 核心支持通过 Magic 帧和单播帧实现的网络唤醒 (Wake up on
 Lan) 特性。)
 
-DMA Descriptors
-(DMA 描述符)
----------------
+DMA Descriptors(DMA 描述符)
+---------------------------
 
 Driver handles both normal and alternate descriptors. The latter has been only
 tested on DesignWare(R) Cores Ethernet MAC Universal version 3.41a and later.
@@ -371,9 +349,8 @@ such explicit chaining is not possible in RING mode.
 (在 CHAINED 模式中，每个描述符都带有指向链表中下一个描述符的指针，从而在描述符自身
 中形成显式链接；而这种显式链接在 RING 模式中是无法实现的。)
 
-Extended Descriptors
-(扩展描述符)
---------------------
+Extended Descriptors(扩展描述符)
+--------------------------------
 
 The extended descriptors give us information about the Ethernet payload when
 it is carrying PTP packets or TCP/UDP/ICMP over IP. These are not available on
@@ -386,9 +363,8 @@ Extended Status.
 它们是否真的可用。PTPv2 也必须依赖此支持，因为这些额外的描述符用于保存硬件时间戳和
 扩展状态 (Extended Status)。)
 
-Ethtool Support
-(Ethtool 支持)
----------------
+Ethtool Support(Ethtool 支持)
+-----------------------------
 
 Ethtool is supported. For example, driver statistics (including RMON),
 internal errors can be taken using::
@@ -404,18 +380,16 @@ checks to the HW using MAC and PHY loopback mechanisms::
 
     ethtool -t ethX
 
-Jumbo and Segmentation Offloading
-(Jumbo 与分段卸载)
----------------------------------
+Jumbo and Segmentation Offloading(Jumbo 与分段卸载)
+---------------------------------------------------
 
 Jumbo frames are supported and tested for the GMAC. The GSO has been also
 added but it's performed in software. LRO is not supported.
 (GMAC 支持并已测试巨型帧 (Jumbo frames)。此外还加入了 GSO，但它由软件执行。不支持
 LRO。)
 
-TSO Support
-(TSO 支持)
------------
+TSO Support(TSO 支持)
+---------------------
 
 TSO (TCP Segmentation Offload) feature is supported by GMAC > 4.x and XGMAC
 chip family. When a packet is sent through TCP protocol, the TCP stack ensures
@@ -440,9 +414,8 @@ IP 必须自行执行分段，以符合最大帧长度。)
 This feature can be enabled in device tree through ``snps,tso`` entry.
 (此特性可以在设备树中通过 ``snps,tso`` 条目启用。)
 
-Energy Efficient Ethernet
-(节能以太网 (EEE))
--------------------------
+Energy Efficient Ethernet(节能以太网 (EEE))
+-------------------------------------------
 
 Energy Efficient Ethernet (EEE) enables IEEE 802.3 MAC sublayer along with a
 family of Physical layer to operate in the Low Power Idle (LPI) mode. The EEE
@@ -470,9 +443,8 @@ and disable the LPI mode when there is nothing to be transmitted.
 (要进入 TX LPI 模式，驱动需要一个软件定时器，在没有数据要发送时启用和禁用 LPI
 模式。)
 
-Precision Time Protocol (PTP)
-(精确时间协议 (PTP))
------------------------------
+Precision Time Protocol (PTP)(精确时间协议 (PTP))
+-------------------------------------------------
 
 The driver supports the IEEE 1588-2002, Precision Time Protocol (PTP), which
 enables precise synchronization of clocks in measurement and control systems
@@ -486,9 +458,8 @@ IEEE 1588-2008 can be enabled when configuring the Kernel.
 (除了 IEEE 1588-2002 时间戳中提到的基本时间戳特性之外，新的 GMAC 核心还支持高级
 时间戳特性。IEEE 1588-2008 可以在配置内核时启用。)
 
-SGMII/RGMII Support
-(SGMII/RGMII 支持)
--------------------
+SGMII/RGMII Support(SGMII/RGMII 支持)
+-------------------------------------
 
 New GMAC devices provide own way to manage RGMII/SGMII. This information is
 available at run-time by looking at the HW capability register. This means
@@ -501,18 +472,16 @@ registers, it is possible to look at the Auto-negotiated Link Parter Ability.
 硬件提供了一组扩展寄存器，用于重启 ANE、校验全/半双工模式和速率。借助这些寄存器，
 可以查看自协商的链路伙伴能力 (Auto-negotiated Link Parter Ability)。)
 
-Physical
-(物理层)
---------
+Physical(物理层)
+----------------
 
 The driver is compatible with Physical Abstraction Layer to be connected with
 PHY and GPHY devices.
 (该驱动与物理抽象层 (Physical Abstraction Layer) 兼容，可以连接 PHY 和 GPHY
 设备。)
 
-Platform Information
-(平台信息)
---------------------
+Platform Information(平台信息)
+------------------------------
 
 Several information can be passed through the platform and device-tree.
 (可以通过 platform 和设备树传递多种信息。)
@@ -897,17 +866,15 @@ For the TX Queues configuration, we have:
 
     }
 
-Device Tree Information
-(设备树信息)
------------------------
+Device Tree Information(设备树信息)
+-----------------------------------
 
 Please refer to the following document:
 Documentation/devicetree/bindings/net/snps,dwmac.yaml
 (请参考以下文档：Documentation/devicetree/bindings/net/snps,dwmac.yaml)
 
-HW Capabilities
-(HW 能力)
----------------
+HW Capabilities(HW 能力)
+------------------------
 
 Note that, starting from new chips, where it is available the HW capability
 register, many configurations are discovered at run-time for example to
@@ -918,9 +885,8 @@ capability register can replace what has been passed from the platform.
 EEE、硬件校验和、PTP、增强描述符等是否真正可用。按照本驱动采用的策略，来自硬件
 能力寄存器的信息可以取代从平台传递的信息。)
 
-Debug Information
-(调试信息)
-=================
+Debug Information(调试信息)
+===========================
 
 The driver exports many information i.e. internal statistics, debug
 information, MAC and DMA registers etc.
@@ -951,9 +917,8 @@ information (please see: NETIF Msg Level).
 (开发者还可以使用 ``debug`` 模块参数获取进一步的调试信息 (请参见：NETIF Msg
 Level)。)
 
-Support
-(支持)
-=======
+Support(支持)
+=============
 
 If an issue is identified with the released source code on a supported kernel
 with a supported adapter, email the specific information related to the

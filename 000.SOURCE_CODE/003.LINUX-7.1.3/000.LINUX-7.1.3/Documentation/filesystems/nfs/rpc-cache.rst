@@ -1,17 +1,14 @@
-=========
-RPC Cache
-=========
-
-(RPC 缓存)
+===================
+RPC Cache(RPC 缓存)
+===================
 
 This document gives a brief introduction to the caching
 mechanisms in the sunrpc layer that is used, in particular,
 for NFS authentication.
 (本文档简要介绍 sunrpc 层中的缓存机制，该机制尤其用于 NFS 认证。)
 
-Caches
-(缓存)
-======
+Caches(缓存)
+============
 
 The caching replaces the old exports table and allows for
 a wide variety of values to be caches.
@@ -59,9 +56,8 @@ The common code handles such things as:
    - clean out old entries as they expire.
      (在旧条目过期时将其清除。)
 
-Creating a Cache
-(创建缓存)
-----------------
+Creating a Cache(创建缓存)
+--------------------------
 
 -  A cache needs a datum to store.  This is in the form of a
    structure definition that must contain a struct cache_head
@@ -138,9 +134,8 @@ Creating a Cache
    cleaned to discard old data.
    (缓存需要使用 cache_register() 进行注册。这会把它加入一个缓存列表，该列表会被定期清理以丢弃旧数据。)
 
-Using a cache
-(使用缓存)
--------------
+Using a cache(使用缓存)
+-----------------------
 
 To find a value in a cache, call sunrpc_cache_lookup_rcu passing a pointer
 to the cache_head in a sample item with the 'key' fields filled in.
@@ -175,9 +170,8 @@ it is being inspected.  If the item found by _lookup does not contain
 valid data, then the content is copied across and CACHE_VALID is set.
 (sunrpc_cache_lookup_rcu 返回的值也可以传递给 sunrpc_cache_update，用于设置该项的内容。还会传入第二个项，它应当保存该内容。如果 _lookup 找到的项已含有有效数据，则该项会被丢弃并创建一个新项。这样，项的任何使用者都无需担心在自己检查该项期间内容发生变化。如果 _lookup 找到的项不包含有效数据，则内容会被复制过去，并设置 CACHE_VALID。)
 
-Populating a cache
-(填充缓存)
-------------------
+Populating a cache(填充缓存)
+----------------------------
 
 Each cache has a name, and when the cache is registered, a directory
 with that name is created in /proc/net/rpc
@@ -252,9 +246,8 @@ provided.
   failed lookup meant a definite 'no'.
   (如果某个缓存在通道上没有活跃的读取者，并且已超过 60 秒没有任何活跃的读取者，则不会再有请求被加入通道，相反，所有未找到有效条目的查找都将失败。这部分是出于向后兼容的考虑：以前的 nfs 导出表被视为权威，查找失败就意味着明确的 '否'。)
 
-request/response format
-(请求/响应格式)
------------------------
+request/response format(请求/响应格式)
+--------------------------------------
 
 While each cache is free to use its own format for requests
 and responses over channel, the following is recommended as

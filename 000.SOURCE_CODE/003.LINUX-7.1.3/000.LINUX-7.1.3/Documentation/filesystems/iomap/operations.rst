@@ -7,11 +7,9 @@
         sentence changes don't bleed colors in diff.
         Heading decorations are documented in sphinx.rst.
 
-=========================
-Supported File Operations
-=========================
-
-(受支持的文件操作)
+===========================================
+Supported File Operations(受支持的文件操作)
+===========================================
 
 .. contents:: Table of Contents
    :local:
@@ -20,9 +18,8 @@ Below are a discussion of the high level file operations that iomap
 implements.
 (下面讨论 iomap 所实现的高层文件操作。)
 
-Buffered I/O
-(缓冲 I/O)
-============
+Buffered I/O(缓冲 I/O)
+======================
 
 Buffered I/O is the default file I/O path in Linux.
 File contents are cached in memory ("pagecache") to satisfy reads and
@@ -44,9 +41,8 @@ be used, which makes buffered I/O much more efficient, and the pagecache
 maintainer much happier.
 (iomap 实现了几乎全部的 folio 和页缓存管理工作，而在传统 I/O 模型下这些必须由文件系统自己实现。这意味着文件系统无需了解分配、映射、管理 uptodate 和脏状态以及页缓存 folio 回写的细节。在传统 I/O 模型下，这些工作通过 buffer_head 链表而不是 iomap 所使用的每 folio 位图来管理，效率非常低。除非文件系统显式选择使用 buffer head，否则它们不会被用到，这使得缓冲 I/O 高效得多，页缓存维护者也省心得多。)
 
-``struct address_space_operations``
-(结构体 address_space_operations)
------------------------------------
+``struct address_space_operations``(结构体 address_space_operations)
+--------------------------------------------------------------------
 
 The following iomap functions can be referenced directly from the
 address space operations structure:
@@ -66,9 +62,8 @@ The following address space operations can be wrapped easily:
  * ``bmap``
  * ``swap_activate``
 
-``struct iomap_write_ops``
-(结构体 iomap_write_ops)
---------------------------
+``struct iomap_write_ops``(结构体 iomap_write_ops)
+--------------------------------------------------
 
 .. code-block:: c
 
@@ -157,9 +152,8 @@ These ``struct kiocb`` flags are significant for buffered I/O with iomap:
  * ``IOCB_DONTCACHE``: Turns on ``IOMAP_DONTCACHE``.
    (IOCB_DONTCACHE：打开 ``IOMAP_DONTCACHE``。)
 
-``struct iomap_read_ops``
-(结构体 iomap_read_ops)
---------------------------
+``struct iomap_read_ops``(结构体 iomap_read_ops)
+------------------------------------------------
 
 .. code-block:: c
 
@@ -182,9 +176,8 @@ iomap calls these functions:
     optional.
     (submit_read：提交任何未决的读请求。此函数是可选的。)
 
-Internal per-Folio State
-(每 folio 内部状态)
-------------------------
+Internal per-Folio State(每 folio 内部状态)
+-------------------------------------------
 
 If the fsblock size matches the size of a pagecache folio, it is assumed
 that all disk I/O operations will operate on the entire folio.
@@ -227,9 +220,8 @@ Filesystems wishing to turn on large folios in the pagecache should call
 ``mapping_set_large_folios`` when initializing the incore inode.
 (希望在页缓存中启用大 folio 的文件系统，应在初始化内存中(incore)的 inode 时调用 ``mapping_set_large_folios``。)
 
-Buffered Readahead and Reads
-(缓冲预读与读取)
-----------------------------
+Buffered Readahead and Reads(缓冲预读与读取)
+--------------------------------------------
 
 The ``iomap_readahead`` function initiates readahead to the pagecache.
 The ``iomap_read_folio`` function reads one folio's worth of data into
@@ -265,9 +257,8 @@ pass in any custom data the caller needs accessible in the ops callbacks for
 fulfilling reads.
 (``ops->submit_read()`` 和 ``read_ctx`` 是可选的。``read_ctx`` 用于传入调用者需要能够在 ops 回调中访问的任何自定义数据，以完成读取。)
 
-Buffered Writes
-(缓冲写入)
----------------
+Buffered Writes(缓冲写入)
+-------------------------
 
 The ``iomap_file_buffered_write`` function writes an ``iocb`` to the
 pagecache.
@@ -277,9 +268,8 @@ Callers commonly take ``i_rwsem`` in either shared or exclusive mode
 before calling this function.
 (``iomap_file_buffered_write`` 函数把一个 ``iocb`` 写入页缓存。``IOMAP_WRITE`` 或 ``IOMAP_WRITE`` | ``IOMAP_NOWAIT`` 将作为 ``flags`` 参数传给 ``->iomap_begin``。调用者通常在调用此函数之前以共享或独占模式获取 ``i_rwsem``。)
 
-mmap Write Faults
-(mmap 写入缺页)
-~~~~~~~~~~~~~~~~~
+mmap Write Faults(mmap 写入缺页)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``iomap_page_mkwrite`` function handles a write fault to a folio in
 the pagecache.
@@ -289,9 +279,8 @@ Callers commonly take the mmap ``invalidate_lock`` in shared or
 exclusive mode before calling this function.
 (``iomap_page_mkwrite`` 函数处理对页缓存中某个 folio 的写入缺页。``IOMAP_WRITE | IOMAP_FAULT`` 将作为 ``flags`` 参数传给 ``->iomap_begin``。调用者通常在调用此函数之前以共享或独占模式获取 mmap 的 ``invalidate_lock``。)
 
-Buffered Write Failures
-(缓冲写入失败)
-~~~~~~~~~~~~~~~~~~~~~~~
+Buffered Write Failures(缓冲写入失败)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 After a short write to the pagecache, the areas not written will not
 become marked dirty.
@@ -314,9 +303,8 @@ to the same region and triggers writeback to flush the dirty data out to
 disk.
 (文件系统必须提供一个 ``punch`` 函数，对处于这种状态的每个文件范围调用它。此函数 *只* 移除延迟分配预留，以防与当前线程竞争的另一个线程成功写入同一区域并触发回写，把脏数据刷出到磁盘。)
 
-Zeroing for File Operations
-(文件操作清零)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Zeroing for File Operations(文件操作清零)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Filesystems can call ``iomap_zero_range`` to perform zeroing of the
 pagecache for non-truncation file operations that are not aligned to
@@ -327,9 +315,8 @@ Callers typically hold ``i_rwsem`` and ``invalidate_lock`` in exclusive
 mode before calling this function.
 (文件系统可以调用 ``iomap_zero_range``，为未按 fsblock 大小对齐的非截断文件操作执行页缓存清零。``IOMAP_ZERO`` 将作为 ``flags`` 参数传给 ``->iomap_begin``。调用者通常在调用此函数之前以独占模式持有 ``i_rwsem`` 和 ``invalidate_lock``。)
 
-Unsharing Reflinked File Data
-(对 reflink 文件数据取消共享)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Unsharing Reflinked File Data(对 reflink 文件数据取消共享)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Filesystems can call ``iomap_file_unshare`` to force a file sharing
 storage with another file to preemptively copy the shared data to newly
@@ -340,9 +327,8 @@ Callers typically hold ``i_rwsem`` and ``invalidate_lock`` in exclusive
 mode before calling this function.
 (文件系统可以调用 ``iomap_file_unshare``，来强制一个与其他文件共享存储的文件抢先地把共享数据复制到新分配的存储中。``IOMAP_WRITE | IOMAP_UNSHARE`` 将作为 ``flags`` 参数传给 ``->iomap_begin``。调用者通常在调用此函数之前以独占模式持有 ``i_rwsem`` 和 ``invalidate_lock``。)
 
-Truncation
-(截断)
-----------
+Truncation(截断)
+----------------
 
 Filesystems can call ``iomap_truncate_page`` to zero the bytes in the
 pagecache from EOF to the end of the fsblock during a file truncation
@@ -355,9 +341,8 @@ Callers typically hold ``i_rwsem`` and ``invalidate_lock`` in exclusive
 mode before calling this function.
 (文件系统可以调用 ``iomap_truncate_page``，在文件截断操作期间把页缓存中从 EOF 到 fsblock 末尾的字节清零。EOF 块之后的一切由 ``truncate_setsize`` 或 ``truncate_pagecache`` 负责处理。``IOMAP_ZERO`` 将作为 ``flags`` 参数传给 ``->iomap_begin``。调用者通常在调用此函数之前以独占模式持有 ``i_rwsem`` 和 ``invalidate_lock``。)
 
-Pagecache Writeback
-(页缓存回写)
--------------------
+Pagecache Writeback(页缓存回写)
+-------------------------------
 
 Filesystems can call ``iomap_writepages`` to respond to a request to
 write dirty pagecache folios to disk.
@@ -380,9 +365,8 @@ This is to prevent dirty folio clots when storage devices fail; an
 The ``ops`` structure must be specified and is as follows:
 (``ops`` 结构必须指定，如下所示：)
 
-``struct iomap_writeback_ops``
-(结构体 iomap_writeback_ops)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``struct iomap_writeback_ops``(结构体 iomap_writeback_ops)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: c
 
@@ -437,9 +421,8 @@ The fields are as follows:
     This function must be supplied by the filesystem.
     (writeback_submit：提交之前构建好的回写上下文。基于块的文件系统应使用 iomap_ioend_writeback_submit 辅助函数，其他文件系统可以实现自己的。文件系统可以选择性地挂钩回写 bio 提交。这可能包括写前的空间记账更新，或者为内部目的安装自定义的 ``->bi_end_io`` 函数，例如在提交 bio 之前，把 ioend 完成推迟到工作队列，以便从进程上下文运行元数据更新事务。文件系统必须提供此函数。)
 
-Pagecache Writeback Completion
-(页缓存回写完成)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Pagecache Writeback Completion(页缓存回写完成)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To handle the bookkeeping that must happen after disk I/O for writeback
 completes, iomap creates chains of ``struct iomap_ioend`` objects that
@@ -487,9 +470,8 @@ amortization:
    ioends linked to it.
    (iomap_finish_ioends：完成一个可能链接了其他 ioend 的 ioend。)
 
-Direct I/O
-(直接 I/O)
-==========
+Direct I/O(直接 I/O)
+====================
 
 In Linux, direct I/O is defined as file I/O that is issued directly to
 storage, bypassing the pagecache.
@@ -588,9 +570,8 @@ filesystem should pass the return value to ``iomap_dio_complete`` after
 finishing its internal work.
 (如果文件系统希望在直接 I/O 完成之前执行自己的工作，它应调用 ``__iomap_dio_rw``。如果其返回值不是错误指针或 NULL 指针，文件系统应在完成自己的内部工作之后，把该返回值传给 ``iomap_dio_complete``。)
 
-Return Values
-(返回值)
--------------
+Return Values(返回值)
+---------------------
 
 ``iomap_dio_rw`` can return one of the following:
 (``iomap_dio_rw`` 可以返回以下之一：)
@@ -612,9 +593,8 @@ Return Values
  * Any of the other negative error codes.
    (任何其他负的错误码。)
 
-Direct Reads
-(直接读取)
-------------
+Direct Reads(直接读取)
+----------------------
 
 A direct I/O read initiates a read I/O from the storage device to the
 caller's buffer.
@@ -631,9 +611,8 @@ Callers commonly hold ``i_rwsem`` in shared mode before calling this
 function.
 (调用者通常在调用此函数之前以共享模式持有 ``i_rwsem``。)
 
-Direct Writes
-(直接写入)
--------------
+Direct Writes(直接写入)
+-----------------------
 
 A direct I/O write initiates a write I/O to the storage device from the
 caller's buffer.
@@ -693,9 +672,8 @@ Callers commonly hold ``i_rwsem`` in shared or exclusive mode before
 calling this function.
 (调用者通常在调用此函数之前以共享或独占模式持有 ``i_rwsem``。)
 
-``struct iomap_dio_ops:``
-(结构体 iomap_dio_ops)
--------------------------
+``struct iomap_dio_ops:``(结构体 iomap_dio_ops)
+-----------------------------------------------
 
 .. code-block:: c
 
@@ -746,18 +724,16 @@ Afterwards, the custom endio function must call
 ``iomap_dio_bio_end_io`` to finish the direct I/O.
 (想要在 I/O 完成之后执行额外工作的文件系统，应通过 ``->submit_io`` 设置自定义的 ``->bi_end_io`` 函数。之后，自定义的 endio 函数必须调用 ``iomap_dio_bio_end_io`` 来完成直接 I/O。)
 
-DAX I/O
-(DAX I/O)
-=======
+DAX I/O(DAX I/O)
+================
 
 Some storage devices can be directly mapped as memory.
 These devices support a new access mode known as "fsdax" that allows
 loads and stores through the CPU and memory controller.
 (一些存储设备可以直接映射为内存。这些设备支持一种称为 "fsdax" 的新访问模式，允许通过 CPU 和内存控制器进行加载和存储。)
 
-fsdax Reads
-(fsdax 读取)
------------
+fsdax Reads(fsdax 读取)
+-----------------------
 
 A fsdax read performs a memcpy from storage device to the caller's
 buffer.
@@ -772,9 +748,8 @@ Callers commonly hold ``i_rwsem`` in shared mode before calling this
 function.
 (调用者通常在调用此函数之前以共享模式持有 ``i_rwsem``。)
 
-fsdax Writes
-(fsdax 写入)
------------
+fsdax Writes(fsdax 写入)
+------------------------
 
 A fsdax write initiates a memcpy to the storage device from the caller's
 buffer.
@@ -799,9 +774,8 @@ Callers commonly hold ``i_rwsem`` in exclusive mode before calling this
 function.
 (调用者通常在调用此函数之前以独占模式持有 ``i_rwsem``。)
 
-fsdax mmap Faults
-(fsdax mmap 缺页)
-~~~~~~~~~~~~~~~~~
+fsdax mmap Faults(fsdax mmap 缺页)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``dax_iomap_fault`` function handles read and write faults to fsdax
 storage.
@@ -815,9 +789,8 @@ Callers commonly hold the same locks as they do to call their iomap
 pagecache counterparts.
 (调用者通常持有与调用其 iomap 页缓存对应函数时相同的锁。)
 
-fsdax Truncation, fallocate, and Unsharing
-(fsdax 截断、fallocate 与取消共享)
-------------------------------------------
+fsdax Truncation, fallocate, and Unsharing(fsdax 截断、fallocate 与取消共享)
+----------------------------------------------------------------------------
 
 For fsdax files, the following functions are provided to replace their
 iomap pagecache I/O counterparts.
@@ -833,25 +806,22 @@ Callers commonly hold the same locks as they do to call their iomap
 pagecache counterparts.
 (调用者通常持有与调用其 iomap 页缓存对应函数时相同的锁。)
 
-fsdax Deduplication
-(fsdax 去重)
--------------------
+fsdax Deduplication(fsdax 去重)
+-------------------------------
 
 Filesystems implementing the ``FIDEDUPERANGE`` ioctl must call the
 ``dax_remap_file_range_prep`` function with their own iomap read ops.
 (实现 ``FIDEDUPERANGE`` ioctl 的文件系统，必须用它们自己的 iomap 读操作(ops)来调用 ``dax_remap_file_range_prep`` 函数。)
 
-Seeking Files
-(文件定位)
-=============
+Seeking Files(文件定位)
+=======================
 
 iomap implements the two iterating whence modes of the ``llseek`` system
 call.
 (iomap 实现了 ``llseek`` 系统调用的两种迭代 whence 模式。)
 
-SEEK_DATA
-(SEEK_DATA，查找数据)
----------
+SEEK_DATA(SEEK_DATA，查找数据)
+------------------------------
 
 The ``iomap_seek_data`` function implements the SEEK_DATA "whence" value
 for llseek.
@@ -868,9 +838,8 @@ Callers commonly hold ``i_rwsem`` in shared mode before calling this
 function.
 (调用者通常在调用此函数之前以共享模式持有 ``i_rwsem``。)
 
-SEEK_HOLE
-(SEEK_HOLE，查找洞)
----------
+SEEK_HOLE(SEEK_HOLE，查找洞)
+----------------------------
 
 The ``iomap_seek_hole`` function implements the SEEK_HOLE "whence" value
 for llseek.
@@ -887,9 +856,8 @@ Callers commonly hold ``i_rwsem`` in shared mode before calling this
 function.
 (调用者通常在调用此函数之前以共享模式持有 ``i_rwsem``。)
 
-Swap File Activation
-(交换文件激活)
-====================
+Swap File Activation(交换文件激活)
+==================================
 
 The ``iomap_swapfile_activate`` function finds all the base-page aligned
 regions in a file and sets them up as swap space.
@@ -902,16 +870,14 @@ Callers must hold ``i_rwsem`` in exclusive mode; this is already
 provided by ``swapon``.
 (``iomap_swapfile_activate`` 函数找出文件中所有按基页对齐的区域，并把它们设置为交换空间。文件在激活之前会被 ``fsync()``。``IOMAP_REPORT`` 将作为 ``flags`` 参数传给 ``->iomap_begin``。所有映射必须是已映射或未写入的；不能是脏的或共享的，并且不能跨越多个块设备。调用者必须以独占模式持有 ``i_rwsem``；这已由 ``swapon`` 提供。)
 
-File Space Mapping Reporting
-(文件空间映射报告)
-============================
+File Space Mapping Reporting(文件空间映射报告)
+==============================================
 
 iomap implements two of the file space mapping system calls.
 (iomap 实现了两个文件空间映射系统调用。)
 
-FS_IOC_FIEMAP
-(FS_IOC_FIEMAP，FIEMAP ioctl)
--------------
+FS_IOC_FIEMAP(FS_IOC_FIEMAP，FIEMAP ioctl)
+------------------------------------------
 
 The ``iomap_fiemap`` function exports file extent mappings to userspace
 in the format specified by the ``FS_IOC_FIEMAP`` ioctl.
@@ -921,9 +887,8 @@ Callers commonly hold ``i_rwsem`` in shared mode before calling this
 function.
 (``iomap_fiemap`` 函数以 ``FS_IOC_FIEMAP`` ioctl 指定的格式把文件扩展映射导出到用户空间。``IOMAP_REPORT`` 将作为 ``flags`` 参数传给 ``->iomap_begin``。调用者通常在调用此函数之前以共享模式持有 ``i_rwsem``。)
 
-FIBMAP (deprecated)
-(FIBMAP(已弃用))
--------------------
+FIBMAP (deprecated)(FIBMAP(已弃用))
+-----------------------------------
 
 ``iomap_bmap`` implements FIBMAP.
 The calling conventions are the same as for FIEMAP.

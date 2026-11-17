@@ -6,9 +6,8 @@ IP Sysctl
 
 (IP Sysctl)
 
-/proc/sys/net/ipv4/* Variables
-(/proc/sys/net/ipv4/* 变量)
-==============================
+/proc/sys/net/ipv4/* Variables(/proc/sys/net/ipv4/* 变量)
+=========================================================
 
 ip_forward - BOOLEAN
 	Forward Packets between interfaces.
@@ -462,9 +461,8 @@ bc_forwarding - INTEGER
 	允许路由器转发定向广播。要启用该特性，'all' 项与入接口项都应设为 1。
 	默认：0)
 
-INET peer storage
-(INET 对端存储)
-=================
+INET peer storage(INET 对端存储)
+================================
 
 inet_peer_threshold - INTEGER
 	The approximate size of the storage.  Starting from this threshold
@@ -490,9 +488,8 @@ inet_peer_maxttl - INTEGER
 	(表项的最大生存期。当池没有内存压力（即池中表项数量很少）时，未使用的
 	表项将在此时限之后过期。以秒计。)
 
-TCP variables
-(TCP 变量)
-=============
+TCP variables(TCP 变量)
+=======================
 
 somaxconn - INTEGER
 	Limit of socket listen() backlog, known in userspace as SOMAXCONN.
@@ -2095,9 +2092,8 @@ tcp_rto_max_ms - INTEGER
 	Default: 120,000
 	(默认：120,000)
 
-UDP variables
-(UDP 变量)
-=============
+UDP variables(UDP 变量)
+=======================
 
 udp_l3mdev_accept - BOOLEAN
 	Enabling this option allows a "global" bound socket to work
@@ -2190,9 +2186,8 @@ udp_child_hash_entries - INTEGER
 	(默认：0)
 
 
-RAW variables
-(RAW 变量)
-=============
+RAW variables(RAW 变量)
+=======================
 
 raw_l3mdev_accept - BOOLEAN
 	Enabling this option allows a "global" bound socket to work
@@ -2215,9 +2210,8 @@ raw_l3mdev_accept - BOOLEAN
 	Default: 1 (enabled)
 	(默认：1（启用）)
 
-CIPSOv4 Variables
-(CIPSOv4 变量)
-=================
+CIPSOv4 Variables(CIPSOv4 变量)
+===============================
 
 cipso_cache_enable - BOOLEAN
 	If enabled, enable additions to and lookups from the CIPSO label mapping
@@ -2298,9 +2292,8 @@ cipso_rbm_strictvalid - BOOLEAN
 	Default: 0 (disabled)
 	(默认：0（禁用）)
 
-IP Variables
-(IP 变量)
-============
+IP Variables(IP 变量)
+=====================
 
 ip_local_port_range - 2 INTEGERS
 	Defines the local port range that is used by TCP and UDP to
@@ -3408,9 +3401,8 @@ Updated by:
 
 
 
-/proc/sys/net/ipv6/* Variables
-(/proc/sys/net/ipv6/* 变量)
-==============================
+/proc/sys/net/ipv6/* Variables(/proc/sys/net/ipv6/* 变量)
+=========================================================
 
 IPv6 has no global variables such as tcp_*.  tcp_* settings under ipv4/ also
 apply to IPv6 [XXX?].
@@ -4715,9 +4707,8 @@ enhanced_dad - BOOLEAN
 	Default: 1 (enabled)
 	(默认：1（启用）)
 
-``icmp/*``:
-(``icmp/*``：)
-===========
+``icmp/*``:(``icmp/*``：)
+=========================
 
 ratelimit - INTEGER
 	Limit the maximal rates for sending ICMPv6 messages to a particular
@@ -4860,9 +4851,8 @@ Pekka Savola <pekkas@netcore.fi>
 YOSHIFUJI Hideaki / USAGI Project <yoshfuji@linux-ipv6.org>
 
 
-/proc/sys/net/bridge/* Variables:
-(/proc/sys/net/bridge/* 变量：)
-=================================
+/proc/sys/net/bridge/* Variables:(/proc/sys/net/bridge/* 变量：)
+================================================================
 
 bridge-nf-call-arptables - BOOLEAN
 
@@ -4947,9 +4937,8 @@ bridge-nf-pass-vlan-input-dev - BOOLEAN
 	Default: 0
 	(默认：0)
 
-``proc/sys/net/sctp/*`` Variables:
-(``proc/sys/net/sctp/*`` 变量：)
-==================================
+``proc/sys/net/sctp/*`` Variables:(``proc/sys/net/sctp/*`` 变量：)
+==================================================================
 
 addip_enable - BOOLEAN
 	Enable or disable extension of  Dynamic Address Reconfiguration
@@ -5513,17 +5502,15 @@ l3mdev_accept - BOOLEAN
 	(默认：1（启用）)
 
 
-``/proc/sys/net/core/*``
-(``/proc/sys/net/core/*``)
-========================
+``/proc/sys/net/core/*``(``/proc/sys/net/core/*``)
+==================================================
 
 	Please see: Documentation/admin-guide/sysctl/net.rst for descriptions of these entries.
 	(这些条目的说明请参见：Documentation/admin-guide/sysctl/net.rst。)
 
 
-``/proc/sys/net/unix/*``
-(``/proc/sys/net/unix/*``)
-========================
+``/proc/sys/net/unix/*``(``/proc/sys/net/unix/*``)
+==================================================
 
 max_dgram_qlen - INTEGER
 	The maximum length of dgram socket receive queue

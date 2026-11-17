@@ -1,9 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==========================================
-EQL Driver: Serial IP Load Balancing HOWTO
-==========================================
-(EQL 驱动：串行 IP 负载均衡 HOWTO)
+============================================================================
+EQL Driver: Serial IP Load Balancing HOWTO(EQL 驱动：串行 IP 负载均衡 HOWTO)
+============================================================================
 
   Simon "Guru Aleph-Null" Janes, simon@ncm.com
   (作者：Simon "Guru Aleph-Null" Janes，simon@ncm.com)
@@ -22,9 +21,8 @@ EQL Driver: Serial IP Load Balancing HOWTO
   source trees. (Yes, it worked fine.)
   (这是 EQL 设备驱动程序的手册。EQL 是一种软件设备，让你可以对 IP 串行链路 (SLIP 或未压缩的 PPP) 进行负载均衡以提高带宽。它不会降低你的延迟 (即 ping 时间)，除非你的链路上本来就有大量流量，那种情况下它会帮上忙。该驱动程序已在 1.1.75 内核上测试过，已知在 1.1.86 上可以干净地打上补丁。还在 1.1.92 上用 v1.1 补丁做了一些测试，该补丁只是为了能在最新的内核源码树上干净地打上而创建的。(是的，它工作得很好。))
 
-1. Introduction
-(1. 简介)
-===============
+1. Introduction(1. 简介)
+========================
 
   Which is worse? A huge fee for a 56K leased line or two phone lines?
   It's probably the former.  If you find yourself craving more bandwidth,
@@ -57,18 +55,16 @@ EQL Driver: Serial IP Load Balancing HOWTO
   (嘿，我们都可以做做梦，不是吗……)
 
 
-2. Kernel Configuration
-(2. 内核配置)
-=======================
+2. Kernel Configuration(2. 内核配置)
+====================================
 
   Here I describe the general steps of getting a kernel up and working
   with the eql driver.	From patching, building, to installing.
   (这里我介绍让内核与 eql 驱动程序一起跑起来的大致步骤：从打补丁、构建到安装。)
 
 
-2.1. Patching The Kernel
-(2.1. 给内核打补丁)
-------------------------
+2.1. Patching The Kernel(2.1. 给内核打补丁)
+-------------------------------------------
 
   If you do not have or cannot get a copy of the kernel with the eql
   driver folded into it, get your copy of the driver from
@@ -95,9 +91,8 @@ EQL Driver: Serial IP Load Balancing HOWTO
        patch </usr/local/src/eql-1.1/eql-1.1.patch
 
 
-2.2. Building The Kernel
-(2.2. 构建内核)
-------------------------
+2.2. Building The Kernel(2.2. 构建内核)
+---------------------------------------
 
   After patching the kernel, run make config and configure the kernel
   for your hardware.
@@ -108,9 +103,8 @@ EQL Driver: Serial IP Load Balancing HOWTO
   (配置完成后，按照你的习惯进行 make 和安装。)
 
 
-3. Network Configuration
-(3. 网络配置)
-========================
+3. Network Configuration(3. 网络配置)
+=====================================
 
   So far, I have only used the eql device with the DSLIP SLIP connection
   manager by Matt Dillon (-- "The man who sold his soul to code so much
@@ -121,9 +115,8 @@ EQL Driver: Serial IP Load Balancing HOWTO
   (到目前为止，我只把 eql 设备与 Matt Dillon 的 DSLIP SLIP 连接管理器 (-- "那个为了这么快写完这么多代码而把灵魂出卖给代码的人。"-- ) 一起使用过。如何为其他"连接"管理器配置它由你自己决定。据我所见，其他大多数连接管理器在处理多个连接时都做得不太好。)
 
 
-3.1. /etc/rc.d/rc.inet1
-(3.1. /etc/rc.d/rc.inet1)
------------------------
+3.1. /etc/rc.d/rc.inet1(3.1. /etc/rc.d/rc.inet1)
+------------------------------------------------
 
   In rc.inet1, ifconfig the eql device to the IP address you usually use
   for your machine, and the MTU you prefer for your SLIP lines.	One
@@ -143,9 +136,8 @@ EQL Driver: Serial IP Load Balancing HOWTO
        route add default eql
 
 
-3.2. Enslaving Devices By Hand
-(3.2. 手动奴役设备)
-------------------------------
+3.2. Enslaving Devices By Hand(3.2. 手动奴役设备)
+-------------------------------------------------
 
   Enslaving devices by hand requires two utility programs: eql_enslave
   and eql_emancipate (-- eql_emancipate hasn't been written because when
@@ -175,18 +167,16 @@ EQL Driver: Serial IP Load Balancing HOWTO
        eql_emancipate eql sl1
 
 
-3.3. DSLIP Configuration for the eql Device
-(3.3. eql 设备的 DSLIP 配置)
--------------------------------------------
+3.3. DSLIP Configuration for the eql Device(3.3. eql 设备的 DSLIP 配置)
+-----------------------------------------------------------------------
 
   The general idea is to bring up and keep up as many SLIP connections
   as you need, automatically.
   (总体思路是按需自动建立并保持尽可能多的 SLIP 连接。)
 
 
-3.3.1.  /etc/slip/runslip.conf
-(3.3.1. /etc/slip/runslip.conf)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+3.3.1.  /etc/slip/runslip.conf(3.3.1. /etc/slip/runslip.conf)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
   Here is an example runslip.conf::
   (下面是一个 runslip.conf 示例：)
@@ -210,9 +200,8 @@ EQL Driver: Serial IP Load Balancing HOWTO
 	  line		/dev/cua3
 
 
-3.4. Using PPP and the eql Device
-(3.4. 使用 PPP 与 eql 设备)
----------------------------------
+3.4. Using PPP and the eql Device(3.4. 使用 PPP 与 eql 设备)
+------------------------------------------------------------
 
   I have not yet done any load-balancing testing for PPP devices, mainly
   because I don't have a PPP-connection manager like SLIP has with
@@ -229,9 +218,8 @@ EQL Driver: Serial IP Load Balancing HOWTO
   (在 1995 年 2 月 25-26 日的周末，我尝试整理了一套用于重拨丢失 PPP 连接的 PPP 脚本/系统，以配合 eql 驱动程序使用 (此后被称为"8 小时 PPP 讨厌节")。也许今年晚些时候能完成。)
 
 
-4. About the Slave Scheduler Algorithm
-(4. 关于从属设备调度器算法)
-======================================
+4. About the Slave Scheduler Algorithm(4. 关于从属设备调度器算法)
+=================================================================
 
   The slave scheduler probably could be replaced with a dozen other
   things and push traffic much faster.	The formula in the current set
@@ -253,9 +241,8 @@ EQL Driver: Serial IP Load Balancing HOWTO
   (调度器的一个版本能够通过 28800 和 14400 的连接推送 5.3 K/s，但当链路上的优先级相差悬殊 (57600 对 14400) 时，"较快"的调制解调器接收了全部流量，而"较慢"的调制解调器则被饿死。)
 
 
-5. Testers' Reports
-(5. 测试者的报告)
-===================
+5. Testers' Reports(5. 测试者的报告)
+====================================
 
   Some people have experimented with the eql device with newer
   kernels (than 1.1.75).  I have since updated the driver to patch
@@ -268,9 +255,8 @@ EQL Driver: Serial IP Load Balancing HOWTO
      to boot the kernel and enslave a couple of ISDN PPP links.
      (来自 LinuxNET 的 icee 给 1.1.86 打补丁时没有任何拒绝 (reject)，并能启动内核、奴役几条 ISDN PPP 链路。)
 
-5.1. Randolph Bentson's Test Report
-(5.1. Randolph Bentson 的测试报告)
------------------------------------
+5.1. Randolph Bentson's Test Report(5.1. Randolph Bentson 的测试报告)
+---------------------------------------------------------------------
 
   ::
 
@@ -404,9 +390,8 @@ EQL Driver: Serial IP Load Balancing HOWTO
 
   (上表各列从左到右依次为：线路数 (#lines)、标称速度 (speed，kbit/sec)、MTU、持续秒数 (seconds duration)、理论速度 (theory speed)、实际速度 (actual speed)，以及实际速度达到理论速度的百分比 (%of max)。表中 "_" 表示该格未测得数据。)
 
-5.2. Anthony Healy's Report
-(5.2. Antony Healy 的报告)
----------------------------
+5.2. Anthony Healy's Report(5.2. Antony Healy 的报告)
+-----------------------------------------------------
 
   ::
 

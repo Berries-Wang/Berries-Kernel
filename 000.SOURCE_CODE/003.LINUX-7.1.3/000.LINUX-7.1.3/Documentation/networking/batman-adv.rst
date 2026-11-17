@@ -28,9 +28,8 @@ layer 2).
 程序，既可用于 wifi，也可用于以太网局域网、vpn 等(任何具有以太网风格第 2 层的环境)。)
 
 
-Configuration
-(配置)
-=============
+Configuration(配置)
+===================
 
 Load the batman-adv module into your kernel::
 (把 batman-adv 模块加载到内核中：)
@@ -104,9 +103,8 @@ subcommands.
 命令提供了人类可读的版本。)
 
 
-Usage
-(使用方法)
-=====
+Usage(使用方法)
+===============
 
 To make use of your newly created mesh, batman advanced provides a new
 interface "bat0" which you should use from this point on. All interfaces added
@@ -138,9 +136,8 @@ interfaces now used by batman advanced, e.g.::
   $ ip addr flush dev eth0
 
 
-Logging/Debugging
-(日志/调试)
-=================
+Logging/Debugging(日志/调试)
+============================
 
 All error messages, warnings and information messages are sent to the kernel
 log. Depending on your operating system distribution this can be read in one of
@@ -184,9 +181,8 @@ module are available through ethtool::
   $ ethtool --statistics bat0
 
 
-batctl
-(batctl)
-======
+batctl(batctl)
+==============
 
 As batman advanced operates on layer 2, all hosts participating in the virtual
 switch are completely transparent for all protocols above layer 2. Therefore
@@ -204,9 +200,8 @@ batctl is available on https://www.open-mesh.org/
 (batctl 可以在 https://www.open-mesh.org/ 获取。)
 
 
-Contact
-(联系方式)
-=======
+Contact(联系方式)
+=================
 
 Please send us comments, experiences, questions, anything :)
 (欢迎向我们发送评论、经验、问题，任何内容都可以 :) )

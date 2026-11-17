@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-============
-Rmnet Driver
-============
+========================
+Rmnet Driver(Rmnet 驱动)
+========================
 
-(Rmnet 驱动)
-
-1. Introduction
-(1. 简介)
-===============
+1. Introduction(1. 简介)
+========================
 
 rmnet driver is used for supporting the Multiplexing and aggregation
 Protocol (MAP). This protocol is used by all recent chipsets using Qualcomm
@@ -35,13 +32,11 @@ these MAP frames and send them to appropriate PDN's.
 (要实现高数据速率，需要聚合。这由硬件发送聚合的一批 MAP 帧来完成。rmnet 驱动会解聚这些 MAP 帧，并将其发送到
 相应的 PDN。)
 
-2. Packet format
-(2. 数据包格式)
-================
+2. Packet format(2. 数据包格式)
+===============================
 
-a. MAP packet v1 (data / control)
-(a. MAP 数据包 v1（数据/控制）)
----------------------------------
+a. MAP packet v1 (data / control)(a. MAP 数据包 v1（数据/控制）)
+----------------------------------------------------------------
 
 MAP header fields are in big endian format.
 (MAP 头字段采用大端格式。)
@@ -75,9 +70,8 @@ Payload length includes the padding length but does not include MAP header
 length.
 (有效载荷长度包含填充长度，但不包含 MAP 头长度。)
 
-b. Map packet v4 (data / control)
-(b. MAP 数据包 v4（数据/控制）)
----------------------------------
+b. Map packet v4 (data / control)(b. MAP 数据包 v4（数据/控制）)
+----------------------------------------------------------------
 
 MAP header fields are in big endian format.
 (MAP 头字段采用大端格式。)
@@ -146,9 +140,8 @@ over which checksum is computed.
 Checksum value, indicates the checksum computed.
 (校验和值 (Checksum value)，指示计算得到的校验和。)
 
-c. MAP packet v5 (data / control)
-(c. MAP 数据包 v5（数据/控制）)
----------------------------------
+c. MAP packet v5 (data / control)(c. MAP 数据包 v5（数据/控制）)
+----------------------------------------------------------------
 
 MAP header fields are in big endian format.
 (MAP 头字段采用大端格式。)
@@ -183,9 +176,8 @@ Payload length includes the padding length but does not include MAP header
 length.
 (有效载荷长度包含填充长度，但不包含 MAP 头长度。)
 
-d. Checksum offload header v5
-(d. 校验和卸载头 v5)
------------------------------
+d. Checksum offload header v5(d. 校验和卸载头 v5)
+-------------------------------------------------
 
 Checksum offload header fields are in big endian format.
 (校验和卸载头字段采用大端格式。)
@@ -220,9 +212,8 @@ indicates that the calculated packet checksum is invalid.
 Reserved bits must be zero when sent and ignored when received.
 (保留位在发送时必须置零，在接收时被忽略。)
 
-e. MAP packet v1/v5 (command specific)
-(e. MAP 数据包 v1/v5（命令专用）)
---------------------------------------
+e. MAP packet v1/v5 (command specific)(e. MAP 数据包 v1/v5（命令专用）)
+-----------------------------------------------------------------------
 
 Packet format::
 (数据包格式：)
@@ -253,9 +244,8 @@ Command types
   (用于命令处理过程中出错)
 = ==========================================
 
-f. Aggregation
-(f. 聚合)
---------------
+f. Aggregation(f. 聚合)
+-----------------------
 
 Aggregation is multiple MAP packets (can be data or command) delivered to
 rmnet in a single linear skb. rmnet will process the individual
@@ -271,9 +261,8 @@ Packet format::
 
   MAP header|IP Packet|Optional padding|MAP header|Command Packet|Optional pad...
 
-3. Userspace configuration
-(3. 用户空间配置)
-==========================
+3. Userspace configuration(3. 用户空间配置)
+===========================================
 
 rmnet userspace configuration is done through netlink using iproute2
 https://git.kernel.org/pub/scm/network/iproute2/iproute2.git/

@@ -1,23 +1,18 @@
-=========================================
-Linux Networking and Network Devices APIs
-=========================================
+===================================================================
+Linux Networking and Network Devices APIs(Linux 网络与网络设备 API)
+===================================================================
 
-(Linux 网络与网络设备 API)
+Linux Networking(Linux 网络)
+============================
 
-Linux Networking
-(Linux 网络)
-================
-
-Networking Base Types
-(网络基础类型)
----------------------
+Networking Base Types(网络基础类型)
+-----------------------------------
 
 .. kernel-doc:: include/linux/net.h
    :internal:
 
-Socket Buffer Functions
-(套接字缓冲区函数)
------------------------
+Socket Buffer Functions(套接字缓冲区函数)
+-----------------------------------------
 
 .. kernel-doc:: include/linux/skbuff.h
    :internal:
@@ -40,16 +35,14 @@ Socket Buffer Functions
 .. kernel-doc:: net/core/stream.c
    :export:
 
-Socket Filter
-(套接字过滤器)
--------------
+Socket Filter(套接字过滤器)
+---------------------------
 
 .. kernel-doc:: net/core/filter.c
    :export:
 
-Generic Network Statistics
-(通用网络统计)
---------------------------
+Generic Network Statistics(通用网络统计)
+----------------------------------------
 
 .. kernel-doc:: include/uapi/linux/gen_stats.h
    :internal:
@@ -60,9 +53,8 @@ Generic Network Statistics
 .. kernel-doc:: net/core/gen_estimator.c
    :export:
 
-SUN RPC subsystem
-(SUN RPC 子系统)
------------------
+SUN RPC subsystem(SUN RPC 子系统)
+---------------------------------
 
 .. kernel-doc:: net/sunrpc/xdr.c
    :export:
@@ -91,13 +83,11 @@ SUN RPC subsystem
 .. kernel-doc:: net/sunrpc/clnt.c
    :export:
 
-Network device support
-(网络设备支持)
-======================
+Network device support(网络设备支持)
+====================================
 
-Driver Support
-(驱动支持)
---------------
+Driver Support(驱动支持)
+------------------------
 
 .. kernel-doc:: net/core/dev.c
    :export:
@@ -117,9 +107,8 @@ Driver Support
 .. kernel-doc:: include/net/net_shaper.h
    :internal:
 
-PHY Support
-(PHY 支持)
------------
+PHY Support(PHY 支持)
+---------------------
 
 .. kernel-doc:: drivers/net/phy/phy.c
    :export:
@@ -148,9 +137,8 @@ PHY Support
 .. kernel-doc:: drivers/net/phy/mdio_bus.c
    :internal:
 
-PHYLINK
-(PHYLINK)
--------
+PHYLINK(PHYLINK)
+----------------
 
   PHYLINK interfaces traditional network drivers with PHYLIB, fixed-links,
   and SFF modules (eg, hot-pluggable SFP) that may contain PHYs.  PHYLINK
@@ -163,9 +151,8 @@ PHYLINK
 
 .. kernel-doc:: drivers/net/phy/phylink.c
 
-SFP support
-(SFP 支持)
------------
+SFP support(SFP 支持)
+---------------------
 
 .. kernel-doc:: drivers/net/phy/sfp-bus.c
    :internal:

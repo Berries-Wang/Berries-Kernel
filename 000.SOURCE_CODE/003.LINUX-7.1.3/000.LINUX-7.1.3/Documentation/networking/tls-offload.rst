@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
 
-==================
-Kernel TLS offload
-==================
+=================================
+Kernel TLS offload(内核 TLS 卸载)
+=================================
 
-(内核 TLS 卸载)
-
-Kernel TLS operation
-(内核 TLS 操作)
-====================
+Kernel TLS operation(内核 TLS 操作)
+===================================
 
 Linux kernel provides TLS connection offload infrastructure. Once a TCP
 connection is in ``ESTABLISHED`` state user space can enable the TLS Upper
@@ -55,9 +52,8 @@ The operation mode is selected automatically based on device configuration,
 offload opt-in or opt-out on per-connection basis is not currently supported.
 (操作模式根据设备配置自动选择，目前尚不支持按连接选择加入或退出卸载。)
 
-TX
-(发送)
---
+TX(发送)
+--------
 
 At a high level user write requests are turned into a scatter list, the TLS ULP
 intercepts them, inserts record framing, performs encryption (in ``TLS_SW``
@@ -75,9 +71,8 @@ and send them to the device for encryption and transmission.
 驱动根据数据包所属的套接字将其标记为需要加密卸载，并送往设备进行加密和
 传输。)
 
-RX
-(接收)
---
+RX(接收)
+--------
 
 On the receive side, if the device handled decryption and authentication
 successfully, the driver will set the decrypted bit in the associated
@@ -102,9 +97,8 @@ otherwise software path handles decryption.
    Layers of Kernel TLS stack
    (内核 TLS 协议栈的层次)
 
-Device configuration
-(设备配置)
-====================
+Device configuration(设备配置)
+==============================
 
 During driver initialization device sets the ``NETIF_F_HW_TLS_RX`` and
 ``NETIF_F_HW_TLS_TX`` features and installs its
@@ -157,9 +151,8 @@ dereferences.
 内核结构的末尾 (见 ``include/net/tls.h`` 中的 :c:member:`driver_state`
 成员)，以避免额外的分配和指针解引用。)
 
-TX
-(发送)
---
+TX(发送)
+--------
 
 After TX state is installed, the stack guarantees that the first segment
 of the stream will start exactly at the ``start_offload_tcp_sn`` sequence
@@ -176,9 +169,8 @@ before installing the connection state in the kernel.
 预期序列号之后并带有内核记录信息。特别是，在内核中安装连接状态之前，
 可能已经有已加密的数据入队到套接字。)
 
-RX
-(接收)
---
+RX(接收)
+--------
 
 In the RX direction, the local networking stack has little control over
 segmentation, so the initial records' TCP sequence number may be anywhere
@@ -186,9 +178,8 @@ inside the segment.
 (在 RX 方向上，本地网络协议栈对分段几乎没有控制权，因此初始记录的 TCP
 序列号可能位于分段内的任何位置。)
 
-Normal operation
-(正常操作)
-================
+Normal operation(正常操作)
+==========================
 
 At the minimum the device maintains the following state for each connection, in
 each direction:
@@ -229,9 +220,8 @@ forward progress.
 (对于 TLS 卸载来说，记录重组并非必需。如果数据包按序到达，设备应能分别
 处理它们并持续推进。)
 
-TX
-(发送)
---
+TX(发送)
+--------
 
 The kernel stack performs record framing reserving space for the authentication
 tag and populating all other TLS header and tailer fields.
@@ -255,9 +245,8 @@ It replaces the authentication tag and TCP checksum with correct values.
 TLS 处理，并确认序列号与自己的期望相符。设备对记录数据执行加密和认证，
 用正确的值替换认证标签和 TCP 校验和。)
 
-RX
-(接收)
---
+RX(接收)
+--------
 
 Before a packet is DMAed to the host (but after NIC's embedded switching
 and packet transformation functions) the device validates the Layer 4
@@ -288,9 +277,8 @@ and takes care of partial decryption.
 网络协议栈确保已解密与未解密的分段不会被合并 (例如被 GRO 或套接字层
 合并)，并负责处理部分解密的情况。)
 
-Resync handling
-(重新同步处理)
-===============
+Resync handling(重新同步处理)
+=============================
 
 In presence of packet drops or network packet reordering, the device may lose
 synchronization with the TLS stream, and require a resync with the kernel's
@@ -307,9 +295,8 @@ does not carry any cryptographic connection state.
 例如，如果在内核中安装加密状态时表已满，这样的连接将永远不会被卸载。
 因此重新同步请求不携带任何加密连接状态。)
 
-TX
-(发送)
---
+TX(发送)
+--------
 
 Segments transmitted from an offloaded socket can get out of sync
 in similar ways to the receive side-retransmissions - local drops
@@ -319,9 +306,8 @@ two mechanisms for dealing with out of order segments.
 可能的，本地丢包也可能发生，但网络乱序不会。目前有两种处理乱序分段的
 机制。)
 
-Crypto state rebuilding
-(加密状态重建)
-~~~~~~~~~~~~~~~~~~~~~~~
+Crypto state rebuilding(加密状态重建)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Whenever an out of order segment is transmitted the driver provides
 the device with enough information to perform cryptographic operations.
@@ -349,9 +335,8 @@ such time it is proven inefficient.
 继续——假定乱序分段只是一次重传。前者更简单，且不需要重传检测，因此
 在被证明低效之前，它是推荐的方法。)
 
-Next record sync
-(下一记录同步)
-~~~~~~~~~~~~~~~~
+Next record sync(下一记录同步)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Whenever an out of order segment is detected the driver requests
 that the ``ktls`` software fallback code encrypt it. If the segment's
@@ -389,9 +374,8 @@ the connection is initially added).
 驱动。协议栈还会确保新记录从一个分段边界开始 (就像连接最初添加时
 那样)。)
 
-RX
-(接收)
---
+RX(接收)
+--------
 
 A small amount of RX reorder events may not require a full resynchronization.
 In particular the device should not lose synchronization
@@ -452,9 +436,8 @@ the device will lose synchronization with the stream.
 上一个记录的长度，才能检测出分段 4 也包含一个 TLS 头部。这种情况下，
 设备将失去与流的同步。)
 
-Stream scan resynchronization
-(流扫描重新同步)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Stream scan resynchronization(流扫描重新同步)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When the device gets out of sync and the stream reaches TCP sequence
 numbers more than a max size record past the expected TCP sequence number,
@@ -546,9 +529,8 @@ by the kernel before the confirmation request.
 (如果确认请求与数据包流异步传递，记录可能在确认请求之前就被内核处理，
 这种情况需要特别注意。)
 
-Stack-driven resynchronization
-(由协议栈驱动的重新同步)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Stack-driven resynchronization(由协议栈驱动的重新同步)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The driver may also request the stack to perform resynchronization
 whenever it sees the records are no longer getting decrypted.
@@ -569,13 +551,11 @@ records, then after 4 records, after 8, after 16... up until every
 同步 (先是在 2 个加密记录之后，然后是 4 个、8 个、16 个……直到每
 128 个记录)。)
 
-Error handling
-(错误处理)
-==============
+Error handling(错误处理)
+========================
 
-TX
-(发送)
---
+TX(发送)
+--------
 
 Packets may be redirected or rerouted by the stack to a different
 device than the selected TLS offload device. The stack will handle
@@ -598,9 +578,8 @@ be encrypted such packet must be dropped.
 协议栈或设备的缺陷导致某个数据包乱序、到达设备且无法被加密，这样的
 数据包必须被丢弃。)
 
-RX
-(接收)
---
+RX(接收)
+--------
 
 If the device encounters any problems with TLS offload on the receive
 side it should pass the packet to the host's networking stack as it was
@@ -631,9 +610,8 @@ A packet should also not be handled by the TLS offload if it contains
 incorrect checksums.
 (如果数据包包含不正确的校验和，也不应由 TLS 卸载处理。)
 
-Performance metrics
-(性能指标)
-===================
+Performance metrics(性能指标)
+=============================
 
 TLS offload can be characterized by the following basic metrics:
 (TLS 卸载可以用以下基本指标来衡量：)
@@ -652,17 +630,15 @@ the performance may be reported treating each direction separately.
 (注意，每条 TCP 连接都需要两个方向各一个 TLS 会话，性能可以按每个方向
 分别报告。)
 
-Max connection count
-(最大连接数)
---------------------
+Max connection count(最大连接数)
+--------------------------------
 
 The number of connections device can support can be exposed via
 ``devlink resource`` API.
 (设备可支持的连接数可以通过 ``devlink resource`` API 暴露。)
 
-Total cryptographic performance
-(总加密性能)
--------------------------------
+Total cryptographic performance(总加密性能)
+-------------------------------------------
 
 Offload performance may depend on segment and record size.
 (卸载性能可能取决于分段和记录的大小。)
@@ -671,9 +647,8 @@ Overload of the cryptographic subsystem of the device should not have
 significant performance impact on non-offloaded streams.
 (设备加密子系统的过载不应对未卸载的流产生显著的性能影响。)
 
-Statistics
-(统计信息)
-==========
+Statistics(统计信息)
+====================
 
 Following minimum set of TLS-related statistics should be reported
 by the driver:
@@ -741,15 +716,13 @@ by the driver:
    (属于某个 TLS 流且因同时包含已由软件加密的数据和期望硬件加密卸载的
    数据而被丢弃的 TX 数据包数量。)
 
-Notable corner cases, exceptions and additional requirements
-(值得注意的边界情况、异常与附加要求)
-============================================================
+Notable corner cases, exceptions and additional requirements(值得注意的边界情况、异常与附加要求)
+================================================================================================
 
 .. _5tuple_problems:
 
-5-tuple matching limitations
-(五元组匹配的局限)
-----------------------------
+5-tuple matching limitations(五元组匹配的局限)
+----------------------------------------------
 
 The device can only recognize received packets based on the 5-tuple
 of the socket. Current ``ktls`` implementation will not offload sockets
@@ -767,9 +740,8 @@ fallback cleanly to software decryption (RX).
 情况下，设备仍应能够执行 TX 卸载 (加密)，并应干净地回退到软件解密
 (RX)。)
 
-Out of order
-(乱序)
-------------
+Out of order(乱序)
+------------------
 
 Introducing extra processing in NICs should not cause packets to be
 transmitted or received out of order, for example pure ACK packets
@@ -777,9 +749,8 @@ should not be reordered with respect to data segments.
 (在网卡中引入额外处理不应导致数据包的发送或接收乱序，例如纯 ACK 数据包
 不应相对于数据分段被重排。)
 
-Ingress reorder
-(入方向重排)
----------------
+Ingress reorder(入方向重排)
+---------------------------
 
 A device is permitted to perform packet reordering for consecutive
 TCP segments (i.e. placing packets in the correct order) but any form
@@ -787,9 +758,8 @@ of additional buffering is disallowed.
 (允许设备对连续的 TCP 分段执行数据包重排 (即把数据包放到正确的顺序)，
 但不允许任何形式的额外缓冲。)
 
-Coexistence with standard networking offload features
-(与标准网络卸载特性共存)
------------------------------------------------------
+Coexistence with standard networking offload features(与标准网络卸载特性共存)
+-----------------------------------------------------------------------------
 
 Offloaded ``ktls`` sockets should support standard TCP stack features
 transparently. Enabling device TLS offload should not cause any difference
@@ -797,9 +767,8 @@ in packets as seen on the wire.
 (已卸载的 ``ktls`` 套接字应透明地支持标准 TCP 协议栈特性。启用设备 TLS
 卸载不应导致线上所见数据包的任何差异。)
 
-Transport layer transparency
-(传输层透明性)
-----------------------------
+Transport layer transparency(传输层透明性)
+------------------------------------------
 
 For the purpose of simplifying TLS offload, the device should not modify any
 packet headers.
@@ -809,9 +778,8 @@ The device should not depend on any packet headers beyond what is strictly
 necessary for TLS offload.
 (设备不应依赖于 TLS 卸载严格必需范围之外的任何数据包头部。)
 
-Segment drops
-(分段丢弃)
--------------
+Segment drops(分段丢弃)
+-----------------------
 
 Dropping packets is acceptable only in the event of catastrophic
 system errors and should never be used as an error handling mechanism
@@ -821,9 +789,8 @@ on TCP retransmissions to handle corner cases is not acceptable.
 中出现问题的错误处理机制。换言之，依靠 TCP 重传来处理边界情况是不可
 接受的。)
 
-TLS device features
-(TLS 设备特性)
--------------------
+TLS device features(TLS 设备特性)
+---------------------------------
 
 Drivers should ignore the changes to the TLS device feature flags.
 These flags will be acted upon accordingly by the core ``ktls`` code.

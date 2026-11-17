@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-================
-FUSE Passthrough
-================
+========================================
+FUSE Passthrough(FUSE 直通(passthrough))
+========================================
 
-(FUSE 直通(passthrough))
-
-Introduction
-(简介)
-============
+Introduction(简介)
+==================
 
 FUSE (Filesystem in Userspace) passthrough is a feature designed to improve the
 performance of FUSE filesystems for I/O operations. Typically, FUSE operations
@@ -31,9 +28,8 @@ Currently, passthrough is supported for operations like ``read(2)``/``write(2)``
 (via ``read_iter``/``write_iter``), ``splice(2)``, and ``mmap(2)``.
 (目前，直通支持的操作包括 ``read(2)``/``write(2)``(经由 ``read_iter``/``write_iter``)、``splice(2)`` 和 ``mmap(2)``。)
 
-Enabling Passthrough
-(启用直通)
-====================
+Enabling Passthrough(启用直通)
+==============================
 
 To use FUSE passthrough:
 (要使用 FUSE 直通：)
@@ -59,9 +55,8 @@ To use FUSE passthrough:
      when it's no longer needed for passthrough setups.
      (当后备文件不再用于直通设置时，FUSE 守护进程最终应携带 ``backing_id`` 调用 ``FUSE_DEV_IOC_BACKING_CLOSE``，以释放内核对该后备文件的引用。)
 
-Privilege Requirements
-(特权要求)
-======================
+Privilege Requirements(特权要求)
+================================
 
 Setting up passthrough functionality currently requires the FUSE daemon to
 possess the ``CAP_SYS_ADMIN`` capability. This requirement stems from several
@@ -70,9 +65,8 @@ discussed and worked on. The primary reasons for this restriction are detailed
 below.
 (设置直通功能目前要求 FUSE 守护进程拥有 ``CAP_SYS_ADMIN`` 能力。这一要求源于若干正在被积极讨论和处理的安全与资源管理方面的考量。该限制的主要原因详见下文。)
 
-Resource Accounting and Visibility
-(资源核算与可见性)
-----------------------------------
+Resource Accounting and Visibility(资源核算与可见性)
+----------------------------------------------------
 
 The core mechanism for passthrough involves the FUSE daemon opening a file
 descriptor to a backing file and registering it with the FUSE kernel module via
@@ -118,9 +112,8 @@ which are visible via ``fdinfo`` and accounted under the registering user's
 ``RLIMIT_NOFILE``.
 (**注意**：``io_uring`` 通过暴露其“固定文件(fixed files)”解决了类似的问题，这些文件可通过 ``fdinfo`` 查看，并计入注册用户的 ``RLIMIT_NOFILE``。)
 
-Filesystem Stacking and Shutdown Loops
-(文件系统堆叠与关闭循环)
---------------------------------------
+Filesystem Stacking and Shutdown Loops(文件系统堆叠与关闭循环)
+--------------------------------------------------------------
 
 Another concern relates to the potential for creating complex and problematic
 filesystem stacking scenarios if unprivileged users could set up passthrough.
@@ -152,9 +145,8 @@ ensuring that only privileged users can create these potentially complex
 stacking arrangements.
 (``CAP_SYS_ADMIN`` 要求提供了额外一层安全保障，确保只有特权用户才能创建这些可能很复杂的堆叠安排。)
 
-General Security Posture
-(总体安全姿态)
-------------------------
+General Security Posture(总体安全姿态)
+--------------------------------------
 
 As a general principle for new kernel features that allow userspace to instruct
 the kernel to perform direct operations on its behalf based on user-provided

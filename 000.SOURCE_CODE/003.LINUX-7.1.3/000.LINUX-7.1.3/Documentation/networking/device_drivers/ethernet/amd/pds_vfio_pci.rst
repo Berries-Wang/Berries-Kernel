@@ -1,27 +1,23 @@
 .. SPDX-License-Identifier: GPL-2.0+
 .. note: can be edited and viewed with /usr/bin/formiko-vim
 
-==========================================================
-PCI VFIO driver for the AMD/Pensando(R) DSC adapter family
-==========================================================
-
-(AMD/Pensando(R) DSC 适配器系列的 PCI VFIO 驱动)
+==========================================================================================================
+PCI VFIO driver for the AMD/Pensando(R) DSC adapter family(AMD/Pensando(R) DSC 适配器系列的 PCI VFIO 驱动)
+==========================================================================================================
 
 AMD/Pensando Linux VFIO PCI Device Driver
 (AMD/Pensando Linux VFIO PCI 设备驱动)
 Copyright(c) 2023 Advanced Micro Devices, Inc.
 
-Overview
-========
-(概述)
+Overview(概述)
+==============
 
 The ``pds-vfio-pci`` module is a PCI driver that supports Live Migration
 capable Virtual Function (VF) devices in the DSC hardware.
 (``pds-vfio-pci`` 模块是一个 PCI 驱动，支持 DSC 硬件中具备实时迁移 (Live Migration) 能力的虚拟功能 (VF) 设备。)
 
-Using the device
-================
-(使用设备)
+Using the device(使用设备)
+==========================
 
 The pds-vfio-pci device is enabled via multiple configuration steps and
 depends on the ``pds_core`` driver to create and enable SR-IOV Virtual
@@ -60,9 +56,8 @@ should have been created.
 (执行上述步骤之后，/dev/vfio/<iommu_group> 中应当已创建一个文件。)
 
 
-Enabling the driver
-===================
-(启用驱动)
+Enabling the driver(启用驱动)
+=============================
 
 The driver is enabled via the standard kernel configuration system,
 using the make command::
@@ -77,9 +72,8 @@ The driver is located in the menu structure at:
     -> VFIO Non-Privileged userspace driver framework
       -> VFIO support for PDS PCI devices
 
-Support
-=======
-(支持)
+Support(支持)
+=============
 
 For general Linux networking support, please use the netdev mailing
 list, which is monitored by Pensando personnel::

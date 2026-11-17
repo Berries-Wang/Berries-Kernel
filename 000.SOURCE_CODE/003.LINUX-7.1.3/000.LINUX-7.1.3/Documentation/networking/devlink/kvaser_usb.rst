@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==========================
-kvaser_usb devlink support
-==========================
-
-(kvaser_usb devlink 支持)
+===================================================
+kvaser_usb devlink support(kvaser_usb devlink 支持)
+===================================================
 
 This document describes the devlink features implemented by the
 ``kvaser_usb`` device driver.
 (本文档描述 ``kvaser_usb`` 设备驱动所实现的 devlink 功能。)
 
-Info versions
-=============
-(Info 版本)
+Info versions(Info 版本)
+========================
 
 The ``kvaser_usb`` driver reports the following versions
 (``kvaser_usb`` 驱动报告以下版本)

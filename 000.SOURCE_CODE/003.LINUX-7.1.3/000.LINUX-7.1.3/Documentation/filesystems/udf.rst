@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===============
-UDF file system
-===============
-
-(UDF 文件系统)
+=============================
+UDF file system(UDF 文件系统)
+=============================
 
 If you encounter problems with reading UDF discs using this driver,
 please report them according to MAINTAINERS file.

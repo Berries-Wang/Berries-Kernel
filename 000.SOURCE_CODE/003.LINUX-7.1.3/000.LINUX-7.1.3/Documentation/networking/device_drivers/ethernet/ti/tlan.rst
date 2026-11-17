@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=====================
-TLAN driver for Linux
-=====================
-
-(Linux 的 TLAN 驱动)
+=========================================
+TLAN driver for Linux(Linux 的 TLAN 驱动)
+=========================================
 
 :Version: 1.14a
 
@@ -25,9 +23,8 @@ For driver information/updates visit http://www.compaq.com
 
 
 
-I. Supported Devices
-(I. 支持的设备)
-====================
+I. Supported Devices(I. 支持的设备)
+===================================
 
     Only PCI devices will work with this driver.
     (只有 PCI 设备才能与本驱动协同工作。)
@@ -74,9 +71,8 @@ I. Supported Devices
     什么问题。)
 
 
-II. Driver Options
-(II. 驱动选项)
-==================
+II. Driver Options(II. 驱动选项)
+================================
 
 	1. You can append debug=x to the end of the insmod line to get
 	   debug messages, where x is a bit field where the bits mean
@@ -166,9 +162,8 @@ II. Driver Options
 	   tlan 驱动最多支持 8 个适配器。)
 
 
-III. Things to try if you have problems
-(III. 遇到问题时可以尝试的方法)
-=======================================
+III. Things to try if you have problems(III. 遇到问题时可以尝试的方法)
+======================================================================
 
 	1. Make sure your card's PCI id is among those listed in
 	   section I, above.

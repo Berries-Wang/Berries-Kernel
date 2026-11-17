@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==================
-AF_XDP TX Metadata
-==================
-
-(AF_XDP TX 元数据)
+====================================
+AF_XDP TX Metadata(AF_XDP TX 元数据)
+====================================
 
 This document describes how to enable offloads when transmitting packets
 via :doc:`af_xdp`. Refer to :doc:`xdp-rx-metadata` on how to access similar
@@ -12,9 +10,8 @@ metadata on the receive side.
 (本文档描述如何在使用 :doc:`af_xdp` 发送数据包时启用卸载(offload)。关于如何在接收
 侧访问类似元数据，请参阅 :doc:`xdp-rx-metadata`。)
 
-General Design
-(总体设计)
-==============
+General Design(总体设计)
+========================
 
 The headroom for the metadata is reserved via ``tx_metadata_len`` and
 ``XDP_UMEM_TX_METADATA_LEN`` flag in ``struct xdp_umem_reg``. The metadata
@@ -37,8 +34,6 @@ with a flag first and if it fails, do another attempt without a flag.
 The headroom and the metadata itself should be located right before
 ``xdp_desc->addr`` in the umem frame. Within a frame, the metadata
 layout is as follows::
-(预留空间和元数据本身应当位于 umem 帧中紧挨 ``xdp_desc->addr`` 之前的位置。在
-一个帧内，元数据布局如下：)
 
            tx_metadata_len
      /                         \
@@ -48,6 +43,9 @@ layout is as follows::
                                 ^
                                 |
                           xdp_desc->addr
+
+(预留空间和元数据本身应当位于 umem 帧中紧挨 ``xdp_desc->addr`` 之前的位置。在
+一个帧内，元数据布局如下：)
 
 An AF_XDP application can request headrooms larger than ``sizeof(struct
 xsk_tx_metadata)``. The kernel will ignore the padding (and will still
@@ -89,9 +87,8 @@ only the first chunk should carry the metadata.
 应在 ``options`` 字段中设置 ``XDP_TX_METADATA`` 位。还要注意，在多缓冲区
 (multi-buffer)数据包中，只有第一个分块应携带元数据。)
 
-Software TX Checksum
-(软件 TX 校验和)
-====================
+Software TX Checksum(软件 TX 校验和)
+====================================
 
 For development and testing purposes its possible to pass
 ``XDP_UMEM_TX_SW_CSUM`` flag to ``XDP_UMEM_REG`` UMEM registration call.
@@ -102,9 +99,8 @@ it will negatively affect performance.
 ``XDP_UMEM_TX_SW_CSUM`` 标志。在这种情况下，当以 ``XDK_COPY`` 模式运行时，TX
 校验和会在 CPU 上计算。不要在生产环境中启用此选项，因为它会对性能产生负面影响。)
 
-Launch Time
-(发射时间)
-===========
+Launch Time(发射时间)
+=====================
 
 The value of the requested launch time should be based on the device's PTP
 Hardware Clock (PHC) to ensure accuracy. AF_XDP takes a different data path
@@ -133,9 +129,8 @@ launch time offload feature.
 正确的解释和有意义的行为，发射时间绝不应设置为大于未来最远可编程时刻
 (the horizon)的值。不同设备对发射时间卸载特性有不同的硬件限制。)
 
-stmmac driver
-(stmmac 驱动程序)
--------------
+stmmac driver(stmmac 驱动程序)
+------------------------------
 
 For stmmac, TSO and launch time (TBS) features are mutually exclusive for
 each individual Tx Queue. By default, the driver configures Tx Queue 0 to
@@ -158,9 +153,8 @@ future.
 256 ns 为步长的时间。编程写入的发射时间会与 PTP 时间(bits[39:8])进行比较，并
 在 256 秒后回绕。因此，dwmac4 和 dwxlgmac2 的发射时间地平线是未来 128 秒。)
 
-igc driver
-(igc 驱动程序)
-----------
+igc driver(igc 驱动程序)
+------------------------
 
 For igc, all four Tx Queues support the launch time feature. The launch
 time hardware offload feature can be enabled or disabled by using the
@@ -187,9 +181,8 @@ running.
 队列 Qbv 发送窗口下一个周期的结束时刻。例如，当 Qbv 周期时间设置为 1 秒时，
 发射时间地平线的范围是 1 秒到 2 秒，取决于 Qbv 周期当前运行到什么位置。)
 
-Querying Device Capabilities
-(查询设备能力)
-============================
+Querying Device Capabilities(查询设备能力)
+==========================================
 
 Every devices exports its offloads capabilities via netlink netdev family.
 Refer to ``xsk-flags`` features bitmask in
@@ -207,9 +200,8 @@ Refer to ``xsk-flags`` features bitmask in
 See ``tools/net/ynl/samples/netdev.c`` on how to query this information.
 (关于如何查询此信息，参见 ``tools/net/ynl/samples/netdev.c``。)
 
-Example
-(示例)
-=======
+Example(示例)
+=============
 
 See ``tools/testing/selftests/bpf/xdp_hw_metadata.c`` for an example
 program that handles TX metadata. Also see https://github.com/fomichev/xskgen

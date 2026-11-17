@@ -1,8 +1,6 @@
-===================
-Linux NFC subsystem
-===================
-
-(Linux NFC 子系统)
+=====================================
+Linux NFC subsystem(Linux NFC 子系统)
+=====================================
 
 The Near Field Communication (NFC) subsystem is required to standardize the
 NFC device drivers development and to create an unified userspace interface.
@@ -13,9 +11,8 @@ This document covers the architecture overview, the device driver interface
 description and the userspace interface description.
 (本文档涵盖架构概述、设备驱动接口描述以及用户空间接口描述。)
 
-Architecture overview
-(架构概述)
-=====================
+Architecture overview(架构概述)
+===============================
 
 The NFC subsystem is responsible for:
 (NFC 子系统负责：)
@@ -68,9 +65,8 @@ NFC 目标的原始通信。)
                                |  driver   |
                                +-----------+
 
-Device Driver Interface
-(设备驱动接口)
-=======================
+Device Driver Interface(设备驱动接口)
+=====================================
 
 When registering on the NFC subsystem, the device driver must inform the core
 of the set of supported NFC protocols and the set of ops callbacks. The ops
@@ -89,17 +85,15 @@ ops 回调集合。必须实现的 ops 回调如下：)
 * data_exchange - send data and receive the response (transceive operation)
   (data_exchange - 发送数据并接收响应 (收发操作))
 
-Userspace interface
-(用户空间接口)
-===================
+Userspace interface(用户空间接口)
+=================================
 
 The userspace interface is divided in control operations and low-level data
 exchange operation.
 (用户空间接口分为控制操作和底层数据交换操作。)
 
-Control operations
-(控制操作)
-------------------
+Control operations(控制操作)
+----------------------------
 
 Generic netlink is used to implement the interface to the control operations.
 The operations are composed by commands and events, all listed below:
@@ -146,9 +140,8 @@ All polling operations requested through one netlink socket are stopped when
 it's closed.
 (通过某个 netlink 套接字请求的所有轮询操作都会在该套接字关闭时停止。)
 
-Low-level data exchange
-(底层数据交换)
------------------------
+Low-level data exchange(底层数据交换)
+-------------------------------------
 
 The userspace must use PF_NFC sockets to perform any data communication with
 targets. All NFC sockets use AF_NFC::

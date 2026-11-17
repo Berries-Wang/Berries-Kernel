@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-====================
-Filesystem Mount API
-====================
-
-(文件系统挂载 API)
+======================================
+Filesystem Mount API(文件系统挂载 API)
+======================================
 
 .. CONTENTS
 
@@ -25,9 +23,8 @@ Filesystem Mount API
  (8) Parameter helper functions.
 
 
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 The creation of new mounts is now to be done in a multistep process:
 (新挂载的创建现在要通过一个多步骤的流程来完成：)
@@ -73,9 +70,8 @@ that the namespaces may be adjusted first.
 (注意，安全初始化是在调用文件系统 *之后* 进行的，以便可以先调整命名空间。)
 
 
-The Filesystem context
-(文件系统上下文)
-======================
+The Filesystem context(文件系统上下文)
+======================================
 
 The creation and reconfiguration of a superblock is governed by a filesystem
 context.  This is represented by the fs_context structure::
@@ -239,9 +235,8 @@ module.
 (也允许文件系统分配资源并用挂载上下文将它们固定住。例如，NFS 可能会固定相应的协议版本模块。)
 
 
-The Filesystem Context Operations
-(文件系统上下文操作)
-=================================
+The Filesystem Context Operations(文件系统上下文操作)
+=====================================================
 
 The filesystem context points to a table of operations::
 
@@ -354,9 +349,8 @@ manage the filesystem context.  They are as follows:
      (成功时应返回 0。出错时，应返回负的错误码。)
 
 
-Filesystem context Security
-(文件系统上下文安全)
-===========================
+Filesystem context Security(文件系统上下文安全)
+===============================================
 
 The filesystem context contains a security pointer that the LSMs can use for
 building up a security context for the superblock to be mounted.  There are a
@@ -461,9 +455,8 @@ number of operations used by the new mount code for this purpose:
      (在挂载过程中调用，用于验证附加到上下文的根 dentry 获准附加到指定的挂载点。成功时应返回 0，失败时返回负的错误码。)
 
 
-VFS Filesystem context API
-(VFS 文件系统上下文 API)
-==========================
+VFS Filesystem context API(VFS 文件系统上下文 API)
+==================================================
 
 There are four operations for creating a filesystem context and one for
 destroying a context:
@@ -632,9 +625,8 @@ returned.
      (根据指定文件系统上下文中的参数创建一个挂载。注意，这不会把挂载附加到任何东西上。)
 
 
-Superblock Creation Helpers
-(超级块创建辅助函数)
-===========================
+Superblock Creation Helpers(超级块创建辅助函数)
+===============================================
 
 A number of VFS helpers are available for use by filesystems for the creation
 or looking up of superblocks.
@@ -683,9 +675,8 @@ The following helpers all wrap sget_fc():
 	    (这种类型的多个独立超级块可以存在。此函数从不匹配现有的超级块，而总是创建一个新的。)
 
 
-Parameter Description
-(参数描述)
-=====================
+Parameter Description(参数描述)
+===============================
 
 Parameters are described using structures defined in linux/fs_parser.h.
 There's a core description struct that links everything together::
@@ -851,9 +842,8 @@ userspace using the fsinfo() syscall.
 (解析器应由 file_system_type 结构体中的 parser 指针来指向，因为这将在注册时提供验证(如果 CONFIG_VALIDATE_FS_PARSER=y)，并允许通过 fsinfo() 系统调用从用户空间查询该描述。)
 
 
-Parameter Helper Functions
-(参数辅助函数)
-==========================
+Parameter Helper Functions(参数辅助函数)
+========================================
 
 A number of helper functions are provided to help a filesystem or an LSM
 process the parameters it is given.

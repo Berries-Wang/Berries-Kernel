@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=================
-Cache Backend API
-=================
-
-(缓存后端 API)
+===============================
+Cache Backend API(缓存后端 API)
+===============================
 
 The FS-Cache system provides an API by which actual caches can be supplied to
 FS-Cache for it to then serve out to network filesystems and other interested
@@ -15,9 +13,8 @@ parties.  This API is used by::
 (FS-Cache 系统提供了一种 API，通过它可以向 FS-Cache 提供实际的缓存，再由 FS-Cache 将其提供给网络文件系统和其他相关方使用。以下模块使用该 API:)
 
 
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 Interaction with the API is handled on three levels: cache, volume and data
 storage, and each level has its own type of cookie object:
@@ -44,9 +41,8 @@ and data cookies, however, are created at the behest of the filesystem only.
 (缓存后端和网络文件系统都可以请求缓存 cookie——如果它们请求同名的一个，将得到同一个 cookie。然而，卷和数据 cookie 只根据文件系统的请求创建。)
 
 
-Cache Cookies
-(缓存 cookie)
-=============
+Cache Cookies(缓存 cookie)
+==========================
 
 Caches are represented in the API by cache cookies.  These are objects of
 type::
@@ -68,9 +64,8 @@ other fields are for internal use.
 (有几个字段是缓存后端可能感兴趣的。``debug_id`` 可用于跟踪中以匹配引用同一缓存的行，``name`` 是缓存注册时使用的名称。``cache_priv`` 成员是缓存在上线时提供的私有数据。其他字段供内部使用。)
 
 
-Registering a Cache
-(注册缓存)
-===================
+Registering a Cache(注册缓存)
+=============================
 
 When a cache backend wants to bring a cache online, it should first register
 the cache name and that will get it a cache cookie.  This is done with::
@@ -97,9 +92,8 @@ to reset and discard the cookie.
 (以重置并丢弃该 cookie。)
 
 
-Bringing a Cache Online
-(使缓存上线)
-=======================
+Bringing a Cache Online(使缓存上线)
+===================================
 
 Once the cache is set up, it can be brought online by calling::
 
@@ -115,9 +109,8 @@ to take place.
 (这会把缓存操作表指针和缓存私有数据存入缓存 cookie，并把缓存移至 active 状态，从而允许访问发生。)
 
 
-Withdrawing a Cache From Service
-(将缓存撤出服务)
-================================
+Withdrawing a Cache From Service(将缓存撤出服务)
+================================================
 
 The cache backend can withdraw a cache from service by calling this function::
 
@@ -167,9 +160,8 @@ to clear fields in the cookie and discard the caller's ref on it.
 (以清除 cookie 中的字段并放弃调用者对它的引用。)
 
 
-Volume Cookies
-(卷 cookie)
-==============
+Volume Cookies(卷 cookie)
+=========================
 
 Within a cache, the data storage objects are organised into logical volumes.
 These are represented in the API as objects of type::
@@ -216,9 +208,8 @@ There are a number of fields here that are of interest to the caching backend:
      (``coherency_len`` - 一致性缓冲区中的数据量。)
 
 
-Data Storage Cookies
-(数据存储 cookie)
-====================
+Data Storage Cookies(数据存储 cookie)
+=====================================
 
 A volume is a logical group of data storage objects, each of which is
 represented to the network filesystem by a cookie.  Cookies are represented in
@@ -312,9 +303,8 @@ detached from the cookie and a pointer is obtained by calling::
 
 
 
-Cookie Accounting
-(cookie 计数)
-=================
+Cookie Accounting(cookie 计数)
+==============================
 
 Data storage cookies are counted and this is used to block cache withdrawal
 completion until all objects have been destroyed.  The following functions are
@@ -338,9 +328,8 @@ objects.
 (wait 函数可在撤回过程中使用，用于等待 fscache 完成撤回缓存中的所有对象。当它完成时，将不再有任何引用该缓存对象或任何卷对象的对象残留。)
 
 
-Cache Management API
-(缓存管理 API)
-====================
+Cache Management API(缓存管理 API)
+==================================
 
 The cache backend implements the cache management API by providing a table of
 operations that fscache can use to manage various aspects of the cache.  These
@@ -533,9 +522,8 @@ pointers to methods to allow fscache to request management of the cache:
      (注意，如果 cookie 仍在创建过程中，cookie 的 cache_priv 上不一定已经附加了任何东西。)
 
 
-Data I/O API
-(数据 I/O API)
-============
+Data I/O API(数据 I/O API)
+==========================
 
 A cache backend provides a data I/O API by through the netfs library's ``struct
 netfs_cache_ops`` attached to a ``struct netfs_cache_resources`` by the
@@ -546,9 +534,8 @@ See the Documentation/filesystems/netfs_library.rst for a description.
 (描述参见 Documentation/filesystems/netfs_library.rst。)
 
 
-Miscellaneous Functions
-(杂项函数)
-=======================
+Miscellaneous Functions(杂项函数)
+=================================
 
 FS-Cache provides some utilities that a cache backend may make use of:
 (FS-Cache 提供了一些缓存后端可能会用到的实用工具：)
@@ -620,8 +607,7 @@ FS-Cache provides some utilities that a cache backend may make use of:
      (从缓存资源中取出指向 cookie 的指针。如果未设置 cookie，可能返回 NULL cookie。)
 
 
-API Function Reference
-(API 函数参考)
-======================
+API Function Reference(API 函数参考)
+====================================
 
 .. kernel-doc:: include/linux/fscache-cache.h

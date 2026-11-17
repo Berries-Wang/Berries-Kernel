@@ -1,26 +1,22 @@
 .. SPDX-License-Identifier: GPL-2.0
 .. include:: <isonum.txt>
 
-=======================
-DPAA2 MAC / PHY support
-=======================
-
-(DPAA2 MAC / PHY 支持)
+=============================================
+DPAA2 MAC / PHY support(DPAA2 MAC / PHY 支持)
+=============================================
 
 :Copyright: |copy| 2019 NXP
 (版权所有: |copy| 2019 NXP)
 
-Overview
-(概述)
---------
+Overview(概述)
+--------------
 
 The DPAA2 MAC / PHY support consists of a set of APIs that help DPAA2 network
 drivers (dpaa2-eth, dpaa2-ethsw) interact with the PHY library.
 (DPAA2 MAC / PHY 支持由一组 API 组成，用于帮助 DPAA2 网络驱动（dpaa2-eth、dpaa2-ethsw）与 PHY 库交互。)
 
-DPAA2 Software Architecture
-(DPAA2 软件架构)
----------------------------
+DPAA2 Software Architecture(DPAA2 软件架构)
+-------------------------------------------
 
 Among other DPAA2 objects, the fsl-mc bus exports DPNI objects (abstracting a
 network interface) and DPMAC objects (abstracting a MAC). The dpaa2-eth driver
@@ -86,9 +82,8 @@ Depending on an MC firmware configuration setting, each MAC may be in one of two
   (DPMAC_LINK_TYPE_PHY：MC 固件仍处于等待链路状态更新事件的状态，但这些事件实际上严格地在 dpaa2-mac（基于
   phylink）与其所挂接的 net_device 驱动（dpaa2-eth、dpaa2-ethsw）之间传递，从而有效地绕过了固件。)
 
-Implementation
-(实现)
---------------
+Implementation(实现)
+--------------------
 
 At probe time or when a DPNI's endpoint is dynamically changed, the dpaa2-eth
 is responsible to find out if the peer object is a DPMAC and if this is the
@@ -214,9 +209,8 @@ the following:
   +-----------------------------------+
 
 
-Exported API
-(导出的 API)
-------------
+Exported API(导出的 API)
+------------------------
 
 Any DPAA2 driver that drivers endpoints of DPMAC objects should service its
 _EVENT_ENDPOINT_CHANGED irq and connect/disconnect from the associated DPMAC

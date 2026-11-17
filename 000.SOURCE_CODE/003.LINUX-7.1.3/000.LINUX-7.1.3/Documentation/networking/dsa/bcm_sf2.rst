@@ -1,8 +1,6 @@
-=============================================
-Broadcom Starfighter 2 Ethernet switch driver
-=============================================
-
-(博通 Starfighter 2 以太网交换机驱动)
+==================================================================================
+Broadcom Starfighter 2 Ethernet switch driver(博通 Starfighter 2 以太网交换机驱动)
+==================================================================================
 
 Broadcom's Starfighter 2 Ethernet switch hardware block is commonly found and
 deployed in the following products:
@@ -60,9 +58,8 @@ contains a bunch of sub-blocks/registers:
 - ``SWITCH_FCB``: Fail-over control block
   (``SWITCH_FCB``： 故障转移控制块)
 
-Implementation details
-(实现细节)
-======================
+Implementation details(实现细节)
+================================
 
 The driver is located in ``drivers/net/dsa/bcm_sf2.c`` and is implemented as a DSA
 driver; see ``Documentation/networking/dsa/dsa.rst`` for details on the subsystem
@@ -84,9 +81,8 @@ specifics covered below.
 (总体而言，SF2 驱动是一个相当常规的 DSA 驱动；下面介绍其中的几个特有
 之处。)
 
-Device Tree probing
-(设备树探测)
--------------------
+Device Tree probing(设备树探测)
+-------------------------------
 
 The DSA platform device driver is probed using a specific compatible string
 provided in ``net/dsa/dsa.c``. The reason for that is because the DSA subsystem gets
@@ -103,9 +99,8 @@ device_node 指针，交换机驱动的 setup 函数随后可以访问这些指�
 函数都不要求 struct device 绑定到 struct device_node，但将来情况可能会
 改变。)
 
-MDIO indirect accesses
-(MDIO 间接访问)
-----------------------
+MDIO indirect accesses(MDIO 间接访问)
+-------------------------------------
 
 Due to a limitation in how Broadcom switches have been designed, external
 Broadcom switches connected to a SF2 require the use of the DSA user MDIO bus
@@ -124,9 +119,8 @@ configurable pseudo-PHY address which circumvents the initial design limitation.
 伪 PHY 地址。较新版本的 SF2 硬件引入了可配置的伪 PHY 地址，从而规避了
 最初的设计限制。)
 
-Multimedia over CoAxial (MoCA) interfaces
-(同轴多媒体 (MoCA) 接口)
------------------------------------------
+Multimedia over CoAxial (MoCA) interfaces(同轴多媒体 (MoCA) 接口)
+-----------------------------------------------------------------
 
 MoCA interfaces are fairly specific and require the use of a firmware blob which
 gets loaded onto the MoCA processor(s) for packet processing. The switch
@@ -147,9 +141,8 @@ PHY 注册一个 ``fixed_link_update`` 回调，该回调反映从中断处理�
 链路状态。)
 
 
-Power Management
-(电源管理)
-----------------
+Power Management(电源管理)
+--------------------------
 
 Whenever possible, the SF2 driver tries to minimize the overall switch power
 consumption by applying a combination of:
@@ -169,9 +162,8 @@ consumption by applying a combination of:
 - turning off RGMII data processing logic when the link goes down
   (在链路断开时关闭 RGMII 数据处理逻辑)
 
-Wake-on-LAN
-(网络唤醒)
------------
+Wake-on-LAN(网络唤醒)
+---------------------
 
 Wake-on-LAN is currently implemented by utilizing the host processor Ethernet
 MAC controller wake-on logic. Whenever Wake-on-LAN is requested, an intersection

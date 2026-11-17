@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=========================
-netdevsim devlink support
-=========================
-
-(netdevsim devlink 支持)
+=================================================
+netdevsim devlink support(netdevsim devlink 支持)
+=================================================
 
 This document describes the ``devlink`` features supported by the
 ``netdevsim`` device driver.
 (本文档描述 ``netdevsim`` 设备驱动所支持的 ``devlink`` 特性。)
 
-Parameters
-(参数)
-==========
+Parameters(参数)
+================
 
 .. list-table:: Generic parameters implemented
 
@@ -42,9 +39,8 @@ parameters.
 The ``netdevsim`` driver supports reloading via ``DEVLINK_CMD_RELOAD``
 (``netdevsim`` 驱动支持通过 ``DEVLINK_CMD_RELOAD`` 进行重载)
 
-Regions
-(区域)
-=======
+Regions(区域)
+=============
 
 The ``netdevsim`` driver exposes a ``dummy`` region as an example of how the
 devlink-region interfaces work. A snapshot is taken whenever the
@@ -53,9 +49,8 @@ devlink-region interfaces work. A snapshot is taken whenever the
 工作的示例。每当 ``take_snapshot`` debugfs 文件被写入时，就会拍摄一个
 快照。)
 
-Resources
-(资源)
-=========
+Resources(资源)
+===============
 
 The ``netdevsim`` driver exposes resources to control the number of FIB
 entries, FIB rule entries and nexthops that the driver will allow.
@@ -71,9 +66,8 @@ entries, FIB rule entries and nexthops that the driver will allow.
     $ devlink resource set netdevsim/netdevsim0 path /nexthops size 16
     $ devlink dev reload netdevsim/netdevsim0
 
-Rate objects
-(速率对象)
-============
+Rate objects(速率对象)
+======================
 
 The ``netdevsim`` driver supports rate objects management, which includes:
 (``netdevsim`` 驱动支持速率对象管理，包括：)
@@ -106,9 +100,8 @@ For ex.:
     $ ls /sys/kernel/debug/netdevsim/netdevsim0/ports/1
     dev  ethtool  rate_parent  tx_max  tx_share
 
-Driver-specific Traps
-(驱动特定陷阱)
-=====================
+Driver-specific Traps(驱动特定陷阱)
+===================================
 
 .. list-table:: List of Driver-specific Traps Registered by ``netdevsim``
    :widths: 5 5 90

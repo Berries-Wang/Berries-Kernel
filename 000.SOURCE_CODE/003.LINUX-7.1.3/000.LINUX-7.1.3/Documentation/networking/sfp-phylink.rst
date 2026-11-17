@@ -6,9 +6,8 @@ phylink
 
 (phylink)
 
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 phylink is a mechanism to support hot-pluggable networking modules
 directly connected to a MAC without needing to re-initialise the
@@ -21,9 +20,8 @@ and SFP (Small Formfactor Pluggable) modules at present.
 (目前，phylink 支持常规的基于 phylib 的配置、固定链路 (fixed link) 配置以及
 SFP (Small Formfactor Pluggable) 模块。)
 
-Modes of operation
-(操作模式)
-==================
+Modes of operation(操作模式)
+============================
 
 phylink has several modes of operation, which depend on the firmware
 settings.
@@ -90,9 +88,8 @@ up and down.
 控制字进行确认。:c:func:`mac_link_up` 与 :c:func:`mac_link_down` 函数不得
 强制将 MAC 侧链路置为 up 与 down。)
 
-Rough guide to converting a network driver to sfp/phylink
-(将网络驱动转换为 sfp/phylink 的粗略指南)
-=========================================================
+Rough guide to converting a network driver to sfp/phylink(将网络驱动转换为 sfp/phylink 的粗略指南)
+==================================================================================================
 
 This guide briefly describes how to convert a network driver from
 phylib to the sfp/phylink support.  Please send patches to improve

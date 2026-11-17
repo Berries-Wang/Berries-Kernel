@@ -1,25 +1,21 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===================
-The QNX6 Filesystem
-===================
-
-(The QNX6 文件系统)
+======================================
+The QNX6 Filesystem(The QNX6 文件系统)
+======================================
 
 The qnx6fs is used by newer QNX operating system versions. (e.g. Neutrino)
 It got introduced in QNX 6.4.0 and is used default since 6.4.1.
 (qnx6fs 被较新的 QNX 操作系统版本所使用(例如 Neutrino)。它于 QNX 6.4.0 中引入，并自 6.4.1 起作为默认文件系统。)
 
-Option
-(选项)
-======
+Option(选项)
+============
 
 mmi_fs		Mount filesystem as used for example by Audi MMI 3G system
 (将文件系统按例如 Audi MMI 3G 系统所使用的方式挂载)
 
-Specification
-(规范)
-=============
+Specification(规范)
+===================
 
 qnx6fs shares many properties with traditional Unix filesystems. It has the
 concepts of blocks, inodes and directories.
@@ -34,9 +30,8 @@ running on a different endianness.
 The Linux driver handles endianness transparently. (LE and BE)
 (Linux 驱动程序透明地处理字节序。(LE 与 BE))
 
-Blocks
-(块)
-------
+Blocks(块)
+----------
 
 The space in the device or file is split up into blocks. These are a fixed
 size of 512, 1024, 2048 or 4096, which is decided when the filesystem is
@@ -47,9 +42,8 @@ Blockpointers are 32bit, so the maximum space that can be addressed is
 2^32 * 4096 bytes or 16TB
 (块指针为 32 位，因此可寻址的最大空间为 2^32 * 4096 字节，即 16TB)
 
-The superblocks
-(超级块)
----------------
+The superblocks(超级块)
+-----------------------
 
 The superblock contains all global information about the filesystem.
 Each qnx6fs got two superblocks, each one having a 64bit serial number.
@@ -101,9 +95,8 @@ that address.
 blocksize of the filesystem.
 (0x1000 是为每个超级块保留的大小——与文件系统的块大小无关。)
 
-Inodes
-(索引节点)
-------
+Inodes(索引节点)
+----------------
 
 Each object in the filesystem is represented by an inode. (index node)
 The inode structure contains pointers to the filesystem blocks which contain
@@ -128,9 +121,8 @@ The filesize is stored 64bit. Inode counting starts with 1. (while long
 filename inodes start with 0)
 (文件大小以 64 位存储。inode 计数从 1 开始。(而长文件名 inode 则从 0 开始))
 
-Directories
-(目录)
------------
+Directories(目录)
+-----------------
 
 A directory is a filesystem object and has an inode just like a file.
 It is a specially formatted file containing records which associate each
@@ -157,9 +149,8 @@ With that longfilename inode number, the longfilename tree can be walked
 starting with the superblock longfilename root node pointers.
 (凭借该长文件名 inode 编号，就可以从超级块的长文件名根节点指针开始遍历长文件名树。)
 
-Special files
-(特殊文件)
--------------
+Special files(特殊文件)
+-----------------------
 
 Symbolic links are also filesystem objects with inodes. They got a specific
 bit in the inode mode field identifying them as symbolic link.
@@ -178,9 +169,8 @@ are handled by the QNX kernel/drivers and created in /dev independent of the
 underlying filesystem.
 (QNX 中不存在字符设备和块设备特殊文件，因为这些文件由 QNX 内核/驱动程序处理，并在 /dev 中创建，与底层文件系统无关。)
 
-Long filenames
-(长文件名)
---------------
+Long filenames(长文件名)
+------------------------
 
 Long filenames are stored in a separate addressing tree. The staring point
 is the longfilename root node in the active superblock.
@@ -195,9 +185,8 @@ If that structure shall fit for all allowed blocksizes, it is clear why there
 is a limit of 510 bytes for the actual filename stored.
 (如果该结构要适用于所有允许的块大小，那么为什么存储的实际文件名有 510 字节的限制就显而易见了。)
 
-Bitmap
-(位图)
-------
+Bitmap(位图)
+------------
 
 The qnx6fs filesystem allocation bitmap is stored in a tree under bitmap
 root node in the superblock and each bit in the bitmap represents one
@@ -213,9 +202,8 @@ Bits at the end of the last bitmap block are set to 1, if the device is
 smaller than addressing space in the bitmap.
 (如果设备小于位图中的寻址空间，则最后一个位图块末尾的位会被设置为 1。)
 
-Bitmap system area
-(位图系统区域)
-------------------
+Bitmap system area(位图系统区域)
+--------------------------------
 
 The bitmap itself is divided into three parts.
 (位图本身被划分为三个部分。)

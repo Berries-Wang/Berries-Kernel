@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=================================
-Flash-Friendly File System (F2FS)
-=================================
+==========================================================
+Flash-Friendly File System (F2FS)(闪存友好文件系统 (F2FS))
+==========================================================
 
-(闪存友好文件系统 (F2FS))
-
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 NAND flash memory-based storage devices, such as SSD, eMMC, and SD cards, have
 been equipped on a variety systems ranging from mobile to server systems. Since
@@ -45,13 +42,11 @@ For reporting bugs, please use the following f2fs bug tracker link:
 
 - https://bugzilla.kernel.org/enter_bug.cgi?product=File%20System&component=f2fs
 
-Background and Design issues
-(背景与设计问题)
-============================
+Background and Design issues(背景与设计问题)
+============================================
 
-Log-structured File System (LFS)
-(日志结构文件系统(LFS))
---------------------------------
+Log-structured File System (LFS)(日志结构文件系统(LFS))
+-------------------------------------------------------
 "A log-structured file system writes all modifications to disk sequentially in
 a log-like structure, thereby speeding up  both file writing and crash recovery.
 The log is the only structure on disk; it contains indexing information so that
@@ -63,9 +58,8 @@ implementation of a log-structured file system", ACM Trans. Computer Systems
 10, 1, 26–52.
 ("日志结构文件系统将所有修改以类似日志的结构顺序地写入磁盘，从而同时加快了文件写入和崩溃恢复的速度。日志是磁盘上唯一的结构；它包含索引信息，使得文件可以高效地从日志中读回。为了在磁盘上维护大片空闲区域以便快速写入，我们将日志划分为段，并使用段清理器来压缩严重碎片化的段中的存活信息。"摘自 Rosenblum, M. and Ousterhout, J. K., 1992, "The design and implementation of a log-structured file system", ACM Trans. Computer Systems 10, 1, 26–52。)
 
-Wandering Tree Problem
-(漫游树问题)
-----------------------
+Wandering Tree Problem(漫游树问题)
+----------------------------------
 In LFS, when a file data is updated and written to the end of log, its direct
 pointer block is updated due to the changed location. Then the indirect pointer
 block is also updated due to the direct pointer block update. In this manner,
@@ -77,9 +71,8 @@ propagation as much as possible.
 
 [1] Bityutskiy, A. 2005. JFFS3 design issues. http://www.linux-mtd.infradead.org/
 
-Cleaning Overhead
-(清理开销)
------------------
+Cleaning Overhead(清理开销)
+---------------------------
 Since LFS is based on out-of-place writes, it produces so many obsolete blocks
 scattered across the whole storage. In order to serve new empty log space, it
 needs to reclaim these obsolete blocks seamlessly to users. This job is called
@@ -104,13 +97,11 @@ is to hide the latencies to users. And also definitely, it should reduce the
 amount of valid data to be moved, and move them quickly as well.
 (这种清理工作可能导致意外的长延迟，因此最重要的目标是向用户隐藏这些延迟。此外，可以肯定的是，它还应减少要迁移的有效数据量，并快速地迁移它们。)
 
-Key Features
-(关键特性)
-============
+Key Features(关键特性)
+======================
 
-Flash Awareness
-(闪存感知)
----------------
+Flash Awareness(闪存感知)
+-------------------------
 
 - Enlarge the random write area for better performance, but provide the high
   spatial locality
@@ -118,9 +109,8 @@ Flash Awareness
 - Align FS data structures to the operational units in FTL as best efforts
   (尽力将 FS 数据结构与 FTL 的操作单元对齐。)
 
-Wandering Tree Problem
-(漫游树问题)
-----------------------
+Wandering Tree Problem(漫游树问题)
+----------------------------------
 
 - Use a term, “node”, that represents inodes as well as various pointer blocks
   (使用一个术语“node”(节点)，它既代表 inode，也代表各种指针块。)
@@ -128,9 +118,8 @@ Wandering Tree Problem
   blocks; this will cut off the update propagation.
   (引入包含所有“node”块位置的节点地址表(NAT)；这将切断更新传播。)
 
-Cleaning Overhead
-(清理开销)
------------------
+Cleaning Overhead(清理开销)
+---------------------------
 
 - Support a background cleaning process
   (支持后台清理过程。)
@@ -141,9 +130,8 @@ Cleaning Overhead
 - Introduce adaptive logging for efficient block allocation
   (引入自适应日志(adaptive logging)以实现高效的块分配。)
 
-Mount Options
-(挂载选项)
-=============
+Mount Options(挂载选项)
+=======================
 
 
 ======================== ============================================================
@@ -449,9 +437,8 @@ lookup_mode=%s		 Control the directory lookup behavior for casefolded
 			     ================== ========================================
 ======================== ============================================================
 
-Debugfs Entries
-(Debugfs 条目)
-===============
+Debugfs Entries(Debugfs 条目)
+=============================
 
 /sys/kernel/debug/f2fs/ contains information about all the partitions mounted as
 f2fs. Each file shows the whole f2fs information.
@@ -467,9 +454,8 @@ f2fs. Each file shows the whole f2fs information.
  - current memory footprint consumed by f2fs.
    (f2fs 当前消耗的内存占用。)
 
-Sysfs Entries
-(Sysfs 条目)
-=============
+Sysfs Entries(Sysfs 条目)
+=========================
 
 Information about mounted f2fs file systems can be found in
 /sys/fs/f2fs.  Each mounted filesystem will have a directory in
@@ -481,9 +467,8 @@ Files in /sys/fs/f2fs/<devname>
 (see also Documentation/ABI/testing/sysfs-fs-f2fs)
 (/sys/fs/f2fs/<devname> 中的文件。另请参见 Documentation/ABI/testing/sysfs-fs-f2fs。)
 
-Usage
-(用法)
-=====
+Usage(用法)
+===========
 
 1. Download userland tools and compile them.
    (下载用户态工具并编译它们。)
@@ -614,13 +599,11 @@ f2fs-specific ones, which is very useful for QA tests.
 Note: please refer to the manpage of f2fs_io(8) to get full option list.
 (注意：完整选项列表请参考 f2fs_io(8) 的 manpage。)
 
-Design
-(设计)
-======
+Design(设计)
+============
 
-On-disk Layout
-(磁盘上布局)
---------------
+On-disk Layout(磁盘上布局)
+--------------------------
 
 F2FS divides the whole volume into a number of segments, each of which is fixed
 to 2MB in size. A section is composed of consecutive segments, and a zone
@@ -696,9 +679,8 @@ Reference the following survey for additional technical details.
 https://wiki.linaro.org/WorkingGroups/Kernel/Projects/FlashCardSurvey
 (更多技术细节请参考以下调查报告。)
 
-File System Metadata Structure
-(文件系统元数据结构)
-------------------------------
+File System Metadata Structure(文件系统元数据结构)
+--------------------------------------------------
 
 F2FS adopts the checkpointing scheme to maintain file system consistency. At
 mount time, F2FS first tries to find the last valid checkpoint data by scanning
@@ -723,9 +705,8 @@ valid, as shown as below (出于文件系统一致性的考虑，每个 CP 指�
      |             |                          |
      `----------------------------------------'
 
-Index Structure
-(索引结构)
----------------
+Index Structure(索引结构)
+-------------------------
 
 The key data structure to manage the data locations is a "node". Similar to
 traditional file structures, F2FS has three types of node: inode, direct node,
@@ -755,9 +736,8 @@ tree problem, F2FS is able to cut off the propagation of node updates caused by
 leaf data writes.
 (注意，所有节点块都由 NAT 映射，这意味着每个节点的位置由 NAT 表进行转换。考虑到漫游树问题，F2FS 能够切断由叶子数据写入引起的节点更新传播。)
 
-Directory Structure
-(目录结构)
--------------------
+Directory Structure(目录结构)
+-----------------------------
 
 A directory entry occupies 11 bytes, which consists of the following attributes.
 (一个目录项占用 11 个字节，由以下属性组成。)
@@ -863,9 +843,8 @@ The following figure shows an example of two cases holding children (下图显�
    Number of children = 6,           Number of children = 3,
    File size = 7                     File size = 7
 
-Default Block Allocation
-(默认块分配)
-------------------------
+Default Block Allocation(默认块分配)
+------------------------------------
 
 At runtime, F2FS manages six active logs inside "Main" area: Hot/Warm/Cold node
 and Hot/Warm/Cold data.
@@ -903,9 +882,8 @@ logs from different zones as much as possible, since FTL can write the data in
 the active logs into one allocation unit according to its mapping granularity.
 (为了使 F2FS 与底层基于闪存的存储对齐，F2FS 以 section 为单位分配段。F2FS 期望 section 大小与 FTL 中垃圾回收的单位大小相同。此外，考虑到 FTL 中的映射粒度，F2FS 尽可能从不同的 zone 分配活动日志的各个 section，因为 FTL 可以根据其映射粒度把活动日志中的数据写入一个分配单元。)
 
-Cleaning process
-(清理过程)
-----------------
+Cleaning process(清理过程)
+--------------------------
 
 F2FS does cleaning both on demand and in the background. On-demand cleaning is
 triggered when there are not enough free segments to serve VFS calls. Background
@@ -927,9 +905,8 @@ F2FS manages a bitmap. Each bit represents the validity of a block, and the
 bitmap is composed of a bit stream covering whole blocks in main area.
 (为了识别受害段中的数据是否有效，F2FS 管理一个位图。每一位代表一个块的有效性，该位图由覆盖 main 区域中所有块的位流组成。)
 
-Write-hint Policy
-(写提示策略)
------------------
+Write-hint Policy(写提示策略)
+-----------------------------
 
 F2FS sets the whint all the time with the below policy.
 (F2FS 始终按照以下策略设置 whint。)
@@ -960,9 +937,8 @@ WRITE_LIFE_MEDIUM     "                        WRITE_LIFE_MEDIUM
 WRITE_LIFE_LONG       "                        WRITE_LIFE_LONG
 ===================== ======================== ===================
 
-Fallocate(2) Policy
-(Fallocate(2) 策略)
--------------------
+Fallocate(2) Policy(Fallocate(2) 策略)
+--------------------------------------
 
 The default policy follows the below POSIX rule.
 (默认策略遵循以下 POSIX 规则。)
@@ -990,9 +966,8 @@ zero or random data, which is useful to the below scenario where:
  5. open(blkdev)
  6. write(blkdev, address)
 
-Compression implementation
-(压缩实现)
---------------------------
+Compression implementation(压缩实现)
+------------------------------------
 
 - New term named cluster is defined as basic unit of compression, file can
   be divided into multiple clusters logically. One cluster includes 4 << n
@@ -1072,8 +1047,7 @@ Compress metadata layout (压缩元数据布局)::
 	| data length | data chksum | reserved |      compressed data       |
 	+-------------+-------------+----------+----------------------------+
 
-Compression mode
-(压缩模式)
+Compression mode(压缩模式)
 --------------------------
 
 f2fs supports "fs" and "user" compression modes with "compression_mode" mount option.
@@ -1106,9 +1080,8 @@ To compress a file (压缩一个文件)::
   fd = open(filename, O_WRONLY, 0);
   ret = ioctl(fd, F2FS_IOC_COMPRESS_FILE);
 
-NVMe Zoned Namespace devices
-(NVMe Zoned Namespace 设备)
-----------------------------
+NVMe Zoned Namespace devices(NVMe Zoned Namespace 设备)
+-------------------------------------------------------
 
 - ZNS defines a per-zone capacity which can be equal or less than the
   zone-size. Zone-capacity is the number of usable blocks in the zone.
@@ -1123,9 +1096,8 @@ NVMe Zoned Namespace devices
   past the zone-capacity are considered unusable in these segments.
   (ZNS 定义了每个 zone 的容量(zone capacity)，它可以等于或小于 zone 大小(zone-size)。zone-capacity 是 zone 中可用块的数量。F2FS 会检查 zone-capacity 是否小于 zone-size，如果是，则在初始挂载时，任何在 zone-capacity 之后开始的段都会在空闲段位图中被标记为非空闲。这些段被标记为永久使用，因此不会被分配用于写入，因而也无需对其进行垃圾回收。如果 zone-capacity 未与默认段大小(2MB)对齐，则某个段可以在 zone-capacity 之前开始并跨越 zone-capacity 边界。此类跨越的段也被视为可用段。在这些段中，超过 zone-capacity 的所有块都被视为不可用。)
 
-Device aliasing feature
-(设备别名特性)
------------------------
+Device aliasing feature(设备别名特性)
+-------------------------------------
 
 f2fs can utilize a special file called a "device aliasing file." This file allows
 the entire storage device to be mapped with a single, large extent, not using
@@ -1171,9 +1143,8 @@ reclaim the space after the use, while the space is counted as /data.
 That doesn't require modifying partition size and filesystem format.
 (因此，其核心思想是：用户可以在 /dev/vdc 上进行任何文件操作，并在使用之后回收该空间，同时该空间被计入 /data。这不需要修改分区大小和文件系统格式。)
 
-Per-file Read-Only Large Folio Support
-(每文件只读 large folio 支持)
---------------------------------------
+Per-file Read-Only Large Folio Support(每文件只读 large folio 支持)
+-------------------------------------------------------------------
 
 F2FS implements large folio support on the read path to leverage high-order
 page allocation for significant performance gains. To minimize code complexity,

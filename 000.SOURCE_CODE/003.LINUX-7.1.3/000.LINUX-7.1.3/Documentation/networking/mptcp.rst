@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=====================
-Multipath TCP (MPTCP)
-=====================
+========================================
+Multipath TCP (MPTCP)(多路径 TCP(MPTCP))
+========================================
 
-(多路径 TCP(MPTCP))
-
-Introduction
-(简介)
-============
+Introduction(简介)
+==================
 
 Multipath TCP or MPTCP is an extension to the standard TCP and is described in
 `RFC 8684 (MPTCPv1) <https://www.rfc-editor.org/rfc/rfc8684.html>`_. It allows a
@@ -29,9 +26,8 @@ official website: `mptcp.dev <https://www.mptcp.dev>`_.
 `mptcp.dev <https://www.mptcp.dev>`_ 。)
 
 
-Use cases
-(使用场景)
-=========
+Use cases(使用场景)
+===================
 
 Thanks to MPTCP, being able to use multiple paths in parallel or simultaneously
 brings new use-cases, compared to TCP:
@@ -51,9 +47,8 @@ brings new use-cases, compared to TCP:
   地发送文件。)
 
 
-Concepts
-(概念)
-========
+Concepts(概念)
+==============
 
 Technically, when a new socket is created with the ``IPPROTO_MPTCP`` protocol
 (Linux-specific), a *subflow* (or *path*) is created. This *subflow* consists of
@@ -79,9 +74,8 @@ the packet scheduler.
 (这一行为由两个内部组件实现：路径管理器(path manager)和数据包调度器(packet
 scheduler)。)
 
-Path Manager
-(路径管理器)
-------------
+Path Manager(路径管理器)
+------------------------
 
 The Path Manager is in charge of *subflows*, from creation to deletion, and also
 address announcements. Typically, it is the client side that initiates subflows,
@@ -110,9 +104,8 @@ example.
 (为了能够在一台主机上使用多个 IP 地址来创建多个 *子流* (路径)，默认的内核内 MPTCP
 路径管理器需要知道可以使用哪些 IP 地址。例如，可以用 ``ip mptcp endpoint`` 来配置。)
 
-Packet Scheduler
-(数据包调度器)
-----------------
+Packet Scheduler(数据包调度器)
+------------------------------
 
 The Packet Scheduler is in charge of selecting which available *subflow(s)* to
 use to send the next data packet. It can decide to maximize the use of the
@@ -126,13 +119,11 @@ see mptcp-sysctl.rst.
 (数据包调度器由 ``net.mptcp.scheduler`` sysctl 开关控制——参见 mptcp-sysctl.rst。)
 
 
-Sockets API
-(套接字 API)
-===========
+Sockets API(套接字 API)
+=======================
 
-Creating MPTCP sockets
-(创建 MPTCP 套接字)
-----------------------
+Creating MPTCP sockets(创建 MPTCP 套接字)
+-----------------------------------------
 
 On Linux, MPTCP can be used by selecting MPTCP instead of TCP when creating the
 ``socket``:
@@ -172,9 +163,8 @@ transparent as possible for the userspace applications.
 (对于用户空间应用程序来说，改用 ``IPPROTO_MPTCP`` 而不是 ``IPPROTO_TCP`` 应当尽可能
 透明。)
 
-Socket options
-(套接字选项)
---------------
+Socket options(套接字选项)
+--------------------------
 
 MPTCP supports most socket options handled by TCP. It is possible some less
 common options are not supported, but contributions are welcome.
@@ -216,9 +206,8 @@ if MPTCP is currently being used: the value will be set to 1 if it is.
 MPTCP：如果是，该值将被设置为 1。)
 
 
-Design choices
-(设计选择)
-==============
+Design choices(设计选择)
+========================
 
 A new socket type has been added for MPTCP for the userspace-facing socket. The
 kernel is in charge of creating subflow sockets: they are TCP sockets where the

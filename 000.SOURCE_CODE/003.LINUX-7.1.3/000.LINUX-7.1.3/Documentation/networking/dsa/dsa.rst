@@ -1,8 +1,6 @@
-============
-Architecture
-============
-
-(架构)
+==================
+Architecture(架构)
+==================
 
 This document describes the **Distributed Switch Architecture (DSA)** subsystem
 design principles, limitations, interactions with other subsystems, and how to
@@ -10,9 +8,8 @@ develop drivers for this subsystem as well as a TODO for developers interested
 in joining the effort.
 (本文档描述 **Distributed Switch Architecture (DSA)** (分布式交换机架构) 子系统的设计原则、限制、与其他子系统的交互，以及如何为该子系统开发驱动程序，并为有兴趣加入这项工作的开发者提供了 TODO。)
 
-Design principles
-(设计原则)
-=================
+Design principles(设计原则)
+===========================
 
 The Distributed Switch Architecture subsystem was primarily designed to
 support Marvell Ethernet switches (MV88E6xxx, a.k.a. Link Street product
@@ -84,9 +81,8 @@ NB: for the past 15 years, the DSA subsystem had been making use of the terms
 have been removed from the DSA codebase and phased out of the uAPI.
 (注意：在过去 15 年里，DSA 子系统一直使用 "master" (而非 "conduit") 和 "slave" (而非 "user") 这两个术语。这些术语已从 DSA 代码库中移除，并已从用户态 API 中逐步淘汰。)
 
-Switch tagging protocols
-(交换机标签协议)
-------------------------
+Switch tagging protocols(交换机标签协议)
+----------------------------------------
 
 DSA supports many vendor-specific tagging protocols, one software-defined
 tagging protocol, and a tag-less mode as well (``DSA_TAG_PROTO_NONE``).
@@ -262,9 +258,8 @@ setting the ``promisc_on_conduit`` property of the ``struct dsa_device_ops``.
 Note that this assumes a DSA-unaware conduit driver, which is the norm.
 (由于各种原因 (最常见的是第 1 类标签器与不识别 DSA 的 conduit 相关联，破坏了 conduit 所认为的 MAC DA)，标签协议可能要求 DSA conduit 工作在混杂模式下，以接收所有帧而不管 MAC DA 的值是什么。这可以通过设置 ``struct dsa_device_ops`` 的 ``promisc_on_conduit`` 属性来完成。注意，这假设 conduit 驱动不识别 DSA，而这正是常态。)
 
-Conduit network devices
-(Conduit 网络设备)
------------------------
+Conduit network devices(Conduit 网络设备)
+-----------------------------------------
 
 Conduit network devices are regular, unmodified Linux network device drivers for
 the CPU/management Ethernet interface. Such a driver might occasionally need to
@@ -276,9 +271,8 @@ devices since they act as a pipe between the host processor and the hardware
 Ethernet switch.
 (Conduit 网络设备是针对 CPU/管理以太网接口的常规、未修改的 Linux 网络设备驱动。这类驱动偶尔可能需要知道 DSA 是否已启用 (例如用于启用/禁用特定的卸载特性)，但 DSA 子系统已被证明可以与工业标准驱动 (如 ``e1000e,`` ``mv643xx_eth`` 等) 配合工作，而无需对这些驱动做任何修改。这类网络设备也常被称为 conduit 网络设备，因为它们充当主机处理器与硬件以太网交换机之间的管道。)
 
-Networking stack hooks
-(网络栈挂接点)
-----------------------
+Networking stack hooks(网络栈挂接点)
+------------------------------------
 
 When a conduit netdev is used with DSA, a small hook is placed in the
 networking stack is in order to have the DSA subsystem process the Ethernet
@@ -338,9 +332,8 @@ Past this point, the DSA user network devices get delivered regular Ethernet
 frames that can be processed by the networking stack.
 (过了这一步之后，DSA 用户网络设备收到的就是可供网络栈处理的普通以太网帧了。)
 
-User network devices
-(用户网络设备)
---------------------
+User network devices(用户网络设备)
+----------------------------------
 
 User network devices created by DSA are stacked on top of their conduit network
 device, each of these network interfaces will be responsible for being a
@@ -389,13 +382,11 @@ other, and in both cases, the packet exits the system through a hardware path
 towards the switch.
 (当使用多个 CPU 端口时，可以在 DSA 用户设备与物理 DSA conduit 之间叠加一个 LAG (bonding/team) 设备。这样，LAG 设备本身也是一个 DSA conduit，但 LAG 的 slave 设备仍然继续作为 DSA conduit (只是没有分配用户端口；这是为了在 LAG DSA conduit 消失时进行恢复所需)。因此，LAG DSA conduit 的数据路径是不对称使用的。在 RX 方向，调用 ``dsa_switch_rcv()`` 的 ``ETH_P_XDSA`` 处理器会被提前调用 (在物理 DSA conduit，即 LAG slave 上)。因此，LAG DSA conduit 的 RX 数据路径不会被使用。而在 TX 方向，处理是线性进行的： ``dsa_user_xmit`` 调用 ``dsa_enqueue_skb`` ，后者朝 LAG DSA conduit 调用 ``dev_queue_xmit`` 。LAG conduit 再向其中一个物理 DSA conduit 调用 ``dev_queue_xmit`` ，无论哪种情况，数据包都通过硬件路径离开系统、前往交换机。)
 
-Graphical representation
-(图形化表示)
-------------------------
+Graphical representation(图形化表示)
+------------------------------------
 
 Summarized, this is basically how DSA looks like from a network device
 perspective::
-(概括地说，从网络设备的角度来看，DSA 大致如下图所示：)
 
                 Unaware application
               opens and binds socket
@@ -426,9 +417,10 @@ perspective::
            || swp0 | | swp1 | | swp2 | | swp3 ||
            ++------+-+------+-+------+-+------++
 
-User MDIO bus
-(用户 MDIO 总线)
--------------
+(概括地说，从网络设备的角度来看，DSA 大致如下图所示：)
+
+User MDIO bus(用户 MDIO 总线)
+-----------------------------
 
 In order to be able to read to/from a switch PHY built into it, DSA creates an
 user MDIO bus which allows a specific switch driver to divert and intercept
@@ -445,9 +437,8 @@ internal or external MDIO devices this switch might be connected to: internal
 PHYs, external PHYs, or even external switches.
 (对于同时具有外部和内部 MDIO 总线的以太网交换机，可以利用用户 MII 总线对 MDIO 读/写进行复用/解复用，将其导向该交换机可能连接的内部或外部 MDIO 设备：内部 PHY、外部 PHY，甚至外部交换机。)
 
-Data structures
-(数据结构)
----------------
+Data structures(数据结构)
+-------------------------
 
 DSA data structures are defined in ``include/net/dsa.h`` as well as
 ``net/dsa/dsa_priv.h``:
@@ -476,13 +467,11 @@ DSA data structures are defined in ``include/net/dsa.h`` as well as
   full description.
   ( ``dsa_switch_ops``：引用函数指针的结构体，完整说明见下文。)
 
-Design limitations
-(设计限制)
-==================
+Design limitations(设计限制)
+============================
 
-Lack of CPU/DSA network devices
-(缺少 CPU/DSA 网络设备)
--------------------------------
+Lack of CPU/DSA network devices(缺少 CPU/DSA 网络设备)
+------------------------------------------------------
 
 DSA does not currently create user network devices for the CPU or DSA ports, as
 described before. This might be an issue in the following cases:
@@ -500,9 +489,8 @@ described before. This might be an issue in the following cases:
   when using a cascaded setup
   (使用级联设置时，无法在交换机之间配置特定的 VLAN ID / trunking VLAN)
 
-Common pitfalls using DSA setups
-(使用 DSA 设置的常见陷阱)
---------------------------------
+Common pitfalls using DSA setups(使用 DSA 设置的常见陷阱)
+---------------------------------------------------------
 
 Once a conduit network device is configured to use DSA (dev->dsa_ptr becomes
 non-NULL), and the switch behind it expects a tagging protocol, this network
@@ -513,9 +501,8 @@ the Ethernet switch on the other end, expecting a tag will typically drop this
 frame.
 (一旦 conduit 网络设备被配置为使用 DSA (dev->dsa_ptr 变为非 NULL)，且其背后的交换机要求某种标签协议，这个网络接口就只能被独占用作 conduit 接口。直接通过该接口发送数据包 (例如用该接口打开套接字) 不会经过交换机标签协议的发送函数，因此另一端期望标签的以太网交换机通常会丢弃这样的帧。)
 
-Interactions with other subsystems
-(与其他子系统的交互)
-==================================
+Interactions with other subsystems(与其他子系统的交互)
+======================================================
 
 DSA currently leverages the following subsystems:
 (DSA 目前利用了以下子系统：)
@@ -529,9 +516,8 @@ DSA currently leverages the following subsystems:
 - Devlink: ``net/core/devlink.c``
   (Devlink： ``net/core/devlink.c``)
 
-MDIO/PHY library
-(MDIO/PHY 库)
-----------------
+MDIO/PHY library(MDIO/PHY 库)
+-----------------------------
 
 User network devices exposed by DSA may or may not be interfacing with PHY
 devices (``struct phy_device`` as defined in ``include/linux/phy.h)``, but the DSA
@@ -569,9 +555,8 @@ logic basically looks like this:
   (最后，如果 PHY 内建于交换机中 (这在独立交换机芯片中非常常见)，则使用 DSA 创建的用户 MII 总线来探测该 PHY)
 
 
-SWITCHDEV
-(SWITCHDEV)
----------
+SWITCHDEV(SWITCHDEV)
+--------------------
 
 DSA directly utilizes SWITCHDEV when interfacing with the bridge layer, and
 more specifically with its VLAN filtering portion when configuring VLANs on top
@@ -579,9 +564,8 @@ of per-port user network devices. As of today, the only SWITCHDEV objects
 supported by DSA are the FDB and VLAN objects.
 (在与网桥层交互时——尤其是在基于每端口用户网络设备配置 VLAN 时与其 VLAN 过滤部分交互——DSA 直接使用 SWITCHDEV。迄今为止，DSA 支持的 SWITCHDEV 对象只有 FDB 和 VLAN 对象。)
 
-Devlink
-(Devlink)
--------
+Devlink(Devlink)
+----------------
 
 DSA registers one devlink device per physical switch in the fabric.
 For each devlink device, every physical port (i.e. user ports, CPU ports, DSA
@@ -618,9 +602,8 @@ DSA drivers can make use of the following devlink features:
 For more details, consult ``Documentation/networking/devlink/``.
 (更多细节请查阅 ``Documentation/networking/devlink/`` 。)
 
-Device Tree
-(设备树)
------------
+Device Tree(设备树)
+-------------------
 
 DSA features a standardized binding which is documented in
 ``Documentation/devicetree/bindings/net/dsa/dsa.txt``. PHY/MDIO library helper
@@ -628,17 +611,15 @@ functions such as ``of_get_phy_mode()``, ``of_phy_connect()`` are also used to q
 per-port PHY specific details: interface connection, MDIO bus location, etc.
 (DSA 提供一个标准化的绑定，记录在 ``Documentation/devicetree/bindings/net/dsa/dsa.txt`` 中。PHY/MDIO 库的辅助函数 (如 ``of_get_phy_mode()`` 、 ``of_phy_connect()``) 也被用于查询每端口的 PHY 特定细节：接口连接方式、MDIO 总线位置等。)
 
-Driver development
-(驱动开发)
-==================
+Driver development(驱动开发)
+============================
 
 DSA switch drivers need to implement a ``dsa_switch_ops`` structure which will
 contain the various members described below.
 (DSA 交换机驱动需要实现一个 ``dsa_switch_ops`` 结构体，其中包含下文描述的各个成员。)
 
-Probing, registration and device lifetime
-(探测、注册与设备生命周期)
------------------------------------------
+Probing, registration and device lifetime(探测、注册与设备生命周期)
+-------------------------------------------------------------------
 
 DSA switches are regular ``device`` structures on buses (be they platform, SPI,
 I2C, MDIO or otherwise). The DSA framework is not involved in their probing
@@ -741,9 +722,8 @@ further callbacks via the provided ``dsa_switch_ops`` may take place, and the
 driver may free the data structures associated with the ``dsa_switch``.
 (在 ``dsa_switch_shutdown()`` 或 ``dsa_unregister_switch()`` 被调用之后，不得再通过所提供的 ``dsa_switch_ops`` 发生任何回调，驱动可以释放与 ``dsa_switch`` 相关联的数据结构。)
 
-Switch configuration
-(交换机配置)
---------------------
+Switch configuration(交换机配置)
+--------------------------------
 
 - ``get_tag_protocol``: this is to indicate what kind of tagging protocol is
   supported, should be a valid value from the ``dsa_tag_protocol`` enum.
@@ -804,9 +784,8 @@ Switch configuration
   interface.
   ( ``port_change_conduit``：用于更改用户端口与 CPU 端口之间的亲和关系 (为流量终结目的而建立的关联) 的方法。默认情况下，树中的所有用户端口都被分配给对它们有意义的第一个可用 CPU 端口 (大多数情况下，这意味着树的所有用户端口都分配给同一个 CPU 端口，但 commit 2c0b03258b8b 所描述的 H 拓扑除外)。 ``port`` 参数表示用户端口的索引， ``conduit`` 参数表示新的 DSA conduit ``net_device`` 。与新 conduit 关联的 CPU 端口可以通过查看 ``struct dsa_port *cpu_dp = conduit->dsa_ptr`` 获得。此外，conduit 也可以是一个 LAG 设备，其所有 slave 设备都是物理 DSA conduit。LAG DSA 也拥有有效的 ``conduit->dsa_ptr`` 指针，但它并不唯一，而是第一个物理 DSA conduit (LAG slave) ``dsa_ptr`` 的副本。对于 LAG DSA conduit，还会为与物理 DSA conduit 相关联的物理 CPU 端口分别发出对 ``port_lag_join`` 的进一步调用，请求它们创建与该 LAG 接口相关联的硬件 LAG。)
 
-PHY devices and link management
-(PHY 设备与链路管理)
--------------------------------
+PHY devices and link management(PHY 设备与链路管理)
+---------------------------------------------------
 
 - ``get_phy_flags``: Some switches are interfaced to various kinds of Ethernet PHYs,
   if the PHY library PHY driver needs to know about information it cannot obtain
@@ -840,9 +819,8 @@ PHY devices and link management
   information is obtained
   ( ``fixed_link_update``：由 PHY 库 (具体而言是 fixed PHY 驱动) 调用的函数，向交换机驱动询问无法通过自动协商或通过 MDIO 读取 PHY 寄存器获得的链路参数。对于 QSGMII、MoCA 等通过带外途径获取链路信息的特定类型硬件或其他非 MDIO 管理的 PHY，此函数尤其有用)
 
-Ethtool operations
-(Ethtool 操作)
-------------------
+Ethtool operations(Ethtool 操作)
+--------------------------------
 
 - ``get_strings``: ethtool function used to query the driver's strings, will
   typically return statistics strings, private flags strings, etc.
@@ -897,9 +875,8 @@ Ethtool operations
   pretty-print register values and registers
   ( ``get_regs``：返回以太网交换机内部寄存器内容的 ethtool 函数。该功能可能需要 ethtool 中的用户态代码来美化打印寄存器值和寄存器)
 
-Power management
-(电源管理)
-----------------
+Power management(电源管理)
+--------------------------
 
 - ``suspend``: function invoked by the DSA platform device when the system goes to
   suspend, should quiesce all Ethernet switch activities, but keep ports
@@ -926,9 +903,8 @@ Power management
   disabled while being a bridge member
   ( ``port_disable``：当端口被管理性禁用时由 DSA 用户网络设备的 ndo_close 函数调用的函数；此函数应完全禁用给定的交换机端口。如果该端口在被禁用时是网桥成员，DSA 会负责用 ``BR_STATE_DISABLED`` 标记端口并把更改传播到硬件)
 
-Address databases
-(地址数据库)
------------------
+Address databases(地址数据库)
+-----------------------------
 
 Switching hardware is expected to have a table for FDB entries, however not all
 of them are active at the same time. An address database is the subset (partition)
@@ -1079,9 +1055,8 @@ shouldn't have, only because that MAC address was in the RX filtering list of
 user port B. These packets will still be dropped in software, however.
 (注意，交换机驱动并不强制为每个独立用户端口实现物理上相互分离的地址数据库。由于端口私有数据库中的 FDB 表项始终指向 CPU 端口，不存在错误转发决策的风险。在这种情况下，所有独立端口可以共享同一个数据库，但主机过滤地址的引用计数 (如果某端口的 MAC 地址仍被另一个端口使用，则不删除其 FDB 表项) 就成为驱动的责任，因为 DSA 并不知道端口数据库实际上是共享的。这可以通过调用 ``dsa_fdb_present_in_other_db()`` 和 ``dsa_mdb_present_in_other_db()`` 来实现。缺点是每个用户端口的 RX 过滤列表实际上是共享的，这意味着用户端口 A 可能接受一个它本不该接受的 MAC DA 的数据包，仅仅因为该 MAC 地址在用户端口 B 的 RX 过滤列表中。不过，这些数据包仍会在软件中被丢弃。)
 
-Bridge layer
-(网桥层)
-------------
+Bridge layer(网桥层)
+--------------------
 
 Offloading the bridge forwarding plane is optional and handled by the methods
 below. They may be absent, return -EOPNOTSUPP, or ``ds->max_num_bridges`` may
@@ -1170,9 +1145,8 @@ the egress-untagged ports, or keep the tag on the egress-tagged ones.
   is turned off via ``port_bridge_flags``.
   ( ``port_fast_age``：当需要刷新端口上动态学习的 FDB 表项时调用的网桥层函数。它在以下情况下被调用：从应当进行学习的 STP 状态转换到不应进行学习的 STP 状态、离开网桥、或通过 ``port_bridge_flags`` 关闭地址学习时。)
 
-Bridge VLAN filtering
-(网桥 VLAN 过滤)
----------------------
+Bridge VLAN filtering(网桥 VLAN 过滤)
+-------------------------------------
 
 - ``port_vlan_filtering``: bridge layer function invoked when the bridge gets
   configured for turning on or off VLAN filtering. If nothing specific needs to
@@ -1231,9 +1205,8 @@ Bridge VLAN filtering
   this port forwarding database.
   ( ``port_mdb_del``：当网桥想要移除组播数据库表项时调用的网桥层函数。如果指定的 MAC 地址曾被映射到该端口转发数据库中的指定 VLAN ID，交换机硬件应被编程为将其删除。)
 
-Link aggregation
-(链路聚合)
-----------------
+Link aggregation(链路聚合)
+--------------------------
 
 Link aggregation is implemented in the Linux networking stack by the bonding
 and team drivers, which are modeled as virtual, stackable network interfaces.
@@ -1270,9 +1243,8 @@ method. The LAG ID associated with a bonding/team interface can then be
 retrieved by a DSA switch driver using the ``dsa_lag_id`` function.
 (希望为每个被卸载的 LAG 关联一个 ID 的驱动，可以在 ``dsa_switch_ops::setup`` 方法中选择性地填充 ``ds->num_lag_ids`` 。之后，DSA 交换机驱动可以使用 ``dsa_lag_id`` 函数获取与 bonding/team 接口相关联的 LAG ID。)
 
-IEC 62439-2 (MRP)
-(IEC 62439-2 (MRP))
------------------
+IEC 62439-2 (MRP)(IEC 62439-2 (MRP))
+------------------------------------
 
 The Media Redundancy Protocol is a topology management protocol optimized for
 fast fault recovery time for ring networks, which has some components
@@ -1305,9 +1277,8 @@ to work properly. The operations are detailed below.
   forwarded.
   ( ``port_mrp_add_ring_role`` 与 ``port_mrp_del_ring_role``：当 MRP 实例在 MRM 或 MRC 之间改变环角色时调用的函数。这会影响哪些 MRP PDU 应被陷阱到软件、哪些应被自主转发。)
 
-IEC 62439-3 (HSR/PRP)
-(IEC 62439-3 (HSR/PRP))
----------------------
+IEC 62439-3 (HSR/PRP)(IEC 62439-3 (HSR/PRP))
+--------------------------------------------
 
 The Parallel Redundancy Protocol (PRP) is a network redundancy protocol which
 works by duplicating and sequence numbering packets through two independent L2
@@ -1351,13 +1322,11 @@ of ``port_hsr_join`` and ``port_hsr_leave``, if this is the only supported
 offload feature.
 (注意， ``NETIF_F_HW_HSR_DUP`` 特性依赖于向多个端口的发送，只要标签协议使用了 ``dsa_xmit_port_mask()`` 辅助函数，该能力通常就具备。如果使用了该辅助函数，也应设置 HSR 卸载特性。 ``dsa_port_simple_hsr_join()`` 和 ``dsa_port_simple_hsr_leave()`` 方法可以用作 ``port_hsr_join`` 和 ``port_hsr_leave`` 的通用实现 (如果这是唯一支持的卸载特性)。)
 
-TODO
-(TODO)
-====
+TODO(TODO)
+==========
 
-Making SWITCHDEV and DSA converge towards an unified codebase
-(让 SWITCHDEV 与 DSA 收敛到统一的代码库)
--------------------------------------------------------------
+Making SWITCHDEV and DSA converge towards an unified codebase(让 SWITCHDEV 与 DSA 收敛到统一的代码库)
+-----------------------------------------------------------------------------------------------------
 
 SWITCHDEV properly takes care of abstracting the networking stack with offload
 capable hardware, but does not enforce a strict switch device driver model. On

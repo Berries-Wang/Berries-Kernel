@@ -7,28 +7,26 @@ Multi-PF Netdev
 
 (Multi-PF Netdev)
 
-Contents
-(目录)
-========
+Contents(目录)
+==============
 
-- `Background`_
+- `Background(背景)`_
   (背景)
-- `Overview`_
+- `Overview(概述)`_
   (概述)
-- `mlx5 implementation`_
+- `mlx5 implementation(mlx5 实现)`_
   (mlx5 实现)
-- `Channels distribution`_
+- `Channels distribution(通道分布)`_
   (通道分布)
-- `Observability`_
+- `Observability(可观测性)`_
   (可观测性)
-- `Steering`_
+- `Steering(导流)`_
   (导流)
-- `Mutually exclusive features`_
+- `Mutually exclusive features(互斥特性)`_
   (互斥特性)
 
-Background
-(背景)
-==========
+Background(背景)
+================
 
 The Multi-PF NIC technology enables several CPUs within a multi-socket server to connect directly to
 the network, each through its own dedicated PCIe interface. Through either a connection harness that
@@ -38,9 +36,8 @@ significantly reducing overhead and latency, in addition to reducing CPU utiliza
 network throughput.
 (Multi-PF 网卡技术使多插槽服务器中的多个 CPU 能够直接连接到网络，每个 CPU 通过自己专用的 PCIe 接口连接。连接方式可以是：通过一个在两块卡之间分配 PCIe 通道的连接转接板，或者对一个插槽做 PCIe 分叉 (bifurcation) 来插单块卡。这样就消除了跨插槽内部总线传输的网络流量，显著降低了开销和延迟，同时还降低了 CPU 利用率并提高了网络吞吐量。)
 
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 The feature adds support for combining multiple PFs of the same port in a Multi-PF environment under
 one netdev instance. It is implemented in the netdev layer. Lower-layer instances like pci func,
@@ -50,9 +47,8 @@ traffic and allows apps running on the same netdev from different NUMAs to still
 proximity to the device and achieve improved performance.
 (该特性支持在 Multi-PF 环境下把同一端口上的多个 PF 组合到一个 netdev 实例之下。它在 netdev 层实现。pci func、sysfs 条目和 devlink 等较低层的实例保持独立。让流量经过属于不同 NUMA 插槽的不同设备，可以节省跨 NUMA 流量，使运行在同一 netdev 上、位于不同 NUMA 的应用程序仍能感觉贴近设备，从而获得更好的性能。)
 
-mlx5 implementation
-(mlx5 实现)
-===================
+mlx5 implementation(mlx5 实现)
+==============================
 
 Multi-PF or Socket-direct in mlx5 is achieved by grouping PFs together which belong to the same
 NIC and has the socket-direct property enabled, once all PFs are probed, we create a single netdev
@@ -73,9 +69,8 @@ to/from the secondaries.
 Currently, we limit the support to PFs only, and up to two PFs (sockets).
 (目前，我们把支持范围限制为仅 PF，且最多两个 PF（插槽）。)
 
-Channels distribution
-(通道分布)
-=====================
+Channels distribution(通道分布)
+===============================
 
 We distribute the channels between the different PFs to achieve local NUMA node performance
 on multiple NUMA nodes.
@@ -109,9 +104,8 @@ This is achieved by using the correct core device instance (mdev) in each channe
 all using the same instance under "priv->mdev".
 (这是通过在每个通道中使用正确的核心设备实例 (mdev) 实现的，而不是让所有通道都使用 "priv->mdev" 下的同一个实例。)
 
-Observability
-(可观测性)
-=============
+Observability(可观测性)
+=======================
 
 The relation between PF, irq, napi, and queue can be observed via netlink spec::
 (PF、irq、napi 和队列之间的关系可以通过 netlink spec 观察：)
@@ -145,9 +139,8 @@ Here you can clearly observe our channels distribution policy::
   /proc/irq/41/mlx5_comp1@pci:0000:09:00.0
   /proc/irq/42/mlx5_comp2@pci:0000:08:00.0
 
-Steering
-(导流)
-========
+Steering(导流)
+==============
 
 Secondary PFs are set to "silent" mode, meaning they are disconnected from the network.
 (Secondary PF 被置为"静默"模式，即它们与网络断开。)
@@ -201,9 +194,8 @@ PF0 on node0, PF1 on node1.
 - /sys/class/net/eth2/queues/tx-22/xps_cpus:000800
 - /sys/class/net/eth2/queues/tx-23/xps_cpus:800000
 
-Mutually exclusive features
-(互斥特性)
-===========================
+Mutually exclusive features(互斥特性)
+=====================================
 
 The nature of Multi-PF, where different channels work with different PFs, conflicts with
 stateful features where the state is maintained in one of the PFs.

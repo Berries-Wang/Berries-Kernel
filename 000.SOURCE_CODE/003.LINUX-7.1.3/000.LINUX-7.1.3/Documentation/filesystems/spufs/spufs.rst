@@ -6,17 +6,15 @@ spufs
 
 (spufs)
 
-Name
-(名称)
-====
+Name(名称)
+==========
 
        spufs - the SPU file system
        (spufs——SPU 文件系统)
 
 
-Description
-(描述)
-===========
+Description(描述)
+=================
 
        The SPU file system is used on PowerPC machines that implement the Cell
        Broadband Engine Architecture in order to access Synergistic  Processor
@@ -35,9 +33,8 @@ Description
        (每个 SPU 上下文都由一个目录表示，其中包含一组预定义的文件。这些文件可用于操控该逻辑 SPU 的状态。用户可以更改这些文件的权限，但实际上并不能添加或删除文件。)
 
 
-Mount Options
-(挂载选项)
-=============
+Mount Options(挂载选项)
+=======================
 
        uid=<uid>
               set the user owning the mount point, the default is 0 (root).
@@ -48,9 +45,8 @@ Mount Options
               (设置拥有该挂载点的组，默认为 0(root)。)
 
 
-Files
-(文件)
-=====
+Files(文件)
+===========
 
        The files in spufs mostly follow the standard behavior for regular sys-
        tem  calls like read(2) or write(2), but often support only a subset of
@@ -301,21 +297,18 @@ Files
               (对该文件的写操作会把寄存器设置为字符串中给定的值。字符串从开头解析到第一个非数字字符或缓冲区末尾。后续对同一文件描述符的写入会覆盖之前的设置。)
 
 
-Examples
-(示例)
-========
+Examples(示例)
+==============
        /etc/fstab entry
               none      /spu      spufs     gid=spu   0    0
        (/etc/fstab 条目)
 
 
-Authors
-(作者)
-=======
+Authors(作者)
+=============
        Arnd  Bergmann  <arndb@de.ibm.com>,  Mark  Nutter <mnutter@us.ibm.com>,
        Ulrich Weigand <Ulrich.Weigand@de.ibm.com>
 
-See Also
-(参见)
-========
+See Also(参见)
+==============
        capabilities(7), close(2), spu_create(2), spu_run(2), spufs(7)

@@ -1,18 +1,14 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===========================================
-HOWTO for multiqueue network device support
-===========================================
+=====================================================================
+HOWTO for multiqueue network device support(多队列网络设备支持 HOWTO)
+=====================================================================
 
-(多队列网络设备支持 HOWTO)
+Section 1: Base driver requirements for implementing multiqueue support(第 1 节：实现多队列支持的底层驱动要求)
+==============================================================================================================
 
-Section 1: Base driver requirements for implementing multiqueue support
-(第 1 节：实现多队列支持的底层驱动要求)
-=======================================================================
-
-Intro: Kernel support for multiqueue devices
-(简介：针对多队列设备的内核支持)
----------------------------------------------------------
+Intro: Kernel support for multiqueue devices(简介：针对多队列设备的内核支持)
+----------------------------------------------------------------------------
 
 Kernel support for multiqueue devices is always present.
 (对多队列设备的内核支持始终存在。)
@@ -32,9 +28,8 @@ comes online or when it's completely shut down (unregister_netdev(), etc.).
 (底层驱动还需要像今天管理全局 netdev->queue_lock 那样来管理这些队列。因此，底层驱动应使用 netif_{start|stop|wake}_subqueue() 函数在设备仍在运行时管理每个队列。而在设备上线或完全关闭(unregister_netdev() 等)时，仍会使用 netdev->queue_lock。)
 
 
-Section 2: Qdisc support for multiqueue devices
-(第 2 节：针对多队列设备的排队规则支持)
-===============================================
+Section 2: Qdisc support for multiqueue devices(第 2 节：针对多队列设备的排队规则支持)
+======================================================================================
 
 Currently two qdiscs are optimized for multiqueue devices.  The first is the
 default pfifo_fast qdisc.  This qdisc supports one qdisc per hardware queue.
@@ -55,9 +50,8 @@ will be queued to the band associated with the hardware queue.
 (在 qdisc 加载时，波段数量取决于硬件上的队列数量。一旦建立了关联，任何设置了 skb->queue_mapping 的 skb 都会被排入与该硬件队列关联的波段。)
 
 
-Section 3: Brief howto using MULTIQ for multiqueue devices
-(第 3 节：使用 MULTIQ 操作多队列设备的简要指南)
-==========================================================
+Section 3: Brief howto using MULTIQ for multiqueue devices(第 3 节：使用 MULTIQ 操作多队列设备的简要指南)
+=========================================================================================================
 
 The userspace command 'tc,' part of the iproute2 package, is used to configure
 qdiscs.  To add the MULTIQ qdisc to your network device, assuming the device

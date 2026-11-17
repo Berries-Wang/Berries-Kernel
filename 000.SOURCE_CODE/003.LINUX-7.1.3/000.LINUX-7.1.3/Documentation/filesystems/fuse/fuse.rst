@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=============
-FUSE Overview
-=============
+========================
+FUSE Overview(FUSE 概述)
+========================
 
-(FUSE 概述)
-
-Definitions
-(定义)
-===========
+Definitions(定义)
+=================
 
 Userspace filesystem:
   A filesystem in which data and metadata are provided by an ordinary
@@ -43,9 +40,8 @@ User:
   The user who is performing filesystem operations.
   (正在执行文件系统操作的用户。)
 
-What is FUSE?
-(什么是 FUSE?)
-=============
+What is FUSE?(什么是 FUSE?)
+===========================
 
 FUSE is a userspace filesystem framework.  It consists of a kernel
 module (fuse.ko), a userspace library (libfuse.*) and a mount utility
@@ -62,9 +58,8 @@ The userspace library and utilities are available from the
 `FUSE homepage: <https://github.com/libfuse/>`_
 (用户空间库和实用工具可从 `FUSE homepage: <https://github.com/libfuse/>`_ 获取。)
 
-Filesystem type
-(文件系统类型)
-===============
+Filesystem type(文件系统类型)
+=============================
 
 The filesystem type given to mount(2) can be one of the following:
 (传递给 mount(2) 的文件系统类型可以是以下之一:)
@@ -80,9 +75,8 @@ The filesystem type given to mount(2) can be one of the following:
       mount system call is interpreted as the name of the device.
       (该文件系统基于块设备。mount 系统调用的第一个参数被解释为设备名。)
 
-Mount options
-(挂载选项)
-=============
+Mount options(挂载选项)
+=======================
 
 fd=N
   The file descriptor to use for communication between the userspace
@@ -129,9 +123,8 @@ blksize=N
   option is only valid for 'fuseblk' type mounts.
   (设置文件系统的块大小。默认值为 512。此选项仅对 'fuseblk' 类型的挂载有效。)
 
-Control filesystem
-(控制文件系统)
-==================
+Control filesystem(控制文件系统)
+================================
 
 There's a control filesystem for FUSE, which can be mounted by::
 (FUSE 有一个控制文件系统，可以通过如下方式挂载:)
@@ -181,9 +174,8 @@ For each connection the following files exist within this directory:
 Only the owner of the mount may read or write these files.
 (只有挂载的所有者才可以读取或写入这些文件。)
 
-Interrupting filesystem operations
-(中断文件系统操作)
-##################################
+Interrupting filesystem operations(中断文件系统操作)
+####################################################
 
 If a process issuing a FUSE filesystem request is interrupted, the
 following will happen:
@@ -232,9 +224,8 @@ should reply to the INTERRUPT request with an EAGAIN error.  In case
 reply will be ignored.
 (如果文件系统找不到原始请求，它应该等待一段超时时间和/或一定数量的新请求到达，然后应以 EAGAIN 错误回复 INTERRUPT 请求。在情况 1) 中，INTERRUPT 请求将被重新排队。在情况 2) 中，INTERRUPT 回复将被忽略。)
 
-Aborting a filesystem connection
-(中止文件系统连接)
-================================
+Aborting a filesystem connection(中止文件系统连接)
+==================================================
 
 It is possible to get into certain situations where the filesystem is
 not responding.  Reasons for this may be:
@@ -274,9 +265,8 @@ the filesystem.  There are several ways to do this:
     powerful method, always works.
     (通过 FUSE 控制文件系统中止文件系统。最强大的方法，始终有效。)
 
-How do non-privileged mounts work?
-(非特权挂载是如何工作的?)
-==================================
+How do non-privileged mounts work?(非特权挂载是如何工作的?)
+===========================================================
 
 Since the mount() system call is a privileged operation, a helper
 program (fusermount) is needed, which is installed setuid root.
@@ -299,9 +289,8 @@ system.  Obvious requirements arising from this are:
     other users' or the super user's processes
     (挂载者不应能够在其他用户或超级用户的进程中引发不期望的行为)
 
-How are requirements fulfilled?
-(这些要求是如何满足的?)
-===============================
+How are requirements fulfilled?(这些要求是如何满足的?)
+======================================================
 
  A) The mount owner could gain elevated privileges by either:
     (挂载者可以通过以下两种方式之一获得提升的特权:)
@@ -377,9 +366,8 @@ How are requirements fulfilled?
 	filesystem, since *SIGSTOP* can be used to get a similar effect.
 	(请注意，*ptrace* 检查对于防止 C/2/i 并非严格必需，只需检查挂载者是否拥有足够的特权向访问文件系统的进程发送信号即可，因为 *SIGSTOP* 可以用来达到类似的效果。)
 
-I think these limitations are unacceptable?
-(我认为这些限制是不可接受的?)
-===========================================
+I think these limitations are unacceptable?(我认为这些限制是不可接受的?)
+========================================================================
 
 If a sysadmin trusts the users enough, or can ensure through other
 measures, that system processes will never enter non-privileged
@@ -412,9 +400,8 @@ information leak or *DoS* as described in points B and C/2/i-ii in the
 preceding section.
 (请注意，这两种放宽方式都会使系统面临上一节中 B 点和 C/2/i-ii 点所描述的潜在信息泄露或 *DoS* 风险。)
 
-Kernel - userspace interface
-(内核 - 用户空间接口)
-============================
+Kernel - userspace interface(内核 - 用户空间接口)
+=================================================
 
 The following diagram shows how a filesystem operation (in this
 example unlink) is performed in FUSE. ::

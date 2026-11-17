@@ -1,8 +1,6 @@
-==========================
-Reference counting in pnfs
-==========================
-
-(pnfs 中的引用计数)
+=============================================
+Reference counting in pnfs(pnfs 中的引用计数)
+=============================================
 
 The are several inter-related caches.  We have layouts which can
 reference multiple devices, each of which can reference multiple data servers.
@@ -12,9 +10,8 @@ we need to reference count.
 (这里有几个相互关联的缓存。我们有可以引用多个设备的布局(layout)，其中每个设备又可以引用多个数据服务器(data server)。每个数据服务器可以被多个设备引用。每个设备可以被多个布局引用。为了把这些关系理清楚，我们需要引用计数。)
 
 
-struct pnfs_layout_hdr
-(结构体 pnfs_layout_hdr)
-======================
+struct pnfs_layout_hdr(结构体 pnfs_layout_hdr)
+==============================================
 
 The on-the-wire command LAYOUTGET corresponds to struct
 pnfs_layout_segment, usually referred to by the variable name lseg.
@@ -33,9 +30,8 @@ the reference count, as the layout is kept around by the lseg that
 keeps it in the list.
 (每个头部还会(在非空时)被放入一个与 struct nfs_client 关联的列表(cl_layouts)中。放入该列表并不会增加引用计数，因为该布局是由把它留在列表中的 lseg 保全的。)
 
-deviceid_cache
-(设备 ID 缓存(deviceid_cache))
-==============
+deviceid_cache(设备 ID 缓存(deviceid_cache))
+============================================
 
 lsegs reference device ids, which are resolved per nfs_client and
 layout driver type.  The device ids are held in a RCU cache (struct
@@ -55,18 +51,16 @@ hashing and variations of this algorithm can be found `here.
 <http://groups.google.com/group/comp.lang.c/browse_thread/thread/9522965e2b8d3809>`_
 (哈希代码复制自 nfsd 代码库。关于哈希以及该算法各种变体的讨论可以在 `这里 <http://groups.google.com/group/comp.lang.c/browse_thread/thread/9522965e2b8d3809>`_ 找到。)
 
-data server cache
-(数据服务器缓存)
-=================
+data server cache(数据服务器缓存)
+=================================
 
 file driver devices refer to data servers, which are kept in a module
 level cache.  Its reference is held over the lifetime of the deviceid
 pointing to it.
 (file 驱动的设备引用数据服务器，这些数据服务器保存在一个模块级缓存中。指向某个数据服务器的 deviceid 在其整个生命周期内都会持有对该数据服务器的引用。)
 
-lseg
-(lseg(布局段))
-====
+lseg(lseg(布局段))
+==================
 
 lseg maintains an extra reference corresponding to the NFS_LSEG_VALID
 bit which holds it in the pnfs_layout_hdr's list.  When the final lseg
@@ -74,9 +68,8 @@ is removed from the pnfs_layout_hdr's list, the NFS_LAYOUT_DESTROYED
 bit is set, preventing any new lsegs from being added.
 (lseg 维护一个与 NFS_LSEG_VALID 位相对应的额外引用，该位把它保持在 pnfs_layout_hdr 的列表中。当最后一个 lseg 从 pnfs_layout_hdr 的列表中移除时，NFS_LAYOUT_DESTROYED 位会被设置，从而防止添加任何新的 lseg。)
 
-layout drivers
-(布局驱动)
-==============
+layout drivers(布局驱动)
+========================
 
 PNFS utilizes what is called layout drivers. The STD defines 4 basic
 layout types: "files", "objects", "blocks", and "flexfiles". For each
@@ -90,9 +83,8 @@ Blocks-layout-driver code is in: fs/nfs/blocklayout/.. directory
 Flexfiles-layout-driver code is in: fs/nfs/flexfilelayout/.. directory
 (Files 布局驱动的代码位于 fs/nfs/filelayout/.. 目录；Blocks 布局驱动的代码位于 fs/nfs/blocklayout/.. 目录；Flexfiles 布局驱动的代码位于 fs/nfs/flexfilelayout/.. 目录。)
 
-blocks-layout setup
-(blocks 布局的设置)
-===================
+blocks-layout setup(blocks 布局的设置)
+======================================
 
 TODO: Document the setup needs of the blocks layout driver
 (TODO: 记录 blocks 布局驱动所需的设置工作。)

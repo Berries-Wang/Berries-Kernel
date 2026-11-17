@@ -1,11 +1,9 @@
 .. SPDX-License-Identifier: GPL-2.0
 .. include:: <isonum.txt>
 
-=============================================
-Chelsio N210 10Gb Ethernet Network Controller
-=============================================
-
-(Chelsio N210 10Gb 以太网网络控制器)
+=================================================================================
+Chelsio N210 10Gb Ethernet Network Controller(Chelsio N210 10Gb 以太网网络控制器)
+=================================================================================
 
 Driver Release Notes for Linux
 
@@ -29,9 +27,8 @@ June 20, 2005
  SUPPORT
 
 
-Introduction
-(简介)
-============
+Introduction(简介)
+==================
 
  This document describes the Linux driver for Chelsio 10Gb Ethernet Network
  Controller. This driver supports the Chelsio N210 NIC and is backward
@@ -40,13 +37,11 @@ Introduction
  N210 NIC，并向后兼容 Chelsio N110 型 10Gb NIC。)
 
 
-Features
-(特性)
-========
+Features(特性)
+==============
 
-Adaptive Interrupts (adaptive-rx)
-(自适应中断 (adaptive-rx))
----------------------------------
+Adaptive Interrupts (adaptive-rx)(自适应中断 (adaptive-rx))
+-----------------------------------------------------------
 
   This feature provides an adaptive algorithm that adjusts the interrupt
   coalescing parameters, allowing the driver to dynamically adapt the latency
@@ -99,9 +94,8 @@ Adaptive Interrupts (adaptive-rx)
       ethtool -c <interface>
 
 
-TCP Segmentation Offloading (TSO) Support
-(TCP 分段卸载 (TSO) 支持)
------------------------------------------
+TCP Segmentation Offloading (TSO) Support(TCP 分段卸载 (TSO) 支持)
+------------------------------------------------------------------
 
   This feature, also known as "large send", enables a system's protocol stack
   to offload portions of outbound TCP processing to a network interface card
@@ -131,9 +125,8 @@ TCP Segmentation Offloading (TSO) Support
       ethtool -k <interface>
 
 
-Performance
-(性能)
-===========
+Performance(性能)
+=================
 
  The following information is provided as an example of how to change system
  parameters for "performance tuning" an what value to use. You may or may not
@@ -277,9 +270,8 @@ Performance
    (最小、最大与默认接收缓冲区 (RX_WINDOW) 大小的设置方式与单连接情形相同。)
 
 
-Driver Messages
-(驱动消息)
-===============
+Driver Messages(驱动消息)
+=========================
 
  The following messages are the most common messages logged by syslog. These
  may be found in /var/log/messages.
@@ -306,9 +298,8 @@ Driver Messages
      eth#: link is down
 
 
-Known Issues
-(已知问题)
-============
+Known Issues(已知问题)
+======================
 
  These issues have been identified during testing. The following information
  is provided as a workaround to the problem. In some cases, this problem is
@@ -504,9 +495,8 @@ Known Issues
       runon 0 ifup eth0)
 
 
-Support
-(支持)
-=======
+Support(支持)
+=============
 
  If you have problems with the software or hardware, please contact our
  customer support team via email at support@chelsio.com or check our website

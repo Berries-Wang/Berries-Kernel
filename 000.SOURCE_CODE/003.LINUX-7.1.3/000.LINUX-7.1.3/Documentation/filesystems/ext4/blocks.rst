@@ -1,8 +1,7 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-Blocks
-(块)
-------
+Blocks(块)
+----------
 
 ext4 allocates storage space in units of “blocks”. A block is a group of
 sectors between 1KiB and 64KiB, and the number of sectors must be an

@@ -1,10 +1,8 @@
 .. _filesystems_index:
 
-===============================
-Filesystems in the Linux kernel
-===============================
-
-(Linux 内核中的文件系统)
+=======================================================
+Filesystems in the Linux kernel(Linux 内核中的文件系统)
+=======================================================
 
 This under-development manual will, some glorious day, provide
 comprehensive information on how the Linux virtual filesystem (VFS) layer
@@ -14,9 +12,8 @@ can be found below.
 (VFS)层如何工作，以及位于其下的各个文件系统。目前，我们已有的内容可以在
 下方找到。)
 
-Core VFS documentation
-(VFS 核心文档)
-======================
+Core VFS documentation(VFS 核心文档)
+====================================
 
 See these manuals for documentation about the VFS layer itself and how its
 algorithms work.
@@ -51,9 +48,8 @@ algorithms work.
 
    porting
 
-Filesystem support layers
-(文件系统支撑层)
-=========================
+Filesystem support layers(文件系统支撑层)
+=========================================
 
 Documentation for the support code within the filesystem layer for use in
 filesystem implementations.
@@ -68,9 +64,8 @@ filesystem implementations.
    fsverity
    netfs_library
 
-Filesystems
-(文件系统)
-===========
+Filesystems(文件系统)
+=====================
 
 Documentation for filesystem implementations.
 (关于各文件系统实现的文档。)

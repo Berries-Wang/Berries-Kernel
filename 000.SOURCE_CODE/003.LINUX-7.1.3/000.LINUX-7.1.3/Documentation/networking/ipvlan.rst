@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===================
-IPVLAN Driver HOWTO
-===================
-
-(IPVLAN 驱动 HOWTO)
+======================================
+IPVLAN Driver HOWTO(IPVLAN 驱动 HOWTO)
+======================================
 
 Initial Release:
 	Mahesh Bandewar <maheshb AT google.com>
 	(初始发布： Mahesh Bandewar <maheshb AT google.com>)
 
-1. Introduction:
-(1. 简介：)
-================
+1. Introduction:(1. 简介：)
+===========================
 
 This is conceptually very similar to the macvlan driver with one major
 exception of using L3 for mux-ing /demux-ing among slaves. This property makes
@@ -22,9 +19,8 @@ outside of it.
 (这在概念上与 macvlan 驱动非常相似，一个主要区别是在各个 slave 之间使用 L3 进行复用/解复用。这一特性使主设备与其 slave 设备共享 L2。本驱动是结合网络命名空间开发的，不确定在命名空间之外是否还有使用场景。)
 
 
-2. Building and Installation:
-=============================
-(2. 构建与安装：)
+2. Building and Installation:(2. 构建与安装：)
+==============================================
 
 In order to build the driver, please select the config item CONFIG_IPVLAN.
 The driver can be built into the kernel (CONFIG_IPVLAN=y) or as a module
@@ -32,9 +28,8 @@ The driver can be built into the kernel (CONFIG_IPVLAN=y) or as a module
 (要构建本驱动，请选择配置项 CONFIG_IPVLAN。驱动可以编入内核 (CONFIG_IPVLAN=y)，也可以作为模块构建 (CONFIG_IPVLAN=m)。)
 
 
-3. Configuration:
-=================
-(3. 配置：)
+3. Configuration:(3. 配置：)
+============================
 
 There are no module parameters for this driver and it can be configured
 using IProute2/ip utility.
@@ -70,9 +65,8 @@ e.g.
 	  bash# ip link add link eth0 name ipvlan type ipvlan mode l2 vepa
 
 
-4. Operating modes:
-===================
-(4. 工作模式：)
+4. Operating modes:(4. 工作模式：)
+==================================
 
 IPvlan has two modes of operation - L2 and L3. For a given master device,
 you can select one of these two modes and all slaves on that master will
@@ -82,9 +76,8 @@ L3 mode is more restrictive since routing is controlled from the other (mostly)
 default namespace.
 (IPvlan 有两种工作模式 - L2 和 L3。对于给定的主设备，可以选择这两种模式之一，该主设备上的所有 slave 都以同一（所选）模式工作。RX 方向的行为几乎完全相同，区别在于 L3 模式下 slave 不会接收任何组播/广播流量。L3 模式限制更多，因为路由由另一个（通常是默认）命名空间控制。)
 
-4.1 L2 mode:
-(4.1 L2模式)
-------------
+4.1 L2 mode:(4.1 L2模式)
+------------------------
 
 In this mode TX processing happens on the stack instance attached to the
 slave device and packets are switched and queued to the master device to send
@@ -92,9 +85,8 @@ out. In this mode the slaves will RX/TX multicast and broadcast (if applicable)
 as well.
 (在此模式下，TX 处理发生在挂接到 slave 设备的协议栈实例上，数据包被交换并排入主设备的队列后发送出去。在此模式下，slave 也会收发组播和广播（如适用）。)
 
-4.2 L3 mode:
-(4.2 L3模式)
-------------
+4.2 L3 mode:(4.2 L3模式)
+------------------------
 
 In this mode TX processing up to L3 happens on the stack instance attached
 to the slave device and packets are switched to the stack instance of the
@@ -103,9 +95,8 @@ used before packets are queued on the outbound device. In this mode the slaves
 will not receive nor can send multicast / broadcast traffic.
 (在此模式下，slave 设备上协议栈实例的处理最多到 L3，数据包被交换到主设备的协议栈实例做 L2 处理，并在数据包排入出站设备队列之前使用该实例的路由。在此模式下，slave 既不能接收也不能发送组播/广播流量。)
 
-4.3 L3S mode:
-(4.3 L3S模式)
--------------
+4.3 L3S mode:(4.3 L3S模式)
+--------------------------
 
 This is very similar to the L3 mode except that iptables (conn-tracking)
 works in this mode and hence it is L3-symmetric (L3s). This will have slightly less
@@ -113,9 +104,8 @@ performance but that shouldn't matter since you are choosing this mode over plai
 mode to make conn-tracking work.
 (这与 L3 模式非常相似，区别在于 iptables（连接跟踪）在此模式下可以工作，因此它是 L3 对称的 (L3s)。这会带来轻微的性能损失，但这无关紧要，因为你选择此模式而不是普通 L3 模式，正是为了让连接跟踪工作。)
 
-5. Mode flags:
-==============
-(5. 模式标志：)
+5. Mode flags:(5. 模式标志：)
+=============================
 
 At this time following mode flags are available
 (目前提供以下模式标志)
@@ -149,9 +139,8 @@ router send the redirect message.
 (如果加上此选项，端口将被设置为 VEPA 模式，即端口把交换功能卸载给 802.1Qbg 中描述的外部实体。
 注意：IPvlan 的 VEPA 模式有局限性。IPvlan 使用主设备的 MAC 地址，因此在此模式下发给相邻邻居的数据包源 MAC 和目的 MAC 相同。这会导致交换机/路由器发送重定向消息。)
 
-6. What to choose (macvlan vs. ipvlan)?
-=======================================
-(6. 该选哪个（macvlan 还是 ipvlan）？)
+6. What to choose (macvlan vs. ipvlan)?(6. 该选哪个（macvlan 还是 ipvlan）？)
+=============================================================================
 
 These two devices are very similar in many regards and the specific use
 case could very well define which device to choose. if one of the following
@@ -170,9 +159,8 @@ situations defines your use case then you can choose to use ipvlan:
     (如果要把 slave 设备放入敌对/不受信任的网络命名空间，其中 slave 上的 L2 可能被更改/滥用。)
 
 
-6. Example configuration:
-=========================
-(6. 配置示例)
+6. Example configuration:(6. 配置示例)
+======================================
 
 ::
 

@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=================
-Linux Kernel TIPC
-=================
+==================================
+Linux Kernel TIPC(Linux 内核 TIPC)
+==================================
 
-(Linux 内核 TIPC)
-
-Introduction
-(简介)
-============
+Introduction(简介)
+==================
 
 TIPC (Transparent Inter Process Communication) is a protocol that is specially
 designed for intra-cluster communication. It can be configured to transmit
@@ -19,9 +16,8 @@ that of TCP.
 (TIPC（透明进程间通信）是一种专为集群内部通信设计的协议。它可以配置为通过 UDP 或直接通过以太网传输消息。消息
 的投递是有序、无损且受流量控制的。其时延比任何其他已知协议都短，而最大吞吐量与 TCP 相当。)
 
-TIPC Features
-(TIPC 特性)
--------------
+TIPC Features(TIPC 特性)
+------------------------
 
 - Cluster wide IPC service
   (集群范围的 IPC 服务)
@@ -139,9 +135,8 @@ TIPC Features
   The TIPC user API has support for C, Python, Perl, Ruby, D and Go.
   (TIPC 用户 API 支持 C、Python、Perl、Ruby、D 和 Go。)
 
-More Information
-(更多信息)
-----------------
+More Information(更多信息)
+--------------------------
 
 - How to set up TIPC:
   (如何搭建 TIPC：)
@@ -164,16 +159,14 @@ More Information
   http://tipc.io/protocol.html
 
 
-Implementation
-(实现)
-==============
+Implementation(实现)
+====================
 
 TIPC is implemented as a kernel module in net/tipc/ directory.
 (TIPC 以内核模块的形式实现在 net/tipc/ 目录中。)
 
-TIPC Base Types
-(TIPC 基础类型)
----------------
+TIPC Base Types(TIPC 基础类型)
+------------------------------
 
 .. kernel-doc:: net/tipc/subscr.h
    :internal:
@@ -190,9 +183,8 @@ TIPC Base Types
 .. kernel-doc:: net/tipc/bcast.c
    :internal:
 
-TIPC Bearer Interfaces
-(TIPC Bearer 接口)
-----------------------
+TIPC Bearer Interfaces(TIPC Bearer 接口)
+----------------------------------------
 
 .. kernel-doc:: net/tipc/bearer.c
    :internal:
@@ -200,37 +192,32 @@ TIPC Bearer Interfaces
 .. kernel-doc:: net/tipc/udp_media.c
    :internal:
 
-TIPC Crypto Interfaces
-(TIPC Crypto 接口)
-----------------------
+TIPC Crypto Interfaces(TIPC Crypto 接口)
+----------------------------------------
 
 .. kernel-doc:: net/tipc/crypto.c
    :internal:
 
-TIPC Discoverer Interfaces
-(TIPC Discoverer 接口)
---------------------------
+TIPC Discoverer Interfaces(TIPC Discoverer 接口)
+------------------------------------------------
 
 .. kernel-doc:: net/tipc/discover.c
    :internal:
 
-TIPC Link Interfaces
-(TIPC Link 接口)
---------------------
+TIPC Link Interfaces(TIPC Link 接口)
+------------------------------------
 
 .. kernel-doc:: net/tipc/link.c
    :internal:
 
-TIPC msg Interfaces
-(TIPC msg 接口)
--------------------
+TIPC msg Interfaces(TIPC msg 接口)
+----------------------------------
 
 .. kernel-doc:: net/tipc/msg.c
    :internal:
 
-TIPC Name Interfaces
-(TIPC Name 接口)
---------------------
+TIPC Name Interfaces(TIPC Name 接口)
+------------------------------------
 
 .. kernel-doc:: net/tipc/name_table.c
    :internal:
@@ -238,37 +225,32 @@ TIPC Name Interfaces
 .. kernel-doc:: net/tipc/name_distr.c
    :internal:
 
-TIPC Node Management Interfaces
-(TIPC 节点管理接口)
--------------------------------
+TIPC Node Management Interfaces(TIPC 节点管理接口)
+--------------------------------------------------
 
 .. kernel-doc:: net/tipc/node.c
    :internal:
 
-TIPC Socket Interfaces
-(TIPC Socket 接口)
-----------------------
+TIPC Socket Interfaces(TIPC Socket 接口)
+----------------------------------------
 
 .. kernel-doc:: net/tipc/socket.c
    :internal:
 
-TIPC Network Topology Interfaces
-(TIPC 网络拓扑接口)
---------------------------------
+TIPC Network Topology Interfaces(TIPC 网络拓扑接口)
+---------------------------------------------------
 
 .. kernel-doc:: net/tipc/subscr.c
    :internal:
 
-TIPC Server Interfaces
-(TIPC 服务器接口)
-----------------------
+TIPC Server Interfaces(TIPC 服务器接口)
+---------------------------------------
 
 .. kernel-doc:: net/tipc/topsrv.c
    :internal:
 
-TIPC Trace Interfaces
-(TIPC Trace 接口)
----------------------
+TIPC Trace Interfaces(TIPC Trace 接口)
+--------------------------------------
 
 .. kernel-doc:: net/tipc/trace.c
    :internal:

@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-============================================================
-Linux kernel driver for Elastic Network Adapter (ENA) family
-============================================================
+=====================================================================================================================
+Linux kernel driver for Elastic Network Adapter (ENA) family(Elastic Network Adapter (ENA) 系列的 Linux 内核驱动程序)
+=====================================================================================================================
 
-(Elastic Network Adapter (ENA) 系列的 Linux 内核驱动程序)
-
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 ENA is a networking interface designed to make good use of modern CPU
 features and system architectures.
@@ -58,9 +55,8 @@ Queue (LLQ), which saves several more microseconds.
 (部分 ENA 设备支持一种称为低延迟队列 (LLQ) 的工作模式，它可以再节省数个
 微秒的时间。)
 
-ENA Source Code Directory Structure
-(ENA 源代码目录结构)
-===================================
+ENA Source Code Directory Structure(ENA 源代码目录结构)
+=======================================================
 
 =================   ======================================================
 ena_com.[ch]        Management communication layer. This layer is
@@ -95,9 +91,8 @@ ena_debugfs.[ch]    debugfs files.
                     (debugfs 文件。)
 =================   ======================================================
 
-Management Interface:
-(管理接口:)
-=====================
+Management Interface:(管理接口:)
+================================
 
 ENA management interface is exposed by means of:
 (ENA 管理接口通过以下方式暴露：)
@@ -186,9 +181,8 @@ the device and the driver.
 Keep-Alive 事件。驱动程序维护一个看门狗 (WD) 处理程序，用于记录当前状态和
 统计信息。如果 keep-alive 事件未按预期送达，WD 将复位设备和驱动程序。)
 
-Data Path Interface
-(数据路径接口)
-===================
+Data Path Interface(数据路径接口)
+=================================
 
 I/O operations are based on Tx and Rx Submission Queues (Tx SQ and Rx
 SQ correspondingly). Each SQ has a completion queue (CQ) associated
@@ -250,9 +244,8 @@ benefits:
 - In hardware interrupt re-direction.
   (硬件中断重定向。)
 
-Interrupt Modes
-(中断模式)
-===============
+Interrupt Modes(中断模式)
+=========================
 
 The driver assigns a single MSI-X vector per queue pair (for both Tx
 and Rx directions). The driver assigns an additional dedicated MSI-X vector
@@ -286,9 +279,8 @@ unmasked by the driver after NAPI processing is complete.
 也就是说，一旦 MSI-X 中断被送达主机，其 Cause 位会被自动清除，且该中断被
 屏蔽。驱动程序在 NAPI 处理完成后解除屏蔽。)
 
-Interrupt Moderation
-(中断调节)
-====================
+Interrupt Moderation(中断调节)
+==============================
 
 ENA driver and device can operate in conventional or adaptive interrupt
 moderation mode.
@@ -320,9 +312,8 @@ Documentation/networking/net_dim.rst)
 
 .. _`RX copybreak`:
 
-RX copybreak
-(RX copybreak)
-============
+RX copybreak(RX copybreak)
+==========================
 
 The rx_copybreak is initialized by default to ENA_DEFAULT_RX_COPYBREAK
 and can be configured by the ETHTOOL_STUNABLE command of the
@@ -340,9 +331,8 @@ buffer and the RX descriptor is returned to HW.
 
 .. _`PHC`:
 
-PTP Hardware Clock (PHC)
-(PTP 硬件时钟 (PHC))
-========================
+PTP Hardware Clock (PHC)(PTP 硬件时钟 (PHC))
+============================================
 .. _`ptp-userspace-api`: https://docs.kernel.org/driver-api/ptp.html#ptp-hardware-clock-user-space-api
 .. _`testptp`: https://elixir.bootlin.com/linux/latest/source/tools/testing/selftests/ptp/testptp.c
 
@@ -461,9 +451,8 @@ PHC timeouts:
                     | 阻塞期间的所有获取时间请求都会被跳过。)
 =================   ======================================================
 
-Statistics
-(统计)
-==========
+Statistics(统计)
+================
 
 The user can obtain ENA device and driver statistics using `ethtool`.
 The driver can collect regular or extended statistics (including
@@ -494,9 +483,8 @@ via `ip(8)` and similar legacy tools.
 SetFeature 命令 (ENA_ADMIN_MTU 属性) 配置 MTU。用户可以通过 `ip(8)` 和
 类似的传统工具更改 MTU。)
 
-Stateless Offloads
-(无状态卸载)
-==================
+Stateless Offloads(无状态卸载)
+==============================
 
 The ENA driver supports:
 (ENA 驱动程序支持：)
@@ -533,9 +521,8 @@ RSS
   indirection table through `ethtool(8)`.
   (用户可以通过 `ethtool(8)` 提供哈希密钥、哈希函数并配置间接表。)
 
-DEVLINK SUPPORT
-(DEVLINK 支持)
-===============
+DEVLINK SUPPORT(DEVLINK 支持)
+=============================
 .. _`devlink`: https://www.kernel.org/doc/html/latest/networking/devlink/index.html
 
 `devlink`_ supports reloading the driver and initiating re-negotiation with the ENA device
@@ -547,9 +534,8 @@ DEVLINK SUPPORT
   # for example:
   sudo devlink dev reload pci/0000:00:06.0
 
-DATA PATH
-(数据路径)
-=========
+DATA PATH(数据路径)
+===================
 
 Tx
 --
@@ -647,9 +633,8 @@ Rx
   (新的 SKB 被更新以包含必要的信息 (协议、校验和硬件验证结果等)，然后通过
   NAPI 接口函数 :code:`napi_gro_receive()` 传递给网络协议栈。)
 
-Dynamic RX Buffers (DRB)
-(动态 RX 缓冲区 (DRB))
-------------------------
+Dynamic RX Buffers (DRB)(动态 RX 缓冲区 (DRB))
+----------------------------------------------
 
 Each RX descriptor in the RX ring is a single memory page (which is either 4KB
 or 16KB long depending on system's configurations).

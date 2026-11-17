@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==================
-Generic HDLC layer
-==================
-
-(通用 HDLC 层)
+================================
+Generic HDLC layer(通用 HDLC 层)
+================================
 
 Krzysztof Halasa <khc@pm.waw.pl>
 (Krzysztof Halasa <khc@pm.waw.pl>)
@@ -194,9 +192,8 @@ Frame-Relay only:
 
 
 
-Board-specific issues
-(板卡特定问题)
----------------------
+Board-specific issues(板卡特定问题)
+-----------------------------------
 
 n2.o and c101.o need parameters to work::
 (n2.o 和 c101.o 需要参数才能工作：)

@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===========================
-SMB Direct - SMB3 over RDMA
-===========================
-
-(SMB Direct - 基于 RDMA 的 SMB3)
+===========================================================
+SMB Direct - SMB3 over RDMA(SMB Direct - 基于 RDMA 的 SMB3)
+===========================================================
 
 This document describes how to set up the Linux SMB client and server to
 use RDMA.
 (本文档描述如何设置 Linux SMB 客户端和服务器以使用 RDMA。)
 
-Overview
-(概述)
-========
+Overview(概述)
+==============
 The Linux SMB kernel client supports SMB Direct, which is a transport
 scheme for SMB3 that uses RDMA (Remote Direct Memory Access) to provide
 high throughput and low latencies by bypassing the traditional TCP/IP
@@ -21,9 +18,8 @@ SMB Direct on the Linux SMB client can be tested against KSMBD - a
 kernel-space SMB server.
 (Linux SMB 内核客户端支持 SMB Direct，这是一种用于 SMB3 的传输方案，它使用 RDMA(远程直接内存访问)通过绕过传统 TCP/IP 栈来提供高吞吐量和低延迟。Linux SMB 客户端上的 SMB Direct 可以针对 KSMBD——一个内核空间的 SMB 服务器——进行测试。)
 
-Installation
-(安装)
-=============
+Installation(安装)
+==================
 
 - Install an RDMA device. As long as the RDMA device driver is supported
   by the kernel, it should work. This includes both software emulators (soft
@@ -93,9 +89,8 @@ Installation
   cifs.ko and ksmbd.ko modules.
   (构建并安装内核。SMB Direct 支持将在 cifs.ko 和 ksmbd.ko 模块中启用。)
 
-Setup and Usage
-(设置与使用)
-================
+Setup and Usage(设置与使用)
+===========================
 
 - Set up and start a KSMBD server as described in the `KSMBD documentation
   <https://www.kernel.org/doc/Documentation/filesystems/smb/ksmbd.rst>`_.

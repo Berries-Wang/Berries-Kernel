@@ -1,8 +1,6 @@
-=======================================================
-Configfs - Userspace-driven Kernel Object Configuration
-=======================================================
-
-(Configfs - 用户空间驱动的内核对象配置)
+==============================================================================================
+Configfs - Userspace-driven Kernel Object Configuration(Configfs - 用户空间驱动的内核对象配置)
+==============================================================================================
 
 Joel Becker <joel.becker@oracle.com>
 (作者: Joel Becker <joel.becker@oracle.com>)
@@ -15,9 +13,8 @@ Copyright (c) 2005 Oracle Corporation,
 	(版权所有 (c) 2005 Oracle Corporation，Joel Becker <joel.becker@oracle.com>)
 
 
-What is configfs?
-(什么是 configfs？)
-=================
+What is configfs?(什么是 configfs？)
+====================================
 
 configfs is a ram-based filesystem that provides the converse of
 sysfs's functionality.  Where sysfs is a filesystem-based view of
@@ -47,9 +44,8 @@ Both sysfs and configfs can and should exist together on the same
 system.  One is not a replacement for the other.
 (sysfs 与 configfs 可以而且应该在同一系统上共存。两者互不替代。)
 
-Using configfs
-(使用 configfs)
-==============
+Using configfs(使用 configfs)
+=============================
 
 configfs can be compiled as a module or into the kernel.  You can access
 it by doing::
@@ -99,9 +95,8 @@ item cannot be destroyed if any other item has a link to it (via
 symlink(2)).  Links can be removed via unlink(2).
 (当需要销毁一个项时，用 rmdir(2) 移除它。如果任何其他项通过 symlink(2) 链接到它，则该项无法被销毁。链接可以通过 unlink(2) 移除。)
 
-Configuring FakeNBD: an Example
-(配置 FakeNBD: 一个示例)
-===============================
+Configuring FakeNBD: an Example(配置 FakeNBD: 一个示例)
+=======================================================
 
 Imagine there's a Network Block Device (NBD) driver that allows you to
 access remote block devices.  Call it FakeNBD.  FakeNBD uses configfs
@@ -143,9 +138,8 @@ That's it.  That's all there is.  Now the device is configured, via the
 shell no less.
 (就是这样。仅此而已。现在设备就配置好了，而且是通过 shell 完成的。)
 
-Coding With configfs
-(使用 configfs 编程)
-====================
+Coding With configfs(使用 configfs 编程)
+========================================
 
 Every object in configfs is a config_item.  A config_item reflects an
 object in the subsystem.  It has attributes that match values on that
@@ -419,9 +413,8 @@ will be visible via configfs.  At that point, mkdir(2) can be called and
 the subsystem must be ready for it.
 (当注册调用返回时，子系统即已生效，并可通过 configfs 看到。此时就可以调用 mkdir(2)，子系统必须为此做好准备。)
 
-An Example
-(一个示例)
-==========
+An Example(一个示例)
+====================
 
 The best example of these basic concepts is the simple_children
 subsystem/group and the simple_child item in
@@ -430,9 +423,8 @@ and storing an attribute, and a simple group creating and destroying
 these children.
 (这些基本概念的最佳示例是 samples/configfs/configfs_sample.c 中的 simple_children 子系统/组以及 simple_child 项。它展示了一个显示并存储属性的简单对象，以及一个创建和销毁这些子对象的简单组。)
 
-Hierarchy Navigation and the Subsystem Mutex
-(层次导航与子系统互斥锁)
-============================================
+Hierarchy Navigation and the Subsystem Mutex(层次导航与子系统互斥锁)
+====================================================================
 
 There is an extra bonus that configfs provides.  The config_groups and
 config_items are arranged in a hierarchy due to the fact that they
@@ -460,9 +452,8 @@ a subsystem to trust ci_parent and cg_children while they hold the
 mutex.
 (当一个新分配的项尚未链接进此层次结构时，子系统将无法获取互斥锁。类似地，当一个被丢弃的项尚未解除链接时，也无法获取互斥锁。这意味着项在 configfs 中期间其 ci_parent 指针永远不会为 NULL，且项在其父组的 cg_children 列表中停留的时长与此相同。这使得子系统在持有互斥锁期间可以信任 ci_parent 和 cg_children。)
 
-Item Aggregation Via symlink(2)
-(通过 symlink(2) 进行项聚合)
-===============================
+Item Aggregation Via symlink(2)(通过 symlink(2) 进行项聚合)
+===========================================================
 
 configfs provides a simple group via the group->item parent/child
 relationship.  Often, however, a larger environment requires aggregation
@@ -495,9 +486,8 @@ can it be removed while an item links to it.  Dangling symlinks are not
 allowed in configfs.
 (当 config_item 还链接着任何其他项时不能被移除；当有项链接到它时同样不能被移除。configfs 不允许悬空符号链接。)
 
-Automatically Created Subgroups
-(自动创建的子组)
-===============================
+Automatically Created Subgroups(自动创建的子组)
+===============================================
 
 A new config_group may want to have two types of child config_items.
 While this could be codified by magic names in ->make_item(), it is much
@@ -532,9 +522,8 @@ rmdir(2).  They also are not considered when rmdir(2) on the parent
 group is checking for children.
 (因此，默认组不能直接通过 rmdir(2) 移除。在对父组执行 rmdir(2) 检查子项时，也不会把它们考虑在内。)
 
-Dependent Subsystems
-(依赖子系统)
-====================
+Dependent Subsystems(依赖子系统)
+================================
 
 Sometimes other drivers depend on particular configfs items.  For
 example, ocfs2 mounts depend on a heartbeat region item.  If that

@@ -1,17 +1,14 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==================================
-XFRM proc - /proc/net/xfrm_* files
-==================================
-
-(XFRM proc - /proc/net/xfrm_* 文件)
+=====================================================================
+XFRM proc - /proc/net/xfrm_* files(XFRM proc - /proc/net/xfrm_* 文件)
+=====================================================================
 
 Masahide NAKAMURA <nakam@linux-ipv6.org>
 
 
-Transformation Statistics
-(转换统计)
--------------------------
+Transformation Statistics(转换统计)
+-----------------------------------
 
 The xfrm_proc code is a set of statistics showing numbers of packets
 dropped by the transformation code and why.  These counters are defined
@@ -22,9 +19,8 @@ as part of the linux private MIB.  These counters can be viewed in
 /proc/net/xfrm_stat 中查看这些计数器。)
 
 
-Inbound errors
-(入站错误)
-~~~~~~~~~~~~~~
+Inbound errors(入站错误)
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 XfrmInError:
 	All errors which is not matched others
@@ -106,9 +102,8 @@ XfrmInStateDirError:
         State direction mismatch (lookup found an output state on the input path, expected input or no direction)
         (状态方向不匹配 (查找在输入路径上找到了输出状态，期望输入或无方向))
 
-Outbound errors
-(出站错误)
-~~~~~~~~~~~~~~~
+Outbound errors(出站错误)
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 XfrmOutError:
 	All errors which is not matched others

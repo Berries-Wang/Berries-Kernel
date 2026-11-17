@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=====================
-The Devpts Filesystem
-=====================
-
-(devpts 文件系统)
+======================================
+The Devpts Filesystem(devpts 文件系统)
+======================================
 
 Each mount of the devpts filesystem is now distinct such that ptys
 and their indices allocated in one mount are independent from ptys

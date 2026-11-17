@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=================
-Linux Kernel SCTP
-=================
-
-(Linux 内核 SCTP)
+==================================
+Linux Kernel SCTP(Linux 内核 SCTP)
+==================================
 
 This is the current BETA release of the Linux Kernel SCTP reference
 implementation.
@@ -29,9 +27,8 @@ referred to as the  UDP-style API of the Sockets Extensions for SCTP, as
 proposed in IETF Internet-Drafts.
 (项目的最初目标是创建一个符合 RFC 2960 的 Linux 内核 SCTP 参考实现，并提供一个被称为 SCTP 套接字扩展的 UDP 风格 API 的编程接口，如 IETF Internet-Draft 所提议的那样。)
 
-Caveats
-=======
-(注意事项)
+Caveats(注意事项)
+=================
 
 - lksctp can be built as statically or as a module.  However, be aware that
   module removal of lksctp is not yet a safe activity.

@@ -1,11 +1,9 @@
 .. SPDX-License-Identifier: GPL-2.0
 .. include:: <isonum.txt>
 
-==============================================
-Intel(R) PRO/Wireless 2915ABG Driver for Linux
-==============================================
-
-(Linux 的 Intel(R) PRO/Wireless 2915ABG 驱动程序)
+===============================================================================================
+Intel(R) PRO/Wireless 2915ABG Driver for Linux(Linux 的 Intel(R) PRO/Wireless 2915ABG 驱动程序)
+===============================================================================================
 
 
 Support for:
@@ -54,9 +52,8 @@ README.ipw2200
     7.   License
 
 
-0. IMPORTANT INFORMATION BEFORE USING THIS DRIVER
-(0. 使用此驱动程序前的重要信息)
-=================================================
+0. IMPORTANT INFORMATION BEFORE USING THIS DRIVER(0. 使用此驱动程序前的重要信息)
+================================================================================
 
 Important Notice FOR ALL USERS OR DISTRIBUTORS!!!!
 (致所有用户或分发者的重要通知！！！！)
@@ -111,9 +108,8 @@ obtain a tested driver from Intel Customer Support at:
 http://support.intel.com
 
 
-1. Introduction
-(1. 简介)
-===============
+1. Introduction(1. 简介)
+========================
 
 The following sections attempt to provide a brief introduction to using
 the Intel(R) PRO/Wireless 2915ABG Driver for Linux.
@@ -129,9 +125,8 @@ file.
 (有关构建和安装驱动程序的信息，请参阅 INSTALL 文件。)
 
 
-1.1. Overview of Features
-(1.1. 功能概述)
--------------------------
+1.1. Overview of Features(1.1. 功能概述)
+----------------------------------------
 The current release (1.1.2) supports the following features:
 (当前版本 (1.1.2) 支持以下特性：)
 
@@ -172,9 +167,8 @@ performed on a given feature.
 
 
 
-1.2. Command Line Parameters
-(1.2. 命令行参数)
-----------------------------
+1.2. Command Line Parameters(1.2. 命令行参数)
+---------------------------------------------
 
 Like many modules used in the Linux kernel, the Intel(R) PRO/Wireless
 2915ABG Driver for Linux allows configuration options to be provided
@@ -245,9 +239,8 @@ Where the supported parameter are:
 	(可用于设置适配器的默认模式。0 = 受管 (Managed)，1 = Ad-Hoc，2 = 监听 (Monitor))
 
 
-1.3. Wireless Extension Private Methods
-(1.3. 无线扩展私有方法)
----------------------------------------
+1.3. Wireless Extension Private Methods(1.3. 无线扩展私有方法)
+--------------------------------------------------------------
 
 As an interface designed to handle generic hardware, there are certain
 capabilities not exposed through the normal Wireless Tool interface.  As
@@ -331,9 +324,8 @@ The supported private methods are:
 	==	========================================
 
 
-1.4. Sysfs Helper Files
-(1.4. Sysfs 辅助文件)
------------------------
+1.4. Sysfs Helper Files(1.4. Sysfs 辅助文件)
+--------------------------------------------
 
 The Linux kernel provides a pseudo file system that can be used to
 access various components of the operating system.  The Intel(R)
@@ -371,9 +363,8 @@ level, which applies only to the single specific instance.
 (Linux 的 Intel(R) PRO/Wireless 2915ABG 驱动程序在两个级别上暴露 sysfs 条目 -- 驱动程序级别 (适用于驱动程序的所有实例，以应对安装了多于一个设备的情况) 和设备级别 (仅适用于单个特定实例)。)
 
 
-1.4.1 Driver Level Sysfs Helper Files
-(1.4.1 驱动程序级别的 Sysfs 辅助文件)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1.4.1 Driver Level Sysfs Helper Files(1.4.1 驱动程序级别的 Sysfs 辅助文件)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For the driver level files, look in /sys/bus/pci/drivers/ipw2200/
 (驱动程序级别的文件请查看 /sys/bus/pci/drivers/ipw2200/)
@@ -386,9 +377,8 @@ For the driver level files, look in /sys/bus/pci/drivers/ipw2200/
 
 
 
-1.4.2 Device Level Sysfs Helper Files
-(1.4.2 设备级别的 Sysfs 辅助文件)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1.4.2 Device Level Sysfs Helper Files(1.4.2 设备级别的 Sysfs 辅助文件)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For the device level files, look in::
 (设备级别的文件请查看：)
@@ -462,9 +452,8 @@ For the device level files, see /sys/bus/pci/drivers/ipw2200:
 	   (注意：据报道，LED 代码在运行 ifconfig 时会使某些系统挂起，因此默认禁用)
 
 
-1.5. Supported channels
-(1.5. 支持的信道)
------------------------
+1.5. Supported channels(1.5. 支持的信道)
+----------------------------------------
 
 Upon loading the Intel(R) PRO/Wireless 2915ABG Driver for Linux, a
 message stating the detected geography code and the number of 802.11
@@ -509,9 +498,8 @@ table below.
         | ZZL  | Europe (欧洲)              |  11      |  13     |
 	+------+----------------------------+----------+---------+
 
-2.  Ad-Hoc Networking
-(2. Ad-Hoc 网络)
-=====================
+2.  Ad-Hoc Networking(2. Ad-Hoc 网络)
+=====================================
 
 When using a device in an Ad-Hoc network, it is useful to understand the
 sequence and requirements for the driver to be able to create, join, or
@@ -523,17 +511,15 @@ have a consistent experience while using the driver as a member of an
 Ad-Hoc network.
 (以下内容试图提供足够的信息，使你在作为 Ad-Hoc 网络成员使用该驱动程序时能够获得一致的体验。)
 
-2.1. Joining an Ad-Hoc Network
-(2.1. 加入 Ad-Hoc 网络)
-------------------------------
+2.1. Joining an Ad-Hoc Network(2.1. 加入 Ad-Hoc 网络)
+-----------------------------------------------------
 
 The easiest way to get onto an Ad-Hoc network is to join one that
 already exists.
 (进入 Ad-Hoc 网络最简单的方式是加入一个已经存在的网络。)
 
-2.2. Creating an Ad-Hoc Network
-(2.2. 创建 Ad-Hoc 网络)
--------------------------------
+2.2. Creating an Ad-Hoc Network(2.2. 创建 Ad-Hoc 网络)
+------------------------------------------------------
 
 An Ad-Hoc networks is created using the syntax of the Wireless tool.
 (Ad-Hoc 网络使用无线工具的语法创建。)
@@ -543,27 +529,23 @@ For Example:
 iwconfig eth1 mode ad-hoc essid testing channel 2
 (示例命令：iwconfig eth1 mode ad-hoc essid testing channel 2)
 
-2.3. Merging Ad-Hoc Networks
-(2.3. 合并 Ad-Hoc 网络)
-----------------------------
+2.3. Merging Ad-Hoc Networks(2.3. 合并 Ad-Hoc 网络)
+---------------------------------------------------
 
 
-3. Interaction with Wireless Tools
-(3. 与无线工具的交互)
-==================================
+3. Interaction with Wireless Tools(3. 与无线工具的交互)
+=======================================================
 
-3.1 iwconfig mode
-(3.1 iwconfig 模式)
------------------
+3.1 iwconfig mode(3.1 iwconfig 模式)
+------------------------------------
 
 When configuring the mode of the adapter, all run-time configured parameters
 are reset to the value used when the module was loaded.  This includes
 channels, rates, ESSID, etc.
 (配置适配器模式时，所有运行时配置的参数都会重置为模块加载时所使用的值。这包括信道、速率、ESSID 等。)
 
-3.2 iwconfig sens
-(3.2 iwconfig sens)
------------------
+3.2 iwconfig sens(3.2 iwconfig sens)
+------------------------------------
 
 The 'iwconfig ethX sens XX' command will not set the signal sensitivity
 threshold, as described in iwconfig documentation, but rather the number
@@ -573,9 +555,8 @@ threshold to 3 times the given value.
 ('iwconfig ethX sens XX' 命令不会像 iwconfig 文档所描述的那样设置信号灵敏度阈值，而是设置将触发切换 (即漫游到另一个接入点) 的连续丢失信标数量。同时，它还会将解除关联阈值设置为给定值的 3 倍。)
 
 
-4.  About the Version Numbers
-(4. 关于版本号)
-=============================
+4.  About the Version Numbers(4. 关于版本号)
+============================================
 
 Due to the nature of open source development projects, there are
 frequently changes being incorporated that have not gone through
@@ -607,9 +588,8 @@ The major version number will be incremented when significant changes
 are made to the driver.  Currently, there are no major changes planned.
 (当对驱动程序进行重大更改时，主版本号将会递增。目前没有计划进行重大更改。)
 
-5. Firmware installation
-(5. 固件安装)
-========================
+5. Firmware installation(5. 固件安装)
+=====================================
 
 The driver requires a firmware image, download it and extract the
 files under /lib/firmware (or wherever your hotplug's firmware.agent
@@ -622,9 +602,8 @@ The firmware can be downloaded from the following URL:
     http://ipw2200.sf.net/
 
 
-6. Support
-(6. 支持)
-==========
+6. Support(6. 支持)
+===================
 
 For direct support of the 1.0.0 version, you can contact
 http://supportmail.intel.com, or you can use the open source project
@@ -637,9 +616,8 @@ For general information and support, go to:
     http://ipw2200.sf.net/
 
 
-7. License
-(7. 许可证)
-==========
+7. License(7. 许可证)
+=====================
 
   Copyright |copy| 2003 - 2006 Intel Corporation. All rights reserved.
   (版权所有 |copy| 2003 - 2006 Intel Corporation。保留所有权利。)

@@ -1,8 +1,7 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-Special inodes
-(特殊 inode)
---------------
+Special inodes(特殊 inode)
+--------------------------
 
 ext4 reserves some inode for special features, as follows:
 (ext4 为特殊功能保留了一些 inode，如下所示：)

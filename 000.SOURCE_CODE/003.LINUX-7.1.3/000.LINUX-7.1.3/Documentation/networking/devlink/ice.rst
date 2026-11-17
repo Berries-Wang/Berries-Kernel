@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===================
-ice devlink support
-===================
-
-(ice 驱动的 devlink 支持)
+============================================
+ice devlink support(ice 驱动的 devlink 支持)
+============================================
 
 This document describes the devlink features implemented by the ``ice``
 device driver.
 (本文档描述 ``ice`` 设备驱动所实现的 devlink 功能。)
 
-Parameters
-(参数)
-==========
+Parameters(参数)
+================
 
 .. list-table:: Generic parameters implemented
    :widths: 5 5 90
@@ -142,9 +139,8 @@ Parameters
         调整环回流量速率，以牺牲一个端口的容量为代价来提升另一个端口的容量。用户需要
         在其中一个端口上禁用本地转发，才能使 ``prioritized`` 端口获得更高的容量。)
 
-Info versions
-(信息版本)
-=============
+Info versions(信息版本)
+=======================
 
 The ``ice`` driver reports the following versions
 (``ice`` 驱动报告以下版本)
@@ -263,9 +259,8 @@ The ``ice`` driver reports the following versions
         (时钟生成单元 (CGU) 的版本。格式：
         <CGU type>.<configuration version>.<firmware version>。)
 
-Flash Update
-(固件更新)
-============
+Flash Update(固件更新)
+======================
 
 The ``ice`` driver implements support for flash update using the
 ``devlink-flash`` interface. It supports updating the device flash using a
@@ -306,9 +301,8 @@ instructed to preserve all settings and identifying fields when updating.
 ``DEVLINK_FLASH_OVERWRITE_IDENTIFIERS`` 将被拒绝。如果未提供覆盖掩码，更新时
 将指示固件保留所有设置和标识字段。)
 
-Reload
-(重新加载)
-======
+Reload(重新加载)
+================
 
 The ``ice`` driver supports activating new firmware after a flash update
 using ``DEVLINK_CMD_RELOAD`` with the ``DEVLINK_RELOAD_ACTION_FW_ACTIVATE``
@@ -331,9 +325,8 @@ The driver does not currently support reloading the driver via
 (驱动程序目前不支持通过 ``DEVLINK_RELOAD_ACTION_DRIVER_REINIT`` 重新加载
 驱动。)
 
-Port split
-(端口拆分)
-==========
+Port split(端口拆分)
+====================
 
 The ``ice`` driver supports port splitting only for port 0, as the FW has
 a predefined set of available port split options for the whole device.
@@ -378,9 +371,8 @@ there is no FW option available with split count 1, you will receive an error.
 (``devlink port unsplit`` 将选择拆分数量为 1 的选项。如果没有拆分数量为 1 的
 固件选项可用，将会收到一个错误。)
 
-Regions
-(区域)
-=======
+Regions(区域)
+=============
 
 The ``ice`` driver implements the following regions for accessing internal
 device data.
@@ -477,9 +469,8 @@ via the ``DEVLINK_CMD_REGION_NEW`` command.
 
     $ devlink region delete pci/0000:01:00.0/device-caps snapshot 1
 
-Devlink Rate
-(Devlink 速率)
-============
+Devlink Rate(Devlink 速率)
+==========================
 
 The ``ice`` driver implements devlink-rate API. It allows for offload of
 the Hierarchical QoS to the hardware. It enables user to group Virtual

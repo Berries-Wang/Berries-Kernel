@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===================================
-Netfilter Conntrack Sysfs variables
-===================================
+===================================================================
+Netfilter Conntrack Sysfs variables(Netfilter Conntrack Sysfs 变量)
+===================================================================
 
-(Netfilter Conntrack Sysfs 变量)
-
-/proc/sys/net/netfilter/nf_conntrack_* Variables:
-(/proc/sys/net/netfilter/nf_conntrack_* 变量：)
-=================================================
+/proc/sys/net/netfilter/nf_conntrack_* Variables:(/proc/sys/net/netfilter/nf_conntrack_* 变量：)
+================================================================================================
 
 nf_conntrack_acct - BOOLEAN
 (nf_conntrack_acct - 布尔值)

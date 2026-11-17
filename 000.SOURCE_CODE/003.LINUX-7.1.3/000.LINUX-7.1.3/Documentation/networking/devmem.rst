@@ -1,15 +1,12 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=================
-Device Memory TCP
-=================
-
-(设备内存 TCP)
+===============================
+Device Memory TCP(设备内存 TCP)
+===============================
 
 
-Intro
-(简介)
-=====
+Intro(简介)
+===========
 
 Device memory TCP (devmem TCP) enables receiving data directly into device
 memory (dmabuf). The feature is currently implemented for TCP sockets.
@@ -17,9 +14,8 @@ memory (dmabuf). The feature is currently implemented for TCP sockets.
 目前针对 TCP 套接字实现。)
 
 
-Opportunity
-(机遇)
------------
+Opportunity(机遇)
+-----------------
 
 A large number of data transfers have device memory as the source and/or
 destination. Accelerators drastically increased the prevalence of such
@@ -75,9 +71,8 @@ Advantages:
   经过根复合体 (root complex) 发送数据。)
 
 
-More Info
-(更多信息)
----------
+More Info(更多信息)
+-------------------
 
   slides, video
   (幻灯片与视频)
@@ -91,14 +86,12 @@ More Info
     https://lore.kernel.org/netdev/20240831004313.3713467-1-almasrymina@google.com/
 
 
-RX Interface
-(RX 接口)
-============
+RX Interface(RX 接口)
+=====================
 
 
-Example
-(示例)
--------
+Example(示例)
+-------------
 
 ./tools/testing/selftests/drivers/net/hw/ncdevmem:do_server shows an example of
 setting up the RX path of this API.
@@ -106,9 +99,8 @@ setting up the RX path of this API.
 RX 路径的示例。)
 
 
-NIC Setup
-(NIC 设置)
----------
+NIC Setup(NIC 设置)
+-------------------
 
 Header split, flow steering, & RSS are required features for devmem TCP.
 (头部拆分 (header split)、流 steering 与 RSS 是 devmem TCP 所需的特性。)
@@ -183,9 +175,8 @@ dmabuf 实际上并非由设备内存支持。udmabuf 就是一例，它把用�
 包装在 dmabuf 中。)
 
 
-Socket Setup
-(套接字设置)
-------------
+Socket Setup(套接字设置)
+------------------------
 
 The socket must be flow steered to the dmabuf bound RX queue::
 (必须通过流 steering 把套接字导向绑定 dmabuf 的 RX 队列：)
@@ -193,9 +184,8 @@ The socket must be flow steered to the dmabuf bound RX queue::
 	ethtool -N eth1 flow-type tcp4 ... queue 15
 
 
-Receiving data
-(接收数据)
---------------
+Receiving data(接收数据)
+------------------------
 
 The user application must signal to the kernel that it is capable of receiving
 devmem data by passing the MSG_SOCK_DEVMEM flag to recvmsg::
@@ -273,9 +263,8 @@ regular TCP data that landed on an RX queue not bound to a dmabuf.
 的是非 devmem 的普通 TCP 数据。)
 
 
-Freeing frags
-(释放分片)
--------------
+Freeing frags(释放分片)
+-----------------------
 
 Frags received via SCM_DEVMEM_DMABUF are pinned by the kernel while the user
 processes the frag. The user must return the frag to the kernel via
@@ -309,14 +298,12 @@ can be less than the tokens provided by the user in case of:
 (b) the user passed more than 1024 frags.
 (b) 用户传入的分片超过 1024 个。
 
-TX Interface
-(TX 接口)
-============
+TX Interface(TX 接口)
+=====================
 
 
-Example
-(示例)
--------
+Example(示例)
+-------------
 
 ./tools/testing/selftests/drivers/net/hw/ncdevmem:do_client shows an example of
 setting up the TX path of this API.
@@ -324,9 +311,8 @@ setting up the TX path of this API.
 TX 路径的示例。)
 
 
-NIC Setup
-(NIC 设置)
----------
+NIC Setup(NIC 设置)
+-------------------
 
 The user must bind a TX dmabuf to a given NIC using the netlink API::
 (用户必须使用 netlink API 将 TX dmabuf 绑定到指定 NIC：)
@@ -363,9 +349,8 @@ this is udmabuf, which wraps user memory (non-devmem) in a dmabuf.
 dmabuf 实际上并非由设备内存支持。udmabuf 就是一例，它把用户内存 (非 devmem)
 包装在 dmabuf 中。)
 
-Socket Setup
-(套接字设置)
-------------
+Socket Setup(套接字设置)
+------------------------
 
 The user application must use MSG_ZEROCOPY flag when sending devmem TCP. Devmem
 cannot be copied by the kernel, so the semantics of the devmem TX are similar
@@ -383,9 +368,8 @@ the dma-buf has been bound to via SO_BINDTODEVICE::
 	setsockopt(socket_fd, SOL_SOCKET, SO_BINDTODEVICE, ifname, strlen(ifname) + 1);
 
 
-Sending data
-(发送数据)
-------------
+Sending data(发送数据)
+----------------------
 
 Devmem data is sent using the SCM_DEVMEM_DMABUF cmsg.
 (Devmem 数据通过 SCM_DEVMEM_DMABUF cmsg 发送。)
@@ -435,9 +419,8 @@ from offset 2000 into the dmabuf. The dmabuf to send from is tx_dmabuf_id::
        sendmsg(socket_fd, &msg, MSG_ZEROCOPY);
 
 
-Reusing TX dmabufs
-(复用 TX dmabuf)
-------------------
+Reusing TX dmabufs(复用 TX dmabuf)
+----------------------------------
 
 Similar to MSG_ZEROCOPY with regular memory, the user should not modify the
 contents of the dma-buf while a send operation is in progress. This is because
@@ -482,13 +465,11 @@ the userspace.
 (在相关 sendmsg 完成之后，用户态即可复用该 dmabuf。)
 
 
-Implementation & Caveats
-(实现与注意事项)
-========================
+Implementation & Caveats(实现与注意事项)
+========================================
 
-Unreadable skbs
-(不可读的 skb)
----------------
+Unreadable skbs(不可读的 skb)
+-----------------------------
 
 Devmem payloads are inaccessible to the kernel processing the packets. This
 results in a few quirks for payloads of devmem skbs:
@@ -507,9 +488,8 @@ results in a few quirks for payloads of devmem skbs:
   (TCP Dump 与 bpf 无法访问 devmem 数据包的载荷。)
 
 
-Testing
-(测试)
-=======
+Testing(测试)
+=============
 
 More realistic example code can be found in the kernel source under
 ``tools/testing/selftests/drivers/net/hw/ncdevmem.c``

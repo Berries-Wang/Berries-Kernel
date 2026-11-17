@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-====================================
-HOWTO for the linux packet generator
-====================================
-
-(Linux 数据包生成器 HOWTO)
+==============================================================
+HOWTO for the linux packet generator(Linux 数据包生成器 HOWTO)
+==============================================================
 
 Enable CONFIG_NET_PKTGEN to compile and build pktgen either in-kernel
 or as a module.  A module is preferred; modprobe pktgen if needed.  Once
@@ -32,9 +30,8 @@ For monitoring and control pktgen creates::
 	/proc/net/pktgen/ethX
 
 
-Tuning NIC for max performance
-(为获得最高性能而调优 NIC)
-==============================
+Tuning NIC for max performance(为获得最高性能而调优 NIC)
+========================================================
 
 The default NIC settings are (likely) not tuned for pktgen's artificial
 overload type of benchmarking, as this could hurt the normal use-case.
@@ -76,9 +73,8 @@ For ixgbe use e.g. "30" resulting in approx 33K interrupts/sec (1/30*10^6)::
  # ethtool -C ethX rx-usecs 30
 
 
-Kernel threads
-(内核线程)
-==============
+Kernel threads(内核线程)
+========================
 
 Pktgen creates a thread for each CPU with affinity to that CPU.
 Which is controlled through procfile /proc/net/pktgen/kpktgend_X.
@@ -119,9 +115,8 @@ The part after "@" can be anything, but it is custom to use the thread
 number.
 ("@" 之后的部分可以是任意内容，但惯例是使用线程编号。)
 
-Viewing devices
-(查看设备)
-===============
+Viewing devices(查看设备)
+=========================
 
 The Params section holds configured information.  The Current section
 holds running statistics.  The Result is printed after a run or after
@@ -153,9 +148,8 @@ interruption.  Example::
     6480562pps 3110Mb/sec (3110669760bps) errors: 0
 
 
-Configuring devices
-(配置设备)
-===================
+Configuring devices(配置设备)
+=============================
 
 This is done via the /proc interface, and most easily done via pgset
 as defined in the sample scripts.
@@ -276,9 +270,8 @@ Examples::
 				  Works with "burst" but not with "clone_skb".
 				  Default xmit_mode is "start_xmit".
 
-Sample scripts
-(示例脚本)
-==============
+Sample scripts(示例脚本)
+========================
 
 A collection of tutorial scripts and helpers for pktgen is in the
 samples/pktgen directory. The helper parameters.sh file support easy
@@ -319,9 +312,8 @@ pktgen_sampleXX scripts and modify them to fit your own needs.
 $DEV。可以复制 pktgen_sampleXX 脚本并加以修改，以满足自己的需求。)
 
 
-Interrupt affinity
-(中断亲和性)
-===================
+Interrupt affinity(中断亲和性)
+==============================
 
 Note that when adding devices to a specific CPU it is a good idea to
 also assign /proc/irq/XX/smp_affinity so that the TX interrupts are bound
@@ -334,9 +326,8 @@ to the running threads CPU (directly from smp_processor_id()).
 (另外还可使用设备标志 QUEUE_MAP_CPU，它将 SKB 的 TX 队列映射到正在运行的
 线程所在的 CPU (直接取自 smp_processor_id())。)
 
-Enable IPsec
-(启用 IPsec)
-============
+Enable IPsec(启用 IPsec)
+========================
 
 Default IPsec transformation with ESP encapsulation plus transport mode
 can be enabled by simply setting::
@@ -351,9 +342,8 @@ to employ.
 (为避免破坏现有测试平台脚本对 AH 类型和隧道模式的使用，可以使用
 "pgset spi SPI_VALUE" 来指定要采用哪种变换模式。)
 
-Disable shared SKB
-(禁用共享 SKB)
-==================
+Disable shared SKB(禁用共享 SKB)
+================================
 
 By default, SKBs sent by pktgen are shared (user count > 1).
 To test with non-shared SKBs, remove the "SHARED" flag by simply setting::
@@ -368,9 +358,8 @@ shared.
 (不过，如果配置了 "clone_skb" 或 "burst" 参数，skb 仍需由 pktgen 持有以便后续
 访问，因此 skb 必须是共享的。)
 
-Current commands and configuration options
-(当前命令与配置选项)
-==========================================
+Current commands and configuration options(当前命令与配置选项)
+==============================================================
 
 **Pgcontrol commands**::
 (**Pgcontrol 命令：**)

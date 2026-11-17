@@ -7,18 +7,15 @@
         sentence changes don't bleed colors in diff.
         Heading decorations are documented in sphinx.rst.
 
-=======================
-Porting Your Filesystem
-=======================
-
-(移植你的文件系统)
+=========================================
+Porting Your Filesystem(移植你的文件系统)
+=========================================
 
 .. contents:: Table of Contents
    :local:
 
-Why Convert?
-(为什么要转换？)
-============
+Why Convert?(为什么要转换？)
+============================
 
 There are several reasons to convert a filesystem to iomap:
 (将文件系统转换为 iomap 有以下几个原因：)
@@ -49,9 +46,8 @@ There are several reasons to convert a filesystem to iomap:
     filesystem using iomap.
     (降低单个文件系统维护者的维护开销。iomap 自行处理常见的页缓存相关操作，例如 folio 的分配、实例化、锁定和解锁。使用 iomap 的文件系统无需实现 ->write_begin()、->write_end() 或 direct_IO address_space_operations。)
 
-How Do I Convert a Filesystem?
-(我如何转换文件系统？)
-==============================
+How Do I Convert a Filesystem?(我如何转换文件系统？)
+====================================================
 
 First, add ``#include <linux/iomap.h>`` from your source code and add
 ``select FS_IOMAP`` to your filesystem's Kconfig option.

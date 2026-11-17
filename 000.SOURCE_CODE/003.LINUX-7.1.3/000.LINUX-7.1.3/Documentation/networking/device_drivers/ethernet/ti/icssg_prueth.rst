@@ -1,17 +1,14 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==============================================
-Texas Instruments ICSSG PRUETH ethernet driver
-==============================================
-
-(德州仪器 ICSSG PRUETH 以太网驱动)
+================================================================================
+Texas Instruments ICSSG PRUETH ethernet driver(德州仪器 ICSSG PRUETH 以太网驱动)
+================================================================================
 
 :Version: 1.0
           (版本: 1.0)
 
-ICSSG Firmware
-==============
-(ICSSG 固件)
+ICSSG Firmware(ICSSG 固件)
+==========================
 
 Every ICSSG core has two Programmable Real-Time Unit(PRUs), two auxiliary
 Real-Time Transfer Unit (RTUs), and two Transmit Real-Time Transfer Units
@@ -19,9 +16,8 @@ Real-Time Transfer Unit (RTUs), and two Transmit Real-Time Transfer Units
 referred as ICSSG Firmware.
 (每个 ICSSG 核心都有两个可编程实时单元 (PRU)、两个辅助实时传输单元 (RTU) 和两个发送实时传输单元 (TX_PRU)。它们各自运行自己的固件。这些固件合起来统称为 ICSSG 固件。)
 
-Firmware Statistics
-===================
-(固件统计信息)
+Firmware Statistics(固件统计信息)
+=================================
 
 The ICSSG firmware maintains certain statistics which are dumped by the driver
 via ``ethtool -S <interface>``

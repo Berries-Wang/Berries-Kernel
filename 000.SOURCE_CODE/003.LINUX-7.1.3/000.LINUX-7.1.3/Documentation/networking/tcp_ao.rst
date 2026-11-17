@@ -15,9 +15,8 @@ key rotation and support for a variety of hashing algorithms.
 的内容生成，所用的口令为通信双方所共知。TCP-AO 的意图是取代 TCP-MD5，提供更好
 的安全性、密钥轮换以及对多种哈希算法的支持。)
 
-1. Introduction
-(1. 简介)
-===============
+1. Introduction(1. 简介)
+========================
 
 .. table:: Short and Limited Comparison of TCP-AO and TCP-MD5
 
@@ -83,9 +82,8 @@ key rotation and support for a variety of hashing algorithms.
  +----------------------+------------------------+-----------------------+
 
 
-1.1 Frequently Asked Questions (FAQ) with references to RFC 5925
-(1.1 常见问题解答 (FAQ) 及 RFC 5925 相关引文)
-----------------------------------------------------------------
+1.1 Frequently Asked Questions (FAQ) with references to RFC 5925(1.1 常见问题解答 (FAQ) 及 RFC 5925 相关引文)
+-------------------------------------------------------------------------------------------------------------
 
 Q: Can either SendID or RecvID be non-unique for the same 4-tuple
 (srcaddr, srcport, dstaddr, dstport)?
@@ -314,9 +312,8 @@ re-establishing the TCP connection.
 (答：否：对于已经建立的非 TCP-AO 连接，无法切换为使用 TCP-AO，因为流量密钥的
 生成需要初始序列号。换句话说，开始使用 TCP-AO 需要重新建立 TCP 连接。)
 
-2. In-kernel MKTs database vs database in userspace
-(2. 内核内 MKT 数据库与用户空间数据库的对比)
-===================================================
+2. In-kernel MKTs database vs database in userspace(2. 内核内 MKT 数据库与用户空间数据库的对比)
+===============================================================================================
 
 Linux TCP-AO support is implemented using ``setsockopt()s``, in a similar way
 to TCP-MD5. It means that a userspace application that wants to use TCP-AO
@@ -386,9 +383,8 @@ TCP-MD5 的 ``setsockopt()s``。)
  +----------------------+------------------------+-----------------------+
 
 
-3. uAPI
-(3. uAPI)
-=======
+3. uAPI(3. uAPI)
+================
 
 Linux provides a set of ``setsockopt()s`` and ``getsockopt()s`` that let
 userspace manage TCP-AO on a per-socket basis. In order to add/delete MKTs
@@ -502,9 +498,8 @@ not implemented.
 (目前的 Linux TCP-AO 实现不提供任何 TCP 端口匹配。就 uAPI 而言，端口范围可能
 是最灵活的方式，但截至目前尚未实现。)
 
-4. ``setsockopt()`` vs ``accept()`` race
-(4. ``setsockopt()`` 与 ``accept()`` 的竞态)
-========================================
+4. ``setsockopt()`` vs ``accept()`` race(4. ``setsockopt()`` 与 ``accept()`` 的竞态)
+====================================================================================
 
 In contrast with an established TCP-MD5 connection which has just one key,
 TCP-AO connections may have many keys, which means that accepted connections
@@ -553,9 +548,8 @@ during the 3-way handshake for the new TCP connection.
 (注意，这种竞态很少见，因为它需要 TCP-AO 密钥轮换恰好发生在新 TCP 连接的 3 次
 握手期间。)
 
-5. Interaction with TCP-MD5
-(5. 与 TCP-MD5 的交互)
-===========================
+5. Interaction with TCP-MD5(5. 与 TCP-MD5 的交互)
+=================================================
 
 A TCP connection can not migrate between TCP-AO and TCP-MD5 options. The
 established sockets that have either AO or MD5 keys are restricted for
@@ -571,9 +565,8 @@ different types of keys for the same peer.
 TCP-MD5 客户端。因此，两种类型的密钥都可以添加到 TCP_CLOSED 或 TCP_LISTEN
 套接字上。但不允许为同一个对等端添加不同类型的密钥。)
 
-6. SNE Linux implementation
-(6. SNE 的 Linux 实现)
-===========================
+6. SNE Linux implementation(6. SNE 的 Linux 实现)
+=================================================
 
 RFC 5925 [6.2] describes the algorithm of how to extend TCP sequence numbers
 with SNE.  In short: TCP has to track the previous sequence numbers and set
@@ -620,9 +613,8 @@ for large TCP windows.
 tcp_sequence() 中）仍会施加在已验证的报文段上。因此，这是以对重放/重传报文段
 稍微更宽松的接受，换取算法的简洁性以及对大 TCP 窗口看似更好的行为。)
 
-7. Links
-(7. 相关链接)
-========
+7. Links(7. 相关链接)
+=====================
 
 RFC 5925 The TCP Authentication Option
    https://www.rfc-editor.org/rfc/pdfrfc/rfc5925.txt.pdf

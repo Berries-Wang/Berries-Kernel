@@ -1,11 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===================================================================
-The Definitive KVM (Kernel-based Virtual Machine) API Documentation
-===================================================================
+======================================================================================================
+The Definitive KVM (Kernel-based Virtual Machine) API Documentation(KVM(基于内核的虚拟机)API 权威文档)
+======================================================================================================
 
-1. General description
-======================
+1. General description(1. 总体描述)
+===================================
 
 The kvm API is centered around different kinds of file descriptors
 and ioctls that can be issued to these file descriptors.  An initial
@@ -15,39 +15,49 @@ handle will create a VM file descriptor which can be used to issue VM
 ioctls.  A KVM_CREATE_VCPU or KVM_CREATE_DEVICE ioctl on a VM fd will
 create a virtual cpu or device and return a file descriptor pointing to
 the new resource.
+(kvm API 以不同种类的文件描述符以及可向这些文件描述符发出的各种 ioctl 为核心。初次调用 open("/dev/kvm") 会取得 kvm 子系统的一个句柄；该句柄可用于发出系统级 ioctl。对该句柄发出 KVM_CREATE_VM ioctl 会创建一个 VM 文件描述符，可用于发出 VM 级 ioctl。对 VM fd 发出 KVM_CREATE_VCPU 或 KVM_CREATE_DEVICE ioctl 会创建一个虚拟 cpu 或设备，并返回指向新资源的文件描述符。)
 
 In other words, the kvm API is a set of ioctls that are issued to
 different kinds of file descriptor in order to control various aspects of
 a virtual machine.  Depending on the file descriptor that accepts them,
 ioctls belong to the following classes:
+(换言之，kvm API 是一组发往不同种类文件描述符的 ioctl，用于控制虚拟机的各个方面。根据接受它们的文件描述符的不同，ioctl 分为以下几个类别：)
 
  - System ioctls: These query and set global attributes which affect the
    whole kvm subsystem.  In addition a system ioctl is used to create
    virtual machines.
+   (系统级 ioctl：查询并设置影响整个 kvm 子系统的全局属性。此外，系统级 ioctl 还用于创建虚拟机。)
 
  - VM ioctls: These query and set attributes that affect an entire virtual
    machine, for example memory layout.  In addition a VM ioctl is used to
    create virtual cpus (vcpus) and devices.
+   (VM 级 ioctl：查询并设置影响整个虚拟机的属性，例如内存布局。此外，VM 级 ioctl 还用于创建虚拟 cpu (vcpu) 和设备。)
 
    VM ioctls must be issued from the same process (address space) that was
    used to create the VM.
+   (VM 级 ioctl 必须由创建该 VM 的同一进程(地址空间)发出。)
 
  - vcpu ioctls: These query and set attributes that control the operation
    of a single virtual cpu.
+   (vcpu 级 ioctl：查询并设置控制单个虚拟 cpu 操作的属性。)
 
    vcpu ioctls should be issued from the same thread that was used to create
    the vcpu, except for asynchronous vcpu ioctl that are marked as such in
    the documentation.  Otherwise, the first ioctl after switching threads
    could see a performance impact.
+   (vcpu 级 ioctl 应当由创建该 vcpu 的同一线程发出，文档中标注为异步的 vcpu ioctl 除外。否则，切换线程之后的第一个 ioctl 可能出现性能损失。)
 
  - device ioctls: These query and set attributes that control the operation
    of a single device.
+   (device 级 ioctl：查询并设置控制单个设备操作的属性。)
 
    device ioctls must be issued from the same process (address space) that
    was used to create the VM.
+   (device 级 ioctl 必须由创建该 VM 的同一进程(地址空间)发出。)
 
 While most ioctls are specific to one kind of file descriptor, in some
 cases the same ioctl can belong to more than one class.
+(虽然大多数 ioctl 只属于某一种文件描述符，但在某些情况下，同一个 ioctl 可以属于多个类别。)
 
 The KVM API grew over time.  For this reason, KVM defines many constants
 of the form ``KVM_CAP_*``, each corresponding to a set of functionality
@@ -55,10 +65,11 @@ provided by one or more ioctls.  Availability of these "capabilities" can
 be checked with :ref:`KVM_CHECK_EXTENSION <KVM_CHECK_EXTENSION>`.  Some
 capabilities also need to be enabled for VMs or VCPUs where their
 functionality is desired (see :ref:`cap_enable` and :ref:`cap_enable_vm`).
+(KVM API 随时间不断演进。为此，KVM 定义了许多形如 KVM_CAP_* 的常量，每个常量对应由一个或多个 ioctl 提供的一组功能。这些 "capabilities"(能力)是否可用，可通过 KVM_CHECK_EXTENSION 查询。某些能力还需要在希望使用其功能的 VM 或 VCPU 上显式启用(参见 cap_enable 与 cap_enable_vm 两节)。)
 
 
-2. Restrictions
-===============
+2. Restrictions(2. 限制)
+========================
 
 In general file descriptors can be migrated among processes by means
 of fork() and the SCM_RIGHTS facility of unix domain socket.  These
@@ -66,6 +77,7 @@ kinds of tricks are explicitly not supported by kvm.  While they will
 not cause harm to the host, their actual behavior is not guaranteed by
 the API.  See "General description" for details on the ioctl usage
 model that is supported by KVM.
+(一般来说，文件描述符可以通过 fork() 和 unix 域套接字的 SCM_RIGHTS 机制在进程之间迁移。kvm 明确不支持这类技巧。虽然它们不会对宿主机造成危害，但其实际行为不受 API 保证。有关 KVM 所支持的 ioctl 使用模型的详细信息，请参见 "General description"(总体描述)一节。)
 
 It is important to note that although VM ioctls may only be issued from
 the process that created the VM, a VM's lifecycle is associated with its
@@ -75,6 +87,7 @@ until the last reference to the VM's file descriptor has been released.
 For example, if fork() is issued after ioctl(KVM_CREATE_VM), the VM will
 not be freed until both the parent (original) process and its child have
 put their references to the VM's file descriptor.
+(需要注意的是，虽然 VM 级 ioctl 只能由创建 VM 的进程发出，但 VM 的生命周期是与它的文件描述符而非其创建者(进程)绑定的。换言之，在对 VM 文件描述符的最后一个引用被释放之前，VM 及其资源(*包括相关联的地址空间*)都不会被释放。例如，如果在 ioctl(KVM_CREATE_VM) 之后执行了 fork()，那么要等到父(原始)进程及其子进程都释放了对 VM 文件描述符的引用之后，VM 才会被释放。)
 
 Because a VM's resources are not freed until the last reference to its
 file descriptor is released, creating additional references to a VM
@@ -82,28 +95,32 @@ via fork(), dup(), etc... without careful consideration is strongly
 discouraged and may have unwanted side effects, e.g. memory allocated
 by and on behalf of the VM's process may not be freed/unaccounted when
 the VM is shut down.
+(由于 VM 的资源要等到其文件描述符的最后一个引用被释放时才会释放，因此强烈不建议不加考虑地通过 fork()、dup() 等方式创建对 VM 的额外引用，否则可能产生不期望的副作用，例如由 VM 进程分配并代表其分配的内存，在 VM 关闭时可能不会被释放或计入统计。)
 
 
-3. Extensions
-=============
+3. Extensions(3. 扩展)
+======================
 
 As of Linux 2.6.22, the KVM ABI has been stabilized: no backward
 incompatible change are allowed.  However, there is an extension
 facility that allows backward-compatible extensions to the API to be
 queried and used.
+(自 Linux 2.6.22 起，KVM ABI 已经稳定：不允许再出现向后不兼容的变更。不过，KVM 提供了一种扩展机制，允许以向后兼容的方式对 API 进行扩展，并可供查询和使用。)
 
 The extension mechanism is not based on the Linux version number.
 Instead, kvm defines extension identifiers and a facility to query
 whether a particular extension identifier is available.  If it is, a
 set of ioctls is available for application use.
+(扩展机制不基于 Linux 版本号。相反，kvm 定义了扩展标识符，并提供查询某个特定扩展标识符是否可用的机制。如果可用，则有一组 ioctl 供应用程序使用。)
 
 
-4. API description
-==================
+4. API description(4. API 描述)
+===============================
 
 This section describes ioctls that can be used to control kvm guests.
 For each ioctl, the following information is provided along with a
 description:
+(本节描述可用于控制 kvm 客户机(guest)的各个 ioctl。除描述之外，每个 ioctl 还提供以下信息：)
 
   Capability:
       which KVM extension provides this ioctl.  Can be 'basic',
@@ -111,20 +128,25 @@ description:
       API version 12 (see :ref:`KVM_GET_API_VERSION <KVM_GET_API_VERSION>`),
       or a KVM_CAP_xyz constant that can be checked with
       :ref:`KVM_CHECK_EXTENSION <KVM_CHECK_EXTENSION>`.
+      (能力：提供该 ioctl 的 KVM 扩展。可以是 'basic'，即任何支持 API 版本 12 的内核都会提供(参见 KVM_GET_API_VERSION 一节)；也可以是 KVM_CAP_xyz 常量，可通过 KVM_CHECK_EXTENSION 查询。)
 
   Architectures:
       which instruction set architectures provide this ioctl.
       x86 includes both i386 and x86_64.
+      (架构：提供该 ioctl 的指令集架构。x86 同时包括 i386 和 x86_64。)
 
   Type:
       system, vm, or vcpu.
+      (类型：system、vm 或 vcpu。)
 
   Parameters:
       what parameters are accepted by the ioctl.
+      (参数：该 ioctl 接受哪些参数。)
 
   Returns:
       the return value.  General error numbers (EBADF, ENOMEM, EINVAL)
       are not detailed, but errors with specific meanings are.
+      (返回值：一般性错误码(EBADF、ENOMEM、EINVAL)不再赘述，但具有特定含义的错误会加以说明。)
 
 
 .. _KVM_GET_API_VERSION:
@@ -133,10 +155,15 @@ description:
 -----------------------
 
 :Capability: basic
+  (能力：basic)
 :Architectures: all
+  (架构：全部)
 :Type: system ioctl
+  (类型：system ioctl)
 :Parameters: none
+  (参数：无)
 :Returns: the constant KVM_API_VERSION (=12)
+  (返回值：常量 KVM_API_VERSION (=12))
 
 This identifies the API version as the stable kvm API. It is not
 expected that this number will change.  However, Linux 2.6.20 and
@@ -144,24 +171,32 @@ expected that this number will change.  However, Linux 2.6.20 and
 supported.  Applications should refuse to run if KVM_GET_API_VERSION
 returns a value other than 12.  If this check passes, all ioctls
 described as 'basic' will be available.
+(本调用将 API 版本标识为稳定的 kvm API。预计该数字不会变化。不过，Linux 2.6.20 和 2.6.21 报告的是更早的版本；这些版本未在文档中说明，也不受支持。如果 KVM_GET_API_VERSION 返回的值不是 12，应用程序应当拒绝运行。若此检查通过，则所有描述为 'basic' 的 ioctl 都可用。)
 
 
 4.2 KVM_CREATE_VM
 -----------------
 
 :Capability: basic
+  (能力：basic)
 :Architectures: all
+  (架构：全部)
 :Type: system ioctl
+  (类型：system ioctl)
 :Parameters: machine type identifier (KVM_VM_*)
+  (参数：机器类型标识符 (KVM_VM_*))
 :Returns: a VM fd that can be used to control the new virtual machine.
+  (返回值：一个可用于控制新虚拟机的 VM fd。)
 
 The new VM has no virtual cpus and no memory.
 You probably want to use 0 as machine type.
+(新建的 VM 没有虚拟 cpu，也没有内存。机器类型很可能应该用 0。)
 
 X86:
 ^^^^
 
 Supported X86 VM types can be queried via KVM_CAP_VM_TYPES.
+(支持的 x86 VM 类型可以通过 KVM_CAP_VM_TYPES 查询。)
 
 S390:
 ^^^^^
@@ -169,6 +204,7 @@ S390:
 In order to create user controlled virtual machines on S390, check
 KVM_CAP_S390_UCONTROL and use the flag KVM_VM_S390_UCONTROL as
 privileged user (CAP_SYS_ADMIN).
+(要在 S390 上创建用户可控的虚拟机，请以特权用户(具备 CAP_SYS_ADMIN)身份检查 KVM_CAP_S390_UCONTROL 并使用标志 KVM_VM_S390_UCONTROL。)
 
 MIPS:
 ^^^^^
@@ -177,6 +213,7 @@ To use hardware assisted virtualization on MIPS (VZ ASE) rather than
 the default trap & emulate implementation (which changes the virtual
 memory layout to fit in user mode), check KVM_CAP_MIPS_VZ and use the
 flag KVM_VM_MIPS_VZ.
+(要在 MIPS 上使用硬件辅助虚拟化(VZ ASE)而不是默认的陷入与模拟(trap & emulate)实现(后者会改变虚拟内存布局以适应用户态)，请检查 KVM_CAP_MIPS_VZ 并使用标志 KVM_VM_MIPS_VZ。)
 
 ARM64:
 ^^^^^^
@@ -188,31 +225,39 @@ KVM_VM_TYPE_ARM_IPA_SIZE(IPA_Bits) to set the size in the machine type
 identifier, where IPA_Bits is the maximum width of any physical
 address used by the VM. The IPA_Bits is encoded in bits[7-0] of the
 machine type identifier.
+(在 arm64 上，VM 的物理地址位宽(IPA Size limit)默认限制为 40 位。如果宿主机支持扩展 KVM_CAP_ARM_VM_IPA_SIZE，则可以配置该限制。在支持的情况下，使用 KVM_VM_TYPE_ARM_IPA_SIZE(IPA_Bits) 将位宽设置到机器类型标识符中，其中 IPA_Bits 是 VM 所用任何物理地址的最大位宽。IPA_Bits 编码在机器类型标识符的 bits[7-0] 中。)
 
 e.g, to configure a guest to use 48bit physical address size::
+(例如，要将客户机配置为使用 48 位物理地址位宽：)
 
     vm_fd = ioctl(dev_fd, KVM_CREATE_VM, KVM_VM_TYPE_ARM_IPA_SIZE(48));
 
 The requested size (IPA_Bits) must be:
+(请求的位宽 (IPA_Bits) 必须是：)
 
  ==   =========================================================
   0   Implies default size, 40bits (for backward compatibility)
+      (表示默认位宽，40 位(为了向后兼容))
   N   Implies N bits, where N is a positive integer such that,
       32 <= N <= Host_IPA_Limit
+      (表示 N 位，其中 N 是满足 32 <= N <= Host_IPA_Limit 的正整数)
  ==   =========================================================
 
 Host_IPA_Limit is the maximum possible value for IPA_Bits on the host and
 is dependent on the CPU capability and the kernel configuration. The limit can
 be retrieved using KVM_CAP_ARM_VM_IPA_SIZE of the KVM_CHECK_EXTENSION
 ioctl() at run-time.
+(Host_IPA_Limit 是宿主机上 IPA_Bits 可能的最大值，取决于 CPU 能力和内核配置。该限制可在运行时通过 KVM_CHECK_EXTENSION ioctl() 的 KVM_CAP_ARM_VM_IPA_SIZE 获取。)
 
 Creation of the VM will fail if the requested IPA size (whether it is
 implicit or explicit) is unsupported on the host.
+(如果请求的 IPA 位宽(无论是隐式还是显式指定)在宿主机上不受支持，VM 的创建将失败。)
 
 Please note that configuring the IPA size does not affect the capability
 exposed by the guest CPUs in ID_AA64MMFR0_EL1[PARange]. It only affects
 size of the address translated by the stage2 level (guest physical to
 host physical address translations).
+(请注意，配置 IPA 位宽不会影响客户机 CPU 在 ID_AA64MMFR0_EL1[PARange] 中暴露的能力。它只影响 stage2 层级转换的地址大小(客户机物理地址到宿主机物理地址的转换)。)
 
 
 4.3 KVM_GET_MSR_INDEX_LIST, KVM_GET_MSR_FEATURE_INDEX_LIST
@@ -4818,15 +4863,24 @@ H_GET_CPU_CHARACTERISTICS hypercall.
 :Parameters: an opaque platform specific structure (in/out)
 :Returns: 0 on success; -1 on error
 
+(能力：basic；架构：x86；类型：vm ioctl, vcpu ioctl；参数：一个不透明的平台相关结构
+(in/out)；返回值：成功时为 0；出错时为 -1。)
+
 If the platform supports creating encrypted VMs then this ioctl can be used
 for issuing platform-specific memory encryption commands to manage those
 encrypted VMs.
+(若平台支持创建加密 VM，则此 ioctl 可用于下发平台特定的内存加密命令，以管理这些加密
+VM。)
 
 Currently, this ioctl is used for issuing both Secure Encrypted Virtualization
 (SEV) commands on AMD Processors and Trusted Domain Extensions (TDX) commands
 on Intel Processors.  The detailed commands are defined in
 Documentation/virt/kvm/x86/amd-memory-encryption.rst and
 Documentation/virt/kvm/x86/intel-tdx.rst.
+(目前，此 ioctl 既用于在 AMD 处理器上下发安全加密虚拟化 (SEV) 命令，也用于在 Intel
+处理器上下发可信域扩展 (TDX) 命令。详细命令定义于
+Documentation/virt/kvm/x86/amd-memory-encryption.rst 与
+Documentation/virt/kvm/x86/intel-tdx.rst。)
 
 4.111 KVM_MEMORY_ENCRYPT_REG_REGION
 -----------------------------------
@@ -4837,8 +4891,12 @@ Documentation/virt/kvm/x86/intel-tdx.rst.
 :Parameters: struct kvm_enc_region (in)
 :Returns: 0 on success; -1 on error
 
+(能力：basic；架构：x86；类型：system；参数：struct kvm_enc_region (in)；返回值：
+成功时为 0；出错时为 -1。)
+
 This ioctl can be used to register a guest memory region which may
 contain encrypted data (e.g. guest RAM, SMRAM etc).
+(此 ioctl 可用于注册一个可能包含加密数据的客户机内存区域（例如客户机 RAM、SMRAM 等）。)
 
 It is used in the SEV-enabled guest. When encryption is enabled, a guest
 memory region may contain encrypted data. The SEV memory encryption
@@ -4847,10 +4905,16 @@ different locations will have differing ciphertexts. So swapping or
 moving ciphertext of those pages will not result in plaintext being
 swapped. So relocating (or migrating) physical backing pages for the SEV
 guest will require some additional steps.
+(它用于启用了 SEV 的客户机。启用加密后，客户机内存区域可能包含加密数据。SEV 内存加
+密引擎使用一个 tweak（微调值），使得位于不同位置的两个相同明文页会得到不同的密文。
+因此，交换或移动这些页的密文并不会导致明文被交换。所以，为 SEV 客户机重定位（或迁
+移）物理后备页需要一些额外的步骤。)
 
 Note: The current SEV key management spec does not provide commands to
 swap or migrate (move) ciphertext pages. Hence, for now we pin the guest
 memory region registered with the ioctl.
+(注意：当前的 SEV 密钥管理规范没有提供交换或迁移（移动）密文页的命令。因此，目前我
+们会钉住（pin）通过该 ioctl 注册的客户机内存区域。)
 
 4.112 KVM_MEMORY_ENCRYPT_UNREG_REGION
 -------------------------------------
@@ -4861,8 +4925,13 @@ memory region registered with the ioctl.
 :Parameters: struct kvm_enc_region (in)
 :Returns: 0 on success; -1 on error
 
+(能力：basic；架构：x86；类型：system；参数：struct kvm_enc_region (in)；返回值：
+成功时为 0；出错时为 -1。)
+
 This ioctl can be used to unregister the guest memory region registered
 with KVM_MEMORY_ENCRYPT_REG_REGION ioctl above.
+(此 ioctl 可用于注销前面通过 KVM_MEMORY_ENCRYPT_REG_REGION ioctl 注册的客户机内存
+区域。)
 
 4.113 KVM_HYPERV_EVENTFD
 ------------------------
@@ -4872,10 +4941,16 @@ with KVM_MEMORY_ENCRYPT_REG_REGION ioctl above.
 :Type: vm ioctl
 :Parameters: struct kvm_hyperv_eventfd (in)
 
+(能力：KVM_CAP_HYPERV_EVENTFD；架构：x86；类型：vm ioctl；参数：struct
+kvm_hyperv_eventfd (in)。)
+
 This ioctl (un)registers an eventfd to receive notifications from the guest on
 the specified Hyper-V connection id through the SIGNAL_EVENT hypercall, without
 causing a user exit.  SIGNAL_EVENT hypercall with non-zero event flag number
 (bits 24-31) still triggers a KVM_EXIT_HYPERV_HCALL user exit.
+(此 ioctl 注册/注销一个 eventfd，用于通过 SIGNAL_EVENT 超级调用接收来自客户机在指定
+Hyper-V 连接 id 上的通知，而不会引发用户态退出。带非零事件标志编号（位 24-31）的
+SIGNAL_EVENT 超级调用仍会触发 KVM_EXIT_HYPERV_HCALL 用户态退出。)
 
 ::
 
@@ -4887,10 +4962,12 @@ causing a user exit.  SIGNAL_EVENT hypercall with non-zero event flag number
   };
 
 The conn_id field should fit within 24 bits::
+(conn_id 字段应当能容纳在 24 位之内：)
 
   #define KVM_HYPERV_CONN_ID_MASK		0x00ffffff
 
 The acceptable values for the flags field are::
+(flags 字段可接受的取值：)
 
   #define KVM_HYPERV_EVENTFD_DEASSIGN	(1 << 0)
 
@@ -4898,6 +4975,9 @@ The acceptable values for the flags field are::
  	  -EINVAL if conn_id or flags is outside the allowed range,
 	  -ENOENT on deassign if the conn_id isn't registered,
 	  -EEXIST on assign if the conn_id is already registered
+
+(返回值：成功时为 0；conn_id 或 flags 超出允许范围时为 -EINVAL；解除绑定时若 conn_id
+未注册为 -ENOENT；绑定时若 conn_id 已注册为 -EEXIST。)
 
 4.114 KVM_GET_NESTED_STATE
 --------------------------
@@ -4908,11 +4988,16 @@ The acceptable values for the flags field are::
 :Parameters: struct kvm_nested_state (in/out)
 :Returns: 0 on success, -1 on error
 
+(能力：KVM_CAP_NESTED_STATE；架构：x86；类型：vcpu ioctl；参数：struct
+kvm_nested_state (in/out)；返回值：成功时为 0，出错时为 -1。)
+
 Errors:
+(错误：)
 
   =====      =============================================================
   E2BIG      the total state size exceeds the value of 'size' specified by
              the user; the size required will be written into size.
+             (状态总大小超过了用户指定的 'size' 值；所需大小会写入 size。)
   =====      =============================================================
 
 ::
@@ -4969,9 +5054,12 @@ Errors:
 
 This ioctl copies the vcpu's nested virtualization state from the kernel to
 userspace.
+(此 ioctl 将 vCPU 的嵌套虚拟化状态从内核复制到用户态。)
 
 The maximum size of the state can be retrieved by passing KVM_CAP_NESTED_STATE
 to the KVM_CHECK_EXTENSION ioctl().
+(向 KVM_CHECK_EXTENSION ioctl() 传入 KVM_CAP_NESTED_STATE 即可获取该状态的最大
+大小。)
 
 4.115 KVM_SET_NESTED_STATE
 --------------------------
@@ -4982,8 +5070,13 @@ to the KVM_CHECK_EXTENSION ioctl().
 :Parameters: struct kvm_nested_state (in)
 :Returns: 0 on success, -1 on error
 
+(能力：KVM_CAP_NESTED_STATE；架构：x86；类型：vcpu ioctl；参数：struct
+kvm_nested_state (in)；返回值：成功时为 0，出错时为 -1。)
+
 This copies the vcpu's kvm_nested_state struct from userspace to the kernel.
 For the definition of struct kvm_nested_state, see KVM_GET_NESTED_STATE.
+(它将 vCPU 的 kvm_nested_state 结构体从用户态复制到内核。struct kvm_nested_state
+的定义参见 KVM_GET_NESTED_STATE。)
 
 4.116 KVM_(UN)REGISTER_COALESCED_MMIO
 -------------------------------------
@@ -4995,24 +5088,37 @@ For the definition of struct kvm_nested_state, see KVM_GET_NESTED_STATE.
 :Parameters: struct kvm_coalesced_mmio_zone
 :Returns: 0 on success, < 0 on error
 
+(能力：KVM_CAP_COALESCED_MMIO（用于合并 mmio）、KVM_CAP_COALESCED_PIO（用于合并
+pio）；架构：all；类型：vm ioctl；参数：struct kvm_coalesced_mmio_zone；返回值：
+成功时为 0，出错时小于 0。)
+
 Coalesced I/O is a performance optimization that defers hardware
 register write emulation so that userspace exits are avoided.  It is
 typically used to reduce the overhead of emulating frequently accessed
 hardware registers.
+(合并 I/O（coalesced I/O）是一种性能优化，它推迟硬件寄存器写操作的模拟，从而避免
+退出到用户态。它通常用于降低模拟频繁访问的硬件寄存器的开销。)
 
 When a hardware register is configured for coalesced I/O, write accesses
 do not exit to userspace and their value is recorded in a ring buffer
 that is shared between kernel and userspace.
+(当硬件寄存器被配置为合并 I/O 后，写访问不再退出到用户态，其值被记录在一个内核与
+用户态共享的环形缓冲区中。)
 
 Coalesced I/O is used if one or more write accesses to a hardware
 register can be deferred until a read or a write to another hardware
 register on the same device.  This last access will cause a vmexit and
 userspace will process accesses from the ring buffer before emulating
 it. That will avoid exiting to userspace on repeated writes.
+(当对某个硬件寄存器的一次或多次写访问可以推迟到对同一设备上另一个硬件寄存器的读或
+写时，就会使用合并 I/O。最后这一次访问会引发 vmexit，用户态在模拟它之前会先处理来
+自环形缓冲区的各次访问。这样可以避免在重复写时多次退出到用户态。)
 
 Coalesced pio is based on coalesced mmio. There is little difference
 between coalesced mmio and pio except that coalesced pio records accesses
 to I/O ports.
+(合并 pio 基于合并 mmio。两者几乎没有区别，只是合并 pio 记录的是对 I/O 端口的
+访问。)
 
 4.117 KVM_CLEAR_DIRTY_LOG
 -------------------------
@@ -5022,6 +5128,9 @@ to I/O ports.
 :Type: vm ioctl
 :Parameters: struct kvm_clear_dirty_log (in)
 :Returns: 0 on success, -1 on error
+
+(能力：KVM_CAP_MANUAL_DIRTY_LOG_PROTECT2；架构：x86、arm64、mips；类型：vm ioctl；
+参数：struct kvm_clear_dirty_log (in)；返回值：成功时为 0，出错时为 -1。)
 
 ::
 
@@ -5046,15 +5155,26 @@ bit that is set in the input bitmap, the corresponding page is marked "clean"
 in KVM's dirty bitmap, and dirty tracking is re-enabled for that page
 (for example via write-protection, or by clearing the dirty bit in
 a page table entry).
+(该 ioctl 依据传入 struct kvm_clear_dirty_log 之 dirty_bitmap 字段的位图，清除内
+存槽中页的脏状态。位图的第 0 位对应内存槽中的页 "first_page"，num_pages 是输入位图
+的位数大小。first_page 必须是 64 的倍数；除非 first_page + num_pages 等于内存槽的
+大小，否则 num_pages 也必须是 64 的倍数。对于输入位图中每个置位的位，KVM 会在其脏
+位图中将对应页标记为 "clean"，并为该页重新启用脏跟踪（例如通过写保护，或清除页表
+项中的脏位）。)
 
 If KVM_CAP_MULTI_ADDRESS_SPACE is available, bits 16-31 of slot field specifies
 the address space for which you want to clear the dirty status.  See
 KVM_SET_USER_MEMORY_REGION for details on the usage of slot field.
+(如果 KVM_CAP_MULTI_ADDRESS_SPACE 可用，则 slot 字段的位 16-31 指定要清除脏状态的
+地址空间。slot 字段用法的细节参见 KVM_SET_USER_MEMORY_REGION。)
 
 This ioctl is mostly useful when KVM_CAP_MANUAL_DIRTY_LOG_PROTECT2
 is enabled; for more information, see the description of the capability.
 However, it can always be used as long as KVM_CHECK_EXTENSION confirms
 that KVM_CAP_MANUAL_DIRTY_LOG_PROTECT2 is present.
+(此 ioctl 主要在启用 KVM_CAP_MANUAL_DIRTY_LOG_PROTECT2 时有用；更多信息参见该能力
+的说明。不过，只要 KVM_CHECK_EXTENSION 确认 KVM_CAP_MANUAL_DIRTY_LOG_PROTECT2
+存在，它就总是可以使用。)
 
 4.118 KVM_GET_SUPPORTED_HV_CPUID
 --------------------------------
@@ -5064,6 +5184,10 @@ that KVM_CAP_MANUAL_DIRTY_LOG_PROTECT2 is present.
 :Type: system ioctl, vcpu ioctl
 :Parameters: struct kvm_cpuid2 (in/out)
 :Returns: 0 on success, -1 on error
+
+(能力：KVM_CAP_HYPERV_CPUID（vcpu）、KVM_CAP_SYS_HYPERV_CPUID（system）；架构：
+x86；类型：system ioctl 与 vcpu ioctl；参数：struct kvm_cpuid2 (in/out)；返回值：
+成功时为 0，出错时为 -1。)
 
 ::
 
@@ -5088,13 +5212,20 @@ This ioctl returns x86 cpuid features leaves related to Hyper-V emulation in
 KVM.  Userspace can use the information returned by this ioctl to construct
 cpuid information presented to guests consuming Hyper-V enlightenments (e.g.
 Windows or Hyper-V guests).
+(此 ioctl 返回 KVM 中与 Hyper-V 模拟相关的 x86 CPUID 特性叶。用户态可以利用此 ioctl
+返回的信息，构造呈现给使用 Hyper-V 半虚拟化加速（enlightenment）的客户机（例如
+Windows 或 Hyper-V 客户机）的 CPUID 信息。)
 
 CPUID feature leaves returned by this ioctl are defined by Hyper-V Top Level
 Functional Specification (TLFS). These leaves can't be obtained with
 KVM_GET_SUPPORTED_CPUID ioctl because some of them intersect with KVM feature
 leaves (0x40000000, 0x40000001).
+(此 ioctl 返回的 CPUID 特性叶由 Hyper-V 顶层功能规范 (TLFS) 定义。这些叶无法通过
+KVM_GET_SUPPORTED_CPUID ioctl 获得，因为其中一些与 KVM 特性叶 (0x40000000、
+0x40000001) 相交。)
 
 Currently, the following list of CPUID leaves are returned:
+(目前返回以下 CPUID 叶列表：)
 
  - HYPERV_CPUID_VENDOR_AND_MAX_FUNCTIONS
  - HYPERV_CPUID_INTERFACE
@@ -5113,19 +5244,32 @@ array 'entries'.  If the number of entries is too low to describe all Hyper-V
 feature leaves, an error (E2BIG) is returned. If the number is more or equal
 to the number of Hyper-V feature leaves, the 'nent' field is adjusted to the
 number of valid entries in the 'entries' array, which is then filled.
+(用户态调用 KVM_GET_SUPPORTED_HV_CPUID 时传入一个 kvm_cpuid2 结构体，其 'nent'
+字段指明变长数组 'entries' 中的条目数。如果条目数过少而无法描述全部 Hyper-V 特性
+叶，则返回错误 (E2BIG)。如果该数目大于或等于 Hyper-V 特性叶的数量，则 'nent' 字段
+会被调整为 'entries' 数组中有效条目的数量，随后填充该数组。)
 
 'index' and 'flags' fields in 'struct kvm_cpuid_entry2' are currently reserved,
 userspace should not expect to get any particular value there.
+('struct kvm_cpuid_entry2' 中的 'index' 与 'flags' 字段目前是保留的，用户态不应期
+望从中得到任何特定值。)
 
 Note, vcpu version of KVM_GET_SUPPORTED_HV_CPUID is currently deprecated. Unlike
 system ioctl which exposes all supported feature bits unconditionally, vcpu
 version has the following quirks:
+(注意：KVM_GET_SUPPORTED_HV_CPUID 的 vcpu 版本目前已废弃。与无条件暴露所有受支持特
+性位的 system ioctl 不同，vcpu 版本有以下怪癖：)
 
 - HYPERV_CPUID_NESTED_FEATURES leaf and HV_X64_ENLIGHTENED_VMCS_RECOMMENDED
   feature bit are only exposed when Enlightened VMCS was previously enabled
   on the corresponding vCPU (KVM_CAP_HYPERV_ENLIGHTENED_VMCS).
+  (仅当先前在相应 vCPU 上启用了 Enlightened VMCS (KVM_CAP_HYPERV_ENLIGHTENED_VMCS)
+  时，才会暴露 HYPERV_CPUID_NESTED_FEATURES 叶与 HV_X64_ENLIGHTENED_VMCS_RECOMMENDED
+  特性位。)
 - HV_STIMER_DIRECT_MODE_AVAILABLE bit is only exposed with in-kernel LAPIC.
   (presumes KVM_CREATE_IRQCHIP has already been called).
+  (仅在使用内核内 LAPIC 时才暴露 HV_STIMER_DIRECT_MODE_AVAILABLE 位（前提是已经调
+  用过 KVM_CREATE_IRQCHIP）。)
 
 4.119 KVM_ARM_VCPU_FINALIZE
 ---------------------------
@@ -5135,39 +5279,57 @@ version has the following quirks:
 :Parameters: int feature (in)
 :Returns: 0 on success, -1 on error
 
+(架构：arm64；类型：vcpu ioctl；参数：int feature (in)；返回值：成功时为 0，出错时
+为 -1。)
+
 Errors:
+(错误：)
 
   ======     ==============================================================
   EPERM      feature not enabled, needs configuration, or already finalized
+             (特性未启用、需要配置，或已经终结)
   EINVAL     feature unknown or not present
+             (特性未知或不存在)
   ======     ==============================================================
 
 Recognised values for feature:
+(feature 的可识别取值：)
 
   =====      ===========================================
   arm64      KVM_ARM_VCPU_SVE (requires KVM_CAP_ARM_SVE)
+             (KVM_ARM_VCPU_SVE（需要 KVM_CAP_ARM_SVE）)
   =====      ===========================================
 
 Finalizes the configuration of the specified vcpu feature.
+(终结指定 vCPU 特性的配置。)
 
 The vcpu must already have been initialised, enabling the affected feature, by
 means of a successful :ref:`KVM_ARM_VCPU_INIT <KVM_ARM_VCPU_INIT>` call with the
 appropriate flag set in features[].
+(该 vCPU 必须已经通过一次成功的 :ref:`KVM_ARM_VCPU_INIT <KVM_ARM_VCPU_INIT>` 调用
+完成初始化，并在 features[] 中设置了相应标志以启用受影响的特性。)
 
 For affected vcpu features, this is a mandatory step that must be performed
 before the vcpu is fully usable.
+(对于受影响的 vCPU 特性而言，这是在 vCPU 完全可用之前必须执行的一个强制步骤。)
 
 Between KVM_ARM_VCPU_INIT and KVM_ARM_VCPU_FINALIZE, the feature may be
 configured by use of ioctls such as KVM_SET_ONE_REG.  The exact configuration
 that should be performed and how to do it are feature-dependent.
+(在 KVM_ARM_VCPU_INIT 与 KVM_ARM_VCPU_FINALIZE 之间，可以使用诸如 KVM_SET_ONE_REG
+之类的 ioctl 来配置该特性。应当执行的确切配置及其方式取决于具体特性。)
 
 Other calls that depend on a particular feature being finalized, such as
 KVM_RUN, KVM_GET_REG_LIST, KVM_GET_ONE_REG and KVM_SET_ONE_REG, will fail with
 -EPERM unless the feature has already been finalized by means of a
 KVM_ARM_VCPU_FINALIZE call.
+(依赖于某个特性已终结的其他调用，例如 KVM_RUN、KVM_GET_REG_LIST、KVM_GET_ONE_REG
+与 KVM_SET_ONE_REG，若该特性尚未通过 KVM_ARM_VCPU_FINALIZE 调用终结，则会以 -EPERM
+失败。)
 
 See KVM_ARM_VCPU_INIT for details of vcpu features that require finalization
 using this ioctl.
+(需要使用此 ioctl 终结的 vCPU 特性的详情参见 KVM_ARM_VCPU_INIT。)
 
 4.120 KVM_SET_PMU_EVENT_FILTER
 ------------------------------
@@ -5178,13 +5340,21 @@ using this ioctl.
 :Parameters: struct kvm_pmu_event_filter (in)
 :Returns: 0 on success, -1 on error
 
+(能力：KVM_CAP_PMU_EVENT_FILTER；架构：x86；类型：vm ioctl；参数：struct
+kvm_pmu_event_filter (in)；返回值：成功时为 0，出错时为 -1。)
+
 Errors:
+(错误：)
 
   ======     ============================================================
   EFAULT     args[0] cannot be accessed
+             (无法访问 args[0])
   EINVAL     args[0] contains invalid data in the filter or filter events
+             (args[0] 中的 filter 或过滤事件包含无效数据)
   E2BIG      nevents is too large
+             (nevents 过大)
   EBUSY      not enough memory to allocate the filter
+             (内存不足以分配过滤器)
   ======     ============================================================
 
 ::
@@ -5200,33 +5370,47 @@ Errors:
 
 This ioctl restricts the set of PMU events the guest can program by limiting
 which event select and unit mask combinations are permitted.
+(此 ioctl 通过限制允许的事件选择 (event select) 与单元掩码 (unit mask) 组合，来约
+束客户机可以编程的 PMU 事件集合。)
 
 The argument holds a list of filter events which will be allowed or denied.
+(参数持有一个将被允许或拒绝的过滤事件列表。)
 
 Filter events only control general purpose counters; fixed purpose counters
 are controlled by the fixed_counter_bitmap.
+(过滤事件只控制通用计数器；固定用途计数器则由 fixed_counter_bitmap 控制。)
 
 Valid values for 'flags'::
+(flags 的有效取值：)
 
 ``0``
 
 To use this mode, clear the 'flags' field.
+(要使用此模式，请将 'flags' 字段清零。)
 
 In this mode each event will contain an event select + unit mask.
+(在此模式下，每个事件将包含一个事件选择 + 单元掩码。)
 
 When the guest attempts to program the PMU the guest's event select +
 unit mask is compared against the filter events to determine whether the
 guest should have access.
+(当客户机尝试对 PMU 编程时，会将客户机的事件选择 + 单元掩码与过滤事件进行比较，
+以决定客户机是否拥有访问权限。)
 
 ``KVM_PMU_EVENT_FLAG_MASKED_EVENTS``
+(``KVM_PMU_EVENT_FLAG_MASKED_EVENTS``（掩码事件）)
+
 :Capability: KVM_CAP_PMU_EVENT_MASKED_EVENTS
 
 In this mode each filter event will contain an event select, mask, match, and
 exclude value.  To encode a masked event use::
+(在此模式下，每个过滤事件将包含一个事件选择、掩码 (mask)、匹配值 (match) 与排除
+位 (exclude)。要编码一个掩码事件，使用：)
 
   KVM_PMU_ENCODE_MASKED_ENTRY()
 
 An encoded event will follow this layout::
+(编码后的事件遵循如下布局：)
 
   Bits   Description
   ----   -----------
@@ -5240,38 +5424,55 @@ An encoded event will follow this layout::
 
 When the guest attempts to program the PMU, these steps are followed in
 determining if the guest should have access:
+(当客户机尝试对 PMU 编程时，按以下步骤判断客户机是否拥有访问权限：)
 
  1. Match the event select from the guest against the filter events.
+    (将来自客户机的事件选择与过滤事件进行匹配。)
  2. If a match is found, match the guest's unit mask to the mask and match
     values of the included filter events.
     I.e. (unit mask & mask) == match && !exclude.
+    (如果找到匹配，则将客户机的单元掩码与所含 (included) 过滤事件的 mask 与 match
+    值进行匹配。即 (unit mask & mask) == match && !exclude。)
  3. If a match is found, match the guest's unit mask to the mask and match
     values of the excluded filter events.
     I.e. (unit mask & mask) == match && exclude.
+    (如果找到匹配，则将客户机的单元掩码与被排除 (excluded) 过滤事件的 mask 与
+    match 值进行匹配。即 (unit mask & mask) == match && exclude。)
  4.
    a. If an included match is found and an excluded match is not found, filter
       the event.
+      (如果找到了 included 匹配且没有找到 excluded 匹配，则过滤该事件。)
    b. For everything else, do not filter the event.
+      (其余所有情况均不过滤该事件。)
  5.
    a. If the event is filtered and it's an allow list, allow the guest to
       program the event.
+      (如果事件被过滤且这是允许列表 (allow list)，则允许客户机对该事件编程。)
    b. If the event is filtered and it's a deny list, do not allow the guest to
       program the event.
+      (如果事件被过滤且这是拒绝列表 (deny list)，则不允许客户机对该事件编程。)
 
 When setting a new pmu event filter, -EINVAL will be returned if any of the
 unused fields are set or if any of the high bits (35:32) in the event
 select are set when called on Intel.
+(设置新的 PMU 事件过滤器时，如果任何未使用字段被置位，或在 Intel 上调用时事件选择
+的高位 (35:32) 中有任何一位被置位，则返回 -EINVAL。)
 
 Valid values for 'action'::
+(action 的有效取值：)
 
   #define KVM_PMU_EVENT_ALLOW 0
   #define KVM_PMU_EVENT_DENY 1
 
 Via this API, KVM userspace can also control the behavior of the VM's fixed
 counters (if any) by configuring the "action" and "fixed_counter_bitmap" fields.
+(通过此 API，KVM 用户态还可以通过配置 "action" 与 "fixed_counter_bitmap" 字段来控
+制 VM 的固定计数器（如果存在的话）的行为。)
 
 Specifically, KVM follows the following pseudo-code when determining whether to
 allow the guest FixCtr[i] to count its pre-defined fixed event::
+(具体而言，在决定是否允许客户机 FixCtr[i] 对其预定义的固定事件计数时，KVM 遵循以下
+伪代码：)
 
   FixCtr[i]_is_allowed = (action == ALLOW) && (bitmap & BIT(i)) ||
     (action == DENY) && !(bitmap & BIT(i));
@@ -5280,10 +5481,14 @@ allow the guest FixCtr[i] to count its pre-defined fixed event::
 KVM always consumes fixed_counter_bitmap, it's userspace's responsibility to
 ensure fixed_counter_bitmap is set correctly, e.g. if userspace wants to define
 a filter that only affects general purpose counters.
+(KVM 总是会消费 fixed_counter_bitmap；确保 fixed_counter_bitmap 被正确设置是用户态
+的责任，例如当用户态想定义一个只影响通用计数器的过滤器时。)
 
 Note, the "events" field also applies to fixed counters' hardcoded event_select
 and unit_mask values.  "fixed_counter_bitmap" has higher priority than "events"
 if there is a contradiction between the two.
+(注意："events" 字段同样适用于固定计数器硬编码的 event_select 与 unit_mask 值。
+若两者存在矛盾，"fixed_counter_bitmap" 的优先级高于 "events"。)
 
 4.121 KVM_PPC_SVM_OFF
 ---------------------

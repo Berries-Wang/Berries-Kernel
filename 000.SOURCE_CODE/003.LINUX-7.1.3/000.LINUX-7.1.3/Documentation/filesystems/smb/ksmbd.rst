@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==========================
-KSMBD - SMB3 Kernel Server
-==========================
-
-(KSMBD - SMB3 内核服务器)
+===================================================
+KSMBD - SMB3 Kernel Server(KSMBD - SMB3 内核服务器)
+===================================================
 
 KSMBD is a linux kernel server which implements SMB3 protocol in kernel space
 for sharing files over network.
 (KSMBD 是一个在内核空间实现 SMB3 协议、用于通过网络共享文件的 Linux 内核服务器。)
 
-KSMBD architecture
-(KSMBD 架构)
-==================
+KSMBD architecture(KSMBD 架构)
+==============================
 
 The subset of performance related operations belong in kernelspace and
 the other subset which belong to operations which are not really related with
@@ -24,9 +21,8 @@ in kernel space (ksmbd). This also allows for easier integration with VFS
 interface for all file operations.
 (与性能相关的操作子集放在内核空间中，而另一部分与性能没有太大关系的操作子集则放在用户空间中。因此，历史上曾导致大量缓冲区溢出问题和危险安全漏洞的 DCE/RPC 管理，以及用户账户管理，都在用户空间中实现为 ksmbd.mountd。与性能相关的文件操作(打开/读/写/关闭等)则在内核空间(ksmbd)中处理。这也使得所有文件操作都更容易与 VFS 接口集成。)
 
-ksmbd (kernel daemon)
-(ksmbd(内核守护进程))
----------------------
+ksmbd (kernel daemon)(ksmbd(内核守护进程))
+------------------------------------------
 
 When the server daemon is started, It starts up a forker thread
 (ksmbd/interface name) at initialization time and open a dedicated port 445
@@ -53,9 +49,8 @@ sharing to be managed optimally by the default kernel and optimizing client
 performance by handling client commands in parallel.
 (当服务器守护进程启动时，它会在初始化时启动一个 forker 线程(ksmbd/接口名)，并打开专用端口 445 来监听 SMB 请求。每当新客户端发出请求时，Forker 线程都会接受该客户端连接，并为客户端与服务器之间的专用通信通道 fork 一个新线程。这允许并行处理来自客户端的 SMB 请求(命令)，同时也允许新客户端建立新的连接。每个实例都被命名为 ksmbd/1~n(端口号)，以指示已连接的客户端。根据 SMB 请求类型，每个新线程可以决定是否将命令传递给用户空间(ksmbd.mountd)处理，目前 DCE/RPC 命令被确定通过用户空间处理。为了进一步利用 Linux 内核，我们选择将这些命令作为工作项(workitem)来处理，并在 ksmbd-io kworker 线程的处理程序中执行。这允许对处理程序进行多路复用：当负载增加时，内核会负责启动额外的工作线程；反之，当负载减少时，它会销毁多余的工作线程。因此，在与客户端建立连接之后，专用的 ksmbd/1..n(端口号)会完全接管 SMB 命令的接收/解析。每个收到的命令都并行处理，也就是说，可以有多个客户端命令并行地得到处理。收到每个命令后，会为每个命令准备一个单独的内核工作项，随后将其排队，由 ksmbd-io kworker 处理。这样，每个 SMB 工作项都会排入 kworker 队列。这使得默认内核能够以最优方式管理负载分担带来的好处，并通过并行处理客户端命令来优化客户端性能。)
 
-ksmbd.mountd (user space daemon)
-(ksmbd.mountd(用户空间守护进程))
---------------------------------
+ksmbd.mountd (user space daemon)(ksmbd.mountd(用户空间守护进程))
+----------------------------------------------------------------
 
 ksmbd.mountd is a userspace process to, transfer the user account and password that
 are registered using ksmbd.adduser (part of utils for user space). Further it
@@ -69,9 +64,8 @@ and passed over to the associated kernel thread for the client.
 (ksmbd.mountd 是一个用户空间进程，用于传输使用 ksmbd.adduser(用户空间工具的一部分)注册的用户账户和密码。此外，它允许将从 smb.conf 解析出的共享信息参数传递给内核中的 ksmbd。在执行部分，它有一个持续运行的守护进程，通过 netlink 套接字连接到内核接口，等待请求(dcerpc 以及共享/用户信息)。它处理对文件服务器最重要的 RPC 调用(至少几十个)，来自 NetShareEnum 和 NetServerGetInfo。完整的 DCE/RPC 响应由用户空间准备，然后传递给与该客户端关联的内核线程。)
 
 
-KSMBD Feature Status
-(KSMBD 特性状态)
-====================
+KSMBD Feature Status(KSMBD 特性状态)
+====================================
 
 ============================== =================================================
 Feature name                   Status (特性名称                状态)
@@ -128,9 +122,8 @@ SMB3.1.1 GMAC signing support  Planned for future. (计划在未来实现。)
 ============================== =================================================
 
 
-How to run
-(如何运行)
-==========
+How to run(如何运行)
+====================
 
 1. Download ksmbd-tools(https://github.com/cifsd-team/ksmbd-tools/releases) and
    compile them.
@@ -181,17 +174,15 @@ How to run
 6. Access share from Windows or Linux using SMB3 client (cifs.ko or smbclient of samba)
    (使用 SMB3 客户端(cifs.ko 或 samba 的 smbclient)从 Windows 或 Linux 访问共享)
 
-Shutdown KSMBD
-(关闭 KSMBD)
-==============
+Shutdown KSMBD(关闭 KSMBD)
+==========================
 
 1. kill user and kernel space daemon
    (终止用户空间和内核空间的守护进程)
 	# sudo ksmbd.control -s
 
-How to turn debug print on
-(如何打开调试打印)
-==========================
+How to turn debug print on(如何打开调试打印)
+============================================
 
 Each layer
 /sys/class/ksmbd-control/debug

@@ -1,13 +1,10 @@
-=============================
-Netlink interface for ethtool
-=============================
-
-(ethtool 的 netlink 接口)
+======================================================
+Netlink interface for ethtool(ethtool 的 netlink 接口)
+======================================================
 
 
-Basic information
-(基本信息)
-=================
+Basic information(基本信息)
+===========================
 
 Netlink interface for ethtool uses generic netlink family ``ethtool``
 (userspace application should use macros ``ETHTOOL_GENL_NAME`` and
@@ -41,9 +38,8 @@ wake-on-lan password) omitted.
 属性中会省略敏感信息(例如 wake-on-lan 密码)。)
 
 
-Conventions
-(约定)
-===========
+Conventions(约定)
+=================
 
 Attributes which represent a boolean value usually use NLA_U8 type so that we
 can distinguish three states: "on", "off" and "not present" (meaning the
@@ -70,9 +66,8 @@ attribute in the device driver API.
 把零用作有效值。这样可以避免在设备驱动 API 中显式标示属性的有效性。)
 
 
-Request header
-(请求头)
-==============
+Request header(请求头)
+======================
 
 Each request or reply message contains a nested attribute with common header.
 Structure of this header is
@@ -127,9 +122,8 @@ is used.
 但这并非强制；对于以 PHY 为目标的命令，若未传入该索引，则使用 net_device.phydev
 指针。)
 
-Bit sets
-(位集)
-========
+Bit sets(位集)
+==============
 
 For short bitmaps of (reasonably) fixed length, standard ``NLA_BITFIELD32``
 type is used. For arbitrary length bitmaps, ethtool netlink uses a nested
@@ -242,9 +236,8 @@ determined by ``ETHTOOL_FLAG_COMPACT_BITSETS`` flag in flags field of request
 header. Semantics of value and mask depends on the attribute.
 
 
-List of message types
-(消息类型列表)
-=====================
+List of message types(消息类型列表)
+===================================
 
 All constants identifying message types use ``ETHTOOL_CMD_`` prefix and suffix
 according to message purpose:
@@ -423,9 +416,8 @@ Later sections describe the format and semantics of these messages.
 (后文各节将描述这些消息的格式和语义。)
 
 
-STRSET_GET
-(STRSET_GET，字符串集获取)
-==========
+STRSET_GET(STRSET_GET，字符串集获取)
+====================================
 
 Requests contents of a string set as provided by ioctl commands
 ``ETHTOOL_GSSET_INFO`` and ``ETHTOOL_GSTRINGS.`` String sets are not user
@@ -507,9 +499,8 @@ counts of the sets, not the actual strings.
 返回各集合的字符串数量，而不返回实际字符串。)
 
 
-LINKINFO_GET
-(LINKINFO_GET，链路信息获取)
-============
+LINKINFO_GET(LINKINFO_GET，链路信息获取)
+========================================
 
 Requests link settings as provided by ``ETHTOOL_GLINKSETTINGS`` except for
 link modes and autonegotiation related information. The request does not use
@@ -545,9 +536,8 @@ devices supporting the request).
 (``LINKINFO_GET`` 允许转储请求(内核为所有支持该请求的设备返回应答消息)。)
 
 
-LINKINFO_SET
-(LINKINFO_SET，链路信息设置)
-============
+LINKINFO_SET(LINKINFO_SET，链路信息设置)
+========================================
 
 ``LINKINFO_SET`` request allows setting some of the attributes reported by
 ``LINKINFO_GET``.
@@ -568,9 +558,8 @@ attributes is rejected.
 (MDI(-X) 状态和收发器不可设置，包含相应属性的请求会被拒绝。)
 
 
-LINKMODES_GET
-(LINKMODES_GET，链路模式获取)
-=============
+LINKMODES_GET(LINKMODES_GET，链路模式获取)
+==========================================
 
 Requests link modes (supported, advertised and peer advertised) and related
 information (autonegotiation status, link speed and duplex) as provided by
@@ -611,9 +600,8 @@ devices supporting the request).
 (``LINKMODES_GET`` 允许转储请求(内核为所有支持该请求的设备返回应答消息)。)
 
 
-LINKMODES_SET
-(LINKMODES_SET，链路模式设置)
-=============
+LINKMODES_SET(LINKMODES_SET，链路模式设置)
+==========================================
 
 Request contents:
 (请求内容：)
@@ -646,9 +634,8 @@ ioctl 接口完成；netlink 接口的目标是让用户无需确切知道内核
 更改。)
 
 
-LINKSTATE_GET
-(LINKSTATE_GET，链路状态获取)
-=============
+LINKSTATE_GET(LINKSTATE_GET，链路状态获取)
+==========================================
 
 Requests link state information. Link up/down flag (as provided by
 ``ETHTOOL_GLINK`` ioctl command) is provided. Optionally, extended state might
@@ -837,9 +824,8 @@ Link extended substates:
                                                         module is stuck at ModuleFault state (CMIS 模块状态机未到达 ModuleReady 状态。例如模块卡在 ModuleFault 状态)
   ===================================================   ============================================
 
-DEBUG_GET
-(DEBUG_GET，调试设置获取)
-=========
+DEBUG_GET(DEBUG_GET，调试设置获取)
+==================================
 
 Requests debugging settings of a device. At the moment, only message mask is
 provided.
@@ -876,9 +862,8 @@ devices supporting the request).
 (``DEBUG_GET`` 允许转储请求(内核为所有支持该请求的设备返回应答消息)。)
 
 
-DEBUG_SET
-(DEBUG_SET，设置调试设置)
-=========
+DEBUG_SET(DEBUG_SET，设置调试设置)
+==================================
 
 Set or update debugging settings of a device. At the moment, only message mask
 is supported.
@@ -897,9 +882,8 @@ enabled debugging message types for the device.
 (``ETHTOOL_A_DEBUG_MSGMASK`` 位集允许设置或修改设备已启用的调试消息类型掩码。)
 
 
-WOL_GET
-(WOL_GET，网络唤醒设置获取)
-=======
+WOL_GET(WOL_GET，网络唤醒设置获取)
+==================================
 
 Query device wake-on-lan settings. Unlike most "GET" type requests,
 ``ETHTOOL_MSG_WOL_GET`` requires (netns) ``CAP_NET_ADMIN`` privileges as it
@@ -931,9 +915,8 @@ included in reply if ``WAKE_MAGICSECURE`` mode is supported.
 ``ETHTOOL_A_WOL_SOPASS`` 仅在支持 ``WAKE_MAGICSECURE`` 模式时才包含在应答中。)
 
 
-WOL_SET
-(WOL_SET，设置网络唤醒设置)
-=======
+WOL_SET(WOL_SET，设置网络唤醒设置)
+==================================
 
 Set or update wake-on-lan settings.
 (设置或更新网络唤醒设置。)
@@ -952,9 +935,8 @@ Request contents:
 (``ETHTOOL_A_WOL_SOPASS`` 仅允许用于支持 ``WAKE_MAGICSECURE`` 模式的设备。)
 
 
-FEATURES_GET
-(FEATURES_GET，特性获取)
-============
+FEATURES_GET(FEATURES_GET，特性获取)
+====================================
 
 Gets netdev features like ``ETHTOOL_GFEATURES`` ioctl request.
 (获取 netdev 特性，如同 ``ETHTOOL_GFEATURES`` ioctl 请求。)
@@ -992,9 +974,8 @@ ETHA_FEATURES_HW 使用由内核识别的全部特性组成的掩码(以便在�
 所有名称)，其余三个不使用掩码(简单位列表)。)
 
 
-FEATURES_SET
-(FEATURES_SET，特性设置)
-============
+FEATURES_SET(FEATURES_SET，特性设置)
+====================================
 
 Request to set netdev features like ``ETHTOOL_SFEATURES`` ioctl request.
 (请求设置 netdev 特性，如同 ``ETHTOOL_SFEATURES`` ioctl 请求。)
@@ -1049,9 +1030,8 @@ or netdev_change_features().
 netdev_update_features() 或 netdev_change_features() 修改特性时也会发送。)
 
 
-PRIVFLAGS_GET
-(PRIVFLAGS_GET，私有标志获取)
-=============
+PRIVFLAGS_GET(PRIVFLAGS_GET，私有标志获取)
+==========================================
 
 Gets private flags like ``ETHTOOL_GPFLAGS`` ioctl request.
 (获取私有标志，如同 ``ETHTOOL_GPFLAGS`` ioctl 请求。)
@@ -1084,9 +1064,8 @@ gets the full information without having to fetch the string set with names.
 信息。)
 
 
-PRIVFLAGS_SET
-(PRIVFLAGS_SET，私有标志设置)
-=============
+PRIVFLAGS_SET(PRIVFLAGS_SET，私有标志设置)
+==========================================
 
 Sets or modifies values of device private flags like ``ETHTOOL_SPFLAGS``
 ioctl request.
@@ -1106,9 +1085,8 @@ modify only values of some of them.
 一部分的值。)
 
 
-RINGS_GET
-(RINGS_GET，环参数获取)
-=========
+RINGS_GET(RINGS_GET，环参数获取)
+================================
 
 Gets ring sizes like ``ETHTOOL_GRINGPARAM`` ioctl request.
 (获取环大小，如同 ``ETHTOOL_GRINGPARAM`` ioctl 请求。)
@@ -1187,9 +1165,8 @@ DMA 映射来降低小数据包的延迟(与 ``ETHTOOL_A_RINGS_TX_PUSH`` 参数�
 内存；而 tx-push-buff 参数把数据包直接复制到设备，让设备能更快地对数据包采取
 行动。)
 
-RINGS_SET
-(RINGS_SET，环参数设置)
-=========
+RINGS_SET(RINGS_SET，环参数设置)
+================================
 
 Sets ring sizes like ``ETHTOOL_SRINGPARAM`` ioctl request.
 (设置环大小，如同 ``ETHTOOL_SRINGPARAM`` ioctl 请求。)
@@ -1239,9 +1216,8 @@ threshold value, header and data will be split.
 (``ETHTOOL_A_RINGS_HDS_THRESH`` 指定头/数据分离特性的阈值。若接收到的数据包
 大小超过该阈值，头和数据将被分离。)
 
-CHANNELS_GET
-(CHANNELS_GET，通道数量获取)
-============
+CHANNELS_GET(CHANNELS_GET，通道数量获取)
+========================================
 
 Gets channel counts like ``ETHTOOL_GCHANNELS`` ioctl request.
 (获取通道数量，如同 ``ETHTOOL_GCHANNELS`` ioctl 请求。)
@@ -1269,9 +1245,8 @@ Kernel response contents:
   =====================================  ======  ==========================
 
 
-CHANNELS_SET
-(CHANNELS_SET，通道数量设置)
-============
+CHANNELS_SET(CHANNELS_SET，通道数量设置)
+========================================
 
 Sets channel counts like ``ETHTOOL_SCHANNELS`` ioctl request.
 (设置通道数量，如同 ``ETHTOOL_SCHANNELS`` ioctl 请求。)
@@ -1294,9 +1269,8 @@ attributes.
 不支持所有属性。)
 
 
-COALESCE_GET
-(COALESCE_GET，合并参数获取)
-============
+COALESCE_GET(COALESCE_GET，合并参数获取)
+========================================
 
 Gets coalescing parameters like ``ETHTOOL_GCOALESCE`` ioctl request.
 (获取合并参数，如同 ``ETHTOOL_GCOALESCE`` ioctl 请求。)
@@ -1406,9 +1380,8 @@ the first packet arrival in a coalesced CQE or writeback to be sent.
 ``ETHTOOL_A_COALESCE_RX_CQE_NSECS`` 描述从合并 CQE 或回写中第一个数据包到达起、
 到其被发送为止的最大纳秒时间。)
 
-COALESCE_SET
-(COALESCE_SET，合并参数设置)
-============
+COALESCE_SET(COALESCE_SET，合并参数设置)
+========================================
 
 Sets coalescing parameters like ``ETHTOOL_SCOALESCE`` ioctl request.
 (设置合并参数，如同 ``ETHTOOL_SCOALESCE`` ioctl 请求。)
@@ -1466,9 +1439,8 @@ and may call the driver twice.
 值得到应用，并可能调用驱动两次。)
 
 
-PAUSE_GET
-(PAUSE_GET，暂停参数获取)
-=========
+PAUSE_GET(PAUSE_GET，暂停参数获取)
+==================================
 
 Gets pause frame settings like ``ETHTOOL_GPAUSEPARAM`` ioctl request.
 (获取暂停帧设置，如同 ``ETHTOOL_GPAUSEPARAM`` ioctl 请求。)
@@ -1518,9 +1490,8 @@ the statistics in the following structure:
 Each member has a corresponding attribute defined.
 (每个成员都定义了对应的属性。)
 
-PAUSE_SET
-(PAUSE_SET，暂停参数设置)
-=========
+PAUSE_SET(PAUSE_SET，暂停参数设置)
+==================================
 
 Sets pause parameters like ``ETHTOOL_GPAUSEPARAM`` ioctl request.
 (设置暂停参数，如同 ``ETHTOOL_GPAUSEPARAM`` ioctl 请求。)
@@ -1536,9 +1507,8 @@ Request contents:
   =====================================  ======  ==========================
 
 
-EEE_GET
-(EEE_GET，EEE 设置获取)
-=======
+EEE_GET(EEE_GET，EEE 设置获取)
+==============================
 
 Gets Energy Efficient Ethernet settings like ``ETHTOOL_GEEE`` ioctl request.
 (获取高能效以太网(Energy Efficient Ethernet)设置，如同 ``ETHTOOL_GEEE`` ioctl
@@ -1575,9 +1545,8 @@ first 32 are provided by the ``ethtool_ops`` callback.
 回调只提供前 32 个。)
 
 
-EEE_SET
-(EEE_SET，设置 EEE 设置)
-=======
+EEE_SET(EEE_SET，设置 EEE 设置)
+===============================
 
 Sets Energy Efficient Ethernet parameters like ``ETHTOOL_SEEE`` ioctl request.
 (设置高能效以太网参数，如同 ``ETHTOOL_SEEE`` ioctl 请求。)
@@ -1603,9 +1572,8 @@ callback supports.
 但目前只能设置前 32 个，因为 ``ethtool_ops`` 回调仅支持这么多。)
 
 
-TSINFO_GET
-(TSINFO_GET，时间戳信息获取)
-==========
+TSINFO_GET(TSINFO_GET，时间戳信息获取)
+======================================
 
 Gets timestamping information like ``ETHTOOL_GET_TS_INFO`` ioctl request.
 (获取时间戳信息，如同 ``ETHTOOL_GET_TS_INFO`` ioctl 请求。)
@@ -1651,9 +1619,8 @@ Additional hardware timestamping statistics response contents:
                                                               unconfirmed delivery (带一步式硬件 Tx 时间戳且送达未确认的数据包数)
   ==================================================  ======  =====================
 
-CABLE_TEST
-(CABLE_TEST，线缆测试)
-==========
+CABLE_TEST(CABLE_TEST，线缆测试)
+================================
 
 Start a cable test.
 (启动线缆测试。)
@@ -1728,9 +1695,8 @@ information.
  +-+-+-----------------------------------------+--------+---------------------+
 
 
-CABLE_TEST TDR
-(CABLE_TEST TDR，线缆测试 TDR)
-==============
+CABLE_TEST TDR(CABLE_TEST TDR，线缆测试 TDR)
+============================================
 
 Start a cable test and report raw TDR data
 (启动线缆测试并报告原始 TDR 数据)
@@ -1866,9 +1832,8 @@ used to report the amplitude of the reflection for a given pair.
  | | |                                         |        | (反射幅度)           |
  +-+-+-----------------------------------------+--------+----------------------+
 
-TUNNEL_INFO
-(TUNNEL_INFO，隧道信息)
-===========
+TUNNEL_INFO(TUNNEL_INFO，隧道信息)
+==================================
 
 Gets information about the tunnel state NIC is aware of.
 (获取 NIC 已知的隧道状态信息。)
@@ -1914,9 +1879,8 @@ the table contains static entries, hard-coded by the NIC.
 (对于 UDP 隧道表，空的 ``ETHTOOL_A_TUNNEL_UDP_TABLE_TYPES`` 表示该表包含由
 NIC 硬编码的静态条目。)
 
-FEC_GET
-(FEC_GET，FEC 设置获取)
-=======
+FEC_GET(FEC_GET，FEC 设置获取)
+==============================
 
 Gets FEC configuration and state like ``ETHTOOL_GFECPARAM`` ioctl request.
 (获取 FEC 配置和状态，如同 ``ETHTOOL_GFECPARAM`` ioctl 请求。)
@@ -1991,9 +1955,8 @@ in the bin.
 ``ETHTOOL_A_FEC_STAT_HIST``。嵌套属性将包含桶中 FEC 错误的范围(含边界)以及
 桶中错误事件的数量。)
 
-FEC_SET
-(FEC_SET，设置 FEC 设置)
-=======
+FEC_SET(FEC_SET，设置 FEC 设置)
+===============================
 
 Sets FEC parameters like ``ETHTOOL_SFECPARAM`` ioctl request.
 (设置 FEC 参数，如同 ``ETHTOOL_SFECPARAM`` ioctl 请求。)
@@ -2023,9 +1986,8 @@ module parameters. This does not mean autonegotiation.
 (``ETHTOOL_A_FEC_AUTO`` 请求驱动根据 SFP 模块参数选择 FEC 模式。这不代表自动
 协商。)
 
-MODULE_EEPROM_GET
-(MODULE_EEPROM_GET，模块 EEPROM 读取)
-=================
+MODULE_EEPROM_GET(MODULE_EEPROM_GET，模块 EEPROM 读取)
+======================================================
 
 Fetch module EEPROM data dump.
 This interface is designed to allow dumps of at most 1/2 page at once. This
@@ -2067,9 +2029,8 @@ Kernel response contents:
 bytes driver actually read.
 (``ETHTOOL_A_MODULE_EEPROM_DATA`` 的属性长度等于驱动实际读取的字节数。)
 
-STATS_GET
-(STATS_GET，统计信息获取)
-=========
+STATS_GET(STATS_GET，统计信息获取)
+==================================
 
 Get standard statistics for the interface. Note that this is not
 a re-implementation of ``ETHTOOL_GSTATS`` which exposed driver-defined
@@ -2189,9 +2150,8 @@ provided with an ``ETHTOOL_A_STATS_SRC`` attribute in the response equal to
 ``ETHTOOL_A_STATS_SRC`` 属性将等于 ``ETHTOOL_MAC_STATS_SRC_AGGREGATE``，并据此
 提供统计信息。)
 
-PHC_VCLOCKS_GET
-(PHC_VCLOCKS_GET，PHC 虚拟时钟信息获取)
-===============
+PHC_VCLOCKS_GET(PHC_VCLOCKS_GET，PHC 虚拟时钟信息获取)
+======================================================
 
 Query device PHC virtual clocks information.
 (查询设备的 PHC 虚拟时钟信息。)
@@ -2212,9 +2172,8 @@ Kernel response contents:
   ``ETHTOOL_A_PHC_VCLOCKS_INDEX``       s32     PHC index array (PHC 索引数组)
   ====================================  ======  ==========================
 
-MODULE_GET
-(MODULE_GET，收发器模块参数获取)
-==========
+MODULE_GET(MODULE_GET，收发器模块参数获取)
+==========================================
 
 Gets transceiver module parameters.
 (获取收发器模块参数。)
@@ -2253,9 +2212,8 @@ is plugged-in. Possible values are:
 .. kernel-doc:: include/uapi/linux/ethtool.h
     :identifiers: ethtool_module_power_mode
 
-MODULE_SET
-(MODULE_SET，收发器模块参数设置)
-==========
+MODULE_SET(MODULE_SET，收发器模块参数设置)
+==========================================
 
 Sets transceiver module parameters.
 (设置收发器模块参数。)
@@ -2285,9 +2243,8 @@ For CMIS modules, low power mode is forced by the host according to table 6-12
 in revision 5.0 of the specification.
 (对于 CMIS 模块，主机按规范 5.0 版表 6-12 强制低功率模式。)
 
-PSE_GET
-(PSE_GET，PSE 属性获取)
-=======
+PSE_GET(PSE_GET，PSE 属性获取)
+==============================
 
 Gets PSE attributes.
 (获取 PSE 属性。)
@@ -2442,9 +2399,8 @@ For a description of PSE priority attributes, see ``PSE_SET``.
 设置时，可选的 ``ETHTOOL_A_PSE_PRIO`` 属性用于标识当前配置的 PSE 优先级。
 PSE 优先级属性的描述见 ``PSE_SET``。)
 
-PSE_SET
-(PSE_SET，PSE 参数设置)
-=======
+PSE_SET(PSE_SET，PSE 参数设置)
+==============================
 
 Sets PSE parameters.
 (设置 PSE 参数。)
@@ -2515,9 +2471,8 @@ Port priority serves two functions:
    priority (higher values) are turned off first.
    (关断顺序：当超出功率预算时，优先级较低(值较高)的端口先被关断。)
 
-PSE_NTF
-(PSE_NTF，PSE 事件通知)
-=======
+PSE_NTF(PSE_NTF，PSE 事件通知)
+==============================
 
 Notify PSE events.
 (通知 PSE 事件。)
@@ -2537,9 +2492,8 @@ PSE events.
 .. kernel-doc:: include/uapi/linux/ethtool_netlink_generated.h
     :identifiers: ethtool_pse_event
 
-RSS_GET
-(RSS_GET，RSS 设置获取)
-=======
+RSS_GET(RSS_GET，RSS 设置获取)
+==============================
 
 Get indirection table, hash key and hash function info associated with a
 RSS context of an interface similar to ``ETHTOOL_GRSSH`` ioctl request.
@@ -2596,9 +2550,8 @@ ETHTOOL_A_RSS_INPUT_XFRM 属性是位图，指示在交给 RSS 哈希函数之�
 ETHTOOL_A_RSS_FLOW_HASH 携带按流类型的位掩码，指示哈希计算中包含哪些报文
 字段。)
 
-RSS_SET
-(RSS_SET，设置 RSS 设置)
-=======
+RSS_SET(RSS_SET，设置 RSS 设置)
+===============================
 
 Request contents:
 (请求内容：)
@@ -2626,9 +2579,8 @@ Using table of size 0 will reset the indirection table to the default.
 大小为 2 的幂，因此大小不是 2 的幂的表很可能被拒绝。
 使用大小为 0 的表会把间接表重置为默认值。)
 
-RSS_CREATE_ACT
-(RSS_CREATE_ACT，创建 RSS 上下文)
-==============
+RSS_CREATE_ACT(RSS_CREATE_ACT，创建 RSS 上下文)
+===============================================
 
 Request contents:
 (请求内容：)
@@ -2655,9 +2607,8 @@ specified kernel will allocate one automatically.
 (创建附加 RSS 上下文；若未指定 ``ETHTOOL_A_RSS_CONTEXT``，内核会自动分配
 一个。)
 
-RSS_DELETE_ACT
-(RSS_DELETE_ACT，删除 RSS 上下文)
-==============
+RSS_DELETE_ACT(RSS_DELETE_ACT，删除 RSS 上下文)
+===============================================
 
 Request contents:
 (请求内容：)
@@ -2670,9 +2621,8 @@ Request contents:
 Delete an additional RSS context.
 (删除附加 RSS 上下文。)
 
-PLCA_GET_CFG
-(PLCA_GET_CFG，PLCA RS 参数获取)
-============
+PLCA_GET_CFG(PLCA_GET_CFG，PLCA RS 参数获取)
+============================================
 
 Gets the IEEE 802.3cg-2019 Clause 148 Physical Layer Collision Avoidance
 (PLCA) Reconciliation Sublayer (RS) attributes.
@@ -2795,9 +2745,8 @@ for PLCA burst mode to work as intended.
 [0 .. 255]。不过，为使 PLCA 突发模式按预期工作，该值应设置为大于 MAC 的帧间隙
 (IFG)时间(外加一定余量)。)
 
-PLCA_SET_CFG
-(PLCA_SET_CFG，PLCA RS 参数设置)
-============
+PLCA_SET_CFG(PLCA_SET_CFG，PLCA RS 参数设置)
+============================================
 
 Sets PLCA RS parameters.
 (设置 PLCA RS 参数。)
@@ -2825,9 +2774,8 @@ Request contents:
 For a description of each attribute, see ``PLCA_GET_CFG``.
 (各属性的描述见 ``PLCA_GET_CFG``。)
 
-PLCA_GET_STATUS
-(PLCA_GET_STATUS，PLCA RS 状态获取)
-===============
+PLCA_GET_STATUS(PLCA_GET_STATUS，PLCA RS 状态获取)
+==================================================
 
 Gets PLCA RS status information.
 (获取 PLCA RS 状态信息。)
@@ -2853,9 +2801,8 @@ corresponding to ``IEEE 802.3cg-2019`` 30.16.1.1.2 aPLCAStatus.
 (设置时，``ETHTOOL_A_PLCA_STATUS`` 属性指示节点是否正在检测网络上的 BEACON。
 该标志对应 ``IEEE 802.3cg-2019`` 30.16.1.1.2 aPLCAStatus。)
 
-MM_GET
-(MM_GET，MAC 合并层参数获取)
-======
+MM_GET(MM_GET，MAC 合并层参数获取)
+==================================
 
 Retrieve 802.3 MAC Merge parameters.
 (检索 802.3 MAC 合并(MAC Merge)参数。)
@@ -2931,9 +2878,8 @@ structure:
 .. kernel-doc:: include/linux/ethtool.h
     :identifiers: ethtool_mm_stats
 
-MM_SET
-(MM_SET，MAC 合并层配置修改)
-======
+MM_SET(MM_SET，MAC 合并层配置修改)
+==================================
 
 Modifies the configuration of the 802.3 MAC Merge layer.
 (修改 802.3 MAC 合并层的配置。)
@@ -2955,9 +2901,8 @@ The attributes are propagated to the driver through the following structure:
 .. kernel-doc:: include/linux/ethtool.h
     :identifiers: ethtool_mm_cfg
 
-MODULE_FW_FLASH_ACT
-(MODULE_FW_FLASH_ACT，收发器模块固件烧录)
-===================
+MODULE_FW_FLASH_ACT(MODULE_FW_FLASH_ACT，收发器模块固件烧录)
+============================================================
 
 Flashes transceiver module firmware.
 (烧录收发器模块固件。)
@@ -3048,9 +2993,8 @@ attributes encode the completed and total amount of work, respectively.
 (``ETHTOOL_A_MODULE_FW_FLASH_DONE`` 和 ``ETHTOOL_A_MODULE_FW_FLASH_TOTAL``
 属性分别编码已完成的工作量和总工作量。)
 
-PHY_GET
-(PHY_GET，PHY 信息获取)
-=======
+PHY_GET(PHY_GET，PHY 信息获取)
+==============================
 
 Retrieve information about a given Ethernet PHY sitting on the link. The DO
 operation returns all available information about dev->phydev. User can also
@@ -3101,9 +3045,8 @@ another PHY.
 (当 ``ETHTOOL_A_PHY_UPSTREAM_TYPE`` 为 PHY_UPSTREAM_PHY 时，该 PHY 的父设备是
 另一个 PHY。)
 
-TSCONFIG_GET
-(TSCONFIG_GET，硬件时间戳配置获取)
-============
+TSCONFIG_GET(TSCONFIG_GET，硬件时间戳配置获取)
+==============================================
 
 Retrieves the information about the current hardware timestamping source and
 configuration.
@@ -3151,9 +3094,8 @@ structure:
 .. kernel-doc:: include/linux/net_tstamp.h
     :identifiers: kernel_hwtstamp_config
 
-TSCONFIG_SET
-(TSCONFIG_SET，硬件时间戳配置设置)
-============
+TSCONFIG_SET(TSCONFIG_SET，硬件时间戳配置设置)
+==============================================
 
 Set the information about the current hardware timestamping source and
 configuration.
@@ -3187,9 +3129,8 @@ Kernel response contents:
 For a description of each attribute, see ``TSCONFIG_GET``.
 (各属性的描述见 ``TSCONFIG_GET``。)
 
-MSE_GET
-(MSE_GET，MSE 诊断信息获取)
-=======
+MSE_GET(MSE_GET，MSE 诊断信息获取)
+==================================
 
 Retrieves detailed Mean Square Error (MSE) diagnostic information from the PHY.
 (从 PHY 检索详细的均方误差(Mean Square Error，MSE)诊断信息。)
@@ -3216,9 +3157,8 @@ Kernel Response Contents:
   ``ETHTOOL_A_MSE_LINK``                nested  snapshot for link-wide aggregate (链路级聚合的快照)
   ====================================  ======  ================================
 
-MSE Capabilities
-(MSE 能力)
-----------------
+MSE Capabilities(MSE 能力)
+--------------------------
 
 This nested attribute reports the capability / scaling properties used to
 interpret snapshot values.
@@ -3241,9 +3181,8 @@ See ``struct phy_mse_capability`` kernel documentation in
 ``include/linux/phy.h``.
 (参见 ``include/linux/phy.h`` 中 ``struct phy_mse_capability`` 的内核文档。)
 
-MSE Snapshot
-(MSE 快照)
-------------
+MSE Snapshot(MSE 快照)
+----------------------
 
 Each per-channel nest contains an atomic snapshot of MSE values for that
 selector (channel A/B/C/D, worst channel, or link).
@@ -3263,9 +3202,8 @@ See ``struct phy_mse_snapshot`` kernel documentation in
 ``include/linux/phy.h``.
 (参见 ``include/linux/phy.h`` 中 ``struct phy_mse_snapshot`` 的内核文档。)
 
-Request translation
-(Request translation，请求对照表)
-===================
+Request translation(Request translation，请求对照表)
+====================================================
 
 The following table maps ioctl commands to netlink commands providing their
 functionality. Entries with "n/a" in right column are commands which do not

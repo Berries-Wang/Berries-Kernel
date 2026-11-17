@@ -1,12 +1,9 @@
-=========================
-NXP SJA1105 switch driver
-=========================
+=================================================
+NXP SJA1105 switch driver(NXP SJA1105 交换机驱动)
+=================================================
 
-(NXP SJA1105 交换机驱动)
-
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 The NXP SJA1105 is a family of 10 SPI-managed automotive switches:
 (NXP SJA1105 是一个包含 10 款由 SPI 管理的汽车级交换机的产品家族：)
@@ -89,9 +86,8 @@ reprogrammed with the updated static configuration.
 动态重配置接口发送给交换机，就直接发送；否则就复位交换机，并用更新后的静态
 配置重新编程。)
 
-Switching features
-(交换功能)
-==================
+Switching features(交换功能)
+============================
 
 The driver supports the configuration of L2 forwarding rules in hardware for
 port bridging. The forwarding, broadcast and flooding domain between ports can
@@ -132,13 +128,11 @@ all bridges should have the same level of VLAN awareness (either both have
 Topology and loop detection through STP is supported.
 (支持通过 STP 进行拓扑与环路检测。)
 
-Offloads
-(硬件卸载)
-========
+Offloads(硬件卸载)
+==================
 
-Time-aware scheduling
-(时间感知调度)
----------------------
+Time-aware scheduling(时间感知调度)
+-----------------------------------
 
 The switch supports a variation of the enhancements for scheduled traffic
 specified in IEEE 802.1Q-2018 (formerly 802.1Qbv). This means it can be used to
@@ -241,9 +235,8 @@ needed to avoid this, which is outside the scope of the document.
 上触发，这里存在硬件限制。驱动程序会对照该限制检查调度的一致性，并在适当时
 报错退出。要避免这一限制需要进行调度分析，这超出了本文档的范围。)
 
-Routing actions (redirect, trap, drop)
-(路由动作（redirect、trap、drop）)
---------------------------------------
+Routing actions (redirect, trap, drop)(路由动作（redirect、trap、drop）)
+------------------------------------------------------------------------
 
 The switch is able to offload flow-based redirection of packets to a set of
 destination ports specified by the user. Internally, this is implemented by
@@ -297,9 +290,8 @@ of 100 and a PCP of 0::
   tc filter add dev swp2 ingress protocol 802.1Q flower skip_sw \
           dst_mac 42:be:24:9b:76:20 vlan_id 100 vlan_prio 0 action drop
 
-Time-based ingress policing
-(基于时间的入口策略)
----------------------------
+Time-based ingress policing(基于时间的入口策略)
+-----------------------------------------------
 
 The TTEthernet hardware abilities of the switch can be constrained to act
 similarly to the Per-Stream Filtering and Policing (PSFP) clause specified in
@@ -397,9 +389,8 @@ not available.
 (每条流也有硬件统计可用（"pkts" 计数被丢弃的帧数，它是因违反时间要求、缺少
 目的端口以及 MTU 强制检查而被丢弃的帧数之和）。没有字节级计数器。)
 
-Limitations
-(限制)
-===========
+Limitations(限制)
+=================
 
 The SJA1105 switch family always performs VLAN processing. When configured as
 VLAN-unaware, frames carry a different VLAN tag internally, depending on
@@ -440,18 +431,16 @@ has been made, and removed by user space before making any changes to it.
 为了正确运行，tc-flower 过滤器应当只在端口的转发配置完成之后安装，并且由
 用户空间在对转发配置做任何更改之前先行移除。)
 
-Device Tree bindings and board design
-(设备树绑定与板级设计)
-=====================================
+Device Tree bindings and board design(设备树绑定与板级设计)
+===========================================================
 
 This section references ``Documentation/devicetree/bindings/net/dsa/nxp,sja1105.yaml``
 and aims to showcase some potential switch caveats.
 (本节引用 ``Documentation/devicetree/bindings/net/dsa/nxp,sja1105.yaml`` ，旨在
 展示该交换机一些潜在的注意事项。)
 
-RMII PHY role and out-of-band signaling
-(RMII PHY 角色与带外信令)
----------------------------------------
+RMII PHY role and out-of-band signaling(RMII PHY 角色与带外信令)
+----------------------------------------------------------------
 
 In the RMII spec, the 50 MHz clock signals are either driven by the MAC or by
 an external oscillator (but not by the PHY).
@@ -494,9 +483,8 @@ PHY 接口，并在帧前导码之前生成 /J/ 和 /K/ 符号，而真正的 PH
 丢包，而对另一些则不丢包。结论是：在 RMII 模式下，如果 SJA1105 连接的是
 PHY，就必须让它来驱动参考时钟。)
 
-RGMII fixed-link and internal delays
-(RGMII fixed-link 与内部时延)
-------------------------------------
+RGMII fixed-link and internal delays(RGMII fixed-link 与内部时延)
+-----------------------------------------------------------------
 
 As mentioned in the bindings document, the second generation of devices has
 tunable delay lines as part of the MAC, which can be used to establish the
@@ -537,9 +525,8 @@ required to work at gigabit.
 一些以太网控制器复位后处于 100 Mbps 模式，如果要求它们工作在千兆速率，其
 驱动程序就不可避免地需要更改速度和时钟频率。)
 
-MDIO bus and PHY management
-(MDIO 总线与 PHY 管理)
----------------------------
+MDIO bus and PHY management(MDIO 总线与 PHY 管理)
+-------------------------------------------------
 
 The SJA1105 does not have an MDIO bus and does not perform in-band AN either.
 Therefore there is no link state notification coming from the switch device.
@@ -571,9 +558,8 @@ similar to SJA1105.
 交换机端口的独立 PHY 应当把其 MDIO 接口接到主机系统的某个 MDIO 控制器上，
 而不是接到交换机上，与 SJA1105 相同。)
 
-Port compatibility matrix
-(端口兼容性矩阵)
--------------------------
+Port compatibility matrix(端口兼容性矩阵)
+-----------------------------------------
 
 The SJA1105 port compatibility matrix is:
 (SJA1105 的端口兼容性矩阵如下：)

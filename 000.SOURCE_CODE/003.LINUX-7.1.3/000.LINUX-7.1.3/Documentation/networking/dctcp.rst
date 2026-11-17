@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-======================
-DCTCP (DataCenter TCP)
-======================
-
-(DCTCP(数据中心 TCP))
+===========================================
+DCTCP (DataCenter TCP)(DCTCP(数据中心 TCP))
+===========================================
 
 DCTCP is an enhancement to the TCP congestion control algorithm for data
 center networks and leverages Explicit Congestion Notification (ECN) in

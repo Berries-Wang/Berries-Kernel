@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===============================
-Acorn Disc Filing System - ADFS
-===============================
+==========================================================
+Acorn Disc Filing System - ADFS(Acorn 磁盘文件系统 - ADFS)
+==========================================================
 
-(Acorn 磁盘文件系统 - ADFS)
-
-Filesystems supported by ADFS
-(ADFS 支持的文件系统)
------------------------------
+Filesystems supported by ADFS(ADFS 支持的文件系统)
+--------------------------------------------------
 
 The ADFS module supports the following Filecore formats which have:
 (ADFS 模块支持下列具有如下特征的 Filecore 格式：)
@@ -40,9 +37,8 @@ If write support (ADFS_FS_RW) is configured, we allow rudimentary
 directory updates, specifically updating the access mode and timestamp.
 (如果配置了写支持(ADFS_FS_RW)，我们允许基本的目录更新，具体而言是更新访问模式和时间戳。)
 
-Mount options for ADFS
-(ADFS 的挂载选项)
-----------------------
+Mount options for ADFS(ADFS 的挂载选项)
+---------------------------------------
 
   ============  ======================================================
   uid=nnn	All files in the partition will be owned by
@@ -58,9 +54,8 @@ Mount options for ADFS
 		the RISC OS file type will be added.  Default 0.(当 ftsuffix=0 时，不会应用任何文件类型后缀。当 ftsuffix=1 时，将添加与 RISC OS 文件类型对应的十六进制后缀。默认 0。)
   ============  ======================================================
 
-Mapping of ADFS permissions to Linux permissions
-(ADFS 权限到 Linux 权限的映射)
-------------------------------------------------
+Mapping of ADFS permissions to Linux permissions(ADFS 权限到 Linux 权限的映射)
+------------------------------------------------------------------------------
 
   ADFS permissions consist of the following:
   (ADFS 权限由以下各项组成：)
@@ -117,9 +112,8 @@ Mapping of ADFS permissions to Linux permissions
   desire the permissions should be under Linux.
   (因此，你可以将权限转换定制为你希望在 Linux 下呈现的任何权限。)
 
-RISC OS file type suffix
-(RISC OS 文件类型后缀)
-------------------------
+RISC OS file type suffix(RISC OS 文件类型后缀)
+----------------------------------------------
 
   RISC OS file types are stored in bits 19..8 of the file load address.
   (RISC OS 文件类型存储在文件加载地址的第 19..8 位中。)

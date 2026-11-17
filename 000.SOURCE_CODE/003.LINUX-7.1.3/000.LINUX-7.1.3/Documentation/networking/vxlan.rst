@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-======================================================
-Virtual eXtensible Local Area Networking documentation
-======================================================
-
-(虚拟可扩展局域网 (VXLAN) 文档)
+=====================================================================================
+Virtual eXtensible Local Area Networking documentation(虚拟可扩展局域网 (VXLAN) 文档)
+=====================================================================================
 
 The VXLAN protocol is a tunnelling protocol designed to solve the
 problem of limited VLAN IDs (4096) in IEEE 802.1q.  With VXLAN the

@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=======================================
-Linux wireless regulatory documentation
-=======================================
-
-(Linux 无线监管文档)
+===========================================================
+Linux wireless regulatory documentation(Linux 无线监管文档)
+===========================================================
 
 This document gives a brief review over how the Linux wireless
 regulatory infrastructure works.
@@ -15,9 +13,8 @@ More up to date information can be obtained at the project's web page:
 
 https://wireless.wiki.kernel.org/en/developers/Regulatory
 
-Keeping regulatory domains in userspace
-(将监管域保存在用户空间)
----------------------------------------
+Keeping regulatory domains in userspace(将监管域保存在用户空间)
+---------------------------------------------------------------
 
 Due to the dynamic nature of regulatory domains we keep them
 in userspace and provide a framework for userspace to upload
@@ -26,9 +23,8 @@ core regulatory domain all wireless devices should adhere to.
 (由于监管域具有动态性，我们将其保存在用户空间，并提供一个框架让用户空间向内核上传一个监管域，作为所有无线设备
 都应遵循的中心核心监管域。)
 
-How to get regulatory domains to the kernel
-(如何将监管域送入内核)
--------------------------------------------
+How to get regulatory domains to the kernel(如何将监管域送入内核)
+-----------------------------------------------------------------
 
 When the regulatory domain is first set up, the kernel will request a
 database file (regulatory.db) containing all the regulatory rules. It
@@ -37,9 +33,8 @@ given country.
 (监管域首次建立时，内核将请求一个包含全部监管规则的数据库文件 (regulatory.db)。之后当需要查询某个国家的规则
 时，内核就会使用该数据库。)
 
-How to get regulatory domains to the kernel (old CRDA solution)
-(如何将监管域送入内核（旧 CRDA 方案）)
----------------------------------------------------------------
+How to get regulatory domains to the kernel (old CRDA solution)(如何将监管域送入内核（旧 CRDA 方案）)
+-----------------------------------------------------------------------------------------------------
 
 Userspace gets a regulatory domain in the kernel by having
 a userspace agent build it and send it via nl80211. Only
@@ -134,9 +129,8 @@ the only ones that will be allowed and therefore *additional*
 channels cannot be enabled.
 (提供自己内置监管域的设备驱动无需回调，因为它们注册的信道是唯一会被允许的信道，因此*额外的* 信道无法被启用。)
 
-Example code - drivers hinting an alpha2:
-(示例代码——驱动提示一个 alpha2：)
-------------------------------------------
+Example code - drivers hinting an alpha2:(示例代码——驱动提示一个 alpha2：)
+--------------------------------------------------------------------------
 
 This example comes from the zd1211rw device driver. You can start
 by having a mapping of your device's EEPROM country/regulatory
@@ -184,9 +178,8 @@ are expected to do this during initialization.
 	if (!r)
 		regulatory_hint(hw->wiphy, alpha2);
 
-Example code - drivers providing a built in regulatory domain:
-(示例代码——驱动提供内置监管域：)
---------------------------------------------------------------
+Example code - drivers providing a built in regulatory domain:(示例代码——驱动提供内置监管域：)
+----------------------------------------------------------------------------------------------
 
 [NOTE: This API is not currently available, it can be added when required]
 ([注意：此 API 目前尚不可用，可在需要时添加])
@@ -248,9 +241,8 @@ Then in some part of your code after your wiphy has been registered::
 		       sizeof(struct ieee80211_reg_rule));
 	regulatory_struct_hint(rd);
 
-Statically compiled regulatory database
-(静态编译的监管数据库)
----------------------------------------
+Statically compiled regulatory database(静态编译的监管数据库)
+-------------------------------------------------------------
 
 When a database should be fixed into the kernel, it can be provided as a
 firmware file at build time that is then linked into the kernel.

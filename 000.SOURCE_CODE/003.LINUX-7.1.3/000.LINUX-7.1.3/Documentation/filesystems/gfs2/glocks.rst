@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-============================
-Glock internal locking rules
-============================
-
-(Glock 内部加锁规则)
+================================================
+Glock internal locking rules(Glock 内部加锁规则)
+================================================
 
 This documents the basic principles of the glock state machine
 internals. Each glock (struct gfs2_glock in fs/gfs2/incore.h)
@@ -148,9 +146,8 @@ is on a per-inode basis. Locking of rgrps is on a per rgrp basis.
 In general we prefer to lock local locks prior to cluster locks.
 (每个 inode 有两个 glock。一个处理对 inode 本身的访问(加锁顺序如上)，另一个被称为 iopen glock，与 inode 中的 i_nlink 字段配合使用，以确定相关 inode 的生命周期。inode 的加锁是按每个 inode 进行的。资源组的加锁是按每个资源组进行的。一般来说，我们倾向于在集群锁之前先加本地锁。)
 
-Glock Statistics
-(Glock 统计)
-----------------
+Glock Statistics(Glock 统计)
+----------------------------
 
 The stats are divided into two sets: those relating to the
 super block and those relating to an individual glock. The

@@ -1,11 +1,9 @@
 .. SPDX-License-Identifier: GPL-2.0 OR Linux-OpenIB
 .. include:: <isonum.txt>
 
-===========
-Tracepoints
-===========
-
-(跟踪点)
+===================
+Tracepoints(跟踪点)
+===================
 
 :Copyright: |copy| 2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 (版权所有 |copy| 2023，NVIDIA CORPORATION & AFFILIATES。保留所有权利。)

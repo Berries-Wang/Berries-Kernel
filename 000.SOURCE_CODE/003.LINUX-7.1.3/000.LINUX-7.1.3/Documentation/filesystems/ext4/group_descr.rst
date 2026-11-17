@@ -1,8 +1,7 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-Block Group Descriptors
-(块组描述符)
------------------------
+Block Group Descriptors(块组描述符)
+-----------------------------------
 
 Each block group on the filesystem has one of these descriptors
 associated with it. As noted in the Layout section above, the group

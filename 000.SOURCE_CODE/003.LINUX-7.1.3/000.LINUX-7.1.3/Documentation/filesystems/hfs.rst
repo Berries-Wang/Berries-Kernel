@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==================================
-Macintosh HFS Filesystem for Linux
-==================================
-
-(面向 Linux 的 Macintosh HFS 文件系统)
+========================================================================
+Macintosh HFS Filesystem for Linux(面向 Linux 的 Macintosh HFS 文件系统)
+========================================================================
 
 
 .. Note:: This filesystem doesn't have a maintainer.
@@ -21,9 +19,8 @@ to access such filesystems from Linux.
 (HFS 代表 ``Hierarchical File System``(分层文件系统)，是 Mac Plus 及其后所有 Macintosh 机型使用的文件系统。更早的 Macintosh 机型使用 MFS(``Macintosh File System``)，它不受支持。MacOS 8.1 及更新版本支持一种名为 HFS+ 的文件系统，它与 HFS 相似但在多个方面有所扩展。在 Linux 中请使用 hfsplus 文件系统驱动程序来访问这类文件系统。)
 
 
-Mount options
-(挂载选项)
-=============
+Mount options(挂载选项)
+=======================
 
 When mounting an HFS filesystem, the following options are accepted:
 (挂载 HFS 文件系统时，接受以下选项：)
@@ -61,9 +58,8 @@ When mounting an HFS filesystem, the following options are accepted:
 	(忽略无效的挂载选项，而不是报错抱怨。)
 
 
-Writing to HFS Filesystems
-(写入 HFS 文件系统)
-==========================
+Writing to HFS Filesystems(写入 HFS 文件系统)
+=============================================
 
 HFS is not a UNIX filesystem, thus it does not have the usual features you'd
 expect:
@@ -92,9 +88,8 @@ the a little strange:
    (将文件复制到其他文件系统会丢失那些对 MacOS 正常工作必不可少的属性。)
 
 
-Creating HFS filesystems
-(创建 HFS 文件系统)
-========================
+Creating HFS filesystems(创建 HFS 文件系统)
+===========================================
 
 The hfsutils package from Robert Leslie contains a program called
 hformat that can be used to create HFS filesystem. See
@@ -102,9 +97,8 @@ hformat that can be used to create HFS filesystem. See
 (Robert Leslie 的 hfsutils 软件包包含一个名为 hformat 的程序，可用于创建 HFS 文件系统。详情请参见 <https://www.mars.org/home/rob/proj/hfs/>。)
 
 
-Credits
-(致谢)
-=======
+Credits(致谢)
+=============
 
 The HFS drivers was written by Paul H. Hargrovea (hargrove@sccm.Stanford.EDU).
 Roman Zippel (roman@ardistech.com) rewrote large parts of the code and brought

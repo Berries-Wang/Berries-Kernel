@@ -1,17 +1,14 @@
 .. SPDX-License-Identifier: GPL-2.0+
 
-=============================================================
-Linux Base Driver for the Intel(R) PRO/100 Family of Adapters
-=============================================================
-
-(Intel(R) PRO/100 系列适配器的 Linux 基础驱动)
+===========================================================================================================
+Linux Base Driver for the Intel(R) PRO/100 Family of Adapters(Intel(R) PRO/100 系列适配器的 Linux 基础驱动)
+===========================================================================================================
 
 June 1, 2018
 (2018 年 6 月 1 日)
 
-Contents
-(目录)
-========
+Contents(目录)
+==============
 
 - In This Release
   (本版内容)
@@ -29,9 +26,8 @@ Contents
   (支持)
 
 
-In This Release
-(本版内容)
-===============
+In This Release(本版内容)
+=========================
 
 This file describes the Linux Base Driver for the Intel(R) PRO/100 Family of
 Adapters. This driver includes support for Itanium(R)2-based systems.
@@ -56,18 +52,16 @@ Channel Bonding documentation can be found in the Linux kernel source:
 (通道绑定文档位于 Linux 内核源码中：/Documentation/networking/bonding.rst)
 
 
-Identifying Your Adapter
-(识别你的适配器)
-========================
+Identifying Your Adapter(识别你的适配器)
+========================================
 
 For information on how to identify your adapter, and for the latest Intel
 network drivers, refer to the Intel Support website:
 https://www.intel.com/support
 (关于如何识别适配器以及获取最新 Intel 网络驱动的信息，请参阅 Intel 支持网站：https://www.intel.com/support)
 
-Driver Configuration Parameters
-(驱动配置参数)
-===============================
+Driver Configuration Parameters(驱动配置参数)
+=============================================
 
 The default value for each parameter is generally the recommended setting,
 unless otherwise noted.
@@ -129,13 +123,11 @@ Event Log Message Level:
      ethtool -s eth? msglvl n
 
 
-Additional Configurations
-(其他配置)
-=========================
+Additional Configurations(其他配置)
+===================================
 
-Configuring the Driver on Different Distributions
-(在不同发行版上配置驱动)
--------------------------------------------------
+Configuring the Driver on Different Distributions(在不同发行版上配置驱动)
+-------------------------------------------------------------------------
 
 Configuring a network driver to load properly when the system is started
 is distribution dependent.  Typically, the configuration process involves
@@ -156,9 +148,8 @@ As an example, if you install the e100 driver for two PRO/100 adapters
        alias eth0 e100
        alias eth1 e100
 
-Viewing Link Messages
-(查看链路消息)
----------------------
+Viewing Link Messages(查看链路消息)
+-----------------------------------
 
 In order to see link messages and other Intel driver information on your
 console, you must set the dmesg level up to six.  This can be done by
@@ -187,9 +178,8 @@ The latest release of ethtool can be found from
 https://www.kernel.org/pub/software/network/ethtool/
 (ethtool 的最新版本可以从 https://www.kernel.org/pub/software/network/ethtool/ 获取。)
 
-Enabling Wake on LAN (WoL)
-(启用 Wake on LAN (WoL))
---------------------------
+Enabling Wake on LAN (WoL)(启用 Wake on LAN (WoL))
+--------------------------------------------------
 
 WoL is provided through the ethtool utility.  For instructions on
 enabling WoL with ethtool, refer to the ethtool man page.  WoL will be
@@ -207,9 +197,8 @@ NAPI (Rx polling mode) is supported in the e100 driver.
 See :ref:`Documentation/networking/napi.rst <napi>` for more information.
 (更多信息参见 :ref:`Documentation/networking/napi.rst <napi>`。)
 
-Multiple Interfaces on Same Ethernet Broadcast Network
-(同一以太网广播网络上的多个接口)
-------------------------------------------------------
+Multiple Interfaces on Same Ethernet Broadcast Network(同一以太网广播网络上的多个接口)
+--------------------------------------------------------------------------------------
 
 Due to the default ARP behavior on Linux, it is not possible to have one
 system on two IP networks in the same Ethernet broadcast domain
@@ -235,9 +224,8 @@ filtering by
     ((2) 将各接口安装在不同的广播域中（使用不同的交换机，或使用按 VLAN 分区的交换机）。)
 
 
-Support
-(支持)
-=======
+Support(支持)
+=============
 
 For general information, go to the Intel support website at:
 https://www.intel.com/support/

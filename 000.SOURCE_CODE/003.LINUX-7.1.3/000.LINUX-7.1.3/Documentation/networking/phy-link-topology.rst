@@ -1,15 +1,12 @@
 .. SPDX-License-Identifier: GPL-2.0
 .. _phy_link_topology:
 
-=================
-PHY link topology
-=================
+===============================
+PHY link topology(PHY 链路拓扑)
+===============================
 
-(PHY 链路拓扑)
-
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 The PHY link topology representation in the networking stack aims at representing
 the hardware layout for any given Ethernet link.

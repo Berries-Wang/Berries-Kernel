@@ -2,11 +2,9 @@
 
 .. include:: <isonum.txt>
 
-=======================================
-Altera Triple-Speed Ethernet MAC driver
-=======================================
-
-(Altera 三速以太网 MAC 驱动)
+===================================================================
+Altera Triple-Speed Ethernet MAC driver(Altera 三速以太网 MAC 驱动)
+===================================================================
 
 Copyright |copy| 2008-2014 Altera Corporation
 (版权所有 |copy| 2008-2014 Altera Corporation。)
@@ -64,9 +62,8 @@ The driver limits PHY operations to 10/100Mbps, and has not yet been fully
 tested for 1Gbps. This support will be added in a future maintenance update.
 (驱动将 PHY 操作限制在 10/100Mbps，尚未对 1Gbps 进行充分测试。该支持将在未来的维护更新中加入。)
 
-1. Kernel Configuration
-(1. 内核配置)
-=======================
+1. Kernel Configuration(1. 内核配置)
+====================================
 
 The kernel configuration option is ALTERA_TSE:
 (内核配置选项为 ALTERA_TSE：)
@@ -75,9 +72,8 @@ The kernel configuration option is ALTERA_TSE:
  Altera Triple-Speed Ethernet MAC support (ALTERA_TSE)
  (设备驱动 ---> 网络设备支持 ---> 以太网驱动支持 ---> Altera 三速以太网 MAC 支持 (ALTERA_TSE))
 
-2. Driver parameters list
-(2. 驱动参数列表)
-=========================
+2. Driver parameters list(2. 驱动参数列表)
+==========================================
 
 	- debug: message level (0: no output, 16: all);
 	- dma_rx_num: Number of descriptors in the RX list (default is 64);
@@ -86,22 +82,19 @@ The kernel configuration option is ALTERA_TSE:
 	RX 列表中的描述符数量（默认为 64）；
 	TX 列表中的描述符数量（默认为 64）。)
 
-3. Command line options
-(3. 命令行选项)
-=======================
+3. Command line options(3. 命令行选项)
+======================================
 
 Driver parameters can be also passed in command line by using::
 (驱动参数也可以通过命令行传递，方式是使用：)
 
 	altera_tse=dma_rx_num:128,dma_tx_num:512
 
-4. Driver information and notes
-(4. 驱动信息与说明)
-===============================
+4. Driver information and notes(4. 驱动信息与说明)
+==================================================
 
-4.1. Transmit process
-(4.1. 发送过程)
----------------------
+4.1. Transmit process(4.1. 发送过程)
+------------------------------------
 
 When the driver's transmit routine is called by the kernel, it sets up a
 transmit descriptor by calling the underlying DMA transmit routine (SGDMA or
@@ -111,9 +104,8 @@ completion in the context of the interrupt handling chain by recycling
 resource required to send and track the requested transmit operation.
 (当内核调用驱动的发送例程时，它会通过调用底层 DMA 发送例程（SGDMA 或 MSGDMA）设置一个发送描述符，并启动一次发送操作。发送完成后，发送 DMA 逻辑会产生一个中断。驱动在中断处理链的上下文中处理发送完成事件，回收发送和跟踪所请求发送操作所需的资源。)
 
-4.2. Receive process
-(4.2. 接收过程)
---------------------
+4.2. Receive process(4.2. 接收过程)
+-----------------------------------
 
 The driver will post receive buffers to the receive DMA logic during driver
 initialization. Receive buffers may or may not be queued depending upon the
@@ -124,33 +116,29 @@ interrupt by obtaining the DMA receive logic status, reaping receive
 completions until no more receive completions are available.
 (驱动会在初始化期间把接收缓冲区投递给接收 DMA 逻辑。接收缓冲区是否排队取决于底层 DMA 逻辑（MSGDMA 能够让接收缓冲区排队，SGDMA 则无法把接收缓冲区排队到 SGDMA 接收逻辑）。当收到一个数据包时，DMA 逻辑会产生一个中断。驱动通过获取 DMA 接收逻辑的状态来处理接收中断，持续收取接收完成事件，直到没有更多可用的接收完成为止。)
 
-4.3. Interrupt Mitigation
-(4.3. 中断缓解)
--------------------------
+4.3. Interrupt Mitigation(4.3. 中断缓解)
+----------------------------------------
 
 The driver is able to mitigate the number of its DMA interrupts
 using NAPI for receive operations. Interrupt mitigation is not yet supported
 for transmit operations, but will be added in a future maintenance release.
 (驱动能够在接收操作上使用 NAPI 来减少其 DMA 中断的数量。发送操作尚不支持中断缓解，但将在未来的维护版本中加入。)
 
-4.4) Ethtool support
-(4.4) Ethtool 支持)
---------------------
+4.4) Ethtool support(4.4) Ethtool 支持)
+---------------------------------------
 
 Ethtool is supported. Driver statistics and internal errors can be taken using:
 ethtool -S ethX command. It is possible to dump registers etc.
 (支持 Ethtool。可以使用 ethtool -S ethX 命令获取驱动统计信息和内部错误。还可以转储寄存器等。)
 
-4.5) PHY Support
-(4.5) PHY 支持)
-----------------
+4.5) PHY Support(4.5) PHY 支持)
+-------------------------------
 
 The driver is compatible with PAL to work with PHY and GPHY devices.
 (该驱动与 PAL 兼容，可与 PHY 和 GPHY 设备协同工作。)
 
-4.7) List of source files:
-(4.7) 源文件列表：)
---------------------------
+4.7) List of source files:(4.7) 源文件列表：)
+---------------------------------------------
 
  - Kconfig
  - Makefile
@@ -177,9 +165,8 @@ The driver is compatible with PAL to work with PHY and GPHY devices.
  - altera_utils.h: Driver utility function definitions
    (驱动工具函数定义)
 
-5. Debug Information
-(5. 调试信息)
-====================
+5. Debug Information(5. 调试信息)
+=================================
 
 The driver exports debug information such as internal statistics,
 debug information, MAC and DMA registers etc.
@@ -194,9 +181,8 @@ The developer can also use the "debug" module parameter to get
 further debug information.
 (开发者还可以使用 "debug" 模块参数来获取更多调试信息。)
 
-6. Statistics Support
-(6. 统计支持)
-=====================
+6. Statistics Support(6. 统计支持)
+==================================
 
 The controller and driver support a mix of IEEE standard defined statistics,
 RFC defined statistics, and driver or Altera defined statistics. The four

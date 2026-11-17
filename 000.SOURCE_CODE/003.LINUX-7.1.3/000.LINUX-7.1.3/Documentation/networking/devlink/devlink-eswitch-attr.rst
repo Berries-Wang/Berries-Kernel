@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==========================
-Devlink E-Switch Attribute
-==========================
-
-(devlink E-Switch 属性)
+=================================================
+Devlink E-Switch Attribute(devlink E-Switch 属性)
+=================================================
 
 Devlink E-Switch supports two modes of operation: legacy and switchdev.
 Legacy mode operates based on traditional MAC/VLAN steering rules. Switching
@@ -25,9 +23,8 @@ In addition, the devlink E-Switch also comes with other attributes listed
 in the following section.
 (此外，devlink E-Switch 还带有其他属性，列在下一节中。)
 
-Attributes Description
-======================
-(属性描述)
+Attributes Description(属性描述)
+================================
 
 The following is a list of E-Switch attributes.
 (以下是 E-Switch 属性的列表。)
@@ -80,9 +77,8 @@ The following is a list of E-Switch attributes.
        * ``basic`` Enable encapsulation support.
          (启用封装支持。)
 
-Example Usage
-=============
-(用法示例)
+Example Usage(用法示例)
+=======================
 
 .. code:: shell
 

@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==============================================================
-Davicom DM9102(A)/DM9132/DM9801 fast ethernet driver for Linux
-==============================================================
-
-(Linux 下的 Davicom DM9102(A)/DM9132/DM9801 快速以太网驱动)
+=========================================================================================================================
+Davicom DM9102(A)/DM9132/DM9801 fast ethernet driver for Linux(Linux 下的 Davicom DM9102(A)/DM9132/DM9801 快速以太网驱动)
+=========================================================================================================================
 
 Note: This driver doesn't have a maintainer.
 (注意：该驱动目前没有维护者。)
@@ -46,11 +44,12 @@ a mode= setting to module while loading, like::
 	insmod dmfe mode=5 # Force 100M Full Duplex
 
 Next you should configure your network interface with a command similar to::
-(接下来，你应该用类似下面的命令配置你的网络接口：)
 
 	ifconfig eth0 172.22.3.18
 		      ^^^^^^^^^^^
 		     Your IP Address
+
+(接下来，你应该用类似下面的命令配置你的网络接口：)
 
 Then you may have to modify the default routing table with command::
 (然后，你可能需要用以下命令修改默认路由表：)

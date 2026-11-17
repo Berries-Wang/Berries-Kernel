@@ -1,21 +1,17 @@
 .. SPDX-License-Identifier: (GPL-2.0-only OR BSD-3-Clause)
 
-can327: ELM327 driver for Linux SocketCAN
-==========================================
+can327: ELM327 driver for Linux SocketCAN(can327：面向 Linux SocketCAN 的 ELM327 驱动)
+======================================================================================
 
-(can327：面向 Linux SocketCAN 的 ELM327 驱动)
-
-Authors
-(作者)
---------
+Authors(作者)
+-------------
 
 Max Staudt <max@enpas.org>
 
 
 
-Motivation
-(动机)
------------
+Motivation(动机)
+----------------
 
 This driver aims to lower the initial cost for hackers interested in
 working with CAN buses.
@@ -29,9 +25,8 @@ Let's use ELM327s as CAN adapters.
 
 
 
-Introduction
-(简介)
--------------
+Introduction(简介)
+------------------
 
 This driver is an effort to turn abundant ELM327 based OBD interfaces
 into full fledged (as far as possible) CAN interfaces.
@@ -66,9 +61,8 @@ known limitations in older controllers and clones.
 
 
 
-Data sheet
-(数据手册)
------------
+Data sheet(数据手册)
+--------------------
 
 The official data sheets can be found at ELM electronics' home page:
 (官方数据手册可在 ELM electronics 的主页上找到：)
@@ -77,9 +71,8 @@ The official data sheets can be found at ELM electronics' home page:
 
 
 
-How to attach the line discipline
-(如何挂接线路规程)
-----------------------------------
+How to attach the line discipline(如何挂接线路规程)
+---------------------------------------------------
 
 Every ELM327 chip is factory programmed to operate at a serial setting
 of 38400 baud/s, 8 data bits, no parity, 1 stopbit.
@@ -125,9 +118,8 @@ After this, you can set out as usual with candump, cansniffer, etc.
 
 
 
-How to check the controller version
-(如何查看控制器版本)
-------------------------------------
+How to check the controller version(如何查看控制器版本)
+-------------------------------------------------------
 
 Use a terminal program to attach to the controller.
 (使用终端程序连接到控制器。)
@@ -151,9 +143,8 @@ It is not indicative of their actual feature set.
 
 
 
-Communication example
-(通信示例)
-----------------------
+Communication example(通信示例)
+-------------------------------
 
 This is a short and incomplete introduction on how to talk to an ELM327.
 It is here to guide understanding of the controller's and the driver's
@@ -258,9 +249,8 @@ incomplete) data frame::
 
 
 
-Known limitations of the controller
-(控制器的已知局限)
-------------------------------------
+Known limitations of the controller(控制器的已知局限)
+-----------------------------------------------------
 
 - Clone devices ("v1.5" and others)
   (克隆设备（"v1.5" 等）)
@@ -365,9 +355,8 @@ Known limitations of the controller
 
 
 
-Known limitations of the driver
-(驱动程序的已知局限)
---------------------------------
+Known limitations of the driver(驱动程序的已知局限)
+---------------------------------------------------
 
 - No 8/7 timing.
   (不支持 8/7 时序。)
@@ -408,9 +397,8 @@ Known limitations of the driver
 
 
 
-Rationale behind the chosen configuration
-(所选配置背后的理由)
-------------------------------------------
+Rationale behind the chosen configuration(所选配置背后的理由)
+-------------------------------------------------------------
 
 ``AT E1``
   Echo on
@@ -443,9 +431,8 @@ Rationale behind the chosen configuration
 
 
 
-A note on CAN bus termination
-(关于 CAN 总线终端电阻的说明)
-------------------------------
+A note on CAN bus termination(关于 CAN 总线终端电阻的说明)
+----------------------------------------------------------
 
 Your adapter may have resistors soldered in which are meant to terminate
 the bus. This is correct when it is plugged into a OBD-II socket, but

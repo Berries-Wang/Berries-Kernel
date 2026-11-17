@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0+
 
-=========================================================================
-OPEN Alliance 10BASE-T1x MAC-PHY Serial Interface (TC6) Framework Support
-=========================================================================
+===================================================================================================================================
+OPEN Alliance 10BASE-T1x MAC-PHY Serial Interface (TC6) Framework Support(OPEN Alliance 10BASE-T1x MAC-PHY 串行接口 (TC6) 框架支持)
+===================================================================================================================================
 
-(OPEN Alliance 10BASE-T1x MAC-PHY 串行接口 (TC6) 框架支持)
-
-Introduction
-------------
-(简介)
+Introduction(简介)
+------------------
 
 The IEEE 802.3cg project defines two 10 Mbit/s PHYs operating over a
 single pair of conductors. The 10BASE-T1L (Clause 146) is a long reach
@@ -39,18 +36,16 @@ to existing low-end microcontrollers which do not integrate a MAC
 controller.
 (MAC-PHY 解决方案集成了 IEEE 第 4 章 MAC 和 10BASE-T1x PHY，向主机微控制器暴露一个低引脚数的串行外设接口 (SPI)。这也使得能够为未集成 MAC 控制器的现有低端微控制器添加以太网功能。)
 
-Overview
---------
-(概述)
+Overview(概述)
+--------------
 
 The MAC-PHY is specified to carry both data (Ethernet frames) and control
 (register access) transactions over a single full-duplex serial peripheral
 interface.
 (MAC-PHY 被规范为通过单个全双工串行外设接口承载数据 (以太网帧) 和控制 (寄存器访问) 事务。)
 
-Protocol Overview
------------------
-(协议概述)
+Protocol Overview(协议概述)
+---------------------------
 
 Two types of transactions are defined in the protocol: data transactions
 for Ethernet frame transfers and control transactions for register
@@ -87,9 +82,8 @@ the payload or not and provides the information to determine which bytes
 of the payload contain valid frame data.
 (与此同时，接收数据块在 MISO 上被接收。每个接收数据块由一个数据块有效载荷组成，并以 32 位数据尾结束。数据尾指示有效载荷中是否存在接收帧数据，并提供用于确定有效载荷中哪些字节包含有效帧数据的信息。)
 
-Reference
----------
-(参考)
+Reference(参考)
+---------------
 
 10BASE-T1x MAC-PHY Serial Interface Specification,
 (《10BASE-T1x MAC-PHY 串行接口规范》，)
@@ -97,9 +91,8 @@ Reference
 Link: https://opensig.org/download/document/OPEN_Alliance_10BASET1x_MAC-PHY_Serial_Interface_V1.1.pdf
 (链接：https://opensig.org/download/document/OPEN_Alliance_10BASET1x_MAC-PHY_Serial_Interface_V1.1.pdf)
 
-Hardware Architecture
----------------------
-(硬件架构)
+Hardware Architecture(硬件架构)
+-------------------------------
 
 .. code-block:: none
 
@@ -110,9 +103,8 @@ Hardware Architecture
   |          |      | +-----------+  +-------+  +-------+ |
   +----------+      +-------------------------------------+
 
-Software Architecture
----------------------
-(软件架构)
+Software Architecture(软件架构)
+-------------------------------
 
 .. code-block:: none
 
@@ -141,13 +133,11 @@ Software Architecture
   |                10BASE-T1x MAC-PHY Device                 |
   +----------------------------------------------------------+
 
-Implementation
---------------
-(实现)
+Implementation(实现)
+--------------------
 
-MAC Driver
-~~~~~~~~~~
-(MAC 驱动程序)
+MAC Driver(MAC 驱动程序)
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 - Probed by SPI subsystem.
   (由 SPI 子系统探测。)
@@ -161,9 +151,8 @@ MAC Driver
 - Sends the tx ethernet frames from n/w subsystem to OA TC6 framework.
   (将来自网络子系统的待发送以太网帧发送给 OA TC6 框架。)
 
-OPEN Alliance TC6 Framework
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-(OPEN Alliance TC6 框架)
+OPEN Alliance TC6 Framework(OPEN Alliance TC6 框架)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - Initializes PHYLIB interface.
   (初始化 PHYLIB 接口。)
@@ -185,9 +174,8 @@ OPEN Alliance TC6 Framework
   subsystem.
   (将从 10Base-T1x MAC-PHY 接收到的以太网帧转发给网络子系统。)
 
-Data Transaction
-~~~~~~~~~~~~~~~~
-(数据事务)
+Data Transaction(数据事务)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The Ethernet frames that are typically transferred from the SPI host to
 the MAC-PHY will be converted into multiple transmit data chunks. Each
@@ -428,9 +416,8 @@ header this interrupt will be deasserted and the received footer for the
 first data chunk will have the receive chunks available information.
 (如果前一个数据页脚指示没有可用的接收数据块，而接收数据块一旦再次变得可供读取，MAC-PHY 中断就会向 SPI 主机发出。在收到第一个数据头后，该中断将被解除，并且为第一个数据块接收到的页脚将包含可用接收块信息。)
 
-MAC-PHY Interrupt
-~~~~~~~~~~~~~~~~~
-(MAC-PHY 中断)
+MAC-PHY Interrupt(MAC-PHY 中断)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The MAC-PHY interrupt is asserted when the following conditions are met.
 (当满足以下条件时，MAC-PHY 中断会被发出。)
@@ -454,9 +441,8 @@ the corresponding error/event. On reception of the first data header this
 interrupt will be deasserted.
 (扩展状态事件 —— 当前一个数据页脚指示没有扩展状态，而扩展事件一旦变得可用时，此中断会被发出。在这种情况下，主机应读取 status #0 寄存器以了解相应的错误/事件。在收到第一个数据头后，此中断将被解除。)
 
-Control Transaction
-~~~~~~~~~~~~~~~~~~~
-(控制事务)
+Control Transaction(控制事务)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 4 bytes control header contains the below fields,
 (4 字节的控制头包含以下字段，)
@@ -536,9 +522,8 @@ MAC-PHY. Reading any unimplemented or undefined registers shall return
 zero.
 (MAC-PHY 会忽略控制读命令其余部分中控制头之后来自 SPI 主机的所有数据。控制读命令还会从 MAC-PHY 回显给 SPI 主机，以便在出现任何总线错误时识别哪个寄存器读失败。回显的控制读命令的前 4 字节为无用值 (由 SPI 主机忽略)，随后是 4 字节回显的控制头，再后跟寄存器读数据。控制读命令可以读单个寄存器或多个连续寄存器。读取多个连续寄存器时，地址由 MAC-PHY 自动递增。读取任何未实现或未定义的寄存器应返回零。)
 
-Device drivers API
-==================
-(设备驱动程序 API)
+Device drivers API(设备驱动程序 API)
+====================================
 
 The include/linux/oa_tc6.h defines the following functions:
 (include/linux/oa_tc6.h 定义了以下函数：)

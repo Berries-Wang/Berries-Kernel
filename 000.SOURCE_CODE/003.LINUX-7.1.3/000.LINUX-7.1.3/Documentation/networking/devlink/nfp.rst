@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===================
-nfp devlink support
-===================
-
-(nfp devlink 支持)
+=====================================
+nfp devlink support(nfp devlink 支持)
+=====================================
 
 This document describes the devlink features implemented by the ``nfp``
 device driver.
 (本文档描述 ``nfp`` 设备驱动所实现的 devlink 功能。)
 
-Parameters
-==========
-(参数)
+Parameters(参数)
+================
 
 .. list-table:: Generic parameters implemented
 
@@ -23,9 +20,8 @@ Parameters
    * - ``reset_dev_on_drv_probe``
      - permanent
 
-Info versions
-=============
-(Info 版本)
+Info versions(Info 版本)
+========================
 
 The ``nfp`` driver reports the following versions
 (``nfp`` 驱动报告以下版本)

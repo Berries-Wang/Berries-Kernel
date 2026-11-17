@@ -1,9 +1,7 @@
 .. SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
 
-Ethernet Device Drivers
-=======================
-
-(以太网设备驱动)
+Ethernet Device Drivers(以太网设备驱动)
+=======================================
 
 Device drivers for Ethernet and Ethernet-based virtual function devices.
 (以太网及基于以太网的虚拟功能设备的设备驱动。)

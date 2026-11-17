@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==================================
-IP dynamic address hack-port v0.03
-==================================
-
-(IP 动态地址 hack-port v0.03)
+===============================================================
+IP dynamic address hack-port v0.03(IP 动态地址 hack-port v0.03)
+===============================================================
 
 This stuff allows diald ONESHOT connections to get established by
 dynamically changing packet source address (and socket's if local procs).

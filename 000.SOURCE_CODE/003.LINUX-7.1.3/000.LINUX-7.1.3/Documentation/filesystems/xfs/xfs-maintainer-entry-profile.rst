@@ -1,10 +1,8 @@
-XFS Maintainer Entry Profile
-(XFS 维护者入门指南)
-============================
+XFS Maintainer Entry Profile(XFS 维护者入门指南)
+================================================
 
-Overview
-(概述)
---------
+Overview(概述)
+--------------
 XFS is a well known high-performance filesystem in the Linux kernel.
 The aim of this project is to provide and maintain a robust and
 performant filesystem.
@@ -26,9 +24,8 @@ All patchsets involving XFS *must* be cc'd in their entirety to the mailing
 list linux-xfs@vger.kernel.org.
 (所有涉及 XFS 的补丁集都 *必须* 完整地抄送到邮件列表 linux-xfs@vger.kernel.org。)
 
-Roles
-(角色)
------
+Roles(角色)
+-----------
 There are eight key roles in the XFS project.
 A person can take on multiple roles, and a role can be filled by
 multiple people.
@@ -130,9 +127,8 @@ others on a regular basis about burnout.
   same file.
   (给定 LTS 版本的维护者应当在该 LTS 树的 MAINTAINERS 文件中以 ``M:`` 条目标明自己的身份。无人维护的 LTS 内核应在同一文件中标记状态 ``S: Orphan``。)
 
-Submission Checklist Addendum
-(提交清单补充说明)
------------------------------
+Submission Checklist Addendum(提交清单补充说明)
+-----------------------------------------------
 Please follow these additional rules when submitting to XFS:
 (向 XFS 提交时请遵循以下附加规则：)
 
@@ -211,9 +207,8 @@ Please follow these additional rules when submitting to XFS:
   the bug fixes at the beginning of the series to ease backporting.
   (实现缺陷修复和进一步代码清理的补丁集应将缺陷修复放在系列的开头，以便于向后移植。)
 
-Key Release Cycle Dates
-(关键发布周期日期)
------------------------
+Key Release Cycle Dates(关键发布周期日期)
+-----------------------------------------
 Bug fixes may be sent at any time, though the release manager may decide to
 defer a patch when the next merge window is close.
 (缺陷修复可以随时发送，但当下一个合并窗口临近时，发布管理者可能会决定推迟某个补丁。)
@@ -230,18 +225,16 @@ This allows the broader kernel community adequate time to test the
 infrastructure changes.
 (同样需要修改 fs/iomap 且面向下一个合并窗口的代码提交应在 -rc1 与 -rc4 之间发送。这让更广泛的内核社区有充足的时间测试基础设施更改。)
 
-Review Cadence
-(评审节奏)
---------------
+Review Cadence(评审节奏)
+------------------------
 In general, please wait at least one week before pinging for feedback.
 To find reviewers, either consult the MAINTAINERS file, or ask
 developers that have Reviewed-by tags for XFS changes to take a look and
 offer their opinion.
 (一般来说，在催促反馈之前请至少等待一周。要寻找评审者，可以查阅 MAINTAINERS 文件，或者请曾为 XFS 更改给出 Reviewed-by 标签的开发者看一看并提出他们的意见。)
 
-References
-(参考文献)
-----------
+References(参考文献)
+--------------------
 | [0] https://git.kernel.org/pub/scm/fs/xfs/xfs-linux.git/
 | [1] https://git.kernel.org/pub/scm/fs/xfs/xfsprogs-dev.git/
 | [2] https://git.kernel.org/pub/scm/fs/xfs/xfstests-dev.git/

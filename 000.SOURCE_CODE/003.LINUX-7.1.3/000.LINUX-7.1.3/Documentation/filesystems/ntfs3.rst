@@ -6,9 +6,8 @@ NTFS3
 
 (NTFS3)
 
-Summary and Features
-(概述与特性)
-====================
+Summary and Features(概述与特性)
+================================
 
 NTFS3 is fully functional NTFS Read-Write driver. The driver works with NTFS
 versions up to 3.1. File system type to use on mount is *ntfs3*.
@@ -44,9 +43,8 @@ versions up to 3.1. File system type to use on mount is *ntfs3*.
 	  (endianness of system.ntfs_attrib is the same as of the CPU).
 	  (与 system.ntfs_attrib 的值相同，但始终以大端序表示(system.ntfs_attrib 的字节序与 CPU 的字节序相同)。)
 
-Mount Options
-(挂载选项)
-=============
+Mount Options(挂载选项)
+=======================
 
 The list below describes mount options supported by NTFS3 driver in addition to
 generic ones. You can use every mount option with **no** option. If it is in
@@ -139,16 +137,14 @@ this table marked with no it means default is without **no**.
        enables support for POSIX ACLs.
        (支持 POSIX ACL(访问控制列表)。在内核支持时生效。不要与 NTFS ACL 混淆。指定 acl 选项即启用对 POSIX ACL 的支持。)
 
-Todo list
-(待办事项)
-=========
+Todo list(待办事项)
+===================
 - Full journaling support over JBD. Currently journal replaying is supported
   which is not necessarily as effective as JBD would be.
   (基于 JBD 的完整日志支持。目前支持日志重放，但其效果不一定能达到 JBD 的水平。)
 
-References
-(参考)
-==========
+References(参考)
+================
 - Commercial version of the NTFS driver for Linux.
 	https://www.paragon-software.com/home/ntfs-linux-professional/
   (面向 Linux 的 NTFS 驱动程序商业版。)

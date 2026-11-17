@@ -1,8 +1,6 @@
-==============================
-LAN9303 Ethernet switch driver
-==============================
-
-(LAN9303 以太网交换机驱动)
+========================================================
+LAN9303 Ethernet switch driver(LAN9303 以太网交换机驱动)
+========================================================
 
 The LAN9303 is a three port 10/100 Mbps ethernet switch with integrated phys for
 the two external ethernet ports. The third port is an RMII/MII interface to a
@@ -10,9 +8,8 @@ host conduit network interface (e.g. fixed link).
 (LAN9303 是一款三端口 10/100 Mbps 以太网交换机，两个外部以太网端口带有集成 PHY。第三个端口是通往主机管道网络接口(例如 fixed link)的 RMII/MII 接口。)
 
 
-Driver details
-==============
-(驱动细节)
+Driver details(驱动细节)
+========================
 
 The driver is implemented as a DSA driver, see ``Documentation/networking/dsa/dsa.rst``.
 (该驱动以 DSA 驱动的形式实现，参见 ``Documentation/networking/dsa/dsa.rst`` 。)
@@ -40,9 +37,8 @@ separated operation.
 (如果其中一个 user port 退出网桥，端口会回到最初的分离运行状态。)
 
 
-Driver limitations
-==================
-(驱动限制)
+Driver limitations(驱动限制)
+============================
 
  - Support for VLAN filtering is not implemented
    (未实现 VLAN 过滤支持)

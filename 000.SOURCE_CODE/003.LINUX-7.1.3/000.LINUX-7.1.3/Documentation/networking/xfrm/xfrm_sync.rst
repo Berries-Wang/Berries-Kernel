@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=========
-XFRM sync
-=========
-
-(XFRM 同步)
+====================
+XFRM sync(XFRM 同步)
+====================
 
 The sync patches work is based on initial patches from
 Krisztian <hidden@balabit.hu> and others and additional patches
@@ -55,9 +53,8 @@ is not driven by packet arrival.
 - the replay sequence for both inbound and outbound
   (入方向和出方向的重放序列)
 
-1) Message Structure
-(1) 消息结构)
---------------------
+1) Message Structure(1) 消息结构)
+---------------------------------
 
 nlmsghdr:aevent_id:optional-TLVs.
 (消息结构为 nlmsghdr:aevent_id:可选 TLV。)
@@ -117,9 +114,8 @@ A program needs to subscribe to multicast group XFRMNLGRP_AEVENTS
 to get notified of these events.
 (程序需要订阅多播组 XFRMNLGRP_AEVENTS 才能获得这些事件的通知。)
 
-2) TLVS reflect the different parameters
-(2) TLV 反映不同的参数)
-----------------------------------------
+2) TLVS reflect the different parameters(2) TLV 反映不同的参数)
+---------------------------------------------------------------
 
 a) byte value (XFRMA_LTIME_VAL)
    (a) 字节值 (XFRMA_LTIME_VAL))
@@ -149,9 +145,8 @@ d) expiry timer (XFRMA_ETIMER_THRESH)
    value to rate limit the events.
    (这是一个以毫秒为单位的定时器值，用作类 nagle 值来对事件进行速率限制。)
 
-3) Default configurations for the parameters
-(3) 参数的默认配置)
---------------------------------------------
+3) Default configurations for the parameters(3) 参数的默认配置)
+---------------------------------------------------------------
 
 By default these events should be turned off unless there is
 at least one listener registered to listen to the multicast
@@ -182,9 +177,8 @@ b) /proc/sys/net/core/sysctl_xfrm_aevent_rseqth
    in incremental packet count. The default is two packets.
    (用于以增量数据包计数为 XFRMA_REPLAY_THRESH 参数提供默认值。默认值为两个数据包。)
 
-4) Message types
-(4) 消息类型)
-----------------
+4) Message types(4) 消息类型)
+-----------------------------
 
 a) XFRM_MSG_GETAE issued by user-->kernel.
    XFRM_MSG_GETAE does not carry any TLVs.
@@ -254,9 +248,8 @@ The message will always have XFRMA_LTIME_VAL and XFRMA_REPLAY_VAL TLVs.
 注意这两个标志是互斥的。
 该消息总是带有 XFRMA_LTIME_VAL 和 XFRMA_REPLAY_VAL 这两个 TLV。)
 
-5) Exceptions to threshold settings
-(5) 阈值设置的例外情况)
------------------------------------
+5) Exceptions to threshold settings(5) 阈值设置的例外情况)
+----------------------------------------------------------
 
 If you have an SA that is getting hit by traffic in bursts such that
 there is a period where the timer threshold expires with no packets

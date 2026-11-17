@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-====================
-Interface statistics
-====================
+==============================
+Interface statistics(接口统计)
+==============================
 
-(接口统计)
-
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 This document is a guide to Linux network interface statistics.
 (本文档是 Linux 网络接口统计指南。)
@@ -24,9 +21,8 @@ There are three main sources of interface statistics in Linux:
  - driver-defined statistics available via ethtool.
    (通过 ethtool 提供的驱动自定义统计。)
 
-Standard interface statistics
-(标准接口统计)
------------------------------
+Standard interface statistics(标准接口统计)
+-------------------------------------------
 
 There are multiple interfaces to reach the standard statistics.
 Most commonly used is the `ip` command from `iproute2`::
@@ -53,9 +49,8 @@ If `-s` is specified once the detailed errors won't be shown.
 `ip` supports JSON formatting via the `-j` option.
 (ip 支持通过 -j 选项进行 JSON 格式化输出。)
 
-Queue statistics
-(队列统计)
-~~~~~~~~~~~~~~~~
+Queue statistics(队列统计)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Queue statistics are accessible via the netdev netlink family.
 (队列统计可通过 netdev netlink 族访问。)
@@ -65,17 +60,15 @@ Kernel development tools (ynl) can be used to experiment with them,
 see `Documentation/userspace-api/netlink/intro-specs.rst`.
 (目前尚无广泛发行的 CLI 可以访问这些统计信息。可以使用内核开发工具 (ynl) 对它们进行试验，参见 Documentation/userspace-api/netlink/intro-specs.rst。)
 
-Protocol-specific statistics
-(协议特定统计)
-----------------------------
+Protocol-specific statistics(协议特定统计)
+------------------------------------------
 
 Protocol-specific statistics are exposed via relevant interfaces,
 the same interfaces as are used to configure them.
 (协议特定统计通过相关接口公开，与用于配置它们的接口相同。)
 
-ethtool
-(ethtool)
-~~~~~~~
+ethtool(ethtool)
+~~~~~~~~~~~~~~~~
 
 Ethtool exposes common low-level statistics.
 All the standard statistics are expected to be maintained
@@ -127,9 +120,8 @@ the ``--groups`` parameter::
   rmon-tx-etherStatsPkts65to127Octets: 3
   rmon-tx-etherStatsPkts128to255Octets: 0
 
-Driver-defined statistics
-(驱动自定义统计)
--------------------------
+Driver-defined statistics(驱动自定义统计)
+-----------------------------------------
 
 Driver-defined ethtool statistics can be dumped using `ethtool -S $ifc`, e.g.::
 (驱动自定义的 ethtool 统计可以用 ethtool -S $ifc 转储，例如：)
@@ -139,13 +131,11 @@ Driver-defined ethtool statistics can be dumped using `ethtool -S $ifc`, e.g.::
      tx_single_collisions: 0
      tx_multi_collisions: 0
 
-uAPIs
-(用户空间 API)
-=====
+uAPIs(用户空间 API)
+===================
 
-procfs
-(procfs)
-------
+procfs(procfs)
+--------------
 
 The historical `/proc/net/dev` text interface gives access to the list
 of interfaces as well as their statistics.
@@ -156,9 +146,8 @@ Note that even though this interface is using
 internally it combines some of the fields.
 (注意，尽管该接口内部使用 struct rtnl_link_stats64，但它把其中一些字段合并了起来。)
 
-sysfs
-(sysfs)
-------
+sysfs(sysfs)
+------------
 
 Each device directory in sysfs contains a `statistics` directory (e.g.
 `/sys/class/net/lo/statistics/`) with files corresponding to
@@ -177,9 +166,8 @@ Documentation/ABI/testing/sysfs-class-net-statistics.
 (sysfs 文件在 Documentation/ABI/testing/sysfs-class-net-statistics 中有文档说明。)
 
 
-netlink
-(netlink)
--------
+netlink(netlink)
+----------------
 
 `rtnetlink` (`NETLINK_ROUTE`) is the preferred method of accessing
 :c:type:`struct rtnl_link_stats64 <rtnl_link_stats64>` stats.
@@ -190,17 +178,15 @@ requests (`RTM_GETLINK`) and statistic requests (`RTM_GETSTATS`,
 when `IFLA_STATS_LINK_64` bit is set in the `.filter_mask` of the request).
 (统计信息既在链路信息请求 (RTM_GETLINK) 的响应中报告，也在统计请求 (RTM_GETSTATS，当请求的 .filter_mask 中设置了 IFLA_STATS_LINK_64 位时) 中报告。)
 
-netdev (netlink)
-(netdev (netlink))
-~~~~~~~~~~~~~~~~
+netdev (netlink)(netdev (netlink))
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 `netdev` generic netlink family allows accessing page pool and per queue
 statistics.
 (netdev generic netlink 族允许访问页池 (page pool) 和每队列统计。)
 
-ethtool
-(ethtool)
--------
+ethtool(ethtool)
+----------------
 
 Ethtool IOCTL interface allows drivers to report implementation
 specific statistics. Historically it has also been used to report
@@ -214,9 +200,8 @@ and values via `ETHTOOL_GSTATS`. User space should use `ETHTOOL_GDRVINFO`
 to retrieve the number of statistics (`.n_stats`).
 (统计值与其字符串标识符分别获取。标识符通过 ETHTOOL_GSTRINGS 获取（string_set 设为 ETH_SS_STATS），值通过 ETHTOOL_GSTATS 获取。用户空间应使用 ETHTOOL_GDRVINFO 来获取统计的数量 (.n_stats)。)
 
-ethtool-netlink
-(ethtool-netlink)
----------------
+ethtool-netlink(ethtool-netlink)
+--------------------------------
 
 Ethtool netlink is a replacement for the older IOCTL interface.
 (Ethtool netlink 是较旧的 IOCTL 接口的替代品。)
@@ -237,23 +222,20 @@ statistics are supported in the following commands:
   - `ETHTOOL_MSG_TSINFO_GET`
     (ETHTOOL_MSG_TSINFO_GET)
 
-debugfs
-(debugfs)
--------
+debugfs(debugfs)
+----------------
 
 Some drivers expose extra statistics via `debugfs`.
 (一些驱动通过 debugfs 公开额外的统计信息。)
 
-struct rtnl_link_stats64
-(struct rtnl_link_stats64 结构)
-========================
+struct rtnl_link_stats64(struct rtnl_link_stats64 结构)
+=======================================================
 
 .. kernel-doc:: include/uapi/linux/if_link.h
     :identifiers: rtnl_link_stats64
 
-Notes for driver authors
-(驱动作者须知)
-========================
+Notes for driver authors(驱动作者须知)
+======================================
 
 Drivers should report all statistics which have a matching member in
 :c:type:`struct rtnl_link_stats64 <rtnl_link_stats64>` exclusively
@@ -283,9 +265,8 @@ Statistics must persist across routine operations like bringing the interface
 down and up.
 (统计必须在诸如关闭再打开接口之类的常规操作中保持不变。)
 
-Kernel-internal data structures
-(内核内部数据结构)
--------------------------------
+Kernel-internal data structures(内核内部数据结构)
+-------------------------------------------------
 
 The following structures are internal to the kernel, their members are
 translated to netlink attributes when dumped. Drivers must not overwrite

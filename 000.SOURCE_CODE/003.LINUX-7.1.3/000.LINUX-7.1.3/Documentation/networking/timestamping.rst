@@ -1,15 +1,12 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-============
-Timestamping
-============
-
-(时间戳)
+====================
+Timestamping(时间戳)
+====================
 
 
-1. Control Interfaces
-(1. 控制接口)
-=====================
+1. Control Interfaces(1. 控制接口)
+==================================
 
 The interfaces for receiving network packages timestamps are:
 (用于接收网络数据包时间戳的接口有：)
@@ -64,9 +61,8 @@ SO_TIMESTAMPING
   支持为流式套接字生成时间戳。)
 
 
-1.1 SO_TIMESTAMP (also SO_TIMESTAMP_OLD and SO_TIMESTAMP_NEW)
-(1.1 SO_TIMESTAMP (亦即 SO_TIMESTAMP_OLD 和 SO_TIMESTAMP_NEW))
--------------------------------------------------------------
+1.1 SO_TIMESTAMP (also SO_TIMESTAMP_OLD and SO_TIMESTAMP_NEW)(1.1 SO_TIMESTAMP (亦即 SO_TIMESTAMP_OLD 和 SO_TIMESTAMP_NEW))
+---------------------------------------------------------------------------------------------------------------------------
 
 This socket option enables timestamping of datagrams on the reception
 path. Because the destination socket, if any, is not known early in
@@ -88,9 +84,8 @@ SO_TIMESTAMP_OLD returns incorrect timestamps after the year 2038
 on 32 bit machines.
 (SO_TIMESTAMP_OLD 在 32 位机器上于 2038 年之后会返回不正确的时间戳。)
 
-1.2 SO_TIMESTAMPNS (also SO_TIMESTAMPNS_OLD and SO_TIMESTAMPNS_NEW)
-(1.2 SO_TIMESTAMPNS (亦即 SO_TIMESTAMPNS_OLD 和 SO_TIMESTAMPNS_NEW))
--------------------------------------------------------------------
+1.2 SO_TIMESTAMPNS (also SO_TIMESTAMPNS_OLD and SO_TIMESTAMPNS_NEW)(1.2 SO_TIMESTAMPNS (亦即 SO_TIMESTAMPNS_OLD 和 SO_TIMESTAMPNS_NEW))
+---------------------------------------------------------------------------------------------------------------------------------------
 
 This option is identical to SO_TIMESTAMP except for the returned data type.
 Its struct timespec allows for higher resolution (ns) timestamps than the
@@ -107,9 +102,8 @@ SO_TIMESTAMPNS_OLD returns incorrect timestamps after the year 2038
 on 32 bit machines.
 (SO_TIMESTAMPNS_OLD 在 32 位机器上于 2038 年之后会返回不正确的时间戳。)
 
-1.3 SO_TIMESTAMPING (also SO_TIMESTAMPING_OLD and SO_TIMESTAMPING_NEW)
-(1.3 SO_TIMESTAMPING (亦即 SO_TIMESTAMPING_OLD 和 SO_TIMESTAMPING_NEW))
-----------------------------------------------------------------------
+1.3 SO_TIMESTAMPING (also SO_TIMESTAMPING_OLD and SO_TIMESTAMPING_NEW)(1.3 SO_TIMESTAMPING (亦即 SO_TIMESTAMPING_OLD 和 SO_TIMESTAMPING_NEW))
+---------------------------------------------------------------------------------------------------------------------------------------------
 
 Supports multiple types of timestamp requests. As a result, this
 socket option takes a bitmap of flags, not a boolean. In::
@@ -132,9 +126,8 @@ be enabled for individual sendmsg calls using cmsg (1.3.4).
 生成 (1.3.4)。)
 
 
-1.3.1 Timestamp Generation
-(1.3.1 时间戳生成)
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+1.3.1 Timestamp Generation(1.3.1 时间戳生成)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Some bits are requests to the stack to try to generate timestamps. Any
 combination of them is valid. Changes to these bits apply to newly
@@ -242,9 +235,8 @@ SOF_TIMESTAMPING_TX_COMPLETION:
   启用。)
 
 
-1.3.2 Timestamp Reporting
-(1.3.2 时间戳报告)
-^^^^^^^^^^^^^^^^^^^^^^^^^
+1.3.2 Timestamp Reporting(1.3.2 时间戳报告)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The other three bits control which timestamps will be reported in a
 generated control message. Changes to the bits take immediate
@@ -276,9 +268,8 @@ SOF_TIMESTAMPING_RAW_HARDWARE:
   SOF_TIMESTAMPING_RX_HARDWARE 生成的硬件时间戳。)
 
 
-1.3.3 Timestamp Options
-(1.3.3 时间戳选项)
-^^^^^^^^^^^^^^^^^^^^^^^
+1.3.3 Timestamp Options(1.3.3 时间戳选项)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The interface supports the options
 (该接口支持以下选项)
@@ -509,9 +500,8 @@ combined with SOF_TIMESTAMPING_OPT_TSONLY.
 访问原始数据包的内容，因此不能与 SOF_TIMESTAMPING_OPT_TSONLY 组合使用。)
 
 
-1.3.4. Enabling timestamps via control messages
-(1.3.4. 通过控制消息启用时间戳)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+1.3.4. Enabling timestamps via control messages(1.3.4. 通过控制消息启用时间戳)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In addition to socket options, timestamp generation can be requested
 per write via cmsg, only for SOF_TIMESTAMPING_TX_* (see Section 1.3.1).
@@ -551,9 +541,8 @@ setsockopt to receive timestamps::
   err = setsockopt(fd, SOL_SOCKET, SO_TIMESTAMPING, &val, sizeof(val));
 
 
-1.4 Bytestream Timestamps
-(1.4 字节流时间戳)
--------------------------
+1.4 Bytestream Timestamps(1.4 字节流时间戳)
+-------------------------------------------
 
 The SO_TIMESTAMPING interface supports timestamping of bytes in a
 bytestream. Each request is interpreted as a request for when the
@@ -643,9 +632,8 @@ unusual.
 并不常见。)
 
 
-2 Data Interfaces
-(2 数据接口)
-==================
+2 Data Interfaces(2 数据接口)
+=============================
 
 Timestamps are read using the ancillary data feature of recvmsg().
 See `man 3 cmsg` for details of this interface. The socket manual
@@ -656,9 +644,8 @@ SO_TIMESTAMP and SO_TIMESTAMPNS records can be retrieved.
 SO_TIMESTAMPNS 记录生成的时间戳。)
 
 
-2.1 SCM_TIMESTAMPING records
-(2.1 SCM_TIMESTAMPING 记录)
-----------------------------
+2.1 SCM_TIMESTAMPING records(2.1 SCM_TIMESTAMPING 记录)
+-------------------------------------------------------
 
 These timestamps are returned in a control message with cmsg_level
 SOL_SOCKET, cmsg_type SCM_TIMESTAMPING, and payload of type
@@ -713,9 +700,8 @@ SOF_TIMESTAMPING_SOFTWARE 的 SO_TIMESTAMPING 一起启用，那么当缺少真�
 时间戳时，recvmsg() 调用中会生成一个虚假的软件时间戳并在 ts[0] 中传递。在硬件
 发送时间戳上也会发生这种情况。)
 
-2.1.1 Transmit timestamps with MSG_ERRQUEUE
-(2.1.1 通过 MSG_ERRQUEUE 获取发送时间戳)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2.1.1 Transmit timestamps with MSG_ERRQUEUE(2.1.1 通过 MSG_ERRQUEUE 获取发送时间戳)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For transmit timestamps the outgoing packet is looped back to the
 socket's error queue with the send timestamp(s) attached. A process
@@ -739,9 +725,8 @@ ENOMSG。另一条辅助消息的 cm_level 为 SOL_SOCKET、cm_type 为 SCM_TIME
 其中内嵌 struct scm_timestamping。)
 
 
-2.1.1.2 Timestamp types
-(2.1.1.2 时间戳类型)
-~~~~~~~~~~~~~~~~~~~~~~~
+2.1.1.2 Timestamp types(2.1.1.2 时间戳类型)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The semantics of the three struct timespec are defined by field
 ee_info in the extended error structure. It contains a value of
@@ -762,9 +747,8 @@ SOF_TIMESTAMPING_TX_HARDWARE 和 SOF_TIMESTAMPING_TX_SOFTWARE 两者。若
 ts[2] 非零则为前者，否则为后者，此时时间戳保存在 ts[0] 中。)
 
 
-2.1.1.3 Fragmentation
-(2.1.1.3 分片)
-~~~~~~~~~~~~~~~~~~~~~
+2.1.1.3 Fragmentation(2.1.1.3 分片)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Fragmentation of outgoing datagrams is rare, but is possible, e.g., by
 explicitly disabling PMTU discovery. If an outgoing packet is fragmented,
@@ -774,9 +758,8 @@ socket.
 的数据包被分片，那么只有第一个分片会被打时间戳并返回给发送套接字。)
 
 
-2.1.1.4 Packet Payload
-(2.1.1.4 数据包载荷)
-~~~~~~~~~~~~~~~~~~~~~~
+2.1.1.4 Packet Payload(2.1.1.4 数据包载荷)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The calling application is often not interested in receiving the whole
 packet payload that it passed to the stack originally: the socket
@@ -791,9 +774,8 @@ however, the full packet is queued, taking up budget from SO_RCVBUF.
 recvmsg() 之前，完整的数据包都会被排队，占用 SO_RCVBUF 的额度。)
 
 
-2.1.1.5 Blocking Read
-(2.1.1.5 阻塞读取)
-~~~~~~~~~~~~~~~~~~~~~
+2.1.1.5 Blocking Read(2.1.1.5 阻塞读取)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Reading from the error queue is always a non-blocking operation. To
 block waiting on a timestamp, use poll or select. poll() will return
@@ -805,9 +787,8 @@ ignored on request. See also `man 2 poll`.
 在 pollfd.events 中传入该标志，它在请求时会被忽略。另见 `man 2 poll`。)
 
 
-2.1.2 Receive timestamps
-(2.1.2 接收时间戳)
-^^^^^^^^^^^^^^^^^^^^^^^^
+2.1.2 Receive timestamps(2.1.2 接收时间戳)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 On reception, there is no reason to read from the socket error queue.
 The SCM_TIMESTAMPING ancillary data is sent along with the packet data
@@ -823,9 +804,8 @@ SOL_IP(V6)/IP(V6)_RECVERROR 消息。这种情况下，struct scm_timestamping �
 ts[2] 在置位时保存硬件时间戳。)
 
 
-3. Hardware Timestamping configuration: ETHTOOL_MSG_TSCONFIG_SET/GET
-(3. 硬件时间戳配置：ETHTOOL_MSG_TSCONFIG_SET/GET)
-====================================================================
+3. Hardware Timestamping configuration: ETHTOOL_MSG_TSCONFIG_SET/GET(3. 硬件时间戳配置：ETHTOOL_MSG_TSCONFIG_SET/GET)
+=====================================================================================================================
 
 Hardware time stamping must also be initialized for each device driver
 that is expected to do hardware time stamping. The parameter is defined in
@@ -938,9 +918,8 @@ ioctl(SIOCSHWTSTAMP) 相同。不过，并非所有驱动程序都实现了它�
 	    */
     };
 
-3.1 Hardware Timestamping Implementation: Device Drivers
-(3.1 硬件时间戳实现：设备驱动程序)
---------------------------------------------------------
+3.1 Hardware Timestamping Implementation: Device Drivers(3.1 硬件时间戳实现：设备驱动程序)
+------------------------------------------------------------------------------------------
 
 A driver which supports hardware time stamping must support the
 ndo_hwtstamp_set NDO and update the supplied struct hwtstamp_config with
@@ -1008,9 +987,8 @@ Time stamps for outgoing packets are to be generated as follows:
   某种原因失败，驱动程序不应回退到软件时间戳。理由是：这将发生在处理流水线中
   比其他软件时间戳更靠后的时刻，因而可能导致时间戳之间出现意外的偏差。)
 
-3.2 Special considerations for stacked PTP Hardware Clocks
-(3.2 堆叠 PTP 硬件时钟的特殊注意事项)
-----------------------------------------------------------
+3.2 Special considerations for stacked PTP Hardware Clocks(3.2 堆叠 PTP 硬件时钟的特殊注意事项)
+-----------------------------------------------------------------------------------------------
 
 There are situations when there may be more than one PHC (PTP Hardware Clock)
 in the data path of a packet. The kernel has no explicit mechanism to allow the
@@ -1023,9 +1001,8 @@ cases of stacked PHCs, detailed below:
 总是最优选择，并由各内核驱动程序协作实现这一目标。目前有 3 种堆叠 PHC 的情况，
 详述如下：)
 
-3.2.1 DSA (Distributed Switch Architecture) switches
-(3.2.1 DSA (分布式交换机架构) 交换机)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+3.2.1 DSA (Distributed Switch Architecture) switches(3.2.1 DSA (分布式交换机架构) 交换机)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 These are Ethernet switches which have one of their ports connected to an
 (otherwise completely unaware) host Ethernet interface, and perform the role of
@@ -1130,9 +1107,8 @@ timestamping:
   时间戳 FIFO)。当获取时间戳需要可睡眠上下文时，RX 方向通常需要推迟处理。
   那种情况下，由 DSA 驱动程序负责对打好时间戳的新 skb 调用 ``netif_rx()``。)
 
-3.2.2 Ethernet PHYs
-(3.2.2 以太网 PHY)
-^^^^^^^^^^^^^^^^^^^
+3.2.2 Ethernet PHYs(3.2.2 以太网 PHY)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 These are devices that typically fulfill a Layer 1 role in the network stack,
 hence they do not have a representation in terms of a network interface as DSA
@@ -1204,9 +1180,8 @@ to each individual MAC driver for PHY timestamping support. This entails:
   被间接调用——许多 MAC 驱动程序出于软件时间戳的目的已经在调用它。因此，如果
   MAC 支持软件时间戳，在这一阶段无需再做任何其他事情。)
 
-3.2.3 MII bus snooping devices
-(3.2.3 MII 总线侦听设备)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+3.2.3 MII bus snooping devices(3.2.3 MII 总线侦听设备)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 These perform the same role as timestamping Ethernet PHYs, save for the fact
 that they are discrete devices and can therefore be used in conjunction with
@@ -1220,9 +1195,8 @@ Documentation/devicetree/bindings/ptp/timestamper.txt for more details.
 是与 PHY 相同的 mii_ts 基础设施。更多信息参见
 Documentation/devicetree/bindings/ptp/timestamper.txt。)
 
-3.2.4 Other caveats for MAC drivers
-(3.2.4 MAC 驱动程序的其他注意事项)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+3.2.4 Other caveats for MAC drivers(3.2.4 MAC 驱动程序的其他注意事项)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The use of stacked PHCs may uncover MAC driver bugs which were impossible to
 trigger without them. One example has to do with this line of code, already

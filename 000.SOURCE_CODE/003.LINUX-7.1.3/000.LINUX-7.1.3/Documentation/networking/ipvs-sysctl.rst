@@ -1,13 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===========
-IPvs-sysctl
-===========
-(IPVS (IP 虚拟服务器) sysctl 参数)
+=============================================
+IPvs-sysctl(IPVS (IP 虚拟服务器) sysctl 参数)
+=============================================
 
-/proc/sys/net/ipv4/vs/* Variables:
-(/proc/sys/net/ipv4/vs/* 变量：)
-==================================
+/proc/sys/net/ipv4/vs/* Variables:(/proc/sys/net/ipv4/vs/* 变量：)
+==================================================================
 
 am_droprate - INTEGER
 (am_droprate - 整数)

@@ -1,8 +1,7 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-Orphan file
-(孤儿文件)
------------
+Orphan file(孤儿文件)
+---------------------
 
 In unix there can inodes that are unlinked from directory hierarchy but that
 are still alive because they are open. In case of crash the filesystem has to

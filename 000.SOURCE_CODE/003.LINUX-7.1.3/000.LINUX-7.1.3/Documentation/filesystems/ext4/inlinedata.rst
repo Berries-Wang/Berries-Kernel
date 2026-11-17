@@ -1,8 +1,7 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-Inline Data
-(内联数据)
------------
+Inline Data(内联数据)
+---------------------
 
 The inline data feature was designed to handle the case that a file's
 data is so tiny that it readily fits inside the inode, which
@@ -26,9 +25,8 @@ The inline data feature requires the presence of an extended attribute
 for “system.data”, even if the attribute value is zero length.
 (内联数据特性要求存在针对 “system.data” 的扩展属性，即使属性值长度为零。)
 
-Inline Directories
-(内联目录)
-~~~~~~~~~~~~~~~~~~
+Inline Directories(内联目录)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The first four bytes of i_block are the inode number of the parent
 directory. Following that is a 56-byte space for an array of directory

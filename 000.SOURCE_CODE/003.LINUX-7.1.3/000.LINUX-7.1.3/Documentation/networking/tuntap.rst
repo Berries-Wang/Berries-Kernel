@@ -1,11 +1,9 @@
 .. SPDX-License-Identifier: GPL-2.0
 .. include:: <isonum.txt>
 
-===============================
-Universal TUN/TAP device driver
-===============================
-
-(通用 TUN/TAP 设备驱动)
+======================================================
+Universal TUN/TAP device driver(通用 TUN/TAP 设备驱动)
+======================================================
 
 Copyright |copy| 1999-2000 Maxim Krasnyansky <max_mk@yahoo.com>
 (版权所有 |copy| 1999-2000 Maxim Krasnyansky <max_mk@yahoo.com>)
@@ -21,9 +19,8 @@ Copyright |copy| 1999-2000 Maxim Krasnyansky <max_mk@yahoo.com>
   Revision of this document 2002 by Florian Thiel <florian.thiel@gmx.net>
   (本文档 2002 年由 Florian Thiel <florian.thiel@gmx.net> 修订)
 
-1. Description
-(1. 描述)
-==============
+1. Description(1. 描述)
+=======================
 
   TUN/TAP provides packet reception and transmission for user space programs.
   It can be seen as a simple Point-to-Point or Ethernet device, which,
@@ -55,9 +52,8 @@ Copyright |copy| 1999-2000 Maxim Krasnyansky <max_mk@yahoo.com>
   br_sigio.c —— 基于异步 I/O 和 SIGIO 信号的网桥。
   不过，最好的示例是 VTun http://vtun.sourceforge.net 。)
 
-2. Configuration
-(2. 配置)
-================
+2. Configuration(2. 配置)
+=========================
 
   Create device node::
   (创建设备节点：)
@@ -99,13 +95,11 @@ Copyright |copy| 1999-2000 Maxim Krasnyansky <max_mk@yahoo.com>
   /dev/net/tun is being opened.
   (如果采用后一种方式，每次需要使用时都必须手动加载该模块；如果采用前一种方式，当 /dev/net/tun 被打开时模块会自动加载。)
 
-3. Program interface
-(3. 程序接口)
-====================
+3. Program interface(3. 程序接口)
+=================================
 
-3.1 Network device allocation
-(3.1 网络设备的分配)
------------------------------
+3.1 Network device allocation(3.1 网络设备的分配)
+-------------------------------------------------
 
 ``char *dev`` should be the name of the device with a format string (e.g.
 "tun%d"), but (as far as I can see) this can be any valid network device name.
@@ -143,9 +137,8 @@ Note that the character pointer becomes overwritten with the real device name
       return fd;
   }
 
-3.2 Frame format
-(3.2 帧格式)
-----------------
+3.2 Frame format(3.2 帧格式)
+----------------------------
 
 If flag IFF_NO_PI is not set each frame format is::
 (如果未设置 IFF_NO_PI 标志，则每帧的格式如下：)
@@ -154,9 +147,8 @@ If flag IFF_NO_PI is not set each frame format is::
      Proto [2 bytes]
      Raw protocol(IP, IPv6, etc) frame.
 
-3.3 Multiqueue tuntap interface
-(3.3 多队列 tuntap 接口)
--------------------------------
+3.3 Multiqueue tuntap interface(3.3 多队列 tuntap 接口)
+-------------------------------------------------------
 
 From version 3.8, Linux supports multiqueue tuntap which can uses multiple
 file descriptors (queues) to parallelize packets sending or receiving. The
@@ -239,9 +231,8 @@ enable is true we enable it, otherwise we disable it::
       return ioctl(fd, TUNSETQUEUE, (void *)&ifr);
   }
 
-Universal TUN/TAP device driver Frequently Asked Question
-(通用 TUN/TAP 设备驱动常见问题解答)
-=========================================================
+Universal TUN/TAP device driver Frequently Asked Question(通用 TUN/TAP 设备驱动常见问题解答)
+============================================================================================
 
 1. What platforms are supported by TUN/TAP driver ?
 (1. TUN/TAP 驱动支持哪些平台？)

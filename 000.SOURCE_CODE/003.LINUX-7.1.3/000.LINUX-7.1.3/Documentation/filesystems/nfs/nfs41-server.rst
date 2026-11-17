@@ -1,7 +1,6 @@
-=============================
-NFSv4.1 Server Implementation
-=============================
-(NFSv4.1 服务器实现)
+=================================================
+NFSv4.1 Server Implementation(NFSv4.1 服务器实现)
+=================================================
 
 Server support for minorversion 1 can be controlled using the
 /proc/fs/nfsd/versions control file.  The string output returned
@@ -59,9 +58,8 @@ The following abbreviations indicate the linux server implementation status.
 - **NS\***	Unimplemented optional feature.
                 (未实现的可选特性。)
 
-Operations
-(操作)
-==========
+Operations(操作)
+================
 
 +-----------------------+----------------------+---------------------+---------------------------+----------------+
 | Implementation status (实现状态) | Operation (操作)            | REQ,REC, OPT or NMI (REQ、REC、OPT 或 NMI) | Feature (REQ, REC or OPT) (特性(REQ, REC 或 OPT)) | Definition (定义)     |
@@ -186,9 +184,8 @@ Operations
 +-----------------------+----------------------+---------------------+---------------------------+----------------+
 
 
-Callback Operations
-(回调操作)
-===================
+Callback Operations(回调操作)
+=============================
 +-----------------------+-------------------------+---------------------+---------------------------+---------------+
 | Implementation status (实现状态) | Operation (操作)               | REQ,REC, OPT or NMI (REQ、REC、OPT 或 NMI) | Feature (REQ, REC or OPT) (特性(REQ, REC 或 OPT)) | Definition (定义)    |
 +=======================+=========================+=====================+===========================+===============+
@@ -236,9 +233,8 @@ Callback Operations
 +-----------------------+-------------------------+---------------------+---------------------------+---------------+
 
 
-Implementation notes:
-(实现说明)
-=====================
+Implementation notes:(实现说明)
+===============================
 
 SSV:
   The spec claims this is mandatory, but we don't actually know of any

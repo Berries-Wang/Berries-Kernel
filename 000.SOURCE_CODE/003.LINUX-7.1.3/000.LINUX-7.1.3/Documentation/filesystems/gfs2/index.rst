@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-====================
-Global File System 2
-====================
+====================================
+Global File System 2(全局文件系统 2)
+====================================
 
-(全局文件系统 2)
-
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 GFS2 is a cluster file system. It allows a cluster of computers to
 simultaneously use a block device that is shared between them (with FC,
@@ -67,9 +64,8 @@ The following man pages are available from gfs2-utils:
   mkfs.gfs2		to make a filesystem (创建文件系统)
   ============		=============================================
 
-Implementation Notes
-(实现说明)
-====================
+Implementation Notes(实现说明)
+==============================
 
 .. toctree::
    :maxdepth: 1

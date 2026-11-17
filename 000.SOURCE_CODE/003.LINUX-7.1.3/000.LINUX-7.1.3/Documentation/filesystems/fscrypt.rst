@@ -1,12 +1,9 @@
-=====================================
-Filesystem-level encryption (fscrypt)
-=====================================
+===============================================================
+Filesystem-level encryption (fscrypt)(文件系统级加密 (fscrypt))
+===============================================================
 
-(文件系统级加密 (fscrypt))
-
-Introduction
-(引言)
-============
+Introduction(引言)
+==================
 
 fscrypt is a library which filesystems can hook into to support
 transparent encryption of files and directories.
@@ -75,13 +72,11 @@ encrypted.
 然后，在用户空间提供密钥之后，在该目录树中创建的所有普通文件、目录和
 符号链接都会被透明地加密。)
 
-Threat model
-(威胁模型)
-============
+Threat model(威胁模型)
+======================
 
-Offline attacks
-(离线攻击)
----------------
+Offline attacks(离线攻击)
+-------------------------
 
 Provided that userspace chooses a strong encryption key, fscrypt
 protects the confidentiality of file contents and filenames in the
@@ -102,18 +97,16 @@ an authorized user later accessing the filesystem.
 (如果攻击者能够在授权用户之后访问文件系统之前离线篡改文件系统，则
 fscrypt 不保证保护机密性或真实性。)
 
-Online attacks
-(在线攻击)
---------------
+Online attacks(在线攻击)
+------------------------
 
 fscrypt (and storage encryption in general) can only provide limited
 protection against online attacks.  In detail:
 (fscrypt(以及一般意义上的存储加密)只能对在线攻击提供有限的保护。详细
 说明如下：)
 
-Side-channel attacks
-(侧信道攻击)
-~~~~~~~~~~~~~~~~~~~~
+Side-channel attacks(侧信道攻击)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 fscrypt is only resistant to side-channel attacks, such as timing or
 electromagnetic attacks, to the extent that the underlying Linux
@@ -127,9 +120,8 @@ against applications consuming decrypted data.
 基于查找表的 AES 实现，攻击者就有可能对在线系统发起侧信道攻击。对消费
 解密数据的应用程序，也可能发起侧信道攻击。)
 
-Unauthorized file access
-(未授权的文件访问)
-~~~~~~~~~~~~~~~~~~~~~~~~
+Unauthorized file access(未授权的文件访问)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 After an encryption key has been added, fscrypt does not hide the
 plaintext file contents or filenames from other users on the same
@@ -151,17 +143,16 @@ with the wide variety of access control mechanisms already available.)
 因此，任何加密专有的访问控制检查只会由内核*代码*来执行，因此与已有的
 多种访问控制机制相比，在很大程度上是冗余的。))
 
-Read-only kernel memory compromise
-(只读内核内存被攻破)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Read-only kernel memory compromise(只读内核内存被攻破)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Unless `hardware-wrapped keys`_ are used, an attacker who gains the
+Unless `Hardware-wrapped keys(硬件封装密钥)`_ are used, an attacker who gains the
 ability to read from arbitrary kernel memory, e.g. by mounting a
 physical attack or by exploiting a kernel security vulnerability, can
 compromise all fscrypt keys that are currently in-use.  This also
 extends to cold boot attacks; if the system is suddenly powered off,
 keys the system was using may remain in memory for a short time.
-(除非使用了 `hardware-wrapped keys`_，否则获得了读取任意内核内存能力的
+(除非使用了 `Hardware-wrapped keys(硬件封装密钥)`_，否则获得了读取任意内核内存能力的
 攻击者，例如通过实施物理攻击或利用内核安全漏洞，可以攻破当前正在使用的
 所有 fscrypt 密钥。这也延伸到冷启动攻击；如果系统突然断电，系统当时正在
 使用的密钥可能会在内存中留存一小段时间。)
@@ -232,9 +223,8 @@ However, these ioctls have some limitations:
   (秘密密钥可能仍然存在于 CPU 寄存器中，或存在于此处未明确考虑的其他
   地方。)
 
-Full system compromise
-(整个系统被攻破)
-~~~~~~~~~~~~~~~~~~~~~~
+Full system compromise(整个系统被攻破)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 An attacker who gains "root" access and/or the ability to execute
 arbitrary kernel code can freely exfiltrate data that is protected by
@@ -249,20 +239,19 @@ was removed prior to the attack.)
 受到保护，但如果密钥在攻击之前已被移除，则受上述密钥移除局限性的
 制约。))
 
-However, if `hardware-wrapped keys`_ are used, such attackers will be
+However, if `Hardware-wrapped keys(硬件封装密钥)`_ are used, such attackers will be
 unable to exfiltrate the master keys or file contents keys in a form
 that will be usable after the system is powered off.  This may be
 useful if the attacker is significantly time-limited and/or
 bandwidth-limited, so they can only exfiltrate some data and need to
 rely on a later offline attack to exfiltrate the rest of it.
-(但是，如果使用了 `hardware-wrapped keys`_，此类攻击者将无法以系统断电
+(但是，如果使用了 `Hardware-wrapped keys(硬件封装密钥)`_，此类攻击者将无法以系统断电
 后仍然可用的形式窃取主密钥或文件内容密钥。如果攻击者受到明显的时间限制
 和/或带宽限制，以致只能窃取部分数据、而需要依赖之后的离线攻击来窃取
 其余数据，这可能会有用。)
 
-Limitations of v1 policies
-(v1 策略的局限性)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Limitations of v1 policies(v1 策略的局限性)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 v1 encryption policies have some weaknesses with respect to online
 attacks:
@@ -293,19 +282,17 @@ policies on all new encrypted directories.
 (以上所有问题都已通过 v2 加密策略修复。基于此原因及其他原因，建议在
 所有新加密目录上使用 v2 加密策略。)
 
-Key hierarchy
-(密钥层次结构)
-=============
+Key hierarchy(密钥层次结构)
+===========================
 
 Note: this section assumes the use of raw keys rather than
 hardware-wrapped keys.  The use of hardware-wrapped keys modifies the
-key hierarchy slightly.  For details, see `Hardware-wrapped keys`_.
+key hierarchy slightly.  For details, see `Hardware-wrapped keys(硬件封装密钥)`_.
 (注意: 本节假设使用原始密钥(raw key)而非硬件封装密钥。硬件封装密钥的
-使用会对密钥层次结构稍作修改。详情请参见 `Hardware-wrapped keys`_。)
+使用会对密钥层次结构稍作修改。详情请参见 `Hardware-wrapped keys(硬件封装密钥)`_。)
 
-Master Keys
-(主密钥)
------------
+Master Keys(主密钥)
+-------------------
 
 Each encrypted directory tree is protected by a *master key*.  Master
 keys can be up to 64 bytes long, and must be at least as long as the
@@ -349,9 +336,8 @@ be used, such as scrypt, PBKDF2, or Argon2.
 stretching)；因此，如果用户空间从诸如口令这类低熵秘密派生密钥，至关
 重要的是使用为此目的设计的 KDF，例如 scrypt、PBKDF2 或 Argon2。)
 
-Key derivation function
-(密钥派生函数)
------------------------
+Key derivation function(密钥派生函数)
+-------------------------------------
 
 With one exception, fscrypt never uses the master key(s) for
 encryption directly.  Instead, they are only used as input to a KDF
@@ -400,9 +386,8 @@ used by other software, whereas the AES-128-ECB based KDF is ad-hoc.
 逆转，并且能均匀分布主密钥的熵。HKDF 还是标准化的，并被其他软件广泛
 使用，而基于 AES-128-ECB 的 KDF 是临时专用的。)
 
-Per-file encryption keys
-(每文件加密密钥)
-------------------------
+Per-file encryption keys(每文件加密密钥)
+----------------------------------------
 
 Since each master key can protect many files, it is necessary to
 "tweak" the encryption of each file so that the same plaintext in two
@@ -410,15 +395,14 @@ files doesn't map to the same ciphertext, or vice versa.  In most
 cases, fscrypt does this by deriving per-file keys.  When a new
 encrypted inode (regular file, directory, or symlink) is created,
 fscrypt randomly generates a 16-byte nonce and stores it in the
-inode's encryption xattr.  Then, it uses a KDF (as described in `Key
-derivation function`_) to derive the file's key from the master key
+inode's encryption xattr.  Then, it uses a KDF (as described in `Key derivation function(密钥派生函数)`_) to derive the file's key from the master key
 and nonce.
 (由于每个主密钥可以保护多个文件，因此有必要对每个文件的加密进行"调整"
 (tweak)，使得两个文件中的相同明文不会映射到相同的密文，反之亦然。在
 大多数情况下，fscrypt 通过派生每文件密钥来做到这一点。当创建一个新的
 加密 inode(普通文件、目录或符号链接)时，fscrypt 会随机生成一个 16 字节
 的 nonce，并将其存储在 inode 的加密 xattr 中。然后，它使用 KDF(如
-`Key derivation function`_ 中所述)从主密钥和 nonce 派生该文件的密钥。)
+`Key derivation function(密钥派生函数)`_ 中所述)从主密钥和 nonce 派生该文件的密钥。)
 
 Key derivation was chosen over key wrapping because wrapped keys would
 require larger xattrs which would be less likely to fit in-line in the
@@ -434,16 +418,15 @@ the master keys may be wrapped in userspace, e.g. as is done by the
 也没有需求要支持轮换主密钥。相反，主密钥可以在用户空间中被封装，例如
 `fscrypt <https://github.com/google/fscrypt>`_ 工具就是这样做的。)
 
-DIRECT_KEY policies
-(DIRECT_KEY 策略)
--------------------
+DIRECT_KEY policies(DIRECT_KEY 策略)
+------------------------------------
 
-The Adiantum encryption mode (see `Encryption modes and usage`_) is
+The Adiantum encryption mode (see `Encryption modes and usage(加密模式与用法)`_) is
 suitable for both contents and filenames encryption, and it accepts
 long IVs --- long enough to hold both an 8-byte data unit index and a
 16-byte per-file nonce.  Also, the overhead of each Adiantum key is
 greater than that of an AES-256-XTS key.
-(Adiantum 加密模式(参见 `Encryption modes and usage`_)同时适用于内容
+(Adiantum 加密模式(参见 `Encryption modes and usage(加密模式与用法)`_)同时适用于内容
 加密和文件名加密，并且它接受较长的 IV——长到足以同时容纳一个 8 字节的
 数据单元索引和一个 16 字节的每文件 nonce。此外，每个 Adiantum 密钥的
 开销大于 AES-256-XTS 密钥的开销。)
@@ -471,9 +454,8 @@ included in the IV.  Moreover:
   (对于 v2 加密策略，加密使用通过 KDF 派生的每模式密钥完成。用户可以将
   同一主密钥用于其他 v2 加密策略。)
 
-IV_INO_LBLK_64 policies
-(IV_INO_LBLK_64 策略)
------------------------
+IV_INO_LBLK_64 policies(IV_INO_LBLK_64 策略)
+--------------------------------------------
 
 When FSCRYPT_POLICY_FLAG_IV_INO_LBLK_64 is set in the fscrypt policy,
 the encryption keys are derived from the master key, encryption mode
@@ -494,9 +476,8 @@ I/O request and may have only a small number of keyslots.
 (此格式针对符合 UFS 标准的内联加密硬件进行了优化，这种硬件每个 I/O 请求
 仅支持 64 个 IV 位，并且可能只有少量的密钥槽(keyslot)。)
 
-IV_INO_LBLK_32 policies
-(IV_INO_LBLK_32 策略)
------------------------
+IV_INO_LBLK_32 policies(IV_INO_LBLK_32 策略)
+--------------------------------------------
 
 IV_INO_LBLK_32 policies work like IV_INO_LBLK_64, except that for
 IV_INO_LBLK_32, the inode number is hashed with SipHash-2-4 (where the
@@ -515,9 +496,8 @@ when necessary due to hardware limitations.
 I/O 请求仅支持 32 个 IV 位，并且可能只有少量的密钥槽。此格式会导致
 一定程度的 IV 重用，因此只应在因硬件限制而必要时使用。)
 
-Key identifiers
-(密钥标识符)
----------------
+Key identifiers(密钥标识符)
+---------------------------
 
 For master keys used for v2 encryption policies, a unique 16-byte "key
 identifier" is also derived using the KDF.  This value is stored in
@@ -526,9 +506,8 @@ the clear, since it is needed to reliably identify the key itself.
 标识符"(key identifier)。该值以明文形式存储，因为需要它来可靠地标识
 密钥本身。)
 
-Dirhash keys
-(目录哈希密钥)
-------------
+Dirhash keys(目录哈希密钥)
+--------------------------
 
 For directories that are indexed using a secret-keyed dirhash over the
 plaintext filenames, the KDF is also used to derive a 128-bit
@@ -542,9 +521,8 @@ encrypted directories use this style of hashing.
 只有启用了大小写折叠(casefolded，即"大小写不敏感")的加密目录才使用这种
 哈希方式。)
 
-Encryption modes and usage
-(加密模式与用法)
-==========================
+Encryption modes and usage(加密模式与用法)
+==========================================
 
 fscrypt allows one encryption mode to be specified for file contents
 and one encryption mode to be specified for filenames.  Different
@@ -552,9 +530,8 @@ directory trees are permitted to use different encryption modes.
 (fscrypt 允许为文件内容指定一种加密模式，并为文件名指定一种加密模式。
 不同的目录树允许使用不同的加密模式。)
 
-Supported modes
-(支持的模式)
----------------
+Supported modes(支持的模式)
+---------------------------
 
 Currently, the following pairs of encryption modes are supported:
 (目前，支持以下几对加密模式：)
@@ -596,23 +573,22 @@ cipher.
 
 The (AES-256-XTS, AES-256-CBC-CTS) pair is the recommended default.
 It is also the only option that is *guaranteed* to always be supported
-if the kernel supports fscrypt at all; see `Kernel config options`_.
+if the kernel supports fscrypt at all; see `Kernel config options(内核配置选项)`_.
 ((AES-256-XTS, AES-256-CBC-CTS) 这一对是推荐的默认选项。它也是唯一
-*保证*在内核支持 fscrypt 时始终受支持的选项；参见 `Kernel config
-options`_。)
+*保证*在内核支持 fscrypt 时始终受支持的选项；参见 `Kernel config options(内核配置选项)`_。)
 
 The (AES-256-XTS, AES-256-HCTR2) pair is also a good choice that
 upgrades the filenames encryption to use a wide-block cipher.  (A
 *wide-block cipher*, also called a tweakable super-pseudorandom
 permutation, has the property that changing one bit scrambles the
-entire result.)  As described in `Filenames encryption`_, a wide-block
+entire result.)  As described in `Filenames encryption(文件名加密)`_, a wide-block
 cipher is the ideal mode for the problem domain, though CBC-CTS is the
 "least bad" choice among the alternatives.  For more information about
 HCTR2, see `the HCTR2 paper <https://eprint.iacr.org/2021/1441.pdf>`_.
 ((AES-256-XTS, AES-256-HCTR2) 这一对也是一个好选择，它将文件名加密升级
 为使用宽块密码。(*宽块密码*(wide-block cipher)，也称为可调超级伪随机
 置换(tweakable super-pseudorandom permutation)，具有改变一位就会打乱
-整个结果的特性。)如 `Filenames encryption`_ 中所述，宽块密码是该问题
+整个结果的特性。)如 `Filenames encryption(文件名加密)`_ 中所述，宽块密码是该问题
 领域的理想模式，尽管 CBC-CTS 是各备选方案中"最不坏"的选择。关于
 HCTR2 的更多信息，参见 `the HCTR2 paper
 <https://eprint.iacr.org/2021/1441.pdf>`_。)
@@ -655,9 +631,8 @@ suggested to only use these ciphers where their use is mandated.
 它们受到的安全审查有限。它们也没有带来多少新东西。建议仅在强制要求
 使用它们的地方使用这些密码。)
 
-Kernel config options
-(内核配置选项)
----------------------
+Kernel config options(内核配置选项)
+-----------------------------------
 
 Enabling fscrypt support (CONFIG_FS_ENCRYPTION) automatically pulls in
 only the basic support from the crypto API needed to use AES-256-XTS
@@ -675,12 +650,12 @@ Below, some relevant options are listed by encryption mode.  Note,
 acceleration options not listed below may be available for your
 platform; refer to the kconfig menus.  File contents encryption can
 also be configured to use inline encryption hardware instead of the
-kernel crypto API (see `Inline encryption support`_); in that case,
+kernel crypto API (see `Inline encryption support(内联加密支持)`_); in that case,
 the file contents mode doesn't need to supported in the kernel crypto
 API, but the filenames mode still does.
 (下面按加密模式列出了一些相关的选项。注意，你的平台可能还有下面未列出
 的加速选项；请参考 kconfig 菜单。文件内容加密也可以配置为使用内联加密
-硬件而不是内核加密 API(参见 `Inline encryption support`_)；在这种情况下，
+硬件而不是内核加密 API(参见 `Inline encryption support(内联加密支持)`_)；在这种情况下，
 文件内容模式不需要在内核加密 API 中受支持，但文件名模式仍然需要。)
 
 - AES-256-XTS and AES-256-CBC-CTS
@@ -725,9 +700,8 @@ API, but the filenames mode still does.
     推荐(Recommended)：
         - AES-CBC 加速)
 
-Contents encryption
-(内容加密)
--------------------
+Contents encryption(内容加密)
+-----------------------------
 
 For contents encryption, each file's contents is divided into "data
 units".  Each data unit is encrypted independently.  The IV for each
@@ -754,12 +728,12 @@ There are two cases for the sizes of the data units:
   is zero-padded if needed.  By default, the data unit size is equal
   to the filesystem block size.  On some filesystems, users can select
   a sub-block data unit size via the ``log2_data_unit_size`` field of
-  the encryption policy; see `FS_IOC_SET_ENCRYPTION_POLICY`_.
+  the encryption policy; see `FS_IOC_SET_ENCRYPTION_POLICY(FS_IOC_SET_ENCRYPTION_POLICY)`_.
   (固定大小的数据单元。这是除 UBIFS 以外所有文件系统的工作方式。文件的
   数据单元大小都相同；最后一个数据单元在需要时做零填充。默认情况下，
   数据单元大小等于文件系统块大小。在某些文件系统上，用户可以通过加密
   策略的 ``log2_data_unit_size`` 字段选择小于块的数据单元大小；参见
-  `FS_IOC_SET_ENCRYPTION_POLICY`_。)
+  `FS_IOC_SET_ENCRYPTION_POLICY(FS_IOC_SET_ENCRYPTION_POLICY)`_。)
 
 * Variable-size data units.  This is what UBIFS does.  Each "UBIFS
   data node" is treated as a crypto data unit.  Each contains variable
@@ -780,34 +754,34 @@ it is encrypted in a similar way to a file containing holes.
 文件系统块。因此，经 f2fs 压缩的文件仍然使用固定大小的数据单元，并且其
 加密方式与包含空洞的文件类似。)
 
-As mentioned in `Key hierarchy`_, the default encryption setting uses
+As mentioned in `Key hierarchy(密钥层次结构)`_, the default encryption setting uses
 per-file keys.  In this case, the IV for each data unit is simply the
 index of the data unit in the file.  However, users can select an
 encryption setting that does not use per-file keys.  For these, some
 kind of file identifier is incorporated into the IVs as follows:
-(如 `Key hierarchy`_ 中所述，默认加密设置使用每文件密钥。在这种情况下，
+(如 `Key hierarchy(密钥层次结构)`_ 中所述，默认加密设置使用每文件密钥。在这种情况下，
 每个数据单元的 IV 就是该数据单元在文件中的索引。但是，用户可以选择不
 使用每文件密钥的加密设置。对于这些设置，某种文件标识符会按如下方式
 并入 IV：)
 
-- With `DIRECT_KEY policies`_, the data unit index is placed in bits
+- With `DIRECT_KEY policies(DIRECT_KEY 策略)`_, the data unit index is placed in bits
   0-63 of the IV, and the file's nonce is placed in bits 64-191.
-  (使用 `DIRECT_KEY policies`_ 时，数据单元索引被放置在 IV 的位
+  (使用 `DIRECT_KEY policies(DIRECT_KEY 策略)`_ 时，数据单元索引被放置在 IV 的位
   0-63 中，文件的 nonce 被放置在位 64-191 中。)
 
-- With `IV_INO_LBLK_64 policies`_, the data unit index is placed in
+- With `IV_INO_LBLK_64 policies(IV_INO_LBLK_64 策略)`_, the data unit index is placed in
   bits 0-31 of the IV, and the file's inode number is placed in bits
   32-63.  This setting is only allowed when data unit indices and
   inode numbers fit in 32 bits.
-  (使用 `IV_INO_LBLK_64 policies`_ 时，数据单元索引被放置在 IV 的位
+  (使用 `IV_INO_LBLK_64 policies(IV_INO_LBLK_64 策略)`_ 时，数据单元索引被放置在 IV 的位
   0-31 中，文件的 inode 编号被放置在位 32-63 中。仅当数据单元索引和
   inode 编号能装进 32 位时才允许此设置。)
 
-- With `IV_INO_LBLK_32 policies`_, the file's inode number is hashed
+- With `IV_INO_LBLK_32 policies(IV_INO_LBLK_32 策略)`_, the file's inode number is hashed
   and added to the data unit index.  The resulting value is truncated
   to 32 bits and placed in bits 0-31 of the IV.  This setting is only
   allowed when data unit indices and inode numbers fit in 32 bits.
-  (使用 `IV_INO_LBLK_32 policies`_ 时，文件的 inode 编号先被哈希，然后
+  (使用 `IV_INO_LBLK_32 policies(IV_INO_LBLK_32 策略)`_ 时，文件的 inode 编号先被哈希，然后
   加到数据单元索引上。得到的值被截断为 32 位，并放置在 IV 的位 0-31 中。
   仅当数据单元索引和 inode 编号能装进 32 位时才允许此设置。)
 
@@ -822,9 +796,8 @@ key is the SHA-256 hash of the file's contents encryption key.
 ESSIV 层。在这种情况下，在 IV 被传给 AES-128-CBC 之前，它会先用 AES-256
 加密，其中 AES-256 密钥是文件内容加密密钥的 SHA-256 哈希值。)
 
-Filenames encryption
-(文件名加密)
---------------------
+Filenames encryption(文件名加密)
+--------------------------------
 
 For filenames, each full filename is encrypted at once.  Because of
 the requirements to retain support for efficient directory lookups and
@@ -834,12 +807,11 @@ in a directory.
 查找以及最长 255 字节的文件名，目录中的每个文件名都使用相同的 IV。)
 
 However, each encrypted directory still uses a unique key, or
-alternatively has the file's nonce (for `DIRECT_KEY policies`_) or
-inode number (for `IV_INO_LBLK_64 policies`_) included in the IVs.
+alternatively has the file's nonce (for `DIRECT_KEY policies(DIRECT_KEY 策略)`_) or
+inode number (for `IV_INO_LBLK_64 policies(IV_INO_LBLK_64 策略)`_) included in the IVs.
 Thus, IV reuse is limited to within a single directory.
 (但是，每个加密目录仍然使用唯一的密钥，或者在 IV 中包含文件的 nonce
-(对于 `DIRECT_KEY policies`_)或 inode 编号(对于 `IV_INO_LBLK_64
-policies`_)。因此，IV 重用被限制在单个目录之内。)
+(对于 `DIRECT_KEY policies(DIRECT_KEY 策略)`_)或 inode 编号(对于 `IV_INO_LBLK_64 policies(IV_INO_LBLK_64 策略)`_)。因此，IV 重用被限制在单个目录之内。)
 
 With CBC-CTS, the IV reuse means that when the plaintext filenames share a
 common prefix at least as long as the cipher block size (16 bytes for AES), the
@@ -873,17 +845,14 @@ that IV reuse is not a problem as each symlink has its own inode.
 (符号链接的目标被视为一种文件名，并以与目录项中文件名相同的方式加密，
 只是 IV 重用不是问题，因为每个符号链接都有自己的 inode。)
 
-User API
-(用户 API)
-========
+User API(用户 API)
+==================
 
-Setting an encryption policy
-(设置加密策略)
-----------------------------
+Setting an encryption policy(设置加密策略)
+------------------------------------------
 
-FS_IOC_SET_ENCRYPTION_POLICY
-(FS_IOC_SET_ENCRYPTION_POLICY)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+FS_IOC_SET_ENCRYPTION_POLICY(FS_IOC_SET_ENCRYPTION_POLICY)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The FS_IOC_SET_ENCRYPTION_POLICY ioctl sets an encryption policy on an
 empty directory or verifies that a directory or regular file already
@@ -934,24 +903,23 @@ This structure must be initialized as follows:
   be set to constants from ``<linux/fscrypt.h>`` which identify the
   encryption modes to use.  If unsure, use FSCRYPT_MODE_AES_256_XTS
   (1) for ``contents_encryption_mode`` and FSCRYPT_MODE_AES_256_CTS
-  (4) for ``filenames_encryption_mode``.  For details, see `Encryption
-  modes and usage`_.
+  (4) for ``filenames_encryption_mode``.  For details, see `Encryption modes and usage(加密模式与用法)`_.
   (``contents_encryption_mode`` 和 ``filenames_encryption_mode``：必须
   设置为 ``<linux/fscrypt.h>`` 中标识要使用的加密模式的常量。如果不确定，
   ``contents_encryption_mode`` 使用 FSCRYPT_MODE_AES_256_XTS (1)，
   ``filenames_encryption_mode`` 使用 FSCRYPT_MODE_AES_256_CTS (4)。
-  详情参见 `Encryption modes and usage`_。)
+  详情参见 `Encryption modes and usage(加密模式与用法)`_。)
 
   v1 encryption policies only support three combinations of modes:
   (FSCRYPT_MODE_AES_256_XTS, FSCRYPT_MODE_AES_256_CTS),
   (FSCRYPT_MODE_AES_128_CBC, FSCRYPT_MODE_AES_128_CTS), and
   (FSCRYPT_MODE_ADIANTUM, FSCRYPT_MODE_ADIANTUM).  v2 policies support
-  all combinations documented in `Supported modes`_.
+  all combinations documented in `Supported modes(支持的模式)`_.
   (v1 加密策略仅支持三种模式组合：
   (FSCRYPT_MODE_AES_256_XTS, FSCRYPT_MODE_AES_256_CTS)、
   (FSCRYPT_MODE_AES_128_CBC, FSCRYPT_MODE_AES_128_CTS) 和
   (FSCRYPT_MODE_ADIANTUM, FSCRYPT_MODE_ADIANTUM)。v2 策略支持
-  `Supported modes`_ 中记录的所有组合。)
+  `Supported modes(支持的模式)`_ 中记录的所有组合。)
 
 - ``flags`` contains optional flags from ``<linux/fscrypt.h>``:
   (``flags``：包含来自 ``<linux/fscrypt.h>`` 的可选标志：)
@@ -961,16 +929,12 @@ This structure must be initialized as follows:
     (0x3).
     (FSCRYPT_POLICY_FLAGS_PAD_*：加密文件名时使用的 NUL 填充值。如果
     不确定，使用 FSCRYPT_POLICY_FLAGS_PAD_32 (0x3)。)
-  - FSCRYPT_POLICY_FLAG_DIRECT_KEY: See `DIRECT_KEY policies`_.
-    (FSCRYPT_POLICY_FLAG_DIRECT_KEY：参见 `DIRECT_KEY policies`_。)
-  - FSCRYPT_POLICY_FLAG_IV_INO_LBLK_64: See `IV_INO_LBLK_64
-    policies`_.
-    (FSCRYPT_POLICY_FLAG_IV_INO_LBLK_64：参见 `IV_INO_LBLK_64
-    policies`_。)
-  - FSCRYPT_POLICY_FLAG_IV_INO_LBLK_32: See `IV_INO_LBLK_32
-    policies`_.
-    (FSCRYPT_POLICY_FLAG_IV_INO_LBLK_32：参见 `IV_INO_LBLK_32
-    policies`_。)
+  - FSCRYPT_POLICY_FLAG_DIRECT_KEY: See `DIRECT_KEY policies(DIRECT_KEY 策略)`_.
+    (FSCRYPT_POLICY_FLAG_DIRECT_KEY：参见 `DIRECT_KEY policies(DIRECT_KEY 策略)`_。)
+  - FSCRYPT_POLICY_FLAG_IV_INO_LBLK_64: See `IV_INO_LBLK_64 policies(IV_INO_LBLK_64 策略)`_.
+    (FSCRYPT_POLICY_FLAG_IV_INO_LBLK_64：参见 `IV_INO_LBLK_64 policies(IV_INO_LBLK_64 策略)`_。)
+  - FSCRYPT_POLICY_FLAG_IV_INO_LBLK_32: See `IV_INO_LBLK_32 policies(IV_INO_LBLK_32 策略)`_.
+    (FSCRYPT_POLICY_FLAG_IV_INO_LBLK_32：参见 `IV_INO_LBLK_32 policies(IV_INO_LBLK_32 策略)`_。)
 
   v1 encryption policies only support the PAD_* and DIRECT_KEY flags.
   The other flags are only supported by v2 encryption policies.
@@ -1021,7 +985,7 @@ This structure must be initialized as follows:
   (对于 v2 加密策略，``__reserved`` 必须清零。)
 
 - For v1 encryption policies, ``master_key_descriptor`` specifies how
-  to find the master key in a keyring; see `Adding keys`_.  It is up
+  to find the master key in a keyring; see `Adding keys(添加密钥)`_.  It is up
   to userspace to choose a unique ``master_key_descriptor`` for each
   master key.  The e4crypt and fscrypt tools use the first 8 bytes of
   ``SHA-512(SHA-512(master_key))``, but this particular scheme is not
@@ -1029,7 +993,7 @@ This structure must be initialized as follows:
   FS_IOC_SET_ENCRYPTION_POLICY is executed.  However, it must be added
   before any files can be created in the encrypted directory.
   (对于 v1 加密策略，``master_key_descriptor`` 指定如何在密钥环中找到
-  主密钥；参见 `Adding keys`_。由用户空间为每个主密钥选择唯一的
+  主密钥；参见 `Adding keys(添加密钥)`_。由用户空间为每个主密钥选择唯一的
   ``master_key_descriptor``。e4crypt 和 fscrypt 工具使用
   ``SHA-512(SHA-512(master_key))`` 的前 8 个字节，但并不要求使用这个
   特定方案。此外，在执行 FS_IOC_SET_ENCRYPTION_POLICY 时，主密钥还不必
@@ -1039,13 +1003,13 @@ This structure must be initialized as follows:
   For v2 encryption policies, ``master_key_descriptor`` has been
   replaced with ``master_key_identifier``, which is longer and cannot
   be arbitrarily chosen.  Instead, the key must first be added using
-  `FS_IOC_ADD_ENCRYPTION_KEY`_.  Then, the ``key_spec.u.identifier``
+  `FS_IOC_ADD_ENCRYPTION_KEY(FS_IOC_ADD_ENCRYPTION_KEY)`_.  Then, the ``key_spec.u.identifier``
   the kernel returned in the struct fscrypt_add_key_arg must
   be used as the ``master_key_identifier`` in
   struct fscrypt_policy_v2.
   (对于 v2 加密策略，``master_key_descriptor`` 已被
   ``master_key_identifier`` 取代，后者更长且不能任意选择。相反，必须先
-  使用 `FS_IOC_ADD_ENCRYPTION_KEY`_ 添加密钥。然后，必须将内核在 struct
+  使用 `FS_IOC_ADD_ENCRYPTION_KEY(FS_IOC_ADD_ENCRYPTION_KEY)`_ 添加密钥。然后，必须将内核在 struct
   fscrypt_add_key_arg 中返回的 ``key_spec.u.identifier`` 用作 struct
   fscrypt_policy_v2 中的 ``master_key_identifier``。)
 
@@ -1053,13 +1017,13 @@ If the file is not yet encrypted, then FS_IOC_SET_ENCRYPTION_POLICY
 verifies that the file is an empty directory.  If so, the specified
 encryption policy is assigned to the directory, turning it into an
 encrypted directory.  After that, and after providing the
-corresponding master key as described in `Adding keys`_, all regular
+corresponding master key as described in `Adding keys(添加密钥)`_, all regular
 files, directories (recursively), and symlinks created in the
 directory will be encrypted, inheriting the same encryption policy.
 The filenames in the directory's entries will be encrypted as well.
 (如果文件尚未加密，FS_IOC_SET_ENCRYPTION_POLICY 会验证该文件是一个空
 目录。如果是，指定的加密策略将被赋予该目录，将其变成加密目录。之后，
-在按照 `Adding keys`_ 中所述提供相应的主密钥之后，在该目录中创建的所有
+在按照 `Adding keys(添加密钥)`_ 中所述提供相应的主密钥之后，在该目录中创建的所有
 普通文件、目录(递归地)和符号链接都将被加密，并继承相同的加密策略。
 目录各项中的文件名也将被加密。)
 
@@ -1141,15 +1105,14 @@ FS_IOC_SET_ENCRYPTION_POLICY can fail with the following errors:
 - ``EROFS``: the filesystem is readonly
   (``EROFS``：文件系统是只读的)
 
-Getting an encryption policy
-(获取加密策略)
-----------------------------
+Getting an encryption policy(获取加密策略)
+------------------------------------------
 
 Two ioctls are available to get a file's encryption policy:
 (有两个 ioctl 可用于获取文件的加密策略：)
 
-- `FS_IOC_GET_ENCRYPTION_POLICY_EX`_
-- `FS_IOC_GET_ENCRYPTION_POLICY`_
+- `FS_IOC_GET_ENCRYPTION_POLICY_EX(FS_IOC_GET_ENCRYPTION_POLICY_EX)`_
+- `FS_IOC_GET_ENCRYPTION_POLICY(FS_IOC_GET_ENCRYPTION_POLICY)`_
 
 The extended (_EX) version of the ioctl is more general and is
 recommended to use when possible.  However, on older kernels only the
@@ -1160,9 +1123,8 @@ version.
 的内核上只有最初的 ioctl 可用。应用程序应先尝试扩展版本，如果它以
 ENOTTY 失败，则回退到最初的版本。)
 
-FS_IOC_GET_ENCRYPTION_POLICY_EX
-(FS_IOC_GET_ENCRYPTION_POLICY_EX)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+FS_IOC_GET_ENCRYPTION_POLICY_EX(FS_IOC_GET_ENCRYPTION_POLICY_EX)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The FS_IOC_GET_ENCRYPTION_POLICY_EX ioctl retrieves the encryption
 policy, if any, for a directory or regular file.  No additional
@@ -1227,18 +1189,17 @@ check for STATX_ATTR_ENCRYPTED in stx_attributes.
 FS_IOC_GETFLAGS ioctl 并检查 FS_ENCRYPT_FL，或者使用 statx() 系统调用
 并检查 stx_attributes 中的 STATX_ATTR_ENCRYPTED。)
 
-FS_IOC_GET_ENCRYPTION_POLICY
-(FS_IOC_GET_ENCRYPTION_POLICY)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+FS_IOC_GET_ENCRYPTION_POLICY(FS_IOC_GET_ENCRYPTION_POLICY)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The FS_IOC_GET_ENCRYPTION_POLICY ioctl can also retrieve the
 encryption policy, if any, for a directory or regular file.  However,
-unlike `FS_IOC_GET_ENCRYPTION_POLICY_EX`_,
+unlike `FS_IOC_GET_ENCRYPTION_POLICY_EX(FS_IOC_GET_ENCRYPTION_POLICY_EX)`_,
 FS_IOC_GET_ENCRYPTION_POLICY only supports the original policy
 version.  It takes in a pointer directly to struct fscrypt_policy_v1
 rather than struct fscrypt_get_policy_ex_arg.
 (FS_IOC_GET_ENCRYPTION_POLICY ioctl 也可以检索目录或普通文件的加密策略
-(如果有的话)。但是，与 `FS_IOC_GET_ENCRYPTION_POLICY_EX`_ 不同，
+(如果有的话)。但是，与 `FS_IOC_GET_ENCRYPTION_POLICY_EX(FS_IOC_GET_ENCRYPTION_POLICY_EX)`_ 不同，
 FS_IOC_GET_ENCRYPTION_POLICY 只支持最初的策略版本。它接受一个直接指向
 struct fscrypt_policy_v1 的指针，而不是 struct
 fscrypt_get_policy_ex_arg。)
@@ -1251,9 +1212,8 @@ encrypted using a newer encryption policy version.
 的相同，不同之处在于：如果文件是使用较新的加密策略版本加密的，
 FS_IOC_GET_ENCRYPTION_POLICY 还会返回 ``EINVAL``。)
 
-Getting the per-filesystem salt
-(获取每文件系统的盐值)
--------------------------------
+Getting the per-filesystem salt(获取每文件系统的盐值)
+-----------------------------------------------------
 
 Some filesystems, such as ext4 and F2FS, also support the deprecated
 ioctl FS_IOC_GET_ENCRYPTION_PWSALT.  This ioctl retrieves a randomly
@@ -1270,9 +1230,8 @@ generate and manage any needed salt(s) in userspace.
 (FS_IOC_GET_ENCRYPTION_PWSALT 已被弃用。相反，建议在用户空间中生成并
 管理所需的盐值。)
 
-Getting a file's encryption nonce
-(获取文件的加密 nonce)
----------------------------------
+Getting a file's encryption nonce(获取文件的加密 nonce)
+-------------------------------------------------------
 
 Since Linux v5.7, the ioctl FS_IOC_GET_ENCRYPTION_NONCE is supported.
 On encrypted files and directories it gets the inode's 16-byte nonce.
@@ -1287,13 +1246,11 @@ of fscrypt.
 (此 ioctl 对于验证加密是否正确完成的自动化测试很有用。正常使用 fscrypt
 并不需要它。)
 
-Adding keys
-(添加密钥)
------------
+Adding keys(添加密钥)
+---------------------
 
-FS_IOC_ADD_ENCRYPTION_KEY
-(FS_IOC_ADD_ENCRYPTION_KEY)
-~~~~~~~~~~~~~~~~~~~~~~~~~
+FS_IOC_ADD_ENCRYPTION_KEY(FS_IOC_ADD_ENCRYPTION_KEY)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The FS_IOC_ADD_ENCRYPTION_KEY ioctl adds a master encryption key to
 the filesystem, making all files on the filesystem which were
@@ -1403,10 +1360,10 @@ as follows:
   (``flags``：包含来自 ``<linux/fscrypt.h>`` 的可选标志：)
 
   - FSCRYPT_ADD_KEY_FLAG_HW_WRAPPED: This denotes that the key is a
-    hardware-wrapped key.  See `Hardware-wrapped keys`_.  This flag
+    hardware-wrapped key.  See `Hardware-wrapped keys(硬件封装密钥)`_.  This flag
     can't be used if FSCRYPT_KEY_SPEC_TYPE_DESCRIPTOR is used.
     (FSCRYPT_ADD_KEY_FLAG_HW_WRAPPED：表示该密钥是硬件封装密钥。参见
-    `Hardware-wrapped keys`_。如果使用了 FSCRYPT_KEY_SPEC_TYPE_DESCRIPTOR
+    `Hardware-wrapped keys(硬件封装密钥)`_。如果使用了 FSCRYPT_KEY_SPEC_TYPE_DESCRIPTOR
     则不能使用此标志。)
 
 - ``raw`` is a variable-length field which must contain the actual
@@ -1422,10 +1379,10 @@ as follows:
 For v2 policy keys, the kernel keeps track of which user (identified
 by effective user ID) added the key, and only allows the key to be
 removed by that user --- or by "root", if they use
-`FS_IOC_REMOVE_ENCRYPTION_KEY_ALL_USERS`_.
+`FS_IOC_REMOVE_ENCRYPTION_KEY_ALL_USERS(FS_IOC_REMOVE_ENCRYPTION_KEY_ALL_USERS)`_.
 (对于 v2 策略密钥，内核会记录是哪个用户(以有效用户 ID 标识)添加了密钥，
 并且只允许该用户移除密钥——或者如果 "root" 使用
-`FS_IOC_REMOVE_ENCRYPTION_KEY_ALL_USERS`_，则由 "root" 移除。)
+`FS_IOC_REMOVE_ENCRYPTION_KEY_ALL_USERS(FS_IOC_REMOVE_ENCRYPTION_KEY_ALL_USERS)`_，则由 "root" 移除。)
 
 However, if another user has added the key, it may be desirable to
 prevent that other user from unexpectedly removing it.  Therefore,
@@ -1482,9 +1439,8 @@ FS_IOC_ADD_ENCRYPTION_KEY can fail with the following errors:
   超级块尚未在其上启用加密；或者指定了硬件封装密钥，但文件系统不支持
   内联加密，或硬件不支持硬件封装密钥)
 
-Legacy method
-(传统方法)
-~~~~~~~~~~~~~
+Legacy method(传统方法)
+~~~~~~~~~~~~~~~~~~~~~~~
 
 For v1 encryption policies, a master encryption key can also be
 provided by adding it to a process-subscribed keyring, e.g. to a
@@ -1496,7 +1452,7 @@ into the session keyring.
 
 This method is deprecated (and not supported for v2 encryption
 policies) for several reasons.  First, it cannot be used in
-combination with FS_IOC_REMOVE_ENCRYPTION_KEY (see `Removing keys`_),
+combination with FS_IOC_REMOVE_ENCRYPTION_KEY (see `Removing keys(移除密钥)`_),
 so for removing a key a workaround such as keyctl_unlink() in
 combination with ``sync; echo 2 > /proc/sys/vm/drop_caches`` would
 have to be used.  Second, it doesn't match the fact that the
@@ -1506,7 +1462,7 @@ has caused much confusion as well as real problems when processes
 running under different UIDs, such as a ``sudo`` command, need to
 access encrypted files.
 (出于几个原因，此方法已被弃用(并且不受 v2 加密策略支持)。首先，它不能
-与 FS_IOC_REMOVE_ENCRYPTION_KEY 结合使用(参见 `Removing keys`_)，因此
+与 FS_IOC_REMOVE_ENCRYPTION_KEY 结合使用(参见 `Removing keys(移除密钥)`_)，因此
 要移除密钥，必须使用诸如 keyctl_unlink() 结合
 ``sync; echo 2 > /proc/sys/vm/drop_caches`` 之类的变通方法。其次，它与
 以下事实不匹配：加密文件的锁定/解锁状态(即它们呈现为明文形式还是密文
@@ -1550,16 +1506,15 @@ new programs.
 (密钥描述前缀 "fscrypt:" 也可以替换为文件系统特定的前缀，例如
 "ext4:"。但是，文件系统特定的前缀已被弃用，不应在新程序中使用。)
 
-Removing keys
-(移除密钥)
--------------
+Removing keys(移除密钥)
+-----------------------
 
 Two ioctls are available for removing a key that was added by
-`FS_IOC_ADD_ENCRYPTION_KEY`_:
-(有两个 ioctl 可用于移除由 `FS_IOC_ADD_ENCRYPTION_KEY`_ 添加的密钥：)
+`FS_IOC_ADD_ENCRYPTION_KEY(FS_IOC_ADD_ENCRYPTION_KEY)`_:
+(有两个 ioctl 可用于移除由 `FS_IOC_ADD_ENCRYPTION_KEY(FS_IOC_ADD_ENCRYPTION_KEY)`_ 添加的密钥：)
 
-- `FS_IOC_REMOVE_ENCRYPTION_KEY`_
-- `FS_IOC_REMOVE_ENCRYPTION_KEY_ALL_USERS`_
+- `FS_IOC_REMOVE_ENCRYPTION_KEY(FS_IOC_REMOVE_ENCRYPTION_KEY)`_
+- `FS_IOC_REMOVE_ENCRYPTION_KEY_ALL_USERS(FS_IOC_REMOVE_ENCRYPTION_KEY_ALL_USERS)`_
 
 These two ioctls differ only in cases where v2 policy keys are added
 or removed by non-root users.
@@ -1570,14 +1525,13 @@ These ioctls don't work on keys that were added via the legacy
 process-subscribed keyrings mechanism.
 (这些 ioctl 对通过传统进程订阅密钥环机制添加的密钥不起作用。)
 
-Before using these ioctls, read the `Online attacks`_ section for a
+Before using these ioctls, read the `Online attacks(在线攻击)`_ section for a
 discussion of the security goals and limitations of these ioctls.
-(在使用这些 ioctl 之前，请阅读 `Online attacks`_ 一节，以了解这些
+(在使用这些 ioctl 之前，请阅读 `Online attacks(在线攻击)`_ 一节，以了解这些
 ioctl 的安全目标和局限性。)
 
-FS_IOC_REMOVE_ENCRYPTION_KEY
-(FS_IOC_REMOVE_ENCRYPTION_KEY)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+FS_IOC_REMOVE_ENCRYPTION_KEY(FS_IOC_REMOVE_ENCRYPTION_KEY)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The FS_IOC_REMOVE_ENCRYPTION_KEY ioctl removes a claim to a master
 encryption key from the filesystem, and possibly removes the key
@@ -1701,17 +1655,16 @@ FS_IOC_REMOVE_ENCRYPTION_KEY can fail with the following errors:
   (``EOPNOTSUPP``：内核配置时未启用对此文件系统的加密支持，或文件系统
   超级块尚未在其上启用加密)
 
-FS_IOC_REMOVE_ENCRYPTION_KEY_ALL_USERS
-(FS_IOC_REMOVE_ENCRYPTION_KEY_ALL_USERS)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+FS_IOC_REMOVE_ENCRYPTION_KEY_ALL_USERS(FS_IOC_REMOVE_ENCRYPTION_KEY_ALL_USERS)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 FS_IOC_REMOVE_ENCRYPTION_KEY_ALL_USERS is exactly the same as
-`FS_IOC_REMOVE_ENCRYPTION_KEY`_, except that for v2 policy keys, the
+`FS_IOC_REMOVE_ENCRYPTION_KEY(FS_IOC_REMOVE_ENCRYPTION_KEY)`_, except that for v2 policy keys, the
 ALL_USERS version of the ioctl will remove all users' claims to the
 key, not just the current user's.  I.e., the key itself will always be
 removed, no matter how many users have added it.  This difference is
 only meaningful if non-root users are adding and removing keys.
-(FS_IOC_REMOVE_ENCRYPTION_KEY_ALL_USERS 与 `FS_IOC_REMOVE_ENCRYPTION_KEY`_
+(FS_IOC_REMOVE_ENCRYPTION_KEY_ALL_USERS 与 `FS_IOC_REMOVE_ENCRYPTION_KEY(FS_IOC_REMOVE_ENCRYPTION_KEY)`_
 完全相同，不同之处在于：对于 v2 策略密钥，ALL_USERS 版本的 ioctl 会
 移除所有用户对该密钥的声明，而不仅仅是当前用户的。也就是说，无论有多少
 用户添加了该密钥，密钥本身总是会被移除。只有在非 root 用户添加和移除
@@ -1723,13 +1676,11 @@ namespace.  Otherwise it will fail with EACCES.
 (因此，FS_IOC_REMOVE_ENCRYPTION_KEY_ALL_USERS 还要求 "root" 身份，即在
 初始用户命名空间中拥有 CAP_SYS_ADMIN 能力。否则它将以 EACCES 失败。)
 
-Getting key status
-(获取密钥状态)
-------------------
+Getting key status(获取密钥状态)
+--------------------------------
 
-FS_IOC_GET_ENCRYPTION_KEY_STATUS
-(FS_IOC_GET_ENCRYPTION_KEY_STATUS)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+FS_IOC_GET_ENCRYPTION_KEY_STATUS(FS_IOC_GET_ENCRYPTION_KEY_STATUS)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The FS_IOC_GET_ENCRYPTION_KEY_STATUS ioctl retrieves the status of a
 master encryption key.  It can be executed on any file or directory on
@@ -1779,11 +1730,11 @@ On success, 0 is returned and the kernel fills in the output fields:
 - ``status`` indicates whether the key is absent, present, or
   incompletely removed.  Incompletely removed means that removal has
   been initiated, but some files are still in use; i.e.,
-  `FS_IOC_REMOVE_ENCRYPTION_KEY`_ returned 0 but set the informational
+  `FS_IOC_REMOVE_ENCRYPTION_KEY(FS_IOC_REMOVE_ENCRYPTION_KEY)`_ returned 0 but set the informational
   status flag FSCRYPT_KEY_REMOVAL_STATUS_FLAG_FILES_BUSY.
   (``status``：指示密钥是不存在、存在还是未完全移除。未完全移除意味着
   移除已经开始，但仍有一些文件在使用中；也就是说，
-  `FS_IOC_REMOVE_ENCRYPTION_KEY`_ 返回了 0，但设置了信息性状态标志
+  `FS_IOC_REMOVE_ENCRYPTION_KEY(FS_IOC_REMOVE_ENCRYPTION_KEY)`_ 返回了 0，但设置了信息性状态标志
   FSCRYPT_KEY_REMOVAL_STATUS_FLAG_FILES_BUSY。)
 
 - ``status_flags`` can contain the following flags:
@@ -1824,22 +1775,20 @@ derive the key.
 
 FS_IOC_GET_ENCRYPTION_KEY_STATUS can only get the status of keys in
 the filesystem-level keyring, i.e. the keyring managed by
-`FS_IOC_ADD_ENCRYPTION_KEY`_ and `FS_IOC_REMOVE_ENCRYPTION_KEY`_.  It
+`FS_IOC_ADD_ENCRYPTION_KEY(FS_IOC_ADD_ENCRYPTION_KEY)`_ and `FS_IOC_REMOVE_ENCRYPTION_KEY(FS_IOC_REMOVE_ENCRYPTION_KEY)`_.  It
 cannot get the status of a key that has only been added for use by v1
 encryption policies using the legacy mechanism involving
 process-subscribed keyrings.
 (FS_IOC_GET_ENCRYPTION_KEY_STATUS 只能获取文件系统级密钥环中的密钥状态，
-即由 `FS_IOC_ADD_ENCRYPTION_KEY`_ 和 `FS_IOC_REMOVE_ENCRYPTION_KEY`_
+即由 `FS_IOC_ADD_ENCRYPTION_KEY(FS_IOC_ADD_ENCRYPTION_KEY)`_ 和 `FS_IOC_REMOVE_ENCRYPTION_KEY(FS_IOC_REMOVE_ENCRYPTION_KEY)`_
 管理的密钥环。它无法获取仅通过涉及进程订阅密钥环的传统机制添加、供 v1
 加密策略使用的密钥的状态。)
 
-Access semantics
-(访问语义)
-================
+Access semantics(访问语义)
+==========================
 
-With the key
-(有密钥时)
-------------
+With the key(有密钥时)
+----------------------
 
 With the encryption key, encrypted regular files, directories, and
 symlinks behave very similarly to their unencrypted counterparts ---
@@ -1851,13 +1800,11 @@ astute users may notice some differences in behavior:
 
 - Unencrypted files, or files encrypted with a different encryption
   policy (i.e. different key, modes, or flags), cannot be renamed or
-  linked into an encrypted directory; see `Encryption policy
-  enforcement`_.  Attempts to do so will fail with EXDEV.  However,
+  linked into an encrypted directory; see `Encryption policy enforcement(加密策略的执行)`_.  Attempts to do so will fail with EXDEV.  However,
   encrypted files can be renamed within an encrypted directory, or
   into an unencrypted directory.
   (未加密的文件，或使用不同加密策略(即不同的密钥、模式或标志)加密的
-  文件，不能被重命名或链接到加密目录中；参见 `Encryption policy
-  enforcement`_。尝试这样做将以 EXDEV 失败。但是，加密文件可以在加密
+  文件，不能被重命名或链接到加密目录中；参见 `Encryption policy enforcement(加密策略的执行)`_。尝试这样做将以 EXDEV 失败。但是，加密文件可以在加密
   目录内重命名，或重命名到未加密目录中。)
 
   Note: "moving" an unencrypted file into an encrypted directory, e.g.
@@ -1873,9 +1820,9 @@ astute users may notice some differences in behavior:
   可用于覆写源文件，但不保证在所有文件系统和存储设备上都有效。)
 
 - Direct I/O is supported on encrypted files only under some
-  circumstances.  For details, see `Direct I/O support`_.
+  circumstances.  For details, see `Direct I/O support(直接 I/O 支持)`_.
   (只有在某些情况下，加密文件才支持直接 I/O(Direct I/O)。详情参见
-  `Direct I/O support`_。)
+  `Direct I/O support(直接 I/O 支持)`_。)
 
 - The fallocate operations FALLOC_FL_COLLAPSE_RANGE and
   FALLOC_FL_INSERT_RANGE are not supported on encrypted files and will
@@ -1911,9 +1858,8 @@ for an encrypted file contains the plaintext, not the ciphertext.
 (注意，mmap *是*受支持的。这是可能的，因为加密文件的页缓存中包含的是
 明文，而不是密文。)
 
-Without the key
-(无密钥时)
----------------
+Without the key(无密钥时)
+-------------------------
 
 Some filesystem operations may be performed on encrypted regular
 files, directories, and symlinks even before their encryption key has
@@ -1926,13 +1872,12 @@ been added, or after their encryption key has been removed:
 
 - Directories may be listed, in which case the filenames will be
   listed in an encoded form derived from their ciphertext.  The
-  current encoding algorithm is described in `Filename hashing and
-  encoding`_.  The algorithm is subject to change, but it is
+  current encoding algorithm is described in `Filename hashing and encoding(文件名哈希与编码)`_.  The algorithm is subject to change, but it is
   guaranteed that the presented filenames will be no longer than
   NAME_MAX bytes, will not contain the ``/`` or ``\0`` characters, and
   will uniquely identify directory entries.
   (可以列出目录，此时文件名将以从其密文派生的编码形式列出。当前的编码
-  算法在 `Filename hashing and encoding`_ 中描述。该算法可能会更改，但
+  算法在 `Filename hashing and encoding(文件名哈希与编码)`_ 中描述。该算法可能会更改，但
   保证所呈现的文件名不会超过 NAME_MAX 字节，不会包含 ``/`` 或 ``\0``
   字符，并且能唯一标识目录项。)
 
@@ -1977,9 +1922,8 @@ have not yet been implemented.
 (目前，在没有加密密钥的情况下无法备份和恢复加密文件。这需要尚未实现的
 特殊 API。)
 
-Encryption policy enforcement
-(加密策略的执行)
-=============================
+Encryption policy enforcement(加密策略的执行)
+=============================================
 
 After an encryption policy has been set on a directory, all regular
 files, directories, and symbolic links created in that directory
@@ -2007,9 +1951,8 @@ this by validating all top-level encryption policies prior to access.
 建议实现某种"验证启动"(verified boot)的系统利用这一点，在访问之前
 验证所有顶层加密策略。)
 
-Inline encryption support
-(内联加密支持)
-=========================
+Inline encryption support(内联加密支持)
+=======================================
 
 Many newer systems (especially mobile SoCs) have *inline encryption
 hardware* that can encrypt/decrypt data while it is on its way to/from
@@ -2070,9 +2013,8 @@ more information about hardware-wrapped keys, see below.
 封装密钥保护的文件只能由内联加密硬件加密/解密，因此只能在使用
 "inlinecrypt" 挂载选项时访问。关于硬件封装密钥的更多信息，参见下文。)
 
-Hardware-wrapped keys
-(硬件封装密钥)
----------------------
+Hardware-wrapped keys(硬件封装密钥)
+-----------------------------------
 
 fscrypt supports using *hardware-wrapped keys* when the inline
 encryption hardware supports it.  Such keys are only present in kernel
@@ -2104,14 +2046,14 @@ the details of how fscrypt can use hardware-wrapped keys.
 
 fscrypt supports hardware-wrapped keys by allowing the fscrypt master
 keys to be hardware-wrapped keys as an alternative to raw keys.  To
-add a hardware-wrapped key with `FS_IOC_ADD_ENCRYPTION_KEY`_,
+add a hardware-wrapped key with `FS_IOC_ADD_ENCRYPTION_KEY(FS_IOC_ADD_ENCRYPTION_KEY)`_,
 userspace must specify FSCRYPT_ADD_KEY_FLAG_HW_WRAPPED in the
 ``flags`` field of struct fscrypt_add_key_arg and also in the
 ``flags`` field of struct fscrypt_provisioning_key_payload when
 applicable.  The key must be in ephemerally-wrapped form, not
 long-term wrapped form.
 (fscrypt 通过允许 fscrypt 主密钥作为原始密钥的替代而采用硬件封装密钥的
-形式，来支持硬件封装密钥。要通过 `FS_IOC_ADD_ENCRYPTION_KEY`_ 添加
+形式，来支持硬件封装密钥。要通过 `FS_IOC_ADD_ENCRYPTION_KEY(FS_IOC_ADD_ENCRYPTION_KEY)`_ 添加
 硬件封装密钥，用户空间必须在 struct fscrypt_add_key_arg 的 ``flags``
 字段中指定 FSCRYPT_ADD_KEY_FLAG_HW_WRAPPED，并且在适用的情况下，还要在
 struct fscrypt_provisioning_key_payload 的 ``flags`` 字段中指定。该
@@ -2123,7 +2065,7 @@ key are tied to the system's inline encryption hardware.  Therefore
 they can only be accessed when the "inlinecrypt" mount option is used,
 and they can't be included in portable filesystem images.  Second,
 currently the hardware-wrapped key support is only compatible with
-`IV_INO_LBLK_64 policies`_ and `IV_INO_LBLK_32 policies`_, as it
+`IV_INO_LBLK_64 policies(IV_INO_LBLK_64 策略)`_ and `IV_INO_LBLK_32 policies(IV_INO_LBLK_32 策略)`_, as it
 assumes that there is just one file contents encryption key per
 fscrypt master key rather than one per file.  Future work may address
 this limitation by passing per-file nonces down the storage stack to
@@ -2131,7 +2073,7 @@ allow the hardware to derive per-file keys.
 (存在一些限制。首先，受硬件封装密钥保护的文件与系统的内联加密硬件绑定。
 因此，只能在使用 "inlinecrypt" 挂载选项时访问它们，并且它们不能包含在
 可移植的文件系统映像中。其次，目前硬件封装密钥支持仅与
-`IV_INO_LBLK_64 policies`_ 和 `IV_INO_LBLK_32 policies`_ 兼容，因为它
+`IV_INO_LBLK_64 policies(IV_INO_LBLK_64 策略)`_ 和 `IV_INO_LBLK_32 policies(IV_INO_LBLK_32 策略)`_ 兼容，因为它
 假设每个 fscrypt 主密钥只有一个文件内容加密密钥，而不是每个文件一个。
 未来的工作可以通过将每文件 nonce 沿存储栈向下传递、让硬件派生每文件
 密钥来解决这一限制。)
@@ -2176,9 +2118,8 @@ fscrypt subkeys such as filenames encryption keys.
 (注意，这意味着硬件封装密钥功能只保护文件内容加密密钥。它不保护其他
 fscrypt 子密钥，例如文件名加密密钥。)
 
-Direct I/O support
-(直接 I/O 支持)
-==================
+Direct I/O support(直接 I/O 支持)
+=================================
 
 For direct I/O on an encrypted file to work, the following conditions
 must be met (in addition to the conditions for direct I/O on an
@@ -2189,10 +2130,10 @@ I/O 条件之外)：)
 * The file must be using inline encryption.  Usually this means that
   the filesystem must be mounted with ``-o inlinecrypt`` and inline
   encryption hardware must be present.  However, a software fallback
-  is also available.  For details, see `Inline encryption support`_.
+  is also available.  For details, see `Inline encryption support(内联加密支持)`_.
   (文件必须正在使用内联加密。通常这意味着文件系统必须以 ``-o
   inlinecrypt`` 挂载，并且内联加密硬件必须存在。不过，也可以使用软件
-  回退。详情参见 `Inline encryption support`_。)
+  回退。详情参见 `Inline encryption support(内联加密支持)`_。)
 
 * The I/O request must be fully aligned to the filesystem block size.
   This means that the file position the I/O is targeting, the lengths
@@ -2208,13 +2149,11 @@ encrypted file will fall back to buffered I/O.
 (如果不满足上述任一条件，加密文件上的直接 I/O 将回退到缓冲 I/O
 (buffered I/O)。)
 
-Implementation details
-(实现细节)
-======================
+Implementation details(实现细节)
+================================
 
-Encryption context
-(加密上下文)
-------------------
+Encryption context(加密上下文)
+------------------------------
 
 An encryption policy is represented on-disk by
 struct fscrypt_context_v1 or struct fscrypt_context_v2.  It is up to
@@ -2257,19 +2196,16 @@ fscrypt_context_v2 表示。由各个文件系统自行决定将其存储在哪�
     };
 
 The context structs contain the same information as the corresponding
-policy structs (see `Setting an encryption policy`_), except that the
+policy structs (see `Setting an encryption policy(设置加密策略)`_), except that the
 context structs also contain a nonce.  The nonce is randomly generated
 by the kernel and is used as KDF input or as a tweak to cause
-different files to be encrypted differently; see `Per-file encryption
-keys`_ and `DIRECT_KEY policies`_.
-(上下文结构体包含与相应策略结构体相同的信息(参见 `Setting an encryption
-policy`_)，只是上下文结构体还包含一个 nonce。该 nonce 由内核随机生成，
+different files to be encrypted differently; see `Per-file encryption keys(每文件加密密钥)`_ and `DIRECT_KEY policies(DIRECT_KEY 策略)`_.
+(上下文结构体包含与相应策略结构体相同的信息(参见 `Setting an encryption policy(设置加密策略)`_)，只是上下文结构体还包含一个 nonce。该 nonce 由内核随机生成，
 用作 KDF 输入，或用作调整值(tweak)以使不同文件以不同方式加密；参见
-`Per-file encryption keys`_ 和 `DIRECT_KEY policies`_。)
+`Per-file encryption keys(每文件加密密钥)`_ 和 `DIRECT_KEY policies(DIRECT_KEY 策略)`_。)
 
-Data path changes
-(数据路径的变化)
------------------
+Data path changes(数据路径的变化)
+---------------------------------
 
 When inline encryption is used, filesystems just need to associate
 encryption contexts with bios to specify how the block layer or the
@@ -2302,9 +2238,8 @@ F2FS, have to allocate bounce pages specially for encryption.
 无论是否加密都已经在使用临时缓冲。其他文件系统，例如 ext4 和 F2FS，
 必须专门为加密分配弹跳页。)
 
-Filename hashing and encoding
-(文件名哈希与编码)
------------------------------
+Filename hashing and encoding(文件名哈希与编码)
+-----------------------------------------------
 
 Modern filesystems accelerate directory lookups by using indexed
 directories.  An indexed directory is organized as a tree keyed by
@@ -2366,9 +2301,8 @@ as a way to temporarily present valid filenames so that commands like
 作为一种临时呈现有效文件名的方式，以便像 ``rm -r`` 这样的命令在加密
 目录上按预期工作。)
 
-Tests
-(测试)
-=====
+Tests(测试)
+===========
 
 To test fscrypt, use xfstests, which is Linux's de facto standard
 filesystem test suite.  First, run all the tests in the "encrypt"

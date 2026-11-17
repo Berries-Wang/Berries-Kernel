@@ -1,19 +1,16 @@
 .. SPDX-License-Identifier: GPL-2.0+
 
-=============================================================
-Linux Base Driver for Intel(R) Ethernet Multi-host Controller
-=============================================================
-
-(Intel(R) Ethernet Multi-host Controller 的 Linux 基础驱动)
+========================================================================================================================
+Linux Base Driver for Intel(R) Ethernet Multi-host Controller(Intel(R) Ethernet Multi-host Controller 的 Linux 基础驱动)
+========================================================================================================================
 
 August 20, 2018
 Copyright(c) 2015-2018 Intel Corporation.
 (2018 年 8 月 20 日
 版权所有 (c) 2015-2018 Intel Corporation。)
 
-Contents
-(目录)
-========
+Contents(目录)
+==============
 
 - Identifying Your Adapter
   (识别你的适配器)
@@ -26,9 +23,8 @@ Contents
 - Support
   (支持)
 
-Identifying Your Adapter
-(识别你的适配器)
-========================
+Identifying Your Adapter(识别你的适配器)
+========================================
 
 The driver in this release is compatible with devices based on the Intel(R)
 Ethernet Multi-host Controller.
@@ -41,9 +37,8 @@ https://www.intel.com/support
 网站： https://www.intel.com/support)
 
 
-Flow Control
-(流控)
-------------
+Flow Control(流控)
+------------------
 
 The Intel(R) Ethernet Switch Host Interface Driver does not support Flow
 Control. It will not send pause frames. This may result in dropped frames.
@@ -51,9 +46,8 @@ Control. It will not send pause frames. This may result in dropped frames.
 这可能导致丢帧。)
 
 
-Virtual Functions (VFs)
-(虚拟功能 (VFs))
------------------------
+Virtual Functions (VFs)(虚拟功能 (VFs))
+---------------------------------------
 
 Use sysfs to enable VFs.
 Valid Range: 0-64
@@ -82,13 +76,11 @@ before the new VLAN filter is added. For example::
     ip link set eth0 vf 0 vlan 200	// set a new vlan 200 for VF 0
 
 
-Additional Features and Configurations
-(其他特性与配置)
-======================================
+Additional Features and Configurations(其他特性与配置)
+======================================================
 
-Jumbo Frames
-(巨型帧)
-------------
+Jumbo Frames(巨型帧)
+--------------------
 
 Jumbo Frames support is enabled by changing the Maximum Transmission Unit (MTU)
 to a value larger than the default value of 1500.
@@ -128,9 +120,8 @@ allocating receive packets.
 有助于避免在分配接收数据包时出现缓冲区不足的问题。)
 
 
-Generic Receive Offload, aka GRO
-(通用接收卸载，即 GRO)
---------------------------------
+Generic Receive Offload, aka GRO(通用接收卸载，即 GRO)
+------------------------------------------------------
 
 The driver supports the in-kernel software implementation of GRO. GRO has
 shown that by coalescing Rx traffic into larger chunks of data, CPU
@@ -145,9 +136,8 @@ are problematic for LRO, namely bridging and iSCSI.
 
 
 
-Supported ethtool Commands and Options for Filtering
-(支持的用于过滤的 ethtool 命令与选项)
-----------------------------------------------------
+Supported ethtool Commands and Options for Filtering(支持的用于过滤的 ethtool 命令与选项)
+-----------------------------------------------------------------------------------------
 
 -n --show-nfc
   Retrieves the receive network flow classification configurations.
@@ -175,13 +165,11 @@ rx-flow-hash tcp4|udp4|ah4|esp4|sctp4|tcp6|udp6|ah6|esp6|sctp6 m|v|t|s|d|f|n|r
   (n 对接收数据包第 4 层头部的第 2 和第 3 字节进行哈希。)
 
 
-Known Issues/Troubleshooting
-(已知问题/故障排查)
-============================
+Known Issues/Troubleshooting(已知问题/故障排查)
+===============================================
 
-Enabling SR-IOV in a 64-bit Microsoft Windows Server 2012/R2 guest OS under Linux KVM
-(在 Linux KVM 下的 64 位 Microsoft Windows Server 2012/R2 客户机操作系统中启用 SR-IOV)
--------------------------------------------------------------------------------------
+Enabling SR-IOV in a 64-bit Microsoft Windows Server 2012/R2 guest OS under Linux KVM(在 Linux KVM 下的 64 位 Microsoft Windows Server 2012/R2 客户机操作系统中启用 SR-IOV)
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 KVM Hypervisor/VMM supports direct assignment of a PCIe device to a VM. This
 includes traditional PCIe devices, as well as SR-IOV-capable devices based on
@@ -190,9 +178,8 @@ the Intel Ethernet Controller XL710.
 以及基于 Intel Ethernet Controller XL710 的支持 SR-IOV 的设备。)
 
 
-Support
-(支持)
-=======
+Support(支持)
+=============
 
 For general information, go to the Intel support website at:
 https://www.intel.com/support/

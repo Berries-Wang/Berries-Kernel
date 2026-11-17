@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-============================
-LC-trie implementation notes
-============================
+==============================================
+LC-trie implementation notes(LC-trie 实现说明)
+==============================================
 
-(LC-trie 实现说明)
-
-Node types
-(节点类型)
-----------
+Node types(节点类型)
+--------------------
 
 leaf
 (叶子节点)
@@ -27,9 +24,8 @@ trie node or tnode
 	(一种内部节点，持有一个子节点(叶子或 tnode)指针数组，通过键的一个子集进行
 	索引。参见层级压缩(Level Compression)。)
 
-A few concepts explained
-(一些概念的解释)
-------------------------
+A few concepts explained(一些概念的解释)
+----------------------------------------
 
 Bits (tnode)
 (位数 (tnode))
@@ -102,9 +98,8 @@ full_children
 	(这里的 "full" 一词更多是取"完整"之意，而不是作为 "empty" 的反义词，这可能
 	有点令人困惑。)
 
-Comments
-(说明)
----------
+Comments(说明)
+--------------
 
 We have tried to keep the structure of the code as close to fib_hash as
 possible to allow verification and help up reviewing.
@@ -191,9 +186,8 @@ fn_trie_dump()
 	前缀长度我们都必须遍历整棵字典树。相比之下，fib_hash 按每个前缀长度组织为
 	一个 "zone"/哈希。)
 
-Locking
-(加锁)
--------
+Locking(加锁)
+-------------
 
 fib_lock is used for an RW-lock in the same way that this is done in fib_hash.
 However, the functions are somewhat separated for other possible locking
@@ -203,9 +197,8 @@ to avoid read_lock in the fn_trie_lookup() function.
 加锁场景，这些函数在一定程度上是相互分离的。可以设想通过 RCU 来运行
 trie_rebalance，以避免 fn_trie_lookup() 函数中的 read_lock。)
 
-Main lookup mechanism
-(主要查找机制)
----------------------
+Main lookup mechanism(主要查找机制)
+-----------------------------------
 fn_trie_lookup() is the main lookup function.
 (fn_trie_lookup() 是主要的查找函数。)
 

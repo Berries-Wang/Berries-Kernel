@@ -1,8 +1,7 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-Bigalloc
-(bigalloc)
---------
+Bigalloc(bigalloc)
+------------------
 
 At the moment, the default size of a block is 4KiB, which is a commonly
 supported page size on most MMU-capable hardware. This is fortunate, as

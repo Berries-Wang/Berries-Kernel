@@ -1,23 +1,19 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=====================================
-Network Devices, the Kernel, and You!
-=====================================
-
-(网络设备、内核与你！)
+===========================================================
+Network Devices, the Kernel, and You!(网络设备、内核与你！)
+===========================================================
 
 
-Introduction
-(简介)
-============
+Introduction(简介)
+==================
 
 The following is a random collection of documentation regarding
 network devices. It is intended for driver developers.
 (以下是关于网络设备的一些零散文档，面向驱动开发者。)
 
-struct net_device lifetime rules
-(struct net_device 生命周期规则)
-================================
+struct net_device lifetime rules(struct net_device 生命周期规则)
+================================================================
 
 Network device structures need to persist even after module is unloaded and
 must be allocated with alloc_netdev_mqs() and friends.
@@ -47,9 +43,8 @@ register_netdevice(), unregister_netdevice(), free_netdevice().
 ``rtnl_lock`` 时使用：register_netdevice()、unregister_netdevice()、
 free_netdevice()。)
 
-Simple drivers
-(简单驱动)
---------------
+Simple drivers(简单驱动)
+------------------------
 
 Most drivers (especially device drivers) handle lifetime of struct net_device
 in context where ``rtnl_lock`` is not held (e.g. driver probe and remove paths).
@@ -112,9 +107,8 @@ register_netdev() failed.
 (free_netdev() 可以在 unregister_netdev() 返回之后调用，或在
 register_netdev() 失败时调用。)
 
-Device management under RTNL
-(RTNL 下的设备管理)
-----------------------------
+Device management under RTNL(RTNL 下的设备管理)
+-----------------------------------------------
 
 Registering struct net_device while in context which already holds
 the ``rtnl_lock`` requires extra care. In those scenarios most drivers
@@ -218,9 +212,8 @@ Devices spawned from struct rtnl_link_ops should never free the
 struct net_device directly.
 (由 struct rtnl_link_ops 派生的设备绝不应直接释放 struct net_device。)
 
-.ndo_init and .ndo_uninit
-(.ndo_init 与 .ndo_uninit)
-~~~~~~~~~~~~~~~~~~~~~~~~~
+.ndo_init and .ndo_uninit(.ndo_init 与 .ndo_uninit)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``.ndo_init`` and ``.ndo_uninit`` callbacks are called during net_device
 registration and de-registration, under ``rtnl_lock``. Drivers can use
@@ -235,9 +228,8 @@ may still have outstanding references to the netdevice.
 (``.ndo_init`` 在设备于系统中可见之前运行；``.ndo_uninit`` 在注销期间、设备
 关闭之后运行，但其他子系统可能仍持有对该 netdevice 的未决引用。)
 
-MTU
-(MTU)
-===
+MTU(MTU)
+========
 
 Each network device has a Maximum Transfer Unit. The MTU does not
 include any link layer protocol overhead. Upper layer protocols must
@@ -273,9 +265,8 @@ packets is preferred.
 包，但首选丢弃超长数据包。)
 
 
-struct net_device synchronization rules
-(struct net_device 同步规则)
-=======================================
+struct net_device synchronization rules(struct net_device 同步规则)
+===================================================================
 
 ndo_open:
 	Synchronization: rtnl_lock() semaphore. In addition, netdev instance
@@ -427,9 +418,8 @@ the driver implements queue management or shaper API.
 (上面列表未列出的大多数 ndo 回调都在 ``rtnl_lock`` 下运行。此外，如果驱动
 实现了队列管理或整形器 API，还会同时获取 netdev 实例锁。)
 
-struct napi_struct synchronization rules
-(struct napi_struct 同步规则)
-========================================
+struct napi_struct synchronization rules(struct napi_struct 同步规则)
+=====================================================================
 
 napi->poll:
 	Synchronization:
@@ -451,9 +441,8 @@ napi->poll:
 		 will be called with interrupts disabled by netconsole.
 		 (softirq（软中断）；由 netconsole 调用时中断已被禁用。)
 
-netdev instance lock
-(netdev 实例锁)
-====================
+netdev instance lock(netdev 实例锁)
+===================================
 
 Historically, all networking control operations were protected by a single
 global lock known as ``rtnl_lock``. There is an ongoing effort to replace this
@@ -503,9 +492,8 @@ the instance lock.
 ``dev_xxx``/``netdev_xxx`` 函数会自行获取实例锁，而 ``netif_xxx`` 函数则假定
 驱动已经获取了实例锁。)
 
-struct net_device_ops
-(struct net_device_ops)
----------------------
+struct net_device_ops(struct net_device_ops)
+--------------------------------------------
 
 ``ndos`` are called without holding the instance lock for most drivers.
 (对于大多数驱动，``ndos`` 在不持有实例锁的情况下被调用。)
@@ -514,9 +502,8 @@ struct net_device_ops
 the instance lock.
 (对于 "ops locked" 驱动，大多数 ``ndos`` 会在实例锁下被调用。)
 
-struct ethtool_ops
-(struct ethtool_ops)
-------------------
+struct ethtool_ops(struct ethtool_ops)
+--------------------------------------
 
 Similarly to ``ndos`` the instance lock is only held for select drivers.
 For "ops locked" drivers all ethtool ops without exceptions should
@@ -524,18 +511,16 @@ be called under the instance lock.
 (与 ``ndos`` 类似，实例锁只对特定的驱动持有。对于 "ops locked" 驱动，所有
 ethtool 回调无一例外地都应在实例锁下调用。)
 
-struct netdev_stat_ops
-(struct netdev_stat_ops)
-----------------------
+struct netdev_stat_ops(struct netdev_stat_ops)
+----------------------------------------------
 
 "qstat" ops are invoked under the instance lock for "ops locked" drivers,
 and under rtnl_lock for all other drivers.
 (对于 "ops locked" 驱动，"qstat" 回调在实例锁下被调用；对所有其他驱动则在
 rtnl_lock 下调用。)
 
-struct net_shaper_ops
-(struct net_shaper_ops)
----------------------
+struct net_shaper_ops(struct net_shaper_ops)
+--------------------------------------------
 
 All net shaper callbacks are invoked while holding the netdev instance
 lock. ``rtnl_lock`` may or may not be held.
@@ -545,9 +530,8 @@ lock. ``rtnl_lock`` may or may not be held.
 Note that supporting net shapers automatically enables "ops locking".
 (注意，支持 net shaper 会自动启用 "ops locking"。)
 
-struct netdev_queue_mgmt_ops
-(struct netdev_queue_mgmt_ops)
-----------------------------
+struct netdev_queue_mgmt_ops(struct netdev_queue_mgmt_ops)
+----------------------------------------------------------
 
 All queue management callbacks are invoked while holding the netdev instance
 lock. ``rtnl_lock`` may or may not be held.
@@ -558,9 +542,8 @@ Note that supporting struct netdev_queue_mgmt_ops automatically enables
 "ops locking".
 (注意，支持 struct netdev_queue_mgmt_ops 会自动启用 "ops locking"。)
 
-Notifiers and netdev instance lock
-(通知器与 netdev 实例锁)
-----------------------------------
+Notifiers and netdev instance lock(通知器与 netdev 实例锁)
+----------------------------------------------------------
 
 For device drivers that implement shaping or queue management APIs,
 some of the notifiers (``enum netdev_cmd``) are running under the netdev
@@ -598,9 +581,8 @@ from a notifier.
 类型的通知器。目标是最终确保所有（或大多数，少数有文档记录的例外）通知器都
 在实例锁下运行。当你明确假设某个通知器会持锁运行时，请扩充本文档。)
 
-NETDEV_INTERNAL symbol namespace
-(NETDEV_INTERNAL 符号命名空间)
-================================
+NETDEV_INTERNAL symbol namespace(NETDEV_INTERNAL 符号命名空间)
+==============================================================
 
 Symbols exported as NETDEV_INTERNAL can only be used in networking
 core and drivers which exclusively flow via the main networking list and trees.

@@ -1,8 +1,7 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-Super Block
-(超级块)
------------
+Super Block(超级块)
+-------------------
 
 The superblock records various information about the enclosing
 filesystem, such as block counts, inode counts, supported features,

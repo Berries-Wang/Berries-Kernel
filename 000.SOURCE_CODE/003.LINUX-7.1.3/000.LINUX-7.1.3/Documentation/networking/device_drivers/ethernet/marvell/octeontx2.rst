@@ -1,27 +1,23 @@
 .. SPDX-License-Identifier: (GPL-2.0-only OR BSD-2-Clause)
 
-====================================
-Marvell OcteonTx2 RVU Kernel Drivers
-====================================
-
-(Marvell OcteonTx2 RVU 内核驱动)
+====================================================================
+Marvell OcteonTx2 RVU Kernel Drivers(Marvell OcteonTx2 RVU 内核驱动)
+====================================================================
 
 Copyright (c) 2020 Marvell International Ltd.
 
-Contents
-(目录)
-========
+Contents(目录)
+==============
 
-- `Overview`_
-- `Drivers`_
-- `Basic packet flow`_
-- `Devlink health reporters`_
-- `Quality of service`_
-- `RVU representors`_
+- `Overview(概述)`_
+- `Drivers(驱动)`_
+- `Basic packet flow(基本数据包流程)`_
+- `Devlink health reporters(devlink 健康报告器)`_
+- `Quality of service(服务质量)`_
+- `RVU Representors(RVU 代表设备)`_
 
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 Resource virtualization unit (RVU) on Marvell's OcteonTX2 SOC maps HW
 resources from the network, crypto and other functional blocks into
@@ -87,18 +83,16 @@ Firmware setups following stuff before kernel boots
  - These are not changed after kernel boot.
    (这些设置在内核启动后不会再改变。)
 
-Drivers
-(驱动)
-=======
+Drivers(驱动)
+=============
 
 Linux kernel will have multiple drivers registering to different PF and VFs
 of RVU. Wrt networking there will be 3 flavours of drivers.
 (Linux 内核会有多个驱动注册到 RVU 的不同 PF 和 VF 上。就网络而言，将有 3 种类型
 的驱动。)
 
-Admin Function driver
-(管理功能驱动)
----------------------
+Admin Function driver(管理功能驱动)
+-----------------------------------
 
 As mentioned above RVU PF0 is called the admin function (AF), this driver
 supports resource provisioning and configuration of functional blocks.
@@ -167,9 +161,8 @@ From pure networking side AF driver supports following functionality.
  - And many more.
    (还有更多。)
 
-Physical Function driver
-(物理功能驱动)
-------------------------
+Physical Function driver(物理功能驱动)
+--------------------------------------
 
 This RVU PF handles IO, is mapped to a physical ethernet link and this
 driver registers a netdev. This supports SR-IOV. As said above this driver
@@ -185,9 +178,8 @@ flow control, ntuple filters, dump PHY EEPROM, config FEC etc.
 (支持通过 ethtool 配置链路、RSS、队列数量、队列大小、流控、ntuple 过滤器、
 转储 PHY EEPROM、配置 FEC 等。)
 
-Virtual Function driver
-(虚拟功能驱动)
------------------------
+Virtual Function driver(虚拟功能驱动)
+-------------------------------------
 
 There are two types VFs, VFs that share the physical link with their parent
 SR-IOV PF and the VFs which work in pairs using internal HW loopback channels (LBK).
@@ -233,13 +225,11 @@ hence same VF driver works for both types of devices.
 (除了用于数据包收发的 IO 通道或链路之外，这两种 VF 类型没有其他区别。IO 通道
 的映射由 AF 驱动负责，因此同一个 VF 驱动可同时适用于这两种类型的设备。)
 
-Basic packet flow
-(基本数据包流程)
-=================
+Basic packet flow(基本数据包流程)
+=================================
 
-Ingress
-(入方向)
--------
+Ingress(入方向)
+---------------
 
 1. CGX LMAC receives packet.
    (CGX LMAC 接收数据包。)
@@ -254,9 +244,8 @@ Ingress
 6. Packet is DMA'ed and driver is notified.
    (数据包经 DMA 传输，随后通知驱动。)
 
-Egress
-(出方向)
-------
+Egress(出方向)
+--------------
 
 1. Driver prepares a send descriptor and submits to SQ for transmission.
    (驱动准备一个发送描述符并提交给 SQ 进行传输。)
@@ -269,13 +258,11 @@ Egress
 5. NPC MCAM entries can be installed to divert pkt onto a different channel.
    (可以安装 NPC MCAM 表项，把数据包改道到其他通道。)
 
-Devlink health reporters
-(devlink 健康报告器)
-========================
+Devlink health reporters(devlink 健康报告器)
+============================================
 
-NPA Reporters
-(NPA 报告器)
--------------
+NPA Reporters(NPA 报告器)
+-------------------------
 
 The NPA reporters are responsible for reporting and recovering the following group of errors:
 (NPA 报告器负责报告并恢复以下几类错误：)
@@ -349,9 +336,8 @@ For example::
 	        AQ Doorbell Error
 
 
-NIX Reporters
-(NIX 报告器)
--------------
+NIX Reporters(NIX 报告器)
+-------------------------
 
 The NIX reporters are responsible for reporting and recovering the following group of errors:
 (NIX 报告器负责报告并恢复以下几类错误：)
@@ -443,14 +429,12 @@ For example::
 	        Rx on unmapped PF_FUNC
 
 
-Quality of service
-(服务质量)
-==================
+Quality of service(服务质量)
+============================
 
 
-Hardware algorithms used in scheduling
-(调度中使用的硬件算法)
---------------------------------------
+Hardware algorithms used in scheduling(调度中使用的硬件算法)
+------------------------------------------------------------
 
 octeontx2 silicon and CN10K transmit interface consists of five transmit levels
 starting from SMQ/MDQ, TL4 to TL1. Each packet will traverse MDQ, TL4 to TL1
@@ -480,9 +464,8 @@ TL1。每个数据包都会经过 MDQ、TL4 到 TL1 各层级。每个层级包�
         (优先级相同的活动 MDQ 通过轮询方式选取。)
 
 
-Setup HTB offload
-(设置 HTB 卸载)
------------------
+Setup HTB offload(设置 HTB 卸载)
+--------------------------------
 
 1. Enable HW TC offload on the interface::
    (在接口上启用硬件 TC 卸载：)
@@ -512,9 +495,8 @@ Setup HTB offload
         # tc class add dev <interface> parent 1: classid 1:3 htb rate 10Gbit prio 2 quantum 32768
 
 
-RVU Representors
-(RVU 代表设备)
-================
+RVU Representors(RVU 代表设备)
+==============================
 
 RVU representor driver adds support for creation of representor devices for
 RVU PFs' VFs in the system. Representor devices are created when user enables
@@ -588,18 +570,16 @@ RVU representors can be managed using devlink ports
 	pci/0002:1c:00.0/2: type eth netdev Rpf1vf2 flavour pcivf controller 0 pfnum 1 vfnum 2 external false splittable false
 	pci/0002:1c:00.0/3: type eth netdev Rpf1vf3 flavour pcivf controller 0 pfnum 1 vfnum 3 external false splittable false
 
-Function attributes
-(功能属性)
-===================
+Function attributes(功能属性)
+=============================
 
 The RVU representor support function attributes for representors.
 Port function configuration of the representors are supported through devlink eswitch port.
 (RVU 代表设备为代表设备提供功能属性支持。代表设备的端口功能配置可通过
 devlink eswitch 端口完成。)
 
-MAC address setup
-(MAC 地址设置)
------------------
+MAC address setup(MAC 地址设置)
+-------------------------------
 
 RVU representor driver support devlink port function attr mechanism to setup MAC
 address. (refer to Documentation/networking/devlink/devlink-port.rst)
@@ -616,9 +596,8 @@ address. (refer to Documentation/networking/devlink/devlink-port.rst)
 		hw_addr 5c:a1:1b:5e:43:11
 
 
-TC offload
-(TC 卸载)
-==========
+TC offload(TC 卸载)
+===================
 
 The rvu representor driver implements support for offloading tc rules using port representors.
 (rvu 代表设备驱动实现了通过端口代表设备卸载 tc 规则的支持。)

@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-======================================
-EROFS - Enhanced Read-Only File System
-======================================
+==================================================================
+EROFS - Enhanced Read-Only File System(EROFS - 增强型只读文件系统)
+==================================================================
 
-(EROFS - 增强型只读文件系统)
-
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 EROFS filesystem stands for Enhanced Read-Only File System.  It aims to form a
 generic read-only filesystem solution for various read-only use cases instead
@@ -130,9 +127,8 @@ linux-erofs mailing list:
 - linux-erofs mailing list   <linux-erofs@lists.ozlabs.org>
   (linux-erofs 邮件列表)
 
-Mount options
-(挂载选项)
-=============
+Mount options(挂载选项)
+=======================
 
 ===================    =========================================================
 (no)user_xattr         Setup Extended User Attributes. Note: xattr is enabled
@@ -184,9 +180,8 @@ inode_share            Enable inode page sharing for this filesystem.  Inodes wi
                        (为此文件系统启用 inode 页共享。同一域 ID 内内容相同的 inode 可以共享页缓存。)
 ===================    =========================================================
 
-Sysfs Entries
-(Sysfs 条目)
-=============
+Sysfs Entries(Sysfs 条目)
+=========================
 
 Information about mounted erofs file systems can be found in /sys/fs/erofs.
 Each mounted filesystem will have a directory in /sys/fs/erofs based on its
@@ -194,13 +189,11 @@ device name (i.e., /sys/fs/erofs/sda).
 (see also Documentation/ABI/testing/sysfs-fs-erofs)
 (关于已挂载 erofs 文件系统的信息可以在 /sys/fs/erofs 中找到。每个已挂载的文件系统都会根据其设备名在 /sys/fs/erofs 中有一个目录(即 /sys/fs/erofs/sda)。(另见 Documentation/ABI/testing/sysfs-fs-erofs))
 
-On-disk details
-(在盘细节)
-===============
+On-disk details(在盘细节)
+=========================
 
-Summary
-(摘要)
--------
+Summary(摘要)
+-------------
 Different from other read-only file systems, an EROFS volume is designed
 to be as simple as possible::
 
@@ -311,9 +304,8 @@ may not. All metadata can be now observed in two different spaces (views):
     |  ...   | xattr_entry |  xattr data | ... |  xattr_entry | xattr data  ...
     |________|_____________|_____________|_____|______________|_______________
 
-Directories
-(目录)
------------
+Directories(目录)
+-----------------
 All directories are now organized in a compact on-disk format. Note that
 each directory block is divided into index and name areas in order to support
 random file lookup, and all directory entries are _strictly_ recorded in
@@ -341,9 +333,8 @@ the total number of directory entries in this block since it is no need to
 introduce another on-disk field at all.
 (请注意，除了第一个文件名的偏移量之外，nameoff0 还指示了此块中目录项的总数，因为完全无需引入另一个在盘字段。)
 
-Chunk-based files
-(基于块的文件)
------------------
+Chunk-based files(基于块的文件)
+-------------------------------
 In order to support chunk-based data deduplication, a new inode data layout has
 been supported since Linux v5.15: Files are split in equal-sized data chunks
 with ``extents`` area of the inode metadata indicating how to get the chunk
@@ -355,9 +346,8 @@ details.)
 By the way, chunk-based files are all uncompressed for now.
 (顺便说一下，基于块的文件目前都是未压缩的。)
 
-Long extended attribute name prefixes
-(长扩展属性名前缀)
--------------------------------------
+Long extended attribute name prefixes(长扩展属性名前缀)
+-------------------------------------------------------
 There are use cases where extended attributes with different values can have
 only a few common prefixes (such as overlayfs xattrs).  The predefined prefixes
 work inefficiently in both image size and runtime performance in such cases.
@@ -393,9 +383,8 @@ index of the predefined xattr name prefix, e.g. EROFS_XATTR_INDEX_TRUSTED for
 after stripping the short prefix, e.g. "overlay." for the example above.
 (每个长名前缀以 ALIGN({__le16 len, data}, 4) 的格式存储，其中 len 表示数据部分的总大小。数据部分实际由 'struct erofs_xattr_long_prefix' 表示，其中 base_index 表示预定义 xattr 名前缀的索引，例如 "trusted.overlay." 长名前缀对应 EROFS_XATTR_INDEX_TRUSTED，而中缀字符串(infix)保留去掉短前缀之后的字符串，例如上例中的 "overlay."。)
 
-Data compression
-(数据压缩)
-----------------
+Data compression(数据压缩)
+--------------------------
 EROFS implements fixed-sized output compression which generates fixed-sized
 compressed data blocks from variable-sized input in contrast to other existing
 fixed-sized input solutions. Relatively higher compression ratios can be gotten

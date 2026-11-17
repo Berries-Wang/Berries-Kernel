@@ -1,13 +1,10 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-Diagnostic Concept for Investigating Twisted Pair Ethernet Variants at OSI Layer 1
-==================================================================================
+Diagnostic Concept for Investigating Twisted Pair Ethernet Variants at OSI Layer 1(在 OSI 第 1 层排查双绞线以太网变体的诊断概念)
+================================================================================================================================
 
-(在 OSI 第 1 层排查双绞线以太网变体的诊断概念)
-
-Introduction
-(引言)
-------------
+Introduction(引言)
+------------------
 
 This documentation is designed for two primary audiences:
 (本文档面向两类主要读者：)
@@ -32,9 +29,8 @@ This documentation is designed for two primary audiences:
    诊断流程，并指出了 Linux 内核诊断接口可以扩展或改进的方面。通过理解诊断流程，
    开发者可以更好地规划未来的增强工作。)
 
-Step-by-Step Diagnostic Guide from Linux (General Ethernet)
-(Linux 分步诊断指南 (通用以太网))
------------------------------------------------------------
+Step-by-Step Diagnostic Guide from Linux (General Ethernet)(Linux 分步诊断指南 (通用以太网))
+--------------------------------------------------------------------------------------------
 
 This diagnostic guide covers common Ethernet troubleshooting scenarios,
 focusing on **link stability and detection** across different Ethernet
@@ -57,9 +53,8 @@ partner** and will focus on diagnosing issues locally.
 (在本指南中，我们假定用户可能 **对链路对端的访问受限或完全无法访问** ，并将专注于
 在本地诊断问题。)
 
-Diagnostic Scenarios
-(诊断场景)
-~~~~~~~~~~~~~~~~~~~~
+Diagnostic Scenarios(诊断场景)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 - **Link is up and stable, but no data transfer**: If the link is stable but
   there are issues with data transmission, refer to the **OSI Layer 2
@@ -74,9 +69,8 @@ Diagnostic Scenarios
 - **No link detected**: The interface is up, but no link is established.
   (**未检测到链路** ：接口已启用，但未建立链路。)
 
-Verify Interface Status
-(验证接口状态)
-~~~~~~~~~~~~~~~~~~~~~~~
+Verify Interface Status(验证接口状态)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Begin by verifying the status of the Ethernet interface to check if it is
 administratively up. Unlike `ethtool`, which provides information on the link
@@ -182,9 +176,8 @@ the administrative "DOWN" state.
       (如果 **链路不稳定** 或 **频繁重置或断开** ，这可能表明存在物理层问题，例如
       电缆故障、干扰或供电问题。在这种情况下，请继续执行本指南的下一步。)
 
-Inspect Link Status and PHY Configuration
-(检查链路状态与 PHY 配置)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Inspect Link Status and PHY Configuration(检查链路状态与 PHY 配置)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Use `ethtool -I` to check the link status, PHY configuration, supported link
 modes, and additional statistics such as the **Link Down Events** counter. This
@@ -278,9 +271,8 @@ multiple link modes and autonegotiation.
     **双工** 及其他相关字段。这些信息将有助于后续分析或故障排除。在收集并保存
     **ethtool** 输出之后，进入下一个诊断步骤。)
 
-Check Power Delivery (PoDL or PoE)
-(检查供电 (PoDL 或 PoE))
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Check Power Delivery (PoDL or PoE)(检查供电 (PoDL 或 PoE))
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If it is known that **PoDL** or **PoE** is **not implemented** on the system,
 or the **PSE** (Power Sourcing Equipment) is managed by proprietary user-space
@@ -415,9 +407,8 @@ these steps to ensure power is being delivered correctly:
     执行 **电缆诊断** 或复查 **检查链路状态与 PHY 配置** 步骤，以找出物理链路或
     设置中存在的潜在问题。)
 
-Cable Diagnostics
-(电缆诊断)
-~~~~~~~~~~~~~~~~~
+Cable Diagnostics(电缆诊断)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Use `ethtool` to test for physical layer issues such as cable faults. The test
 results can vary depending on the cable's condition, the technology in use, and
@@ -474,9 +465,8 @@ refer to the **"Troubleshooting Based on Cable Test Results"** section.
 (有关各种可能的电缆测试结果的详细说明，请参考 **"基于电缆测试结果的故障排除"**
 一节。)
 
-Troubleshooting Based on Cable Test Results
-(基于电缆测试结果的故障排除)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Troubleshooting Based on Cable Test Results(基于电缆测试结果的故障排除)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 After running the cable test, the results can help identify specific issues in
 the physical connection. However, it is important to note that **cable testing
@@ -645,9 +635,8 @@ The results can be one of the following:
       (**后续步骤** ：重新运行测试，验证链路对端的状态，如有必要请手动检查
       电缆。)
 
-Verify Link Partner PHY Configuration
-(验证链路对端 PHY 配置)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Verify Link Partner PHY Configuration(验证链路对端 PHY 配置)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If the cable test passes but the link is still not functioning correctly, it’s
 essential to verify the configuration of the link partner’s PHY. Mismatches in
@@ -655,9 +644,8 @@ speed, duplex settings, or master-slave roles can cause connection issues.
 (如果电缆测试通过但链路仍然无法正常工作，则必须验证链路对端 PHY 的配置。速率、
 双工设置或主从角色的不匹配都可能导致连接问题。)
 
-Autonegotiation Mismatch
-(自协商失配)
-^^^^^^^^^^^^^^^^^^^^^^^^
+Autonegotiation Mismatch(自协商失配)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - If both link partners support autonegotiation, ensure that autonegotiation is
   enabled on both sides and that all supported link modes are advertised. A
@@ -698,9 +686,8 @@ Autonegotiation Mismatch
         Duplex: Full
         Auto-negotiation: on
 
-Combined Mode Mismatch (Autonegotiation on One Side, Forced on the Other)
-(组合模式失配 (一侧自协商，另一侧强制))
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Combined Mode Mismatch (Autonegotiation on One Side, Forced on the Other)(组合模式失配 (一侧自协商，另一侧强制))
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - One possible issue occurs when one side is using **autonegotiation** (as in
   most modern systems), and the other side is set to a **forced link mode**
@@ -739,9 +726,8 @@ Combined Mode Mismatch (Autonegotiation on One Side, Forced on the Other)
 
      ethtool -s <interface> speed 1000 duplex full autoneg off
 
-Master/Slave Role Mismatch (BaseT1 and 1000BaseT PHYs)
-(主/从角色失配 (BaseT1 和 1000BaseT PHY))
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Master/Slave Role Mismatch (BaseT1 and 1000BaseT PHYs)(主/从角色失配 (BaseT1 和 1000BaseT PHY))
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - In **BaseT1** systems (e.g., 1000BaseT1, 100BaseT1), link establishment
   requires that one device is configured as **master** and the other as
@@ -810,9 +796,8 @@ Master/Slave Role Mismatch (BaseT1 and 1000BaseT PHYs)
   驱动源代码或硬件文档以了解详情。确保两个链路对端的角色兼容；如果两个 PHY 都被
   强制为相同的模式，请相应地调整一侧以解决失配。)
 
-Monitor Link Resets and Speed Drops
-(监控链路重置与速率下降)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Monitor Link Resets and Speed Drops(监控链路重置与速率下降)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If the link is unstable, showing frequent resets or speed drops, this may
 indicate issues with the cable, PHY configuration, or environmental factors.
@@ -994,9 +979,8 @@ driver supports reporting such events.
       between the MAC and PHY.
       (显著的差异表明 MAC 与 PHY 之间的数据路径可能存在问题。)
 
-When All Else Fails...
-(当一切都失败了……)
-~~~~~~~~~~~~~~~~~~~~~~
+When All Else Fails...(当一切都失败了……)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 So you've checked the cables, monitored the logs, disabled EEE, and still...
 nothing? Don’t worry, you’re not alone. Sometimes, Ethernet gremlins just don’t

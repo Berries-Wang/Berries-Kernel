@@ -5,9 +5,8 @@ Written by: Neil Brown
 Please see MAINTAINERS file for where to send questions.
 (问题反馈地址请参见 MAINTAINERS 文件。)
 
-Overlay Filesystem
-(Overlay 文件系统)
-==================
+Overlay Filesystem(Overlay 文件系统)
+====================================
 
 This document describes a prototype for a new approach to providing
 overlay-filesystem functionality in Linux (sometimes referred to as
@@ -17,9 +16,8 @@ of the other.
 (本文档描述一种在 Linux 中提供 overlay 文件系统功能(有时称为联合文件系统，union-filesystems)的新方法的原型。overlay 文件系统试图呈现一个文件系统，它是把一个文件系统叠加到另一个文件系统之上得到的结果。)
 
 
-Overlay objects
-(Overlay 对象)
----------------
+Overlay objects(Overlay 对象)
+-----------------------------
 
 The overlay filesystem approach is 'hybrid', because the objects that
 appear in the filesystem do not always appear to belong to that filesystem.
@@ -65,9 +63,8 @@ The following table summarizes what can be expected in different overlay
 configurations.
 (下表总结了在不同的 overlay 配置下可以预期的情况。)
 
-Inode properties
-````````````````
-(inode 属性)
+Inode properties(inode 属性)
+````````````````````````````
 
 +--------------+------------+------------+-----------------+----------------+
 |Configuration | Persistent | Uniform    | st_ino == d_ino | d_ino == i_ino |
@@ -100,9 +97,8 @@ Inode properties
 file descriptor.
 ([*] nfsd v3 readdirplus 会验证 d_ino == i_ino。i_ino 通过若干 /proc 文件暴露，例如 /proc/locks 以及 inotify 文件描述符的 /proc/self/fdinfo/<fd>。)
 
-Upper and Lower
-(上层与下层)
----------------
+Upper and Lower(上层与下层)
+---------------------------
 
 An overlay filesystem combines two filesystems - an 'upper' filesystem
 and a 'lower' filesystem.  When a name exists in both filesystems, the
@@ -131,9 +127,8 @@ A read-only overlay of two read-only filesystems may use any
 filesystem type.
 (两个只读文件系统的只读 overlay 可以使用任何文件系统类型。)
 
-Directories
-(目录)
------------
+Directories(目录)
+-----------------
 
 Overlaying mainly involves directories.  If a given name appears in both
 upper and lower filesystems and refers to a non-directory in either,
@@ -169,9 +164,8 @@ such as metadata and extended attributes are reported for the upper
 directory only.  These attributes of the lower directory are hidden.
 (只有目录中的名字列表会被合并。其他内容(如元数据和扩展属性)只针对上层目录报告。下层目录的这些属性被隐藏。)
 
-whiteouts and opaque directories
-(whiteouts 与不透明目录)
---------------------------------
+whiteouts and opaque directories(whiteouts 与不透明目录)
+--------------------------------------------------------
 
 In order to support rm and rmdir without changing the lower
 filesystem, an overlay filesystem needs to record in the upper filesystem
@@ -201,9 +195,8 @@ This is needed to avoid the overhead of checking the "trusted.overlay.whiteout"
 on all entries during readdir in the common case.
 (不透明目录不应包含任何 whiteout，因为它们没有任何用处。包含带有 xattr "trusted.overlay.whiteout" 的普通文件的合并(merge)目录，应额外通过在该合并目录自身上把 xattr "trusted.overlay.opaque" 设置为 "x" 来标记。这样做是为了避免在常见情况下 readdir 期间对所有目录项检查 "trusted.overlay.whiteout" 的开销。)
 
-readdir
-(readdir 的行为)
--------
+readdir(readdir 的行为)
+-----------------------
 
 When a 'readdir' request is made on a merged directory, the upper and
 lower directories are each read and the name lists merged in the
@@ -243,9 +236,8 @@ Readdir on directories that are not merged is simply handled by the
 underlying directory (upper or lower).
 (对于未合并的目录，readdir 直接由底层目录(上层或下层)处理。)
 
-renaming directories
-(重命名目录)
---------------------
+renaming directories(重命名目录)
+--------------------------------
 
 When renaming a directory that is on the lower layer or merged (i.e. the
 directory was not created on the upper layer to start with) overlayfs can
@@ -327,9 +319,8 @@ turning off redirect follow (e.g. "redirect_dir=nofollow").
 (由于下层重定向无法用索引来验证，在没有上层的 overlay 文件系统上启用 NFS 导出支持需要关闭重定向跟随(例如 "redirect_dir=nofollow")。)
 
 
-Non-directories
-(非目录对象)
----------------
+Non-directories(非目录对象)
+---------------------------
 
 Objects that are not directories (files, symlinks, device-special
 files etc.) are presented either from the upper or lower filesystem as
@@ -361,9 +352,8 @@ rename or unlink will of course be noticed and handled).
 (copy_up 完成后，overlay 文件系统只是提供对上层文件系统中新建文件的直接访问——之后对该文件的操作几乎不会被 overlay 文件系统察觉(当然，对文件名字本身的操作(如 rename 或 unlink)会被察觉并处理)。)
 
 
-Permission model
-(权限模型)
-----------------
+Permission model(权限模型)
+--------------------------
 
 An overlay filesystem stashes credentials that will be used when
 accessing lower or upper filesystems.
@@ -435,9 +425,8 @@ the time of copy (on-demand vs. up-front).
 (两者产生的访问权限应当相同。区别在于复制的时机(按需 vs. 预先)。)
 
 
-Multiple lower layers
-(多个下层)
----------------------
+Multiple lower layers(多个下层)
+-------------------------------
 
 Multiple lower layers can now be given using the colon (":") as a
 separator character between the directory names.  For example::
@@ -471,9 +460,8 @@ In the latter case, colons in lower layer directory names will be escaped
 as an octal characters (\072) when displayed in /proc/self/mountinfo.
 (在后一种情况下，下层目录名中的冒号在 /proc/self/mountinfo 中显示时会被转义为八进制字符(\072)。)
 
-Metadata only copy up
-(仅元数据 copy up)
----------------------
+Metadata only copy up(仅元数据 copy up)
+---------------------------------------
 
 When the "metacopy" feature is enabled, overlayfs will only copy
 up metadata (as opposed to whole file), when a metadata specific operation
@@ -512,9 +500,8 @@ given.
 ([*] 只有在给出 upperdir=... 时，redirect_dir=follow 才与 metacopy=on 冲突。)
 
 
-Data-only lower layers
-(仅数据下层)
-----------------------
+Data-only lower layers(仅数据下层)
+----------------------------------
 
 With "metacopy" feature enabled, an overlayfs regular file may be a composition
 of information from up to three different layers:
@@ -575,9 +562,8 @@ For example::
   fsconfig(fs_fd, FSCONFIG_SET_STRING, "datadir+", "/do2", 0);
 
 
-Specifying layers via file descriptors
-(通过文件描述符指定层)
---------------------------------------
+Specifying layers via file descriptors(通过文件描述符指定层)
+------------------------------------------------------------
 
 Since kernel v6.13, overlayfs supports specifying layers via file descriptors in
 addition to specifying them as paths. This feature is available for the
@@ -594,9 +580,8 @@ fsconfig syscall from the new mount api::
   fsconfig(fs_fd, FSCONFIG_SET_FD, "upperdir", NULL, fd_upper);
 
 
-fs-verity support
-(fs-verity 支持)
------------------
+fs-verity support(fs-verity 支持)
+---------------------------------
 
 During metadata copy up of a lower file, if the source file has
 fs-verity enabled and overlay verity support is enabled, then the
@@ -649,9 +634,8 @@ supports these values:
     otherwise a full copy-up is used.
     (与 "on" 相同，但另外所有 metacopy 文件都必须指定摘要(否则打开时返回 EIO)。这意味着只有当数据文件启用了 fs-verity 时才会使用元数据 copy up，否则使用完整 copy-up。)
 
-Sharing and copying layers
-(共享与复制层)
---------------------------
+Sharing and copying layers(共享与复制层)
+----------------------------------------
 
 Lower layers may be shared among several overlay mounts and that is indeed
 a very common practice.  An overlay mount may use the same lower layer
@@ -696,9 +680,8 @@ to a different machine.  With the "index" feature, trying to mount
 the copied layers will fail the verification of the lower root file handle.
 (把 overlay 层复制到同一或不同底层文件系统上的不同目录树，甚至复制到不同的机器上，是相当常见的做法。使用 "index" 特性时，尝试挂载复制出来的层将无法通过下层根文件句柄的验证。)
 
-Nesting overlayfs mounts
-(嵌套 overlayfs 挂载)
-------------------------
+Nesting overlayfs mounts(嵌套 overlayfs 挂载)
+---------------------------------------------
 
 It is possible to use a lower directory that is stored on an overlayfs
 mount. For regular files this does not need any special care. However, files
@@ -718,16 +701,15 @@ A lower dir with a regular whiteout will always be handled by the overlayfs
 mount, so to support storing an effective whiteout file in an overlayfs mount an
 alternative form of whiteout is supported. This form is a regular, zero-size
 file with the "overlay.whiteout" xattr set, inside a directory with the
-"overlay.opaque" xattr set to "x" (see `whiteouts and opaque directories`_).
+"overlay.opaque" xattr set to "x" (see `whiteouts and opaque directories(whiteouts 与不透明目录)`_).
 These alternative whiteouts are never created by overlayfs, but can be used by
 userspace tools (like containers) that generate lower layers.
 These alternative whiteouts can be escaped using the standard xattr escape
 mechanism in order to properly nest to any depth.
 (带有普通 whiteout 的下层目录总是会被 overlayfs 挂载处理，因此为了支持在 overlayfs 挂载中存储有效的 whiteout 文件，支持一种替代形式的 whiteout。这种形式是一个设置了 "overlay.whiteout" xattr 的普通零大小文件，位于一个把 "overlay.opaque" xattr 设置为 "x" 的目录内(参见"whiteouts 与不透明目录"一节)。这些替代形式的 whiteout 从不由 overlayfs 创建，但可以由生成下层的用户空间工具(如容器)使用。这些替代形式的 whiteout 可以使用标准的 xattr 转义机制进行转义，以便正确嵌套到任意深度。)
 
-Non-standard behavior
-(非标准行为)
----------------------
+Non-standard behavior(非标准行为)
+---------------------------------
 
 Current version of overlayfs can act as a mostly POSIX compliant
 filesystem.
@@ -753,9 +735,8 @@ The following options allow overlayfs to act more like a standards
 compliant filesystem:
 (以下选项使 overlayfs 的行为更像一个符合标准的文件系统：)
 
-redirect_dir
-````````````
-(redirect_dir 选项)
+redirect_dir(redirect_dir 选项)
+```````````````````````````````
 
 Enabled with the mount option or module option: "redirect_dir=on" or with
 the kernel config option CONFIG_OVERLAY_FS_REDIRECT_DIR=y.
@@ -765,9 +746,8 @@ If this feature is disabled, then rename(2) on a lower or merged directory
 will fail with EXDEV ("Invalid cross-device link").
 (如果此特性被禁用，则对下层或合并目录执行 rename(2) 将以 EXDEV ("Invalid cross-device link") 失败。)
 
-index
-`````
-(index 特性)
+index(index 特性)
+`````````````````
 
 Enabled with the mount option or module option "index=on" or with the
 kernel config option CONFIG_OVERLAY_FS_INDEX=y.
@@ -778,9 +758,8 @@ up, then this will "break" the link.  Changes will not be propagated to
 other names referring to the same inode.
 (如果此特性被禁用，且一个有多个硬链接的文件被复制上去，那么这会"打断"链接。更改不会传播到指向同一 inode 的其他名字。)
 
-xino
-````
-(xino 特性)
+xino(xino 特性)
+```````````````
 
 Enabled with the mount option "xino=auto" or "xino=on", with the module
 option "xino_auto=on" or with the kernel config option
@@ -795,13 +774,12 @@ value of d_ino returned by readdir(3) will act like on a normal filesystem.
 E.g. the value of st_dev may be different for two objects in the same
 overlay filesystem and the value of st_ino for filesystem objects may not be
 persistent and could change even while the overlay filesystem is mounted, as
-summarized in the `Inode properties`_ table above.
+summarized in the `Inode properties(inode 属性)`_ table above.
 (如果此特性被禁用，或底层文件系统在 inode 编号中没有足够的空闲位，那么 overlayfs 将无法保证 stat(2) 返回的 st_ino 和 st_dev 值以及 readdir(3) 返回的 d_ino 值表现得像在普通文件系统上一样。例如，同一 overlay 文件系统中两个对象的 st_dev 值可能不同，文件系统对象的 st_ino 值可能不持久，甚至在 overlay 文件系统仍处于挂载状态时也可能改变，如上文"inode 属性"表中所总结的。)
 
 
-Changes to underlying filesystems
-(对底层文件系统的更改)
----------------------------------
+Changes to underlying filesystems(对底层文件系统的更改)
+-------------------------------------------------------
 
 Changes to the underlying filesystems while part of a mounted overlay
 filesystem are not allowed.  If the underlying filesystem is changed,
@@ -838,9 +816,8 @@ will not be merged with the upper directory.
 
 
 
-NFS export
-(NFS 导出)
-----------
+NFS export(NFS 导出)
+--------------------
 
 When the underlying filesystems supports NFS export and the "nfs_export"
 feature is enabled, an overlay filesystem may be exported to NFS.
@@ -941,9 +918,8 @@ the same filesystem, otherwise it will fallback to normal behaviour.
 (注意：挂载选项 uuid=off 可用于把文件句柄中底层文件系统的 UUID 替换为 null，以放宽 UUID 检查。这在底层磁盘被复制且该副本的 UUID 被更改的情况下可能有用。这仅适用于所有下层目录都在同一文件系统上的情况，否则将回退到正常行为。)
 
 
-UUID and fsid
-(UUID 与 fsid)
--------------
+UUID and fsid(UUID 与 fsid)
+---------------------------
 
 The UUID of overlayfs instance itself and the fsid reported by statfs(2) are
 controlled by the "uuid" mount option, which supports these values:
@@ -971,9 +947,8 @@ controlled by the "uuid" mount option, which supports these values:
     (UUID 取自 xattr "trusted.overlay.uuid"(如果它存在)。对满足前提条件的新 overlay 文件系统在首次挂载时升级为 "uuid=on"。对于从未以 "uuid=on" 挂载过的现有 overlay 文件系统，降级为 "uuid=null"。)
 
 
-Durability and copy up
-(持久性与 copy up)
-----------------------
+Durability and copy up(持久性与 copy up)
+----------------------------------------
 
 The fsync(2) system call ensures that the data and metadata of a file
 are safely written to the backing storage, which is expected to
@@ -1025,16 +1000,15 @@ option, which supports these values:
     copy up.
     (在任何 copy up 完成之前对上层文件和目录调用 fsync(2)。)
 - "volatile": [*]
-    Prefer performance over durability (see `Volatile mount`_)
+    Prefer performance over durability (see `Volatile mount(volatile 挂载)`_)
     (优先考虑性能而非持久性(参见"volatile 挂载"一节))
 
 [*] The mount option "volatile" is an alias to "fsync=volatile".
 ([*] 挂载选项 "volatile" 是 "fsync=volatile" 的别名。)
 
 
-Volatile mount
-(volatile 挂载)
---------------
+Volatile mount(volatile 挂载)
+-----------------------------
 
 This is enabled with the "volatile" mount option.  Volatile mounts are not
 guaranteed to survive a crash.  It is strongly recommended that volatile
@@ -1065,9 +1039,8 @@ can be removed.
 (当 overlay 以 "volatile" 选项挂载时，会创建目录 "$workdir/work/incompat/volatile"。在下一次挂载期间，overlay 会检查该目录，如果存在则拒绝挂载。这强烈表明用户应当丢弃上层和 work 目录并创建新的目录。在极少数情况下，如果用户确定系统没有崩溃且 upperdir 内容完好，则可以删除该 "volatile" 目录。)
 
 
-User xattr
-(用户 xattr)
-----------
+User xattr(用户 xattr)
+----------------------
 
 The "-o userxattr" mount option forces overlayfs to use the
 "user.overlay." xattr namespace instead of "trusted.overlay.".  This is
@@ -1075,9 +1048,8 @@ useful for unprivileged mounting of overlayfs.
 ("-o userxattr" 挂载选项强制 overlayfs 使用 "user.overlay." xattr 命名空间而不是 "trusted.overlay."。这对于 overlayfs 的非特权挂载很有用。)
 
 
-Testsuite
-(测试套件)
----------
+Testsuite(测试套件)
+-------------------
 
 There's a testsuite originally developed by David Howells and currently
 maintained by Amir Goldstein at:

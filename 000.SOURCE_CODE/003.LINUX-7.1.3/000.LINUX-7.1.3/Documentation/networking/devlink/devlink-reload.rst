@@ -1,19 +1,16 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==============
-Devlink Reload
-==============
-
-(devlink 重新加载)
+================================
+Devlink Reload(devlink 重新加载)
+================================
 
 ``devlink-reload`` provides mechanism to reinit driver entities, applying
 ``devlink-params`` and ``devlink-resources`` new values. It also provides
 mechanism to activate firmware.
 (``devlink-reload`` 提供重新初始化驱动实体的机制，并应用 ``devlink-params`` 和 ``devlink-resources`` 的新值。它还提供激活固件的机制。)
 
-Reload Actions
-==============
-(重载动作)
+Reload Actions(重载动作)
+========================
 
 User may select a reload action.
 By default ``driver_reinit`` action is selected.
@@ -56,9 +53,8 @@ being performed without fw activation. Therefore, the devlink reload
 command returns the list of actions which were actrually performed.
 (请注意，即使用户请求的是某个特定动作，驱动的实现也可能需要同时执行另一个动作。例如，某些驱动不支持在不进行固件激活的情况下执行驱动重新初始化。因此，devlink reload 命令会返回实际执行的动作列表。)
 
-Reload Limits
-=============
-(重载限制)
+Reload Limits(重载限制)
+=======================
 
 By default reload actions are not limited and driver implementation may
 include reset or downtime as needed to perform the actions.
@@ -78,18 +74,16 @@ implementation to specific constraints.
        configuration is lost.
        (不允许复位，不允许停机，链路不翻转 (link flap)，且不丢失任何配置。)
 
-Change Namespace
-================
-(更改命名空间)
+Change Namespace(更改命名空间)
+==============================
 
 The netns option allows user to be able to move devlink instances into
 namespaces during devlink reload operation.
 By default all devlink instances are created in init_net and stay there.
 (netns 选项允许用户在 devlink reload 操作期间将 devlink 实例移动到命名空间中。默认情况下，所有 devlink 实例都在 init_net 中创建并停留在其中。)
 
-example usage
--------------
-(用法示例)
+example usage(用法示例)
+-----------------------
 
 .. code:: shell
 

@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===============
-UBI File System
-===============
+=============================
+UBI File System(UBI 文件系统)
+=============================
 
-(UBI 文件系统)
-
-Introduction
-(简介)
-============
+Introduction(简介)
+==================
 
 UBIFS file-system stands for UBI File System. UBI stands for "Unsorted
 Block Images". UBIFS is a flash file system, which means it is designed
@@ -100,9 +97,8 @@ changed to use UBI2
 (UBIFS 的作者认为，开发同样按对数方式扩展的 UBI2 是可能的。UBI2 将支持与 UBI 相同的 API，但与 UBI 二进制不兼容。因此 UBIFS 无需更改即可使用 UBI2。)
 
 
-Mount options
-(挂载选项)
-=============
+Mount options(挂载选项)
+=======================
 
 (*) == default.
 ((*) 表示默认值。)
@@ -130,9 +126,8 @@ auth_hash_name=		The hash algorithm used for authentication. Used for
 ====================	=======================================================
 
 
-Quick usage instructions
-(快速使用说明)
-========================
+Quick usage instructions(快速使用说明)
+======================================
 
 The UBI volume to mount is specified using "ubiX_Y" or "ubiX:NAME" syntax,
 where "X" is UBI device number, "Y" is UBI volume number, and "NAME" is
@@ -155,9 +150,8 @@ to UBI and mount volume "rootfs":
 ubi.mtd=0 root=ubi0:rootfs rootfstype=ubifs
 (以下是将 mtd0 关联到 UBI 并挂载 "rootfs" 卷的内核启动参数示例：)
 
-References
-(参考)
-==========
+References(参考)
+================
 
 UBIFS documentation and FAQ/HOWTO at the MTD web site:
 (MTD 网站上的 UBIFS 文档与 FAQ/HOWTO：)

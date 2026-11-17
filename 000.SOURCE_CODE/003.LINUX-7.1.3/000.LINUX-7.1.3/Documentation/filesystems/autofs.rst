@@ -1,12 +1,9 @@
-=====================
-autofs - how it works
-=====================
+==========================================
+autofs - how it works(autofs - 其工作原理)
+==========================================
 
-(autofs - 其工作原理)
-
-Purpose
-(目的)
-=======
+Purpose(目的)
+=============
 
 The goal of autofs is to provide on-demand mounting and race free
 automatic unmounting of various other filesystems.  This provides two
@@ -30,9 +27,8 @@ key advantages:
    first accessed a name.
    (文件系统的名称和位置可以存储在远程数据库中，并且可以随时更改。访问时该数据库中的内容将被用作访问的目标。对文件系统中名称的解释甚至可以是程序化的而非基于数据库的，例如允许使用通配符，并且可以根据首次访问某个名称的用户而变化。)
 
-Context
-(背景)
-=======
+Context(背景)
+=============
 
 The "autofs" filesystem module is only one part of an autofs system.
 There also needs to be a user-space program which looks up names
@@ -48,9 +44,8 @@ filesystem type.  Several "autofs" filesystems can be mounted and they
 can each be managed separately, or all managed by the same daemon.
 (“autofs” 是一个提供 “autofs” 文件系统类型的 Linux 内核模块。可以挂载多个 “autofs” 文件系统，它们可以各自单独管理，也可以全部由同一个 daemon 管理。)
 
-Content
-(内容)
-=======
+Content(内容)
+=============
 
 An autofs filesystem can contain 3 sorts of objects: directories,
 symbolic links and mount traps.  Mount traps are directories with
@@ -93,9 +88,8 @@ where in the tree they are (root, top level, or lower), the *maxproto*,
 and whether the mount was *indirect* or not.
 (所以：非空(即非叶子)目录绝不是挂载陷阱。空目录有时是挂载陷阱，有时不是，这取决于它们在树中的位置(根、顶层或更低)、*maxproto*，以及该挂载是否为 *间接*。)
 
-Mount Traps
-(挂载陷阱)
-===========
+Mount Traps(挂载陷阱)
+=====================
 
 A core element of the implementation of autofs is the Mount Traps
 which are provided by the Linux VFS.  Any directory provided by a
@@ -240,9 +234,8 @@ initiated or is being considered, otherwise it returns 0.
 (如果文件系统的过期已启动或正在被考虑，autofs 将返回 `-ECHILD`，否则返回 0。)
 
 
-Mountpoint expiry
-(挂载点过期)
-=================
+Mountpoint expiry(挂载点过期)
+=============================
 
 The VFS has a mechanism for automatically expiring unused mounts,
 much as it can expire any unused dentry information from the dcache.
@@ -353,9 +346,8 @@ completed (together with removing any directories that might have been
 necessary), or has been aborted.
 (在该 ioctl 阻塞期间，该条目被标记为 “expiring”，`d_manage` 会阻塞，直到 daemon 确认卸载已完成(连同移除任何可能必需的目录)，或者已被中止。)
 
-Communicating with autofs: detecting the daemon
-(与 autofs 通信：检测 daemon)
-===============================================
+Communicating with autofs: detecting the daemon(与 autofs 通信：检测 daemon)
+============================================================================
 
 There are several forms of communication between the automount daemon
 and the filesystem.  As we have already seen, the daemon can create and
@@ -372,9 +364,8 @@ If the daemon ever has to be stopped and restarted a new pgid can be
 provided through an ioctl as will be described below.
 (当 autofs 文件系统被挂载时，会记录挂载进程的 pgid，除非给出了 “pgrp=” 选项，此时记录的是该选项给定的编号。来自该进程组中进程的任何请求都被视为来自 daemon。如果 daemon 必须停止并重新启动，可以通过一个 ioctl 提供新的 pgid，如下文所述。)
 
-Communicating with autofs: the event pipe
-(与 autofs 通信：事件管道)
-=========================================
+Communicating with autofs: the event pipe(与 autofs 通信：事件管道)
+===================================================================
 
 When an autofs filesystem is mounted, the 'write' end of a pipe must
 be passed using the 'fd=' mount option.  autofs will write
@@ -428,9 +419,8 @@ acknowledged using one of the ioctls below with the relevant
 `wait_queue_token`.
 (`wait_queue_token` 是一个唯一编号，可以标识一个需要确认的特定请求。当消息通过管道发送时，受影响的 dentry 会被标记为 “active” 或 “expiring”，对它的其他访问会阻塞，直到使用下文相关 ioctl 之一及相应的 `wait_queue_token` 确认该消息。)
 
-Communicating with autofs: root directory ioctls
-(与 autofs 通信：根目录 ioctl)
-================================================
+Communicating with autofs: root directory ioctls(与 autofs 通信：根目录 ioctl)
+==============================================================================
 
 The root directory of an autofs filesystem will respond to a number of
 ioctls.  The process issuing the ioctl must have the CAP_SYS_ADMIN
@@ -511,9 +501,8 @@ The available ioctl commands are:
 	name to expire.  This is only safe when *maxproto* is 4.
 	(**AUTOFS_EXP_LEAVES** 将选择一个叶子而不是顶层名称进行过期。这仅在 *maxproto* 为 4 时才是安全的。)
 
-Communicating with autofs: char-device ioctls
-(与 autofs 通信：字符设备 ioctl)
-=============================================
+Communicating with autofs: char-device ioctls(与 autofs 通信：字符设备 ioctl)
+=============================================================================
 
 It is not always possible to open the root of an autofs filesystem,
 particularly a *direct* mounted filesystem.  If the automount daemon
@@ -617,9 +606,8 @@ instead of assuming `ENOENT`, and this **EXPIRE** command
 corresponds to **AUTOFS_IOC_EXPIRE_MULTI**.
 (这些命令与类似命名的 **AUTOFS_IOC** ioctl 具有相同的功能，除了 **FAIL** 可以在 `fail.status` 中给定一个显式的错误号而不是假定 `ENOENT`，并且此 **EXPIRE** 命令对应于 **AUTOFS_IOC_EXPIRE_MULTI**。)
 
-Catatonic mode
-(Catatonic 模式)
-==============
+Catatonic mode(Catatonic 模式)
+==============================
 
 As mentioned, an autofs mount can enter "catatonic" mode.  This
 happens if a write to the notification pipe fails, or if it is
@@ -647,9 +635,8 @@ Catatonic mode can only be left via the
 **AUTOFS_DEV_IOCTL_OPENMOUNT_CMD** ioctl on the `/dev/autofs`.
 (只能通过对 `/dev/autofs` 使用 **AUTOFS_DEV_IOCTL_OPENMOUNT_CMD** ioctl 才能离开 catatonic 模式。)
 
-The "ignore" mount option
-(“ignore” 挂载选项)
-=========================
+The "ignore" mount option(“ignore” 挂载选项)
+============================================
 
 The "ignore" mount option can be used to provide a generic indicator
 to applications that the mount entry should be ignored when displaying
@@ -666,9 +653,8 @@ This is intended to be used by user space programs to exclude autofs
 mounts from consideration when reading the mounts list.
 (这旨在供用户空间程序在读取挂载列表时将 autofs 挂载排除在考虑之外。)
 
-autofs, name spaces, and shared mounts
-(autofs、命名空间与共享挂载)
-======================================
+autofs, name spaces, and shared mounts(autofs、命名空间与共享挂载)
+==================================================================
 
 With bind mounts and name spaces it is possible for an autofs
 filesystem to appear at multiple places in one or more filesystem

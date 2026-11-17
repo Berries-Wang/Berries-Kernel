@@ -4,9 +4,8 @@ VFAT
 
 (VFAT)
 
-USING VFAT
-(使用 VFAT)
-==========
+USING VFAT(使用 VFAT)
+=====================
 
 To use the vfat filesystem, use the filesystem type 'vfat'.  i.e.::
 (要使用 vfat 文件系统，请使用文件系统类型 'vfat'。即：)
@@ -18,9 +17,8 @@ No special partition formatter is required,
 'mkdosfs' will work fine if you want to format from within Linux.
 (不需要特殊的分区格式化工具，如果想从 Linux 内部进行格式化，'mkdosfs' 就可以很好地完成。)
 
-VFAT MOUNT OPTIONS
-(VFAT 挂载选项)
-==================
+VFAT MOUNT OPTIONS(VFAT 挂载选项)
+=================================
 
 **uid=###**
 	Set the owner of all files on this filesystem.
@@ -272,9 +270,8 @@ VFAT MOUNT OPTIONS
 
 
 
-LIMITATION
-(限制)
-==========
+LIMITATION(限制)
+================
 
 The fallocated region of file is discarded at umount/evict time
 when using fallocate with FALLOC_FL_KEEP_SIZE.
@@ -285,18 +282,16 @@ the fallocated region, user should make sure to recheck fallocate
 after reopening the file.
 (当在 fallocate 中使用 FALLOC_FL_KEEP_SIZE 时，文件中已预分配的区域会在 umount/evict 时刻被丢弃。因此，如果出现内存压力导致 inode 从内存中被逐出，用户应当假设在最后一次关闭时预分配区域可能被丢弃。结果，对于任何对预分配区域的依赖，用户都应当确保在重新打开文件后重新检查 fallocate。)
 
-TODO
-(待办事项)
-====
+TODO(待办事项)
+==============
 Need to get rid of the raw scanning stuff.  Instead, always use
 a get next directory entry approach.  The only thing left that uses
 raw scanning is the directory renaming code.
 (需要摆脱原始扫描的那一套。相反，应当始终采用"获取下一个目录项"的方式。目前仍在使用原始扫描的只有目录重命名代码。)
 
 
-POSSIBLE PROBLEMS
-(可能的问题)
-=================
+POSSIBLE PROBLEMS(可能的问题)
+=============================
 
 - vfat_valid_longname does not properly checked reserved names.
   (vfat_valid_longname 没有对保留名字进行恰当的检查。)
@@ -308,9 +303,8 @@ POSSIBLE PROBLEMS
   (autoconv 选项不能正确工作。)
 
 
-TEST SUITE
-(测试套件)
-==========
+TEST SUITE(测试套件)
+====================
 If you plan to make any modifications to the vfat filesystem, please
 get the test suite that comes with the vfat distribution at
 (如果你打算对 vfat 文件系统做任何修改，请从以下位置获取 vfat 发行版自带的测试套件：)
@@ -321,9 +315,8 @@ This tests quite a few parts of the vfat filesystem and additional
 tests for new features or untested features would be appreciated.
 (它测试了 vfat 文件系统的相当多部分，欢迎为新特性或未测试的特性补充更多测试。)
 
-NOTES ON THE STRUCTURE OF THE VFAT FILESYSTEM
-(关于 VFAT 文件系统结构的说明)
-=============================================
+NOTES ON THE STRUCTURE OF THE VFAT FILESYSTEM(关于 VFAT 文件系统结构的说明)
+===========================================================================
 This documentation was provided by Galen C. Hunt gchunt@cs.rochester.edu and
 lightly annotated by Gordon Chaffee.
 (本文档由 Galen C. Hunt gchunt@cs.rochester.edu 提供，并由 Gordon Chaffee 作了少量注释。)

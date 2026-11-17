@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-================================
-The UDP-Lite protocol (RFC 3828)
-================================
-
-(UDP-Lite 协议 (RFC 3828))
+==========================================================
+The UDP-Lite protocol (RFC 3828)(UDP-Lite 协议 (RFC 3828))
+==========================================================
 
 
   UDP-Lite is a Standards-Track IETF transport protocol whose characteristic
@@ -36,9 +34,8 @@ The UDP-Lite protocol (RFC 3828)
      (协议规范 RFC 3828。)
 
 
-1. Applications
-(1. 应用)
-===============
+1. Applications(1. 应用)
+========================
 
   Several applications have been ported successfully to UDP-Lite. Ethereal
   (now called wireshark) has UDP-Litev4/v6 support by default.
@@ -49,9 +46,8 @@ The UDP-Lite protocol (RFC 3828)
   length (default = header length = 8). Details are in the next section.
   (将应用程序移植到 UDP-Lite 很直接：只需修改套接字级别和 IPPROTO；发送方另外还要设置校验和覆盖长度（默认 = 头长度 = 8）。详情见下一节。)
 
-2. Programming API
-(2. 编程 API)
-==================
+2. Programming API(2. 编程 API)
+===============================
 
   UDP-Lite provides a connectionless, unreliable datagram service and hence
   uses the same socket type as UDP. In fact, porting from UDP to UDP-Lite is
@@ -115,9 +111,8 @@ The UDP-Lite protocol (RFC 3828)
   A detailed discussion of UDP-Lite checksum coverage options is in section IV.
   (关于 UDP-Lite 校验和覆盖选项的详细讨论见第 IV 节。)
 
-3. Header Files
-(3. 头文件)
-===============
+3. Header Files(3. 头文件)
+==========================
 
   The socket API requires support through header files in /usr/include:
   (套接字 API 需要通过 /usr/include 中的头文件来提供支持：)
@@ -141,9 +136,8 @@ The UDP-Lite protocol (RFC 3828)
   Ready-made header files for various distros are in the UDP-Lite tarball.
   (适用于各种发行版的现成头文件包含在 UDP-Lite tarball 中。)
 
-4. Kernel Behaviour with Regards to the Various Socket Options
-(4. 内核对各种套接字选项的处理行为)
-==============================================================
+4. Kernel Behaviour with Regards to the Various Socket Options(4. 内核对各种套接字选项的处理行为)
+=================================================================================================
 
 
   To enable debugging messages, the log level need to be set to 8, as most
@@ -241,7 +235,6 @@ The UDP-Lite protocol (RFC 3828)
 
   As an example of what happens when one UDP-Lite packet is split into
   several tiny fragments, consider the following example::
-  (要了解一个 UDP-Lite 数据包被拆成多个小分片时会发生什么，请看以下示例：)
 
     Payload: 1024 bytes            Send buffer size: 1024 bytes
     MTU:      300 bytes            Coverage length:   575 bytes
@@ -249,6 +242,9 @@ The UDP-Lite protocol (RFC 3828)
     +-+-----------+--------------+--------------+--------------+
     |8|    272    |      280     |     280      |     280      |
     +-+-----------+--------------+--------------+--------------+
+
+  (要了解一个 UDP-Lite 数据包被拆成多个小分片时会发生什么，请看以下示例：)
+
 		280            560            840           1032
 					^
     *****checksum coverage*************
@@ -283,9 +279,8 @@ The UDP-Lite protocol (RFC 3828)
   coverage lengths are likely to be expected.
   (虽然正确处理这些情况很重要，但它们（令人恼火地）很少出现：UDP-Lite 的设计目标是在无线（或泛指有噪声的）链路上优化多媒体性能，因此预计会使用较小的覆盖长度。)
 
-5. UDP-Lite Runtime Statistics and their Meaning
-(5. UDP-Lite 运行时统计及其含义)
-================================================
+5. UDP-Lite Runtime Statistics and their Meaning(5. UDP-Lite 运行时统计及其含义)
+================================================================================
 
   Exceptional and error conditions are logged to syslog at the KERN_DEBUG
   level.  Live statistics about UDP-Lite are available in /proc/net/snmp
@@ -324,9 +319,8 @@ The UDP-Lite protocol (RFC 3828)
    These statistics derive from the UDP MIB (RFC 2013).
    (这些统计源自 UDP MIB (RFC 2013)。)
 
-6. IPtables
-(6. IPtables)
-===========
+6. IPtables(6. IPtables)
+========================
 
   There is packet match support for UDP-Lite as well as support for the LOG target.
   If you copy and paste the following line into /etc/protocols::
@@ -342,9 +336,8 @@ The UDP-Lite protocol (RFC 3828)
   will produce logging output to syslog. Dropping and rejecting packets also works.
   (将产生输出到 syslog 的日志记录。丢弃和拒绝数据包也同样可行。)
 
-7. Maintainer Address
-(7. 维护者地址)
-=====================
+7. Maintainer Address(7. 维护者地址)
+====================================
 
   The UDP-Lite patch was developed at
   (UDP-Lite 补丁由以下机构开发：)

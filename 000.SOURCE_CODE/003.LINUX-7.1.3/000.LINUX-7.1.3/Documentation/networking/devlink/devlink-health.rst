@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==============
-Devlink Health
-==============
+================================
+Devlink Health(devlink 健康机制)
+================================
 
-(devlink 健康机制)
-
-Background
-(背景)
-==========
+Background(背景)
+================
 
 The ``devlink`` health mechanism is targeted for Real Time Alerting, in
 order to know when something bad happened to a PCI device.
@@ -22,9 +19,8 @@ order to know when something bad happened to a PCI device.
     debugging information.
     (如果问题需要厂商支持，提供收集全部所需调试信息的途径。)
 
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 The main idea is to unify and centralize driver health reports in the
 generic ``devlink`` instance and allow the user to set different
@@ -58,9 +54,8 @@ Different parts of the driver can register different types of health reporters
 with different handlers.
 (驱动的不同部分可以注册带有不同处理器的不同类型的健康报告器。)
 
-Actions
-(处理动作)
-=======
+Actions(处理动作)
+=================
 
 Once an error is reported, devlink health will perform the following actions:
 (一旦报告了错误，devlink health 将执行以下动作：)
@@ -81,9 +76,8 @@ Once an error is reported, devlink health will perform the following actions:
     - Grace period (and burst period)  vs. time passed since last recover
       (宽限期 (及突发期) 与距上次恢复所经过时间的对比)
 
-Devlink formatted message
-(devlink 格式化消息)
-=========================
+Devlink formatted message(devlink 格式化消息)
+=============================================
 
 To handle devlink health diagnose and health dump requests, devlink creates a
 formatted message structure ``devlink_fmsg`` and send it to the driver's callback
@@ -111,9 +105,8 @@ netlink 消息。当需要使用 SKB 把数据发送到 netlink 层时，它会�
 不同的 SKB 中。为了完成这种分片，它使用虚拟嵌套属性，以避免无法在不同
 SKB 之间拆分的真实嵌套。)
 
-User Interface
-(用户接口)
-==============
+User Interface(用户接口)
+========================
 
 User can access/change each reporter's parameters and driver specific callbacks
 via ``devlink``, e.g per error type (per health reporter):
@@ -165,7 +158,6 @@ via ``devlink``, e.g per error type (per health reporter):
        (清除指定报告器最近保存的转储文件。)
 
 The following diagram provides a general overview of ``devlink-health``::
-(下图给出了 ``devlink-health`` 的总体概览：)
 
                                                    netlink
                                           +--------------------------+
@@ -194,3 +186,6 @@ The following diagram provides a general overview of ``devlink-health``::
     |        |     health reporter create |                          |
     |        +---------------------------->                          |
     +--------+                            +--------------------------+
+
+(下图给出了 ``devlink-health`` 的总体概览：)
+

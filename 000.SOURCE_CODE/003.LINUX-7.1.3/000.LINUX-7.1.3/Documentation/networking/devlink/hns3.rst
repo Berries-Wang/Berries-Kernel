@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-====================
-hns3 devlink support
-====================
-
-(hns3 devlink 支持)
+=======================================
+hns3 devlink support(hns3 devlink 支持)
+=======================================
 
 This document describes the devlink features implemented by the ``hns3``
 device driver.
@@ -13,9 +11,8 @@ device driver.
 The ``hns3`` driver supports reloading via ``DEVLINK_CMD_RELOAD``.
 (``hns3`` 驱动支持通过 ``DEVLINK_CMD_RELOAD`` 进行重载。)
 
-Info versions
-=============
-(Info 版本)
+Info versions(Info 版本)
+========================
 
 The ``hns3`` driver reports the following versions
 (``hns3`` 驱动报告以下版本)

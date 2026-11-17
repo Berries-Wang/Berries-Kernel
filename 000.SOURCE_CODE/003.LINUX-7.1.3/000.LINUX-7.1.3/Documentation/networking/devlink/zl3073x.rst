@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=======================
-zl3073x devlink support
-=======================
-
-(zl3073x devlink 支持)
+=============================================
+zl3073x devlink support(zl3073x devlink 支持)
+=============================================
 
 This document describes the devlink features implemented by the ``zl3073x``
 device driver.
 (本文档描述 ``zl3073x`` 设备驱动所实现的 devlink 功能。)
 
-Parameters
-==========
-(参数)
+Parameters(参数)
+================
 
 .. list-table:: Generic parameters implemented
    :widths: 5 5 90
@@ -26,9 +23,8 @@ Parameters
        and pins.
        (设置驱动注册 DPLL 设备和引脚时所使用的时钟 ID。)
 
-Info versions
-=============
-(Info 版本)
+Info versions(Info 版本)
+========================
 
 The ``zl3073x`` driver reports the following versions
 (``zl3073x`` 驱动报告以下版本)
@@ -57,9 +53,8 @@ The ``zl3073x`` driver reports the following versions
       - 1.3.0.1
       - Device configuration version customized by OEM (OEM 定制的设备配置版本)
 
-Flash Update
-============
-(Flash 更新)
+Flash Update(Flash 更新)
+========================
 
 The ``zl3073x`` driver implements support for flash update using the
 ``devlink-flash`` interface. It supports updating the device flash using a

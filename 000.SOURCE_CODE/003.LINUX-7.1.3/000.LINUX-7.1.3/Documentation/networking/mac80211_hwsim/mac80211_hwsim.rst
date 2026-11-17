@@ -3,11 +3,9 @@
 .. SPDX-License-Identifier: GPL-2.0
 .. include:: <isonum.txt>
 
-===================================================================
-mac80211_hwsim - software simulator of 802.11 radio(s) for mac80211
-===================================================================
-
-(mac80211_hwsim - mac80211 的 802.11 无线电软件模拟器)
+=========================================================================================================================
+mac80211_hwsim - software simulator of 802.11 radio(s) for mac80211(mac80211_hwsim - mac80211 的 802.11 无线电软件模拟器)
+=========================================================================================================================
 
 :Copyright: |copy| 2008, Jouni Malinen <j@w1.fi>
             (版权所有 |copy| 2008, Jouni Malinen <j@w1.fi>)
@@ -18,9 +16,8 @@ published by the Free Software Foundation.
 (本程序是自由软件；您可以遵照自由软件基金会发布的 GNU 通用公共许可证第 2 版的条款对其进行再分发和/或修改。)
 
 
-Introduction
-============
-(介绍)
+Introduction(介绍)
+==================
 
 mac80211_hwsim is a Linux kernel module that can be used to simulate
 arbitrary number of IEEE 802.11 radios for mac80211. It can be used to
@@ -61,9 +58,8 @@ regardless of channel.
 (一个全局监控网络设备 hwsim# 的创建独立于 mac80211。该接口可用于监视所有发送的帧，而不论其所在信道为何。)
 
 
-Simple example
-==============
-(简单示例)
+Simple example(简单示例)
+========================
 
 This example shows how to use mac80211_hwsim to simulate two radios:
 one to act as an access point and the other as a station that

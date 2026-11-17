@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=========================
-Resilient Next-hop Groups
-=========================
-
-(弹性下一跳组)
+=======================================
+Resilient Next-hop Groups(弹性下一跳组)
+=======================================
 
 Resilient groups are a type of next-hop group that is aimed at minimizing
 disruption in flow routing across changes to the group composition and
@@ -22,7 +20,6 @@ comparing the SKB hash with the individual ranges. When a next hop is
 removed from the group, the ranges are recomputed, which leads to
 reassignment of parts of hash space from one next hop to another. RFC 2992
 illustrates it thus::
-(为了选择下一跳，哈希阈值算法首先为组内每个下一跳分配一段哈希值区间，然后通过将 SKB 哈希与各区间比较来选出下一跳。当某个下一跳被从组中移除时，这些区间会被重新计算，导致部分哈希空间从一个下一跳重新分配给另一个下一跳。RFC 2992 对此有如下图示：)
 
              +-------+-------+-------+-------+-------+
              |   1   |   2   |   3   |   4   |   5   |
@@ -32,6 +29,8 @@ illustrates it thus::
 
               Before and after deletion of next hop 3
 	      under the hash-threshold algorithm.
+
+(为了选择下一跳，哈希阈值算法首先为组内每个下一跳分配一段哈希值区间，然后通过将 SKB 哈希与各区间比较来选出下一跳。当某个下一跳被从组中移除时，这些区间会被重新计算，导致部分哈希空间从一个下一跳重新分配给另一个下一跳。RFC 2992 对此有如下图示：)
 
 Note how next hop 2 gave up part of the hash space in favor of next hop 1,
 and 4 in favor of 5. While there will usually be some overlap between the
@@ -63,7 +62,6 @@ algorithm, the range of hashes associated with a next hop must be
 continuous. With a hash table, mapping between the hash table buckets and
 the individual next hops is arbitrary. Therefore when a next hop is deleted
 the buckets that held it are simply reassigned to other next hops::
-(这种间接机制带来一个重要特性。在哈希阈值算法中，与某个下一跳关联的哈希区间必须是连续的；而有了哈希表，哈希表桶与各个下一跳之间的映射可以是任意的。因此当某个下一跳被删除时，原先容纳它的桶只需被重新指派给其他下一跳：)
 
 	    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 	    |1|1|1|1|2|2|2|2|3|3|3|3|4|4|4|4|5|5|5|5|
@@ -76,6 +74,8 @@ the buckets that held it are simply reassigned to other next hops::
 	    Before and after deletion of next hop 3
 	    under the resilient hashing algorithm.
 
+(这种间接机制带来一个重要特性。在哈希阈值算法中，与某个下一跳关联的哈希区间必须是连续的；而有了哈希表，哈希表桶与各个下一跳之间的映射可以是任意的。因此当某个下一跳被删除时，原先容纳它的桶只需被重新指派给其他下一跳：)
+
 When weights of next hops in a group are altered, it may be possible to
 choose a subset of buckets that are currently not used for forwarding
 traffic, and use those to satisfy the new next-hop distribution demands,
@@ -84,9 +84,8 @@ kept being forwarded to the same endpoints through the same paths as before
 the next-hop group change.
 (当组内下一跳的权重被修改时，有可能选取出一部分当前未用于转发流量的桶，用它们来满足新的下一跳分布需求，同时保持"忙碌"的桶原封不动。这样，理想情况下已建立的流仍会像下一跳组变更之前一样，经由相同的路径被转发到相同的端点。)
 
-Algorithm
-(算法)
----------
+Algorithm(算法)
+---------------
 
 In a nutshell, the algorithm works as follows. Each next hop deserves a
 certain number of buckets, according to its weight and the number of
@@ -145,9 +144,8 @@ item. Thus buckets:
 \... are migrated as well.
 (……也将被迁移。)
 
-Offloading & Driver Feedback
-(卸载与驱动反馈)
-----------------------------
+Offloading & Driver Feedback(卸载与驱动反馈)
+--------------------------------------------
 
 When offloading resilient groups, the algorithm that distributes buckets
 among next hops is still the one in SW. Drivers are notified of updates to
@@ -190,13 +188,11 @@ Offloaded buckets should be flagged as either "offload" or "trap". This is
 done through the ``nexthop_bucket_set_hw_flags()`` API.
 (已卸载的桶应被标记为 "offload" 或 "trap"。这通过 ``nexthop_bucket_set_hw_flags()`` API 完成。)
 
-Netlink UAPI
-(Netlink UAPI)
-------------
+Netlink UAPI(Netlink UAPI)
+--------------------------
 
-Resilient Group Replacement
-(弹性组的替换)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Resilient Group Replacement(弹性组的替换)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Resilient groups are configured using the ``RTM_NEWNEXTHOP`` message in the
 same manner as other multipath groups. The following changes apply to the
@@ -223,9 +219,8 @@ attributes passed in the netlink message:
                                       (失衡计时器，以 clock_t 为单位。)
   =================================== =========================================
 
-Next Hop Get
-(下一跳获取)
-^^^^^^^^^^^^
+Next Hop Get(下一跳获取)
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 Requests to get resilient next-hop groups use the ``RTM_GETNEXTHOP``
 message in exactly the same way as other next hop get requests. The
@@ -239,9 +234,8 @@ response attributes match the replacement attributes cited above, except
                                       (弹性组处于失衡状态已有多长时间，以 clock_t 为单位。)
   =================================== =========================================
 
-Bucket Get
-(桶获取)
-^^^^^^^^^^
+Bucket Get(桶获取)
+^^^^^^^^^^^^^^^^^^
 
 The message ``RTM_GETNEXTHOPBUCKET`` without the ``NLM_F_DUMP`` flag is
 used to request a single bucket. The attributes recognized at get requests
@@ -263,9 +257,8 @@ are:
                            (桶在弹性表中的索引。)
   ======================== ====================================================
 
-Bucket Dumps
-(桶转储)
-^^^^^^^^^^^^
+Bucket Dumps(桶转储)
+^^^^^^^^^^^^^^^^^^^^
 
 The message ``RTM_GETNEXTHOPBUCKET`` with the ``NLM_F_DUMP`` flag is used
 to request a dump of matching buckets. The attributes recognized at dump
@@ -295,9 +288,8 @@ requests are:
                            (如果指定，则将转储限制为仅针对包含具有此 ID 的下一跳的桶。)
   ======================== ====================================================
 
-Usage
-(用法)
------
+Usage(用法)
+-----------
 
 To illustrate the usage, consider the following commands::
 (为了说明用法，请看以下命令：)
@@ -337,9 +329,8 @@ were migrated after the next-hop replace command to satisfy the new demand
 that next hop 1 be given 6 buckets instead of 4.
 (注意空闲时间较短的那两个桶。它们是在执行下一跳替换命令之后被迁移的，以满足下一跳 1 从 4 个桶改为获得 6 个桶的新需求。)
 
-Netdevsim
-(Netdevsim)
----------
+Netdevsim(Netdevsim)
+--------------------
 
 The netdevsim driver implements a mock offload of resilient groups, and
 exposes debugfs interface that allows marking individual buckets as busy.

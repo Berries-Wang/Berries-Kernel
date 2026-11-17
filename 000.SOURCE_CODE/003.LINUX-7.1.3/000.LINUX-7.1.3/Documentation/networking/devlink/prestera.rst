@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-========================
-prestera devlink support
-========================
-
-(prestera devlink 支持)
+===============================================
+prestera devlink support(prestera devlink 支持)
+===============================================
 
 This document describes the devlink features implemented by the ``prestera``
 device driver.
 (本文档描述 ``prestera`` 设备驱动程序所实现的 devlink 功能。)
 
-Driver-specific Traps
-(驱动特定陷阱(trap))
-=====================
+Driver-specific Traps(驱动特定陷阱(trap))
+=========================================
 
 .. list-table:: List of Driver-specific Traps Registered by ``prestera``
    :widths: 5 5 90

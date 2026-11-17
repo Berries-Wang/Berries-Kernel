@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0+
 
-=================================================================
-Linux Base Driver for the Intel(R) Ethernet Controller 700 Series
-=================================================================
-
-(Intel(R) Ethernet Controller 700 系列的 Linux 基础驱动)
+=========================================================================================================================
+Linux Base Driver for the Intel(R) Ethernet Controller 700 Series(Intel(R) Ethernet Controller 700 系列的 Linux 基础驱动)
+=========================================================================================================================
 
 Intel 40 Gigabit Linux driver.
 Copyright(c) 1999-2018 Intel Corporation.
 (Intel 40 千兆位 Linux 驱动。版权所有 (c) 1999-2018 Intel Corporation。)
 
-Contents
-(目录)
-========
+Contents(目录)
+==============
 
 - Overview
   (概述)
@@ -41,9 +38,8 @@ with Linux.
 Linux。)
 
 
-Identifying Your Adapter
-(识别你的适配器)
-========================
+Identifying Your Adapter(识别你的适配器)
+========================================
 
 The driver is compatible with devices based on the following:
 (此驱动兼容基于以下设备的硬件：)
@@ -63,9 +59,8 @@ https://www.intel.com/support
 (有关如何识别适配器的信息，以及最新的 NVM/FW 映像和 Intel 网络驱动，请参考 Intel
 支持网站：https://www.intel.com/support)
 
-SFP+ and QSFP+ Devices
-(SFP+ 和 QSFP+ 设备)
-----------------------
+SFP+ and QSFP+ Devices(SFP+ 和 QSFP+ 设备)
+------------------------------------------
 
 For information about supported media, refer to this document:
 https://www.intel.com/content/dam/www/public/us/en/documents/release-notes/xl710-ethernet-controller-feature-matrix.pdf
@@ -90,9 +85,8 @@ NOTE: In systems that do not have adequate airflow to cool the adapter and
 optical modules, you must use high temperature optical modules.
 (注意：在没有足够气流来冷却适配器和光模块的系统中，必须使用耐高温光模块。)
 
-Virtual Functions (VFs)
-(虚拟功能 (VFs))
------------------------
+Virtual Functions (VFs)(虚拟功能 (VFs))
+---------------------------------------
 Use sysfs to enable VFs. For example::
 (使用 sysfs 启用 VF。例如：)
 
@@ -105,9 +99,8 @@ on VLAN 10::
 
   $ ip link set dev eth0 vf 0 vlan 10
 
-VLAN Tag Packet Steering
-(VLAN 标签数据包引导)
-------------------------
+VLAN Tag Packet Steering(VLAN 标签数据包引导)
+---------------------------------------------
 Allows you to send all packets with a specific VLAN tag to a particular SR-IOV
 virtual function (VF). Further, this feature allows you to designate a
 particular VF as trusted, and allows that trusted VF to request selective
@@ -170,9 +163,8 @@ this example is that the VF will get all traffic that is tagged with VLAN 100.
 (注意，设置 VF 混杂模式和添加 VLAN 接口的先后顺序无关紧要 (可以先做任一个)。在此
 示例中，最终结果是 VF 将收到所有带有 VLAN 100 标签的流量。)
 
-Intel(R) Ethernet Flow Director
-(Intel(R) Ethernet Flow Director (以太网流导向器))
--------------------------------
+Intel(R) Ethernet Flow Director(Intel(R) Ethernet Flow Director (以太网流导向器))
+---------------------------------------------------------------------------------
 
 The Intel Ethernet Flow Director performs the following tasks:
 (Intel Ethernet Flow Director 执行以下任务：)
@@ -234,9 +226,8 @@ To see the list of filters currently present::
 
   # ethtool <-u|-n> ethX
 
-Application Targeted Routing (ATR) Perfect Filters
-(应用定向路由 (ATR) 完美过滤器)
---------------------------------------------------
+Application Targeted Routing (ATR) Perfect Filters(应用定向路由 (ATR) 完美过滤器)
+---------------------------------------------------------------------------------
 ATR is enabled by default when the kernel is in multiple transmit queue mode.
 An ATR Intel Ethernet Flow Director filter rule is added when a TCP-IP flow
 starts and is deleted when the flow ends. When a TCP-IP Intel Ethernet Flow
@@ -261,9 +252,8 @@ ethtool, which also can be used to verify whether ATR rules still exist.
 (匹配 ATR 规则的数据包计入 ethtool 的 fdir_atr_match 统计，该统计也可用于验证
 ATR 规则是否仍然存在。)
 
-Sideband Perfect Filters
-(Sideband 完美过滤器)
-------------------------
+Sideband Perfect Filters(Sideband 完美过滤器)
+---------------------------------------------
 Sideband Perfect Filters are used to direct traffic that matches specified
 characteristics. They are enabled through ethtool's ntuple interface. To add a
 new filter use the following command::
@@ -409,9 +399,8 @@ Function.
 (注意，这些过滤器不会破坏内部路由规则，也不会路由原本不会被发送到指定虚拟功能的
 流量。)
 
-Setting the link-down-on-close Private Flag
-(设置 link-down-on-close 私有标志)
--------------------------------------------
+Setting the link-down-on-close Private Flag(设置 link-down-on-close 私有标志)
+-----------------------------------------------------------------------------
 When the link-down-on-close private flag is set to "on", the port's link will
 go down when the interface is brought down using the ifconfig ethX down command.
 (当 link-down-on-close 私有标志设置为 "on" 时，使用 ifconfig ethX down 命令关闭
@@ -423,9 +412,8 @@ Use ethtool to view and set link-down-on-close, as follows::
   ethtool --show-priv-flags ethX
   ethtool --set-priv-flags ethX link-down-on-close [on|off]
 
-Setting the mdd-auto-reset-vf Private Flag
-(设置 mdd-auto-reset-vf 私有标志)
-------------------------------------------
+Setting the mdd-auto-reset-vf Private Flag(设置 mdd-auto-reset-vf 私有标志)
+---------------------------------------------------------------------------
 
 When the mdd-auto-reset-vf private flag is set to "on", the problematic VF will
 be automatically reset if a malformed descriptor is detected. If the flag is
@@ -439,9 +427,8 @@ Use ethtool to view and set mdd-auto-reset-vf, as follows::
   ethtool --show-priv-flags ethX
   ethtool --set-priv-flags ethX mdd-auto-reset-vf [on|off]
 
-Viewing Link Messages
-(查看链路消息)
----------------------
+Viewing Link Messages(查看链路消息)
+-----------------------------------
 Link messages will not be displayed to the console if the distribution is
 restricting system messages. In order to see network driver link messages on
 your console, set dmesg to eight by entering the following::
@@ -453,9 +440,8 @@ your console, set dmesg to eight by entering the following::
 NOTE: This setting is not saved across reboots.
 (注意：此设置在重启后不会保存。)
 
-Jumbo Frames
-(巨型帧 (Jumbo Frames))
-------------
+Jumbo Frames(巨型帧 (Jumbo Frames))
+-----------------------------------
 Jumbo Frames support is enabled by changing the Maximum Transmission Unit (MTU)
 to a value larger than the default value of 1500.
 (通过将最大传输单元 (MTU) 更改为大于默认值 1500 的值来启用巨型帧支持。)
@@ -490,9 +476,8 @@ allocating receive packets.
 (注意：此驱动将尝试使用多个页面大小的缓冲区来接收每个巨型数据包。这应有助于避免
 在分配接收数据包时出现缓冲区不足的问题。)
 
-ethtool
-(ethtool)
--------
+ethtool(ethtool)
+----------------
 
 The driver utilizes the ethtool interface for driver configuration and
 diagnostics, as well as displaying statistical information. The latest ethtool
@@ -501,9 +486,8 @@ https://www.kernel.org/pub/software/network/ethtool/
 (驱动使用 ethtool 接口进行驱动配置和诊断，以及显示统计信息。此功能需要最新的
 ethtool 版本。下载地址见上面的链接。)
 
-Supported ethtool Commands and Options for Filtering
-(用于过滤的受支持 ethtool 命令和选项)
-----------------------------------------------------
+Supported ethtool Commands and Options for Filtering(用于过滤的受支持 ethtool 命令和选项)
+-----------------------------------------------------------------------------------------
 -n --show-nfc
   Retrieves the receive network flow classification configurations.
   (获取接收网络流分类配置。)
@@ -529,9 +513,8 @@ n Hash on bytes 2 and 3 of the Layer 4 header of the Rx packet.
 (f：对接收数据包第 4 层头部的字节 0 和 1 进行哈希；n：对接收数据包第 4 层头部的
 字节 2 和 3 进行哈希。)
 
-Speed and Duplex Configuration
-(速率与双工配置)
-------------------------------
+Speed and Duplex Configuration(速率与双工配置)
+----------------------------------------------
 In addressing speed and duplex configuration issues, you need to distinguish
 between copper-based adapters and fiber-based adapters.
 (在处理速率和双工配置问题时，需要区分铜缆适配器和光纤适配器。)
@@ -577,9 +560,8 @@ operate only in full duplex and only at their native speed.
 (而使用光纤连接的 Intel(R) 以太网网络适配器不会尝试与其链路对端自协商，因为这类
 适配器只以全双工和原生速率工作。)
 
-NAPI
-(NAPI)
-----
+NAPI(NAPI)
+----------
 
 NAPI (Rx polling mode) is supported in the i40e driver.
 (i40e 驱动支持 NAPI (Rx 轮询模式)。)
@@ -587,9 +569,8 @@ NAPI (Rx polling mode) is supported in the i40e driver.
 See :ref:`Documentation/networking/napi.rst <napi>` for more information.
 (更多信息参见 :ref:`Documentation/networking/napi.rst <napi>` 。)
 
-Flow Control
-(流控制)
-------------
+Flow Control(流控制)
+--------------------
 Ethernet Flow Control (IEEE 802.3x) can be configured with ethtool to enable
 receiving and transmitting pause frames for i40e. When transmit is enabled,
 pause frames are generated when the receive packet buffer crosses a predefined
@@ -629,9 +610,8 @@ on your device, you may not be able to change the auto-negotiation setting.
 (注意：流控制自协商是链路自协商的一部分。取决于你的设备，你可能无法更改自协商
 设置。)
 
-RSS Hash Flow
-(RSS 哈希流)
--------------
+RSS Hash Flow(RSS 哈希流)
+-------------------------
 Allows you to set the hash bytes per flow type and any combination of one or
 more options for Receive Side Scaling (RSS) hash byte configuration.
 (允许你按流类型设置哈希字节，并为接收侧扩展 (RSS) 哈希字节配置选择一项或多项
@@ -662,9 +642,8 @@ And <option> is one or more of:
   f：对接收数据包第 4 层头部的字节 0 和 1 进行哈希；n：对接收数据包第 4 层头部
   的字节 2 和 3 进行哈希。)
 
-MAC and VLAN anti-spoofing feature
-(MAC 和 VLAN 防欺骗功能)
-----------------------------------
+MAC and VLAN anti-spoofing feature(MAC 和 VLAN 防欺骗功能)
+----------------------------------------------------------
 When a malicious driver attempts to send a spoofed packet, it is dropped by the
 hardware and not transmitted.
 (当恶意驱动尝试发送欺骗数据包时，该数据包会被硬件丢弃而不会被发送。)
@@ -673,9 +652,8 @@ NOTE: This feature can be disabled for a specific Virtual Function (VF)::
 
   ip link set <pf dev> vf <vf id> spoofchk {off|on}
 
-IEEE 1588 Precision Time Protocol (PTP) Hardware Clock (PHC)
-(IEEE 1588 精确时间协议 (PTP) 硬件时钟 (PHC))
-------------------------------------------------------------
+IEEE 1588 Precision Time Protocol (PTP) Hardware Clock (PHC)(IEEE 1588 精确时间协议 (PTP) 硬件时钟 (PHC))
+---------------------------------------------------------------------------------------------------------
 Precision Time Protocol (PTP) is used to synchronize clocks in a computer
 network. PTP support varies among Intel devices that support this driver. Use
 "ethtool -T <netdev name>" to get a definitive list of PTP capabilities
@@ -684,9 +662,8 @@ supported by the device.
 的支持情况各不相同。使用 "ethtool -T <netdev name>" 可以获得设备所支持的 PTP 能力
 的确切列表。)
 
-IEEE 802.1ad (QinQ) Support
-(IEEE 802.1ad (QinQ) 支持)
----------------------------
+IEEE 802.1ad (QinQ) Support(IEEE 802.1ad (QinQ) 支持)
+-----------------------------------------------------
 The IEEE 802.1ad standard, informally known as QinQ, allows for multiple VLAN
 IDs within a single Ethernet frame. VLAN IDs are sometimes referred to as
 "tags," and multiple VLAN IDs are thus referred to as a "tag stack." Tag stacks
@@ -713,9 +690,8 @@ NOTES:
   (802.1ad (QinQ) 数据包不支持接收校验和卸载、云过滤器 (cloud filters) 和 VLAN
   加速。)
 
-VXLAN and GENEVE Overlay HW Offloading
-(VXLAN 和 GENEVE 叠加网络硬件卸载)
---------------------------------------
+VXLAN and GENEVE Overlay HW Offloading(VXLAN 和 GENEVE 叠加网络硬件卸载)
+------------------------------------------------------------------------
 Virtual Extensible LAN (VXLAN) allows you to extend an L2 network over an L3
 network, which may be useful in a virtualized or cloud environment. Some
 Intel(R) Ethernet Network devices perform VXLAN processing, offloading it from
@@ -734,9 +710,8 @@ Support for VXLAN and GENEVE HW offloading is dependent on kernel support of
 the HW offloading features.
 (对 VXLAN 和 GENEVE 硬件卸载的支持取决于内核对硬件卸载特性的支持。)
 
-Multiple Functions per Port
-(每端口多功能)
----------------------------
+Multiple Functions per Port(每端口多功能)
+-----------------------------------------
 Some adapters based on the Intel Ethernet Controller X710/XL710 support
 multiple functions on a single physical port. Configure these functions through
 the System Setup/BIOS.
@@ -777,9 +752,8 @@ per Port (MFP) and SR-IOV are enabled. An error from i40e is logged that says
 (64)。i40e 会记录一条错误，内容为 "add vsi failed for VF N, aq_err 16"。
 要规避此问题，请启用少于 64 个虚拟功能 (VF)。)
 
-Data Center Bridging (DCB)
-(数据中心桥接 (DCB))
---------------------------
+Data Center Bridging (DCB)(数据中心桥接 (DCB))
+----------------------------------------------
 DCB is a configuration Quality of Service implementation in hardware. It uses
 the VLAN priority tag (802.1p) to filter traffic. That means that there are 8
 different priorities that traffic can be filtered into. It also enables
@@ -814,9 +788,8 @@ enabled when setting up DCB on your switch.
 (注意：内核假定 TC0 可用；如果 TC0 不可用，将在设备上禁用优先级流控制 (PFC)。
 要解决此问题，请确保在交换机上设置 DCB 时启用 TC0。)
 
-Interrupt Rate Limiting
-(中断速率限制)
------------------------
+Interrupt Rate Limiting(中断速率限制)
+-------------------------------------
 :Valid Range: 0-235 (0=no limit)
 (有效范围：0-235 (0=无限制))
 
@@ -856,9 +829,8 @@ limits total interrupts per second to 50,000 via the rx-usecs-high parameter.
 不过，它不是产生多达每秒 200,000 次中断，而是通过 rx-usecs-high 参数将每秒总中断
 数限制为 50,000 次。)
 
-Performance Optimization
-(性能优化)
-========================
+Performance Optimization(性能优化)
+==================================
 Driver defaults are meant to fit a wide variety of workloads, but if further
 optimization is required we recommend experimenting with the following settings.
 (驱动默认值旨在适应各种工作负载，但如果需要进一步优化，我们建议尝试以下设置。)
@@ -870,9 +842,8 @@ the adapter.
 (注意：为了在处理小 (64B) 帧尺寸时获得更好的性能，请尝试在 BIOS 中启用超线程，
 以增加系统中的逻辑核心数，进而增加适配器可用的队列数量。)
 
-Virtualized Environments
-(虚拟化环境)
-------------------------
+Virtualized Environments(虚拟化环境)
+------------------------------------
 1. Disable XPS on both ends by using the included virt_perf_default script
 or by running the following command as root::
    (通过使用附带的 virt_perf_default 脚本，或以 root 身份运行以下命令，在两端
@@ -893,9 +864,8 @@ the default setting of 1.
    (在 VM 中按可用数量配置尽可能多的 Rx/Tx 队列。不要依赖默认的 1 个。)
 
 
-Non-virtualized Environments
-(非虚拟化环境)
-----------------------------
+Non-virtualized Environments(非虚拟化环境)
+------------------------------------------
 Pin the adapter's IRQs to specific cores by disabling the irqbalance service
 and using the included set_irq_affinity script. Please see the script's help
 text for further options.
@@ -952,9 +922,8 @@ ethtool.
   # ethtool -C <interface> adaptive-rx off adaptive-tx off rx-usecs 0 \
     tx-usecs 0
 
-Application Device Queues (ADq)
-(应用设备队列 (ADq))
--------------------------------
+Application Device Queues (ADq)(应用设备队列 (ADq))
+---------------------------------------------------
 Application Device Queues (ADq) allows you to dedicate one or more queues to a
 specific application. This can reduce latency for the specified application,
 and allow Tx traffic to be rate limited per application. Follow the steps below
@@ -1061,9 +1030,8 @@ NOTES:
    的 TC 队列。当匹配多个过滤器时，硬件交换机会将数据包镜像到 VSI 列表。)
 
 
-Known Issues/Troubleshooting
-(已知问题/故障排除)
-============================
+Known Issues/Troubleshooting(已知问题/故障排除)
+===============================================
 
 NOTE: 1 Gb devices based on the Intel(R) Ethernet Network Connection X722 do
 not support the following features:
@@ -1078,9 +1046,8 @@ not support the following features:
   * Energy Efficient Ethernet (EEE) (节能以太网)
   * Auto-media detect (自动介质检测)
 
-Unexpected Issues when the device driver and DPDK share a device
-(设备驱动与 DPDK 共享设备时的意外问题)
-----------------------------------------------------------------
+Unexpected Issues when the device driver and DPDK share a device(设备驱动与 DPDK 共享设备时的意外问题)
+------------------------------------------------------------------------------------------------------
 Unexpected issues may result when an i40e device is in multi driver mode and
 the kernel driver and DPDK driver are sharing the device. This is because
 access to the global NIC resources is not synchronized between multiple
@@ -1093,9 +1060,8 @@ affect all ports and drivers on the device. Loading DPDK with the
 (写全局寄存器、通过 AQ 设置全局配置、或更改交换模式) 都会影响设备上的所有端口和
 驱动。使用 "multi-driver" 模块参数加载 DPDK 可能缓解其中一些问题。)
 
-TC0 must be enabled when setting up DCB on a switch
-(在交换机上设置 DCB 时必须启用 TC0)
----------------------------------------------------
+TC0 must be enabled when setting up DCB on a switch(在交换机上设置 DCB 时必须启用 TC0)
+--------------------------------------------------------------------------------------
 The kernel assumes that TC0 is available, and will disable Priority Flow
 Control (PFC) on the device if TC0 is not available. To fix this, ensure TC0 is
 enabled when setting up DCB on your switch.
@@ -1103,9 +1069,8 @@ enabled when setting up DCB on your switch.
 问题，请确保在交换机上设置 DCB 时启用 TC0。)
 
 
-Support
-(支持)
-=======
+Support(支持)
+=============
 For general information, go to the Intel support website at:
 https://www.intel.com/support/
 (有关一般信息，请访问 Intel 支持网站：https://www.intel.com/support/)

@@ -1,37 +1,32 @@
 .. SPDX-License-Identifier: GPL-2.0+
 
-====================================================================
-Linux kernel networking driver for Marvell's Octeon PCI Endpoint NIC
-====================================================================
-
-(Marvell Octeon PCI Endpoint 网卡的 Linux 内核网络驱动)
+===========================================================================================================================
+Linux kernel networking driver for Marvell's Octeon PCI Endpoint NIC(Marvell Octeon PCI Endpoint 网卡的 Linux 内核网络驱动)
+===========================================================================================================================
 
 Network driver for Marvell's Octeon PCI EndPoint NIC.
 (Marvell Octeon PCI EndPoint 网卡的网络驱动。)
 Copyright (c) 2020 Marvell International Ltd.
 
-Contents
-========
-(目录)
+Contents(目录)
+==============
 
-- `Overview`_
+- `Overview(概述)`_
   (概述)
-- `Supported Devices`_
+- `Supported Devices(支持的设备)`_
   (支持的设备)
-- `Interface Control`_
+- `Interface Control(接口控制)`_
   (接口控制)
 
-Overview
-========
-(概述)
+Overview(概述)
+==============
 
 This driver implements networking functionality of Marvell's Octeon PCI
 EndPoint NIC.
 (该驱动实现 Marvell Octeon PCI EndPoint 网卡的网络功能。)
 
-Supported Devices
-=================
-(支持的设备)
+Supported Devices(支持的设备)
+=============================
 
 Currently, this driver support following devices:
 (目前，该驱动支持以下设备：)
@@ -43,9 +38,8 @@ Currently, this driver support following devices:
  * Network controller: Cavium, Inc. Device bc00
  * Network controller: Cavium, Inc. Device bd00
 
-Interface Control
-=================
-(接口控制)
+Interface Control(接口控制)
+===========================
 
 Network Interface control like changing mtu, link speed, link down/up are
 done by writing command to mailbox command queue, a mailbox interface

@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=================================
-The Linux NTFS filesystem driver
-=================================
-
-(Linux NTFS 文件系统驱动程序)
+=============================================================
+The Linux NTFS filesystem driver(Linux NTFS 文件系统驱动程序)
+=============================================================
 
 
 .. Table of contents
@@ -14,9 +12,8 @@ The Linux NTFS filesystem driver
    - Supported mount options
 
 
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 NTFS is a Linux kernel filesystem driver that provides full read and write
 support for NTFS volumes. It is designed for high performance, modern
@@ -24,9 +21,8 @@ kernel infrastructure (iomap, folio), and stable long-term maintenance.
 (NTFS 是一个 Linux 内核文件系统驱动程序，为 NTFS 卷提供完整的读写支持。它为高性能、现代内核基础设施(iomap、folio)以及稳定的长期维护而设计。)
 
 
-Utilities support
-(工具支持)
-=================
+Utilities support(工具支持)
+===========================
 
 The NTFS utilities project, called ntfsprogs-plus, provides mkfs.ntfs,
 fsck.ntfs, and other related tools (e.g., ntfsinfo, ntfsclone, etc.) for
@@ -41,9 +37,8 @@ The project is available at:
   https://github.com/ntfsprogs-plus/ntfsprogs-plus
 
 
-Supported mount options
-(支持的挂载选项)
-=======================
+Supported mount options(支持的挂载选项)
+=======================================
 
 The NTFS driver supports the following mount options:
 (NTFS 驱动程序支持以下挂载选项：)

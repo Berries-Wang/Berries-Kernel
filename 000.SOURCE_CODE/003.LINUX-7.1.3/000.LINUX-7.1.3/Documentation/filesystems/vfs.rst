@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=========================================
-Overview of the Linux Virtual File System
-=========================================
-
-(Linux 虚拟文件系统概述)
+=================================================================
+Overview of the Linux Virtual File System(Linux 虚拟文件系统概述)
+=================================================================
 
 Original author: Richard Gooch <rgooch@atnf.csiro.au>
 (原作者: Richard Gooch <rgooch@atnf.csiro.au>)
@@ -15,9 +13,8 @@ Original author: Richard Gooch <rgooch@atnf.csiro.au>
   (版权所有 (C) 2005 Pekka Enberg)
 
 
-Introduction
-(引言)
-============
+Introduction(引言)
+==================
 
 The Virtual File System (also known as the Virtual Filesystem Switch) is
 the software layer in the kernel that provides the filesystem interface
@@ -31,9 +28,8 @@ the document Documentation/filesystems/locking.rst.
 (VFS 系统调用 open(2)、stat(2)、read(2)、write(2)、chmod(2) 等都在进程上下文中被调用。文件系统的锁机制在文档 Documentation/filesystems/locking.rst 中描述。)
 
 
-Directory Entry Cache (dcache)
-(目录项缓存(dcache))
-------------------------------
+Directory Entry Cache (dcache)(目录项缓存(dcache))
+--------------------------------------------------
 
 The VFS implements the open(2), stat(2), chmod(2), and similar system
 calls.  The pathname argument that is passed to them is used by the VFS
@@ -51,9 +47,8 @@ and then loading the inode.  This is done by looking up the inode.
 (dentry 缓存本应是整个文件空间的视图。由于大多数计算机无法同时把所有 dentry 都装进内存(RAM)，缓存中总会缺少一些部分。为了把你的路径名解析成 dentry，VFS 可能不得不沿途创建 dentry，然后再加载 inode。这是通过查找 inode 来完成的。)
 
 
-The Inode Object
-(inode 对象)
-----------------
+The Inode Object(inode 对象)
+----------------------------
 
 An individual dentry usually has a pointer to an inode.  Inodes are
 filesystem objects such as regular files, directories, FIFOs and other
@@ -74,9 +69,8 @@ peeks at the inode data and passes some of it back to userspace.
 (查找一个 inode 需要 VFS 调用父目录 inode 的 lookup() 方法。该方法由 inode 所在的具体文件系统实现安装。一旦 VFS 拿到了所需的 dentry(进而也拿到了 inode)，我们就可以做那些乏味的事情了，比如 open(2) 这个文件，或者对它执行 stat(2) 来查看 inode 数据。stat(2) 操作相当简单：一旦 VFS 拿到 dentry，它就查看 inode 数据并把其中一部分传回用户空间。)
 
 
-The File Object
-(文件对象)
----------------
+The File Object(文件对象)
+-------------------------
 
 Opening a file requires another operation: allocation of a file
 structure (this is the kernel-side implementation of file descriptors).
@@ -96,9 +90,8 @@ dentry in use, which in turn means that the VFS inode is still in use.
 (读、写和关闭文件(以及其他各种 VFS 操作)的做法是：用用户空间的文件描述符获取相应的 file 结构，然后调用所需的 file 结构方法来完成要求的工作。只要文件保持打开状态，它就使其 dentry 一直处于使用中，这又意味着 VFS inode 也仍处于使用中。)
 
 
-Registering and Mounting a Filesystem
-(注册与挂载文件系统)
-=====================================
+Registering and Mounting a Filesystem(注册与挂载文件系统)
+=========================================================
 
 To register and unregister a filesystem, use the following API
 functions:
@@ -196,9 +189,8 @@ members are defined:
   i_lock_key, i_mutex_key, invalidate_lock_key, i_mutex_dir_key: lockdep-specific
   (以上各锁类键为 lockdep 专用)
 
-The Superblock Object
-(超级块对象)
-=====================
+The Superblock Object(超级块对象)
+=================================
 
 A superblock object represents a mounted filesystem.
 (超级块对象表示一个已挂载的文件系统。)
@@ -471,9 +463,8 @@ the various ``*xattr(2)`` system calls return -EOPNOTSUPP.
 (当文件系统的所有 xattr 处理程序都不匹配指定的属性名，或文件系统不支持扩展属性时，各种 ``*xattr(2)`` 系统调用返回 -EOPNOTSUPP。)
 
 
-The Inode Object
-(inode 对象)
-================
+The Inode Object(inode 对象)
+============================
 
 An inode object represents an object within the filesystem.
 (inode 对象表示文件系统内的一个对象。)
@@ -738,9 +729,8 @@ otherwise noted.
         simple_offset_dir_operations.
         (调用它以获取目录 inode 的偏移上下文(offset context)。文件系统必须定义此操作才能使用 simple_offset_dir_operations。)
 
-The Address Space Object
-(地址空间对象)
-========================
+The Address Space Object(地址空间对象)
+======================================
 
 The address space object is used to group and manage pages in the page
 cache.  It can be used to keep track of the pages in a file (or anything
@@ -826,9 +816,8 @@ writepages request.
 (回写使用 writeback_control 结构来指导操作。这为 writepages 操作提供了关于回写请求的性质、原因以及执行时所受约束的一些信息。它还用于向调用者返回关于 writepages 请求结果的信息。)
 
 
-Handling errors during writeback
-(处理回写期间的错误)
---------------------------------
+Handling errors during writeback(处理回写期间的错误)
+----------------------------------------------------
 
 Most applications that do buffered I/O will periodically call a file
 synchronization call (fsync, fdatasync, msync or sync_file_range) to
@@ -1141,9 +1130,8 @@ cache in your filesystem.  The following members are defined:
 	Called to read or write swap pages when SWP_FS_OPS is set.
 	(当设置了 SWP_FS_OPS 时，调用它来读或写交换页。)
 
-The File Object
-(文件对象)
-===============
+The File Object(文件对象)
+=========================
 
 A file object represents a file opened by a process.  This is also known
 as an "open file description" in POSIX parlance.
@@ -1374,9 +1362,8 @@ method.
 (注意，文件操作由 inode 所在的具体文件系统实现。当打开设备节点(字符或块特殊设备)时，大多数文件系统会调用 VFS 中的特殊支持例程，这些例程会定位所需的设备驱动信息。这些支持例程把文件系统的文件操作替换为设备驱动的文件操作，然后接着为该文件调用新的 open() 方法。这就是在文件系统中打开设备文件最终会调用设备驱动 open() 方法的原理。)
 
 
-Directory Entry Cache (dcache)
-(目录项缓存(dcache))
-==============================
+Directory Entry Cache (dcache)(目录项缓存(dcache))
+==================================================
 
 
 struct dentry_operations
@@ -1627,9 +1614,8 @@ directory.
 (每个 dentry 都有一个指向其父 dentry 的指针，以及一个子 dentry 的哈希链表。子 dentry 基本上就像目录中的文件。)
 
 
-Directory Entry Cache API
-(目录项缓存 API)
---------------------------
+Directory Entry Cache API(目录项缓存 API)
+-----------------------------------------
 
 There are a number of functions defined which permit a filesystem to
 manipulate dentries:
@@ -1685,14 +1671,12 @@ manipulate dentries:
 	(根据给定的父 dentry 和路径名分量查找一个 dentry。它在 dcache 哈希表中查找该给定名字的孩子。如果找到，递增其引用计数并返回该 dentry。调用者用完后必须使用 dput() 释放该 dentry。)
 
 
-Mount Options
-(挂载选项)
-=============
+Mount Options(挂载选项)
+=======================
 
 
-Parsing options
-(解析选项)
----------------
+Parsing options(解析选项)
+-------------------------
 
 On mount and remount the filesystem is passed a string containing a
 comma separated list of mount options.  The options can have either of
@@ -1708,9 +1692,8 @@ filesystems.
 (<linux/parser.h> 头文件定义了一个帮助解析这些选项的 API。在现有文件系统中有大量使用它的示例。)
 
 
-Showing options
-(显示选项)
----------------
+Showing options(显示选项)
+-------------------------
 
 If a filesystem accepts mount options, it must define show_options() to
 show all the currently active options.  The rules are:
@@ -1736,9 +1719,8 @@ on the information found in /proc/mounts.
 (上述规则的深层原因是要确保：能够基于 /proc/mounts 中找到的信息精确地重现一次挂载(例如卸载后再次挂载)。)
 
 
-Resources
-(参考资料)
-=========
+Resources(参考资料)
+===================
 
 (Note some of these resources are not up-to-date with the latest kernel
  version.)

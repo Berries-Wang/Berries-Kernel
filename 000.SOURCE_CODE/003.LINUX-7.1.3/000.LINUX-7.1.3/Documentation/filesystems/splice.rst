@@ -1,8 +1,6 @@
-================
-splice and pipes
-================
-
-(splice 与管道)
+===============================
+splice and pipes(splice 与管道)
+===============================
 
 splice API
 ==========
@@ -13,9 +11,8 @@ without continually transferring them between the kernel and user space.
 
 .. kernel-doc:: fs/splice.c
 
-pipes API
-(管道 API)
-=========
+pipes API(管道 API)
+===================
 
 Pipe interfaces are all for in-kernel (builtin image) use. They are not
 exported for use by modules.

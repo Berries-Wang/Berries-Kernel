@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-================================
-Optimized MPEG Filesystem (OMFS)
-================================
+============================================================
+Optimized MPEG Filesystem (OMFS)(优化的 MPEG 文件系统(OMFS))
+============================================================
 
-(优化的 MPEG 文件系统(OMFS))
-
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 OMFS is a filesystem created by SonicBlue for use in the ReplayTV DVR
 and Rio Karma MP3 player.  The filesystem is extent-based, utilizing
@@ -36,9 +33,8 @@ omfsprogs, available at:
 Instructions are included in its README.
 (其 README 中包含使用说明。)
 
-Options
-(选项)
-=======
+Options(选项)
+=============
 
 OMFS supports the following mount-time options:
 (OMFS 支持以下挂载时选项：)
@@ -51,9 +47,8 @@ OMFS supports the following mount-time options:
     dmask=xxx      set umask to xxx for directories (对目录将 umask 设置为 xxx)
     ============   ========================================
 
-Disk format
-(磁盘格式)
-===========
+Disk format(磁盘格式)
+=====================
 
 OMFS discriminates between "sysblocks" and normal data blocks.  The sysblock
 group consists of super block information, file metadata, directory structures,

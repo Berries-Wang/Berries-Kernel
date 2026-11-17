@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=====================
-io_uring zero copy Rx
-=====================
+==========================================
+io_uring zero copy Rx(io_uring 零拷贝接收)
+==========================================
 
-(io_uring 零拷贝接收)
-
-Introduction
-(简介)
-============
+Introduction(简介)
+==================
 
 io_uring zero copy Rx (ZC Rx) is a feature that removes kernel-to-user copy on
 the network receive path, allowing packet data to be received directly into
@@ -18,26 +15,23 @@ Compared to kernel bypass solutions such as e.g. DPDK, the packet headers are
 processed by the kernel TCP stack as normal.
 (io_uring 零拷贝接收 (ZC Rx) 是一项消除网络接收路径上内核到用户拷贝的特性，使数据包数据能够直接接收到用户空间内存中。此特性与 TCP_ZEROCOPY_RECEIVE 不同：它没有严格的对齐要求，也不需要 mmap()/munmap()。与 DPDK 之类的内核旁路方案相比，数据包报头仍由内核 TCP 协议栈照常处理。)
 
-NIC HW Requirements
-(网卡硬件要求)
-===================
+NIC HW Requirements(网卡硬件要求)
+=================================
 
 Several NIC HW features are required for io_uring ZC Rx to work. For now the
 kernel API does not configure the NIC and it must be done by the user.
 (io_uring ZC Rx 正常工作需要若干网卡硬件特性。目前内核 API 不会配置网卡，必须由用户自行完成。)
 
-Header/data split
-(报头/数据分离)
------------------
+Header/data split(报头/数据分离)
+--------------------------------
 
 Required to split packets at the L4 boundary into a header and a payload.
 Headers are received into kernel memory as normal and processed by the TCP
 stack as normal. Payloads are received into userspace memory directly.
 (需要该功能在 L4 边界把数据包拆分为报头与载荷。报头像往常一样接收到内核内存中，并由 TCP 协议栈照常处理。载荷则直接接收到用户空间内存中。)
 
-Flow steering
-(流导向)
--------------
+Flow steering(流导向)
+---------------------
 
 Specific HW Rx queues are configured for this feature, but modern NICs
 typically distribute flows across all HW Rx queues. Flow steering is required
@@ -45,21 +39,18 @@ to ensure that only desired flows are directed towards HW queues that are
 configured for io_uring ZC Rx.
 (该特性使用特定的硬件接收队列，但现代网卡通常会把流分散到所有硬件接收队列上。需要流导向 (flow steering) 来确保只有期望的流被导向配置用于 io_uring ZC Rx 的硬件队列。)
 
-RSS
-(RSS)
----
+RSS(RSS)
+--------
 
 In addition to flow steering above, RSS is required to steer all other non-zero
 copy flows away from queues that are configured for io_uring ZC Rx.
 (除上述流导向之外，还需要 RSS 把所有其他非零拷贝流从配置用于 io_uring ZC Rx 的队列上引开。)
 
-Usage
-(用法)
-=====
+Usage(用法)
+===========
 
-Setup NIC
-(设置网卡)
----------
+Setup NIC(设置网卡)
+-------------------
 
 Must be done out of band for now.
 (目前必须在带外完成。)
@@ -84,9 +75,8 @@ Set up flow steering, bearing in mind that queues are 0-indexed::
 
   ethtool -N eth0 flow-type tcp6 ... action 1
 
-Setup io_uring
-(设置 io_uring)
---------------
+Setup io_uring(设置 io_uring)
+-----------------------------
 
 This section describes the low level io_uring kernel API. Please refer to
 liburing documentation for how to use the higher level API.
@@ -99,9 +89,8 @@ Create an io_uring instance with the following required setup flags::
   IORING_SETUP_DEFER_TASKRUN
   IORING_SETUP_CQE32 or IORING_SETUP_CQE_MIXED
 
-Create memory area
-(创建内存区域)
-------------------
+Create memory area(创建内存区域)
+--------------------------------
 
 Allocate userspace memory area for receiving zero copy data::
 (为接收零拷贝数据分配用户空间内存区域：)
@@ -111,9 +100,8 @@ Allocate userspace memory area for receiving zero copy data::
                         MAP_ANONYMOUS | MAP_PRIVATE,
                         0, 0);
 
-Create refill ring
-(创建补充环形缓冲)
-------------------
+Create refill ring(创建补充环形缓冲)
+------------------------------------
 
 Allocate memory for a shared ringbuf used for returning consumed buffers::
 (为用于归还已消费缓冲区的共享环形缓冲区分配内存：)
@@ -132,9 +120,8 @@ This refill ring consists of some space for the header, followed by an array of
   /* align to page size */
   ring_size = (ring_size + (PAGE_SIZE - 1)) & ~(PAGE_SIZE - 1);
 
-Register ZC Rx
-(注册 ZC Rx)
---------------
+Register ZC Rx(注册 ZC Rx)
+--------------------------
 
 Fill in registration structs::
 (填写注册结构体：)
@@ -165,9 +152,8 @@ Register with kernel::
 
   io_uring_register_ifq(ring, &reg);
 
-Map refill ring
-(映射补充环形缓冲)
----------------
+Map refill ring(映射补充环形缓冲)
+---------------------------------
 
 The kernel fills in fields for the refill ring in the registration ``struct
 io_uring_zcrx_ifq_reg``. Map it into userspace::
@@ -183,9 +169,8 @@ io_uring_zcrx_ifq_reg`` 中填写补充环形缓冲的字段。把它映射到�
   refill_ring.rq_tail = 0;
   refill_ring.ring_ptr = ring_ptr;
 
-Receiving data
-(接收数据)
---------------
+Receiving data(接收数据)
+------------------------
 
 Prepare a zero copy recv request::
 (准备一个零拷贝接收请求：)
@@ -219,9 +204,8 @@ Finally, process completions::
   }
   io_uring_cq_advance(ring, count);
 
-Recycling buffers
-(回收缓冲区)
------------------
+Recycling buffers(回收缓冲区)
+-----------------------------
 
 Return buffers back to the kernel to be used again::
 (把缓冲区交还内核以便再次使用：)
@@ -235,9 +219,8 @@ Return buffers back to the kernel to be used again::
   rqe->len = cqe->res;
   IO_URING_WRITE_ONCE(*refill_ring.ktail, ++refill_ring.rq_tail);
 
-Area chunking
-(区域分块)
--------------
+Area chunking(区域分块)
+-----------------------
 
 zcrx splits the memory area into fixed-length physically contiguous chunks.
 This limits the maximum buffer size returned in a single io_uring CQE. Users
@@ -259,9 +242,8 @@ hardware offload, etc. It doesn't require any application changes beyond zcrx
 registration.
 (更大的块对 CQE 中返回的缓冲区大小不提供任何额外保证，实际大小可能因流量模式、硬件卸载等许多因素而变化。除 zcrx 注册之外，它不需要应用程序做任何改动。)
 
-Testing
-(测试)
-=======
+Testing(测试)
+=============
 
 See ``tools/testing/selftests/drivers/net/hw/iou-zcrx.c``
 (参见 tools/testing/selftests/drivers/net/hw/iou-zcrx.c。)

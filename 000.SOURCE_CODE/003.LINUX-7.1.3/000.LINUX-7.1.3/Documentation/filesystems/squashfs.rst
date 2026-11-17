@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=======================
-Squashfs 4.0 Filesystem
-=======================
-
-(Squashfs 4.0 文件系统)
+==============================================
+Squashfs 4.0 Filesystem(Squashfs 4.0 文件系统)
+==============================================
 
 Squashfs is a compressed read-only filesystem for Linux.
 (Squashfs 是一个面向 Linux 的压缩只读文件系统。)
@@ -26,9 +24,8 @@ Mailing list (kernel code): linux-fsdevel@vger.kernel.org
 Web site: github.com/plougher/squashfs-tools
 (网站：github.com/plougher/squashfs-tools)
 
-1. Filesystem Features
-(1. 文件系统特性)
-----------------------
+1. Filesystem Features(1. 文件系统特性)
+---------------------------------------
 
 Squashfs filesystem features versus Cramfs:
 (Squashfs 文件系统特性与 Cramfs 对比：)
@@ -63,9 +60,8 @@ file type, i.e. regular file, directory, symbolic link, and block/char device
 inodes have different sizes).
 (Squashfs 压缩数据、inode 和目录。此外，inode 和目录数据被高度紧缩，并按字节边界打包。每个压缩后的 inode 平均长度为 8 字节(确切长度因文件类型而异，即普通文件、目录、符号链接以及块/字符设备 inode 具有不同的大小)。)
 
-2. Using Squashfs
-(2. 使用 Squashfs)
------------------
+2. Using Squashfs(2. 使用 Squashfs)
+-----------------------------------
 
 As squashfs is a read-only filesystem, the mksquashfs program must be used to
 create populated squashfs filesystems.  This and other squashfs utilities
@@ -74,9 +70,8 @@ The source code can be obtained from github.com/plougher/squashfs-tools.
 Usage instructions can also be obtained from this site.
 (由于 squashfs 是只读文件系统，必须使用 mksquashfs 程序来创建填充了内容的 squashfs 文件系统。这个工具以及其他 squashfs 实用程序很可能已由你的 linux 发行版打包(称为 squashfs-tools)。源代码可以从 github.com/plougher/squashfs-tools 获取。使用说明也可以从该站点获取。)
 
-2.1 Mount options
-(2.1 挂载选项)
------------------
+2.1 Mount options(2.1 挂载选项)
+-------------------------------
 ===================    =========================================================
 errors=%s              Specify whether squashfs errors trigger a kernel panic
                        or not (指定 squashfs 错误是否触发内核 panic)
@@ -135,13 +130,11 @@ threads=%s             Select the decompression mode or the number of threads (�
 
 ===================    =========================================================
 
-3. Squashfs Filesystem Design
-(3. Squashfs 文件系统设计)
------------------------------
+3. Squashfs Filesystem Design(3. Squashfs 文件系统设计)
+-------------------------------------------------------
 
 A squashfs filesystem consists of a maximum of nine parts, packed together on a
 byte alignment::
-(squashfs 文件系统最多由九个部分组成，按字节对齐打包在一起：)
 
 	 ---------------
 	|  superblock 	|
@@ -166,9 +159,11 @@ byte alignment::
 	|    uid/gid	|
 	|  lookup table	|
 	|---------------|
-	|     xattr     |
-	|     table	|
-	 ---------------
+|     xattr     |
+|     table	|
+ ---------------
+
+(squashfs 文件系统最多由九个部分组成，按字节对齐打包在一起：)
 
 Compressed data blocks are written to the filesystem as files are read from
 the source directory, and checked for duplicates.  Once all file data has been
@@ -176,18 +171,16 @@ written the completed inode, directory, fragment, export, uid/gid lookup and
 xattr tables are written.
 (压缩的数据块在从源目录读取文件时被写入文件系统，并进行重复检查。一旦所有文件数据都写入完毕，就会写入完整的 inode 表、目录表、碎片表、导出表、uid/gid 查找表和 xattr 表。)
 
-3.1 Compression options
-(3.1 压缩选项)
------------------------
+3.1 Compression options(3.1 压缩选项)
+-------------------------------------
 
 Compressors can optionally support compression specific options (e.g.
 dictionary size).  If non-default compression options have been used, then
 these are stored here.
 (压缩器可以有选择地支持压缩相关的选项(例如字典大小)。如果使用了非默认的压缩选项，那么这些选项就被存储在这里。)
 
-3.2 Inodes
-(3.2 Inode)
-----------
+3.2 Inodes(3.2 Inode)
+---------------------
 
 Metadata (inodes and directories) are compressed in 8Kbyte blocks.  Each
 compressed block is prefixed by a two byte length, the top bit is set if the
@@ -213,9 +206,8 @@ regular files and directories, and extended types where extra
 information has to be stored.
 (为了进一步最大化压缩率，定义了两种类型的普通文件 inode 和目录 inode：针对频繁出现的普通文件和目录进行优化的 inode，以及需要存储额外信息的扩展类型。)
 
-3.3 Directories
-(3.3 目录)
----------------
+3.3 Directories(3.3 目录)
+-------------------------
 
 Like inodes, directories are packed into compressed metadata blocks, stored
 in a directory table.  Directories are accessed using the start address of
@@ -247,9 +239,8 @@ This scheme has the advantage that it doesn't require extra memory overhead
 and doesn't require much extra storage on disk.
 (目录是经过排序的，并且可以包含一个目录索引来加速文件查找。目录索引在每个元数据块中存储一个条目，每个条目存储映射到每个元数据块中第一个目录头的索引/文件名映射。目录按字母顺序排序，在查找时，索引被线性扫描，寻找按字母顺序大于被查找文件名的第一个文件名。此时，该文件名所在的元数据块的位置就已经找到了。索引的总体思想是确保无论目录有多长，进行一次查找只需要解压一个元数据块。这种方案的优点是它不需要额外的内存开销，也不需要在磁盘上占用太多额外存储空间。)
 
-3.4 File data
-(3.4 文件数据)
--------------
+3.4 File data(3.4 文件数据)
+---------------------------
 
 Regular files consist of a sequence of contiguous compressed blocks, and/or a
 compressed fragment block (tail-end packed block).   The compressed size
@@ -270,9 +261,8 @@ The index cache is designed to be memory efficient, and by default uses
 16 KiB.
 (索引缓存使 Squashfs 能够处理大文件(最大 1.75 TiB)，同时在磁盘上保留一个简单且节省空间的块列表。缓存被划分成多个槽位，最多可缓存八个 224 GiB 的文件(128 KiB 块)。更大的文件会使用多个槽位，1.75 TiB 的文件会使用全部 8 个槽位。索引缓存的设计注重内存效率，默认使用 16 KiB。)
 
-3.5 Fragment lookup table
-(3.5 碎片查找表)
--------------------------
+3.5 Fragment lookup table(3.5 碎片查找表)
+-----------------------------------------
 
 Regular files can contain a fragment index which is mapped to a fragment
 location on disk and compressed size using a fragment lookup table.  This
@@ -282,9 +272,8 @@ speed of access (and because it is small) is read at mount time and cached
 in memory.
 (普通文件可以包含一个碎片索引，该索引通过碎片查找表映射到磁盘上的碎片位置和压缩后大小。这个碎片查找表本身也以压缩形式存储在元数据块中。使用第二个索引表来定位这些内容。第二个索引表为了访问速度(并且因为它很小)会在挂载时读取并缓存在内存中。)
 
-3.6 Uid/gid lookup table
-(3.6 Uid/gid 查找表)
-------------------------
+3.6 Uid/gid lookup table(3.6 Uid/gid 查找表)
+--------------------------------------------
 
 For space efficiency regular files store uid and gid indexes, which are
 converted to 32-bit uids/gids using an id look up table.  This table is
@@ -293,9 +282,8 @@ locate these.  This second index table for speed of access (and because it
 is small) is read at mount time and cached in memory.
 (为了节省空间，普通文件存储 uid 和 gid 索引，这些索引通过一个 id 查找表转换为 32 位的 uid/gid。该表以压缩形式存储在元数据块中。使用第二个索引表来定位这些内容。第二个索引表为了访问速度(并且因为它很小)会在挂载时读取并缓存在内存中。)
 
-3.7 Export table
-(3.7 导出表)
-----------------
+3.7 Export table(3.7 导出表)
+----------------------------
 
 To enable Squashfs filesystems to be exportable (via NFS etc.) filesystems
 can optionally (disabled with the -no-exports Mksquashfs option) contain
@@ -310,9 +298,8 @@ used to locate these.  This second index table for speed of access (and because
 it is small) is read at mount time and cached in memory.
 (该表以压缩形式存储在元数据块中。使用第二个索引表来定位这些内容。第二个索引表为了访问速度(并且因为它很小)会在挂载时读取并缓存在内存中。)
 
-3.8 Xattr table
-(3.8 Xattr 表)
----------------
+3.8 Xattr table(3.8 Xattr 表)
+-----------------------------
 
 The xattr table contains extended attributes for each inode.  The xattrs
 for each inode are stored in a list, each list entry containing a type,
@@ -334,20 +321,17 @@ is stored.  This xattr id is mapped into the location of the xattr
 list using a second xattr id lookup table.
 (xattr 列表被打包进压缩的 8K 元数据块中。为了减少 inode 中的开销，不在每个 inode 内存储 xattr 列表的磁盘位置，而是存储一个 32 位的 xattr id。这个 xattr id 通过第二个 xattr id 查找表映射到 xattr 列表的位置。)
 
-4. TODOs and Outstanding Issues
-(4. TODO 与未决问题)
--------------------------------
+4. TODOs and Outstanding Issues(4. TODO 与未决问题)
+---------------------------------------------------
 
-4.1 TODO list
-(4.1 TODO 列表)
--------------
+4.1 TODO list(4.1 TODO 列表)
+----------------------------
 
 Implement ACL support.
 (实现 ACL 支持。)
 
-4.2 Squashfs Internal Cache
-(4.2 Squashfs 内部缓存)
----------------------------
+4.2 Squashfs Internal Cache(4.2 Squashfs 内部缓存)
+--------------------------------------------------
 
 Blocks in Squashfs are compressed.  To avoid repeatedly decompressing
 recently accessed data Squashfs uses two small metadata and fragment caches.

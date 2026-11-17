@@ -1,20 +1,17 @@
 .. SPDX-License-Identifier: GPL-2.0+
 .. note: can be edited and viewed with /usr/bin/formiko-vim
 
-==========================================================
-PCI vDPA driver for the AMD/Pensando(R) DSC adapter family
-==========================================================
-
-(AMD/Pensando(R) DSC 适配器系列的 PCI vDPA 驱动)
+==========================================================================================================
+PCI vDPA driver for the AMD/Pensando(R) DSC adapter family(AMD/Pensando(R) DSC 适配器系列的 PCI vDPA 驱动)
+==========================================================================================================
 
 AMD/Pensando vDPA VF Device Driver
 (AMD/Pensando vDPA VF 设备驱动)
 
 Copyright(c) 2023 Advanced Micro Devices, Inc
 
-Overview
-========
-(概述)
+Overview(概述)
+==============
 
 The ``pds_vdpa`` driver is an auxiliary bus driver that supplies
 a vDPA device for use by the virtio network stack.  It is used with
@@ -23,9 +20,8 @@ services.  It depends on the ``pds_core`` driver and hardware for the PF
 and VF PCI handling as well as for device configuration services.
 (``pds_vdpa`` 驱动是一个辅助总线 (auxiliary bus) 驱动，为 virtio 网络栈提供一个 vDPA 设备。它与提供 vDPA 和 virtio 队列服务的 Pensando 虚拟功能设备配合使用。它依赖 ``pds_core`` 驱动及硬件来完成 PF 和 VF 的 PCI 处理以及设备配置服务。)
 
-Using the device
-================
-(使用设备)
+Using the device(使用设备)
+==========================
 
 The ``pds_vdpa`` device is enabled via multiple configuration steps and
 depends on the ``pds_core`` driver to create and enable SR-IOV Virtual
@@ -63,9 +59,8 @@ Example steps:
 
 
 
-Enabling the driver
-===================
-(启用驱动)
+Enabling the driver(启用驱动)
+=============================
 
 The driver is enabled via the standard kernel configuration system,
 using the make command::
@@ -82,9 +77,8 @@ The driver is located in the menu structure at:
         -> Pensando devices
           -> Pensando Ethernet PDS_VDPA Support
 
-Support
-=======
-(支持)
+Support(支持)
+=============
 
 For general Linux networking support, please use the netdev mailing
 list, which is monitored by Pensando personnel::

@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==================
-XFS Logging Design
-==================
+================================
+XFS Logging Design(XFS 日志设计)
+================================
 
-(XFS 日志设计)
-
-Preamble
-(前言)
-========
+Preamble(前言)
+==============
 
 This document describes the design and algorithms that the XFS journalling
 subsystem is based on. This document describes the design and algorithms that
@@ -25,9 +22,8 @@ documented.
 (我们从 XFS 中事务的概述开始，接着描述事务预留是如何构造和记账的，然后进入我们如何用有限的初始预留上限为长时间运行的事务保证向前推进。在这一点上，我们需要解释重新日志记录(re-logging)是如何工作的。在介绍完这些基本概念之后，将记录延迟日志(delayed logging)机制的设计。)
 
 
-Introduction
-(引言)
-============
+Introduction(引言)
+==================
 
 XFS uses Write Ahead Logging for ensuring changes to the filesystem metadata
 are atomic and recoverable. For reasons of space and time efficiency, the
@@ -61,9 +57,8 @@ followed to guarantee forwards progress and prevent deadlocks.
 (用于记录某个项的日志或将修改链接在一起的方法在本文档的范围内并不特别重要。只需知道：记录特定对象日志或链接修改所用的方法各不相同，并且取决于正在执行的对象和/或修改。日志子系统只关心是否遵循某些特定的规则以保证向前推进并防止死锁。)
 
 
-Transactions in XFS
-(XFS 中的事务)
-===================
+Transactions in XFS(XFS 中的事务)
+=================================
 
 XFS has two types of high level transactions, defined by the type of log space
 reservation they take. These are known as "one shot" and "permanent"
@@ -143,9 +138,8 @@ the on-disk journal.
 (这会影响长时间运行的永久事务：由于无法保证操作中有多少到达了稳定存储，因此无法预测长时间运行的操作实际会有多少被恢复。因此，如果一个长时间运行的操作需要多个事务才能完全完成，那么高层操作必须使用 intent 和延迟操作(deferred operations)来保证在第一个事务持久化到磁盘上的日志之后，恢复能够完成该操作。)
 
 
-Transactions are Asynchronous
-(事务是异步的)
-=============================
+Transactions are Asynchronous(事务是异步的)
+===========================================
 
 In XFS, all high level transactions are asynchronous by default. This means that
 xfs_trans_commit() does not guarantee that the modification has been committed
@@ -172,9 +166,8 @@ a user operation requires a synchronisation point to occur (e.g. fsync).
 (然而，同步事务很少使用，因为它们会将日志吞吐量限制在底层存储的 IO 延迟水平。相反，我们倾向于只在用户操作需要出现同步点时(例如 fsync)才使用日志强制来确保修改位于稳定存储上。)
 
 
-Transaction Reservations
-(事务预留)
-========================
+Transaction Reservations(事务预留)
+==================================
 
 It has been mentioned a number of times now that the logging subsystem needs to
 provide a forwards progress guarantee so that no modification ever stalls
@@ -246,9 +239,8 @@ an understanding of how the log accounts for space that has been reserved.
 (如果永久事务的日志计数达到零，那么它需要重新预留日志中的物理空间。这有些复杂，需要理解日志如何为已预留的空间记账。)
 
 
-Log Space Accounting
-(日志空间记账)
-====================
+Log Space Accounting(日志空间记账)
+==================================
 
 The position in the log is typically referred to as a Log Sequence Number (LSN).
 The log is circular, so the positions in the log are defined by the combination
@@ -346,9 +338,8 @@ they roll.
 (如果所有滚动事务都遵守这条规则，那么它们都可以独立地向前推进，因为没有什么会阻碍日志尾向前移动的进程，从而确保无论永久事务滚动多少次，写授权空间总是(最终)对它们可用。)
 
 
-Re-logging Explained
-(重新日志记录详解)
-====================
+Re-logging Explained(重新日志记录详解)
+======================================
 
 XFS allows multiple separate modifications to a single object to be carried in
 the log at any given time.  This allows the log to avoid needing to flush each
@@ -426,9 +417,8 @@ IO permanently. Hence the XFS journalling subsystem can be considered to be IO
 bound.
 (实际上，这为我们给出了在任意时间点可以对文件系统做出的未决元数据更改的最大上限——如果所有日志缓冲都已满且正处于 IO 之中，那么在当前这一批完成之前，不能再提交更多的事务。如今，单个当前 CPU 核心能够发出足够多的事务、使日志缓冲永久保持满且处于 IO 之中，已属常见。因此，XFS 日志子系统可以被认为是 IO 受限的。)
 
-Delayed Logging: Concepts
-(延迟日志：概念)
-=========================
+Delayed Logging: Concepts(延迟日志：概念)
+=========================================
 
 The key thing to note about the asynchronous logging combined with the
 relogging technique XFS uses is that we can be relogging changed objects
@@ -510,13 +500,11 @@ The fundamental requirements for delayed logging in XFS are simple:
 	6. No performance regressions for synchronous transaction workloads.
 	   (同步事务工作负载没有性能回归。)
 
-Delayed Logging: Design
-(延迟日志：设计)
-=======================
+Delayed Logging: Design(延迟日志：设计)
+=======================================
 
-Storing Changes
-(存储更改)
----------------
+Storing Changes(存储更改)
+-------------------------
 
 The problem with accumulating changes at a logical level (i.e. just using the
 existing log item dirty region tracking) is that when it comes to writing the
@@ -613,9 +601,8 @@ relogged in memory.
 (因此我们需要保留向量，但通过把内存缓冲附着到它上面并重写向量地址使其指向内存缓冲，我们最终得到一个自描述对象，它可以被传递给日志缓冲写入代码，并以与现有日志向量完全相同的方式处理。因此，我们避免了为处理在内存中被重新记录日志的项而需要新的磁盘格式。)
 
 
-Tracking Changes
-(跟踪更改)
-----------------
+Tracking Changes(跟踪更改)
+--------------------------
 
 Now that we can record transactional changes in memory in a form that allows
 them to be used without limitations, we need to be able to track and accumulate
@@ -655,9 +642,8 @@ done for convenience/sanity of the developers.
 (与 AIL 类似，对已提交项的跟踪通过一个称为已提交项列表(Committed Item List, CIL)的新链表完成。该列表跟踪已被提交并附着了格式化内存缓冲的日志项。它按事务提交顺序跟踪对象，因此当一个对象被重新记录日志时，它会从列表中的原位置移除并重新插入到尾部。这完全是任意的选择，只是为了便于调试——列表中靠后的项就是最近被修改的项。CIL 的顺序对于事务完整性并不是必需的(将在下一节讨论)，因此这样做只是为了开发者的便利/合理性。)
 
 
-Delayed Logging: Checkpoints
-(延迟日志：检查点)
-----------------------------
+Delayed Logging: Checkpoints(延迟日志：检查点)
+----------------------------------------------
 
 When we have a log synchronisation event, commonly known as a "log force",
 all the items in the CIL must be written into the log via the log buffers.
@@ -803,9 +789,8 @@ compare" situation that can be done after a working and reviewed implementation
 is in the dev tree....
 (讨论点：我不确定日志项是否是跟踪向量的最有效方式，尽管它看起来是自然的做法。我们遍历日志项(在 CIL 中)只是为了链接日志向量并断开日志项与日志向量之间的链接，这意味着我们在日志项链表修改上付出一次缓存行命中，然后在日志向量链接上再付出一次。如果我们按日志向量进行跟踪，那么我们只需要断开日志项与日志向量之间的链接，这意味着我们应该只弄脏日志项的缓存行。通常我不会在意一个还是两个脏缓存行，只是我曾经在一个检查点事务中看到多达 80,000 个日志向量。我猜这是一个"测量并比较"的情形，可以在一个可工作且经过评审的实现进入 dev 树之后再做……)
 
-Delayed Logging: Checkpoint Sequencing
-(延迟日志：检查点排序)
---------------------------------------
+Delayed Logging: Checkpoint Sequencing(延迟日志：检查点排序)
+------------------------------------------------------------
 
 One of the key aspects of the XFS transaction subsystem is that it tags
 committed transactions with the log sequence number of the transaction commit.
@@ -876,9 +861,8 @@ force the log at the LSN of that transaction) and so the higher level code
 behaves the same regardless of whether delayed logging is being used or not.
 (剩下的唯一复杂性是，日志强制现在还必须处理强制序列号与当前上下文相同的情况。也就是说，我们需要刷新 CIL 并可能等待其完成。这是对现有日志强制代码的一个简单补充：检查序列号并在需要时推送。实际上，把当前序列的检查点刷新放在日志强制代码中，使发出同步事务的现有机制保持不变(即提交一个异步事务，然后在该事务的 LSN 处强制日志)，因此无论是否使用延迟日志，高层代码的行为都是相同的。)
 
-Delayed Logging: Checkpoint Log Space Accounting
-(延迟日志：检查点日志空间记账)
-------------------------------------------------
+Delayed Logging: Checkpoint Log Space Accounting(延迟日志：检查点日志空间记账)
+------------------------------------------------------------------------------
 
 The big issue for a checkpoint transaction is the log space reservation for the
 transaction. We don't know how big a checkpoint transaction is going to be
@@ -980,9 +964,8 @@ which is once every 30s.
 (如果事务子系统进入空闲状态而 CIL 中仍有项，它们将通过 xfssyncd 发出的周期性日志强制被刷新。这个日志强制会把 CIL 推送到磁盘，如果事务子系统保持空闲，则允许空闲日志被覆盖(有效地标记为干净)，其方式与现有日志记录方法所做的方式完全相同。一个讨论点是，这个日志强制是否需要比当前每 30 秒一次的频率更频繁地执行。)
 
 
-Delayed Logging: Log Item Pinning
-(延迟日志：日志项钉住)
----------------------------------
+Delayed Logging: Log Item Pinning(延迟日志：日志项钉住)
+-------------------------------------------------------
 
 Currently log items are pinned during transaction commit while the items are
 still locked. This happens just after the items are formatted, though it could
@@ -1026,9 +1009,8 @@ object, we have a race with CIL being flushed between the check and the pin
 lock to guarantee that we pin the items correctly.
 (为了让事情稍微更复杂一点，这个检查点级别的钉住计数上下文意味着对项的钉住必须在 CIL 提交/刷新锁之下进行。如果我们在锁之外钉住对象，我们就无法保证钉住计数与哪个上下文相关联。这是因为钉住项取决于该项是否存在于当前 CIL 中。如果我们在检查并钉住对象之前不先持有 CIL 锁，我们就会在检查和钉住之间与 CIL 被刷新产生竞争(或者按情况而不钉住)。因此，我们必须持有 CIL 刷新/提交锁来保证我们正确地钉住各项。)
 
-Delayed Logging: Concurrent Scalability
-(延迟日志：并发可扩展性)
----------------------------------------
+Delayed Logging: Concurrent Scalability(延迟日志：并发可扩展性)
+---------------------------------------------------------------
 
 A fundamental requirement for the CIL is that accesses through transaction
 commits must scale to many concurrent commits. The current transaction commit
@@ -1118,9 +1100,8 @@ woken by the wrong event.
 (这两个排序操作可以使用同一机制，尽管它们等待的事件不同。检查点提交记录排序需要等待直到检查点上下文包含提交 LSN(通过提交记录写入的完成获得)，而日志强制排序需要等待直到先前的检查点上下文从提交中列表中移除(即它们已完成)。一个简单的等待变量和广播唤醒(惊群)已被用来实现这两个串行化队列。它们也使用与 CIL 相同的锁。如果我们看到 CIL 锁上有太多竞争，或者由于广播唤醒导致太多上下文切换，这些操作可以被置于一个新的自旋锁之下，并给予单独的等待列表，以减少锁竞争和被错误事件唤醒的进程数量。)
 
 
-Lifecycle Changes
-(生命周期变化)
------------------
+Lifecycle Changes(生命周期变化)
+-------------------------------
 
 The existing log item life cycle is as follows::
 (现有的日志项生命周期如下：)

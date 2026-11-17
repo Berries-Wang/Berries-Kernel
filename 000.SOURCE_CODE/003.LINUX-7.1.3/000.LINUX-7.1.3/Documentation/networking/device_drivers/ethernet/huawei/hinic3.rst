@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=====================================================================
-Linux kernel driver for Huawei Ethernet Device Driver (hinic3) family
-=====================================================================
+========================================================================================================================
+Linux kernel driver for Huawei Ethernet Device Driver (hinic3) family(华为以太网设备驱动 (hinic3) 家族的 Linux 内核驱动)
+========================================================================================================================
 
-(华为以太网设备驱动 (hinic3) 家族的 Linux 内核驱动)
-
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 The hinic3 is a network interface card (NIC) for Data Center. It supports
 a range of link-speed devices (10GE, 25GE, 100GE, etc.). The hinic3
@@ -33,9 +30,8 @@ The hinic3 driver supports the following features:
 - SR-IOV (Single Root I/O Virtualization).
   (SR-IOV (单根 I/O 虚拟化)。)
 
-Content
-(目录)
-=======
+Content(目录)
+=============
 
 - Supported PCI vendor ID/device IDs
   (支持的 PCI 厂商 ID/设备 ID)
@@ -44,9 +40,8 @@ Content
 - Management Interface
   (管理接口)
 
-Supported PCI vendor ID/device IDs
-(支持的 PCI 厂商 ID/设备 ID)
-==================================
+Supported PCI vendor ID/device IDs(支持的 PCI 厂商 ID/设备 ID)
+==============================================================
 
 19e5:0222 - hinic3 PF/PPF
 19e5:375F - hinic3 VF
@@ -58,9 +53,8 @@ the host. Any PF may serve as a PPF. The PPF is selected dynamically.
 (主物理功能 (Prime Physical Function，PPF) 负责管理整块网卡。例如，网卡
 与主机之间的时钟同步。任何 PF 都可以充当 PPF。PPF 是动态选择的。)
 
-Source Code Structure of Hinic3 Driver
-(Hinic3 驱动源码结构)
-======================================
+Source Code Structure of Hinic3 Driver(Hinic3 驱动源码结构)
+===========================================================
 
 ========================  ================================================
 hinic3_pci_id_tbl.h       Supported device IDs (支持的设备 ID)
@@ -92,13 +86,11 @@ hinic3_ethtool.c          Interface for ethtool operations (ops) (ethtool 操作
 hinic3_filter.c           Interface for MAC address (MAC 地址接口)
 ========================  ================================================
 
-Management Interface
-(管理接口)
-====================
+Management Interface(管理接口)
+==============================
 
-Asynchronous Event Queue (AEQ)
-(异步事件队列 (AEQ))
-------------------------------
+Asynchronous Event Queue (AEQ)(异步事件队列 (AEQ))
+--------------------------------------------------
 
 AEQ receives high priority events from the HW over a descriptor queue.
 Every descriptor is a fixed size of 64 bytes. AEQ can receive solicited or
@@ -111,9 +103,8 @@ of events, but in practice the hinic3 driver ignores all events except for
 PF) 最多可以拥有 4 个 AEQ。每个 AEQ 都关联一个专用 IRQ。AEQ 可以接收多种
 类型的事件，但实际上 hinic3 驱动会忽略除 2 个邮箱相关事件之外的所有事件。)
 
-Mailbox
-(邮箱)
--------
+Mailbox(邮箱)
+-------------
 
 Mailbox is a communication mechanism between the hinic3 driver and the HW.
 Each device has an independent mailbox. Driver can use the mailbox to send
@@ -131,9 +122,8 @@ can also be used to post requests and responses between the PF and its VFs.
 (每个设备都可以使用自己的邮箱向固件提交请求。邮箱也可以用于在 PF 与其 VF
 之间传递请求和响应。)
 
-Completion Event Queue (CEQ)
-(完成事件队列 (CEQ))
-----------------------------
+Completion Event Queue (CEQ)(完成事件队列 (CEQ))
+------------------------------------------------
 
 The implementation of CEQ is the same as AEQ. It receives completion events
 from HW over a fixed size descriptor of 32 bits. Every device can have up
@@ -148,9 +138,8 @@ posted commands on a cmdq.
 实际上 hinic3 驱动会忽略除 HINIC3_CMDQ (表示 cmdq 上先前提交的命令已完成)
 之外的所有事件。)
 
-Command Queue (cmdq)
-(命令队列 (cmdq))
---------------------
+Command Queue (cmdq)(命令队列 (cmdq))
+-------------------------------------
 
 Every cmdq has a dedicated work queue on which commands are posted.
 Commands on the work queue are fixed size descriptor of size 64 bytes.
@@ -165,9 +154,8 @@ Hinic3 driver only uses type HINIC3_CMDQ_SYNC.
 队列，它们作为一个集合被初始化 (称为 cmdqs)，各自有自己的类型。Hinic3
 驱动只使用 HINIC3_CMDQ_SYNC 类型。)
 
-Work Queues(WQ)
-(工作队列 (WQ))
----------------
+Work Queues(WQ)(工作队列 (WQ))
+------------------------------
 
 Work queues are logical arrays of fixed size WQEs. The array may be spread
 over multiple non-contiguous pages using indirection table. Work queues are
@@ -175,9 +163,8 @@ used by I/O queues and command queues.
 (工作队列是固定大小 WQE 的逻辑数组。该数组可以使用间接表分布在多个不连续
 的页面上。I/O 队列和命令队列都会使用工作队列。)
 
-Global function ID
-(全局功能 ID)
-------------------
+Global function ID(全局功能 ID)
+-------------------------------
 
 Every function, PF or VF, has a unique ordinal identification within the device.
 Many management commands (mbox or cmdq) contain this ID so HW can apply the

@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=======================================
-FUSE-over-io-uring design documentation
-=======================================
-
-(FUSE-over-io-uring 设计文档)
+====================================================================
+FUSE-over-io-uring design documentation(FUSE-over-io-uring 设计文档)
+====================================================================
 
 This documentation covers basic details how the fuse
 kernel/userspace communication through io-uring is configured
@@ -15,18 +13,16 @@ This document also covers the current interface, which is
 still in development and might change.
 (本文档还涵盖了当前的接口，该接口仍在开发中，可能会发生变化。)
 
-Limitations
-(限制)
-===========
+Limitations(限制)
+=================
 As of now not all requests types are supported through io-uring, userspace
 is required to also handle requests through /dev/fuse after io-uring setup
 is complete. Specifically notifications (initiated from the daemon side)
 and interrupts.
 (截至目前，并非所有请求类型都支持通过 io-uring 处理，在 io-uring 设置完成后，用户空间仍需要通过 /dev/fuse 处理请求，具体来说就是通知(由守护进程侧发起)和中断。)
 
-Fuse io-uring configuration
-(Fuse io-uring 配置)
-===========================
+Fuse io-uring configuration(Fuse io-uring 配置)
+===============================================
 
 Fuse kernel requests are queued through the classical /dev/fuse
 read/write interface - until io-uring setup is complete.

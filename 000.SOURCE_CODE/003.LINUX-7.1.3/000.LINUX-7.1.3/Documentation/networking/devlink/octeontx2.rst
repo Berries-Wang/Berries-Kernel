@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=========================
-octeontx2 devlink support
-=========================
-
-(octeontx2 devlink 支持)
+=================================================
+octeontx2 devlink support(octeontx2 devlink 支持)
+=================================================
 
 This document describes the devlink features implemented by the ``octeontx2 AF, PF and VF``
 device drivers.
 (本文档描述 ``octeontx2 AF, PF and VF`` 设备驱动所实现的 devlink 功能。)
 
-Parameters
-==========
-(参数)
+Parameters(参数)
+================
 
 The ``octeontx2 PF and VF`` drivers implement the following driver-specific parameters.
 (``octeontx2 PF and VF`` 驱动实现以下驱动特定参数。)

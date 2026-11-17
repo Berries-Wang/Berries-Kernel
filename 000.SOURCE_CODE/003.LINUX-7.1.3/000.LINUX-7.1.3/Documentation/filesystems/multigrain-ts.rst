@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=====================
-Multigrain Timestamps
-=====================
+===================================
+Multigrain Timestamps(多粒度时间戳)
+===================================
 
-(多粒度时间戳)
-
-Introduction
-(简介)
-============
+Introduction(简介)
+==================
 Historically, the kernel has always used coarse time values to stamp inodes.
 This value is updated every jiffy, so any change that happens within that jiffy
 will end up with the same timestamp.
@@ -38,9 +35,8 @@ timestamps when a file has had its timestamps queried recently, and the current
 coarse-grained time does not cause a change.
 (多粒度时间戳旨在弥补这一点：当某个文件最近被查询过时间戳、且当前粗粒度时间不会造成变化时，选择性地使用细粒度时间戳。)
 
-Inode Timestamps
-(inode 时间戳)
-================
+Inode Timestamps(inode 时间戳)
+==============================
 There are currently 3 timestamps in the inode that are updated to the current
 wallclock time on different activity:
 (当前 inode 中有 3 个时间戳，会在不同的活动发生时被更新为当前的墙上时钟时间：)
@@ -70,9 +66,8 @@ Multigrain timestamps are only tracked for the ctime and the mtime. atimes are
 not affected and always use the coarse-grained value (subject to the floor).
 (多粒度时间戳只针对 ctime 和 mtime 进行跟踪。atime 不受影响，始终使用粗粒度值(受下限值约束)。)
 
-Inode Timestamp Ordering
-(inode 时间戳排序)
-========================
+Inode Timestamp Ordering(inode 时间戳排序)
+==========================================
 
 In addition to just providing info about changes to individual files, file
 timestamps also serve an important purpose in applications like "make". These
@@ -104,9 +99,8 @@ of the realtime clock. If that occurs at an inopportune time, then timestamps
 can appear to go backward, even on a properly functioning system.
 (注意，上面的叙述假设系统不会经历实时时钟的向后跳变。如果这种情况在不合适的时刻发生，那么即使是在正常工作的系统上，时间戳看起来也可能在倒退。)
 
-Multigrain Timestamp Implementation
-(多粒度时间戳的实现)
-===================================
+Multigrain Timestamp Implementation(多粒度时间戳的实现)
+=======================================================
 Multigrain timestamps are aimed at ensuring that changes to a single file are
 always recognizable, without violating the ordering guarantees when multiple
 different files are modified. This affects the mtime and the ctime, but the
@@ -120,9 +114,8 @@ This ensures tight cache coherency for use-cases like NFS, without sacrificing
 the benefits of reduced metadata updates when files aren't being watched.
 (它使用 i_ctime_nsec 字段中一个未使用的位来指示 mtime 或 ctime 是否已被查询。如果其中之一或两者都被查询过，内核会格外小心，以确保下一次时间戳更新将显示出可见的变化。这为 NFS 之类的用例提供了紧密的缓存一致性，同时在文件未被监视时又不牺牲减少元数据更新的好处。)
 
-The Ctime Floor Value
-(ctime 下限值)
-=====================
+The Ctime Floor Value(ctime 下限值)
+===================================
 It's not sufficient to simply use fine or coarse-grained timestamps based on
 whether the mtime or ctime has been queried. A file could get a fine grained
 timestamp, and then a second file modified later could get a coarse-grained one
@@ -138,9 +131,8 @@ monotonic ktime_t, and the values are converted to realtime clock values as
 needed.
 (为缓解这一问题，需要维护一个全局下限值来确保这种情况不会发生。在这种情况下，上述示例中的两个文件可能看起来是在同一时刻被修改的，但它们绝不会显示相反的顺序。为避免实时时钟跳变带来的问题，该下限以单调的 ktime_t 形式管理，并在需要时转换为实时时钟值。)
 
-Implementation Notes
-(实现说明)
-====================
+Implementation Notes(实现说明)
+==============================
 Multigrain timestamps are intended for use by local filesystems that get
 ctime values from the local clock. This is in contrast to network filesystems
 and the like that just mirror timestamp values from a server.

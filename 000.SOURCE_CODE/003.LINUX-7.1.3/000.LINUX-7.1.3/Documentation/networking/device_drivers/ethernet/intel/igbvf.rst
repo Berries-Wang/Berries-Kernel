@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0+
 
-===========================================================
-Linux Base Virtual Function Driver for Intel(R) 1G Ethernet
-===========================================================
-
-(Intel(R) 1G 以太网的 Linux 基础虚拟功能驱动)
+========================================================================================================
+Linux Base Virtual Function Driver for Intel(R) 1G Ethernet(Intel(R) 1G 以太网的 Linux 基础虚拟功能驱动)
+========================================================================================================
 
 Intel Gigabit Virtual Function Linux driver.
 (Intel 千兆虚拟功能 Linux 驱动。)
 Copyright(c) 1999-2018 Intel Corporation.
 
-Contents
-========
-(目录)
+Contents(目录)
+==============
 
 - Identifying Your Adapter
   (识别你的适配器)
@@ -45,9 +42,8 @@ NOTE: There is a limit of a total of 32 shared VLANs to 1 or more VFs.
 (注意：共享给一个或多个 VF 的 VLAN 总数上限为 32 个。)
 
 
-Identifying Your Adapter
-========================
-(识别你的适配器)
+Identifying Your Adapter(识别你的适配器)
+========================================
 
 For information on how to identify your adapter, and for the latest Intel
 network drivers, refer to the Intel Support website:
@@ -55,9 +51,8 @@ https://www.intel.com/support
 (有关如何识别你的适配器的信息以及最新的 Intel 网络驱动，请参阅 Intel 支持网站：https://www.intel.com/support)
 
 
-Additional Features and Configurations
-======================================
-(其他特性与配置)
+Additional Features and Configurations(其他特性与配置)
+======================================================
 
 ethtool
 -------
@@ -71,9 +66,8 @@ version is required for this functionality. Download it at:
 https://www.kernel.org/pub/software/network/ethtool/
 
 
-Support
-=======
-(支持)
+Support(支持)
+=============
 
 For general information, go to the Intel support website at:
 https://www.intel.com/support/

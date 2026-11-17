@@ -1,8 +1,7 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-Idmappings
-(ID 映射)
-==========
+Idmappings(ID 映射)
+===================
 
 Most filesystem developers will have encountered idmappings. They are used when
 reading from or writing ownership to disk, reporting ownership to userspace, or
@@ -10,9 +9,8 @@ for permission checking. This document is aimed at filesystem developers that
 want to know how idmappings work.
 (大多数文件系统开发者都会接触过 idmapping(ID 映射)。它们用于从磁盘读取所有权或将所有权写入磁盘、向用户空间报告所有权，或者进行权限检查。本文档面向想了解 idmapping 工作原理的文件系统开发者。)
 
-Formal notes
-(正式说明)
-------------
+Formal notes(正式说明)
+----------------------
 
 An idmapping is essentially a translation of a range of ids into another or the
 same range of ids. The notational convention for idmappings that is widely used
@@ -140,9 +138,8 @@ idmapping::
  id    - u    + k      = n
  u1100 - u500 + k30000 = k30600
 
-General notes
-(一般说明)
--------------
+General notes(一般说明)
+-----------------------
 
 In the context of the kernel an idmapping can be interpreted as mapping a range
 of userspace ids into a range of kernel ids::
@@ -223,17 +220,15 @@ owned by ``u1000``:
   ``i_uid`` and ``i_gid`` would contain ``k11000``.
   (如果文件系统以 ``u0:k10000:r10000`` 的 idmapping 挂载，那么从磁盘读取的 ``u1000`` 会被映射为 ``k11000``。因此 inode 的 ``i_uid`` 和 ``i_gid`` 将包含 ``k11000``。)
 
-Translation algorithms
-(翻译算法)
-----------------------
+Translation algorithms(翻译算法)
+--------------------------------
 
 We've already seen briefly that it is possible to translate between different
 idmappings. We'll now take a closer look how that works.
 (我们已经简要地看到，可以在不同的 idmapping 之间进行翻译。现在我们将更仔细地看看这是如何做到的。)
 
-Crossmapping
-(交叉映射)
-~~~~~~~~~~~~
+Crossmapping(交叉映射)
+~~~~~~~~~~~~~~~~~~~~~~
 
 This translation algorithm is used by the kernel in quite a few places. For
 example, it is used when reporting back the ownership of a file to userspace
@@ -292,9 +287,8 @@ assume the caller has the somewhat unconventional idmapping
 Consequently the user would see that this file is owned by ``u4000``.
 (因此内核会在调用者的 idmapping 中把 id 向上映射回来。假设调用者拥有有点非常规的 idmapping ``u3000:k20000:r10000``，那么 ``k21000`` 会向上映射回 ``u4000``。因此用户会看到这个文件由 ``u4000`` 拥有。)
 
-Remapping
-(重映射)
-~~~~~~~~~
+Remapping(重映射)
+~~~~~~~~~~~~~~~~~
 
 It is possible to translate a kernel id from one idmapping to another one via
 the userspace idmapset of the two idmappings. This is equivalent to remapping
@@ -355,9 +349,8 @@ idmapping and applying another idmapping if both idmappings have the relevant
 userspace id mapped. This will come in handy when working with idmapped mounts.
 (看待这种翻译的另一种方式是：如果两个 idmapping 都映射了相关的用户空间 id，就把它视为反转一个 idmapping 并应用另一个 idmapping。在处理 idmapped 挂载时这会派上用场。)
 
-Invalid translations
-(无效翻译)
-~~~~~~~~~~~~~~~~~~~~
+Invalid translations(无效翻译)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 It is never valid to use an id in the kernel idmapset of one idmapping as the
 id in the userspace idmapset of another or the same idmapping. While the kernel
@@ -389,9 +382,8 @@ Since userspace ids have type ``uid_t`` and ``gid_t`` and kernel ids have type
 conflated. So the two examples above would cause a compilation failure.
 (由于用户空间 id 的类型是 ``uid_t`` 和 ``gid_t``，而内核 id 的类型是 ``kuid_t`` 和 ``kgid_t``，当它们被混用时编译器会抛出错误。因此上面的两个例子会导致编译失败。)
 
-Idmappings when creating filesystem objects
-(创建文件系统对象时的 idmapping)
--------------------------------------------
+Idmappings when creating filesystem objects(创建文件系统对象时的 idmapping)
+---------------------------------------------------------------------------
 
 The concepts of mapping an id down or mapping an id up are expressed in the two
 kernel functions filesystem developers are rather familiar with and which we've
@@ -465,9 +457,8 @@ revisit/reconsider these examples, this time using mount idmappings, to see how
 they can solve the problems we observed before.
 (让我们看一些只涉及调用者/文件系统 idmapping 而没有挂载 idmapping 的例子。这会暴露出我们可能遇到的一些问题。之后我们会重新审视这些例子，这次使用挂载 idmapping，看看它们如何解决我们之前观察到的问题。)
 
-Example 1
-(示例 1)
-~~~~~~~~~
+Example 1(示例 1)
+~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -498,9 +489,8 @@ In this example both idmappings are the same so there's nothing exciting going
 on. Ultimately the userspace id that lands on disk will be ``u1000``.
 (在这个例子中两个 idmapping 是相同的，所以没有什么特别之处。最终落到磁盘上的用户空间 id 将是 ``u1000``。)
 
-Example 2
-(示例 2)
-~~~~~~~~~
+Example 2(示例 2)
+~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -531,9 +521,8 @@ mounted with non-initial idmappings this is a general problem as we can see in
 the next examples.
 (请注意，虽然这个例子不太常见——因为大多数文件系统不能用非初始 idmapping 挂载——但正如我们在接下来的例子中看到的，这是一个普遍存在的问题。)
 
-Example 3
-(示例 3)
-~~~~~~~~~
+Example 3(示例 3)
+~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -581,9 +570,8 @@ kernel ids map up into valid userspace ids in the caller's idmapping
 
     from_kuid(u0:k10000:r10000, k1000) = u-1
 
-Example 4
-(示例 4)
-~~~~~~~~~
+Example 4(示例 4)
+~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -612,9 +600,8 @@ idmapping. Thus, the kernel will report the ownership of this file as the
 overflowid.
 (在这种情况下交叉映射算法会失败，因为文件系统 idmapping 中的内核 id 无法向上映射为调用者 idmapping 中的用户空间 id。因此，内核将把这个文件的所有权报告为 overflowid。)
 
-Example 5
-(示例 5)
-~~~~~~~~~
+Example 5(示例 5)
+~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -660,9 +647,8 @@ idmapping of ``u0:k20000:r10000``:
 
     from_kuid(u0:k0:r4294967295, k21000) = u21000
 
-Idmappings on idmapped mounts
-(idmapped 挂载上的 idmapping)
------------------------------
+Idmappings on idmapped mounts(idmapped 挂载上的 idmapping)
+----------------------------------------------------------
 
 The examples we've seen in the previous section where the caller's idmapping
 and the filesystem's idmapping are incompatible causes various issues for
@@ -759,9 +745,8 @@ However, it is perfectly possible to combine idmapped mounts with filesystems
 mountable inside user namespaces. We will touch on this further below.
 (不过，把 idmapped 挂载与可在用户命名空间内挂载的文件系统结合起来是完全可行的。我们将在下文进一步讨论这一点。)
 
-Filesystem types vs idmapped mount types
-(文件系统类型与 idmapped 挂载类型)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Filesystem types vs idmapped mount types(文件系统类型与 idmapped 挂载类型)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 With the introduction of idmapped mounts we need to distinguish between
 filesystem ownership and mount ownership of a VFS object such as an inode. The
@@ -830,9 +815,8 @@ kernel ids with ``k`` we will prefix all VFS ids with ``v``. So a mount
 idmapping will be written as: ``u0:v10000:r10000``.
 (类似于本文档中给所有用户空间 id 加 ``u`` 前缀、给所有内核 id 加 ``k`` 前缀的做法，我们将给所有 VFS id 加 ``v`` 前缀。因此一个挂载 idmapping 将写作：``u0:v10000:r10000``。)
 
-Remapping helpers
-(重映射辅助函数)
-~~~~~~~~~~~~~~~~~
+Remapping helpers(重映射辅助函数)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Idmapping functions were added that translate between idmappings. They make use
 of the remapping algorithm we've introduced earlier. We're going to look at:
@@ -948,9 +932,8 @@ Let's now briefly reconsider the failing examples from earlier in the context
 of idmapped mounts.
 (现在让我们在 idmapped 挂载的上下文中简要地重新考虑一下前面失败的例子。)
 
-Example 2 reconsidered
-(重新审视示例 2)
-~~~~~~~~~~~~~~~~~~~~~~
+Example 2 reconsidered(重新审视示例 2)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -988,9 +971,8 @@ the same idmapping to the mount. We now perform three steps:
 So the ownership that lands on disk will be ``u1000``.
 (因此落到磁盘上的所有权将是 ``u1000``。)
 
-Example 3 reconsidered
-(重新审视示例 3)
-~~~~~~~~~~~~~~~~~~~~~~
+Example 3 reconsidered(重新审视示例 3)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -1027,9 +1009,8 @@ The same translation algorithm works with the third example.
 So the ownership that lands on disk will be ``u1000``.
 (因此落到磁盘上的所有权将是 ``u1000``。)
 
-Example 4 reconsidered
-(重新审视示例 4)
-~~~~~~~~~~~~~~~~~~~~~~
+Example 4 reconsidered(重新审视示例 4)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -1070,9 +1051,8 @@ filesystem's idmapping via the mount's idmapping. The file will now be created
 with ``u1000`` according to the mount's idmapping.
 (在此之前，调用者的内核 id 无法在文件系统的 idmapping 中交叉映射。有了 idmapped 挂载之后，现在可以通过挂载的 idmapping 把它交叉映射进文件系统的 idmapping。现在将根据挂载的 idmapping 以 ``u1000`` 来创建该文件。)
 
-Example 5 reconsidered
-(重新审视示例 5)
-~~~~~~~~~~~~~~~~~~~~~~
+Example 5 reconsidered(重新审视示例 5)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ::
 
@@ -1113,9 +1093,8 @@ filesystem's idmapping via the mount's idmapping. The file is now owned by
 ``u1000`` according to the mount's idmapping.
 (在此之前，文件的内核 id 无法在文件系统的 idmapping 中交叉映射。有了 idmapped 挂载之后，现在可以通过挂载的 idmapping 把它交叉映射进文件系统的 idmapping。根据挂载的 idmapping，该文件现在由 ``u1000`` 拥有。)
 
-Changing ownership on a home directory
-(更改主目录的所有权)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Changing ownership on a home directory(更改主目录的所有权)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We've seen above how idmapped mounts can be used to translate between
 idmappings when either the caller, the filesystem or both uses a non-initial

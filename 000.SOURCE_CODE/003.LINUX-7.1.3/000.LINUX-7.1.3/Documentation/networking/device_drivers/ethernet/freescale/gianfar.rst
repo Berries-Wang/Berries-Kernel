@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===========================
-The Gianfar Ethernet Driver
-===========================
-
-(Gianfar 以太网驱动)
+===============================================
+The Gianfar Ethernet Driver(Gianfar 以太网驱动)
+===============================================
 
 :Author: Andy Fleming <afleming@freescale.com>
          (作者: Andy Fleming <afleming@freescale.com>)
@@ -12,9 +10,8 @@ The Gianfar Ethernet Driver
          (更新于: 2005-07-28)
 
 
-Checksum Offloading
-===================
-(校验和卸载)
+Checksum Offloading(校验和卸载)
+===============================
 
 The eTSEC controller (first included in parts from late 2005 like
 the 8548) has the ability to perform TCP, UDP, and IP checksums
@@ -35,9 +32,8 @@ extraction of VLAN headers, but not filtering.  Filtering will be
 done by the kernel.
 (要使用 VLAN，请查阅 Linux 中关于配置 VLAN 的文档。gianfar 驱动支持以硬件方式插入和提取 VLAN 头，但不支持过滤。过滤将由内核完成。)
 
-Multicasting
-============
-(组播)
+Multicasting(组播)
+==================
 
 The gianfar driver supports using the group hash table on the
 TSEC (and the extended hash table on the eTSEC) for multicast
@@ -46,9 +42,8 @@ before the hash tables.  See Linux documentation on how to join
 multicast groups.
 (gianfar 驱动支持使用 TSEC 上的组哈希表(以及 eTSEC 上的扩展哈希表)进行组播过滤。在 eTSEC 上，会先使用精确匹配的 MAC 寄存器，然后才使用哈希表。关于如何加入组播组，请参阅 Linux 文档。)
 
-Padding
-=======
-(填充)
+Padding(填充)
+=============
 
 The gianfar driver supports padding received frames with 2 bytes
 to align the IP header to a 16-byte boundary, when supported by

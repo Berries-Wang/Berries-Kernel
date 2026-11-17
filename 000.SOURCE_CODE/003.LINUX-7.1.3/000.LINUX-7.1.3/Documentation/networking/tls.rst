@@ -1,26 +1,21 @@
 .. _kernel_tls:
 
-==========
-Kernel TLS
-==========
+====================
+Kernel TLS(内核 TLS)
+====================
 
-(内核 TLS)
-
-Overview
-(总览)
-========
+Overview(总览)
+==============
 
 Transport Layer Security (TLS) is a Upper Layer Protocol (ULP) that runs over
 TCP. TLS provides end-to-end data integrity and confidentiality.
 (传输层安全 (TLS) 是一种运行在 TCP 之上的上层协议 (ULP)。TLS 提供端到端的数据完整性和机密性。)
 
-User interface
-(用户接口)
-==============
+User interface(用户接口)
+========================
 
-Creating a TLS connection
-(创建 TLS 连接)
--------------------------
+Creating a TLS connection(创建 TLS 连接)
+----------------------------------------
 
 First create a new TCP socket and once the connection is established set the
 TLS ULP.
@@ -72,9 +67,8 @@ Transmit and receive are set separately, but the setup is the same, using either
 TLS_TX or TLS_RX.
 (发送和接收分开设置，但设置方法相同，使用 TLS_TX 或 TLS_RX 均可。)
 
-Sending TLS application data
-(发送 TLS 应用数据)
-----------------------------
+Sending TLS application data(发送 TLS 应用数据)
+-----------------------------------------------
 
 After setting the TLS_TX socket option all application data sent over this
 socket is encrypted using TLS and the parameters provided in the socket option.
@@ -113,9 +107,8 @@ for memory), or the encryption will always succeed.  If send() returns
 call using MSG_MORE, the MSG_MORE data is left on the socket buffer.
 (内核需要为加密数据分配一个缓冲区。该缓冲区在调用 send() 时分配，这样要么整个 send() 调用返回 -ENOMEM (或阻塞等待内存)，要么加密总是能够成功。如果 send() 返回 -ENOMEM，并且之前使用 MSG_MORE 的调用在套接字缓冲区中留下了一些数据，那么这些 MSG_MORE 数据会继续留在套接字缓冲区中。)
 
-Receiving TLS application data
-(接收 TLS 应用数据)
-------------------------------
+Receiving TLS application data(接收 TLS 应用数据)
+-------------------------------------------------
 
 After setting the TLS_RX socket option, all recv family socket calls
 are decrypted using TLS parameters provided.  A full TLS record must
@@ -143,9 +136,8 @@ match the version passed in setsockopt.
 ``EBADMSG`` is returned if decryption failed for any other reason.
 (如果解密因任何其他原因失败，则返回 ``EBADMSG`` 。)
 
-Send TLS control messages
-(发送 TLS 控制消息)
--------------------------
+Send TLS control messages(发送 TLS 控制消息)
+--------------------------------------------
 
 Other than application data, TLS has control messages such as alert
 messages (record type 21) and handshake messages (record type 22), etc.
@@ -187,9 +179,8 @@ Control message data should be provided unencrypted, and will be
 encrypted by the kernel.
 (控制消息数据应以未加密的形式提供，由内核负责加密。)
 
-Receiving TLS control messages
-(接收 TLS 控制消息)
-------------------------------
+Receiving TLS control messages(接收 TLS 控制消息)
+-------------------------------------------------
 
 TLS control messages are passed in the userspace buffer, with message
 type passed via cmsg.  If no cmsg buffer is provided, an error is
@@ -229,9 +220,8 @@ received without a cmsg buffer set.
 recv will never return data from mixed types of TLS records.
 (recv 永远不会把来自混合类型 TLS 记录的数据一起返回。)
 
-TLS 1.3 Key Updates
-(TLS 1.3 密钥更新)
--------------------
+TLS 1.3 Key Updates(TLS 1.3 密钥更新)
+-------------------------------------
 
 In TLS 1.3, KeyUpdate handshake messages signal that the sender is
 updating its TX key. Any message sent after a KeyUpdate will be
@@ -260,9 +250,8 @@ The number of successful and failed key updates is tracked in the
 counts KeyUpdate handshake messages that have been received.
 (成功和失败的密钥更新次数分别记录在 ``TlsTxRekeyOk`` 、 ``TlsRxRekeyOk`` 、 ``TlsTxRekeyError`` 和 ``TlsRxRekeyError`` 统计项中。 ``TlsRxRekeyReceived`` 统计项统计已收到的 KeyUpdate 握手消息数量。)
 
-Integrating in to userspace TLS library
-(集成到用户态 TLS 库)
----------------------------------------
+Integrating in to userspace TLS library(集成到用户态 TLS 库)
+------------------------------------------------------------
 
 At a high level, the kernel TLS ULP is a replacement for the record
 layer of a userspace TLS library.
@@ -278,9 +267,8 @@ Since it doesn't implement a full record layer, control
 messages are not supported.
 (上面链接中的示例演示了使用 gnutls 在握手完成后直接调用 send。由于它没有实现完整的记录层，因此不支持控制消息。)
 
-Optional optimizations
-(可选优化)
-----------------------
+Optional optimizations(可选优化)
+--------------------------------
 
 There are certain condition-specific optimizations the TLS ULP can make,
 if requested. Those optimizations are either not universally beneficial
@@ -289,9 +277,8 @@ All options are set per-socket using setsockopt(), and their
 state can be checked using getsockopt() and via socket diag (``ss``).
 (TLS ULP 可以在请求时进行某些针对特定条件的优化。这些优化或者并非在所有情况下都有益，或者可能影响正确性，因此需要显式选择启用。所有选项都通过 setsockopt() 按套接字设置，其状态可以使用 getsockopt() 以及 socket diag ( ``ss`` ) 查看。)
 
-TLS_TX_ZEROCOPY_RO
-(TLS_TX_ZEROCOPY_RO)
-~~~~~~~~~~~~~~~~~~
+TLS_TX_ZEROCOPY_RO(TLS_TX_ZEROCOPY_RO)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For device offload only. Allow sendfile() data to be transmitted directly
 to the NIC without making an in-kernel copy. This allows true zero-copy
@@ -309,9 +296,8 @@ this will look like TLS records had been tampered with and will result
 in record authentication failures.
 (修改数据可能导致原始 TCP 传输与 TCP 重传使用不同版本的数据。对接收方来说，这看起来就像 TLS 记录被篡改过，会导致记录认证失败。)
 
-TLS_RX_EXPECT_NO_PAD
-(TLS_RX_EXPECT_NO_PAD)
-~~~~~~~~~~~~~~~~~~~~
+TLS_RX_EXPECT_NO_PAD(TLS_RX_EXPECT_NO_PAD)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 TLS 1.3 only. Expect the sender to not pad records. This allows the data
 to be decrypted directly into user space buffers with TLS 1.3.
@@ -326,9 +312,8 @@ record it will be decrypted again into a kernel buffer without zero copy.
 Such events are counted in the ``TlsDecryptRetry`` statistic.
 (如果解密后的记录结果表明它曾被填充，或者它不是数据记录，则会把它重新解密到内核缓冲区中，不使用零拷贝。这类事件会计入 ``TlsDecryptRetry`` 统计项。)
 
-TLS_TX_MAX_PAYLOAD_LEN
-(TLS_TX_MAX_PAYLOAD_LEN)
-~~~~~~~~~~~~~~~~~~~~~~
+TLS_TX_MAX_PAYLOAD_LEN(TLS_TX_MAX_PAYLOAD_LEN)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Specifies the maximum size of the plaintext payload for transmitted TLS records.
 (指定所发送 TLS 记录的明文负载最大大小。)
@@ -353,9 +338,8 @@ extra byte used by the ContentType field.
 [1] https://datatracker.ietf.org/doc/html/rfc8449
 ([1] 即 RFC 8449。)
 
-Statistics
-(统计)
-==========
+Statistics(统计)
+================
 
 TLS implementation exposes the following per-namespace statistics
 (``/proc/net/tls_stat``):

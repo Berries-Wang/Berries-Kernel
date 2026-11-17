@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===============================
-The Linux LAPB Module Interface
-===============================
-
-(Linux LAPB 模块接口)
+====================================================
+The Linux LAPB Module Interface(Linux LAPB 模块接口)
+====================================================
 
 Version 1.3
 (版本 1.3)
@@ -32,9 +30,8 @@ structures for getting and setting information about the module.
 (与 LAPB 模块的接口包括：调用模块的函数、模块用于指示重要状态变化的
 回调，以及获取和设置模块信息的结构体。)
 
-Structures
-(结构体)
-----------
+Structures(结构体)
+------------------
 
 Probably the most important structure is the skbuff structure for holding
 received and transmitted data, however it is beyond the scope of this
@@ -50,9 +47,8 @@ module and is not for use.
 在标准头文件 <linux/lapb.h> 中。头文件 <net/lapb.h> 是 LAPB 模块内部的
 文件，不供外部使用。)
 
-LAPB Initialisation Structure
-(LAPB 初始化结构体)
------------------------------
+LAPB Initialisation Structure(LAPB 初始化结构体)
+------------------------------------------------
 
 This structure is used only once, in the call to lapb_register (see below).
 It contains information about the device driver that requires the services
@@ -78,9 +74,8 @@ may be substituted.
 可以用 NULL 代替。)
 
 
-LAPB Parameter Structure
-(LAPB 参数结构体)
-------------------------
+LAPB Parameter Structure(LAPB 参数结构体)
+-----------------------------------------
 
 This structure is used with the lapb_getparms and lapb_setparms functions
 (see below). They are used to allow the device driver to get and set the
@@ -138,9 +133,8 @@ names will be defined in the public LAPB header file.
 发送一个未置轮询位的 DM。大写常量名将在公共 LAPB 头文件中定义。)
 
 
-Functions
-(函数)
----------
+Functions(函数)
+---------------
 
 The LAPB module provides a number of function entry points.
 (LAPB 模块提供若干函数入口点。)
@@ -283,9 +277,8 @@ LAPB_OK			LAPB has accepted the data. (LAPB 已接受该数据。)
 LAPB_BADTOKEN		Invalid/unknown LAPB token. (LAPB token 无效或未知。)
 =============		===========================
 
-Callbacks
-(回调)
----------
+Callbacks(回调)
+---------------
 
 These callbacks are functions provided by the device driver for the LAPB
 module to call when an event occurs. They are registered with the LAPB

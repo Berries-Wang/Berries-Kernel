@@ -1,8 +1,7 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-Extended Attributes
-(扩展属性)
--------------------
+Extended Attributes(扩展属性)
+-----------------------------
 
 Extended attributes (xattrs) are typically stored in a separate data
 block on the disk and referenced from inodes via ``inode.i_file_acl*``.
@@ -182,9 +181,8 @@ The first four fields of the ``ext4_xattr_entry`` are set to zero to
 mark the end of the key list.
 (``ext4_xattr_entry`` 的前四个字段被设置为零，以标记键列表的结束。)
 
-Attribute Name Indices
-(属性名称索引)
-~~~~~~~~~~~~~~~~~~~~~~
+Attribute Name Indices(属性名称索引)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Logically speaking, extended attributes are a series of key=value pairs.
 The keys are assumed to be NULL-terminated strings. To reduce the amount
@@ -226,9 +224,8 @@ For example, if the attribute key is “user.fubar”, the attribute name
 index is set to 1 and the “fubar” name is recorded on disk.
 (例如，如果属性键是 “user.fubar”，则属性名称索引被设置为 1，并且 “fubar” 这个名称会被记录在磁盘上。)
 
-POSIX ACLs
-(POSIX ACL)
-~~~~~~~~~~
+POSIX ACLs(POSIX ACL)
+~~~~~~~~~~~~~~~~~~~~~
 
 POSIX ACLs are stored in a reduced version of the Linux kernel (and
 libacl's) internal ACL format. The key difference is that the version

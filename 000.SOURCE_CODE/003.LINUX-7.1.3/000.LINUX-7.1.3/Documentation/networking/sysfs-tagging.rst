@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=============
-Sysfs tagging
-=============
-
-(Sysfs 标签)
+=========================
+Sysfs tagging(Sysfs 标签)
+=========================
 
 (Taken almost verbatim from Eric Biederman's netns tagging patch
 commit msg)

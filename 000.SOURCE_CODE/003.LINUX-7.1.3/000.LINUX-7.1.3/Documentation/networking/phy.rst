@@ -1,12 +1,9 @@
-=====================
-PHY Abstraction Layer
-=====================
+=================================
+PHY Abstraction Layer(PHY 抽象层)
+=================================
 
-(PHY 抽象层)
-
-Purpose
-=======
-(目的)
+Purpose(目的)
+=============
 
 Most network devices consist of set of registers which provide an interface
 to a MAC layer, which communicates with the physical connection through a
@@ -41,9 +38,8 @@ allows network driver writers to write as little code as possible, while
 still providing a full feature set.
 (基本上，此层旨在提供通往 PHY 设备的接口，让网络驱动程序编写者能够编写尽可能少的代码，同时仍提供完整的功能集。)
 
-The MDIO bus
-============
-(MDIO 总线)
+The MDIO bus(MDIO 总线)
+=======================
 
 Most network devices are connected to a PHY by means of a management bus.
 Different devices use different busses (though some share common interfaces).
@@ -85,9 +81,8 @@ drivers/net/ethernet/freescale/fsl_pq_mdio.c and an associated DTS file
 for one of the users. (e.g. "git grep fsl,.*-mdio arch/powerpc/boot/dts/")
 (有关某个驱动程序如何实现 mdio 总线驱动程序的示例，请参阅 drivers/net/ethernet/freescale/fsl_pq_mdio.c 以及其某个使用者关联的 DTS 文件 (例如 "git grep fsl,.*-mdio arch/powerpc/boot/dts/")。)
 
-(RG)MII/electrical interface considerations
-===========================================
-((RG)MII/电气接口注意事项)
+(RG)MII/electrical interface considerations((RG)MII/电气接口注意事项)
+=====================================================================
 
 The Reduced Gigabit Medium Independent Interface (RGMII) is a 12-pin
 electrical signal interface using a synchronous 125Mhz clock signal and several
@@ -159,9 +154,8 @@ available:
   designed serpentine), which may not require software configuration at all.
   (修改 PCB 设计以包含固定延迟 (例如使用专门设计的蛇形走线)，这可能完全不需要软件配置。)
 
-Common problems with RGMII delay mismatch
-(RGMII 延迟不匹配的常见问题)
------------------------------------------
+Common problems with RGMII delay mismatch(RGMII 延迟不匹配的常见问题)
+---------------------------------------------------------------------
 
 When there is a RGMII delay mismatch between the Ethernet MAC and the PHY, this
 will most likely result in the clock and data line signals to be unstable when
@@ -182,9 +176,8 @@ symptoms include:
   (since there is enough setup/hold time in that case)
   (切换到较低的速率 (如 10/100Mbit/s) 会使问题消失 (因为在这种情况下有足够的建立/保持时间))
 
-Connecting to a PHY
-===================
-(连接到 PHY)
+Connecting to a PHY(连接到 PHY)
+===============================
 
 Sometime during startup, the network driver needs to establish a connection
 between the PHY device, and the network device.  At this time, the PHY's bus
@@ -210,9 +203,8 @@ At this point, there are several ways to connect to the PHY:
    (PAL 仅作为函数库使用，由网络设备手动调用函数来更新状态和配置 PHY)
 
 
-Letting the PHY Abstraction Layer do Everything
-===============================================
-(让 PHY 抽象层处理一切)
+Letting the PHY Abstraction Layer do Everything(让 PHY 抽象层处理一切)
+======================================================================
 
 If you choose option 1 (The hope is that every driver can, but to still be
 useful to drivers that can't), connecting to the PHY is simple:
@@ -281,9 +273,8 @@ phy_stop(phydev). This function also stops the phylib state machine and
 disables PHY interrupts.
 (当你想与网络断开连接时 (即使只是短暂的)，调用 phy_stop(phydev)。此函数还会停止 phylib 状态机并禁用 PHY 中断。)
 
-PHY interface modes
-===================
-(PHY 接口模式)
+PHY interface modes(PHY 接口模式)
+=================================
 
 The PHY interface mode supplied in the phy_connect() family of functions
 defines the initial operating mode of the PHY interface.  This is not
@@ -443,9 +434,8 @@ Some of the interface modes are described below:
     only.
     (非标准的简化 MII 模式，没有 MII 所定义的 TXER、RXER、CRS 和 COL 信号。COL 信号的缺失使半双工链路模式无法实现，但这并不影响 Broadcom (及其他两线以太网) PHY 上的 BroadR-Reach 链路模式，因为它们仅支持全双工。)
 
-Pause frames / flow control
-===========================
-(暂停帧 / 流控制)
+Pause frames / flow control(暂停帧 / 流控制)
+============================================
 
 The PHY does not participate directly in flow control/pause frames except by
 making sure that the SUPPORTED_Pause and SUPPORTED_AsymPause bits are set in
@@ -459,9 +449,8 @@ ethtool::set_pauseparam feature.
 (PHY 并不直接参与流控制/暂停帧，只是确保在 MII_ADVERTISE 中设置 SUPPORTED_Pause 和 SUPPORTED_AsymPause 位，以向链路伙伴表明以太网 MAC 控制器支持此类功能。由于流控制/暂停帧的生成涉及以太网 MAC 驱动程序，建议由该驱动程序负责通过相应地设置 SUPPORTED_Pause 和 SUPPORTED_AsymPause 位来正确通告对此类特性的支持和通告。这可以在 phy_connect() 之前或之后完成，和/或作为实现 ethtool::set_pauseparam 特性的结果来完成。)
 
 
-Keeping Close Tabs on the PAL
-=============================
-(密切关注 PAL)
+Keeping Close Tabs on the PAL(密切关注 PAL)
+===========================================
 
 It is possible that the PAL's built-in state machine needs a little help to
 keep your network device and the PHY properly in sync.  If so, you can
@@ -477,9 +466,8 @@ on it has been limited because the author does not have any drivers which use
 it (they all use option 1).  So Caveat Emptor.
 (目前没有关于如何使用此功能的示例，对它的测试也很有限，因为作者没有任何使用它的驱动程序 (它们都使用方式 1)。所以请使用者自担风险。)
 
-Doing it all yourself
-=====================
-(全部自己动手)
+Doing it all yourself(全部自己动手)
+===================================
 
 There's a remote chance that the PAL's built-in state machine cannot track
 the complex interactions between the PHY and your network device.  If this is
@@ -558,18 +546,16 @@ use this only to write registers which are not standard, and don't set off
 a renegotiation.
 (MII ioctl。注意，如果你写入 BMCR、BMSR、ADVERTISE 等寄存器，此函数会完全搞乱状态机。最好仅用它写入非标准寄存器，并且不要触发重新协商。)
 
-PHY Device Drivers
-==================
-(PHY 设备驱动程序)
+PHY Device Drivers(PHY 设备驱动程序)
+====================================
 
 With the PHY Abstraction Layer, adding support for new PHYs is
 quite easy. In some cases, no work is required at all! However,
 many PHYs require a little hand-holding to get up-and-running.
 (有了 PHY 抽象层，为新的 PHY 添加支持相当容易。在某些情况下，完全不需要做任何工作！但是，许多 PHY 需要一些悉心照料才能启动并运行。)
 
-Generic PHY driver
-------------------
-(通用 PHY 驱动程序)
+Generic PHY driver(通用 PHY 驱动程序)
+-------------------------------------
 
 If the desired PHY doesn't have any errata, quirks, or special
 features you want to support, then it may be best to not add
@@ -577,9 +563,8 @@ support, and let the PHY Abstraction Layer's Generic PHY Driver
 do all of the work.
 (如果所需的 PHY 没有任何勘误、怪癖或你想支持的特性，那么最好不要添加支持，而让 PHY 抽象层的通用 PHY 驱动程序完成所有工作。)
 
-Writing a PHY driver
---------------------
-(编写 PHY 驱动程序)
+Writing a PHY driver(编写 PHY 驱动程序)
+---------------------------------------
 
 If you do need to write a PHY driver, the first thing to do is
 make sure it can be matched with an appropriate PHY device.
@@ -636,9 +621,8 @@ the Micrel driver in drivers/net/phy/ for an example of how this
 can be implemented.
 (默认情况下，PHY 的 MMD 寄存器访问由 PAL 框架处理，但如果需要，可以由特定的 PHY 驱动程序重写。如果某个 PHY 在 IEEE 将 MMD PHY 寄存器定义标准化之前就已投产发布，就可能出现这种情况。大多数现代 PHY 都能够使用通用 PAL 框架来访问 PHY 的 MMD 寄存器。这种用法的一个例子是在 PAL 中实现的节能以太网 (Energy Efficient Ethernet) 支持。如果 PHY 支持 IEEE 标准访问机制，该支持就使用 PAL 访问 MMD 寄存器以进行 EEE 查询和配置；如果被特定的 PHY 驱动程序重写，则可以使用该 PHY 特定的访问接口。有关如何实现这一点，请参阅 drivers/net/phy/ 中的 Micrel 驱动程序示例。)
 
-Board Fixups
-============
-(板级修正 (Board Fixups))
+Board Fixups(板级修正 (Board Fixups))
+=====================================
 
 Sometimes the specific interaction between the platform and the PHY requires
 special handling.  For instance, to change where the PHY's clock input is,
@@ -667,9 +651,8 @@ The platform code can register the fixup using one of::
  int phy_register_fixup_for_id(const char *phy_id,
 		int (*run)(struct phy_device *));
 
-Standards
-=========
-(标准)
+Standards(标准)
+===============
 
 IEEE Standard 802.3: CSMA/CD Access Method and Physical Layer Specifications, Section Two:
 http://standards.ieee.org/getieee802/download/802.3-2008_section2.pdf

@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===================================
-Cache on Already Mounted Filesystem
-===================================
-
-(在已挂载文件系统上的缓存)
+=============================================================
+Cache on Already Mounted Filesystem(在已挂载文件系统上的缓存)
+=============================================================
 
 .. Contents:
 
@@ -45,9 +43,8 @@ Cache on Already Mounted Filesystem
      (按需读。)
 
 
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 CacheFiles is a caching backend that's meant to use as a cache a directory on
 an already mounted filesystem of a local type (such as Ext3).
@@ -83,9 +80,8 @@ space.
 
 
 
-Requirements
-(要求)
-============
+Requirements(要求)
+==================
 
 The use of CacheFiles and its daemon requires the following features to be
 available in the system and in the cache filesystem:
@@ -111,9 +107,8 @@ filesystems being used as a cache.
 (强烈建议在用作缓存的 Ext3 文件系统上启用 "dir_index" 选项。)
 
 
-Configuration
-(配置)
-=============
+Configuration(配置)
+===================
 
 The cache is configured by a script in /etc/cachefilesd.conf.  These commands
 set up cache ready for use.  The following script commands are available:
@@ -156,9 +151,8 @@ set up cache ready for use.  The following script commands are available:
 	(此掩码也可以通过 sysfs 设置，例如：)
 
 
-Starting the Cache
-(启动缓存)
-==================
+Starting the Cache(启动缓存)
+============================
 
 The cache is started by running the daemon.  The daemon opens the cache device,
 configures the cache and tells it to begin caching.  At that point the cache
@@ -192,9 +186,8 @@ The flags are:
 	(使用替代的配置文件，而不是默认的那个。)
 
 
-Things to Avoid
-(应当避免的事情)
-===============
+Things to Avoid(应当避免的事情)
+===============================
 
 Do not mount other things within the cache as this will cause problems.  The
 kernel module contains its own very cut-down path walking facility that ignores
@@ -222,9 +215,8 @@ permissions to prevent random users being able to access them directly.
 (不要对缓存中的文件执行 chmod。模块以最小权限创建这些东西，以防止任意用户能够直接访问它们。)
 
 
-Cache Culling
-(缓存剔除)
-=============
+Cache Culling(缓存剔除)
+=======================
 
 The cache may need culling occasionally to make space.  This involves
 discarding objects from the cache that have been used less recently than
@@ -272,9 +264,8 @@ their atimes have changed or if the kernel module says it is still using them.
 (用户空间守护进程扫描缓存，以建立一个可剔除对象的表。随后按最近最少使用的顺序剔除这些对象。一旦表中腾出了空间，就会立即开始对缓存的新一轮扫描。如果对象的 atime 已改变，或者内核模块表示它仍在使用该对象，则该对象会被跳过。)
 
 
-Cache Structure
-(缓存结构)
-===============
+Cache Structure(缓存结构)
+=========================
 
 The CacheFiles module will create two directories in the directory it was
 given:
@@ -371,9 +362,8 @@ any file of an incorrect type (such as a FIFO file or a device file).
 (注意，CacheFiles 会从缓存中擦除它不认识的任何文件，以及类型不正确的任何文件(例如 FIFO 文件或设备文件)。)
 
 
-Security Model and SELinux
-(安全模型与 SELinux)
-==========================
+Security Model and SELinux(安全模型与 SELinux)
+==============================================
 
 CacheFiles is implemented to deal properly with the LSM security features of
 the Linux kernel and the SELinux facility.
@@ -493,9 +483,8 @@ in the sources.
 (当 cachefilesd rpm 已安装时可用；另外，该文档也可以在源代码中找到。)
 
 
-A Note on Security
-(关于安全的一点说明)
-==================
+A Note on Security(关于安全的一点说明)
+======================================
 
 CacheFiles makes use of the split security in the task_struct.  It allocates
 its own task_security structure, and redirects current->cred to point to it
@@ -543,9 +532,8 @@ files and directories with another security label.
 (存在这样的 LSM 钩子：允许 SELinux(或 Smack 或其他任何 LSM)拒绝让 CacheFiles 在特定安全标签的上下文中运行的请求，或拒绝用另一个安全标签创建文件和目录。)
 
 
-Statistical Information
-(统计信息)
-=======================
+Statistical Information(统计信息)
+=================================
 
 If FS-Cache is compiled with the following option enabled::
 
@@ -583,9 +571,8 @@ then it will gather certain statistics and display them through a proc file.
      (每一行显示了花费特定时间范围的事件数量。每一步的大小为 1 个 jiffy。JIFS 列指示所覆盖的特定 jiffy 范围，SECS 字段则是等效的秒数。)
 
 
-Debugging
-(调试)
-=========
+Debugging(调试)
+===============
 
 If CONFIG_CACHEFILES_DEBUG is enabled, the CacheFiles facility can have runtime
 debugging enabled by adjusting the value in::
@@ -616,9 +603,8 @@ will turn on all function entry debugging.
 (将会打开所有函数入口调试。)
 
 
-On-demand Read
-(按需读)
-==============
+On-demand Read(按需读)
+======================
 
 When working in its original mode, CacheFiles serves as a local cache for a
 remote networking fs - while in on-demand read mode, CacheFiles can boost the
@@ -636,9 +622,8 @@ the data and writing it into the cache is delegated to a user daemon.
 (应启用 ``CONFIG_CACHEFILES_ONDEMAND`` 以支持按需读模式。)
 
 
-Protocol Communication
-(协议通信)
-----------------------
+Protocol Communication(协议通信)
+--------------------------------
 
 The on-demand read mode uses a simple protocol for communication between kernel
 and user daemon. The protocol can be modeled as::
@@ -691,9 +676,8 @@ where:
 	  (``len`` 表示本请求的总长度，包括消息头和其后的类型特定载荷。)
 
 
-Turning on On-demand Mode
-(开启按需模式)
--------------------------
+Turning on On-demand Mode(开启按需模式)
+---------------------------------------
 
 An optional parameter becomes available to the "bind" command::
 
@@ -707,9 +691,8 @@ mode will be enabled.
 (当 "bind" 命令没有给定参数时，默认为原始模式。当它被给定 "ondemand" 参数时，即 "bind ondemand"，将启用按需读模式。)
 
 
-The OPEN Request
-(OPEN 请求)
-----------------
+The OPEN Request(OPEN 请求)
+---------------------------
 
 When the netfs opens a cache file for the first time, a request with the
 CACHEFILES_OP_OPEN opcode, a.k.a an OPEN request will be sent to the user
@@ -783,9 +766,8 @@ where:
 	  (当 >= 0 时，``cache_size`` 指示缓存文件的大小；当 < 0 时，``cache_size`` 指示用户守护进程遇到的任何错误码。)
 
 
-The CLOSE Request
-(CLOSE 请求)
------------------
+The CLOSE Request(CLOSE 请求)
+-----------------------------
 
 When a cookie withdrawn, a CLOSE request (opcode CACHEFILES_OP_CLOSE) will be
 sent to the user daemon.  This tells the user daemon to close all anonymous fds
@@ -794,9 +776,8 @@ and shouldn't be replied.
 (当某个 cookie 被撤回时，一个 CLOSE 请求(操作码 CACHEFILES_OP_CLOSE)将被发送给用户守护进程。它告诉用户守护进程关闭与给定 object_id 相关联的所有匿名文件描述符。CLOSE 请求没有额外的载荷，也不应回复。)
 
 
-The READ Request
-(READ 请求)
-----------------
+The READ Request(READ 请求)
+---------------------------
 
 When a cache miss is encountered in on-demand read mode, CacheFiles will send a
 READ request (opcode CACHEFILES_OP_READ) to the user daemon. This tells the user

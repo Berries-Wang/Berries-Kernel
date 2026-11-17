@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-======================================
-Texas Instruments CPSW ethernet driver
-======================================
+=========================================================================
+Texas Instruments CPSW ethernet driver(Texas Instruments CPSW 以太网驱动)
+=========================================================================
 
-(Texas Instruments CPSW 以太网驱动)
-
-Multiqueue & CBS & MQPRIO
-(多队列 & CBS & MQPRIO)
-=========================
+Multiqueue & CBS & MQPRIO(多队列 & CBS & MQPRIO)
+================================================
 
 
 The cpsw has 3 CBS shapers for each external ports. This document
@@ -22,9 +19,8 @@ cpsw 驱动的 MQPRIO 和 CBS Qdisc 卸载配置。它潜在地可用于音视�
 The following examples were tested on AM572x EVM and BBB boards.
 (以下示例已在 AM572x EVM 和 BBB 开发板上测试过。)
 
-Test setup
-(测试环境)
-==========
+Test setup(测试环境)
+====================
 
 Under consideration two examples with AM572x EVM running cpsw driver
 in dual_emac mode.
@@ -59,9 +55,8 @@ Several prerequisites:
   (仅测试了 2 个流量类：A 和 B，但已验证可以支持更多，最多允许 4 个，
   但只能为其中 3 个设定速率。)
 
-Test setup for examples
-(示例的测试环境)
-=======================
+Test setup for examples(示例的测试环境)
+=======================================
 
 ::
 
@@ -88,9 +83,8 @@ Test setup for examples
 					+-------------------------------+
 
 
-Example 1: One port tx AVB configuration scheme for target board
-(示例 1：目标板的单端口 tx AVB 配置方案)
-----------------------------------------------------------------
+Example 1: One port tx AVB configuration scheme for target board(示例 1：目标板的单端口 tx AVB 配置方案)
+--------------------------------------------------------------------------------------------------------
 
 (prints and scheme for AM572x evm, applicable for single port boards)
 (AM572x EVM 的打印输出与示意图，适用于单端口开发板)
@@ -332,9 +326,8 @@ Example 1: One port tx AVB configuration scheme for target board
 	net eth0: set FIFO2 bw = 0
 	$ ethtool -L eth0 rx 1 tx 1
 
-Example 2: Two port tx AVB configuration scheme for target board
-(示例 2：目标板的双端口 tx AVB 配置方案)
-----------------------------------------------------------------
+Example 2: Two port tx AVB configuration scheme for target board(示例 2：目标板的双端口 tx AVB 配置方案)
+--------------------------------------------------------------------------------------------------------
 
 (prints and scheme for AM572x evm, for dual emac boards only)
 (AM572x EVM 的打印输出与示意图，仅适用于双 EMAC 开发板)

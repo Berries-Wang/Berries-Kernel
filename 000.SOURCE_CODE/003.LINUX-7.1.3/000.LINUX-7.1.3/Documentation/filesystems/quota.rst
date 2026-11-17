@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===============
-Quota subsystem
-===============
-
-(配额子系统)
+===========================
+Quota subsystem(配额子系统)
+===========================
 
 Quota subsystem allows system administrator to set limits on used space and
 number of used inodes (inode is a filesystem structure which is associated with
@@ -25,9 +23,8 @@ For more details about quota design, see the documentation in quota-tools packag
 (https://sourceforge.net/projects/linuxquota).
 (有关配额设计的更多细节，请参见 quota-tools 软件包中的文档(https://sourceforge.net/projects/linuxquota)。)
 
-Quota netlink interface
-(配额 netlink 接口)
-=======================
+Quota netlink interface(配额 netlink 接口)
+==========================================
 When user exceeds a softlimit, runs out of grace time or reaches hardlimit,
 quota subsystem traditionally printed a message to the controlling terminal of
 the process which caused the excess. This method has the disadvantage that

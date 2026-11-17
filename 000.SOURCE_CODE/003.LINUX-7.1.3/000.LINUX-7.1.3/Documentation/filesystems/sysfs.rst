@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=====================================================
-sysfs - _The_ filesystem for exporting kernel objects
-=====================================================
-
-(sysfs - 用于导出内核对象的_首要_文件系统)
+===============================================================================================
+sysfs - _The_ filesystem for exporting kernel objects(sysfs - 用于导出内核对象的_首要_文件系统)
+===============================================================================================
 
 Patrick Mochel	<mochel@osdl.org>
 (作者: Patrick Mochel <mochel@osdl.org>)
@@ -18,9 +16,8 @@ Mike Murphy <mamurph@cs.clemson.edu>
 (原始: 2003年1月10日)
 
 
-What it is
-(它是什么)
-~~~~~~~~~~
+What it is(它是什么)
+~~~~~~~~~~~~~~~~~~~~
 
 sysfs is a RAM-based filesystem initially based on ramfs. It provides
 a means to export kernel data structures, their attributes, and the
@@ -33,9 +30,8 @@ interface.
 (sysfs 与 kobject 基础设施内在地绑定在一起。有关 kobject 接口的更多信息，请阅读 Documentation/core-api/kobject.rst。)
 
 
-Using sysfs
-(使用 sysfs)
-~~~~~~~~~~~
+Using sysfs(使用 sysfs)
+~~~~~~~~~~~~~~~~~~~~~~~
 
 sysfs is always compiled in if CONFIG_SYSFS is defined. You can access
 it by doing::
@@ -44,9 +40,8 @@ it by doing::
     mount -t sysfs sysfs /sys
 
 
-Directory Creation
-(目录创建)
-~~~~~~~~~~~~~~~~~~
+Directory Creation(目录创建)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For every kobject that is registered with the system, a directory is
 created for it in sysfs. That directory is created as a subdirectory
@@ -65,9 +60,8 @@ only modified directly by the function sysfs_schedule_callback().
 (sysfs 在与目录相关联的 kernfs_node 对象中内部存储一个指向实现该目录的 kobject 的指针。过去，每当文件被打开或关闭时，sysfs 都会使用这个 kobject 指针直接对 kobject 进行引用计数。在当前的 sysfs 实现中，kobject 引用计数仅由函数 sysfs_schedule_callback() 直接修改。)
 
 
-Attributes
-(属性)
-~~~~~~~~~~
+Attributes(属性)
+~~~~~~~~~~~~~~~~
 
 Attributes can be exported for kobjects in the form of regular files in
 the filesystem. sysfs forwards file I/O operations to methods defined
@@ -180,9 +174,8 @@ __ATTR_NULL:
                  indicator (see: kernel/workqueue.c)
 	         (将 name 设置为 NULL，并用作列表结束指示符(参见: kernel/workqueue.c))
 
-Subsystem-Specific Callbacks
-(子系统特定的回调)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Subsystem-Specific Callbacks(子系统特定的回调)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When a subsystem defines a new attribute type, it must implement a
 set of sysfs operations for forwarding read and write calls to the
@@ -229,9 +222,8 @@ To illustrate::
 
 
 
-Reading/Writing Attribute Data
-(读/写属性数据)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Reading/Writing Attribute Data(读/写属性数据)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To read or write attributes, show() or store() methods must be
 specified when declaring the attribute. The method types should be as
@@ -337,9 +329,8 @@ name for a device.)
 ((请注意，实际的实现不允许用户空间为设备设置名称。))
 
 
-Top Level Directory Layout
-(顶层目录布局)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Top Level Directory Layout(顶层目录布局)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The sysfs directory arrangement exposes the relationship of kernel
 data structures.
@@ -425,17 +416,15 @@ sleep states, suspend/resume capabilities, and policies.
 (power/ 包含电源管理子系统信息，包括睡眠状态、挂起/恢复能力和策略。)
 
 
-Current Interfaces
-(当前接口)
-~~~~~~~~~~~~~~~~~~
+Current Interfaces(当前接口)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The following interface layers currently exist in sysfs.
 (以下接口层目前存在于 sysfs 中。)
 
 
-devices (include/linux/device.h)
-(devices (include/linux/device.h))
---------------------------------
+devices (include/linux/device.h)(devices (include/linux/device.h))
+------------------------------------------------------------------
 Structure::
 (结构：)
 
@@ -459,9 +448,8 @@ Creation/Removal::
     void device_remove_file(struct device *dev, const struct device_attribute * attr);
 
 
-bus drivers (include/linux/device.h)
-(总线驱动 (include/linux/device.h))
-------------------------------------
+bus drivers (include/linux/device.h)(总线驱动 (include/linux/device.h))
+-----------------------------------------------------------------------
 Structure::
 (结构：)
 
@@ -485,9 +473,8 @@ Creation/Removal::
     void bus_remove_file(struct bus_type *, struct bus_attribute *);
 
 
-device drivers (include/linux/device.h)
-(设备驱动 (include/linux/device.h))
----------------------------------------
+device drivers (include/linux/device.h)(设备驱动 (include/linux/device.h))
+--------------------------------------------------------------------------
 
 Structure::
 (结构：)
@@ -512,9 +499,8 @@ Creation/Removal::
     void driver_remove_file(struct device_driver *, const struct driver_attribute *);
 
 
-Documentation
-(文档)
-~~~~~~~~~~~~~
+Documentation(文档)
+~~~~~~~~~~~~~~~~~~~
 
 The sysfs directory structure and the attributes in each directory define an
 ABI between the kernel and user space. As for any ABI, it is important that

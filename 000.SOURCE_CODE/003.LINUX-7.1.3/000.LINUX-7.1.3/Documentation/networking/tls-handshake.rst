@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=======================
-In-Kernel TLS Handshake
-=======================
+========================================
+In-Kernel TLS Handshake(内核内 TLS 握手)
+========================================
 
-(内核内 TLS 握手)
-
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 Transport Layer Security (TLS) is an Upper Layer Protocol (ULP) that runs
 over TCP. TLS provides end-to-end data integrity and confidentiality in
@@ -28,9 +25,8 @@ aware of how the handshake gets done.
 (在内核中提供握手服务有多种可能的方式。这里描述的 API 旨在隐藏这些实现的细节，使内核内的 TLS 消费者无需关心握手是如何完成的。)
 
 
-User handshake agent
-(用户态握手代理)
-====================
+User handshake agent(用户态握手代理)
+====================================
 
 As of this writing, there is no TLS handshake implementation in the
 Linux kernel. To provide a handshake service, a handshake agent
@@ -53,9 +49,8 @@ kernel via a second netlink operation.
 手代理通过第二次 netlink 操作将该套接字交还给内核。)
 
 
-Kernel Handshake API
-(内核握手 API)
-====================
+Kernel Handshake API(内核握手 API)
+==================================
 
 A kernel TLS consumer initiates a client-side TLS handshake on an open
 socket by invoking one of the tls_client_hello() functions. First, it
@@ -197,9 +192,8 @@ completion callback has already been invoked.
 false，则说明消费者的完成回调已经被调用过了。)
 
 
-Handshake Completion
-(握手完成)
-====================
+Handshake Completion(握手完成)
+==============================
 
 When the handshake agent has completed processing, it notifies the
 kernel that the socket may be used by the consumer again. At this point,
@@ -261,9 +255,8 @@ handshake failed.
 (最佳实践是：如果握手失败，立即关闭并销毁该套接字。)
 
 
-Other considerations
-(其他注意事项)
---------------------
+Other considerations(其他注意事项)
+----------------------------------
 
 While a handshake is under way, the kernel consumer must alter the
 socket's sk_data_ready callback function to ignore all incoming data.

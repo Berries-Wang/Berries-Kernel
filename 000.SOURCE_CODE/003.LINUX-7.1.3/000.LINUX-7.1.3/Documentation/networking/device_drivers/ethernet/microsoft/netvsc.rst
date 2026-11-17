@@ -1,26 +1,21 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-======================
-Hyper-V network driver
-======================
+========================================
+Hyper-V network driver(Hyper-V 网络驱动)
+========================================
 
-(Hyper-V 网络驱动)
-
-Compatibility
-(兼容性)
-=============
+Compatibility(兼容性)
+=====================
 
 This driver is compatible with Windows Server 2012 R2, 2016 and
 Windows 10.
 (此驱动兼容 Windows Server 2012 R2、2016 和 Windows 10。)
 
-Features
-(特性)
-========
+Features(特性)
+==============
 
-Checksum offload
-(校验和卸载)
-----------------
+Checksum offload(校验和卸载)
+----------------------------
 
   The netvsc driver supports checksum offload as long as the
   Hyper-V host version does. Windows Server 2016 and Azure
@@ -30,9 +25,8 @@ Checksum offload
   Server 2016 和 Azure 支持 IPv4 与 IPv6 的 TCP 和 UDP 校验和卸载。
   Windows Server 2012 只支持 TCP 校验和卸载。)
 
-Receive Side Scaling
-(接收侧扩展)
---------------------
+Receive Side Scaling(接收侧扩展)
+--------------------------------
 
   Hyper-V supports receive side scaling. For TCP & UDP, packets can
   be distributed among available queues based on IP address and port
@@ -71,9 +65,8 @@ Receive Side Scaling
 
 	ethtool -n eth0 rx-flow-hash udp4
 
-Generic Receive Offload, aka GRO
-(通用接收卸载，即 GRO)
---------------------------------
+Generic Receive Offload, aka GRO(通用接收卸载，即 GRO)
+------------------------------------------------------
 
   The driver supports GRO and it is enabled by default. GRO coalesces
   like packets and significantly reduces CPU usage under heavy Rx
@@ -81,9 +74,8 @@ Generic Receive Offload, aka GRO
   (驱动支持 GRO 且默认启用。GRO 会合并同类数据包，在高接收负载下显著
   降低 CPU 占用。)
 
-Large Receive Offload (LRO), or Receive Side Coalescing (RSC)
-(大接收卸载 (LRO)，即接收侧合并 (RSC))
--------------------------------------------------------------
+Large Receive Offload (LRO), or Receive Side Coalescing (RSC)(大接收卸载 (LRO)，即接收侧合并 (RSC))
+---------------------------------------------------------------------------------------------------
 
   The driver supports LRO/RSC in the vSwitch feature. It reduces the per packet
   processing overhead by coalescing multiple TCP segments when possible. The
@@ -96,9 +88,8 @@ Large Receive Offload (LRO), or Receive Side Coalescing (RSC)
 	ethtool -K eth0 lro on
 	ethtool -K eth0 lro off
 
-SR-IOV support
-(SR-IOV 支持)
---------------
+SR-IOV support(SR-IOV 支持)
+---------------------------
 
   Hyper-V supports SR-IOV as a hardware acceleration option. If SR-IOV
   is enabled in both the vSwitch and the guest configuration, then the
@@ -122,9 +113,8 @@ SR-IOV support
   netvsc 设备；在大多数情况下不应直接访问从属设备。例外情况是：如果需要
   特殊的排队规则或流导向，这些应直接应用到 VF 从属设备。)
 
-Receive Buffer
-(接收缓冲区)
---------------
+Receive Buffer(接收缓冲区)
+--------------------------
 
   Packets are received into a receive area which is created when device
   is probed. The receive area is broken into MTU sized chunks and each may
@@ -149,9 +139,8 @@ Receive Buffer
   LSO 数据包，驱动会向主机提供指向 SKB 中数据的指针。这试图在数据复制
   开销与重新映射 VM 内存以使主机可访问所造成的影响之间取得平衡。)
 
-XDP support
-(XDP 支持)
------------
+XDP support(XDP 支持)
+---------------------
 
   XDP (eXpress Data Path) is a feature that runs eBPF bytecode at the early
   stage when packets arrive at a NIC card. The goal is to increase performance

@@ -1,12 +1,9 @@
-===============================
-IEEE 802.15.4 Developer's Guide
-===============================
+=========================================================
+IEEE 802.15.4 Developer's Guide(IEEE 802.15.4 开发者指南)
+=========================================================
 
-(IEEE 802.15.4 开发者指南)
-
-Introduction
-(简介)
-============
+Introduction(简介)
+==================
 
 The IEEE 802.15.4 working group focuses on standardization of the bottom
 two layers: Medium Access Control (MAC) and Physical access (PHY). And there
@@ -35,9 +32,8 @@ The stack is composed of three main parts:
 - PHY - represents device drivers
   (PHY - 代表设备驱动)
 
-Socket API
-(套接字)
-==========
+Socket API(套接字)
+==================
 
 ::
 
@@ -49,9 +45,8 @@ in the userspace package (see either https://linux-wpan.org/wpan-tools.html
 or the git tree at https://github.com/linux-wpan/wpan-tools).
 (地址族、套接字地址等定义在 include/net/af_ieee802154.h 头文件中，或定义在用户态软件包的特殊头文件中（参见 https://linux-wpan.org/wpan-tools.html 或 https://github.com/linux-wpan/wpan-tools 处的 git 树）。)
 
-6LoWPAN Linux implementation
-(6LoWPAN 的 Linux 实现)
-============================
+6LoWPAN Linux implementation(6LoWPAN 的 Linux 实现)
+===================================================
 
 The IEEE 802.15.4 standard specifies an MTU of 127 bytes, yielding about 80
 octets of actual MAC payload once security is turned on, on a wireless link
@@ -85,9 +80,8 @@ To setup a 6LoWPAN interface you need:
 # ip link add link wpan0 name lowpan0 type lowpan
 3. 启用 'lowpan0' 接口。)
 
-Drivers
-(驱动)
-=======
+Drivers(驱动)
+=============
 
 Like with WiFi, there are several types of devices implementing IEEE 802.15.4.
 1) 'HardMAC'. The MAC layer is implemented in the device itself, the device
@@ -141,18 +135,16 @@ See header include/net/mac802154.h and several drivers in
 drivers/net/ieee802154/.
 (参见头文件 include/net/mac802154.h 以及 drivers/net/ieee802154/ 下的若干驱动。)
 
-Fake drivers
-(模拟驱动)
-------------
+Fake drivers(模拟驱动)
+----------------------
 
 In addition there is a driver available which simulates a real device with
 SoftMAC (fakelb - IEEE 802.15.4 loopback driver) interface. This option
 provides a possibility to test and debug the stack without usage of real hardware.
 (此外还有一个可用的驱动，它用 SoftMAC（fakelb - IEEE 802.15.4 环回驱动）接口模拟真实设备。该选项使你可以在不使用真实硬件的情况下测试和调试协议栈。)
 
-Device drivers API
-(设备驱动 API)
-==================
+Device drivers API(设备驱动 API)
+================================
 
 The include/net/mac802154.h defines following functions:
 (include/net/mac802154.h 定义了以下函数：)

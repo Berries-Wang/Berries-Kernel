@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-================
-Devlink Resource
-================
-
-(Devlink 资源)
+==============================
+Devlink Resource(Devlink 资源)
+==============================
 
 ``devlink`` provides the ability for drivers to register resources, which
 can allow administrators to see the device restrictions for a given
@@ -22,9 +20,8 @@ rules for a given device.
 (例如，``netdevsim`` 驱动程序启用 ``/IPv4/fib`` 和 ``/IPv4/fib-rules`` 作为资源，
 以限制给定设备的 IPv4 FIB 表项和规则的数量。)
 
-Resource Ids
-(资源 ID)
-============
+Resource Ids(资源 ID)
+=====================
 
 Each resource is represented by an id, and contains information about its
 current size and related sub resources. To access a sub resource, you
@@ -34,9 +31,8 @@ the ``fib`` sub-resource under the ``IPv4`` resource.
 需要指定资源的路径。例如，``/IPv4/fib`` 是 ``IPv4`` 资源之下 ``fib`` 子资源的
 id。)
 
-Generic Resources
-(通用资源)
-=================
+Generic Resources(通用资源)
+===========================
 
 Generic resources are used to describe resources that can be shared by multiple
 device drivers and their description must be added to the following table:
@@ -51,9 +47,8 @@ device drivers and their description must be added to the following table:
      - A limited capacity of physical ports that the switch ASIC can support
        (交换 ASIC 可以支持的物理端口数量上限)
 
-example usage
-(使用示例)
--------------
+example usage(使用示例)
+-----------------------
 
 The resources exposed by the driver can be observed, for example:
 (驱动程序暴露的资源可以查看，例如：)
@@ -95,9 +90,8 @@ Note that changes in resource size may require a device reload to properly
 take effect.
 (注意，资源大小的更改可能需要重新加载设备才能正确生效。)
 
-Port-level Resources and Full Dump
-(端口级资源与完整转储)
-==================================
+Port-level Resources and Full Dump(端口级资源与完整转储)
+========================================================
 
 In addition to device-level resources, ``devlink`` also supports port-level
 resources. These resources are associated with a specific devlink port rather
@@ -135,9 +129,8 @@ To show resources for a specific port:
     pci/0000:03:00.0/196608:
       name max_SFs size 128 unit entry dpipe_tables none
 
-Resource Scope Filtering
-(资源范围过滤)
-========================
+Resource Scope Filtering(资源范围过滤)
+======================================
 
 When dumping resources for all devices, ``devlink resource show`` accepts
 an optional ``scope`` parameter to restrict the response to device-level

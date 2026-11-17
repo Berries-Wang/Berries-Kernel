@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===============
-Shared Subtrees
-===============
-
-(共享子树)
+=========================
+Shared Subtrees(共享子树)
+=========================
 
 .. Contents:
 	1) Overview
@@ -17,9 +15,8 @@ Shared Subtrees
 	8) Implementation
 
 
-1) Overview
-(1) 概述)
------------
+1) Overview(1) 概述)
+--------------------
 
 Consider the following situation:
 (考虑以下情况：)
@@ -33,9 +30,8 @@ It provides the necessary building blocks for features like per-user-namespace
 and versioned filesystem.
 (它为诸如 per-user-namespace(每用户命名空间)和 versioned filesystem(版本化文件系统)之类的特性提供了必要的构建块。)
 
-2) Features
-(2) 特性)
------------
+2) Features(2) 特性)
+--------------------
 
 Shared subtree provides four different flavors of mounts; struct vfsmount to be
 precise:
@@ -180,9 +176,8 @@ d) An **unbindable mount** is, as the name suggests, an unbindable private
    (绑定一个不可绑定挂载是无效操作。)
 
 
-3) Setting mount states
-(3) 设置挂载状态)
------------------------
+3) Setting mount states(3) 设置挂载状态)
+----------------------------------------
 
 The mount command (util-linux package) can be used to set mount
 states::
@@ -194,9 +189,8 @@ states::
     mount --make-unbindable mountpoint
 
 
-4) Use cases
-(4) 用例)
-------------
+4) Use cases(4) 用例)
+---------------------
 
 A) A process wants to clone its own namespace, but still wants to
    access the CD that got mounted recently.
@@ -292,9 +286,8 @@ D)  Versioned files
     inode.
     (用户可以通过访问 /view/v3/usr/fs/namespace.c 来请求文件 /usr/fs/namespace.c 的 v3 版本。底层的版本化文件系统随后可以辨别出正在请求的是文件系统的 v3 版本，并返回相应的 inode。)
 
-5) Detailed semantics
-(5) 详细语义)
----------------------
+5) Detailed semantics(5) 详细语义)
+----------------------------------
 The section below explains the detailed semantics of
 bind, rbind, move, mount, umount and clone-namespace operations.
 (下面这一节解释 bind、rbind、move、mount、umount 和 clone-namespace 操作的详细语义。)
@@ -748,9 +741,8 @@ g) Clone Namespace
    (如果 'A' 是不可绑定挂载，那么 'B' 也是不可绑定挂载。)
 
 
-6) Quiz
-(6) 测验)
--------
+6) Quiz(6) 测验)
+----------------
 
 A. What is the result of the following command sequence?
    (以下命令序列的结果是什么？)
@@ -822,9 +814,8 @@ C. What is the result of the following command sequence?
    /mnt/1/test be?
    (/mnt/1/test 的内容会是什么？)
 
-7) FAQ
-(7) 常见问题)
-------
+7) FAQ(7) 常见问题)
+-------------------
 
 1. Why is bind mount needed? How is it different from symbolic links?
    (为什么需要 bind 挂载？它与符号链接有何不同？)
@@ -1022,9 +1013,8 @@ C. What is the result of the following command sequence?
                               /  \     / \    /  \
                              tmp  usr tmp usr tmp usr
 
-8) Implementation
-(8) 实现)
------------------
+8) Implementation(8) 实现)
+--------------------------
 
 A) Datastructure
 (数据结构)

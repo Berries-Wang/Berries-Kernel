@@ -1,19 +1,16 @@
 .. SPDX-License-Identifier: GPL-2.0+
 
-===========================================================================
-Linux Base Driver for the Intel(R) Ethernet 10 Gigabit PCI Express Adapters
-===========================================================================
-
-(Intel(R) Ethernet 10 Gigabit PCI Express 适配器的 Linux 基础驱动程序)
+=================================================================================================================================================
+Linux Base Driver for the Intel(R) Ethernet 10 Gigabit PCI Express Adapters(Intel(R) Ethernet 10 Gigabit PCI Express 适配器的 Linux 基础驱动程序)
+=================================================================================================================================================
 
 Intel 10 Gigabit Linux driver.
 (Intel 10 Gigabit Linux 驱动程序。)
 Copyright(c) 1999-2018 Intel Corporation.
 (版权所有 (c) 1999-2018 Intel Corporation。)
 
-Contents
-========
-(目录)
+Contents(目录)
+==============
 
 - Identifying Your Adapter
   (识别你的适配器)
@@ -26,9 +23,8 @@ Contents
 - Support
   (支持)
 
-Identifying Your Adapter
-(识别你的适配器)
-========================
+Identifying Your Adapter(识别你的适配器)
+========================================
 
 The driver is compatible with devices based on the following:
 (该驱动程序兼容基于以下控制器的设备：)
@@ -46,13 +42,11 @@ network drivers, refer to the Intel Support website:
 https://www.intel.com/support
 (有关如何识别你的适配器以及获取最新 Intel 网络驱动程序的信息，请参阅 Intel 支持网站：https://www.intel.com/support)
 
-SFP+ Devices with Pluggable Optics
-(带可插拔光模块的 SFP+ 设备)
-----------------------------------
+SFP+ Devices with Pluggable Optics(带可插拔光模块的 SFP+ 设备)
+--------------------------------------------------------------
 
-82599-BASED ADAPTERS
-(基于 82599 的适配器)
-~~~~~~~~~~~~~~~~~~~~
+82599-BASED ADAPTERS(基于 82599 的适配器)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 NOTES:
 (注意事项：)
 - If your 82599-based Intel(R) Network Adapter came with Intel optics or is an
@@ -116,9 +110,8 @@ testing. Not all modules are applicable to all devices.
 cables that comply with SFF-8431 v4.1 and SFF-8472 v10.4 specifications.
 (基于 82599 的适配器支持所有符合 SFF-8431 v4.1 和 SFF-8472 v10.4 规范的无源及有源限距直连电缆。)
 
-Laser turns off for SFP+ when ifconfig ethX down
-(ifconfig ethX down 时 SFP+ 的激光器会关闭)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Laser turns off for SFP+ when ifconfig ethX down(ifconfig ethX down 时 SFP+ 的激光器会关闭)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 "ifconfig ethX down" turns off the laser for 82599-based SFP+ fiber adapters.
 "ifconfig ethX up" turns on the laser.
 Alternatively, you can use "ip link set [down/up] dev ethX" to turn the
@@ -126,9 +119,8 @@ laser off and on.
 ("ifconfig ethX down" 会关闭基于 82599 的 SFP+ 光纤适配器上的激光器。"ifconfig ethX up" 会打开激光器。或者，你也可以使用 "ip link set [down/up] dev ethX" 来关闭和打开激光器。)
 
 
-82599-based QSFP+ Adapters
-(基于 82599 的 QSFP+ 适配器)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+82599-based QSFP+ Adapters(基于 82599 的 QSFP+ 适配器)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 NOTES:
 (注意事项：)
 - If your 82599-based Intel(R) Network Adapter came with Intel optics, it only
@@ -157,9 +149,8 @@ and direct attach cables listed below.
 direct attach cables that comply with SFF-8436 v4.1 specifications.
 (基于 82599 的 QSFP+ 适配器支持所有符合 SFF-8436 v4.1 规范的无源及有源限距 QSFP+ 直连电缆。)
 
-82598-BASED ADAPTERS
-(基于 82598 的适配器)
-~~~~~~~~~~~~~~~~~~~~
+82598-BASED ADAPTERS(基于 82598 的适配器)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 NOTES:
 (注意事项：)
 - Intel(r) Ethernet Network Adapters that support removable optical modules
@@ -212,9 +203,8 @@ WARRANTY, RELATING TO SALE AND/OR USE OF SUCH THIRD PARTY PRODUCTS OR
 SELECTION OF VENDOR BY CUSTOMERS.
 (上文提到的第三方光模块和电缆的列出仅是为了强调第三方规范及潜在的兼容性，并非 Intel 对任何第三方产品的推荐、认可或赞助。Intel 不为任何第三方制造的产品背书或推广，提供第三方信息仅是为了分享符合上述规范的某些光模块和电缆的相关信息。可能还存在其他生产或供应具有相似或相同描述的光模块和电缆的制造商或供应商。客户在从其自行选择的任何第三方购买光模块和电缆时，必须自行审慎判断并尽到注意义务。客户应自行负责评估产品和/或设备的适用性，并自行负责选择购买任何产品的供应商。上文提到的光模块和电缆不享受 Intel 的保修或支持。对于此类第三方产品的销售和/或使用或客户对供应商的选择，Intel 不承担任何责任，并声明不作出任何明示或默示的保证。)
 
-Command Line Parameters
-(命令行参数)
-=======================
+Command Line Parameters(命令行参数)
+===================================
 
 max_vfs
 -------
@@ -339,13 +329,12 @@ logs.
 (此参数用于调整系统日志中显示的调试消息的级别。)
 
 
-Additional Features and Configurations
-(附加功能与配置)
-======================================
+Additional Features and Configurations(附加功能与配置)
+======================================================
 
-Flow Control
-------------
-(流控制)
+Flow Control(流控制)
+--------------------
+
 Ethernet Flow Control (IEEE 802.3x) can be configured with ethtool to enable
 receiving and transmitting pause frames for ixgbe. When transmit is enabled,
 pause frames are generated when the receive packet buffer crosses a predefined
@@ -433,9 +422,9 @@ To see the list of filters currently present::
 
   # ethtool <-u|-n> ethX
 
-Sideband Perfect Filters
-------------------------
-(带外完美过滤器 (Sideband Perfect Filters))
+Sideband Perfect Filters(带外完美过滤器 (Sideband Perfect Filters))
+-------------------------------------------------------------------
+
 Sideband Perfect Filters are used to direct traffic that matches specified
 characteristics. They are enabled through ethtool's ntuple interface. To add a
 new filter use the following command::
@@ -514,9 +503,9 @@ route traffic that otherwise would not have been sent to the specified Virtual
 Function.
 (注意，这些过滤器不会破坏内部路由规则，也不会路由原本不会发送到指定虚拟函数的流量。)
 
-Jumbo Frames
-------------
-(巨型帧)
+Jumbo Frames(巨型帧)
+--------------------
+
 Jumbo Frames support is enabled by changing the Maximum Transmission Unit (MTU)
 to a value larger than the default value of 1500.
 (将最大传输单元 (MTU) 更改为大于默认值 1500 的数值，即可启用巨型帧支持。)
@@ -554,9 +543,9 @@ a virtual function (VF), jumbo frames must first be enabled in the physical
 function (PF). The VF MTU setting cannot be larger than the PF MTU.
 (注意：对于基于 82599 的网络连接，如果要在虚拟函数 (VF) 中启用巨型帧，必须先在物理函数 (PF) 中启用巨型帧。VF 的 MTU 设置不能大于 PF 的 MTU。)
 
-NBASE-T Support
----------------
-(NBASE-T 支持)
+NBASE-T Support(NBASE-T 支持)
+-----------------------------
+
 The ixgbe driver supports NBASE-T on some devices. However, the advertisement
 of NBASE-T speeds is suppressed by default, to accommodate broken network
 switches which cannot cope with advertised NBASE-T speeds. Use the ethtool
@@ -573,9 +562,9 @@ NBASE-T support, e.g.::
   iface eth? inet dhcp
        pre-up ethtool -s eth? advertise 0x1800000001028 || true
 
-Generic Receive Offload, aka GRO
---------------------------------
-(通用接收卸载 (GRO))
+Generic Receive Offload, aka GRO(通用接收卸载 (GRO))
+----------------------------------------------------
+
 The driver supports the in-kernel software implementation of GRO. GRO has
 shown that by coalescing Rx traffic into larger chunks of data, CPU
 utilization can be significantly reduced when under large Rx load. GRO is an
@@ -584,9 +573,9 @@ other protocols besides TCP. It's also safe to use with configurations that
 are problematic for LRO, namely bridging and iSCSI.
 (驱动程序支持内核内的 GRO 软件实现。GRO 表明，通过将 Rx 流量合并成更大的数据块，在高 Rx 负载下可以显著降低 CPU 利用率。GRO 是先前使用的 LRO 接口的演进版本。GRO 能够合并 TCP 以外的其他协议。对于对 LRO 有问题的配置 (即网桥和 iSCSI)，使用 GRO 也是安全的。)
 
-Data Center Bridging (DCB)
---------------------------
-(数据中心桥接 (DCB))
+Data Center Bridging (DCB)(数据中心桥接 (DCB))
+----------------------------------------------
+
 NOTE:
 (注意：)
 The kernel assumes that TC0 is available, and will disable Priority Flow
@@ -631,9 +620,9 @@ to http://www.open-fcoe.org/ for FCoE project information and contact
 ixgbe-eedc@lists.sourceforge.net for DCB information.
 (ixgbe 驱动程序支持以太网光纤通道 (FCoE) 和数据中心桥接 (DCB)。此代码对常规驱动程序操作没有默认影响。DCB 和 FCoE 的配置不在本 README 的讨论范围内。FCoE 项目信息请参阅 http://www.open-fcoe.org/ ，DCB 信息请联系 ixgbe-eedc@lists.sourceforge.net。)
 
-MAC and VLAN anti-spoofing feature
-----------------------------------
-(MAC 和 VLAN 防欺骗功能)
+MAC and VLAN anti-spoofing feature(MAC 和 VLAN 防欺骗功能)
+----------------------------------------------------------
+
 When a malicious driver attempts to send a spoofed packet, it is dropped by the
 hardware and not transmitted.
 (当恶意驱动程序尝试发送伪造的数据包时，硬件会丢弃该数据包，不将其发送出去。)
@@ -651,9 +640,9 @@ NOTE: This feature can be disabled for a specific Virtual Function (VF)::
 
   ip link set <pf dev> vf <vf id> spoofchk {off|on}
 
-IPsec Offload
--------------
-(IPsec 卸载)
+IPsec Offload(IPsec 卸载)
+-------------------------
+
 The ixgbe driver supports IPsec Hardware Offload.  When creating Security
 Associations with "ip xfrm ..." the 'offload' tag option can be used to
 register the IPsec SA with the driver in order to get higher throughput in
@@ -668,22 +657,21 @@ The offload is also supported for ixgbe's VFs, but the VF must be set as
   ip link set eth<x> vf <y> trust on
 
 
-Known Issues/Troubleshooting
-============================
-(已知问题/故障排除)
+Known Issues/Troubleshooting(已知问题/故障排除)
+===============================================
 
-Enabling SR-IOV in a 64-bit Microsoft Windows Server 2012/R2 guest OS
----------------------------------------------------------------------
-(在 64 位 Microsoft Windows Server 2012/R2 客户机操作系统中启用 SR-IOV)
+Enabling SR-IOV in a 64-bit Microsoft Windows Server 2012/R2 guest OS(在 64 位 Microsoft Windows Server 2012/R2 客户机操作系统中启用 SR-IOV)
+--------------------------------------------------------------------------------------------------------------------------------------------
+
 Linux KVM Hypervisor/VMM supports direct assignment of a PCIe device to a VM.
 This includes traditional PCIe devices, as well as SR-IOV-capable devices based
 on the Intel Ethernet Controller XL710.
 (Linux KVM 虚拟机管理程序/VMM 支持将 PCIe 设备直接分配给虚拟机。这包括传统 PCIe 设备，以及基于 Intel Ethernet Controller XL710 的具备 SR-IOV 能力的设备。)
 
 
-Support
-=======
-(支持)
+Support(支持)
+=============
+
 For general information, go to the Intel support website at:
 https://www.intel.com/support/
 (一般信息请访问 Intel 支持网站：https://www.intel.com/support/)

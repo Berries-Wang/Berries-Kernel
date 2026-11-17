@@ -4,15 +4,12 @@
 .. sigma star gmbh
 .. 2018
 
-============================
-UBIFS Authentication Support
-============================
+============================================
+UBIFS Authentication Support(UBIFS 认证支持)
+============================================
 
-(UBIFS 认证支持)
-
-Introduction
-(简介)
-============
+Introduction(简介)
+==================
 
 UBIFS utilizes the fscrypt framework to provide confidentiality for file
 contents and file names. This prevents attacks where an attacker is able to
@@ -47,9 +44,8 @@ be possible to use UBIFS authentication without using encryption.
 (本文档描述了一种为 UBIFS 获得文件内容_和_完整元数据认证的方法。由于 UBIFS 使用 fscrypt 进行文件内容和文件名加密，认证系统可以绑定到 fscrypt 中，从而可以利用密钥派生等现有特性。不过，也应该可以在不使用加密的情况下使用 UBIFS 认证。)
 
 
-MTD, UBI & UBIFS
-(MTD、UBI 与 UBIFS)
-----------------
+MTD, UBI & UBIFS(MTD、UBI 与 UBIFS)
+-----------------------------------
 
 On Linux, the MTD (Memory Technology Devices) subsystem provides a uniform
 interface to access raw flash devices. One of the more prominent subsystems that
@@ -108,9 +104,8 @@ persisted onto the flash directly. More details on UBIFS can also be found in
 (在本节的剩余部分，我们将更详细地介绍片上的 UBIFS 数据结构。TNC 在此不太重要，因为它从不直接持久化到闪存上。有关 UBIFS 的更多细节还可参见 [UBIFS-WP]。)
 
 
-UBIFS Index & Tree Node Cache
-(UBIFS 索引与树节点缓存)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+UBIFS Index & Tree Node Cache(UBIFS 索引与树节点缓存)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Basic on-flash UBIFS entities are called *nodes*. UBIFS knows different types
 of nodes. Eg. data nodes (``struct ubifs_data_node``) which store chunks of file
@@ -147,9 +142,8 @@ marked as dirty are written to the flash to update the persisted index.
 (TNC 是片上索引在内存中的表示。它为每个节点包含一些额外的、不会被持久化的运行时属性。其中之一是脏标志，它标记下次将索引写入闪存时需要持久化的节点。TNC 充当回写缓存，片上索引的所有修改都通过 TNC 完成。与其他缓存一样，TNC 不必将整个索引镜像到内存中，而是在需要时从闪存读取其中的一部分。*提交* (commit)是 UBIFS 更新片上文件系统结构(如索引)的操作。每次提交时，被标记为脏的 TNC 节点会被写入闪存，以更新持久化的索引。)
 
 
-Journal
-(日志)
-~~~~~~~
+Journal(日志)
+~~~~~~~~~~~~~
 
 To avoid wearing out the flash, the index is only persisted (*committed*) when
 certain conditions are met (eg. ``fsync(2)``). The journal is used to record
@@ -208,9 +202,8 @@ for every other LEB will directly cause UBIFS to fail the mount operation.
                           containing their buds
 
 
-LEB Property Tree/Table
-(LEB 属性树/表)
-~~~~~~~~~~~~~~~~~~~~~~~
+LEB Property Tree/Table(LEB 属性树/表)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The LEB property tree is used to store per-LEB information. This includes the
 LEB type and amount of free and *dirty* (old, obsolete content) space [1]_ on
@@ -231,18 +224,16 @@ commit. Thus, saving the LPT is an atomic operation.
    but can't be overwritten without erasing the full LEB.
 
 
-UBIFS Authentication
-(UBIFS 认证)
-====================
+UBIFS Authentication(UBIFS 认证)
+================================
 
 This chapter introduces UBIFS authentication which enables UBIFS to verify
 the authenticity and integrity of metadata and file contents stored on flash.
 (本章介绍 UBIFS 认证，它使 UBIFS 能够验证存储在闪存上的元数据和文件内容的真实性与完整性。)
 
 
-Threat Model
-(威胁模型)
-------------
+Threat Model(威胁模型)
+----------------------
 
 UBIFS authentication enables detection of offline data modification. While it
 does not prevent it, it enables (trusted) code to check the integrity and
@@ -272,9 +263,8 @@ ensure that only trusted code is executed on a device.
 (UBIFS 认证不覆盖攻击者在提供认证密钥之后能够在设备上执行代码的情况。必须采取诸如安全启动和受信任启动之类的额外措施，以确保设备上只运行受信任的代码。)
 
 
-Authentication
-(认证)
---------------
+Authentication(认证)
+--------------------
 
 To be able to fully trust data read from flash, all UBIFS data structures
 stored on flash are authenticated. That is:
@@ -290,9 +280,8 @@ stored on flash are authenticated. That is:
   (LPT，它存储 UBIFS 用于空闲空间记账的 UBI LEB 元数据。)
 
 
-Index Authentication
-(索引认证)
-~~~~~~~~~~~~~~~~~~~~
+Index Authentication(索引认证)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Through UBIFS' concept of a wandering tree, it already takes care of only
 updating and persisting changed parts from leaf node up to the root node
@@ -364,9 +353,8 @@ atomically together with its respective node.
 (鲁棒性和断电安全性的最重要部分是原子性地持久化哈希和文件内容。在这里，UBIFS 现有的关于如何持久化被更改节点的逻辑已经为此目的而设计，使得 UBIFS 可以在持久化期间发生断电时安全恢复。向索引节点添加哈希不会改变这一点，因为每个哈希都会与其各自的节点一起原子性地持久化。)
 
 
-Journal Authentication
-(日志认证)
-~~~~~~~~~~~~~~~~~~~~~~
+Journal Authentication(日志认证)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The journal is authenticated too. Since the journal is continuously written
 it is necessary to also add authentication information frequently to the
@@ -420,9 +408,8 @@ modified on feature flag or similar changes, but never on file changes.
 (日志区的位置存储在主节点中。由于主节点如上所述使用 HMAC 进行认证，因此不可能在不被检测到的情况下篡改它。日志区的大小在创建文件系统时使用 `mkfs.ubifs` 指定，并存储在超级块节点中。为了防止篡改存储在其中的这个值和其他值，超级块结构中添加了一个 HMAC。超级块节点存储在 LEB 0 中，只在特性标志或类似更改时被修改，从不因文件更改而修改。)
 
 
-LPT Authentication
-(LPT 认证)
-~~~~~~~~~~~~~~~~~~
+LPT Authentication(LPT 认证)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The location of the LPT root node on the flash is stored in the UBIFS master
 node. Since the LPT is written and read atomically on every commit, there is
@@ -434,9 +421,8 @@ LTP hash stored there with the hash computed from the read on-flash LPT.
 (LPT 根节点在闪存上的位置存储在 UBIFS 主节点中。由于 LPT 在每次提交时都以原子方式写入和读取，因此无需对树的各个节点进行认证。只需用存储在主节点中的一个简单哈希来保护整个 LPT 的完整性即可。由于主节点本身经过认证，可以通过验证主节点的真实性，并将其中存储的 LPT 哈希与从读取的片上 LPT 计算出的哈希进行比较，来验证 LPT 的真实性。)
 
 
-Key Management
-(密钥管理)
---------------
+Key Management(密钥管理)
+------------------------
 
 For simplicity, UBIFS authentication uses a single key to compute the HMACs
 of superblock, master, commit start and reference nodes. This key has to be
@@ -477,9 +463,8 @@ approach is similar to the approach proposed for fscrypt encryption policy v2
 (为了能够检查挂载时正确的密钥是否可用，UBIFS 超级块节点还将额外存储认证密钥的哈希。该方法类似于针对 fscrypt 加密策略 v2 提出的方法 [FSCRYPT-POLICY2]。)
 
 
-Future Extensions
-(未来扩展)
-=================
+Future Extensions(未来扩展)
+===========================
 
 In certain cases where a vendor wants to provide an authenticated filesystem
 image to customers, it should be possible to do so without sharing the secret
@@ -492,9 +477,8 @@ will then have to be provided beforehand in the normal way.
 (在某些情况下，供应商希望向客户提供已认证的文件系统映像，应当可以在不共享机密的 UBIFS 认证密钥的情况下做到这一点。相反，除了每个 HMAC 之外，还可以存储一个数字签名，供应商将公钥与文件系统映像一起提供。如果此后必须修改该文件系统，UBIFS 可以在首次挂载时将所有数字签名替换为 HMAC，类似于 IMA/EVM 子系统处理此类情况的方式。之后，HMAC 密钥将必须以通常方式预先提供。)
 
 
-References
-(参考文献)
-==========
+References(参考文献)
+====================
 
 [CRYPTSETUP2]        https://www.saout.de/pipermail/dm-crypt/2017-November/005745.html
 

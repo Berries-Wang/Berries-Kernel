@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=====================
-ixgbe devlink support
-=====================
-
-(ixgbe devlink 支持)
+=========================================
+ixgbe devlink support(ixgbe devlink 支持)
+=========================================
 
 This document describes the devlink features implemented by the ``ixgbe``
 device driver.
 (本文描述 ``ixgbe`` 设备驱动实现的 devlink 特性。)
 
-Info versions
-(信息版本)
-=============
+Info versions(信息版本)
+=======================
 
 Any of the versions dealing with the security presented by ``devlink-info``
 is purely informational. Devlink does not use a secure channel to communicate
@@ -93,9 +90,8 @@ The ``ixgbe`` driver reports the following versions
       - The first 4 bytes of the hash of the netlist module contents.
         (netlist 模块内容哈希的前 4 个字节。)
 
-Flash Update
-(闪存更新)
-============
+Flash Update(闪存更新)
+======================
 
 The ``ixgbe`` driver implements support for flash update using the
 ``devlink-flash`` interface. It supports updating the device flash using a
@@ -123,9 +119,8 @@ combined flash image that contains the ``fw.mgmt``, ``fw.undi``, and
        image customized for the specific device.
        (既不保留设置也不保留标识符。用提供的镜像内容覆盖闪存中的所有内容，不做任何保留。这包括覆盖设备标识字段，如 MAC 地址、重要产品数据 (VPD) 区和设备序列号。预期此组合应与针对特定设备定制的镜像一起使用。)
 
-Reload
-(重载)
-======
+Reload(重载)
+============
 
 The ``ixgbe`` driver supports activating new firmware after a flash update
 using ``DEVLINK_CMD_RELOAD`` with the ``DEVLINK_RELOAD_ACTION_FW_ACTIVATE``
@@ -145,9 +140,8 @@ The driver does not currently support reloading the driver via
 ``DEVLINK_RELOAD_ACTION_DRIVER_REINIT``.
 (驱动目前不支持通过 ``DEVLINK_RELOAD_ACTION_DRIVER_REINIT`` 重新加载驱动自身。)
 
-Regions
-(区域)
-=======
+Regions(区域)
+=============
 
 The ``ixgbe`` driver implements the following regions for accessing internal
 device data.

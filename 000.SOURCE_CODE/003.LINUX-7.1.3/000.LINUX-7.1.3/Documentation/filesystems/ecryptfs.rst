@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-======================================================
-eCryptfs: A stacked cryptographic filesystem for Linux
-======================================================
-
-(eCryptfs: 面向 Linux 的堆叠式加密文件系统)
+=================================================================================================
+eCryptfs: A stacked cryptographic filesystem for Linux(eCryptfs: 面向 Linux 的堆叠式加密文件系统)
+=================================================================================================
 
 eCryptfs is free software. Please see the file COPYING for details.
 For documentation, please see the files in the doc/ subdirectory.  For
@@ -50,9 +48,8 @@ Userspace requirements include:
    (在 eCryptfs 的 beta/实验版本中，当你升级 eCryptfs 时，你应该将文件复制到一个未加密的位置，然后再将文件复制回新的 eCryptfs 挂载中，以迁移这些文件。)
 
 
-Mount-wide Passphrase
-(整个挂载范围的口令)
-=====================
+Mount-wide Passphrase(整个挂载范围的口令)
+=========================================
 
 Create a new directory into which eCryptfs will write its encrypted
 files (i.e., /root/crypt).  Then, create the mount point directory
@@ -88,9 +85,8 @@ above.
     cat /mnt/crypt/hello.txt
 
 
-Notes
-(注意事项)
-=====
+Notes(注意事项)
+===============
 
 eCryptfs version 0.1 should only be mounted on (1) empty directories
 or (2) directories containing files only created by eCryptfs. If you

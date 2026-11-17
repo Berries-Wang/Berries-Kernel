@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=============
-NFSD IO MODES
-=============
+===========================
+NFSD IO MODES(NFSD IO 模式)
+===========================
 
-(NFSD IO 模式)
-
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 NFSD has historically always used buffered IO when servicing READ and
 WRITE operations. BUFFERED is NFSD's default IO mode, but it is possible
@@ -54,9 +51,8 @@ If you experiment with NFSD's IO modes on a recent kernel and have
 interesting results, please report them to linux-nfs@vger.kernel.org
 (如果你在较新的内核上试验 NFSD 的 IO 模式并得到了有趣的结果，请将它们报告给 linux-nfs@vger.kernel.org。)
 
-NFSD DONTCACHE
-(NFSD DONTCACHE(不缓存))
-==============
+NFSD DONTCACHE(NFSD DONTCACHE(不缓存))
+======================================
 
 DONTCACHE offers a hybrid approach to servicing IO that aims to offer
 the benefits of using DIRECT IO without any of the strict alignment
@@ -89,9 +85,8 @@ NFSD_IO_DONTCACHE will fall back to NFSD_IO_BUFFERED if the underlying
 filesystem doesn't indicate support by setting FOP_DONTCACHE.
 (如果底层文件系统没有通过设置 FOP_DONTCACHE 来表明支持，NFSD_IO_DONTCACHE 将回退到 NFSD_IO_BUFFERED。)
 
-NFSD DIRECT
-(NFSD DIRECT(直接 IO))
-===========
+NFSD DIRECT(NFSD DIRECT(直接 IO))
+=================================
 
 DIRECT IO doesn't make use of the page cache, as such it is able to
 avoid the Linux memory management's page reclaim scalability problems

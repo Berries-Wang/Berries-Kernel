@@ -1,8 +1,7 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-Directory Entries
-(目录项)
------------------
+Directory Entries(目录项)
+-------------------------
 
 In an ext4 filesystem, a directory is more or less a flat file that maps
 an arbitrary byte string (usually ASCII) to an inode number on the
@@ -14,9 +13,8 @@ associated with a directory file for the particular directory entry that
 is desired.
 (在 ext4 文件系统中，目录或多或少是一个扁平文件，它将任意字节串(通常是 ASCII)映射到文件系统上的 inode 号。文件系统各处可以有许多引用同一 inode 号的目录项——这些被称为硬链接，这也是硬链接不能引用其他文件系统上的文件的原因。因此，查找目录项的方式就是读取与目录文件相关联的数据块，从中找到所需的特定目录项。)
 
-Linear (Classic) Directories
-(线性(经典)目录)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Linear (Classic) Directories(线性(经典)目录)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 By default, each directory lists its entries in an “almost-linear”
 array. I write “almost” because it's not a linear array in the memory
@@ -198,9 +196,8 @@ inode number, the directory's inode generation number, and the entire
 directory entry block up to (but not including) the fake directory entry.
 (目录叶块校验和是针对 FS UUID(如果该文件系统启用了校验和种子特性，则用校验和种子)、目录的 inode 号、目录的 inode 代数，以及直到(但不包括)假目录项的整个目录项块来计算的。)
 
-Hash Tree Directories
-(哈希树目录)
-~~~~~~~~~~~~~~~~~~~~~
+Hash Tree Directories(哈希树目录)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A linear array of directory entries isn't great for performance, so a
 new feature was added to ext3 to provide a faster (but peculiar)

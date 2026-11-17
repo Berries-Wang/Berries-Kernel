@@ -113,9 +113,8 @@ informational. Devlink does not use a secure channel to communicate with
 the device.
 (请注意，通过 devlink 报告的任何安全版本都纯粹是信息性的。Devlink 不会使用安全通道与设备通信。)
 
-Generic Versions
-(通用版本)
-================
+Generic Versions(通用版本)
+==========================
 
 It is expected that drivers use the following generic names for exporting
 version information. If a generic name for a given component doesn't exist yet,
@@ -156,128 +155,111 @@ All versions should try to use the following terminology:
        the bundle.
        (``bundle_id`` 可以同时出现在 ``running`` 和 ``stored`` 版本中，但如果 ``bundle_id`` 所涵盖的任何组件已被更改、不再与捆绑包中的版本匹配，则不得报告它。)
 
-board.id
-(board.id（板卡设计唯一标识符）)
---------
+board.id(board.id（板卡设计唯一标识符）)
+----------------------------------------
 
 Unique identifier of the board design.
 (板卡设计的唯一标识符。)
 
-board.rev
-(board.rev（板卡设计修订版本）)
----------
+board.rev(board.rev（板卡设计修订版本）)
+----------------------------------------
 
 Board design revision.
 (板卡设计修订版本。)
 
-asic.id
-(asic.id（ASIC 设计标识符）)
--------
+asic.id(asic.id（ASIC 设计标识符）)
+-----------------------------------
 
 ASIC design identifier.
 (ASIC 设计标识符。)
 
-asic.rev
-(asic.rev（ASIC 设计修订版本）)
---------
+asic.rev(asic.rev（ASIC 设计修订版本）)
+---------------------------------------
 
 ASIC design revision/stepping.
 (ASIC 设计修订版本/步进。)
 
-board.manufacture
-(board.manufacture（制造商标识）)
------------------
+board.manufacture(board.manufacture（制造商标识）)
+--------------------------------------------------
 
 An identifier of the company or the facility which produced the part.
 (生产该部件的公司或工厂的标识符。)
 
-board.part_number
-(board.part_number（板卡部件号）)
------------------
+board.part_number(board.part_number（板卡部件号）)
+--------------------------------------------------
 
 Part number of the board and its components.
 (板卡及其组件的部件号。)
 
-fw
-(fw（固件总体版本）)
---
+fw(fw（固件总体版本）)
+----------------------
 
 Overall firmware version, often representing the collection of
 fw.mgmt, fw.app, etc.
 (固件总体版本，通常代表 fw.mgmt、fw.app 等的集合。)
 
-fw.mgmt
-(fw.mgmt（管理固件版本）)
--------
+fw.mgmt(fw.mgmt（管理固件版本）)
+--------------------------------
 
 Control unit firmware version. This firmware is responsible for house
 keeping tasks, PHY control etc. but not the packet-by-packet data path
 operation.
 (控制单元固件版本。该固件负责日常管理任务、PHY 控制等，但不负责逐个数据包的数据路径操作。)
 
-fw.mgmt.api
-(fw.mgmt.api（管理固件 API 版本）)
------------
+fw.mgmt.api(fw.mgmt.api（管理固件 API 版本）)
+---------------------------------------------
 
 Firmware interface specification version of the software interfaces between
 driver and firmware.
 (驱动与固件之间软件接口的固件接口规范版本。)
 
-fw.app
-(fw.app（应用固件版本）)
-------
+fw.app(fw.app（应用固件版本）)
+------------------------------
 
 Data path microcode controlling high-speed packet processing.
 (控制高速数据包处理的数据路径微码。)
 
-fw.undi
-(fw.undi（UNDI 软件版本）)
--------
+fw.undi(fw.undi（UNDI 软件版本）)
+---------------------------------
 
 UNDI software, may include the UEFI driver, firmware or both.
 (UNDI 软件，可能包含 UEFI 驱动、固件，或两者兼有。)
 
-fw.ncsi
-(fw.ncsi（NCSI 软件版本）)
--------
+fw.ncsi(fw.ncsi（NCSI 软件版本）)
+---------------------------------
 
 Version of the software responsible for supporting/handling the
 Network Controller Sideband Interface.
 (负责支持/处理网络控制器边带接口 (Network Controller Sideband Interface) 的软件版本。)
 
-fw.psid
-(fw.psid（固件参数集标识符）)
--------
+fw.psid(fw.psid（固件参数集标识符）)
+------------------------------------
 
 Unique identifier of the firmware parameter set. These are usually
 parameters of a particular board, defined at manufacturing time.
 (固件参数集的唯一标识符。这些通常是某个特定板卡的参数，在制造时定义。)
 
-fw.roce
-(fw.roce（RoCE 固件版本）)
--------
+fw.roce(fw.roce（RoCE 固件版本）)
+---------------------------------
 
 RoCE firmware version which is responsible for handling roce
 management.
 (负责处理 RoCE 管理的 RoCE 固件版本。)
 
-fw.bundle_id
-(fw.bundle_id（固件捆绑包标识符）)
-------------
+fw.bundle_id(fw.bundle_id（固件捆绑包标识符）)
+----------------------------------------------
 
 Unique identifier of the entire firmware bundle.
 (整个固件捆绑包的唯一标识符。)
 
-fw.bootloader
-(fw.bootloader（引导加载程序版本）)
--------------
+fw.bootloader(fw.bootloader（引导加载程序版本）)
+------------------------------------------------
 
 Version of the bootloader.
 (引导加载程序的版本。)
 
-Future work
-(未来工作)
-===========
+Future work(未来工作)
+=====================
 
 The following extensions could be useful:
 (以下扩展可能会有用：)

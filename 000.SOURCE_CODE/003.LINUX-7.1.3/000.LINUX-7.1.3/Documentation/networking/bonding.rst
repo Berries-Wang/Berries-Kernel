@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===================================
-Linux Ethernet Bonding Driver HOWTO
-===================================
-
-(Linux 以太网绑定驱动 HOWTO)
+===============================================================
+Linux Ethernet Bonding Driver HOWTO(Linux 以太网绑定驱动 HOWTO)
+===============================================================
 
 Latest update: 27 April 2011
 (最近更新：2011 年 4 月 27 日)
@@ -28,9 +26,8 @@ Added Sysfs information: 2006/04/24
 
   - Mitch Williams <mitch.a.williams at intel.com>
 
-Introduction
-(引言)
-============
+Introduction(引言)
+==================
 
 The Linux bonding driver provides a method for aggregating
 multiple network interfaces into a single logical "bonded" interface.
@@ -117,9 +114,8 @@ who to ask for help, please follow the links at the end of this file.
    16. Resources and Links
 
 
-1. Bonding Driver Installation
-(1. 绑定驱动安装)
-==============================
+1. Bonding Driver Installation(1. 绑定驱动安装)
+===============================================
 
 Most popular distro kernels ship with the bonding driver
 already available as a module. If your distro does not, or you
@@ -128,9 +124,8 @@ installing a mainline kernel from kernel.org), you'll need to perform
 the following steps:
 (大多数流行的发行版内核都已将绑定驱动以模块形式提供。如果你的发行版没有提供，或者你需要从源码编译 bonding（例如配置并安装来自 kernel.org 的主线内核），则需要执行以下步骤：)
 
-1.1 Configure and build the kernel with bonding
-(1.1 配置并构建支持 bonding 的内核)
------------------------------------------------
+1.1 Configure and build the kernel with bonding(1.1 配置并构建支持 bonding 的内核)
+----------------------------------------------------------------------------------
 
 The current version of the bonding driver is available in the
 drivers/net/bonding subdirectory of the most recent kernel source
@@ -148,17 +143,15 @@ to the driver or configure more than one bonding device.
 Build and install the new kernel and modules.
 (构建并安装新内核及各模块。)
 
-1.2 Bonding Control Utility
-(1.2 bonding 控制工具)
----------------------------
+1.2 Bonding Control Utility(1.2 bonding 控制工具)
+-------------------------------------------------
 
 It is recommended to configure bonding via iproute2 (netlink)
 or sysfs, the old ifenslave control utility is obsolete.
 (建议通过 iproute2（netlink）或 sysfs 来配置 bonding，旧的 ifenslave 控制工具已废弃。)
 
-2. Bonding Driver Options
-(2. 绑定驱动选项)
-=========================
+2. Bonding Driver Options(2. 绑定驱动选项)
+==========================================
 
 Options for the bonding driver are supplied as parameters to the
 bonding module at load time, or are specified via sysfs.
@@ -1342,9 +1335,8 @@ lp_interval
 	has effect only in balance-tlb and balance-alb modes.
 	(有效范围是 1 - 0x7fffffff，默认值为 1。该选项仅在 balance-tlb 和 balance-alb 模式下生效。)
 
-3. Configuring Bonding Devices
-(3. 配置 bonding 设备)
-==============================
+3. Configuring Bonding Devices(3. 配置 bonding 设备)
+====================================================
 
 You can configure bonding using either your distro's network
 initialization scripts, or manually using either iproute2 or the
@@ -1391,9 +1383,8 @@ If this returns any matches, then your initscripts or
 sysconfig has support for bonding.
 (如果返回任何匹配项，说明你的 initscripts 或 sysconfig 支持 bonding。)
 
-3.1 Configuration with Sysconfig Support
-(3.1 使用 sysconfig 支持进行配置)
-----------------------------------------
+3.1 Configuration with Sysconfig Support(3.1 使用 sysconfig 支持进行配置)
+-------------------------------------------------------------------------
 
 This section applies to distros using a version of sysconfig
 with bonding support, for example, SuSE Linux Enterprise Server 9.
@@ -1547,9 +1538,8 @@ Note that the template does not document the various ``BONDING_*``
 settings described above, but does describe many of the other options.
 (注意，该模板并未记录上述各种 ``BONDING_*`` 设置，但描述了许多其他选项。)
 
-3.1.1 Using DHCP with Sysconfig
-(3.1.1 在 sysconfig 中使用 DHCP)
--------------------------------
+3.1.1 Using DHCP with Sysconfig(3.1.1 在 sysconfig 中使用 DHCP)
+---------------------------------------------------------------
 
 Under sysconfig, configuring a device with BOOTPROTO='dhcp'
 will cause it to query DHCP for its IP address information.  At this
@@ -1559,9 +1549,8 @@ the slave devices.  Without active slaves, the DHCP requests are not
 sent to the network.
 (在 sysconfig 下，将设备配置为 BOOTPROTO='dhcp' 会使它向 DHCP 查询自己的 IP 地址信息。撰写本文时，这对 bonding 设备不起作用：脚本会在添加任何从设备之前先尝试从 DHCP 获取设备地址。没有活动从设备时，DHCP 请求不会发往网络。)
 
-3.1.2 Configuring Multiple Bonds with Sysconfig
-(3.1.2 使用 sysconfig 配置多个 bond)
------------------------------------------------
+3.1.2 Configuring Multiple Bonds with Sysconfig(3.1.2 使用 sysconfig 配置多个 bond)
+-----------------------------------------------------------------------------------
 
 The sysconfig network initialization system is capable of
 handling multiple bonding devices.  All that is necessary is for each
@@ -1577,9 +1566,8 @@ options in the ifcfg-bondX file, it is not necessary to add them to
 the system ``/etc/modules.d/*.conf`` configuration files.
 (由于 sysconfig 脚本已在 ifcfg-bondX 文件中提供 bonding 模块选项，因此无需再把它们添加到系统的 ``/etc/modules.d/*.conf`` 配置文件中。)
 
-3.2 Configuration with Initscripts Support
-(3.2 使用 initscripts 支持进行配置)
-------------------------------------------
+3.2 Configuration with Initscripts Support(3.2 使用 initscripts 支持进行配置)
+-----------------------------------------------------------------------------
 
 This section applies to distros using a recent version of
 initscripts with bonding support, for example, Red Hat Enterprise Linux
@@ -1684,9 +1672,8 @@ will restart the networking subsystem and your bond link should be now
 up and running.
 (最后以 root 身份运行 "/etc/rc.d/init.d/network restart"。这将重启网络子系统，你的 bond 链路现在应该已经 up 并正常运行。)
 
-3.2.1 Using DHCP with Initscripts
-(3.2.1 在 initscripts 中使用 DHCP)
----------------------------------
+3.2.1 Using DHCP with Initscripts(3.2.1 在 initscripts 中使用 DHCP)
+-------------------------------------------------------------------
 
 Recent versions of initscripts (the versions supplied with Fedora
 Core 3 and Red Hat Enterprise Linux 4, or later versions, are reported to
@@ -1700,9 +1687,8 @@ and add a line consisting of "TYPE=Bonding".  Note that the TYPE value
 is case sensitive.
 (要把 bonding 配置为使用 DHCP，按上文所述配置，只是把 "BOOTPROTO=none" 一行换成 "BOOTPROTO=dhcp"，并添加一行 "TYPE=Bonding"。注意 TYPE 的值区分大小写。)
 
-3.2.2 Configuring Multiple Bonds with Initscripts
-(3.2.2 使用 initscripts 配置多个 bond)
--------------------------------------------------
+3.2.2 Configuring Multiple Bonds with Initscripts(3.2.2 使用 initscripts 配置多个 bond)
+---------------------------------------------------------------------------------------
 
 Initscripts packages that are included with Fedora 7 and Red Hat
 Enterprise Linux 5 support multiple bonding interfaces by simply
@@ -1714,9 +1700,8 @@ those instances, see the "Configuring Multiple Bonds Manually" section,
 below.
 (Fedora 7 和 Red Hat Enterprise Linux 5 所带的 initscripts 软件包支持多个 bonding 接口，只需在 ifcfg-bondX（X 为 bond 编号）中指定相应的 BONDING_OPTS= 即可。该支持要求内核具备 sysfs 支持，且 bonding 驱动版本为 3.0.0 或更高。其他配置可能不支持这种指定多个 bonding 接口的方法；这类情况请参阅下文 "Configuring Multiple Bonds Manually" 一节。)
 
-3.3 Configuring Bonding Manually with iproute2
-(3.3 使用 iproute2 手动配置 bonding)
------------------------------------------------
+3.3 Configuring Bonding Manually with iproute2(3.3 使用 iproute2 手动配置 bonding)
+----------------------------------------------------------------------------------
 
 This section applies to distros whose network initialization
 scripts (the sysconfig or initscripts package) do not have specific
@@ -1782,9 +1767,8 @@ with these commands.
 (同样，为了方便，也可以把这些命令做成一个脚本。)
 
 
-3.3.1 Configuring Multiple Bonds Manually
-(3.3.1 手动配置多个 bond)
------------------------------------------
+3.3.1 Configuring Multiple Bonds Manually(3.3.1 手动配置多个 bond)
+------------------------------------------------------------------
 
 This section contains information on configuring multiple
 bonding devices with differing options for those systems whose network
@@ -1851,9 +1835,8 @@ to configure multiple bonds with differing parameters (as they are older
 kernels, and also lack sysfs support).
 (据观察，一些 Red Hat 提供的内核无法在加载时重命名模块（即 "-o bond1" 部分）。尝试向 modprobe 传递该选项会产生 "Operation not permitted" 错误。这一问题在某些 Fedora Core 内核上有报告，RHEL 4 上也出现过。在存在此问题的内核上，将无法配置参数各不相同的多个 bond（因为这些内核较老，而且缺少 sysfs 支持）。)
 
-3.4 Configuring Bonding Manually via Sysfs
-(3.4 通过 sysfs 手动配置 bonding)
-------------------------------------------
+3.4 Configuring Bonding Manually via Sysfs(3.4 通过 sysfs 手动配置 bonding)
+---------------------------------------------------------------------------
 
 Starting with version 3.0.0, Channel Bonding may be configured
 via the sysfs interface.  This interface allows dynamic configuration
@@ -1875,9 +1858,8 @@ sysfs filesystem is mounted elsewhere, you will need to adjust the
 example paths accordingly.
 (要用这种方式配置 bonding，必须已挂载 sysfs 文件系统。本文档的示例假定你使用 sysfs 的标准挂载点，例如 /sys。如果你的 sysfs 文件系统挂载在其他位置，需要相应调整示例中的路径。)
 
-Creating and Destroying Bonds
-(创建和删除 bond)
------------------------------
+Creating and Destroying Bonds(创建和删除 bond)
+----------------------------------------------
 To add a new bond foo::
 (要添加一个名为 foo 的新 bond：)
 
@@ -1900,9 +1882,8 @@ To show all existing bonds::
    to occur under normal operating conditions.
    (注意：由于 sysfs 文件有 4K 的大小限制，如果 bond 数量超过几百个，此列表可能被截断。正常运行条件下一般不会出现这种情况。)
 
-Adding and Removing Slaves
-(添加和移除从设备)
---------------------------
+Adding and Removing Slaves(添加和移除从设备)
+--------------------------------------------
 Interfaces may be enslaved to a bond using the file
 /sys/class/net/<bond>/bonding/slaves.  The semantics for this file
 are the same as for the bonding_masters file.
@@ -1932,9 +1913,8 @@ will free eth0 from whatever bond it is enslaved to, regardless of
 the name of the bond interface.
 (这意味着，只需查看 master 符号链接是否存在，就能快速判断某个接口是否已被绑定。因此：# echo -eth0 > /sys/class/net/eth0/master/bonding/slaves 可以把 eth0 从它所绑定的任何 bond 中解除，无论该 bond 接口叫什么名字。)
 
-Changing a Bond's Configuration
-(修改 bond 的配置)
--------------------------------
+Changing a Bond's Configuration(修改 bond 的配置)
+-------------------------------------------------
 Each bond may be configured individually by manipulating the
 files located in /sys/class/net/<bond name>/bonding
 (每个 bond 都可以通过操作 /sys/class/net/<bond name>/bonding 目录下的文件单独配置。)
@@ -2002,9 +1982,8 @@ To configure the interval between learning packet transmits::
    default interval is 1 second.
    (注意：lp_interval 是 bonding 驱动向每个从设备的对端交换机发送学习包的间隔秒数。默认间隔为 1 秒。)
 
-Example Configuration
-(配置示例)
----------------------
+Example Configuration(配置示例)
+-------------------------------
 We begin with the same example that is shown in section 3.3,
 executed with sysfs, and without using ifenslave.
 (我们从 3.3 节所示的同一样例开始，改用 sysfs 执行，且不使用 ifenslave。)
@@ -2037,9 +2016,8 @@ your init script::
 	echo +eth2 > /sys/class/net/bond1/bonding/slaves
 	echo +eth3 > /sys/class/net/bond1/bonding/slaves
 
-3.5 Configuration with Interfaces Support
-(3.5 使用 interfaces 支持进行配置)
------------------------------------------
+3.5 Configuration with Interfaces Support(3.5 使用 interfaces 支持进行配置)
+---------------------------------------------------------------------------
 
 This section applies to distros which use /etc/network/interfaces file
 to describe network interface configuration, most notably Debian and its
@@ -2056,9 +2034,8 @@ Note that ifenslave-2.6 package will load the bonding module and use
 the ifenslave command when appropriate.
 (注意，ifenslave-2.6 软件包会加载 bonding 模块，并在适当时机使用 ifenslave 命令。)
 
-Example Configurations
-(配置示例)
-----------------------
+Example Configurations(配置示例)
+--------------------------------
 
 In /etc/network/interfaces, the following stanza will configure bond0, in
 active-backup mode, with eth0 and eth1 as slaves::
@@ -2098,9 +2075,8 @@ some more advanced examples tailored to you particular distros, see the files in
 /usr/share/doc/ifenslave-2.6.
 (关于 /etc/network/interfaces 中支持的 ``bond-*`` 选项的完整列表，以及针对你所用发行版定制的一些更高级的示例，请参阅 /usr/share/doc/ifenslave-2.6 中的文件。)
 
-3.6 Overriding Configuration for Special Cases
-(3.6 特殊场景下的配置覆盖)
-----------------------------------------------
+3.6 Overriding Configuration for Special Cases(3.6 特殊场景下的配置覆盖)
+------------------------------------------------------------------------
 
 When using the bonding driver, the physical port which transmits a frame is
 typically selected by the bonding driver, and is not relevant to the user or
@@ -2189,9 +2165,8 @@ This feature first appeared in bonding driver version 3.7.0 and support for
 output slave selection was limited to round-robin and active-backup modes.
 (该特性最早出现于 bonding 驱动 3.7.0 版本，且当时对输出从设备选择的支持仅限于 round-robin 和 active-backup 模式。)
 
-3.7 Configuring LACP for 802.3ad mode in a more secure way
-(3.7 以更安全的方式为 802.3ad 模式配置 LACP)
-----------------------------------------------------------
+3.7 Configuring LACP for 802.3ad mode in a more secure way(3.7 以更安全的方式为 802.3ad 模式配置 LACP)
+------------------------------------------------------------------------------------------------------
 
 When using 802.3ad bonding mode, the Actor (host) and Partner (switch)
 exchange LACPDUs.  These LACPDUs cannot be sniffed, because they are
@@ -2241,13 +2216,11 @@ few bonding parameters:
 	    # echo $usr_port_key > /sys/class/net/bond0/bonding/ad_user_port_key
 
 
-4 Querying Bonding Configuration
-(4. 查询 bonding 配置)
-=================================
+4 Querying Bonding Configuration(4. 查询 bonding 配置)
+======================================================
 
-4.1 Bonding Configuration
-(4.1 bonding 配置)
--------------------------
+4.1 Bonding Configuration(4.1 bonding 配置)
+-------------------------------------------
 
 Each bonding device has a read-only file residing in the
 /proc/net/bonding directory.  The file contents include information
@@ -2279,9 +2252,8 @@ The precise format and contents will change depending upon the
 bonding configuration, state, and version of the bonding driver.
 (确切的格式和内容会随 bonding 配置、状态以及 bonding 驱动版本的不同而变化。)
 
-4.2 Network configuration
-(4.2 网络配置)
--------------------------
+4.2 Network configuration(4.2 网络配置)
+---------------------------------------
 
 The network configuration can be inspected using the ifconfig
 command.  Bonding devices will have the MASTER flag set; Bonding slave
@@ -2317,9 +2289,8 @@ TLB and ALB that require a unique MAC address for each slave::
 	    collisions:0 txqueuelen:100
 	    Interrupt:9 Base address:0x1400
 
-5. Switch Configuration
-(5. 交换机配置)
-=======================
+5. Switch Configuration(5. 交换机配置)
+======================================
 
 For this section, "switch" refers to whatever system the
 bonded devices are directly connected to (i.e., where the other end of
@@ -2355,9 +2326,8 @@ with another EtherChannel group.
 (balance-rr、balance-xor 和 broadcast 模式通常要求交换机将相应端口归为一组。这种组的名称因交换机而异，可能叫 "etherchannel"（如上面的 Cisco 示例）、"trunk group" 或其他类似的说法。对于这些模式，各交换机还有自己的配置选项来设定交换机发往 bond 的发送策略。典型选择包括对 MAC 地址或 IP 地址做 XOR。两个对端的发送策略不必一致。对这三种模式而言，bonding 模式实际上是在为 EtherChannel 组选择一种发送策略；这三种模式都能与另一个 EtherChannel 组互操作。)
 
 
-6. 802.1q VLAN Support
-(6. 802.1q VLAN 支持)
-======================
+6. 802.1q VLAN Support(6. 802.1q VLAN 支持)
+===========================================
 
 It is possible to configure VLAN devices over a bond interface
 using the 8021q driver.  However, only packets coming from the 8021q
@@ -2415,9 +2385,8 @@ mode, which might not be what you want.
 (注意，更改 VLAN 接口的硬件地址会把底层设备（即 bonding 接口）置于混杂模式，这可能不是你想要的效果。)
 
 
-7. Link Monitoring
-(7. 链路监控)
-==================
+7. Link Monitoring(7. 链路监控)
+===============================
 
 The bonding driver at present supports two schemes for
 monitoring a slave device's link state: the ARP monitor and the MII
@@ -2429,9 +2398,8 @@ bonding driver itself, it is not possible to enable both ARP and MII
 monitoring simultaneously.
 (目前，由于 bonding 驱动自身的实现限制，无法同时启用 ARP 和 MII 监控。)
 
-7.1 ARP Monitor Operation
-(7.1 ARP 监控的运作)
--------------------------
+7.1 ARP Monitor Operation(7.1 ARP 监控的运作)
+---------------------------------------------
 
 The ARP monitor operates as its name suggests: it sends ARP
 queries to one or more designated peer systems on the network, and
@@ -2440,9 +2408,8 @@ gives some assurance that traffic is actually flowing to and from one
 or more peers on the local network.
 (ARP 监控如其名称所示：它向网络上一个或多个指定的对端系统发送 ARP 查询，并以响应作为链路正常工作的标志。这在一定程度上保证了流量确实在本地网络上的一个或多个对端之间往返。)
 
-7.2 Configuring Multiple ARP Targets
-(7.2 配置多个 ARP 目标)
-------------------------------------
+7.2 Configuring Multiple ARP Targets(7.2 配置多个 ARP 目标)
+-----------------------------------------------------------
 
 While ARP monitoring can be done with just one target, it can
 be useful in a High Availability setup to have several targets to
@@ -2467,9 +2434,8 @@ For just a single target the options would resemble::
     options bond0 arp_interval=60 arp_ip_target=192.168.0.100
 
 
-7.3 MII Monitor Operation
-(7.3 MII 监控的运作)
--------------------------
+7.3 MII Monitor Operation(7.3 MII 监控的运作)
+---------------------------------------------
 
 The MII monitor monitors only the carrier state of the local
 network interface.  It accomplishes this in one of three ways: by
@@ -2482,13 +2448,11 @@ The MII monitor relies on the driver for carrier state information (via
 the netif_carrier subsystem).
 (MII 监控依靠驱动（通过 netif_carrier 子系统）获取载波状态信息。)
 
-8. Potential Sources of Trouble
-(8. 潜在问题来源)
-===============================
+8. Potential Sources of Trouble(8. 潜在问题来源)
+================================================
 
-8.1 Adventures in Routing
-(8.1 路由的玄机)
--------------------------
+8.1 Adventures in Routing(8.1 路由的玄机)
+-----------------------------------------
 
 When bonding is configured, it is important that the slave
 devices not have routes that supersede routes of the master (or,
@@ -2526,9 +2490,8 @@ case, but unusual configurations or errant manual or automatic static
 route additions may cause trouble.
 (解决办法很简单：确保从设备没有自己的路由；如果出于某种原因必须有路由，也要保证这些路由不会取代其主设备的路由。通常情况本该如此，但异常配置或误加的手工/自动静态路由可能引发麻烦。)
 
-8.2 Ethernet Device Renaming
-(8.2 以太网设备重命名)
-----------------------------
+8.2 Ethernet Device Renaming(8.2 以太网设备重命名)
+--------------------------------------------------
 
 On systems with network configuration scripts that do not
 associate physical devices directly with network interface names (so
@@ -2578,9 +2541,8 @@ Full documentation on this can be found in the modprobe.d and modprobe
 manual pages.
 (这会先加载 tg3 和 e1000 模块，再加载 bonding 模块。完整说明可参见 modprobe.d 和 modprobe 手册页。)
 
-9. SNMP agents
-(9. SNMP 代理)
-===============
+9. SNMP agents(9. SNMP 代理)
+============================
 
 If running SNMP agents, the bonding driver should be loaded
 before any network drivers participating in a bond.  This requirement
@@ -2631,9 +2593,8 @@ and SNMP functions such as Interface_Scan_Next will report that
 association.
 (虽然某些发行版可能不在 ifDescr 中报告接口名称，但 IP 地址与 IfIndex 之间的关联依然存在，Interface_Scan_Next 等 SNMP 函数会报告这一关联。)
 
-10. Promiscuous mode
-(10. 混杂模式)
-====================
+10. Promiscuous mode(10. 混杂模式)
+==================================
 
 When running network monitoring tools, e.g., tcpdump, it is
 common to enable promiscuous mode on the device, so that all traffic
@@ -2665,9 +2626,8 @@ the active slave changes (e.g., due to a link failure), the
 promiscuous setting will be propagated to the new active slave.
 (对于 active-backup、balance-tlb 和 balance-alb 模式，当活动从设备发生变化时（例如因链路故障），混杂模式设置会传播到新的活动从设备。)
 
-11. Configuring Bonding for High Availability
-(11. 为高可用性配置 bonding)
-=============================================
+11. Configuring Bonding for High Availability(11. 为高可用性配置 bonding)
+=========================================================================
 
 High Availability refers to configurations that provide
 maximum network availability by having redundant or backup devices,
@@ -2677,9 +2637,8 @@ goal is to provide the maximum availability of network connectivity
 could provide higher throughput.
 (高可用性 (High Availability) 指通过在主机与外部世界之间部署冗余或备份设备、链路或交换机来提供最大化网络可用性的配置。其目标是提供最大的网络连通性可用性（即网络始终可用），尽管其他配置可能提供更高的吞吐量。)
 
-11.1 High Availability in a Single Switch Topology
-(11.1 单交换机拓扑中的高可用性)
---------------------------------------------------
+11.1 High Availability in a Single Switch Topology(11.1 单交换机拓扑中的高可用性)
+---------------------------------------------------------------------------------
 
 If two hosts (or a host and a single switch) are directly
 connected via multiple physical links, then there is no availability
@@ -2694,9 +2653,8 @@ See Section 12, "Configuring Bonding for Maximum Throughput"
 for information on configuring bonding with one peer device.
 (关于与单个对端设备配置 bonding 的信息，请参阅第 12 节 "Configuring Bonding for Maximum Throughput"。)
 
-11.2 High Availability in a Multiple Switch Topology
-(11.2 多交换机拓扑中的高可用性)
-----------------------------------------------------
+11.2 High Availability in a Multiple Switch Topology(11.2 多交换机拓扑中的高可用性)
+-----------------------------------------------------------------------------------
 
 With multiple switches, the configuration of bonding and the
 network changes dramatically.  In multiple switch topologies, there is
@@ -2725,9 +2683,8 @@ the outside world ("port3" on each switch).  There is no technical
 reason that this could not be extended to a third switch.
 (在这种配置中，两台交换机之间有一条链路（ISL，即交换机间链路），并且有多条连接外部世界的端口（每台交换机上的 "port3"）。没有技术上的理由阻止将其扩展到第三台交换机。)
 
-11.2.1 HA Bonding Mode Selection for Multiple Switch Topology
-(11.2.1 多交换机拓扑下 HA 的 bonding 模式选择)
--------------------------------------------------------------
+11.2.1 HA Bonding Mode Selection for Multiple Switch Topology(11.2.1 多交换机拓扑下 HA 的 bonding 模式选择)
+-----------------------------------------------------------------------------------------------------------
 
 In a topology such as the example above, the active-backup and
 broadcast modes are the only useful bonding modes when optimizing for
@@ -2753,9 +2710,8 @@ broadcast:
 	independent networks, then the broadcast mode may be suitable.
 	(该模式实际上是特殊用途模式，仅适合非常特殊的需求。例如，两台交换机之间没有连接（无 ISL），它们之外的网络彼此完全独立。在这种情况下，如果需要让某些特定的单向流量同时到达两个独立网络，那么 broadcast 模式可能合适。)
 
-11.2.2 HA Link Monitoring Selection for Multiple Switch Topology
-(11.2.2 多交换机拓扑下 HA 的链路监控选择)
-----------------------------------------------------------------
+11.2.2 HA Link Monitoring Selection for Multiple Switch Topology(11.2.2 多交换机拓扑下 HA 的链路监控选择)
+---------------------------------------------------------------------------------------------------------
 
 The choice of link monitoring ultimately depends upon your
 switch.  If the switch can reliably fail ports in response to other
@@ -2787,13 +2743,11 @@ switch, but this can be a viable alternative to the ARP monitor when using
 suitable switches.
 (另外要注意，近来许多交换机已支持一种通常称为 "trunk failover"（干道故障转移）的功能。这是交换机的一项特性：当另一个交换机端口的状态变为 down（或 up）时，特定交换机端口的链路状态也会被置为 down（或 up）。其目的是将链路故障从逻辑上的"外部"端口传播到 bonding 能通过 miimon 监控的逻辑"内部"端口。trunk failover 的可用性与配置方法因交换机而异，但在使用合适的交换机时，它可以作为 ARP 监控的可行替代方案。)
 
-12. Configuring Bonding for Maximum Throughput
-(12. 为最大吞吐量配置 bonding)
-==============================================
+12. Configuring Bonding for Maximum Throughput(12. 为最大吞吐量配置 bonding)
+============================================================================
 
-12.1 Maximizing Throughput in a Single Switch Topology
-(12.1 单交换机拓扑中的吞吐量最大化)
-------------------------------------------------------
+12.1 Maximizing Throughput in a Single Switch Topology(12.1 单交换机拓扑中的吞吐量最大化)
+-----------------------------------------------------------------------------------------
 
 In a single switch configuration, the best method to maximize
 throughput depends upon the application and network environment.  The
@@ -2873,9 +2827,8 @@ mode is described below.
 (gatewayed 与 local 网络配置之间的这一区别很重要，因为许多可用的负载均衡模式会利用本地网络源与目的地的 MAC 地址来做负载均衡决策。每种模式的行为将在下文描述。)
 
 
-12.1.1 MT Bonding Mode Selection for Single Switch Topology
-(12.1.1 单交换机拓扑下的 MT bonding 模式选择)
------------------------------------------------------------
+12.1.1 MT Bonding Mode Selection for Single Switch Topology(12.1.1 单交换机拓扑下的 MT bonding 模式选择)
+--------------------------------------------------------------------------------------------------------
 
 This configuration is the easiest to set up and to understand,
 although you will have to decide which bonding mode best suits your
@@ -3025,9 +2978,8 @@ balance-alb:
 	the device is open.
 	(该模式唯一的额外不利之处是，网络设备驱动必须支持在设备处于打开状态时更改硬件地址。)
 
-12.1.2 MT Link Monitoring for Single Switch Topology
-(12.1.2 单交换机拓扑下的 MT 链路监控)
-----------------------------------------------------
+12.1.2 MT Link Monitoring for Single Switch Topology(12.1.2 单交换机拓扑下的 MT 链路监控)
+-----------------------------------------------------------------------------------------
 
 The choice of link monitoring may largely depend upon which
 mode you choose to use.  The more advanced load balancing modes do not
@@ -3036,14 +2988,12 @@ the MII monitor (which does not provide as high a level of end to end
 assurance as the ARP monitor).
 (链路监控的选择在很大程度上取决于你选用哪种模式。较高级的负载均衡模式不支持 ARP 监控，因此只能使用 MII 监控（它提供的端到端保障水平不如 ARP 监控）。)
 
-12.2 Maximum Throughput in a Multiple Switch Topology
-(12.2 多交换机拓扑中的最大吞吐量)
------------------------------------------------------
+12.2 Maximum Throughput in a Multiple Switch Topology(12.2 多交换机拓扑中的最大吞吐量)
+--------------------------------------------------------------------------------------
 
 Multiple switches may be utilized to optimize for throughput
 when they are configured in parallel as part of an isolated network
 between two or more systems, for example::
-(当多台交换机并行配置、构成两台或更多系统之间的隔离网络时，可以用它们来优化吞吐量，例如：)
 
 		       +-----------+
 		       |  Host A   |
@@ -3061,6 +3011,8 @@ between two or more systems, for example::
 		       |  Host B   |
 		       +-----------+
 
+(当多台交换机并行配置、构成两台或更多系统之间的隔离网络时，可以用它们来优化吞吐量，例如：)
+
 In this configuration, the switches are isolated from one
 another.  One reason to employ a topology such as this is for an
 isolated network with many hosts (a cluster configured for high
@@ -3075,9 +3027,8 @@ can be equipped with an additional network device connected to an
 external network; this host then additionally acts as a gateway.
 (如果需要访问该网络之外，可以给某台主机加装一个连接外部网络的额外网络设备；这台主机便同时充当网关。)
 
-12.2.1 MT Bonding Mode Selection for Multiple Switch Topology
-(12.2.1 多交换机拓扑下的 MT bonding 模式选择)
--------------------------------------------------------------
+12.2.1 MT Bonding Mode Selection for Multiple Switch Topology(12.2.1 多交换机拓扑下的 MT bonding 模式选择)
+----------------------------------------------------------------------------------------------------------
 
 In actual practice, the bonding mode typically employed in
 configurations of this type is balance-rr.  Historically, in this
@@ -3090,9 +3041,8 @@ mode allows individual connections between two hosts to effectively
 utilize greater than one interface's bandwidth.
 (在实际实践中，这类配置通常采用 balance-rr。历史上，在这种网络配置中，关于数据包乱序送达的常见顾虑，可以通过使用不做任何数据包合并的网络适配器来缓解（借助 NAPI，或因为设备本身在累积一定数量的数据包之前不产生中断）。以这种方式使用时，balance-rr 模式能让两台主机之间的单条连接有效利用超过一个接口的带宽。)
 
-12.2.2 MT Link Monitoring for Multiple Switch Topology
-(12.2.2 多交换机拓扑下的 MT 链路监控)
-------------------------------------------------------
+12.2.2 MT Link Monitoring for Multiple Switch Topology(12.2.2 多交换机拓扑下的 MT 链路监控)
+-------------------------------------------------------------------------------------------
 
 Again, in actual practice, the MII monitor is most often used
 in this configuration, as performance is given preference over
@@ -3102,13 +3052,11 @@ needed as the number of systems involved grows (remember that each
 host in the network is configured with bonding).
 (同样，在实际实践中，这种配置最常使用 MII 监控，因为性能优先于可用性。ARP 监控在这种拓扑中也能工作，但随着涉及系统的数量增长，所需探测的流量规模会削弱它相对 MII 监控的优势（记住网络中每台主机都配置了 bonding）。)
 
-13. Switch Behavior Issues
-(13. 交换机行为问题)
-==========================
+13. Switch Behavior Issues(13. 交换机行为问题)
+==============================================
 
-13.1 Link Establishment and Failover Delays
-(13.1 链路建立与故障转移延迟)
--------------------------------------------
+13.1 Link Establishment and Failover Delays(13.1 链路建立与故障转移延迟)
+------------------------------------------------------------------------
 
 Some switches exhibit undesirable behavior with regard to the
 timing of link up and down reporting by the switch.
@@ -3147,9 +3095,8 @@ to not activate a backup interface immediately after a link goes down.
 Failover may be delayed via the downdelay bonding module option.
 (除了交换机时序方面的顾虑，如果你的交换机进入备份模式需要较长时间，可能希望不要在链路断开后立即激活备份接口。可以通过 downdelay bonding 模块选项延迟故障转移。)
 
-13.2 Duplicated Incoming Packets
-(13.2 重复的入站数据包)
---------------------------------
+13.2 Duplicated Incoming Packets(13.2 重复的入站数据包)
+-------------------------------------------------------
 
 NOTE: Starting with version 3.0.2, the bonding driver has logic to
 suppress duplicate packets, which should largely eliminate this problem.
@@ -3196,18 +3143,16 @@ most Cisco switches, the privileged command "clear mac address-table
 dynamic" will accomplish this).
 (重复数据包行为与交换机有关，有些交换机会出现，有些不会。在表现出此行为的交换机上，可以通过清空 MAC 转发表来诱发（在大多数 Cisco 交换机上，特权命令 "clear mac address-table dynamic" 即可完成）。)
 
-14. Hardware Specific Considerations
-(14. 硬件相关注意事项)
-====================================
+14. Hardware Specific Considerations(14. 硬件相关注意事项)
+==========================================================
 
 This section contains additional information for configuring
 bonding on specific hardware platforms, or for interfacing bonding
 with particular switches or other devices.
 (本节包含在特定硬件平台上配置 bonding，或让 bonding 与特定交换机及其他设备配合使用的补充信息。)
 
-14.1 IBM BladeCenter
-(14.1 IBM BladeCenter)
---------------------
+14.1 IBM BladeCenter(14.1 IBM BladeCenter)
+------------------------------------------
 
 This applies to the JS20 and similar systems.
 (这适用于 JS20 及类似系统。)
@@ -3218,9 +3163,8 @@ largely due to the network topology inside the BladeCenter, detailed
 below.
 (在 JS20 刀片服务器上，bonding 驱动仅支持 balance-rr、active-backup、balance-tlb 和 balance-alb 模式。这主要归因于 BladeCenter 内部的网络拓扑，详见下文。)
 
-JS20 network adapter information
-(JS20 网络适配器信息)
---------------------------------
+JS20 network adapter information(JS20 网络适配器信息)
+-----------------------------------------------------
 
 All JS20s come with two Broadcom Gigabit Ethernet ports
 integrated on the planar (that's "motherboard" in IBM-speak).  In the
@@ -3244,9 +3188,8 @@ found in two IBM Redbooks (www.ibm.com/redbooks):
 - "IBM eServer BladeCenter Networking Options"
 - "IBM eServer BladeCenter Layer 2-7 Network Switching"
 
-BladeCenter networking configuration
-(BladeCenter 网络配置)
-------------------------------------
+BladeCenter networking configuration(BladeCenter 网络配置)
+----------------------------------------------------------
 
 Because a BladeCenter can be configured in a very large number
 of ways, this discussion will be confined to describing basic
@@ -3274,9 +3217,8 @@ much like the example in "High Availability in a Multiple Switch
 Topology," above.
 (根据 ESM 与 PM 的组合情况，网络在 bonding 看来要么是单交换机拓扑（全部为 PM），要么是多交换机拓扑（一个或多个 ESM，零个或多个 PM）。也可以把多台 ESM 相互连接，得到与上文 "High Availability in a Multiple Switch Topology" 示例非常相似的配置。)
 
-Requirements for specific modes
-(特定模式的要求)
--------------------------------
+Requirements for specific modes(特定模式的要求)
+-----------------------------------------------
 
 The balance-rr mode requires the use of passthrough modules
 for devices in the bond, all connected to an common external switch.
@@ -3295,9 +3237,8 @@ the BladeCenter).
 The active-backup mode has no additional requirements.
 (active-backup 模式没有额外要求。)
 
-Link monitoring issues
-(链路监控问题)
-----------------------
+Link monitoring issues(链路监控问题)
+------------------------------------
 
 When an Ethernet Switch Module is in place, only the ARP
 monitor will reliably detect link loss to an external switch.  This is
@@ -3313,9 +3254,8 @@ detect failures to the "external" port, which is then directly
 connected to the JS20 system.
 (当使用直通模块时，MII 监控确实能检测到"外部"端口的故障，因为此时该端口直接连接到 JS20 系统。)
 
-Other concerns
-(其他注意事项)
---------------
+Other concerns(其他注意事项)
+----------------------------
 
 The Serial Over LAN (SoL) link is established over the primary
 ethernet (eth0) only, therefore, any loss of link to eth0 will result
@@ -3330,21 +3270,18 @@ avoid fail-over delay issues when using bonding.
 (可能最好在交换机（无论是内部以太网交换机模块还是外部交换机）上禁用生成树协议，以避免使用 bonding 时的故障转移延迟问题。)
 
 
-15. Frequently Asked Questions
-(15. 常见问题)
-==============================
+15. Frequently Asked Questions(15. 常见问题)
+============================================
 
-1.  Is it SMP safe?
-(1. 它是 SMP 安全的吗？)
--------------------
+1.  Is it SMP safe?(1. 它是 SMP 安全的吗？)
+-------------------------------------------
 
 Yes. The old 2.0.xx channel bonding patch was not SMP safe.
 The new driver was designed to be SMP safe from the start.
 (是的。旧的 2.0.xx 通道绑定补丁不是 SMP 安全的。新驱动从设计之初就考虑了 SMP 安全性。)
 
-2.  What type of cards will work with it?
-(2. 什么类型的网卡可以配合它使用？)
------------------------------------------
+2.  What type of cards will work with it?(2. 什么类型的网卡可以配合它使用？)
+----------------------------------------------------------------------------
 
 Any Ethernet type cards (you can even mix cards - a Intel
 EtherExpress PRO/100 and a 3com 3c905b, for example).  For most modes,
@@ -3355,25 +3292,22 @@ Starting with version 3.2.1, bonding also supports Infiniband
 slaves in active-backup mode.
 (从 3.2.1 版本开始，bonding 在 active-backup 模式下还支持 Infiniband 从设备。)
 
-3.  How many bonding devices can I have?
-(3. 我可以有多少个 bonding 设备？)
-----------------------------------------
+3.  How many bonding devices can I have?(3. 我可以有多少个 bonding 设备？)
+--------------------------------------------------------------------------
 
 There is no limit.
 (没有限制。)
 
-4.  How many slaves can a bonding device have?
-(4. 一个 bonding 设备可以有多少个从设备？)
-----------------------------------------------
+4.  How many slaves can a bonding device have?(4. 一个 bonding 设备可以有多少个从设备？)
+----------------------------------------------------------------------------------------
 
 This is limited only by the number of network interfaces Linux
 supports and/or the number of network cards you can place in your
 system.
 (这仅受 Linux 支持的网络接口数量和/或你能装进系统的网卡数量限制。)
 
-5.  What happens when a slave link dies?
-(5. 从设备链路失效时会发生什么？)
-----------------------------------------
+5.  What happens when a slave link dies?(5. 从设备链路失效时会发生什么？)
+-------------------------------------------------------------------------
 
 If link monitoring is enabled, then the failing device will be
 disabled.  The active-backup mode will fail over to a backup link, and
@@ -3398,16 +3332,14 @@ resulting degradation of performance.  The precise performance loss
 depends upon the bonding mode and network configuration.
 (如果未配置任何链路监控，bonding 驱动将无法检测链路故障，并会假设所有链路始终可用。这很可能导致丢包，进而造成性能下降。具体的性能损失取决于 bonding 模式和网络配置。)
 
-6.  Can bonding be used for High Availability?
-(6. bonding 能用于高可用性吗？)
-----------------------------------------------
+6.  Can bonding be used for High Availability?(6. bonding 能用于高可用性吗？)
+-----------------------------------------------------------------------------
 
 Yes.  See the section on High Availability for details.
 (可以。详情请参阅高可用性一节。)
 
-7.  Which switches/systems does it work with?
-(7. 它可以与哪些交换机/系统配合工作？)
----------------------------------------------
+7.  Which switches/systems does it work with?(7. 它可以与哪些交换机/系统配合工作？)
+-----------------------------------------------------------------------------------
 
 The full answer to this depends upon the desired mode.
 (完整的答案取决于你所需要的模式。)
@@ -3432,9 +3364,8 @@ switches currently available support 802.3ad.
 The active-backup mode should work with any Layer-II switch.
 (active-backup 模式应当能与任何二层交换机配合工作。)
 
-8.  Where does a bonding device get its MAC address from?
-(8. bonding 设备的 MAC 地址从哪里来？)
----------------------------------------------------------
+8.  Where does a bonding device get its MAC address from?(8. bonding 设备的 MAC 地址从哪里来？)
+-----------------------------------------------------------------------------------------------
 
 When using slave devices that have fixed MAC addresses, or when
 the fail_over_mac option is enabled, the bonding device's MAC address is
@@ -3474,9 +3405,8 @@ then restore the MAC addresses that the slaves had before they were
 enslaved.
 (要恢复从设备原有的 MAC 地址，需要把它们从 bond 上解除 (``ifenslave -d bond0 eth0``)。此后 bonding 驱动会把各从设备恢复为绑定之前的 MAC 地址。)
 
-9.  What bonding modes support native XDP?
-(9. 哪些 bonding 模式支持原生 XDP？)
-------------------------------------------
+9.  What bonding modes support native XDP?(9. 哪些 bonding 模式支持原生 XDP？)
+------------------------------------------------------------------------------
 
   * balance-rr (0)
   * active-backup (1)
@@ -3487,9 +3417,8 @@ Note that the vlan+srcmac hash policy does not support native XDP.
 For other bonding modes, the XDP program must be loaded with generic mode.
 (注意，vlan+srcmac 哈希策略不支持原生 XDP。对于其他 bonding 模式，XDP 程序必须以 generic 模式加载。)
 
-16. Resources and Links
-(16. 资源与链接)
-=======================
+16. Resources and Links(16. 资源与链接)
+=======================================
 
 The latest version of the bonding driver can be found in the latest
 version of the linux kernel, found on http://kernel.org

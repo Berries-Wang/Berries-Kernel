@@ -1,11 +1,9 @@
 .. SPDX-License-Identifier: GPL-2.0
 .. _phy_port:
 
-=================
-Ethernet ports
-=================
-
-(以太网端口)
+==========================
+Ethernet ports(以太网端口)
+==========================
 
 This document is a basic description of the phy_port infrastructure,
 introduced to represent physical interfaces of Ethernet devices.
@@ -58,15 +56,13 @@ a firmware, SFP module, Ethernet PHY).
 (phy_port 表示的目标是提供一种表示网卡物理接口的方法，而不关心是什么在
 驱动该端口 (通过固件驱动的网卡、SFP 模块、以太网 PHY)。)
 
-Multi-port interfaces examples
-(多端口接口示例)
-==============================
+Multi-port interfaces examples(多端口接口示例)
+==============================================
 
 Several cases of multi-interface NICs have been observed so far :
 (迄今为止已观察到以下几种多接口网卡的情形：)
 
 Internal MII Mux::
-(内部 MII 复用器：)
 
   +------------------+
   | SoC              |
@@ -77,8 +73,9 @@ Internal MII Mux::
   |          +-----+ |   +-----+
   +------------------+
 
+(内部 MII 复用器：)
+
 Internal Mux with internal PHY::
-(带内部 PHY 的内部复用器：)
 
   +------------------------+
   | SoC                    |
@@ -89,8 +86,9 @@ Internal Mux with internal PHY::
   |          +-----+       |   +-----+
   +------------------------+
 
+(带内部 PHY 的内部复用器：)
+
 External Mux::
-(外部复用器：)
 
   +---------+
   | SoC     |  +-----+  +-----+
@@ -103,8 +101,9 @@ External Mux::
   |    GPIO-------+
   +---------+
 
+(外部复用器：)
+
 Double-port PHY::
-(双端口 PHY：)
 
   +---------+
   | SoC     | +-----+
@@ -114,13 +113,12 @@ Double-port PHY::
   | +-----+ | |     |---| SFP |
   +---------+ +-----+   +-----+
 
+(双端口 PHY：)
+
 phy_port aims at providing a path to support all the above topologies, by
 representing the media interfaces in a way that's agnostic to what's driving
 the interface. the struct phy_port object has its own set of callback ops, and
 will eventually be able to report its own ksettings::
-(phy_port 旨在提供一条支持上述所有拓扑的路径，以一种与驱动该接口者无关
-的方式表示介质接口。struct phy_port 对象有自己的一组回调 ops，并且最终
-将能够报告自己的 ksettings：)
 
              _____      +------+
             (     )-----| Port |
@@ -130,9 +128,12 @@ will eventually be able to report its own ksettings::
             (_____)-----| Port |
                         +------+
 
-Next steps
-(后续步骤)
-==========
+(phy_port 旨在提供一条支持上述所有拓扑的路径，以一种与驱动该接口者无关
+的方式表示介质接口。struct phy_port 对象有自己的一组回调 ops，并且最终
+将能够报告自己的 ksettings：)
+
+Next steps(后续步骤)
+====================
 
 As of writing this documentation, only ports controlled by PHY devices are
 supported. The next steps will be to add the Netlink API to expose these

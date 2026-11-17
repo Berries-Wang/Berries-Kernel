@@ -1,11 +1,9 @@
 .. SPDX-License-Identifier: GPL-2.0
 .. include:: <isonum.txt>
 
-===========================================
-Intel(R) PRO/Wireless 2100 Driver for Linux
-===========================================
-
-(Intel(R) PRO/Wireless 2100 Linux 驱动程序)
+======================================================================================
+Intel(R) PRO/Wireless 2100 Driver for Linux(Intel(R) PRO/Wireless 2100 Linux 驱动程序)
+======================================================================================
 
 Support for:
 (支持以下设备：)
@@ -37,9 +35,8 @@ README.ipw2100
     9. License
 
 
-0. IMPORTANT INFORMATION BEFORE USING THIS DRIVER
-(0. 使用本驱动前的重要信息)
-=================================================
+0. IMPORTANT INFORMATION BEFORE USING THIS DRIVER(0. 使用本驱动前的重要信息)
+============================================================================
 
 Important Notice FOR ALL USERS OR DISTRIBUTORS!!!!
 (致所有用户或发行者的重要通告!!!!)
@@ -113,9 +110,8 @@ https://www.intel.com/support/wireless/sb/CS-006408.htm
 客户支持部门获取经过测试的驱动程序，网址：
 https://www.intel.com/support/wireless/sb/CS-006408.htm)
 
-1. Introduction
-(1. 简介)
-===============
+1. Introduction(1. 简介)
+========================
 
 This document provides a brief overview of the features supported by the
 IPW2100 driver project.  The main project website, where the latest
@@ -132,9 +128,8 @@ for the driver project.
 该驱动项目开发邮件列表的链接。)
 
 
-2. Release git-1.1.5 Current Supported Features
-(2. git-1.1.5 版本当前支持的特性)
-===============================================
+2. Release git-1.1.5 Current Supported Features(2. git-1.1.5 版本当前支持的特性)
+================================================================================
 
 - Managed (BSS) and Ad-Hoc (IBSS)
   (托管模式（BSS）与 Ad-Hoc（IBSS）)
@@ -160,9 +155,8 @@ performed on a given feature.
 多寡。)
 
 
-3. Command Line Parameters
-(3. 命令行参数)
-==========================
+3. Command Line Parameters(3. 命令行参数)
+=========================================
 
 If the driver is built as a module, the following optional parameters are used
 by entering them on the command line with the modprobe command using this
@@ -191,9 +185,8 @@ disable		boolean		disable=1     Do not power the HW (不要给硬件上电)
 =========	==============	============  ==============================
 
 
-4. Sysfs Helper Files
-(4. Sysfs 辅助文件)
-=====================
+4. Sysfs Helper Files(4. Sysfs 辅助文件)
+========================================
 
 There are several ways to control the behavior of the driver.  Many of the
 general capabilities are exposed through the Wireless Tools (iwconfig).  There
@@ -264,9 +257,8 @@ For the device level files, see /sys/bus/pci/drivers/ipw2100:
 	   ON -> OFF -> ON 切换，无线电不会重新开启。)
 
 
-5. Radio Kill Switch
-(5. 无线电禁用开关)
-====================
+5. Radio Kill Switch(5. 无线电禁用开关)
+=======================================
 
 Most laptops provide the ability for the user to physically disable the radio.
 Some vendors have implemented this as a physical switch that requires no
@@ -284,9 +276,8 @@ on your system.
 (要确定您系统上 RF 开关的状态，请参阅 Sysfs 辅助文件 'rf_kill'。)
 
 
-6. Dynamic Firmware
-(6. 动态固件)
-===================
+6. Dynamic Firmware(6. 动态固件)
+================================
 
 As the firmware is licensed under a restricted use license, it can not be
 included within the kernel sources.  To enable the IPW2100 you will need a
@@ -301,9 +292,8 @@ See INSTALL for instructions on installing the firmware.
 (固件安装说明参见 INSTALL。)
 
 
-7. Power Management
-(7. 电源管理)
-===================
+7. Power Management(7. 电源管理)
+================================
 
 The IPW2100 supports the configuration of the Power Save Protocol
 through a private wireless extension interface.  The IPW2100 supports
@@ -378,9 +368,8 @@ level if `iwconfig eth1 power on` is invoked.
 报告的级别将是活动级别。)
 
 
-8. Support
-(8. 支持)
-==========
+8. Support(8. 支持)
+===================
 
 For general development information and support,
 go to:
@@ -400,9 +389,8 @@ For installation support on the ipw2100 1.1.0 driver on Linux kernels
 
     http://supportmail.intel.com
 
-9. License
-(9. 许可证)
-==========
+9. License(9. 许可证)
+=====================
 
   Copyright |copy| 2003 - 2006 Intel Corporation. All rights reserved.
   (版权所有 |copy| 2003 - 2006 Intel Corporation。保留所有权利。)

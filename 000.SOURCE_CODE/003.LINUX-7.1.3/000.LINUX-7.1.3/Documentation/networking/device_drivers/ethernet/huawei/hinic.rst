@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-============================================================
-Linux Kernel Driver for Huawei Intelligent NIC(HiNIC) family
-============================================================
+========================================================================================================
+Linux Kernel Driver for Huawei Intelligent NIC(HiNIC) family(华为智能网卡 (HiNIC) 家族的 Linux 内核驱动)
+========================================================================================================
 
-(华为智能网卡 (HiNIC) 家族的 Linux 内核驱动)
-
-Overview:
-(概述：)
-=========
+Overview:(概述：)
+=================
 
 HiNIC is a network interface card for the Data Center Area.
 (HiNIC 是一款面向数据中心领域的网络接口卡。)
@@ -33,17 +30,15 @@ LRO(Large Receive Offload).
 接收侧扩展 (RSS) 以及 LRO (大接收卸载)。)
 
 
-Supported PCI vendor ID/device IDs:
-(支持的 PCI 厂商 ID/设备 ID：)
-===================================
+Supported PCI vendor ID/device IDs:(支持的 PCI 厂商 ID/设备 ID：)
+=================================================================
 
 19e5:1822 - HiNIC PF
 (19e5:1822 对应 HiNIC PF。)
 
 
-Driver Architecture and Source Code:
-(驱动架构与源码：)
-====================================
+Driver Architecture and Source Code:(驱动架构与源码：)
+======================================================
 
 hinic_dev - Implement a Logical Network device that is independent from
 specific HW details about HW data structure formats.
@@ -54,13 +49,11 @@ hinic_hwdev - Implement the HW details of the device and include the components
 for accessing the PCI NIC.
 (hinic_hwdev - 实现设备的硬件细节，并包含用于访问 PCI 网卡的组件。)
 
-hinic_hwdev contains the following components:
-(hinic_hwdev 包含以下组件：)
-===============================================
+hinic_hwdev contains the following components:(hinic_hwdev 包含以下组件：)
+==========================================================================
 
-HW Interface:
-(硬件接口：)
-=============
+HW Interface:(硬件接口：)
+=========================
 
 The interface for accessing the pci device (DMA memory and PCI BARs).
 (hinic_hw_if.c, hinic_hw_if.h)
@@ -71,9 +64,8 @@ Configuration Status Registers Area that describes the HW Registers on the
 configuration and status BAR0. (hinic_hw_csr.h)
 (配置状态寄存器区域，描述配置与状态 BAR0 上的硬件寄存器。(hinic_hw_csr.h))
 
-MGMT components:
-(MGMT 组件：)
-================
+MGMT components:(MGMT 组件：)
+=============================
 
 Asynchronous Event Queues(AEQs) - The event queues for receiving messages from
 the MGMT modules on the cards. (hinic_hw_eqs.c, hinic_hw_eqs.h)
@@ -93,9 +85,8 @@ card by AEQs. Also set the addresses of the IO CMDQs in HW.
 并通过 AEQ 从网卡上的 MGMT 模块接收通知。还会在硬件中设置 IO CMDQ 的
 地址。(hinic_hw_mgmt.c, hinic_hw_mgmt.h))
 
-IO components:
-(IO 组件：)
-==============
+IO components:(IO 组件：)
+=========================
 
 Completion Event Queues(CEQs) - The completion Event Queues that describe IO
 tasks that are finished. (hinic_hw_eqs.c, hinic_hw_eqs.h)
@@ -126,9 +117,8 @@ Data. (hinic_hw_qp.c, hinic_hw_qp.h, hinic_hw_qp_ctxt.h)
 IO - de/constructs all the IO components. (hinic_hw_io.c, hinic_hw_io.h)
 (IO - 构建/解构所有 IO 组件。(hinic_hw_io.c, hinic_hw_io.h))
 
-HW device:
-(硬件设备)
-==========
+HW device:(硬件设备)
+====================
 
 HW device - de/constructs the HW Interface, the MGMT components on the
 initialization of the driver and the IO components on the case of Interface
@@ -137,9 +127,8 @@ UP/DOWN Events. (hinic_hw_dev.c, hinic_hw_dev.h)
 事件时构建/解构 IO 组件。(hinic_hw_dev.c, hinic_hw_dev.h))
 
 
-hinic_dev contains the following components:
-(hinic_dev 包含以下组件：)
-===============================================
+hinic_dev contains the following components:(hinic_dev 包含以下组件：)
+======================================================================
 
 PCI ID table - Contains the supported PCI Vendor/Device IDs.
 (hinic_pci_tbl.h)
@@ -167,18 +156,16 @@ hinic_dev - de/constructs the Logical Tx and Rx Queues.
 (hinic_dev - 构建/解构逻辑 Tx 和 Rx 队列。(hinic_main.c, hinic_dev.h))
 
 
-Miscellaneous
-(杂项)
-=============
+Miscellaneous(杂项)
+===================
 
 Common functions that are used by HW and Logical Device.
 (hinic_common.c, hinic_common.h)
 (由硬件和逻辑设备共同使用的通用函数。(hinic_common.c, hinic_common.h))
 
 
-Support
-(支持)
-=======
+Support(支持)
+=============
 
 If an issue is identified with the released source code on the supported kernel
 with a supported adapter, email the specific information related to the issue to

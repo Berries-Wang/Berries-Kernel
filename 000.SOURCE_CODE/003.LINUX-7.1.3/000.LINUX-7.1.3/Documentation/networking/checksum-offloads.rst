@@ -1,15 +1,12 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=================
-Checksum Offloads
-=================
-
-(校验和卸载)
+=============================
+Checksum Offloads(校验和卸载)
+=============================
 
 
-Introduction
-(简介)
-============
+Introduction(简介)
+==================
 
 This document describes a set of techniques in the Linux networking stack to
 take advantage of checksum offload capabilities of various NICs.
@@ -34,9 +31,8 @@ Things that should be documented here but aren't yet:
   (CHECKSUM_UNNECESSARY 转换)
 
 
-TX Checksum Offload
-(TX 校验和卸载)
-===================
+TX Checksum Offload(TX 校验和卸载)
+==================================
 
 The interface for offloading a transmit checksum to a device is explained in
 detail in comments near the top of include/linux/skbuff.h.
@@ -119,9 +115,8 @@ netdev->features 决定)，则在软件中执行相应的卸载。就 TX 校验�
 着调用 skb_csum_hwoffload_help(skb, features)。)
 
 
-LCO: Local Checksum Offload
-(LCO：本地校验和卸载)
-===========================
+LCO: Local Checksum Offload(LCO：本地校验和卸载)
+================================================
 
 LCO is a technique for efficiently computing the outer checksum of an
 encapsulated datagram when the inner checksum is due to be offloaded.
@@ -188,9 +183,8 @@ there doesn't seem to be a way to avoid that without incurring bigger costs
 SKB 膨胀)就能避免这种情况的办法。)
 
 
-RCO: Remote Checksum Offload
-(RCO：远程校验和卸载)
-============================
+RCO: Remote Checksum Offload(RCO：远程校验和卸载)
+=================================================
 
 RCO is a technique for eliding the inner checksum of an encapsulated datagram,
 allowing the outer checksum to be offloaded.  It does, however, involve a

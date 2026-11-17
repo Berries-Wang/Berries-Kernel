@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-====================
-i40e devlink support
-====================
-
-(i40e devlink 支持)
+=======================================
+i40e devlink support(i40e devlink 支持)
+=======================================
 
 This document describes the devlink features implemented by the ``i40e``
 device driver.
 (本文档描述 ``i40e`` 设备驱动所实现的 devlink 功能。)
 
-Parameters
-==========
-(参数)
+Parameters(参数)
+================
 
 .. list-table:: Generic parameters implemented
     :widths: 5 5 90
@@ -53,9 +50,8 @@ Parameters
         (默认值为 ``0``，即使用内部计算结果。)
 
 
-Info versions
-=============
-(Info 版本)
+Info versions(Info 版本)
+========================
 
 The ``i40e`` driver reports the following versions
 (``i40e`` 驱动报告以下版本)

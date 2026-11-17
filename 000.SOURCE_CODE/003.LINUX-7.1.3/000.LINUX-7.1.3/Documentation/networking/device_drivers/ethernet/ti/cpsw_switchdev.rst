@@ -1,17 +1,14 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-======================================================
-Texas Instruments CPSW switchdev based ethernet driver
-======================================================
-
-(德州仪器基于 CPSW switchdev 的以太网驱动)
+================================================================================================
+Texas Instruments CPSW switchdev based ethernet driver(德州仪器基于 CPSW switchdev 的以太网驱动)
+================================================================================================
 
 :Version: 2.0
 (版本：2.0)
 
-Port renaming
-(端口重命名)
-=============
+Port renaming(端口重命名)
+=========================
 
 On older udev versions renaming of ethX to swXpY will not be automatically
 supported
@@ -26,9 +23,8 @@ In order to rename via udev::
 	    ATTR{phys_port_name}!="", NAME="sw0$attr{phys_port_name}"
 
 
-Dual mac mode
-(双 MAC 模式)
-=============
+Dual mac mode(双 MAC 模式)
+==========================
 
 - The new (cpsw_new.c) driver is operating in dual-emac mode by default, thus
   working as 2 individual network interfaces. Main differences from legacy CPSW
@@ -67,16 +63,14 @@ Dual mac mode
 	values:
 		cmode runtime value false
 
-Devlink configuration parameters
-(devlink 配置参数)
-================================
+Devlink configuration parameters(devlink 配置参数)
+==================================================
 
 See Documentation/networking/devlink/ti-cpsw-switch.rst
 (参见 Documentation/networking/devlink/ti-cpsw-switch.rst。)
 
-Bridging in dual mac mode
-(双 MAC 模式下的桥接)
-=========================
+Bridging in dual mac mode(双 MAC 模式下的桥接)
+==============================================
 
 The dual_mac mode requires two vids to be reserved for internal purposes,
 which, by default, equal CPSW Port numbers. As result, bridge has to be
@@ -99,9 +93,8 @@ or::
 	ip link set dev sw0p1 master br0
 	ip link set dev sw0p2 master br0
 
-Enabling "switch"
-(启用 "switch" 模式)
-=================
+Enabling "switch"(启用 "switch" 模式)
+=====================================
 
 The Switch mode can be enabled by configuring devlink driver parameter
 "switch_mode" to 1/true::
@@ -123,9 +116,8 @@ marking packets with offload_fwd_mark flag unless "ale_bypass=0"
 All configuration is implemented via switchdev API.
 (所有配置均通过 switchdev API 实现。)
 
-Bridge setup
-(网桥设置)
-============
+Bridge setup(网桥设置)
+======================
 
 ::
 
@@ -146,17 +138,15 @@ Bridge setup
 	Note. Steps [*] are mandatory.
 
 
-On/off STP
-(打开/关闭 STP)
-==========
+On/off STP(打开/关闭 STP)
+=========================
 
 ::
 
 	ip link set dev BRDEV type bridge stp_state 1/0
 
-VLAN configuration
-(VLAN 配置)
-==================
+VLAN configuration(VLAN 配置)
+=============================
 
 ::
 
@@ -165,9 +155,8 @@ VLAN configuration
 Note. This step is mandatory for bridge/default_pvid.
 (注意。对于网桥的 default_pvid 而言，此步骤是必需的。)
 
-Add extra VLANs
-(添加额外的 VLAN)
-===============
+Add extra VLANs(添加额外的 VLAN)
+================================
 
  1. untagged::
  (1. 未打标签（untagged）：)
@@ -183,9 +172,8 @@ Add extra VLANs
 	bridge vlan add dev sw0p2 vid 100 master
 	bridge vlan add dev br0 vid 100 pvid tagged self <---- Add cpu port to VLAN100
 
-FDBs
-(FDB（转发数据库条目）)
-----
+FDBs(FDB（转发数据库条目）)
+---------------------------
 
 FDBs are automatically added on the appropriate switch port upon detection
 (FDB 在检测到时自动添加到相应的交换机端口上。)
@@ -196,9 +184,8 @@ Manually adding FDBs::
     bridge fdb add aa:bb:cc:dd:ee:ff dev sw0p1 master vlan 100
     bridge fdb add aa:bb:cc:dd:ee:fe dev sw0p2 master <---- Add on all VLANs
 
-MDBs
-(MDB（组播数据库条目）)
-----
+MDBs(MDB（组播数据库条目）)
+---------------------------
 
 MDBs are automatically added on the appropriate switch port upon detection
 (MDB 在检测到时自动添加到相应的交换机端口上。)
@@ -209,9 +196,8 @@ Manually adding MDBs::
   bridge mdb add dev br0 port sw0p1 grp 239.1.1.1 permanent vid 100
   bridge mdb add dev br0 port sw0p1 grp 239.1.1.1 permanent <---- Add on all VLANs
 
-Multicast flooding
-(组播泛洪)
-==================
+Multicast flooding(组播泛洪)
+============================
 
 CPU port mcast_flooding is always on
 (CPU 端口的 mcast_flooding 始终为开启。)
@@ -220,9 +206,8 @@ Turning flooding on/off on switch ports:
 (在交换机端口上打开/关闭泛洪：)
 bridge link set dev sw0p1 mcast_flood on/off
 
-Access and Trunk port
-(Access 和 Trunk 端口)
-=====================
+Access and Trunk port(Access 和 Trunk 端口)
+===========================================
 
 ::
 
@@ -237,9 +222,8 @@ Note. Setting PVID on Bridge device itself working only for
 default VLAN (default_pvid).
 (注意。在网桥设备自身上设置 PVID 只对默认 VLAN (default_pvid) 有效。)
 
-NFS
-(NFS)
-===
+NFS(NFS)
+========
 
 The only way for NFS to work is by chrooting to a minimal environment when
 switch configuration that will affect connectivity is needed.

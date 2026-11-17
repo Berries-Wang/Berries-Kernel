@@ -1,11 +1,9 @@
 .. SPDX-License-Identifier: GPL-2.0
 .. _representors:
 
-=============================
-Network Function Representors
-=============================
-
-(网络功能代表设备 (representor))
+=============================================================
+Network Function Representors(网络功能代表设备 (representor))
+=============================================================
 
 This document describes the semantics and usage of representor netdevices, as
 used to control internal switching on SmartNICs.  For the closely-related port
@@ -13,9 +11,8 @@ representors on physical (multi-port) switches, see
 :ref:`Documentation/networking/switchdev.rst <switchdev>`.
 (本文档描述代表 (representor) 网络设备的语义与用法，它们用于控制 SmartNIC 的内部交换。关于物理（多端口）交换机上密切相关的端口代表设备，参见 :ref:`Documentation/networking/switchdev.rst <switchdev>` 。)
 
-Motivation
-(背景动机)
-----------
+Motivation(背景动机)
+--------------------
 
 Since the mid-2010s, network cards have started offering more complex
 virtualisation capabilities than the legacy SR-IOV approach (with its simple
@@ -47,9 +44,8 @@ representor's configuration, while in others there are separate APIs to
 configure the representee.
 (因此，代表设备既是控制面对象（在管理命令中表示该功能），又是数据面对象（虚拟管道的一端）。作为虚拟链路端点，代表设备可以像任何其他网络设备一样加以配置；在某些情况下（例如链路状态），被代表者 (representee) 会跟随代表设备的配置，而在其他情况下则有单独的 API 用于配置被代表者。)
 
-Definitions
-(定义)
------------
+Definitions(定义)
+-----------------
 
 This document uses the term "switchdev function" to refer to the PCIe function
 which has administrative control over the virtual switch on the device.
@@ -69,9 +65,8 @@ A "representee" is the object that a representor represents.  So for example in
 the case of a VF representor, the representee is the corresponding VF.
 ("被代表者" (representee) 是代表设备所代表的对象。例如对于 VF 代表设备，被代表者就是对应的 VF。)
 
-What does a representor do?
-(代表设备有什么作用？)
----------------------------
+What does a representor do?(代表设备有什么作用？)
+-------------------------------------------------
 
 A representor has three main roles.
 (代表设备有三个主要角色。)
@@ -104,9 +99,8 @@ the representee VF.  Conversely, a mirred egress redirect to a VF representor
 corresponds in hardware to delivery directly to the representee VF.
 (角色 2) 与 3) 的组合意味着，除性能之外，TC 过滤器无论是否被卸载，行为都应当相同。例如，VF 代表设备上的 TC 规则在软件中应用于该代表 netdevice 上收到的数据包，而在硬件卸载中则应用于被代表 VF 发送的数据包。反过来，指向 VF 代表设备的 mirred egress redirect 在硬件中对应于直接投递给被代表 VF。)
 
-What functions should have a representor?
-(哪些功能应当有代表设备？)
------------------------------------------
+What functions should have a representor?(哪些功能应当有代表设备？)
+-------------------------------------------------------------------
 
 Essentially, for each virtual port on the device's internal switch, there
 should be a representor.
@@ -178,9 +172,8 @@ user' netdevice.
    (这里的思路是：设备中的硬件 IP 栈执行块 DMA 请求与网络数据包之间的转换，从而只有网络数据包经过虚拟端口进入交换机。该 IP 栈"看到"的网络访问随后可以通过 tc 规则加以配置；例如其流量可能全部被封装在特定 VLAN 或 VxLAN 中。然而，块设备 *本身* (qua block device) 所需的任何配置，由于不是网络实体，不适合由代表设备进行，因而会使用 devlink 之类的其他通道。
    与此对比的是 virtio-blk 实现：它把 DMA 请求原样转发给另一个 PF，由其驱动在软件中发起并终结 IP 流量；在这种情况下 DMA 流量 *不会* 经过虚拟交换机，因此 virtio-blk PF 相应地 *不应* 有代表设备。)
 
-How are representors created?
-(代表设备是如何创建的？)
------------------------------
+How are representors created?(代表设备是如何创建的？)
+-----------------------------------------------------
 
 The driver instance attached to the switchdev function should, for each virtual
 port on the switch, create a pure-software netdevice which has some form of
@@ -198,9 +191,8 @@ either packet metadata or queue configuration marking it for delivery to the
 representee.
 (代表 netdevice 的操作通常需要经由 switchdev 功能进行。例如，ndo_start_xmit() 可能通过挂接到 switchdev 功能的硬件发送队列发送数据包，用数据包元数据或队列配置将其标记为投递给被代表者。)
 
-How are representors identified?
-(代表设备是如何标识的？)
---------------------------------
+How are representors identified?(代表设备是如何标识的？)
+--------------------------------------------------------
 
 The representor netdevice should *not* directly refer to a PCIe device (e.g.
 through ``net_dev->dev.parent`` / ``SET_NETDEV_DEV()``), either of the
@@ -227,9 +219,8 @@ There are as yet no established conventions for naming representors which do not
 correspond to PCIe functions (e.g. accelerators and plugins).
 (对于不对应 PCIe 功能的代表设备（例如加速器和插件），目前还没有既定的命名惯例。)
 
-How do representors interact with TC rules?
-(代表设备如何与 TC 规则交互？)
--------------------------------------------
+How do representors interact with TC rules?(代表设备如何与 TC 规则交互？)
+-------------------------------------------------------------------------
 
 Any TC rule on a representor applies (in software TC) to packets received by
 that representor netdevice.  Thus, if the delivery part of the rule corresponds
@@ -299,9 +290,8 @@ processed through the slow path, traversed software TC (except ignoring any
 received through the representor netdevices.
 (如果这一切看起来很复杂，只需记住 TC 卸载的"黄金法则"：硬件应确保最终结果与以下情形相同——数据包经由慢路径处理，经过软件 TC（除了忽略任何 skip_hw 规则并应用任何 skip_sw 规则之外），并通过代表 netdevice 发送或接收。)
 
-Configuring the representee's MAC
-(配置被代表者的 MAC)
----------------------------------
+Configuring the representee's MAC(配置被代表者的 MAC)
+-----------------------------------------------------
 
 The representee's link state is controlled through the representor.  Setting the
 representor administratively UP or DOWN should cause carrier ON or OFF at the

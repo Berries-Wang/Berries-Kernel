@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-====================
-kAFS: AFS FILESYSTEM
-====================
-
-(kAFS：AFS 文件系统)
+========================================
+kAFS: AFS FILESYSTEM(kAFS：AFS 文件系统)
+========================================
 
 .. Contents:
 
@@ -26,9 +24,8 @@ kAFS: AFS FILESYSTEM
    (@sys 替换。)
 
 
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 This filesystem provides a fairly simple secure AFS filesystem driver. It is
 under development and does not yet provide the full feature set.  The features
@@ -54,9 +51,8 @@ It does not yet support the following AFS features:
      (pioctl() 系统调用。)
 
 
-Compilation
-(编译)
-===========
+Compilation(编译)
+=================
 
 The filesystem should be enabled by turning on the kernel configuration
 options::
@@ -80,9 +76,8 @@ the masks in the following files::
 	/sys/module/kafs/parameters/debug
 
 
-Usage
-(用法)
-=====
+Usage(用法)
+===========
 
 When inserting the driver modules the root cell must be specified along with a
 list of volume location server IP addresses::
@@ -136,9 +131,8 @@ Additional cells can be added through /proc (see later section).
 (可以通过 /proc 添加更多的 cell(参见后面的章节)。)
 
 
-Mountpoints
-(挂载点)
-===========
+Mountpoints(挂载点)
+===================
 
 AFS has a concept of mountpoints. In AFS terms, these are specially formatted
 symbolic links (of the same form as the "device name" passed to mount).  kAFS
@@ -164,9 +158,8 @@ mounted on /afs in one go by doing::
 	umount /afs
 
 
-Dynamic Root
-(动态根)
-============
+Dynamic Root(动态根)
+====================
 
 A mount option is available to create a serverless mount that is only usable
 for dynamic lookup.  Creating such a mount can be done by, for example::
@@ -182,9 +175,8 @@ looks up a cell of the same name, for example::
 	ls /afs/grand.central.org/
 
 
-Proc Filesystem
-(Proc 文件系统)
-===============
+Proc Filesystem(Proc 文件系统)
+==============================
 
 The AFS module creates a "/proc/fs/afs/" directory and populates it:
 (AFS 模块会创建一个 "/proc/fs/afs/" 目录并填充它：)
@@ -212,9 +204,8 @@ The AFS module creates a "/proc/fs/afs/" directory and populates it:
 	  1 Val 20000000 20000001 20000002 root.afs
 
 
-The Cell Database
-(cell 数据库)
-=================
+The Cell Database(cell 数据库)
+==============================
 
 The filesystem maintains an internal database of all the cells it knows and the
 IP addresses of the volume location servers for those cells.  The cell to which
@@ -233,9 +224,8 @@ No other cell database operations are available at this time.
 (目前没有其他可用的 cell 数据库操作。)
 
 
-Security
-(安全性)
-========
+Security(安全性)
+================
 
 Secure operations are initiated by acquiring a key using the klog program.  A
 very primitive klog program is available at:
@@ -284,9 +274,8 @@ open the file.
 (如果一个文件是用某个特定密钥打开的，随后文件描述符又被传递给一个不拥有该密钥的进程(也许是通过 AF_UNIX 套接字)，那么对该文件的操作将使用打开该文件时所用的那个密钥来进行。)
 
 
-The @sys Substitution
-(@sys 替换)
-=====================
+The @sys Substitution(@sys 替换)
+================================
 
 The list of up to 16 @sys substitutions for the current network namespace can
 be configured by writing a list to /proc/fs/afs/sysname::

@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=========================
-mv88e6xxx devlink support
-=========================
-
-(mv88e6xxx devlink 支持)
+=================================================
+mv88e6xxx devlink support(mv88e6xxx devlink 支持)
+=================================================
 
 This document describes the devlink features implemented by the ``mv88e6xxx``
 device driver.
 (本文档描述 ``mv88e6xxx`` 设备驱动所实现的 devlink 功能。)
 
-Parameters
-==========
-(参数)
+Parameters(参数)
+================
 
 The ``mv88e6xxx`` driver implements the following driver-specific parameters.
 (``mv88e6xxx`` 驱动实现以下驱动特定参数。)

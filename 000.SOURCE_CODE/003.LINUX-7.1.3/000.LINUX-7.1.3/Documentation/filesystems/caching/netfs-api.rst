@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==============================
-Network Filesystem Caching API
-==============================
-
-(网络文件系统缓存 API)
+====================================================
+Network Filesystem Caching API(网络文件系统缓存 API)
+====================================================
 
 Fscache provides an API by which a network filesystem can make use of local
 caching facilities.  The API is arranged around a number of principles:
@@ -49,9 +47,8 @@ This API is used by::
 	(11) Page release and invalidation
 
 
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 The fscache hierarchy is organised on two levels from a network filesystem's
 point of view.  The upper level represents "volumes" and the lower level
@@ -108,9 +105,8 @@ actually required and it can use the fscache I/O API directly.
 (文件系统应使用 netfslib 来访问缓存，但这并非硬性要求，它也可以直接使用 fscache I/O API。)
 
 
-Volume Registration
-(卷注册)
-===================
+Volume Registration(卷注册)
+===========================
 
 The first step for a network filesystem is to acquire a volume cookie for the
 volume it wants to access::
@@ -170,9 +166,8 @@ relinquished.
 (这将导致该卷被提交或移除，并且如果该卷已封存，一致性数据将被设置为所提供的值。一致性数据的数量必须与获取该卷时指定的长度相匹配。注意，在此卷中获取的所有数据 cookie 必须在放弃该卷之前全部放弃。)
 
 
-Data File Registration
-(数据文件注册)
-======================
+Data File Registration(数据文件注册)
+====================================
 
 Once it has a volume cookie, a network filesystem can use it to acquire a
 cookie for data storage::
@@ -226,9 +221,8 @@ delete it.
 (这将使 fscache 要么提交支撑该 cookie 的存储，要么将其删除。)
 
 
-Marking A Cookie In-Use
-(将 cookie 标记为使用中)
-=======================
+Marking A Cookie In-Use(将 cookie 标记为使用中)
+===============================================
 
 Once a cookie has been acquired by a network filesystem, the filesystem should
 tell fscache when it intends to use the cookie (typically done on file open)
@@ -267,9 +261,8 @@ in-use, it must be unused.
 (注意，使用中标记是累积的。cookie 每被标记一次使用中，就必须相应地被 unuse 一次。)
 
 
-Resizing A Data File (Truncation)
-(调整数据文件大小(截断))
-=================================
+Resizing A Data File (Truncation)(调整数据文件大小(截断))
+=========================================================
 
 If a network filesystem file is resized locally by truncation, the following
 should be called to notify the cache::
@@ -285,9 +278,8 @@ be called from ``->setattr()`` inode operation under the inode lock.
 (调用者必须已先将 cookie 标记为使用中。传入 cookie 和新的大小，缓存将被同步调整大小。该函数应在持有 inode 锁的情况下从 ``->setattr()`` inode 操作中调用。)
 
 
-Data I/O API
-(数据 I/O API)
-============
+Data I/O API(数据 I/O API)
+==========================
 
 To do data I/O operations directly through a cookie, the following functions
 are available::
@@ -349,9 +341,8 @@ operation was ongoing.
 (如果在操作进行期间发生了失效，read 操作将以 ESTALE 失败。)
 
 
-Data File Coherency
-(数据文件一致性)
-===================
+Data File Coherency(数据文件一致性)
+===================================
 
 To request an update of the coherency data and file size on a cookie, the
 following should be called::
@@ -366,9 +357,8 @@ This will update the cookie's coherency data and/or file size.
 (这将更新 cookie 的一致性数据和/或文件大小。)
 
 
-Data File Invalidation
-(数据文件失效)
-======================
+Data File Invalidation(数据文件失效)
+====================================
 
 Sometimes it will be necessary to invalidate an object that contains data.
 Typically this will be necessary when the server informs the network filesystem
@@ -398,9 +388,8 @@ too much.
 (失效在工作者线程中异步运行，因此不会造成太多阻塞。)
 
 
-Write-Back Resource Management
-(回写资源管理)
-==============================
+Write-Back Resource Management(回写资源管理)
+============================================
 
 To write data to the cache from network filesystem writeback, the cache
 resources required need to be pinned at the point the modification is made (for
@@ -453,9 +442,8 @@ be updated.
 (*clear* 函数应由 netfs 的 ``evict_inode`` 超级块操作调用。调用时机必须在 ``truncate_inode_pages_final()`` *之后*、``clear_inode()`` *之前*。这会清理任何遗留的 ``I_PINNING_FSCACHE_WB``。它还允许更新一致性数据。)
 
 
-Caching of Local Modifications
-(本地修改的缓存)
-==============================
+Caching of Local Modifications(本地修改的缓存)
+==============================================
 
 If a network filesystem has locally modified data that it wants to write to the
 cache, it needs to mark the pages to indicate that a write is in progress, and
@@ -520,9 +508,8 @@ the pages upon completion before calling term_func.
 (注意，write 函数始终异步运行，并会在完成时、调用 term_func 之前，取消所有页的标记。)
 
 
-Page Release and Invalidation
-(页释放与失效)
-=============================
+Page Release and Invalidation(页释放与失效)
+===========================================
 
 Fscache keeps track of whether we have any data in the cache yet for a cache
 object we've just created.  It knows it doesn't have to do any reading until it
@@ -549,8 +536,7 @@ page to say that a DIO write is underway from that page::
 (页释放和页失效还应等待页上残留的任何标记，这些标记表明从该页发起的 DIO 写正在进行：)
 
 
-API Function Reference
-(API 函数参考)
-======================
+API Function Reference(API 函数参考)
+====================================
 
 .. kernel-doc:: include/linux/fscache.h

@@ -1,8 +1,7 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-Index Nodes
-(索引节点)
------------
+Index Nodes(索引节点)
+---------------------
 
 In a regular UNIX filesystem, the inode stores all the metadata
 pertaining to the file (time stamps, block maps, extended attributes,
@@ -598,9 +597,8 @@ Masix:
      - m_i_reserved2[2]
      - ??
 
-Inode Size
-(inode 大小)
-~~~~~~~~~~
+Inode Size(inode 大小)
+~~~~~~~~~~~~~~~~~~~~~~
 
 In ext2 and ext3, the inode structure size was fixed at 128 bytes
 (``EXT2_GOOD_OLD_INODE_SIZE``) and each inode had a disk record size of
@@ -621,9 +619,8 @@ attributes. Each inode record can be as large as the filesystem block
 size, though this is not terribly efficient.
 (在 ext2 和 ext3 中，inode 结构大小固定为 128 字节(``EXT2_GOOD_OLD_INODE_SIZE``)，并且每个 inode 在磁盘上的记录大小为 128 字节。从 ext4 开始，可以在格式化时为文件系统中的所有 inode 分配一个更大的在盘 inode，以在原始 ext2 inode 末尾之外提供空间。在盘 inode 记录大小记录在超级块中的 ``s_inode_size`` 里。struct ext4_inode 在原始 128 字节 ext2 inode 之外实际使用的字节数记录在每个 inode 的 ``i_extra_isize`` 字段中，这使得 struct ext4_inode 可以随新内核增长而无需升级所有在盘 inode。对超出 EXT2_GOOD_OLD_INODE_SIZE 的字段的访问，应验证其是否位于 ``i_extra_isize`` 范围内。默认情况下，ext4 inode 记录为 256 字节，并且(截至 2019 年 8 月)inode 结构为 160 字节(``i_extra_isize = 32``)。inode 结构末尾与 inode 记录末尾之间的额外空间可用于存储扩展属性。每个 inode 记录最大可以与文件系统块大小一样大，不过这并不十分高效。)
 
-Finding an Inode
-(查找一个 inode)
-~~~~~~~~~~~~~~~~
+Finding an Inode(查找一个 inode)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Each block group contains ``sb->s_inodes_per_group`` inodes. Because
 inode 0 is defined not to exist, this formula can be used to find the
@@ -635,9 +632,8 @@ address within the inode table, use
 ``offset = index * sb->s_inode_size``.
 (每个块组包含 ``sb->s_inodes_per_group`` 个 inode。由于 inode 0 被定义为不存在，可以使用以下公式找到某个 inode 所在的块组：``bg = (inode_num - 1) / sb->s_inodes_per_group``。特定 inode 可以在块组的 inode 表中通过 ``index = (inode_num - 1) % sb->s_inodes_per_group`` 找到。要获得 inode 表内的字节地址，使用 ``offset = index * sb->s_inode_size``。)
 
-Inode Timestamps
-(inode 时间戳)
-~~~~~~~~~~~~~~~~
+Inode Timestamps(inode 时间戳)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Four timestamps are recorded in the lower 128 bytes of the inode
 structure -- inode change time (ctime), access time (atime), data

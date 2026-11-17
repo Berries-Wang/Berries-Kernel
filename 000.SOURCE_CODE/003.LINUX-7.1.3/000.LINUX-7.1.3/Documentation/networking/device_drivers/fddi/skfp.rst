@@ -2,11 +2,9 @@
 
 .. include:: <isonum.txt>
 
-========================
-SysKonnect driver - SKFP
-========================
-
-(SysKonnect 驱动 —— SKFP)
+=================================================
+SysKonnect driver - SKFP(SysKonnect 驱动 —— SKFP)
+=================================================
 
 |copy| Copyright 1998-2000 SysKonnect,
 (|copy| 版权所有 1998-2000 SysKonnect，)
@@ -30,9 +28,8 @@ Readme File for skfp.o v2.06
    (8) HISTORY
 
 
-1. Overview
-(1. 概述)
-===========
+1. Overview(1. 概述)
+====================
 
 This README explains how to use the driver 'skfp' for Linux with your
 network adapter.
@@ -58,9 +55,8 @@ Chapter 6: History of development.
 (第 6 章：开发历史。)
 
 
-2. Supported adapters
-(2. 支持的适配器)
-=====================
+2. Supported adapters(2. 支持的适配器)
+======================================
 
 The network driver 'skfp' supports the following network adapters:
 SysKonnect adapters:
@@ -88,9 +84,8 @@ Compaq adapters (not tested):
   - Netelligent 100 FDDI SAS Fibre MIC
 
 
-3. General Information
-(3. 一般信息)
-======================
+3. General Information(3. 一般信息)
+===================================
 
 From v2.01 on, the driver is integrated in the linux kernel sources.
 Therefore, the installation is the same as for any other adapter
@@ -104,9 +99,8 @@ of network adapters.
 Makes my life much easier :-)
 (这让我的生活轻松多了 :-))
 
-4. Troubleshooting
-(4. 故障排除)
-==================
+4. Troubleshooting(4. 故障排除)
+===============================
 
 If you run into problems during installation, check those items:
 (如果在安装过程中遇到问题，请检查以下事项：)
@@ -184,9 +178,8 @@ please ensure that the following information is available:
   (内核版本)
 
 
-5. Function of the Adapter LEDs
-(5. 适配器 LED 的功能)
-===============================
+5. Function of the Adapter LEDs(5. 适配器 LED 的功能)
+=====================================================
 
 	The functionality of the LED's on the FDDI network adapters was
 	changed in SMT version v2.82. With this new SMT version, the yellow
@@ -207,9 +200,8 @@ please ensure that the following information is available:
 	(在所有实现中，如果所有 LED 都熄灭，则表示驱动未加载。)
 
 
-6. History
-(6. 历史)
-==========
+6. History(6. 历史)
+===================
 
 v2.06 (20000511) (In-Kernel version)
     New features:

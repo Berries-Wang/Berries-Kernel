@@ -14,11 +14,9 @@
         Sections are manually numbered because apparently that's what everyone
         does in the kernel.
 
-======================
-XFS Online Fsck Design
-======================
-
-(XFS 在线 fsck 设计)
+==========================================
+XFS Online Fsck Design(XFS 在线 fsck 设计)
+==========================================
 
 This document captures the design of the online filesystem check feature for
 XFS.
@@ -60,9 +58,8 @@ might be built atop online fsck.
 .. contents:: Table of Contents
    :local:
 
-1. What is a Filesystem Check?
-(1. 什么是文件系统检查？)
-==============================
+1. What is a Filesystem Check?(1. 什么是文件系统检查？)
+=======================================================
 
 A Unix filesystem has four main responsibilities:
 (Unix 文件系统有四项主要职责：)
@@ -123,9 +120,8 @@ occur; this capability aids both strategies.
 | (fsck 工具只解决第一个问题。)                                                       |
 +--------------------------------------------------------------------------+
 
-TLDR; Show Me the Code!
-(TLDR；直接看代码！)
------------------------
+TLDR; Show Me the Code!(TLDR；直接看代码！)
+-------------------------------------------
 
 Kernel and userspace code has been fully merged as of October 2025.
 (截至 2025 年 10 月，内核和用户空间代码已全部合并。)
@@ -134,9 +130,8 @@ Each kernel patchset adding an online repair function will use the same branch
 name across the kernel, xfsprogs, and fstests git repos.
 (每个添加在线修复功能的内核补丁集都会在内核、xfsprogs 和 fstests 的 git 仓库中使用相同的分支名称。)
 
-Existing Tools
-(现有工具)
---------------
+Existing Tools(现有工具)
+------------------------
 
 The online fsck tool described here will be the third tool in the history of
 XFS (on Linux) to check and repair filesystems.
@@ -163,9 +158,8 @@ to eliminate problems.
 Space usage metadata are rebuilt from the observed file metadata.
 (第二个程序 ``xfs_repair`` 的创建目的是比第一个程序更快、更健壮。与其前身一样，它只能在未挂载的文件系统上使用。它使用基于区段的内存数据结构来减少内存消耗，并尝试适当地调度预读 IO 以减少扫描整个文件系统元数据时的 I/O 等待时间。此工具最重要的特性是它能够通过按需删除内容来响应文件元数据和目录树中的不一致，从而消除问题。空间使用元数据从观察到的文件元数据重建。)
 
-Problem Statement
-(问题陈述)
------------------
+Problem Statement(问题陈述)
+---------------------------
 
 The current XFS tools leave several problems unsolved:
 (当前的 XFS 工具留下了若干未解决的问题：)
@@ -256,9 +250,8 @@ This capability will be coupled to automatic system management so that
 autonomous self-healing of XFS maximizes service availability.
 (总之，在线 fsck 利用资源分片和冗余元数据，在系统运行时实现有针对性的检查和修复操作。这一能力将与自动系统管理相结合，使 XFS 的自主自愈最大化服务可用性。)
 
-2. Theory of Operation
-(2. 工作原理)
-======================
+2. Theory of Operation(2. 工作原理)
+===================================
 
 Because it is necessary for online fsck to lock and scan live metadata objects,
 online fsck consists of three separate code components.
@@ -284,9 +277,8 @@ philosophy, which is to say that each item should handle one aspect of a
 metadata structure, and handle it well.
 (scrub 项类型的划分方式与 Unix 设计哲学一致，也就是说，每一项应处理元数据结构的一个方面，并把它处理好。)
 
-Scope
-(范围)
------
+Scope(范围)
+-----------
 
 In principle, online fsck should be able to check and to repair everything that
 the offline fsck program can handle.
@@ -308,9 +300,8 @@ and to **increase predictability of operation**.
 
 .. _scrubphases:
 
-Phases of Work
-(工作阶段)
---------------
+Phases of Work(工作阶段)
+------------------------
 
 The userspace driver program ``xfs_scrub`` splits the work of checking and
 repairing an entire filesystem into seven phases.
@@ -381,9 +372,8 @@ This allocation of responsibilities will be :ref:`revisited <scrubcheck>`
 later in this document.
 (这一职责分配将在本文档后面 :ref:`重新讨论 <scrubcheck>`。)
 
-Steps for Each Scrub Item
-(每个 scrub 项的步骤)
--------------------------
+Steps for Each Scrub Item(每个 scrub 项的步骤)
+----------------------------------------------
 
 The kernel scrub code uses a three-step strategy for checking and repairing
 the one aspect of a metadata object represented by a scrub item:
@@ -413,17 +403,15 @@ the one aspect of a metadata object represented by a scrub item:
    The results of the reassessment are returned to userspace.
    (在第三步中，内核对新的元数据项运行相同的检查，以评估修复的效果。重新评估的结果返回给用户空间。)
 
-Classification of Metadata
-(元数据分类)
---------------------------
+Classification of Metadata(元数据分类)
+--------------------------------------
 
 Each type of metadata object (and therefore each type of scrub item) is
 classified as follows:
 (每种类型的元数据对象(因此每种类型的 scrub 项)按如下方式分类：)
 
-Primary Metadata
-(主元数据)
-````````````````
+Primary Metadata(主元数据)
+``````````````````````````
 
 Metadata structures in this category should be most familiar to filesystem
 users either because they are directly created by the user or they index
@@ -502,9 +490,8 @@ duration of the repair is *always* an offline algorithm.
 
 .. _secondary_metadata:
 
-Secondary Metadata
-(二级元数据)
-``````````````````
+Secondary Metadata(二级元数据)
+``````````````````````````````
 
 Metadata structures in this category reflect records found in primary metadata,
 but are only needed for online fsck or for reorganization of the filesystem.
@@ -611,9 +598,8 @@ The live scans and hooks were developed much later.
 That in turn increases the runtime of those scrub functions.
 (*回答*：理论上可以。如果每个 scrub 函数都采用这些实时扫描来构建元数据的影子副本，然后将影子记录与磁盘记录进行比较，检查会强大得多。然而，这样做比现在的检查函数要多做相当多的工作。实时扫描和挂钩是很久以后才开发出来的。这反过来又会增加那些 scrub 函数的运行时间。)
 
-Summary Information
-(摘要信息)
-```````````````````
+Summary Information(摘要信息)
+`````````````````````````````
 
 Metadata structures in this last category summarize the contents of primary
 metadata records.
@@ -666,9 +652,8 @@ Each online fsck function will be discussed as case studies later in this
 document.
 (由于配额是资源使用的非负整数计数，在线配额检查可以使用第 2.14 节描述的增量视图增量来跟踪每个事务中对块和 inode 使用计数的待定更改，并在事务提交时将这些更改提交到 dquot 边文件。dquot 需要增量跟踪，因为索引构建器扫描的是 inode，而正在重建的数据结构是 dquot 的索引。链接计数检查将视图增量和提交步骤合而为一，因为它设置被扫描对象的属性，而不是将它们写入单独的数据结构。本文档稍后将作为案例研究讨论每个在线 fsck 函数。)
 
-Risk Management
-(风险管理)
----------------
+Risk Management(风险管理)
+-------------------------
 
 During the development of online fsck, several risk factors were identified
 that may make the feature unsuitable for certain distributors and users.
@@ -736,9 +721,8 @@ Despite this, it is hoped that this new functionality will prove useful in
 reducing unexpected downtime.
 (这些风险中有许多是软件编程所固有的。尽管如此，希望这一新功能能在减少意外停机方面证明是有用的。)
 
-3. Testing Plan
-(3. 测试计划)
-===============
+3. Testing Plan(3. 测试计划)
+============================
 
 As stated before, fsck tools have three main goals:
 (如前所述，fsck 工具有三个主要目标：)
@@ -763,9 +747,8 @@ systematic testing of every attribute of every type of metadata object.
 Testing can be split into four major categories, as discussed below.
 (对正确操作的演示是建立用户对软件在预期范围内运行的信心所必需的。不幸的是，在引入配备高 IOPS 存储的低成本虚拟机之前，对 fsck 工具的每个方面进行定期穷举测试并不真正可行。考虑到硬件的充足可用性，在线 fsck 项目的测试策略包括与现有 fsck 工具的差分分析，以及对每种类型的元数据对象的每个属性的系统化测试。测试可以分为四个主要类别，如下所述。)
 
-Integrated Testing with fstests
-(与 fstests 的集成测试)
--------------------------------
+Integrated Testing with fstests(与 fstests 的集成测试)
+------------------------------------------------------
 
 The primary goal of any free software QA effort is to make testing as
 inexpensive and widespread as possible to maximize the scaling advantages of
@@ -801,9 +784,8 @@ This enables a comparison of the effectiveness of online repair as compared to
 the existing offline repair tools.
 (为了开始在线修复的开发，fstests 被修改为在测试之间运行 ``xfs_repair`` 来重建文件系统的元数据索引。这确保离线修复不会崩溃、在退出后留下损坏的文件系统，或引发在线检查的抱怨。这也建立了什么能修、什么不能离线修复的基线。为了完成在线修复开发的第一阶段，fstests 被修改为能够以"强制重建"模式运行 ``xfs_scrub``。这使得可以比较在线修复与现有离线修复工具的有效性。)
 
-General Fuzz Testing of Metadata Blocks
-(元数据块的通用模糊测试)
----------------------------------------
+General Fuzz Testing of Metadata Blocks(元数据块的通用模糊测试)
+---------------------------------------------------------------
 
 XFS benefits greatly from having a very robust debugging tool, ``xfs_db``.
 (XFS 得益于拥有一个非常健壮的调试工具 ``xfs_db``。)
@@ -844,9 +826,8 @@ In other words, for a given fstests filesystem configuration:
     3. Online repair (``xfs_scrub``) to detect and fix
        (在线修复(``xfs_scrub``)检测并修复)
 
-Targeted Fuzz Testing of Metadata Records
-(元数据记录的定向模糊测试)
------------------------------------------
+Targeted Fuzz Testing of Metadata Records(元数据记录的定向模糊测试)
+-------------------------------------------------------------------
 
 The testing plan for online fsck includes extending the existing fs testing
 infrastructure to provide a much more powerful facility: targeted fuzz testing
@@ -930,9 +911,8 @@ Proposed patchsets include
 <https://git.kernel.org/pub/scm/linux/kernel/git/djwong/xfstests-dev.git/log/?h=fuzz-baseline>`_.
 (提议的补丁集包括 `fuzzing baselines <https://git.kernel.org/pub/scm/linux/kernel/git/djwong/xfstests-dev.git/log/?h=fuzz-baseline>`_。)
 
-Stress Testing
-(压力测试)
---------------
+Stress Testing(压力测试)
+------------------------
 
 A unique requirement to online fsck is the ability to operate on a filesystem
 concurrently with regular workloads.
@@ -970,9 +950,8 @@ any unexpected filesystem shutdowns due to corrupted metadata, kernel hang
 check warnings, or any other sort of mischief.
 (成功的定义是能够运行所有这些测试，而观察不到任何因元数据损坏导致的意外文件系统停机、内核挂起检查警告或任何其他类型的恶作剧。)
 
-4. User Interface
-(4. 用户界面)
-=================
+4. User Interface(4. 用户界面)
+==============================
 
 The primary user of online fsck is the system administrator, just like offline
 repair.
@@ -981,9 +960,8 @@ A foreground CLI process for online fsck on demand, and a background service
 that performs autonomous checking and repair.
 (在线 fsck 的主要用户是系统管理员，就像离线修复一样。在线 fsck 向管理员提供两种操作模式：按需执行在线 fsck 的前台 CLI 进程，以及执行自主检查和修复的后台服务。)
 
-Checking on Demand
-(按需检查)
-------------------
+Checking on Demand(按需检查)
+----------------------------
 
 For administrators who want the absolute freshest information about the
 metadata in a filesystem, ``xfs_scrub`` can be run as a foreground process on
@@ -1010,9 +988,8 @@ It serializes scans for any filesystems that resolve to the same top level
 kernel block device to prevent resource overconsumption.
 (``xfs_scrub_all`` 程序遍历已挂载文件系统的列表，并并行地对每个文件系统启动 ``xfs_scrub``。它对解析到同一顶层内核块设备的任何文件系统将扫描串行化，以防止资源过度消耗。)
 
-Background Service
-(后台服务)
-------------------
+Background Service(后台服务)
+----------------------------
 
 To reduce the workload of system administrators, the ``xfs_scrub`` package
 provides a suite of `systemd <https://systemd.io/>`_ timers and services that
@@ -1065,9 +1042,8 @@ This measure was taken to minimize delays in the rest of the filesystem.
 No such hardening has been performed for the cron job.
 (systemd 单元文件定义已经过安全审计(截至 systemd 249)，以确保 xfs_scrub 进程对系统其余部分的访问尽可能少。这是通过 ``systemd-analyze security`` 执行的，之后特权被限制到所需的最小值，通过沙箱和系统调用过滤将沙箱设置到最大程度；并且对文件系统树的访问被限制为启动程序和访问被扫描文件系统所需的最小值。服务定义文件将 CPU 使用限制在一个 CPU 核心的 80%，并尽可能对 IO 和 CPU 调度应用尽可能好的优先级。采取这一措施是为了尽量减少文件系统其余部分的延迟。cron 任务没有执行这种加固。)
 
-Health Reporting
-(健康报告)
-----------------
+Health Reporting(健康报告)
+--------------------------
 
 XFS caches a summary of each filesystem's health status in memory.
 The information is updated whenever ``xfs_scrub`` is run, or whenever
@@ -1091,9 +1067,8 @@ notifications and initiate a repair?
 conversation with early adopters and potential downstream users of XFS.
 (*回答*：这些问题仍未有答案，但应当成为与 XFS 的早期采用者和潜在下游用户对话的一部分。)
 
-5. Kernel Algorithms and Data Structures
-(5. 内核算法和数据结构)
-========================================
+5. Kernel Algorithms and Data Structures(5. 内核算法和数据结构)
+===============================================================
 
 This section discusses the key algorithms and data structures of the kernel
 code that provide the ability to check and repair metadata while the system
@@ -1104,9 +1079,8 @@ The remainder of this section presents the mechanisms through which XFS
 regenerates itself.
 (本节讨论内核代码中提供在系统运行时检查和修复元数据能力的关键算法和数据结构。本节的第一批章节揭示为检查元数据提供基础的部件。本节的其余部分展示 XFS 借以自我再生(重建)的机制。)
 
-Self Describing Metadata
-(自描述元数据)
-------------------------
+Self Describing Metadata(自描述元数据)
+--------------------------------------
 
 Starting with XFS version 5 in 2012, XFS updated the format of nearly every
 ondisk block header to record a magic number, a checksum, a universally
@@ -1143,9 +1117,8 @@ For more information, please see the documentation for
 Documentation/filesystems/xfs/xfs-self-describing-metadata.rst
 (更多信息请参阅 Documentation/filesystems/xfs/xfs-self-describing-metadata.rst 文档。)
 
-Reverse Mapping
-(反向映射)
----------------
+Reverse Mapping(反向映射)
+-------------------------
 
 The original design of XFS (circa 1993) is an improvement upon 1980s Unix
 filesystem design.
@@ -1277,9 +1250,8 @@ The details of how these records are staged, written to disk, and committed
 into the filesystem are covered in subsequent sections.
 (总之，反向映射在主元数据的重建中扮演关键角色。关于这些记录如何暂存、写入磁盘以及提交到文件系统的细节将在后续章节中介绍。)
 
-Checking and Cross-Referencing
-(检查与交叉引用)
-------------------------------
+Checking and Cross-Referencing(检查与交叉引用)
+----------------------------------------------
 
 The first step of checking a metadata structure is to examine every record
 contained within the structure and its relationship with the rest of the
@@ -1308,9 +1280,8 @@ three decisions about the health of a metadata structure:
 The following sections describe how the metadata scrubbing process works.
 (以下各节描述元数据 scrubbing 过程的工作方式。)
 
-Metadata Buffer Verification
-(元数据缓冲校验)
-````````````````````````````
+Metadata Buffer Verification(元数据缓冲校验)
+````````````````````````````````````````````
 
 The lowest layer of metadata protection in XFS are the metadata verifiers built
 into the buffer cache.
@@ -1353,9 +1324,8 @@ Reads satisfied by a buffer already in cache (and hence already verified)
 bypass these checks.
 (每个在线 fsck scrubbing 函数都应在检查结构的过程中读取该结构的每个磁盘元数据块。检查期间观察到的损坏问题会立即作为损坏报告给用户空间；在交叉引用期间，一旦完整检查完成，它们会被报告为交叉引用失败。由缓存中已有的缓冲(因此已校验过)满足的读取会绕过这些检查。)
 
-Internal Consistency Checks
-(内部一致性检查)
-```````````````````````````
+Internal Consistency Checks(内部一致性检查)
+```````````````````````````````````````````
 
 After the buffer cache, the next level of metadata protection is the internal
 record verification code built into the filesystem.
@@ -1396,9 +1366,8 @@ debugging is enabled or a write is about to occur.
 Scrub functions, of course, must check all possible problems.
 (这一类别的记录检查更严格、更耗时。例如，检查块指针和 inumber 以确保它们指向分配组的动态分配部分之内以及文件系统之内。检查名称是否含有无效字符，检查标志是否为无效组合。检查其他记录属性是否有合理的值。跨越 btree 键空间一个区间的 btree 记录被检查顺序是否正确以及是否不可合并(文件 fork 映射除外)。出于性能原因，常规代码可能会跳过其中一些检查，除非启用了调试或即将发生写入。当然，scrub 函数必须检查所有可能的问题。)
 
-Validation of Userspace-Controlled Record Attributes
-(用户空间控制的记录属性的校验)
-````````````````````````````````````````````````````
+Validation of Userspace-Controlled Record Attributes(用户空间控制的记录属性的校验)
+``````````````````````````````````````````````````````````````````````````````````
 
 Various pieces of filesystem metadata are directly controlled by userspace.
 Because of this nature, validation work cannot be more precise than checking
@@ -1432,9 +1401,8 @@ These fields include:
 - Quota timer expiration (if resource usage exceeds the soft limit)
   (配额计时器到期(如果资源使用超过软限制))
 
-Cross-Referencing Space Metadata
-(交叉引用空间元数据)
-````````````````````````````````
+Cross-Referencing Space Metadata(交叉引用空间元数据)
+````````````````````````````````````````````````````
 
 After internal block checks, the next higher level of checking is
 cross-referencing records between metadata structures.
@@ -1594,9 +1562,8 @@ Space allocation records are cross-referenced as follows:
      reference count record claims?
      (在 rmap btree 的空间子键空间内(也就是说，映射到特定空间区段的所有记录，忽略属主信息)，每个块的反向映射记录数量是否与引用计数记录所声称的相同？)
 
-Checking Extended Attributes
-(检查扩展属性)
-````````````````````````````
+Checking Extended Attributes(检查扩展属性)
+``````````````````````````````````````````
 
 Extended attributes implement a key-value store that enable fragments of data
 to be attached to any file.
@@ -1648,9 +1615,8 @@ blocks:
       integrity of the remote value block.
       (读取 attr 值。这会对 attr 名称执行一次按名查找，以确保 dabtree 的正确性。如果值存储在远程块中，这也会校验远程值块的完整性。)
 
-Checking and Cross-Referencing Directories
-(检查和交叉引用目录)
-``````````````````````````````````````````
+Checking and Cross-Referencing Directories(检查和交叉引用目录)
+``````````````````````````````````````````````````````````````
 
 The filesystem directory tree is a directed acylic graph structure, with files
 constituting the nodes, and directory entries (dirents) constituting the edges.
@@ -1723,9 +1689,8 @@ Checking operations involving :ref:`parents <dirparent>` and
 sections.
 (涉及 :ref:`父目录 <dirparent>` 和 :ref:`文件链接计数 <nlinks>` 的检查操作将在后面的章节中更详细地讨论。)
 
-Checking Directory/Attribute Btrees
-(检查目录/属性 btree)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Checking Directory/Attribute Btrees(检查目录/属性 btree)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 As stated in previous sections, the directory/attribute btree (dabtree) index
 maps user-provided names to improve lookup times by avoiding linear scans.
@@ -1783,9 +1748,8 @@ space btrees:
   contents of the directory or attr block?
   (对于每个 dabtree 叶子记录，记录键是否准确反映了目录或 attr 块的内容？)
 
-Cross-Referencing Summary Counters
-(交叉引用摘要计数器)
-``````````````````````````````````
+Cross-Referencing Summary Counters(交叉引用摘要计数器)
+``````````````````````````````````````````````````````
 
 XFS maintains three classes of summary counters: available resources, quota
 resource usage, and file link counts.
@@ -1805,9 +1769,8 @@ realtime bitmap, but there are complications that will be discussed in
 checking are sufficiently complicated to warrant separate sections.
 (:ref:`配额使用 <quotacheck>` 和 :ref:`文件链接计数 <nlinks>` 检查相当复杂，值得单独设节。)
 
-Post-Repair Reverification
-(修复后重新校验)
-``````````````````````````
+Post-Repair Reverification(修复后重新校验)
+``````````````````````````````````````````
 
 After performing a repair, the checking code is run a second time to validate
 the new structure, and the results of the health assessment are recorded
@@ -1818,9 +1781,8 @@ For developers, it is a useful means to judge the efficacy of error detection
 and correction in the online and offline checking tools.
 (执行修复之后，检查代码会再次运行以校验新结构，健康评估的结果被记录在内部并返回给调用进程。这一步骤对于让系统管理员能够监控文件系统状态和任何修复的进度至关重要。对开发者而言，它是评判在线和离线检查工具错误检测与纠正效果的有用手段。)
 
-Eventual Consistency vs. Online Fsck
-(最终一致性与在线 fsck)
-------------------------------------
+Eventual Consistency vs. Online Fsck(最终一致性与在线 fsck)
+-----------------------------------------------------------
 
 Complex operations can make modifications to multiple per-AG data structures
 with a chain of transactions.
@@ -1861,9 +1823,8 @@ are presented :ref:`after that<intent_drains>`.
 
 .. _chain_coordination:
 
-Discovery of the Problem
-(问题的发现)
-````````````````````````
+Discovery of the Problem(问题的发现)
+````````````````````````````````````
 
 Midway through the development of online scrubbing, the fsstress tests
 uncovered a misinteraction between online fsck and compound transaction chains
@@ -2059,9 +2020,8 @@ flaw and rejected:
 
 .. _intent_drains:
 
-Intent Drains
-(意图排空)
-`````````````
+Intent Drains(意图排空)
+```````````````````````
 
 Online fsck uses an atomic intent item counter and lock cycling to coordinate
 with transaction chains.
@@ -2127,9 +2087,8 @@ be woken up whenever the intent count drops to zero.
 
 .. _jump_labels:
 
-Static Keys (aka Jump Label Patching)
-(静态键(又名跳转标签修补))
-`````````````````````````````````````
+Static Keys (aka Jump Label Patching)(静态键(又名跳转标签修补))
+```````````````````````````````````````````````````````````````
 
 Online fsck for XFS separates the regular filesystem from the checking and
 repair code as much as possible.
@@ -2215,9 +2174,8 @@ Documentation/staging/static-keys.rst.
 
 .. _xfile:
 
-Pageable Kernel Memory
-(可分页的内核内存)
-----------------------
+Pageable Kernel Memory(可分页的内核内存)
+----------------------------------------
 
 Some online checking functions work by scanning the filesystem to build a
 shadow copy of an ondisk metadata structure in memory and comparing the two
@@ -2281,9 +2239,8 @@ Hence, the ``xfile`` was born!
 | (第三版通过使用链表解决了 OOM 问题，但链表指针的内存开销极大。)                                      |
 +--------------------------------------------------------------------------+
 
-xfile Access Models
-(xfile 访问模型)
-```````````````````
+xfile Access Models(xfile 访问模型)
+```````````````````````````````````
 
 A survey of the intended uses of xfiles suggested these use cases:
 (对 xfile 预期用途的调查表明了以下用例：)
@@ -2348,9 +2305,8 @@ The only code to use these folio lease functions are the xfarray
 btrees<xfbtree>`.
 (提供 ``xfile_get_folio`` 和 ``xfile_put_folio`` 函数来取回支撑 xfile 某部分的(已锁定的)folio 并释放它。唯一使用这些 folio 租借函数的代码是 xfarray 的 :ref:`排序 <xfarray_sort>` 算法和 :ref:`内存中 btree <xfbtree>`。)
 
-xfile Access Coordination
-(xfile 访问协调)
-`````````````````````````
+xfile Access Coordination(xfile 访问协调)
+`````````````````````````````````````````
 
 For security reasons, xfiles must be owned privately by the kernel.
 They are marked ``S_PRIVATE`` to prevent interference from the security system,
@@ -2380,9 +2336,8 @@ provide a lock for all threads to share.
 
 .. _xfarray:
 
-Arrays of Fixed-Sized Records
-(固定大小记录的数组)
-`````````````````````````````
+Arrays of Fixed-Sized Records(固定大小记录的数组)
+`````````````````````````````````````````````````
 
 In XFS, each type of indexed space metadata (free space, inodes, reference
 counts, file fork space, and reverse mappings) consists of a set of fixed-size
@@ -2405,9 +2360,8 @@ the byte-accessible xfile.
 
 .. _xfarray_access_patterns:
 
-Array Access Patterns
-(数组访问模式)
-^^^^^^^^^^^^^^^^^^^^^
+Array Access Patterns(数组访问模式)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Array access patterns in online fsck tend to fall into three categories.
 Iteration of records is assumed to be necessary for all cases and will be
@@ -2450,9 +2404,8 @@ null record slot in the bag; and the ``xfarray_unset`` function removes a
 record from the bag.
 (第三类调用者是一个袋子(bag)，它对记录计数很有用。这里的典型用例是从反向映射信息构造空间区段引用计数。记录可以按任意顺序放入袋子，可以随时从袋子中移除，记录的唯一性留给调用者。``xfarray_store_anywhere`` 函数用于在袋子中任何空记录槽位插入一条记录；``xfarray_unset`` 函数从袋子中移除一条记录。)
 
-Iterating Array Elements
-(迭代数组元素)
-^^^^^^^^^^^^^^^^^^^^^^^^
+Iterating Array Elements(迭代数组元素)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Most users of the xfarray require the ability to iterate the records stored in
 the array.
@@ -2488,9 +2441,8 @@ Once it finds a page, it will skip the zeroed areas of the page.
 
 .. _xfarray_sort:
 
-Sorting Array Elements
-(排序数组元素)
-^^^^^^^^^^^^^^^^^^^^^^
+Sorting Array Elements(排序数组元素)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 During the fourth demonstration of online repair, a community reviewer remarked
 that for performance reasons, online repair ought to load batches of records
@@ -2501,9 +2453,8 @@ of the records, so naturally the xfarray must also support sorting the record
 set prior to bulk loading.
 (在在线修复的第四次演示期间，一位社区评审者指出，出于性能原因，在线修复应当成批地将记录加载到 btree 记录块中，而不是一次一条地将记录插入新的 btree。XFS 中的 btree 插入代码负责维护记录的正确顺序，因此 xfarray 自然也必须支持在批量加载之前对记录集排序。)
 
-Case Study: Sorting xfarrays
-(案例研究：排序 xfarray)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Case Study: Sorting xfarrays(案例研究：排序 xfarray)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The sorting algorithm used in the xfarray is actually a combination of adaptive
 quicksort and a heapsort subalgorithm in the spirit of
@@ -2574,9 +2525,8 @@ accounting for the application of heapsort directly onto xfile pages.
 
 .. _xfblob:
 
-Blob Storage
-(Blob 存储)
-````````````
+Blob Storage(Blob 存储)
+```````````````````````
 
 Extended attributes and directories add an additional requirement for staging
 records: arbitrary byte sequences of finite length.
@@ -2604,9 +2554,8 @@ file, which is why compaction is not required.
 
 .. _xfbtree:
 
-In-Memory B+Trees
-(内存中的 B+ 树)
-`````````````````
+In-Memory B+Trees(内存中的 B+ 树)
+`````````````````````````````````
 
 The chapter about :ref:`secondary metadata<secondary_metadata>` mentioned that
 checking and repairing of secondary metadata commonly requires coordination
@@ -2644,9 +2593,8 @@ Btrees built atop an xfile are collectively known as ``xfbtrees``.
 The next few sections describe how they actually work.
 (回想一下，:ref:`xfile <xfile>` 抽象将内存页面表示为常规文件，这意味着内核可以随意创建可按字节或块寻址的虚拟地址空间。XFS 缓冲缓存专门负责对面向块的地址空间的 IO 进行抽象，这意味着改造缓冲缓存以与 xfile 接口，就能重用整个 btree 库。构建在 xfile 之上的 btree 统称为 ``xfbtrees``。接下来几节描述它们实际上如何工作。)
 
-Using xfiles as a Buffer Cache Target
-(将 xfile 用作缓冲缓存目标)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Using xfiles as a Buffer Cache Target(将 xfile 用作缓冲缓存目标)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Two modifications are necessary to support xfiles as a buffer cache target.
 The first is to make it possible for the ``struct xfs_buftarg`` structure to
@@ -2664,9 +2612,8 @@ updates to an in-memory btree.
 Today, however, it simply eliminates the need for new code.
 (为支持将 xfile 用作缓冲缓存目标，需要两处修改。第一处是使 ``struct xfs_buftarg`` 结构能够承载 ``struct xfs_buf`` rhashtable，因为这些通常由每 AG 结构持有。第二处修改是改造缓冲 ``ioapply`` 函数，使其从 xfile "读取"缓存的页面并将缓存的页面"写回"xfile。对单个缓冲的多次访问由 ``xfs_buf`` 锁控制，因为 xfile 自身不提供任何锁定。有了这一改造，xfile 支撑的缓冲缓存的使用者使用的 API 与磁盘支撑的缓冲缓存的使用者完全相同。xfile 与缓冲缓存的分离意味着更高的内存使用，因为它们不共享页面，但这一特性有朝一日可能启用对内存中 btree 的事务性更新。不过今天，它只是免除了编写新代码的需要。)
 
-Space Management with an xfbtree
-(用 xfbtree 进行空间管理)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Space Management with an xfbtree(用 xfbtree 进行空间管理)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Space management for an xfile is very simple -- each btree block is one memory
 page in size.
@@ -2689,9 +2636,8 @@ To free an xfbtree block, use ``xfile_discard`` (which internally uses
 ``FALLOC_FL_PUNCH_HOLE``) to remove the memory page from the xfile.
 (要分配一个 btree 块，使用 ``xfile_seek_data`` 在文件中寻找一个间隙。如果没有间隙，则通过延长 xfile 的长度来创建一个。用 ``xfile_prealloc`` 为该块预分配空间，并交回该位置。要释放一个 xfbtree 块，使用 ``xfile_discard``(内部使用 ``FALLOC_FL_PUNCH_HOLE``)从 xfile 中移除该内存页面。)
 
-Populating an xfbtree
-(填充一个 xfbtree)
-^^^^^^^^^^^^^^^^^^^^^
+Populating an xfbtree(填充一个 xfbtree)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 An online fsck function that wants to create an xfbtree should proceed as
 follows:
@@ -2733,9 +2679,8 @@ follows:
 
 .. _xfbtree_commit:
 
-Committing Logged xfbtree Buffers
-(提交已记录日志的 xfbtree 缓冲)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Committing Logged xfbtree Buffers(提交已记录日志的 xfbtree 缓冲)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Although it is a clever hack to reuse the rmap btree code to handle the staging
 structure, the ephemeral nature of the in-memory btree block storage presents
@@ -2779,9 +2724,8 @@ After removing xfile logged buffers from the transaction in this manner, the
 transaction can be committed or cancelled.
 (以这种方式从事务中移除 xfile 日志缓冲之后，该事务就可以被提交或取消了。)
 
-Bulk Loading of Ondisk B+Trees
-(磁盘上 B+ 树的批量加载)
-------------------------------
+Bulk Loading of Ondisk B+Trees(磁盘上 B+ 树的批量加载)
+------------------------------------------------------
 
 As mentioned previously, early iterations of online repair built new btree
 structures by creating a new btree and adding observations individually.
@@ -2804,9 +2748,8 @@ loading mechanism.
 Those notes in turn have been refreshed and are presented below.
 (为了给在线 fsck 做准备，对四个批量加载器逐一进行了研究、做了笔记，并将它们重构为单一的通用 btree 批量加载机制。这些笔记随后经过更新，呈现如下。)
 
-Geometry Computation
-(几何计算)
-````````````````````
+Geometry Computation(几何计算)
+``````````````````````````````
 
 The zeroth step of bulk loading is to assemble the entire record set that will
 be stored in the new btree, and sort the records.
@@ -2894,9 +2837,8 @@ The resulting geometry is as follows:
 
 .. _newbt:
 
-Reserving New B+Tree Blocks
-(预留新 B+ 树块)
-```````````````````````````
+Reserving New B+Tree Blocks(预留新 B+ 树块)
+```````````````````````````````````````````
 
 Once repair knows the number of blocks needed for the new btree, it allocates
 those blocks using the free space information.
@@ -2930,9 +2872,8 @@ EFIs have a role to play during the commit and reaping phases; please see the
 next section and the section about :ref:`reaping<reaping>` for more details.
 (EFI 在提交和回收阶段都有作用；更多细节请参阅下一节以及关于 :ref:`回收 <reaping>` 的章节。)
 
-Writing the New Tree
-(写入新树)
-````````````````````
+Writing the New Tree(写入新树)
+``````````````````````````````
 
 This part is pretty simple -- the btree builder (``xfs_btree_bulkload``) claims
 a block from the reserved list, writes the new btree block header, fills the
@@ -3041,9 +2982,8 @@ Repair moves on to reaping the old blocks, which will be presented in a
 subsequent :ref:`section<reaping>` after a few case studies of bulk loading.
 (步骤 2c 和 3 中的事务滚动代表着修复算法的一个弱点，因为在回收步骤结束之前的日志刷新和崩溃可能导致空间泄漏。在线修复函数通过使用非常大的事务来最小化这种情况发生的几率，每个这样的事务可以容纳数千条块释放指令。修复接着进行旧块的回收，这将在几个批量加载案例研究之后的后续 :ref:`章节 <reaping>` 中呈现。)
 
-Case Study: Rebuilding the Inode Index
-(案例研究：重建 inode 索引)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Case Study: Rebuilding the Inode Index(案例研究：重建 inode 索引)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The high level process to rebuild the inode index btree is:
 (重建 inode 索引 btree 的高层流程是：)
@@ -3113,9 +3053,8 @@ but the record count for the free inode btree has to be computed as inode chunk
 records are stored in the xfarray.
 (一旦修复函数累积了一个块的数据量，它就调用 ``xfarray_append`` 将 inode btree 记录添加到 xfarray。这个 xfarray 在 btree 创建步骤中被遍历两次——第一次用所有 inode 块记录填充 inode btree，第二次用拥有空闲非稀疏 inode 的块的记录填充空闲 inode btree。inode btree 的记录数就是 xfarray 记录数，但空闲 inode btree 的记录数必须在 inode 块记录存入 xfarray 时计算。)
 
-Case Study: Rebuilding the Space Reference Counts
-(案例研究：重建空间引用计数)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Case Study: Rebuilding the Space Reference Counts(案例研究：重建空间引用计数)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Reverse mapping records are used to rebuild the reference count information.
 Reference counts are required for correct operation of copy on write for shared
@@ -3223,9 +3162,8 @@ removed via ``xfarray_unset``.
 Bag members are examined through ``xfarray_iter`` loops.
 (这种情况下的类袋子结构是 :ref:`xfarray 访问模式 <xfarray_access_patterns>` 一节中讨论的类型 2 xfarray。反向映射通过 ``xfarray_store_anywhere`` 添加到袋子，通过 ``xfarray_unset`` 移除。袋子成员通过 ``xfarray_iter`` 循环进行检查。)
 
-Case Study: Rebuilding File Fork Mapping Indices
-(案例研究：重建文件 fork 映射索引)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Case Study: Rebuilding File Fork Mapping Indices(案例研究：重建文件 fork 映射索引)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The high level process to rebuild a data/attr fork mapping btree is:
 (重建数据/属性 fork 映射 btree 的高层流程是：)
@@ -3272,9 +3210,8 @@ any delayed allocation extents.
 
 .. _reaping:
 
-Reaping Old Metadata Blocks
-(回收旧元数据块)
----------------------------
+Reaping Old Metadata Blocks(回收旧元数据块)
+-------------------------------------------
 
 Whenever online fsck builds a new data structure to replace one that is
 suspect, there is a question of how to find and dispose of the blocks that
@@ -3371,9 +3308,8 @@ As stated earlier, online repair functions use very large transactions to
 minimize the chances of this occurring.
 (这也是一个窗口，在此期间回收过程中的崩溃可能泄漏块。如前所述，在线修复函数使用非常大的事务来尽量减少这种情况发生的几率。)
 
-Case Study: Reaping After a Regular Btree Repair
-(案例研究：常规 btree 修复后的回收)
-````````````````````````````````````````````````
+Case Study: Reaping After a Regular Btree Repair(案例研究：常规 btree 修复后的回收)
+```````````````````````````````````````````````````````````````````````````````````
 
 Old reference count and inode btrees are the easiest to reap because they have
 rmap records with special owner codes: ``XFS_RMAP_OWN_REFC`` for the refcount
@@ -3404,9 +3340,8 @@ common case), then step 2 can be performed at the same time as the reverse
 mapping record walk that creates the records for the new btree.
 (如果可以在整个修复期间保持 AGF 锁(这是常见情形)，则步骤 2 可以与为新 btree 创建记录的反向映射记录遍历同时执行。)
 
-Case Study: Rebuilding the Free Space Indices
-(案例研究：重建空闲空间索引)
-`````````````````````````````````````````````
+Case Study: Rebuilding the Free Space Indices(案例研究：重建空闲空间索引)
+`````````````````````````````````````````````````````````````````````````
 
 The high level process to rebuild the free space indices is:
 (重建空闲空间索引的高层流程是：)
@@ -3488,9 +3423,8 @@ These blocks can then be reaped using the methods outlined above.
 
 .. _rmap_reap:
 
-Case Study: Reaping After Repairing Reverse Mapping Btrees
-(案例研究：修复反向映射 btree 后的回收)
-``````````````````````````````````````````````````````````
+Case Study: Reaping After Repairing Reverse Mapping Btrees(案例研究：修复反向映射 btree 后的回收)
+`````````````````````````````````````````````````````````````````````````````````````````````````
 
 Old reverse mapping btrees are less difficult to reap after a repair.
 As mentioned in the previous section, blocks on the AGFL, the two free space
@@ -3513,9 +3447,8 @@ The rest of the process of rebuildng the reverse mapping btree is discussed
 in a separate :ref:`case study<rmap_repair>`.
 (重建反向映射 btree 过程的其余部分在单独的 :ref:`案例研究 <rmap_repair>` 中讨论。)
 
-Case Study: Rebuilding the AGFL
-(案例研究：重建 AGFL)
-```````````````````````````````
+Case Study: Rebuilding the AGFL(案例研究：重建 AGFL)
+````````````````````````````````````````````````````
 
 The allocation group free block list (AGFL) is repaired as follows:
 (分配组空闲块列表(AGFL)按如下方式修复：)
@@ -3540,9 +3473,8 @@ The allocation group free block list (AGFL) is repaired as follows:
 See `fs/xfs/scrub/agheader_repair.c <https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/fs/xfs/scrub/agheader_repair.c>`_ for more details.
 (更多细节参见 `fs/xfs/scrub/agheader_repair.c <https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/fs/xfs/scrub/agheader_repair.c>`_。)
 
-Inode Record Repairs
-(inode 记录修复)
---------------------
+Inode Record Repairs(inode 记录修复)
+------------------------------------
 
 Inode records must be handled carefully, because they have both ondisk records
 ("dinodes") and an in-memory ("cached") representation.
@@ -3572,9 +3504,8 @@ forks, or if that fails, leaving the fields invalid and waiting for the fork
 fsck functions to run.
 (一旦内存表示被加载，修复就可以锁定 inode，并对其进行全面的检查、修复和优化。大多数 inode 属性易于检查和约束，或者是用户控制的任意位模式；这两者都容易修复。处理数据和属性 fork 的区段计数以及文件块计数则更复杂，因为计算正确的值需要遍历 fork，如果做不到，就让字段保持无效并等待 fork fsck 函数运行。)
 
-Quota Record Repairs
-(配额记录修复)
---------------------
+Quota Record Repairs(配额记录修复)
+----------------------------------
 
 Similar to inodes, quota records ("dquots") also have both ondisk records and
 an in-memory representation, and hence are subject to the same cache coherency
@@ -3594,9 +3525,8 @@ section about :ref:`live quotacheck <quotacheck>`.
 
 .. _fscounters:
 
-Freezing to Fix Summary Counters
-(冻结以修复摘要计数器)
---------------------------------
+Freezing to Fix Summary Counters(冻结以修复摘要计数器)
+------------------------------------------------------
 
 Filesystem summary counters track availability of filesystem resources such
 as free blocks, free inodes, and allocated inodes.
@@ -3714,9 +3644,8 @@ long enough to check and correct the summary counters.
 | (该 bug 已在 Linux 5.17 中修复。)                                               |
 +--------------------------------------------------------------------------+
 
-Full Filesystem Scans
-(全文件系统扫描)
----------------------
+Full Filesystem Scans(全文件系统扫描)
+-------------------------------------
 
 Certain types of metadata can only be checked by walking every file in the
 entire filesystem to record observations and comparing the observations against
@@ -3739,9 +3668,8 @@ There are two questions that need to be solved to perform a live walk:
 
 .. _iscan:
 
-Coordinated Inode Scans
-(协调的 inode 扫描)
-```````````````````````
+Coordinated Inode Scans(协调的 inode 扫描)
+``````````````````````````````````````````
 
 In the original Unix filesystems of the 1970s, each directory entry contained
 an index number (*inumber*) which was used as an index into on ondisk array
@@ -3870,9 +3798,8 @@ coordinator must release the AGI and push the main filesystem to get the inode
 back into a loadable state.
 (inode 缓存有一些微妙之处，使为调用者抓取内存中 inode 变得复杂。显然，inode 元数据必须一致到足以加载进 inode 缓存，这是绝对要求。其次，如果内存中 inode 卡在某个中间状态，扫描协调器必须释放 AGI 并推动主文件系统使该 inode 恢复到可加载状态。)
 
-Inode Management
-(inode 管理)
-````````````````
+Inode Management(inode 管理)
+````````````````````````````
 
 In regular filesystem code, references to allocated XFS incore inodes are
 always obtained (``xfs_iget``) outside of transaction context because the
@@ -3960,9 +3887,8 @@ The next few sections detail the specific ways in which online fsck takes care
 to avoid deadlocks.
 (资源通常以相反的顺序释放，但这并非必需。然而，在线 fsck 与常规 XFS 操作不同，因为它可能检查一个通常在加锁顺序较后阶段才获取的对象，然后决定将该对象与顺序中较早获取的对象交叉引用。接下来几节详细介绍在线 fsck 为避免死锁而采取的具体措施。)
 
-iget and irele During a Scrub
-(scrub 期间的 iget 与 irele)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+iget and irele During a Scrub(scrub 期间的 iget 与 irele)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 An inode scan performed on behalf of a scrub operation runs in transaction
 context, and possibly with resources already locked and bound to it.
@@ -3992,9 +3918,8 @@ behavior.
 
 .. _ilocking:
 
-Locking Inodes
-(锁定 inode)
-^^^^^^^^^^^^^^
+Locking Inodes(锁定 inode)
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In regular filesystem code, the VFS and XFS will acquire multiple IOLOCK locks
 in a well-known order: parent → child when updating the directory tree, and
@@ -4031,9 +3956,8 @@ react accordingly.
 
 .. _dirparent:
 
-Case Study: Finding a Directory Parent
-(案例研究：寻找目录父项)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Case Study: Finding a Directory Parent(案例研究：寻找目录父项)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Consider the directory parent pointer repair code as an example.
 Online fsck must verify that the dotdot dirent of a directory points up to a
@@ -4054,9 +3978,8 @@ exit early.
 
 .. _fshooks:
 
-Filesystem Hooks
-(文件系统挂钩)
-`````````````````
+Filesystem Hooks(文件系统挂钩)
+``````````````````````````````
 
 The second piece of support that online fsck functions need during a full
 filesystem scan is the ability to stay informed about updates being made by
@@ -4141,9 +4064,8 @@ zero when online fsck is not running.
 
 .. _liveupdate:
 
-Live Updates During a Scan
-(扫描期间的实时更新)
-``````````````````````````
+Live Updates During a Scan(扫描期间的实时更新)
+``````````````````````````````````````````````
 
 The code paths of the online fsck scanning code and the :ref:`hooked<fshooks>`
 filesystem code look like this::
@@ -4228,9 +4150,8 @@ The inode scan APIs are pretty simple:
 
 .. _quotacheck:
 
-Case Study: Quota Counter Checking
-(案例研究：配额计数器检查)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Case Study: Quota Counter Checking(案例研究：配额计数器检查)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 It is useful to compare the mount time quotacheck code to the online repair
 quotacheck code.
@@ -4343,9 +4264,8 @@ resource counts are set to the values in the shadow dquot.
 
 .. _nlinks:
 
-Case Study: File Link Count Checking
-(案例研究：文件链接计数检查)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Case Study: File Link Count Checking(案例研究：文件链接计数检查)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 File link count checking also uses live update hooks.
 The coordinated inode scanner is used to visit all directories on the
@@ -4405,9 +4325,8 @@ orphanage to prevent the file from being lost forever.
 
 .. _rmap_repair:
 
-Case Study: Rebuilding Reverse Mapping Records
-(案例研究：重建反向映射记录)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Case Study: Rebuilding Reverse Mapping Records(案例研究：重建反向映射记录)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Most repair functions follow the same pattern: lock filesystem resources,
 walk the surviving ondisk metadata looking for replacement metadata records,
@@ -4503,9 +4422,8 @@ scan for reverse mapping records.
 12. Free the xfbtree now that it not needed.
     (既然不再需要，就释放该 xfbtree。)
 
-Staging Repairs with Temporary Files on Disk
-(用磁盘上的临时文件暂存修复)
---------------------------------------------
+Staging Repairs with Temporary Files on Disk(用磁盘上的临时文件暂存修复)
+------------------------------------------------------------------------
 
 XFS stores a substantial amount of metadata in file forks: directories,
 extended attributes, symbolic link targets, free space bitmaps and summary
@@ -4642,9 +4560,8 @@ opened by handle, and they must never be linked into the directory tree.
 | (这导致了临时文件暂存机制的引入。)                                                       |
 +--------------------------------------------------------------------------+
 
-Using a Temporary File
-(使用临时文件)
-``````````````````````
+Using a Temporary File(使用临时文件)
+````````````````````````````````````
 
 Online repair code should use the ``xrep_tempfile_create`` function to create a
 temporary file inside the filesystem.
@@ -4683,9 +4600,8 @@ must be conveyed to the file being repaired, which is the topic of the next
 section.
 (一旦在临时文件中构建好数据文件的良好副本，就必须把它传递给被修复的文件，这是下一节的主题。)
 
-Logged File Content Exchanges
-(日志化的文件内容交换)
------------------------------
+Logged File Content Exchanges(日志化的文件内容交换)
+---------------------------------------------------
 
 Once repair builds a temporary file with a new data structure written into
 it, it must commit the new changes into the existing file.
@@ -4799,9 +4715,8 @@ old kernels.
 | (日志辅助的扩展属性更新和文件内容交换都使用日志不兼容特性，并为该功能提供了便利的包装函数。)                          |
 +--------------------------------------------------------------------------+
 
-Mechanics of a Logged File Content Exchange
-(日志化文件内容交换的机制)
-```````````````````````````````````````````
+Mechanics of a Logged File Content Exchange(日志化文件内容交换的机制)
+`````````````````````````````````````````````````````````````````````
 
 Exchanging contents between file forks is a complex task.
 The goal is to exchange all file fork mappings between two file fork offset
@@ -4935,9 +4850,8 @@ will either see the old broken structure or the new one, and never a mismash of
 both.
 (如果文件系统在操作中途宕机，日志恢复将找到最近的未完成的映射交换日志意图项并从那里重启。原子文件映射交换就是这样保证外部观察者要么看到旧的损坏结构，要么看到新结构，而绝不会看到两者的混搭。)
 
-Preparation for File Content Exchanges
-(文件内容交换的准备)
-``````````````````````````````````````
+Preparation for File Content Exchanges(文件内容交换的准备)
+``````````````````````````````````````````````````````````
 
 There are a few things that need to be taken care of before initiating an
 atomic file mapping exchange operation.
@@ -4974,9 +4888,8 @@ Regular users are required to abide the quota limits, though metadata repairs
 may exceed quota to resolve inconsistent metadata elsewhere.
 (精确估计的需要增加了交换操作的运行时间，但保持正确的记账非常重要。文件系统绝不能完全耗尽空闲空间，映射交换也绝不能向 fork 添加超出其支持能力的区段映射。要求常规用户遵守配额限制，不过元数据修复可以超过配额以解决别处不一致的元数据。)
 
-Special Features for Exchanging Metadata File Contents
-(交换元数据文件内容的特殊功能)
-``````````````````````````````````````````````````````
+Special Features for Exchanging Metadata File Contents(交换元数据文件内容的特殊功能)
+````````````````````````````````````````````````````````````````````````````````````
 
 Extended attributes, symbolic links, and directories can set the fork format to
 "local" and treat the fork as a literal area for data storage.
@@ -5025,9 +4938,8 @@ However, this iunlink processing omits the cross-link detection of online
 repair, and is not completely foolproof.
 (交换操作成功之后，修复操作必须通过修复后执行的标准 :ref:`文件区段回收 <reaping>` 机制处理每个 fork 映射来回收旧 fork 块。如果文件系统在修复的回收部分宕机，恢复末尾的 iunlink 处理将同时释放临时文件和所有未被回收的块。不过，这一 iunlink 处理省略了在线修复的交叉链接检测，并非完全万无一失。)
 
-Exchanging Temporary File Contents
-(交换临时文件内容)
-``````````````````````````````````
+Exchanging Temporary File Contents(交换临时文件内容)
+````````````````````````````````````````````````````
 
 To repair a metadata file, online repair proceeds as follows:
 (要修复一个元数据文件，在线修复按如下步骤进行：)
@@ -5057,9 +4969,8 @@ To repair a metadata file, online repair proceeds as follows:
 
 .. _rtsummary:
 
-Case Study: Repairing the Realtime Summary File
-(案例研究：修复实时摘要文件)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Case Study: Repairing the Realtime Summary File(案例研究：修复实时摘要文件)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In the "realtime" section of an XFS filesystem, free space is tracked via a
 bitmap, similar to Unix FFS.
@@ -5107,9 +5018,8 @@ and use atomic mapping exchange to commit the new contents.
 The temporary file is then reaped.
 (要修复摘要文件，将 xfile 内容写入临时文件，并使用原子映射交换提交新内容。然后回收该临时文件。)
 
-Case Study: Salvaging Extended Attributes
-(案例研究：抢救扩展属性)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Case Study: Salvaging Extended Attributes(案例研究：抢救扩展属性)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In XFS, extended attributes are implemented as a namespaced name-value store.
 Values are limited in size to 64KiB, but there is no limit in the number of
@@ -5158,9 +5068,8 @@ Salvaging extended attributes is done as follows:
 4. Reap the temporary file.
    (回收临时文件。)
 
-Fixing Directories
-(修复目录)
-------------------
+Fixing Directories(修复目录)
+----------------------------
 
 Fixing directories is difficult with currently available filesystem features,
 since directory entries are not redundant.
@@ -5179,9 +5088,8 @@ The :ref:`file link count fsck <nlinks>` code takes care of fixing link counts
 and moving orphans to the ``/lost+found`` directory.
 (在线修复目前能做的最好的事情是：读取目录数据块，抢救任何看起来合理的 dirent，纠正链接计数，并把孤儿移回目录树。抢救过程在本节末尾的案例研究中讨论。:ref:`文件链接计数 fsck <nlinks>` 代码负责修复链接计数并把孤儿移到 ``/lost+found`` 目录。)
 
-Case Study: Salvaging Directories
-(案例研究：抢救目录)
-`````````````````````````````````
+Case Study: Salvaging Directories(案例研究：抢救目录)
+`````````````````````````````````````````````````````
 
 Unlike extended attributes, directory blocks are all the same size, so
 salvaging directories is straightforward:
@@ -5252,9 +5160,8 @@ every child dentry of a specific directory, which makes this a hard problem.
 There is no known solution.
 (不幸的是，当前的 dentry 缓存设计没有提供遍历特定目录的每个子 dentry 的手段，这使它成为一个难题。目前没有已知的解决方案。)
 
-Parent Pointers
-(父指针)
-```````````````
+Parent Pointers(父指针)
+```````````````````````
 
 A parent pointer is a piece of file metadata that enables a user to locate the
 file's parent directory without having to traverse the directory tree from the
@@ -5423,9 +5330,8 @@ Both online and offline repair can use this strategy.
 +--------------------------------------------------------------------------+
 
 
-Case Study: Repairing Directories with Parent Pointers
-(案例研究：用父指针修复目录)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Case Study: Repairing Directories with Parent Pointers(案例研究：用父指针修复目录)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Directory rebuilding uses a :ref:`coordinated inode scan <iscan>` and
 a :ref:`directory entry live update hook <liveupdate>` as follows:
@@ -5478,9 +5384,8 @@ a :ref:`directory entry live update hook <liveupdate>` as follows:
 7. Reap the temporary directory.
    (回收临时目录。)
 
-Case Study: Repairing Parent Pointers
-(案例研究：修复父指针)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Case Study: Repairing Parent Pointers(案例研究：修复父指针)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Online reconstruction of a file's parent pointer information works similarly to
 directory reconstruction:
@@ -5536,9 +5441,8 @@ directory reconstruction:
 8. Reap the temporary file.
    (回收临时文件。)
 
-Digression: Offline Checking of Parent Pointers
-(题外话：父指针的离线检查)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Digression: Offline Checking of Parent Pointers(题外话：父指针的离线检查)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Examining parent pointers in offline repair works differently because corrupt
 files are erased long before directory tree connectivity checks are performed.
@@ -5682,9 +5586,8 @@ This code has not yet been constructed.
 
 .. _dirtree:
 
-Case Study: Directory Tree Structure
-(案例研究：目录树结构)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Case Study: Directory Tree Structure(案例研究：目录树结构)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 As mentioned earlier, the filesystem directory tree is supposed to be a
 directed acylic graph structure.
@@ -5829,9 +5732,8 @@ Repairing the directory tree works as follows:
 
 .. _orphanage:
 
-The Orphanage
-(孤儿院)
--------------
+The Orphanage(孤儿院)
+---------------------
 
 Filesystems present files as a directed, and hopefully acyclic, graph.
 In other words, a tree.
@@ -5905,9 +5807,8 @@ Orphaned files are adopted by the orphanage as follows:
    resources.
    (如果发生运行时错误，则调用 ``xrep_adoption_cancel`` 释放所有资源。)
 
-6. Userspace Algorithms and Data Structures
-(6. 用户空间算法和数据结构)
-===========================================
+6. Userspace Algorithms and Data Structures(6. 用户空间算法和数据结构)
+======================================================================
 
 This section discusses the key algorithms and data structures of the userspace
 program, ``xfs_scrub``, that provide the ability to drive metadata checks and
@@ -5916,9 +5817,8 @@ repairs in the kernel, verify file data, and look for other potential problems.
 
 .. _scrubcheck:
 
-Checking Metadata
-(检查元数据)
------------------
+Checking Metadata(检查元数据)
+-----------------------------
 
 Recall the :ref:`phases of fsck work<scrubphases>` outlined earlier.
 That structure follows naturally from the data dependencies designed into the
@@ -6001,9 +5901,8 @@ Notice that the data dependencies between groups are enforced by the structure
 of the program flow.
 (注意，组之间的数据依赖由程序流程的结构来强制执行。)
 
-Parallel Inode Scans
-(并行 inode 扫描)
---------------------
+Parallel Inode Scans(并行 inode 扫描)
+-------------------------------------
 
 An XFS filesystem can easily contain hundreds of millions of inodes.
 Given that XFS targets installations with large high-performance storage,
@@ -6046,9 +5945,8 @@ move on to more pressing issues.
 
 .. _scrubrepair:
 
-Scheduling Repairs
-(调度修复)
-------------------
+Scheduling Repairs(调度修复)
+----------------------------
 
 During phase 2, corruptions and inconsistencies reported in any AGI header or
 inode btree are repaired immediately, because phase 3 relies on proper
@@ -6143,9 +6041,8 @@ Corrupt file data blocks reported by phase 6 cannot be recovered by the
 filesystem.
 (在阶段 5 和 7 中遇到的损坏和不一致会立即修复。阶段 6 报告的损坏文件数据块无法由文件系统恢复。)
 
-Checking Names for Confusable Unicode Sequences
-(检查名称中易混淆的 Unicode 序列)
------------------------------------------------
+Checking Names for Confusable Unicode Sequences(检查名称中易混淆的 Unicode 序列)
+--------------------------------------------------------------------------------
 
 If ``xfs_scrub`` succeeds in validating the filesystem metadata by the end of
 phase 4, it moves on to phase 5, which checks for suspicious looking names in
@@ -6230,9 +6127,8 @@ All of these potential issues are reported to the system administrator during
 phase 5.
 (检测易混淆名称的技术在 `Unicode Security Mechanisms <https://unicode.org/reports/tr39/>`_ 文档的第 4 和第 5 节中有非常详细的说明。当 ``xfs_scrub`` 检测到系统正在使用 UTF-8 编码时，它会将 Unicode 规范化形式 NFD 与 `libicu <https://github.com/unicode-org/icu>`_ 的易混淆名称检测组件结合使用，以识别目录内或文件扩展属性中可能彼此混淆的名称。名称还会被检查控制字符、不呈现字符以及双向字符的混用。所有这些潜在问题都会在阶段 5 中向系统管理员报告。)
 
-Media Verification of File Data Extents
-(文件数据区段的介质校验)
----------------------------------------
+Media Verification of File Data Extents(文件数据区段的介质校验)
+---------------------------------------------------------------
 
 The system administrator can elect to initiate a media scan of all file data
 blocks.
@@ -6256,9 +6152,8 @@ For media errors in blocks owned by files, parent pointers can be used to
 construct file paths from inode numbers for user-friendly reporting.
 (如果校验读取失败，``xfs_scrub`` 会用单块读取重试，以把失败缩小到介质的特定区域并记录下来。在发出完所有校验请求之后，它再次使用空间映射 ioctl 将记录的介质错误映射回元数据结构，并报告丢失的内容。对于文件拥有的块中的介质错误，可以使用父指针从 inode 编号构造文件路径，以便进行对用户友好的报告。)
 
-7. Conclusion and Future Work
-(7. 结论与未来工作)
-=============================
+7. Conclusion and Future Work(7. 结论与未来工作)
+================================================
 
 It is hoped that the reader of this document has followed the designs laid out
 in this document and now has some familiarity with how XFS performs online
@@ -6270,9 +6165,8 @@ has been built, and why.
 Please feel free to contact the XFS mailing list with questions.
 (希望本文档的读者跟上了本文阐述的设计，现在对 XFS 如何在线重建其元数据索引、文件系统用户如何与该功能交互已有一定的了解。虽然这项工作的范围令人生畏，但希望本指南能让代码阅读者更容易理解构建了什么、为谁构建以及为什么构建。欢迎通过 XFS 邮件列表提出问题。)
 
-XFS_IOC_EXCHANGE_RANGE
-(XFS_IOC_EXCHANGE_RANGE)
-----------------------
+XFS_IOC_EXCHANGE_RANGE(XFS_IOC_EXCHANGE_RANGE)
+----------------------------------------------
 
 As discussed earlier, a second frontend to the atomic file mapping exchange
 mechanism is a new ioctl call that userspace programs can use to commit updates
@@ -6282,9 +6176,8 @@ necessary refinements to online repair and lack of customer demand mean that
 the proposal has not been pushed very hard.
 (如前所述，原子文件映射交换机制的第二个前端是一个新的 ioctl 调用，用户空间程序可以用它原子地提交对文件的更新。这个前端已经公开评审好几年了，不过对在线修复的必要改进以及客户需求的缺乏意味着该提案没有被大力推动。)
 
-File Content Exchanges with Regular User Files
-(与常规用户文件的文件内容交换)
-``````````````````````````````````````````````
+File Content Exchanges with Regular User Files(与常规用户文件的文件内容交换)
+````````````````````````````````````````````````````````````````````````````
 
 As mentioned earlier, XFS has long had the ability to swap extents between
 files, which is used almost exclusively by ``xfs_fsr`` to defragment files.
@@ -6350,9 +6243,8 @@ The extra flexibility enables several new use cases:
 (This functionality was merged into mainline as of 2025)
 (截至 2025 年，此功能已合并到主线。)
 
-Vectorized Scrub
-(向量化 scrub)
-----------------
+Vectorized Scrub(向量化 scrub)
+------------------------------
 
 As it turns out, the :ref:`refactoring <scrubrepair>` of repair items mentioned
 earlier was a catalyst for enabling a vectorized scrub system call.
@@ -6377,9 +6269,8 @@ call to XFS.
 (This functionality was merged into mainline as of 2025)
 (截至 2025 年，此功能已合并到主线。)
 
-Quality of Service Targets for Scrub
-(scrub 的服务质量目标)
-------------------------------------
+Quality of Service Targets for Scrub(scrub 的服务质量目标)
+----------------------------------------------------------
 
 One serious shortcoming of the online fsck code is that the amount of time that
 it can spend in the kernel holding resource locks is basically unbounded.
@@ -6394,9 +6285,8 @@ ondisk metadata, the operation cannot be cancelled cleanly, after which a QoS
 timeout is no longer useful.
 (在线 fsck 代码的一个严重缺点是它在内核中持有资源锁的时间基本上没有上限。允许用户空间向进程发送致命信号，使 ``xfs_scrub`` 在到达合适的停止点时退出，但用户空间没有办法向内核提供时间预算。鉴于 scrub 代码库有检测致命信号的辅助函数，允许用户空间为 scrub/repair 操作指定超时并在超出预算时中止操作，工作量应该不会太大。然而，大多数修复函数有一个特性：一旦开始接触磁盘元数据，操作就无法干净地取消，此后 QoS 超时就不再有用。)
 
-Defragmenting Free Space
-(空闲空间碎片整理)
-------------------------
+Defragmenting Free Space(空闲空间碎片整理)
+------------------------------------------
 
 Over the years, many XFS users have requested the creation of a program to
 clear a portion of the physical storage underlying a filesystem so that it
@@ -6482,9 +6372,8 @@ and
 series.
 (相关的补丁集是 `kernel freespace defrag <https://git.kernel.org/pub/scm/linux/kernel/git/djwong/xfs-linux.git/log/?h=defrag-freespace>`_ 和 `userspace freespace defrag <https://git.kernel.org/pub/scm/linux/kernel/git/djwong/xfsprogs-dev.git/log/?h=defrag-freespace>`_ 系列。)
 
-Shrinking Filesystems
-(收缩文件系统)
----------------------
+Shrinking Filesystems(收缩文件系统)
+-----------------------------------
 
 Removing the end of the filesystem ought to be a simple matter of evacuating
 the data and metadata at the end of the filesystem, and handing the freed space

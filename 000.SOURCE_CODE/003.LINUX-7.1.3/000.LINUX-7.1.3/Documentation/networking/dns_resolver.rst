@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===================
-DNS Resolver Module
-===================
-
-(DNS 解析器模块)
+===================================
+DNS Resolver Module(DNS 解析器模块)
+===================================
 
 .. Contents:
 
@@ -16,9 +14,8 @@ DNS Resolver Module
  - Debugging.
 
 
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 The DNS resolver module provides a way for kernel services to make DNS queries
 by way of requesting a key of key type dns_resolver.  These queries are
@@ -45,9 +42,8 @@ This code is extracted from the CIFS filesystem.
 (这段代码提取自 CIFS 文件系统。)
 
 
-Compilation
-(编译)
-===========
+Compilation(编译)
+=================
 
 The module should be enabled by turning on the kernel configuration options::
 (应当通过打开以下内核配置选项来启用该模块：)
@@ -55,9 +51,8 @@ The module should be enabled by turning on the kernel configuration options::
 	CONFIG_DNS_RESOLVER	- tristate "DNS Resolver support"
 
 
-Setting up
-(设置)
-==========
+Setting up(设置)
+================
 
 To set up this facility, the /etc/request-key.conf file must be altered so that
 /sbin/request-key can appropriately direct the upcalls.  For example, to handle
@@ -79,9 +74,8 @@ before the more general line given above as the first match is the one taken::
 	create	dns_resolver  	foo:*	*	/usr/sbin/dns.foo %k
 
 
-Usage
-(用法)
-=====
+Usage(用法)
+===========
 
 To make use of this facility, first ``dns_resolver.h`` must be included::
 (要使用这一设施，首先必须包含 ``dns_resolver.h``：)
@@ -140,9 +134,8 @@ the use of KEYCTL_KEYRING_CLEAR on the keyring ID.
 进程都可以通过对该密钥环 ID 使用 KEYCTL_KEYRING_CLEAR 来清空它。)
 
 
-Reading DNS Keys from Userspace
-(从用户空间读取 DNS 密钥)
-===============================
+Reading DNS Keys from Userspace(从用户空间读取 DNS 密钥)
+========================================================
 
 Keys of dns_resolver type can be read from userspace using keyctl_read() or
 "keyctl read/print/pipe".
@@ -150,9 +143,8 @@ Keys of dns_resolver type can be read from userspace using keyctl_read() or
 类型的密钥。)
 
 
-Mechanism
-(机制)
-=========
+Mechanism(机制)
+===============
 
 The dns_resolver module registers a key type called "dns_resolver".  Keys of
 this type are used to transport and cache DNS lookup results from userspace.
@@ -196,9 +188,8 @@ request-key function.
 Documentation/security/keys/request-key.rst。)
 
 
-Debugging
-(调试)
-=========
+Debugging(调试)
+===============
 
 Debugging messages can be turned on dynamically by writing a 1 into the
 following file::

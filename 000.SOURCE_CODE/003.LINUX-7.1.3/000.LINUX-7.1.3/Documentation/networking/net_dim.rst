@@ -1,26 +1,22 @@
-======================================================
-Net DIM - Generic Network Dynamic Interrupt Moderation
-======================================================
-
-(Net DIM - 通用网络动态中断调节)
+======================================================================================
+Net DIM - Generic Network Dynamic Interrupt Moderation(Net DIM - 通用网络动态中断调节)
+======================================================================================
 
 :Author: Tal Gilboa <talgi@mellanox.com>
 (作者: Tal Gilboa <talgi@mellanox.com>)
 
 .. contents:: :depth: 2
 
-Assumptions
-(前提假设)
-===========
+Assumptions(前提假设)
+=====================
 
 This document assumes the reader has basic knowledge in network drivers
 and in general interrupt moderation.
 (本文假定读者已具备网络驱动以及一般中断调节方面的基础知识。)
 
 
-Introduction
-(简介)
-============
+Introduction(简介)
+==================
 
 Dynamic Interrupt Moderation (DIM) (in networking) refers to changing the
 interrupt moderation configuration of a channel in order to optimize packet
@@ -46,9 +42,8 @@ increase bandwidth over reducing interrupt rate.
 断速率之上。)
 
 
-Net DIM Algorithm
-(Net DIM 算法)
-=================
+Net DIM Algorithm(Net DIM 算法)
+===============================
 
 Each iteration of the Net DIM algorithm follows these steps:
 (Net DIM 算法的每次迭代遵循以下步骤：)
@@ -117,9 +112,8 @@ under some conditions.
 部分数据，或者忽略算法的建议。)
 
 
-Registering a Network Device to DIM
-(将网络设备注册到 DIM)
-===================================
+Registering a Network Device to DIM(将网络设备注册到 DIM)
+=========================================================
 
 Net DIM API exposes the main function net_dim().
 This function is the entry point to the Net
@@ -172,9 +166,8 @@ the proper state in order to move to the next iteration.
 状态，以便进入下一次迭代。)
 
 
-Example
-(示例)
-=======
+Example(示例)
+=============
 
 The following code demonstrates how to register a driver to Net DIM. The actual
 usage is not complete but it should make the outline of the usage clear.
@@ -224,9 +217,8 @@ usage is not complete but it should make the outline of the usage clear.
   }
 
 
-Tuning DIM
-(调优 DIM)
-==========
+Tuning DIM(调优 DIM)
+====================
 
 Net DIM serves a range of network devices and delivers excellent acceleration
 benefits. Yet, it has been observed that some preset configurations of DIM may
@@ -277,9 +269,8 @@ modified, error messages will be reported.
 消息。)
 
 
-Dynamic Interrupt Moderation (DIM) library API
-(动态中断调节 (DIM) 库 API)
-==============================================
+Dynamic Interrupt Moderation (DIM) library API(动态中断调节 (DIM) 库 API)
+=========================================================================
 
 .. kernel-doc:: include/linux/dim.h
     :internal:

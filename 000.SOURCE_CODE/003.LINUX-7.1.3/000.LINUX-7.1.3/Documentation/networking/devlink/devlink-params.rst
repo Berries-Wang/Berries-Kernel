@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==============
-Devlink Params
-==============
-
-(Devlink 参数)
+============================
+Devlink Params(Devlink 参数)
+============================
 
 ``devlink`` provides capability for a driver to expose device parameters for low
 level device functionality. Since devlink can operate at the device-wide
@@ -20,9 +18,8 @@ whether generic or not.
 (本文档描述了多个驱动程序都支持的一些通用参数。每个驱动程序也可以自由添加自己的参数。每个驱动
 程序都必须记录其所支持的特定参数，无论是否为通用参数。)
 
-Configuration modes
-(配置模式)
-===================
+Configuration modes(配置模式)
+=============================
 
 Parameters may be set in different configuration modes.
 (参数可以在不同的配置模式下设置。)
@@ -45,9 +42,8 @@ Parameters may be set in different configuration modes.
        for it to take effect.
        (写入设备的非易失性存储器。需要硬复位才能生效。)
 
-Reloading
-(重新加载)
----------
+Reloading(重新加载)
+-------------------
 
 In order for ``driverinit`` parameters to take effect, the driver must
 support reloading via the ``devlink-reload`` command. This command will
@@ -55,9 +51,8 @@ request a reload of the device driver.
 (要使 ``driverinit`` 参数生效，驱动程序必须支持通过 ``devlink-reload`` 命令进行重新加载。
 该命令将请求重新加载设备驱动程序。)
 
-Default parameter values
-(默认参数值)
-=========================
+Default parameter values(默认参数值)
+====================================
 
 Drivers may optionally export default values for parameters of cmode
 ``runtime`` and ``permanent``. For ``driverinit`` parameters, the last
@@ -72,9 +67,8 @@ by devlink core without additional driver support needed.
 
 .. _devlink_params_generic:
 
-Generic configuration parameters
-(通用配置参数)
-================================
+Generic configuration parameters(通用配置参数)
+==============================================
 
 The following is a list of generic configuration parameters that drivers may
 add. Use of generic parameters is preferred over each driver creating their

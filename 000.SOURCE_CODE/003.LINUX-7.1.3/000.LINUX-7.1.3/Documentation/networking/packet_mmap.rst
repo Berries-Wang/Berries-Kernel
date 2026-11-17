@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===========
-Packet MMAP
-===========
+==========================================
+Packet MMAP(Packet MMAP，即数据包内存映射)
+==========================================
 
-(Packet MMAP，即数据包内存映射)
-
-Abstract
-(摘要)
-========
+Abstract(摘要)
+==============
 
 This file documents the mmap() facility available with the PACKET
 socket interface. This type of sockets is used for
@@ -31,9 +28,8 @@ Please send your comments to
     - Ulisses Alonso Camaró <uaca@i.hate.spam.alumni.uv.es>
     - Johann Baudy
 
-Why use PACKET_MMAP
-(为何使用 PACKET_MMAP)
-===================
+Why use PACKET_MMAP(为何使用 PACKET_MMAP)
+=========================================
 
 Non PACKET_MMAP capture process (plain AF_PACKET) is very
 inefficient. It uses very limited buffers and requires one system call to
@@ -69,9 +65,8 @@ card can also be an advantage.
 设备所使用和支持的 MTU (最大传输单元)。将网卡的 CPU IRQ 绑定 (pinning) 到特定
 处理器也可能带来好处。)
 
-How to use mmap() to improve capture process
-(如何使用 mmap() 改进捕获过程)
-============================================
+How to use mmap() to improve capture process(如何使用 mmap() 改进捕获过程)
+==========================================================================
 
 From the user standpoint, you should use the higher level libpcap library, which
 is a de facto standard, portable across nearly all operating systems
@@ -84,9 +79,8 @@ TPACKET_V3 support was added in version 1.5.0
 (Packet MMAP 支持大约在 1.3.0 版本时被集成进 libpcap；TPACKET_V3 支持则在 1.5.0
 版本中加入。)
 
-How to use mmap() directly to improve capture process
-(如何直接使用 mmap() 改进捕获过程)
-=====================================================
+How to use mmap() directly to improve capture process(如何直接使用 mmap() 改进捕获过程)
+=======================================================================================
 
 From the system calls stand point, the use of PACKET_MMAP involves
 the following process::
@@ -138,9 +132,8 @@ the use of this buffer.
 (接下来我将介绍 PACKET_MMAP 的设置及其约束，以及循环缓冲区在用户进程中的映射
 和该缓冲区的使用方法。)
 
-How to use mmap() directly to improve transmission process
-(如何直接使用 mmap() 改进发送过程)
-==========================================================
+How to use mmap() directly to improve transmission process(如何直接使用 mmap() 改进发送过程)
+============================================================================================
 
 Transmission process is similar to capture as shown below::
 (发送过程与捕获过程类似，如下所示：)
@@ -181,7 +174,6 @@ know the header size of frames used in the circular buffer.
 大小。)
 
 As capture, each frame contains two parts::
-(与捕获时一样，每个帧包含两个部分：)
 
     --------------------
     | struct tpacket_hdr | Header. It contains the status of
@@ -221,6 +213,8 @@ As capture, each frame contains two parts::
  (完整教程可在此处获取：)
  https://web.archive.org/web/20220404160947/https://sites.google.com/site/packetmmap/
 
+(与捕获时一样，每个帧包含两个部分：)
+
 By default, the user should put data at::
 (默认情况下，用户应将数据放在：)
 
@@ -242,9 +236,8 @@ and the PACKET_TX_HAS_OFF option.
 对齐负载)，可以设置 tp_net (SOCK_DGRAM 模式) 或 tp_mac (SOCK_RAW 模式)。
 要使其生效，必须事先通过 setsockopt() 和 PACKET_TX_HAS_OFF 选项将其启用。)
 
-PACKET_MMAP settings
-(PACKET_MMAP 设置)
-====================
+PACKET_MMAP settings(PACKET_MMAP 设置)
+======================================
 
 To setup PACKET_MMAP from user level code is done with a call like
 (从用户态代码中通过如下调用来设置 PACKET_MMAP)
@@ -323,9 +316,8 @@ buffer (ring)".
 换句话说，一个帧不能跨越两个块，因此在选择 frame_size 时需要注意一些细节。参见
 "Mapping and use of the circular buffer (ring)" 一节。)
 
-PACKET_MMAP setting constraints
-(PACKET_MMAP 设置约束)
-===============================
+PACKET_MMAP setting constraints(PACKET_MMAP 设置约束)
+=====================================================
 
 In kernel versions prior to 2.4.26 (for the 2.4 branch) and 2.6.5 (2.6 branch),
 the PACKET_MMAP buffer could hold only 32768 frames in a 32 bit architecture or
@@ -334,9 +326,8 @@ the PACKET_MMAP buffer could hold only 32768 frames in a 32 bit architecture or
 PACKET_MMAP 缓冲区最多只能容纳 32768 个帧，在 64 位体系结构上最多只能容纳
 16384 个帧。)
 
-Block size limit
-(块大小限制)
-----------------
+Block size limit(块大小限制)
+----------------------------
 
 As stated earlier, each block is a contiguous physical region of memory. These
 memory regions are allocated with calls to the __get_free_pages() function. As
@@ -373,9 +364,8 @@ The pagesize can also be determined dynamically with the getpagesize (2)
 system call.
 (页大小也可以通过 getpagesize (2) 系统调用动态确定。)
 
-Block number limit
-(块数量限制)
-------------------
+Block number limit(块数量限制)
+------------------------------
 
 To understand the constraints of PACKET_MMAP, we have to see the structure
 used to hold the pointers to each block.
@@ -383,8 +373,6 @@ used to hold the pointers to each block.
 
 Currently, this structure is a dynamically allocated vector with kmalloc
 called pg_vec, its size limits the number of blocks that can be allocated::
-(目前，该结构是用 kmalloc 动态分配的向量，名为 pg_vec，其大小限制了可分配块的
-数量：)
 
     +---+---+---+---+
     | x | x | x | x |
@@ -396,6 +384,9 @@ called pg_vec, its size limits the number of blocks that can be allocated::
       |   v  block #3
       v  block #2
      block #1
+
+(目前，该结构是用 kmalloc 动态分配的向量，名为 pg_vec，其大小限制了可分配块的
+数量：)
 
 kmalloc allocates any number of bytes of physically contiguous memory from
 a pool of pre-determined sizes. This pool of memory is maintained by the slab
@@ -417,9 +408,8 @@ pointers to blocks is::
 
      131072/4 = 32768 blocks
 
-PACKET_MMAP buffer size calculator
-(PACKET_MMAP 缓冲区大小计算器)
-==================================
+PACKET_MMAP buffer size calculator(PACKET_MMAP 缓冲区大小计算器)
+================================================================
 
 Definitions:
 (定义：)
@@ -488,9 +478,8 @@ the necessary memory, so normally limits can be reached.
 这基本上意味着分配过程可以等待，并可将其他进程的内存换出以分配所需的内存，
 因此通常可以达到上述上限。)
 
-Other constraints
-(其他约束)
------------------
+Other constraints(其他约束)
+---------------------------
 
 If you check the source code you will see that what I draw here as a frame
 is not only the link level frame. At the beginning of each frame there is a
@@ -532,9 +521,8 @@ Note that tp_block_size should be chosen to be a power of two or there will
 be a waste of memory.
 (注意，tp_block_size 应选择为 2 的幂，否则会浪费内存。)
 
-Mapping and use of the circular buffer (ring)
-(循环缓冲区 (ring) 的映射与使用)
----------------------------------------------
+Mapping and use of the circular buffer (ring)(循环缓冲区 (ring) 的映射与使用)
+-----------------------------------------------------------------------------
 
 The mapping of the buffer in the user process is done with the conventional
 mmap function. Even the circular buffer is compound of several physically
@@ -578,9 +566,8 @@ and the following flags apply:
 表示该帧已就绪，可供内核使用；如果不为 0，则表示有一个帧可供用户读取，此时
 适用以下标志：)
 
-Capture process
-(捕获过程)
-^^^^^^^^^^^^^^^
+Capture process(捕获过程)
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 From include/linux/if_packet.h::
 (摘自 include/linux/if_packet.h：)
@@ -665,9 +652,8 @@ It doesn't incur in a race condition to first check the status value and
 then poll for frames.
 (先检查状态值再 poll 等待帧，并不会导致竞争条件。)
 
-Transmission process
-(传输过程)
-^^^^^^^^^^^^^^^^^^^^
+Transmission process(传输过程)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Those defines are also used for transmission::
 (这些定义同样用于发送过程：)
@@ -712,9 +698,8 @@ The user can also use poll() to check if a buffer is available:
     pfd.events = POLLOUT;
     retval = poll(&pfd, 1, timeout);
 
-What TPACKET versions are available and when to use them?
-(有哪些 TPACKET 版本可用？何时使用它们？)
-=========================================================
+What TPACKET versions are available and when to use them?(有哪些 TPACKET 版本可用？何时使用它们？)
+==================================================================================================
 
 ::
 
@@ -808,9 +793,8 @@ TPACKET_V2 --> TPACKET_V3:
 	  tpacket3_hdr 中的 tp_next_offset 字段必须设置为 0，表示该环不保存
 	  可变大小的帧。tp_next_offset 值非零的数据包将被丢弃。)
 
-AF_PACKET fanout mode
-(AF_PACKET fanout 模式)
-=====================
+AF_PACKET fanout mode(AF_PACKET fanout 模式)
+============================================
 
 In the AF_PACKET fanout mode, packet reception can be load balanced among
 processes. This also works in combination with mmap(2) on packet sockets.
@@ -976,9 +960,8 @@ Minimal example code by David S. Miller (try things like "./test eth0 hash",
 	    return 0;
     }
 
-AF_PACKET TPACKET_V3 example
-(AF_PACKET TPACKET_V3 示例)
-============================
+AF_PACKET TPACKET_V3 example(AF_PACKET TPACKET_V3 示例)
+=======================================================
 
 AF_PACKET's TPACKET_V3 ring buffer can be configured to use non-static frame
 sizes by doing its own memory management. It is based on blocks where polling
@@ -1239,9 +1222,8 @@ it with gcc -Wall -O2 blob.c, and try things like "./a.out eth0", etc.)::
 	    return 0;
     }
 
-PACKET_QDISC_BYPASS
-(PACKET_QDISC_BYPASS，绕过排队规则)
-===================
+PACKET_QDISC_BYPASS(PACKET_QDISC_BYPASS，绕过排队规则)
+======================================================
 
 If there is a requirement to load the network with many packets in a similar
 fashion as pktgen does, you might set the following option after socket
@@ -1267,9 +1249,8 @@ On default, PACKET_QDISC_BYPASS is disabled and needs to be explicitly enabled
 on PF_PACKET sockets.
 (默认情况下，PACKET_QDISC_BYPASS 是禁用的，需要在 PF_PACKET 套接字上显式启用。)
 
-PACKET_TIMESTAMP
-(PACKET_TIMESTAMP，数据包时间戳)
-================
+PACKET_TIMESTAMP(PACKET_TIMESTAMP，数据包时间戳)
+================================================
 
 The PACKET_TIMESTAMP setting determines the source of the timestamp in
 the packet meta information for mmap(2)ed RX_RING and TX_RINGs.  If your
@@ -1342,18 +1323,16 @@ for more information on hardware timestamps.
 (有关硬件时间戳的更多信息，参见 include/linux/net_tstamp.h 和
 Documentation/networking/timestamping.rst。)
 
-Miscellaneous bits
-(杂项)
-==================
+Miscellaneous bits(杂项)
+========================
 
 - Packet sockets work well together with Linux socket filters, thus you also
   might want to have a look at Documentation/networking/filter.rst
   (包套接字与 Linux 套接字过滤器配合得很好，因此您可能还想看看
   Documentation/networking/filter.rst)
 
-THANKS
-(致谢)
-======
+THANKS(致谢)
+============
 
    Jesse Brandeburg, for fixing my grammathical/spelling errors
    (Jesse Brandeburg，感谢他修正我的语法/拼写错误)

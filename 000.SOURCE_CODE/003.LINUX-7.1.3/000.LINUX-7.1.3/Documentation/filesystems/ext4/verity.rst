@@ -1,8 +1,7 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-Verity files
-(verity 文件)
-------------
+Verity files(verity 文件)
+-------------------------
 
 ext4 supports fs-verity, which is a filesystem feature that provides
 Merkle tree based hashing for individual readonly files.  Most of

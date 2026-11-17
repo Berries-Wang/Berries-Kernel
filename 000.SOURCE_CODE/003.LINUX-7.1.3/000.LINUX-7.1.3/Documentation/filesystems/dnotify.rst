@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-============================
-Linux Directory Notification
-============================
-
-(Linux 目录通知)
+============================================
+Linux Directory Notification(Linux 目录通知)
+============================================
 
 	   Stephen Rothwell <sfr@canb.auug.org.au>
 (作者: Stephen Rothwell <sfr@canb.auug.org.au>)
@@ -48,9 +46,8 @@ especially important if DN_MULTISHOT is specified.  Note that SIGRTMIN
 is often blocked, so it is better to use (at least) SIGRTMIN + 1.
 (最好让应用程序选择一个实时信号(SIGRTMIN + <n>)，这样通知就可以排队。如果指定了 DN_MULTISHOT，这一点尤为重要。注意，SIGRTMIN 通常被阻塞，所以最好使用(至少)SIGRTMIN + 1。)
 
-Implementation expectations (features and bugs :-))
-(实现预期(特性与缺陷 :-))
----------------------------------------------------
+Implementation expectations (features and bugs :-))(实现预期(特性与缺陷 :-))
+----------------------------------------------------------------------------
 
 The notification should work for any local access to files even if the
 actual file system is on a remote server.  This implies that remote
@@ -71,23 +68,20 @@ Also, files that are unlinked, will still cause notifications in the
 last directory that they were linked to.
 (此外，被解除链接的文件仍会在它们最后所链接的目录中产生通知。)
 
-Configuration
-(配置)
--------------
+Configuration(配置)
+-------------------
 
 Dnotify is controlled via the CONFIG_DNOTIFY configuration option.  When
 disabled, fcntl(fd, F_NOTIFY, ...) will return -EINVAL.
 (Dnotify 通过 CONFIG_DNOTIFY 配置选项控制。禁用时，fcntl(fd, F_NOTIFY, ...) 将返回 -EINVAL。)
 
-Example
-(示例)
--------
+Example(示例)
+-------------
 See tools/testing/selftests/filesystems/dnotify_test.c for an example.
 (示例见 tools/testing/selftests/filesystems/dnotify_test.c。)
 
-NOTE
-(注意)
-----
+NOTE(注意)
+----------
 Beginning with Linux 2.6.13, dnotify has been replaced by inotify.
 See Documentation/filesystems/inotify.rst for more information on it.
 (从 Linux 2.6.13 开始，dnotify 已被 inotify 取代。有关它的更多信息参见 Documentation/filesystems/inotify.rst。)

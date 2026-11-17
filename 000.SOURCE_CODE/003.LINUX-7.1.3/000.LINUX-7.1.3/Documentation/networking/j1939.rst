@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: (GPL-2.0 OR MIT)
 
-===================
-J1939 Documentation
-===================
+===============================
+J1939 Documentation(J1939 文档)
+===============================
 
-(J1939 文档)
-
-Overview / What Is J1939
-(概述 / 什么是 J1939)
-========================
+Overview / What Is J1939(概述 / 什么是 J1939)
+=============================================
 
 SAE J1939 defines a higher layer protocol on CAN. It implements a more
 sophisticated addressing scheme and extends the maximum packet size above 8
@@ -19,9 +16,8 @@ Transport Protocol), which has been included in this implementation. This
 results in a maximum packet size of ((2 ^ 24) - 1) * 7 bytes == 111 MiB.
 (SAE J1939 在 CAN 之上定义了一个更高层的协议。它实现了更为复杂的寻址方案，并将最大数据包大小扩展到 8 字节以上。存在若干派生规范，它们在应用层与原始 J1939 有所差异，例如 MilCAN A、NMEA2000，尤其是 ISO-11783 (ISOBUS)。其中最后这一规范定义了所谓的 ETP (Extended Transport Protocol，扩展传输协议)，本实现已将其包含在内。这使得最大数据包大小可达 ((2 ^ 24) - 1) * 7 字节 == 111 MiB。)
 
-Specifications used
-(所用规范)
--------------------
+Specifications used(所用规范)
+-----------------------------
 
 * SAE J1939-21 : data link layer
   (SAE J1939-21：数据链路层)
@@ -32,9 +28,8 @@ Specifications used
 
 .. _j1939-motivation:
 
-Motivation
-(动机)
-==========
+Motivation(动机)
+================
 
 Given the fact there's something like SocketCAN with an API similar to BSD
 sockets, we found some reasons to justify a kernel implementation for the
@@ -78,13 +73,11 @@ cannot share ECU addresses. A single ECU (or virtual ECU) address is used by
 the library exclusively, or by the in-kernel system exclusively.
 (J1939 套接字工作在 CAN 网络设备之上 (参见 SocketCAN)。任何基于 CAN 原始套接字工作的 J1939 用户态库仍能正常运行。由于这类库不会与内核内实现进行通信，因此必须注意二者不得相互干扰。实际上，这意味着它们不能共享 ECU 地址：一个 ECU (或虚拟 ECU) 地址要么由用户态库独占使用，要么由内核内系统独占使用。)
 
-J1939 concepts
-(J1939 概念)
-==============
+J1939 concepts(J1939 概念)
+==========================
 
-Data Sent to the J1939 Stack
-(发送到 J1939 协议栈的数据)
-----------------------------
+Data Sent to the J1939 Stack(发送到 J1939 协议栈的数据)
+-------------------------------------------------------
 
 The data buffers sent to the J1939 stack from user space are not CAN frames
 themselves. Instead, they are payloads that the J1939 stack converts into
@@ -193,9 +186,8 @@ and reassembly of large payloads and ensures that the correct CAN frames are
 generated and transmitted for each session.
 (这些不同的行为在很大程度上取决于提供给协议栈的缓冲区大小，协议栈会根据有效载荷大小选择合适的传输机制 (TP 或 ETP)。协议栈会自动管理大数据载荷的分片与重组，并确保为每个会话生成并传输正确的 CAN 帧。)
 
-PGN
-(PGN)
----
+PGN(PGN)
+--------
 
 The J1939 protocol uses the 29-bit CAN identifier with the following structure:
 (J1939 协议使用具有如下结构的 29 位 CAN 标识符：)
@@ -264,9 +256,8 @@ be get/set from/to the appropriate bits of the identifier by the kernel.
 (关于 PGN 到 29 位 CAN 标识符的映射，目标地址由内核从标识符的相应位中读取/写入。)
 
 
-Addressing
-(寻址)
-----------
+Addressing(寻址)
+----------------
 
 Both static and dynamic addressing methods can be used.
 (静态寻址与动态寻址两种方法均可使用。)
@@ -288,9 +279,8 @@ allowed. The BSD sockets define separate API calls for getting/setting the
 local & remote address and are applicable for J1939 sockets.
 (混合模式的数据包 (从静态地址到动态地址，或反之) 是允许的。BSD 套接字为获取/设置本地与远程地址定义了独立的 API 调用，这些调用同样适用于 J1939 套接字。)
 
-Filtering
-(过滤)
----------
+Filtering(过滤)
+---------------
 
 J1939 defines white list filters per socket that a user can set in order to
 receive a subset of the J1939 traffic. Filtering can be based on:
@@ -308,13 +298,11 @@ that matches several of those filters, the packet is only received once for
 that socket.
 (当单个套接字上设置了多个过滤器，且到来的数据包匹配其中多个过滤器时，该数据包对于该套接字只会被接收一次。)
 
-How to Use J1939
-(如何使用 J1939)
-================
+How to Use J1939(如何使用 J1939)
+================================
 
-API Calls
-(API 调用)
----------
+API Calls(API 调用)
+-------------------
 
 On CAN, you first need to open a socket for communicating over a CAN network.
 To use J1939, ``#include <linux/can/j1939.h>``. From there, ``<linux/can.h>`` will be
@@ -471,9 +459,8 @@ TX path related options:
 ``SO_J1939_SEND_PRIO`` - change default send priority for the socket
 (``SO_J1939_SEND_PRIO`` - 更改套接字的默认发送优先级)
 
-Message Flags during send() and Related System Calls
-(send() 及相关系统调用期间的消息标志)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Message Flags during send() and Related System Calls(send() 及相关系统调用期间的消息标志)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ``send(2)``, ``sendto(2)`` and ``sendmsg(2)`` take a 'flags' argument. Currently
 supported flags are:
@@ -482,9 +469,8 @@ supported flags are:
 * ``MSG_DONTWAIT``, i.e. non-blocking operation.
   (``MSG_DONTWAIT``，即非阻塞操作。)
 
-recvmsg(2)
-(recvmsg(2))
-^^^^^^^^^^
+recvmsg(2)(recvmsg(2))
+^^^^^^^^^^^^^^^^^^^^^^
 
 In most cases ``recvmsg(2)`` is needed if you want to extract more information than
 ``recvfrom(2)`` can provide. For example package priority and timestamp. The
@@ -513,17 +499,15 @@ with ``cmsg_level == SOL_J1939 && cmsg_type == SCM_J1939_DEST_ADDR``,
 		}
 	}
 
-setsockopt(2)
-(setsockopt(2))
-^^^^^^^^^^^^^
+setsockopt(2)(setsockopt(2))
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The ``setsockopt(2)`` function is used to configure various socket-level
 options for J1939 communication. The following options are supported:
 (``setsockopt(2)`` 函数用于配置 J1939 通信的各种套接字级选项。支持以下选项：)
 
-``SO_J1939_FILTER``
-(``SO_J1939_FILTER``)
-~~~~~~~~~~~~~~~~~~~
+``SO_J1939_FILTER``(``SO_J1939_FILTER``)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``SO_J1939_FILTER`` option is essential when the default behavior of
 ``bind(2)`` and ``connect(2)`` is insufficient for specific use cases. By
@@ -625,9 +609,8 @@ you want to monitor and process address claims without being overwhelmed by
 other traffic on the J1939 network.
 (在这个示例中，套接字只会接收与地址声明相关的 PGN 的消息： ``J1939_PGN_ADDRESS_CLAIMED`` 、 ``J1939_PGN_REQUEST`` 和 ``J1939_PGN_ADDRESS_COMMANDED`` 。这在想要监视并处理地址声明、又不想被 J1939 网络上的其他流量淹没的场景中特别有用。)
 
-``SO_J1939_PROMISC``
-(``SO_J1939_PROMISC``)
-~~~~~~~~~~~~~~~~~~~~
+``SO_J1939_PROMISC``(``SO_J1939_PROMISC``)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``SO_J1939_PROMISC`` option enables socket-level promiscuous mode. When
 this option is enabled, the socket will receive all J1939 traffic, regardless
@@ -666,9 +649,8 @@ promiscuous mode, allowing the socket to receive all J1939 traffic on the
 network.
 (在这个示例中，将 ``value`` 设置为任何非零值 (如 `1`) 会启用混杂模式，使套接字能够接收网络上的所有 J1939 流量。)
 
-``SO_BROADCAST``
-(``SO_BROADCAST``)
-~~~~~~~~~~~~~~~~
+``SO_BROADCAST``(``SO_BROADCAST``)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``SO_BROADCAST`` option enables the sending and receiving of broadcast
 messages. By default, broadcast messages are disabled for J1939 sockets. When
@@ -702,9 +684,8 @@ In this example, setting ``value`` to any non-zero value (e.g., `1`) enables
 the socket to send and receive broadcast messages.
 (在这个示例中，将 ``value`` 设置为任何非零值 (如 `1`) 会使套接字能够发送和接收广播消息。)
 
-``SO_J1939_SEND_PRIO``
-(``SO_J1939_SEND_PRIO``)
-~~~~~~~~~~~~~~~~~~~~~~
+``SO_J1939_SEND_PRIO``(``SO_J1939_SEND_PRIO``)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``SO_J1939_SEND_PRIO`` option sets the priority of outgoing J1939 messages
 for the socket. In J1939, messages can have different priorities, and lower
@@ -736,9 +717,8 @@ In this example, the priority is set to `3`, meaning the outgoing messages will
 be sent with a moderate priority level.
 (在这个示例中，优先级被设置为 `3` ，意味着发出的消息将以中等优先级发送。)
 
-``SO_J1939_ERRQUEUE``
-(``SO_J1939_ERRQUEUE``)
-~~~~~~~~~~~~~~~~~~~~~
+``SO_J1939_ERRQUEUE``(``SO_J1939_ERRQUEUE``)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``SO_J1939_ERRQUEUE`` option enables the socket to receive error messages
 from the error queue, providing diagnostic information about transmission
@@ -818,9 +798,8 @@ For more information on enabling timestamps and session tracking, refer to the
 `SO_TIMESTAMPING` section.
 (有关启用时间戳与会话跟踪的更多信息，请参阅 `SO_TIMESTAMPING` 一节。)
 
-``SO_TIMESTAMPING``
-(``SO_TIMESTAMPING``)
-~~~~~~~~~~~~~~~~~~~
+``SO_TIMESTAMPING``(``SO_TIMESTAMPING``)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``SO_TIMESTAMPING`` option allows the socket to receive timestamps for
 various events related to message transmissions and receptions in J1939. This
@@ -1073,9 +1052,8 @@ Example:
 
 
 
-Dynamic Addressing
-(动态寻址)
-------------------
+Dynamic Addressing(动态寻址)
+----------------------------
 
 Distinction has to be made between using the claimed address and doing an
 address claim. To use an already claimed address, one has to fill in the
@@ -1159,13 +1137,11 @@ participant on the bus) for this NAME.
 default Address Claiming daemon.
 ( ``can-utils`` 还包含 ``j1939acd`` 工具，因此它既可以用作代码示例，也可以用作默认的地址声明守护进程。)
 
-Send Examples
-(发送示例)
--------------
+Send Examples(发送示例)
+-----------------------
 
-Static Addressing
-(静态寻址)
-^^^^^^^^^^^^^^^^^
+Static Addressing(静态寻址)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This example will send a PGN (0x12300) from SA 0x20 to DA 0x30.
 (这个示例将从 SA 0x20 向 DA 0x30 发送一个 PGN (0x12300)。)
@@ -1208,9 +1184,8 @@ Send:
 	sendto(sock, dat, sizeof(dat), 0, (const struct sockaddr *)&saddr, sizeof(saddr));
 
 
-Error Codes in the J1939 Stack
-(J1939 协议栈中的错误码)
-------------------------------
+Error Codes in the J1939 Stack(J1939 协议栈中的错误码)
+------------------------------------------------------
 
 This section lists all potential kernel error codes that can be exposed to user
 space when interacting with the J1939 stack. It includes both standard error

@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-================================
-TC Actions - Environmental Rules
-================================
-
-(TC Actions - 环境规则)
+=======================================================
+TC Actions - Environmental Rules(TC Actions - 环境规则)
+=======================================================
 
 
 The "environmental" rules for authors of any new tc actions are:

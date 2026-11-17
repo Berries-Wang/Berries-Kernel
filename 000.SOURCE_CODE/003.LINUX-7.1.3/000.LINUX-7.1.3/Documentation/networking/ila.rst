@@ -1,15 +1,12 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===================================
-Identifier Locator Addressing (ILA)
-===================================
-
-(标识符-定位符寻址（ILA）)
+=============================================================
+Identifier Locator Addressing (ILA)(标识符-定位符寻址（ILA）)
+=============================================================
 
 
-Introduction
-(简介)
-============
+Introduction(简介)
+==================
 
 Identifier-locator addressing (ILA) is a technique used with IPv6 that
 differentiates between location and identity of a network node. Part of an
@@ -41,9 +38,8 @@ The ILA protocol is described in Internet-Draft draft-herbert-intarea-ila.
 (ILA 协议在 Internet-Draft draft-herbert-intarea-ila 中描述。)
 
 
-ILA terminology
-(ILA 术语)
-===============
+ILA terminology(ILA 术语)
+=========================
 
   - Identifier
 		(标识符)
@@ -123,9 +119,8 @@ ILA terminology
 		转发缓存或 ILA 主机。)
 
 
-Operation
-(操作)
-=========
+Operation(操作)
+===============
 
 There are two fundamental operations with ILA:
 (ILA 有两种基本操作：)
@@ -165,9 +160,8 @@ as showing ILA hosts and routers::
     +--------+              ................
 
 
-Transport checksum handling
-(传输层校验和处理)
-===========================
+Transport checksum handling(传输层校验和处理)
+=============================================
 
 When an address is translated by ILA, an encapsulated transport checksum
 that includes the translated address in a pseudo header may be rendered
@@ -214,9 +208,8 @@ SIR 地址的转换时，低位会恢复为原值，从而使标识符恢复为�
 样子。)
 
 
-Identifier types
-(标识符类型)
-================
+Identifier types(标识符类型)
+============================
 
 ILA defines different types of identifiers for different use cases.
 (ILA 针对不同用例定义了不同类型的标识符。)
@@ -249,9 +242,8 @@ identifier.
 通用的、无格式的 64 位标识符。)
 
 
-Identifier formats
-(标识符格式)
-==================
+Identifier formats(标识符格式)
+==============================
 
 Kernel ILA supports two optional fields in an identifier for formatting:
 "C-bit" and "identifier type". The presence of these fields is determined
@@ -273,8 +265,6 @@ ILA address, never a SIR address.
 In the simplest format the identifier types, C-bit, and checksum
 adjustment value are not present so an identifier is considered an
 unstructured sixty-four bit value::
-(在最简单的格式中，标识符类型、C 位与校验和调整值都不存在，此时标识符
-被视为一个无结构的 64 位值：)
 
      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
      |                            Identifier                         |
@@ -282,12 +272,13 @@ unstructured sixty-four bit value::
      |                                                               |
      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
+(在最简单的格式中，标识符类型、C 位与校验和调整值都不存在，此时标识符
+被视为一个无结构的 64 位值：)
+
 The checksum neutral adjustment may be configured to always be
 present using neutral-map-auto. In this case there is no C-bit, but the
 checksum adjustment is in the low order 16 bits. The identifier is
 still sixty-four bits::
-(可以通过 neutral-map-auto 把校验和中性调整配置为始终存在。这种情况下
-没有 C 位，但校验和调整位于低 16 位。标识符仍然是 64 位：)
 
      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
      |                            Identifier                         |
@@ -295,9 +286,11 @@ still sixty-four bits::
      |                               |  Checksum-neutral adjustment  |
      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
+(可以通过 neutral-map-auto 把校验和中性调整配置为始终存在。这种情况下
+没有 C 位，但校验和调整位于低 16 位。标识符仍然是 64 位：)
+
 The C-bit may used to explicitly indicate that checksum neutral
 mapping has been applied to an ILA address. The format is::
-(C 位可用于显式指示已对 ILA 地址应用校验和中性映射。格式如下：)
 
      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
      |     |C|                    Identifier                         |
@@ -305,13 +298,12 @@ mapping has been applied to an ILA address. The format is::
      |                               |  Checksum-neutral adjustment  |
      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
+(C 位可用于显式指示已对 ILA 地址应用校验和中性映射。格式如下：)
+
 The identifier type field may be present to indicate the identifier
 type. If it is not present then the type is inferred based on mapping
 configuration. The checksum neutral adjustment may automatically
 used with the identifier type as illustrated below::
-(标识符类型字段可以存在，用于指示标识符类型。如果不存在，则类型根据
-映射配置推断。校验和中性调整可以与标识符类型自动配合使用，如下图
-所示：)
 
      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
      | Type|                      Identifier                         |
@@ -319,9 +311,12 @@ used with the identifier type as illustrated below::
      |                               |  Checksum-neutral adjustment  |
      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
+(标识符类型字段可以存在，用于指示标识符类型。如果不存在，则类型根据
+映射配置推断。校验和中性调整可以与标识符类型自动配合使用，如下图
+所示：)
+
 If the identifier type and the C-bit can be present simultaneously so
 the identifier format would be::
-(如果标识符类型与 C 位同时存在，标识符格式将为：)
 
      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
      | Type|C|                    Identifier                         |
@@ -329,10 +324,10 @@ the identifier format would be::
      |                               |  Checksum-neutral adjustment  |
      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
+(如果标识符类型与 C 位同时存在，标识符格式将为：)
 
-Configuration
-(配置)
-=============
+Configuration(配置)
+===================
 
 There are two methods to configure ILA mappings. One is by using LWT routes
 and the other is ila_xlat (called from NFHOOK PREROUTING hook). ila_xlat
@@ -377,9 +372,8 @@ same meanings as described above.
 位的定位符。MODE 与 TYPE 的含义与上文所述相同。)
 
 
-Some examples
-(一些示例)
-=============
+Some examples(一些示例)
+=======================
 
 ::
 

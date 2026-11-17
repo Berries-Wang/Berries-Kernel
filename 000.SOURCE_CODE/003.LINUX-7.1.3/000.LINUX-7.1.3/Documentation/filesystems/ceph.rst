@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-============================
-Ceph Distributed File System
-============================
-
-(Ceph 分布式文件系统)
+=================================================
+Ceph Distributed File System(Ceph 分布式文件系统)
+=================================================
 
 Ceph is a distributed network file system designed to provide good
 performance, reliability, and scalability.
@@ -115,9 +113,8 @@ limit is reached.  A modified or adversarial client cannot be prevented
 from writing as much data as it needs.
 (当前配额实现的一个局限是，它依赖于挂载该文件系统的客户端的配合，以便在达到限制时阻止写入者。无法阻止一个被修改过的或怀有恶意的客户端写入它所需要的任意多数据。)
 
-Mount Syntax
-(挂载语法)
-============
+Mount Syntax(挂载语法)
+======================
 
 The basic mount syntax is::
 (基本的挂载语法是：)
@@ -152,9 +149,8 @@ of the device string) is validated by checking it with the FSID reported by
 the monitor.
 (使用挂载助手时，如果 ceph 配置文件可用，monitor 地址可以从配置文件中读取。注意，集群 FSID(作为设备字符串的一部分传入)会通过与 monitor 报告的 FSID 进行比对来验证。)
 
-Mount Options
-(挂载选项)
-=============
+Mount Options(挂载选项)
+=======================
 
   mon_addr=ip_address[:port][/ip_address[:port]]
 	Monitor address to the cluster. This is used to bootstrap the
@@ -259,9 +255,8 @@ Mount Options
 	  inode is not allowed until applications release all stale file locks.
 	  (clean：当客户端检测到自己被列入黑名单时，自动重连到 ceph 集群。在重连期间，客户端会丢弃脏数据/元数据，使页缓存和可写文件句柄失效。重连之后，由于 MDS 失去了对这些锁的跟踪，文件锁会变得陈旧。如果某个 inode 包含任何陈旧的文件锁，则在应用程序释放所有陈旧文件锁之前，不允许对该 inode 进行读/写。)
 
-More Information
-(更多信息)
-================
+More Information(更多信息)
+==========================
 
 For more information on Ceph, see the home page at
 (有关 Ceph 的更多信息，请参见其主页：)

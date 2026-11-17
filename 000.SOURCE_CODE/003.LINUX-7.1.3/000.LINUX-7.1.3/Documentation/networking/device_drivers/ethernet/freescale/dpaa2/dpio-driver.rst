@@ -1,10 +1,8 @@
 .. include:: <isonum.txt>
 
-===================================
-DPAA2 DPIO (Data Path I/O) Overview
-===================================
-
-(DPAA2 DPIO(数据路径 I/O)概述)
+=================================================================
+DPAA2 DPIO (Data Path I/O) Overview(DPAA2 DPIO(数据路径 I/O)概述)
+=================================================================
 
 :Copyright: |copy| 2016-2018 NXP
 
@@ -14,9 +12,8 @@ This document provides an overview of the Freescale DPAA2 DPIO
 drivers
 (本文档概述 Freescale DPAA2 DPIO 驱动程序)
 
-Introduction
-(简介)
-============
+Introduction(简介)
+==================
 
 A DPAA2 DPIO (Data Path I/O) is a hardware object that provides
 interfaces to enqueue and dequeue frames to/from network interfaces
@@ -36,9 +33,8 @@ in Linux.
 (有关 DPAA2 以及 Linux 中通用 DPAA2 驱动程序架构的总体概述，请参阅
 Documentation/networking/device_drivers/ethernet/freescale/dpaa2/overview.rst。)
 
-Driver Overview
-(驱动程序概述)
----------------
+Driver Overview(驱动程序概述)
+-----------------------------
 
 The DPIO driver is bound to DPIO objects discovered on the fsl-mc bus and
 provides services that:
@@ -64,7 +60,6 @@ The Linux DPIO driver consists of 3 primary components--
    (DPIO 服务——为其他 Linux 驱动程序提供服务 API)
 
    QBman portal interface-- sends portal commands, gets responses::
-   (QBman 门户接口——发送门户命令，获取响应：)
 
           fsl-mc          other
            bus           drivers
@@ -81,10 +76,10 @@ The Linux DPIO driver consists of 3 primary components--
                             |
                          hardware
 
+   (QBman 门户接口——发送门户命令，获取响应：)
 
 The diagram below shows how the DPIO driver components fit with the other
 DPAA2 Linux driver components::
-(下图展示了 DPIO 驱动程序组件如何与其他 DPAA2 Linux 驱动程序组件相配合：)
 
                                                    +------------+
                                                    | OS Network |
@@ -117,10 +112,12 @@ DPAA2 Linux driver components::
 
  ============================================================================
 
+(下图展示了 DPIO 驱动程序组件如何与其他 DPAA2 Linux 驱动程序组件相配合：)
 
-DPIO Object Driver (dpio-driver.c)
-(DPIO 对象驱动程序(dpio-driver.c))
-----------------------------------
+
+
+DPIO Object Driver (dpio-driver.c)(DPIO 对象驱动程序(dpio-driver.c))
+--------------------------------------------------------------------
 
    The dpio-driver component registers with the fsl-mc bus to handle objects of
    type "dpio".  The implementation of probe() handles basic initialization
@@ -131,9 +128,8 @@ DPIO Object Driver (dpio-driver.c)
    DPIO 的基本初始化，包括映射 DPIO 区域(QBman 软件门户)、初始化中断并注册 irq 处理
    函数。dpio-driver 将探测到的 DPIO 注册到 dpio-service。)
 
-DPIO service  (dpio-service.c, dpaa2-io.h)
-(DPIO 服务(dpio-service.c、dpaa2-io.h))
-------------------------------------------
+DPIO service  (dpio-service.c, dpaa2-io.h)(DPIO 服务(dpio-service.c、dpaa2-io.h))
+---------------------------------------------------------------------------------
 
    The dpio service component provides queuing, notification, and buffers
    management services to DPAA2 drivers, such as the Ethernet driver.  A system
@@ -176,9 +172,8 @@ DPIO service  (dpio-service.c, dpaa2-io.h)
 
       dpaa2_io_service_acquire()
 
-QBman portal interface (qbman-portal.c)
-(QBman 门户接口(qbman-portal.c))
----------------------------------------
+QBman portal interface (qbman-portal.c)(QBman 门户接口(qbman-portal.c))
+-----------------------------------------------------------------------
 
    The qbman-portal component provides APIs to do the low level hardware
    bit twiddling for operations such as:
@@ -195,9 +190,8 @@ QBman portal interface (qbman-portal.c)
    only used by dpio-service.
    (qbman-portal API 不对其他驱动程序公开，仅由 dpio-service 使用。)
 
-Other (dpaa2-fd.h, dpaa2-global.h)
-(其他(dpaa2-fd.h、dpaa2-global.h))
-----------------------------------
+Other (dpaa2-fd.h, dpaa2-global.h)(其他(dpaa2-fd.h、dpaa2-global.h))
+--------------------------------------------------------------------
 
    Frame descriptor and scatter-gather definitions and the APIs used to
    manipulate them are defined in dpaa2-fd.h.

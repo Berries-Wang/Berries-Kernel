@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=============================
-Kernel Connection Multiplexor
-=============================
-
-(内核连接复用器)
+=============================================
+Kernel Connection Multiplexor(内核连接复用器)
+=============================================
 
 Kernel Connection Multiplexor (KCM) is a mechanism that provides a message based
 interface over TCP for generic application protocols. With KCM an application
@@ -13,7 +11,6 @@ datagram sockets.
 (内核连接复用器 (KCM) 是一种在 TCP 之上为通用应用协议提供基于消息接口的机制。借助 KCM，应用程序可以使用数据报套接字在 TCP 上高效地发送和接收应用协议消息。)
 
 KCM implements an NxM multiplexor in the kernel as diagrammed below::
-(KCM 在内核中实现了一个 NxM 复用器，如下图所示：)
 
     +------------+   +------------+   +------------+   +------------+
     | KCM socket |   | KCM socket |   | KCM socket |   | KCM socket |
@@ -35,9 +32,10 @@ KCM implements an NxM multiplexor in the kernel as diagrammed below::
     | TCP sock |  | TCP sock |  | TCP sock |  | TCP sock | | TCP sock |
     +----------+  +----------+  +----------+  +----------+ +----------+
 
-KCM sockets
-(KCM 套接字)
-===========
+(KCM 在内核中实现了一个 NxM 复用器，如下图所示：)
+
+KCM sockets(KCM 套接字)
+=======================
 
 The KCM sockets provide the user interface to the multiplexor. All the KCM sockets
 bound to a multiplexor are considered to have equivalent function, and I/O
@@ -45,9 +43,8 @@ operations in different sockets may be done in parallel without the need for
 synchronization between threads in userspace.
 (KCM 套接字提供复用器的用户接口。绑定到同一复用器的所有 KCM 套接字被视为具有等同功能，不同套接字上的 I/O 操作可以并行进行，而无需用户态线程之间做同步。)
 
-Multiplexor
-(复用器)
-===========
+Multiplexor(复用器)
+===================
 
 The multiplexor provides the message steering. In the transmit path, messages
 written on a KCM socket are sent atomically on an appropriate TCP socket.
@@ -55,18 +52,16 @@ Similarly, in the receive path, messages are constructed on each TCP socket
 (Psock) and complete messages are steered to a KCM socket.
 (复用器提供消息导向。在发送路径上，写入 KCM 套接字的消息会在合适的 TCP 套接字上原子地发送。类似地，在接收路径上，会在每个 TCP 套接字（Psock）上构造消息，完整的消息被导向到某个 KCM 套接字。)
 
-TCP sockets & Psocks
-(TCP 套接字与 Psock)
-====================
+TCP sockets & Psocks(TCP 套接字与 Psock)
+========================================
 
 TCP sockets may be bound to a KCM multiplexor. A Psock structure is allocated
 for each bound TCP socket, this structure holds the state for constructing
 messages on receive as well as other connection specific information for KCM.
 (TCP 套接字可以绑定到 KCM 复用器。每个被绑定的 TCP 套接字都会分配一个 Psock 结构，该结构保存接收方向上构造消息的状态以及 KCM 的其他连接相关信息。)
 
-Connected mode semantics
-(连接模式语义)
-========================
+Connected mode semantics(连接模式语义)
+======================================
 
 Each multiplexor assumes that all attached TCP connections are to the same
 destination and can use the different connections for load balancing when
@@ -74,16 +69,14 @@ transmitting. The normal send and recv calls (include sendmmsg and recvmmsg)
 can be used to send and receive messages from the KCM socket.
 (每个复用器假定所有挂接的 TCP 连接都指向同一目的地，并且可以在发送时利用不同的连接做负载均衡。普通的 send 和 recv 调用（包括 sendmmsg 和 recvmmsg）都可用于在 KCM 套接字上发送和接收消息。)
 
-Socket types
-(套接字类型)
-============
+Socket types(套接字类型)
+========================
 
 KCM supports SOCK_DGRAM and SOCK_SEQPACKET socket types.
 (KCM 支持 SOCK_DGRAM 和 SOCK_SEQPACKET 套接字类型。)
 
-Message delineation
-(消息定界)
--------------------
+Message delineation(消息定界)
+-----------------------------
 
 Messages are sent over a TCP stream with some application protocol message
 format that typically includes a header which frames the messages. The length
@@ -100,9 +93,8 @@ information, KCM will construct the message of the stated length and deliver it
 to a KCM socket.
 (必须对 TCP 流进行解析才能确定消息边界。这使用伯克利包过滤器 (BPF) 来完成。将 TCP 套接字挂载到复用器时必须指定一个 BPF 程序。该程序在开始接收新消息时被调用，并得到一个包含到目前为止已接收字节的 skbuff。它解析消息头并返回消息的长度。得到这一信息后，KCM 会构造出所述长度的消息并将其交付给某个 KCM 套接字。)
 
-TCP socket management
-(TCP 套接字管理)
----------------------
+TCP socket management(TCP 套接字管理)
+-------------------------------------
 
 When a TCP socket is attached to a KCM multiplexor data ready (POLLIN) and
 write space available (POLLOUT) events are handled by the multiplexor. If there
@@ -128,13 +120,11 @@ by SO_RCVTIMEO). If the timer expires before assembly is complete an error
 (ETIMEDOUT) is posted on the socket.
 (可以为接收套接字上的消息组装设置超时。超时值取自所挂接 TCP 套接字的接收超时（通过 SO_RCVTIMEO 设置）。如果在组装完成之前计时器到期，就会在该套接字上报告错误 (ETIMEDOUT)。)
 
-User interface
-(用户接口)
-==============
+User interface(用户接口)
+========================
 
-Creating a multiplexor
-(创建复用器)
-----------------------
+Creating a multiplexor(创建复用器)
+----------------------------------
 
 A new multiplexor and initial KCM socket is created by a socket call::
 (通过一次 socket 调用即可创建新的复用器和初始 KCM 套接字：)
@@ -146,9 +136,8 @@ A new multiplexor and initial KCM socket is created by a socket call::
 - protocol is KCMPROTO_CONNECTED
   (protocol 为 KCMPROTO_CONNECTED)
 
-Cloning KCM sockets
-(克隆 KCM 套接字)
--------------------
+Cloning KCM sockets(克隆 KCM 套接字)
+------------------------------------
 
 After the first KCM socket is created using the socket call as described
 above, additional sockets for the multiplexor can be created by cloning
@@ -169,9 +158,8 @@ a KCM socket. This is accomplished by an ioctl on a KCM socket::
   if (!err)
     newkcmfd = info.fd;
 
-Attach transport sockets
-(挂载传输套接字)
-------------------------
+Attach transport sockets(挂载传输套接字)
+----------------------------------------
 
 Attaching of transport sockets to a multiplexor is performed by calling an
 ioctl on a KCM socket for the multiplexor. e.g.::
@@ -200,9 +188,8 @@ The kcm_attach structure contains:
   - bpf_prog_fd: file descriptor for compiled BPF program downloaded
     (bpf_prog_fd：已下载的编译后 BPF 程序的文件描述符)
 
-Unattach transport sockets
-(卸载传输套接字)
---------------------------
+Unattach transport sockets(卸载传输套接字)
+------------------------------------------
 
 Unattaching a transport socket from a multiplexor is straightforward. An
 "unattach" ioctl is done with the kcm_unattach structure as the argument::
@@ -221,9 +208,8 @@ Unattaching a transport socket from a multiplexor is straightforward. An
 
   ioctl(fd, SIOCKCMUNATTACH, &info);
 
-Disabling receive on KCM socket
-(禁用 KCM 套接字上的接收)
--------------------------------
+Disabling receive on KCM socket(禁用 KCM 套接字上的接收)
+--------------------------------------------------------
 
 A setsockopt is used to disable or enable receiving on a KCM socket.
 When receive is disabled, any pending messages in the socket's
@@ -237,9 +223,8 @@ while. Example use::
 
   setsockopt(kcmfd, SOL_KCM, KCM_RECV_DISABLE, &val, sizeof(val))
 
-BPF programs for message delineation
-(用于消息定界的 BPF 程序)
-------------------------------------
+BPF programs for message delineation(用于消息定界的 BPF 程序)
+-------------------------------------------------------------
 
 BPF programs can be compiled using the BPF LLVM backend. For example,
 the BPF program for parsing Thrift is::
@@ -256,9 +241,8 @@ the BPF program for parsing Thrift is::
 
   char _license[] SEC("license") = "GPL";
 
-Use in applications
-(在应用程序中使用)
-===================
+Use in applications(在应用程序中使用)
+=====================================
 
 KCM accelerates application layer protocols. Specifically, it allows
 applications to use a message based interface for sending and receiving
@@ -270,9 +254,8 @@ steering and scheduling, which in turn allows a simpler networking model in
 multithreaded applications.
 (KCM 为应用层协议加速。具体而言，它允许应用程序使用基于消息的接口来发送和接收消息。内核提供必要的保证，确保消息被原子地发送和接收。这减轻了应用程序在把基于消息的协议映射到 TCP 流时的大部分负担。KCM 还使应用层消息成为内核中导向与调度方面的工作单元，这进而使多线程应用程序中的网络模型更加简单。)
 
-Configurations
-(配置)
---------------
+Configurations(配置)
+--------------------
 
 In an Nx1 configuration, KCM logically provides multiple socket handles
 to the same TCP connection. This allows parallelism between in I/O
@@ -286,9 +269,8 @@ In a MxN configuration, multiple connections are established to the
 same destination. These are used for simple load balancing.
 (在 MxN 配置中，会建立多条指向同一目的地的连接。它们用于简单的负载均衡。)
 
-Message batching
-(消息批处理)
-----------------
+Message batching(消息批处理)
+----------------------------
 
 The primary purpose of KCM is load balancing between KCM sockets and hence
 threads in a nominal use case. Perfect load balancing, that is steering
@@ -317,9 +299,8 @@ changes at each receive ready callback on the KCM socket. The application
 does not need to configure this.
 (在接收方向上，KCM 模块会尝试把每次 TCP 就绪回调期间在同一 KCM 套接字上收到的消息排入队列。目标 KCM 套接字会在该 KCM 套接字的每次接收就绪回调时更换。应用程序无需对此进行配置。)
 
-Error handling
-(错误处理)
---------------
+Error handling(错误处理)
+------------------------
 
 An application should include a thread to monitor errors raised on
 the TCP connection. Normally, this will be done by placing each
@@ -332,9 +313,8 @@ posted on the TCP socket the data stream is unrecoverable (i.e. an error
 may have occurred in the middle of receiving a message).
 (应用程序应当包含一个线程来监控 TCP 连接上引发的错误。通常做法是把每个挂接到 KCM 复用器的 TCP 套接字都放入 epoll 集合以监听 POLLERR 事件。如果某个被挂接的 TCP 套接字发生错误，KCM 会在该套接字上设置 EPIPE，从而唤醒应用程序线程。当应用程序看到该错误（可能只是断开连接）时，应将该套接字从 KCM 上解除挂接，然后将其关闭。这里假定一旦在 TCP 套接字上出现错误，数据流便不可恢复（即错误可能发生在接收某条消息的中途）。)
 
-TCP connection monitoring
-(TCP 连接监控)
--------------------------
+TCP connection monitoring(TCP 连接监控)
+---------------------------------------
 
 In KCM there is no means to correlate a message to the TCP socket that
 was used to send or receive the message (except in the case there is

@@ -7,18 +7,15 @@
         sentence changes don't bleed colors in diff.
         Heading decorations are documented in sphinx.rst.
 
-==============
-Library Design
-==============
-
-(库设计)
+======================
+Library Design(库设计)
+======================
 
 .. contents:: Table of Contents
    :local:
 
-Introduction
-(简介)
-============
+Introduction(简介)
+==================
 
 iomap is a filesystem library for handling common file operations.
 The library has two layers:
@@ -62,9 +59,8 @@ This origins of this library is the file I/O path that XFS once used; it
 has now been extended to cover several other operations.
 (本库起源于 XFS 曾经使用的文件 I/O 路径；如今它已被扩展到涵盖若干其他操作。)
 
-Who Should Read This?
-(谁应该阅读本文？)
-=====================
+Who Should Read This?(谁应该阅读本文？)
+=======================================
 
 The target audience for this document are filesystem, storage, and
 pagecache programmers and code reviewers.
@@ -74,9 +70,8 @@ If you are working on PCI, machine architectures, or device drivers, you
 are most likely in the wrong place.
 (如果你从事的是 PCI、机器体系结构或设备驱动方面的工作，那么你很可能来错了地方。)
 
-How Is This Better?
-(这为何更好？)
-===================
+How Is This Better?(这为何更好？)
+=================================
 
 Unlike the classic Linux I/O model which breaks file I/O into small
 units (generally memory pages or blocks) and looks up space mappings on
@@ -132,13 +127,11 @@ of the interfaces presented by iomap.
 If you change iomap, please update this design document.
 (本文档的目标是先简要讨论 iomap 的设计与能力，然后更详细地列出 iomap 所提供的接口。如果你修改了 iomap，请更新这份设计文档。)
 
-File Range Iterator
-(文件范围迭代器)
-===================
+File Range Iterator(文件范围迭代器)
+===================================
 
-Definitions
-(定义)
------------
+Definitions(定义)
+-----------------
 
  * **buffer head**: Shattered remnants of the old buffer cache.
    (**buffer head**: 旧缓冲缓存的残存碎片。)
@@ -192,9 +185,8 @@ Definitions
    size and alignment, typically sector size).
    (**pure overwrite**: 一种在提交或完成阶段都不需要执行任何元数据或清零操作的写操作。这意味着文件系统必须已经以 ``IOMAP_MAPPED`` 的形式在磁盘上分配了空间，且文件系统不得对 I/O 对齐或大小施加任何约束。对 I/O 对齐的唯一约束来自设备层(最小 I/O 大小和对齐，通常是扇区大小)。)
 
-``struct iomap``
-(``struct iomap``)
-----------------
+``struct iomap``(``struct iomap``)
+----------------------------------
 
 The filesystem communicates to the iomap iterator the mapping of
 byte ranges of a file to byte ranges of a storage device with the
@@ -376,9 +368,8 @@ The fields are as follows:
    ``iomap_valid`` for details.
    (``validity_cookie`` 是由文件系统设置的一个用于检测过期映射的神奇新鲜度值。对于页缓存操作，它对正确运行至关重要，因为可能发生缺页，这意味着在 ``->iomap_begin`` 和 ``->iomap_end`` 之间不应持有文件系统锁。具有完全静态映射的文件系统无需设置此值。只有页缓存操作会重新验证映射；详情请参见关于 ``iomap_valid`` 的章节。)
 
-``struct iomap_ops``
-(``struct iomap_ops``)
---------------------
+``struct iomap_ops``(``struct iomap_ops``)
+------------------------------------------
 
 Every iomap function requires the filesystem to pass an operations
 structure to obtain a mapping and (optionally) to release the mapping:
@@ -396,9 +387,8 @@ structure to obtain a mapping and (optionally) to release the mapping:
                       struct iomap *iomap);
  };
 
-``->iomap_begin``
-(``->iomap_begin``)
-~~~~~~~~~~~~~~~~~
+``->iomap_begin``(``->iomap_begin``)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 iomap operations call ``->iomap_begin`` to obtain one file mapping for
 the range of bytes specified by ``pos`` and ``length`` for the file
@@ -465,9 +455,8 @@ writing to another.
 <https://lore.kernel.org/all/20191008071527.29304-9-hch@lst.de/>`_
 设备或地址范围读取现有文件内容，文件系统应通过 ``srcmap`` 返回该信息。只有页缓存和 fsdax 操作支持从一个映射读取并写入另一个映射。)
 
-``->iomap_end``
-(``->iomap_end``)
-~~~~~~~~~~~~~~~
+``->iomap_end``(``->iomap_end``)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 After the operation completes, the ``->iomap_end`` function, if present,
 is called to signal that iomap is finished with a mapping.
@@ -485,9 +474,8 @@ Both functions should return a negative errno code on error, or zero on
 success.
 (两个函数在出错时应返回负的 errno 代码，成功时返回零。)
 
-Preparing for File Operations
-(为文件操作做准备)
-=============================
+Preparing for File Operations(为文件操作做准备)
+===============================================
 
 iomap only handles mapping and I/O.
 Filesystems must still call out to the VFS to check input parameters
@@ -496,9 +484,8 @@ It does not handle obtaining filesystem freeze protection, updating of
 timestamps, stripping privileges, or access control.
 (iomap 只处理映射和 I/O。在发起 I/O 操作之前，文件系统仍必须调用 VFS 来检查输入参数和文件状态。它不负责获取文件系统冻结保护、更新时间戳、剥离特权或访问控制。)
 
-Locking Hierarchy
-(锁定层级)
-=================
+Locking Hierarchy(锁定层级)
+===========================
 
 iomap requires that filesystems supply their own locking model.
 There are three categories of synchronization primitives, as far as
@@ -546,9 +533,8 @@ All further mentions of locking are *recommendations*, not mandates.
 Each filesystem author must figure out the locking for themself.
 (确切的锁定要求因文件系统而异；对于某些操作，其中一些锁可以被省略。后文所有关于锁定的提及都是*建议*，而非强制要求。每个文件系统作者必须自己弄清楚适合自己的锁定方案。)
 
-Bugs and Limitations
-(缺陷与限制)
-====================
+Bugs and Limitations(缺陷与限制)
+================================
 
  * No support for fscrypt.
    (不支持 fscrypt。)

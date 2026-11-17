@@ -1,15 +1,12 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=====================
-Segmentation Offloads
-=====================
-
-(分段卸载)
+===============================
+Segmentation Offloads(分段卸载)
+===============================
 
 
-Introduction
-(简介)
-============
+Introduction(简介)
+==================
 
 This document describes a set of techniques in the Linux networking stack
 to take advantage of segmentation offload capabilities of various NICs.
@@ -34,9 +31,8 @@ The following technologies are described:
    (用 GSO 加速 SCTP - GSO_BY_FRAGS)
 
 
-TCP Segmentation Offload
-(TCP 分段卸载)
-========================
+TCP Segmentation Offload(TCP 分段卸载)
+======================================
 
 TCP segmentation allows a device to segment a single frame into multiple
 frames with a data payload size specified in skb_shinfo()->gso_size.
@@ -78,9 +74,8 @@ segment.
 (如果设备设置了 NETIF_F_TSO_MANGLEID，执行 TSO 时可以忽略 IP ID，我们将对所有帧递增 IP ID，或根据驱动偏好保持其为一个固定值。对于封装的数据包，NETIF_F_TSO_MANGLEID 对外层和内层头都有效，除非外层头未设置 DF 位；此时设备驱动必须保证外层头的 IP ID 字段随每个分段递增。)
 
 
-UDP Fragmentation Offload
-(UDP 分片卸载)
-=========================
+UDP Fragmentation Offload(UDP 分片卸载)
+=======================================
 
 UDP fragmentation offload allows a device to fragment an oversized UDP
 datagram into multiple IPv4 fragments.  Many of the requirements for UDP
@@ -94,9 +89,8 @@ tunnel protocols is still supported.
 (UFO 已被弃用：现代内核不再生成 UFO skb，但仍可以从 tuntap 及类似设备接收它们。基于 UDP 的隧道协议的卸载仍然受支持。)
 
 
-IPIP, SIT, GRE, UDP Tunnel, and Remote Checksum Offloads
-(IPIP、SIT、GRE、UDP 隧道与远程校验和卸载)
-========================================================
+IPIP, SIT, GRE, UDP Tunnel, and Remote Checksum Offloads(IPIP、SIT、GRE、UDP 隧道与远程校验和卸载)
+==================================================================================================
 
 In addition to the offloads described above it is possible for a frame to
 contain additional headers such as an outer tunnel.  In order to account
@@ -143,9 +137,8 @@ checksum will be computed.
 (最后还有 SKB_GSO_TUNNEL_REMCSUM，它表示某个隧道头请求了远程校验和卸载。在这种情况下，内层头将保留部分校验和，只计算外层头的校验和。)
 
 
-Generic Segmentation Offload
-(通用分段卸载)
-============================
+Generic Segmentation Offload(通用分段卸载)
+==========================================
 
 Generic segmentation offload is a pure software offload that is meant to
 deal with cases where device drivers cannot perform the offloads described
@@ -160,9 +153,8 @@ be re-routed between devices and end up being unable to be transmitted.
 (在启用任何硬件分段卸载之前，GSO 中必须存在对应的软件卸载。否则，帧可能在设备之间被重新路由，最终无法发送。)
 
 
-Generic Receive Offload
-(通用接收卸载)
-=======================
+Generic Receive Offload(通用接收卸载)
+=====================================
 
 Generic receive offload is the complement to GSO.  Ideally any frame
 assembled by GRO should be segmented to create an identical sequence of
@@ -171,9 +163,8 @@ able to be reassembled back to the original by GRO.
 (通用接收卸载是 GSO 的对偶。理想情况下，GRO 聚合出的任何帧都应能用 GSO 分段生成完全相同的帧序列；而 GSO 分段出的任何帧序列也都应能被 GRO 重新聚合回原样。)
 
 
-Partial Generic Segmentation Offload
-(部分通用分段卸载)
-====================================
+Partial Generic Segmentation Offload(部分通用分段卸载)
+======================================================
 
 Partial generic segmentation offload is a hybrid between TSO and GSO.  What
 it effectively does is take advantage of certain traits of TCP and tunnels
@@ -192,9 +183,8 @@ not have the DF bit set.
 (在部分卸载中，除内层传输头之外的所有头都会被更新，使其包含与简单复制该头时相同的正确值。唯一的例外是外层 IPv4 ID 字段。当某个头未设置 DF 位时，IPv4 ID 字段是否递增由设备驱动负责保证。)
 
 
-SCTP acceleration with GSO
-(用 GSO 加速 SCTP)
-===========================
+SCTP acceleration with GSO(用 GSO 加速 SCTP)
+============================================
 
 SCTP - despite the lack of hardware support - can still take advantage of
 GSO to pass one large packet through the network stack, rather than

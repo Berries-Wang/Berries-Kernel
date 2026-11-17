@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-====================
-mlx5 devlink support
-====================
-
-(mlx5 devlink 支持)
+=======================================
+mlx5 devlink support(mlx5 devlink 支持)
+=======================================
 
 This document describes the devlink features implemented by the ``mlx5``
 device driver.
 (本文档描述 ``mlx5`` 设备驱动所实现的 devlink 功能。)
 
-Parameters
-(参数)
-==========
+Parameters(参数)
+================
 
 .. list-table:: Generic parameters implemented
 
@@ -242,9 +239,8 @@ parameters.
 The ``mlx5`` driver supports reloading via ``DEVLINK_CMD_RELOAD``
 (``mlx5`` 驱动支持通过 ``DEVLINK_CMD_RELOAD`` 进行重载。)
 
-Info versions
-(信息版本)
-=============
+Info versions(信息版本)
+=======================
 
 The ``mlx5`` driver reports the following versions
 (``mlx5`` 驱动报告以下版本信息。)
@@ -262,13 +258,11 @@ The ``mlx5`` driver reports the following versions
      - stored, running
      - Three digit major.minor.subminor firmware version number.
 
-Health reporters
-(健康报告器)
-================
+Health reporters(健康报告器)
+============================
 
-tx reporter
-(tx 报告器)
------------
+tx reporter(tx 报告器)
+----------------------
 
 The tx reporter is responsible for reporting and recovering of the following three error scenarios:
 (tx 报告器负责报告并恢复以下三种错误场景：)
@@ -318,9 +312,8 @@ User commands examples:
 
     $ devlink health show pci/0000:82:00.0 reporter tx
 
-rx reporter
-(rx 报告器)
------------
+rx reporter(rx 报告器)
+----------------------
 
 The rx reporter is responsible for reporting and recovering of the following two error scenarios:
 (rx 报告器负责报告并恢复以下两种错误场景：)
@@ -363,9 +356,8 @@ provides real time information of its receive queues' status.
 
     $ devlink health show pci/0000:82:00.0 reporter rx
 
-fw reporter
-(fw 报告器)
------------
+fw reporter(fw 报告器)
+----------------------
 
 The fw reporter implements `diagnose` and `dump` callbacks.
 (fw 报告器实现了 `diagnose` 与 `dump` 回调。)
@@ -396,9 +388,8 @@ User commands examples:
    (注意：该命令只能在拥有 fw tracer 所有权的 PF 上运行；在其他 PF 或任何 VF
    上运行将返回 "Operation not permitted"。)
 
-fw fatal reporter
-(fw 致命错误报告器)
------------------
+fw fatal reporter(fw 致命错误报告器)
+------------------------------------
 
 The fw fatal reporter implements `dump` and `recover` callbacks.
 (fw fatal 报告器实现了 `dump` 与 `recover` 回调。)
@@ -433,9 +424,8 @@ User commands examples:
    This command can run only on PF.
    (注意：该命令只能在 PF 上运行。)
 
-vnic reporter
-(vnic 报告器)
--------------
+vnic reporter(vnic 报告器)
+--------------------------
 
 The vnic reporter implements only the `diagnose` callback.
 (vnic 报告器只实现了 `diagnose` 回调。)

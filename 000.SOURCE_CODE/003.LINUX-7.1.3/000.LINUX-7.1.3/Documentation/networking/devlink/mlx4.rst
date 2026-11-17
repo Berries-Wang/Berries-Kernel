@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-====================
-mlx4 devlink support
-====================
-
-(mlx4 devlink 支持)
+=======================================
+mlx4 devlink support(mlx4 devlink 支持)
+=======================================
 
 This document describes the devlink features implemented by the ``mlx4``
 device driver.
 (本文档描述 ``mlx4`` 设备驱动所实现的 devlink 功能。)
 
-Parameters
-==========
-(参数)
+Parameters(参数)
+================
 
 .. list-table:: Generic parameters implemented
 
@@ -50,9 +47,8 @@ parameters.
 The ``mlx4`` driver supports reloading via ``DEVLINK_CMD_RELOAD``
 (``mlx4`` 驱动支持通过 ``DEVLINK_CMD_RELOAD`` 进行重载)
 
-Regions
-=======
-(区域)
+Regions(区域)
+=============
 
 The ``mlx4`` driver supports dumping the firmware PCI crspace and health
 buffer during a critical firmware issue.

@@ -1,19 +1,16 @@
 .. SPDX-License-Identifier: GPL-2.0+
 
-=============================
-Flexcan CAN Controller driver
-=============================
-
-(Flexcan CAN 控制器驱动)
+=====================================================
+Flexcan CAN Controller driver(Flexcan CAN 控制器驱动)
+=====================================================
 
 Authors: Marc Kleine-Budde <mkl@pengutronix.de>,
 Dario Binacchi <dario.binacchi@amarulasolutions.com>
 (作者: Marc Kleine-Budde <mkl@pengutronix.de>、
 Dario Binacchi <dario.binacchi@amarulasolutions.com>)
 
-On/off RTR frames reception
-===========================
-(RTR 帧接收的开启/关闭)
+On/off RTR frames reception(RTR 帧接收的开启/关闭)
+==================================================
 
 For most flexcan IP cores the driver supports 2 RX modes:
 (对于大多数 flexcan IP 核心，该驱动支持 2 种 RX 模式：)

@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0+
 
-=====================================
-Meta Platforms Host Network Interface
-=====================================
+==================================================================
+Meta Platforms Host Network Interface(Meta Platforms 主机网络接口)
+==================================================================
 
-(Meta Platforms 主机网络接口)
-
-Firmware Versions
-(固件版本)
------------------
+Firmware Versions(固件版本)
+---------------------------
 
 fbnic has three components stored on the flash which are provided in one PLDM
 image:
@@ -37,13 +34,11 @@ addition to the version the hg commit hash of the build is included as a
 separate entry.
 (devlink dev info 提供所有三个组件的版本信息。除版本号外，构建所用的 hg 提交哈希也作为单独条目提供。)
 
-Configuration
-(配置)
--------------
+Configuration(配置)
+-------------------
 
-Ringparams (ethtool -g / -G)
-(环形缓冲区参数)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Ringparams (ethtool -g / -G)(环形缓冲区参数)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 fbnic has two submission (host -> device) rings for every completion
 (device -> host) ring. The three ring objects together form a single
@@ -73,9 +68,8 @@ and completion ring sizes will depend on the workload, as for small packets
 multiple packets will fit into a single page.
 (HPQ 和 PPQ（``rx-mini``、``rx-jumbo``）上的每个条目对应 4kB 已分配内存，而其余环上的条目以描述符为单位（8B）。提交环与完成环大小的理想比例取决于工作负载，因为对于小数据包，单个页内可容纳多个数据包。)
 
-Upgrading Firmware
-(升级固件)
-------------------
+Upgrading Firmware(升级固件)
+----------------------------
 
 fbnic supports updating firmware using signed PLDM images with devlink dev
 flash. PLDM images are written into the flash. Flashing does not interrupt
@@ -87,13 +81,11 @@ is required. Firmware activation is required to run new control firmware. cmrt
 firmware can only be activated by power cycling the NIC.
 (主机启动时始终使用最新的 UEFI 驱动，无需显式激活。运行新的控制固件需要固件激活。cmrt 固件只能通过给网卡断电重启来激活。)
 
-Health reporters
-(健康报告器)
-----------------
+Health reporters(健康报告器)
+----------------------------
 
-fw reporter
-(fw 报告器)
-~~~~~~~~~~~
+fw reporter(fw 报告器)
+~~~~~~~~~~~~~~~~~~~~~~
 
 The ``fw`` health reporter tracks FW crashes. Dumping the reporter will
 show the core dump of the most recent FW crash, and if no FW crash has
@@ -102,22 +94,19 @@ shows FW uptime based on the most recently received heartbeat message
 (the crashes are detected by checking if uptime goes down).
 (``fw`` 健康报告器跟踪固件崩溃。转储该报告器会显示最近一次固件崩溃的核心转储；如果自断电重启以来没有发生过固件崩溃，则显示固件内存的快照。诊断回调基于最近收到的心跳消息显示固件运行时长（崩溃是通过检查运行时长是否回退来检测的）。)
 
-otp reporter
-(otp 报告器)
-~~~~~~~~~~~~
+otp reporter(otp 报告器)
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 OTP memory ("fuses") are used for secure boot and anti-rollback
 protection. The OTP memory is ECC protected, ECC errors indicate
 either manufacturing defect or part deteriorating with age.
 (OTP 存储器（"熔丝"）用于安全启动和防回滚保护。OTP 存储器受 ECC 保护，ECC 错误表明存在制造缺陷或部件随时间老化。)
 
-Statistics
-(统计)
-----------
+Statistics(统计)
+----------------
 
-TX MAC Interface
-(TX MAC 接口)
-~~~~~~~~~~~~~~~~
+TX MAC Interface(TX MAC 接口)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
  - ``ptp_illegal_req``: packets sent to the NIC with PTP request bit set but routed to BMC/FW
    (发送到网卡且置位了 PTP 请求位、却被路由到 BMC/FW 的数据包。)
@@ -126,9 +115,8 @@ TX MAC Interface
  - ``ptp_bad_ts``: packets destined for MAC with PTP request bit set but aborted because of some error (e.g., DMA read error)
    (目的地为 MAC 且置位 PTP 请求位、但因某种错误（如 DMA 读取错误）而中止的数据包。)
 
-TX Extension (TEI) Interface (TTI)
-(TX 扩展 (TEI) 接口 (TTI))
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+TX Extension (TEI) Interface (TTI)(TX 扩展 (TEI) 接口 (TTI))
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
  - ``tti_cm_drop``: control messages dropped at the TX Extension (TEI) Interface because of credit starvation
    (在 TX 扩展 (TEI) 接口处因信用额度不足而丢弃的控制消息。)
@@ -137,9 +125,8 @@ TX Extension (TEI) Interface (TTI)
  - ``tti_tbi_drop``: packets dropped at the TX BMC Interface (TBI) because of credit starvation
    (在 TX BMC 接口 (TBI) 处因信用额度不足而丢弃的数据包。)
 
-RXB (RX Buffer) Enqueue
-(RXB（RX 缓冲区）入队)
-~~~~~~~~~~~~~~~~~~~~~~~
+RXB (RX Buffer) Enqueue(RXB（RX 缓冲区）入队)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
  - ``rxb_integrity_err[i]``: frames enqueued with integrity errors (e.g., multi-bit ECC errors) on RXB input i
    (在 RXB 输入 i 上入队时带有完整性错误（如多位 ECC 错误）的帧。)
@@ -154,9 +141,8 @@ RXB (RX Buffer) Enqueue
  - ``rxb_drbo[i]_bytes``: bytes received at RXB input i
    (在 RXB 输入 i 收到的字节数。)
 
-RXB (RX Buffer) FIFO
-(RXB 缓冲区 FIFO)
-~~~~~~~~~~~~~~~~~~~~
+RXB (RX Buffer) FIFO(RXB 缓冲区 FIFO)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
  - ``rxb_fifo[i]_drop``: transitions into the drop state on RXB pool i
    (RXB 池 i 进入丢弃状态的次数。)
@@ -167,9 +153,8 @@ RXB (RX Buffer) FIFO
  - ``rxb_fifo[i]_level``: current occupancy of RXB pool i
    (RXB 池 i 的当前占用程度。)
 
-RXB (RX Buffer) Dequeue
-(RXB（RX 缓冲区）出队)
-~~~~~~~~~~~~~~~~~~~~~~~
+RXB (RX Buffer) Dequeue(RXB（RX 缓冲区）出队)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
    - ``rxb_intf[i]_frames``: frames sent to the output i
      (发送到输出 i 的帧数。)
@@ -180,9 +165,8 @@ RXB (RX Buffer) Dequeue
    - ``rxb_pbuf[i]_bytes``: bytes sent to output i from the perspective of internal packet buffer
      (从内部数据包缓冲区的角度统计的发送到输出 i 的字节数。)
 
-RPC (Rx parser)
-(RPC 解析器)
-~~~~~~~~~~~~~~~
+RPC (Rx parser)(RPC 解析器)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
  - ``rpc_unkn_etype``: frames containing unknown EtherType
    (包含未知 EtherType 的帧。)
@@ -203,9 +187,8 @@ RPC (Rx parser)
  - ``ovr_size_err``: oversized frames
    (超长帧。)
 
-Hardware Queues
-(硬件队列)
-~~~~~~~~~~~~~~~
+Hardware Queues(硬件队列)
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 1. RX DMA Engine:
    (1. RX DMA 引擎：)
@@ -260,9 +243,8 @@ behavior and potential performance bottlenecks.
 	  credit exhaustion
           (因非 posted 信用额度耗尽而丢弃的读请求。)
 
-XDP Length Error:
-(XDP 长度错误：)
-~~~~~~~~~~~~~~~~~
+XDP Length Error:(XDP 长度错误：)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For XDP programs without frags support, fbnic tries to make sure that MTU fits
 into a single buffer. If an oversized frame is received and gets fragmented,

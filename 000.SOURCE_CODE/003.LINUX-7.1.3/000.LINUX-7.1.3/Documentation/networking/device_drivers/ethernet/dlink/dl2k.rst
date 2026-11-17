@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=========================================================
-D-Link DL2000-based Gigabit Ethernet Adapter Installation
-=========================================================
-
-(基于 D-Link DL2000 的千兆以太网适配器安装指南)
+========================================================================================================
+D-Link DL2000-based Gigabit Ethernet Adapter Installation(基于 D-Link DL2000 的千兆以太网适配器安装指南)
+========================================================================================================
 
 May 23, 2002
 (2002 年 5 月 23 日)
@@ -20,9 +18,8 @@ May 23, 2002
  - Troubleshooting
 
 
-Compatibility List
-(兼容性列表)
-==================
+Compatibility List(兼容性列表)
+==============================
 
 Adapter Support:
 (支持的适配器：)
@@ -46,9 +43,8 @@ on the environments below.
  . Red Hat v7.2 (kernel 2.4.7-10)
 
 
-Quick Install
-(快速安装)
-=============
+Quick Install(快速安装)
+=======================
 Install linux driver as following command::
 (按以下命令安装 Linux 驱动程序：)
 
@@ -81,9 +77,8 @@ Now eth0 should active, you can test it by "ping" or get more information by
 8. Driver will automatically load and configure at next boot time.
    (8. 下次启动时驱动程序将自动加载并完成配置。)
 
-Compiling the Driver
-(编译驱动程序)
-====================
+Compiling the Driver(编译驱动程序)
+==================================
 In Linux, NIC drivers are most commonly configured as loadable modules.
 The approach of building a monolithic kernel has become obsolete. The driver
 can be compiled as part of a monolithic kernel, but is strongly discouraged.
@@ -108,9 +103,8 @@ to compile and link the driver:
 驱动程序支持 Linux 2.4.7 内核。将这些文件复制到一个目录，然后输入以下
 命令来编译并链接驱动程序：)
 
-CD-ROM drive
-(CD-ROM 光驱)
-------------
+CD-ROM drive(CD-ROM 光驱)
+-------------------------
 
 ::
 
@@ -123,9 +117,8 @@ CD-ROM drive
     [root@XXX dl2k] tar xfvz dl2k.tgz
     [root@XXX dl2k] make all
 
-Floppy disc drive
-(软盘驱动器)
------------------
+Floppy disc drive(软盘驱动器)
+-----------------------------
 
 ::
 
@@ -136,13 +129,11 @@ Floppy disc drive
     [root@XXX dl2k] tar xfvz dl2k.tgz
     [root@XXX dl2k] make all
 
-Installing the Driver
-(安装驱动程序)
-=====================
+Installing the Driver(安装驱动程序)
+===================================
 
-Manual Installation
-(手动安装)
--------------------
+Manual Installation(手动安装)
+-----------------------------
 
   Once the driver has been compiled, it must be loaded, enabled, and bound
   to a protocol stack in order to establish network connectivity. To load a
@@ -217,9 +208,8 @@ Manual Installation
     ifconfig
 
 
-Automated Installation
-(自动安装)
-----------------------
+Automated Installation(自动安装)
+--------------------------------
 
   This section describes how to install the driver such that it is
   automatically loaded and configured at boot time. The following description
@@ -228,9 +218,8 @@ Automated Installation
   (本节描述如何安装驱动程序，使其在启动时自动加载并完成配置。以下描述
   基于 Red Hat 6.0/7.0 发行版，但同样可以轻松移植到其他发行版。)
 
-Red Hat v6.x/v7.x
-(Red Hat v6.x/v7.x)
------------------
+Red Hat v6.x/v7.x(Red Hat v6.x/v7.x)
+------------------------------------
 
   1. Copy dl2k.o to the network modules directory, typically
      /lib/modules/2.x.x-xx/net or /lib/modules/2.x.x/kernel/drivers/net.
@@ -340,9 +329,8 @@ rx_flow=[1|0]			  Specifies the Rx flow control. If rx_flow=0,
 ===============================   ==============================================
 
 
-Configuration Script Sample
-(配置脚本示例)
-===========================
+Configuration Script Sample(配置脚本示例)
+=========================================
 Here is a sample of a simple configuration script::
 (下面是一个简单配置脚本的示例：)
 
@@ -356,9 +344,8 @@ Here is a sample of a simple configuration script::
     IPADDR=207.200.5.2
 
 
-Troubleshooting
-(故障排除)
-===============
+Troubleshooting(故障排除)
+=========================
 Q1. Source files contain ^ M behind every line.
 (Q1. 源文件中每行末尾都有 ^ M。)
 

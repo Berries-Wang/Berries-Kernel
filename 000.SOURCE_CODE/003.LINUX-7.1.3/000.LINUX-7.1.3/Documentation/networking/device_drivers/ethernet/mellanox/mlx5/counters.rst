@@ -1,32 +1,28 @@
 .. SPDX-License-Identifier: GPL-2.0 OR Linux-OpenIB
 .. include:: <isonum.txt>
 
-================
-Ethtool counters
-================
-
-(Ethtool 计数器)
+================================
+Ethtool counters(Ethtool 计数器)
+================================
 
 :Copyright: |copy| 2023, NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 
 (版权： |copy| 2023，NVIDIA CORPORATION & AFFILIATES。保留所有权利。)
 
-Contents
-(目录)
-========
+Contents(目录)
+==============
 
-- `Overview`_
+- `Overview(概览)`_
   (概览)
-- `Groups`_
+- `Groups(分组)`_
   (分组)
-- `Types`_
+- `Types(类型)`_
   (类型)
-- `Descriptions`_
+- `Descriptions(描述)`_
   (描述)
 
-Overview
-(概览)
-========
+Overview(概览)
+==============
 
 There are several counter groups based on where the counter is being counted. In
 addition, each group of counters may have different counter types.
@@ -35,7 +31,6 @@ addition, each group of counters may have different counter types.
 
 These counter groups are based on which component in a networking setup,
 illustrated below, that they describe::
-(这些计数器组基于网络部署中它们所描述的组件，如下图所示：)
 
                                                   ----------------------------------------
 
@@ -109,9 +104,10 @@ illustrated below, that they describe::
 
                                                      | Port
 
-Groups
-(分组)
-======
+(这些计数器组基于网络部署中它们所描述的组件，如下图所示：)
+
+Groups(分组)
+============
 
 Ring
 (Ring)
@@ -153,9 +149,8 @@ Priority Port Counters
   A set of the physical port counters, per priority per port.
   (物理端口计数器的一个集合，按每端口每优先级划分。)
 
-Types
-(类型)
-=====
+Types(类型)
+===========
 
 Counters are divided into three types.
 (计数器分为三种类型。)
@@ -195,9 +190,8 @@ provides more detailed information.::
     ip –s link show <if-name>
     ethtool -S <if-name>
 
-Descriptions
-(描述)
-============
+Descriptions(描述)
+==================
 
 XSK, PTP, and QoS counters that are similar to counters defined previously will
 not be separately listed. For example, `ptp_tx[i]_packets` will not be
@@ -208,9 +202,8 @@ protocol is used.
 `ptp_tx[i]_packets` 不会被单独说明，因为 `tx[i]_packets` 已描述了两者的行为，
 只是 `ptp_tx[i]_packets` 仅在使用精确时间协议时才会计数。)
 
-Ring / Netdev Counter
-(Ring / Netdev 计数器)
-----------------------------
+Ring / Netdev Counter(Ring / Netdev 计数器)
+-------------------------------------------
 The following counters are available per ring or software port.
 (以下计数器按每个 ring 或软件端口提供。)
 
@@ -995,9 +988,8 @@ ring 0 上会打印为 `rx0_packets`，在软件端口上则打印为 `rx_packet
                   (对应的 ring 计数器与全局计数器名称并不相同（即不遵循通用命
                   名规则）。)
 
-vPort Counters
-(vPort 计数器)
---------------
+vPort Counters(vPort 计数器)
+----------------------------
 Counters on the NIC port that is connected to a eSwitch.
 (连接到 eSwitch 的 NIC 端口上的计数器。)
 
@@ -1196,9 +1188,8 @@ Counters on the NIC port that is connected to a eSwitch.
        (因内部设备 RQ 缺少接收 WQE 而丢弃的数据包数量。)
      - Error (错误型)
 
-Physical Port Counters
-(物理端口计数器)
-----------------------
+Physical Port Counters(物理端口计数器)
+--------------------------------------
 The physical port counters are the counters on the external port connecting the
 adapter to the network. This measuring point holds information on standardized
 counters like IEEE 802.3, RFC2863, RFC 2819, RFC 3635 and additional counters
@@ -1609,9 +1600,8 @@ like flow control, FEC and more.
        (因接口 down 而被丢弃的接收数据包数量。)
      - Informative (信息型)
 
-Priority Port Counters
-(优先级端口计数器)
-----------------------
+Priority Port Counters(优先级端口计数器)
+----------------------------------------
 The following counters are physical port counters that are counted per L2
 priority (0-7).
 (以下计数器是按 L2 优先级（0-7）分别计数的物理端口计数器。)
@@ -1719,9 +1709,8 @@ priority (0-7).
        (设备因缺少接收缓冲区而丢弃的数据包数量。)
      - Informative (信息型)
 
-Device Counters
-(设备计数器)
----------------
+Device Counters(设备计数器)
+---------------------------
 
 .. flat-table:: Device Counter Table
    :widths: 2 3 1

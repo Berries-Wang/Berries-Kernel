@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-====================================
-Virtual Routing and Forwarding (VRF)
-====================================
+==========================================================
+Virtual Routing and Forwarding (VRF)(虚拟路由和转发 (VRF))
+==========================================================
 
-(虚拟路由和转发 (VRF))
-
-The VRF Device
-(VRF 设备)
-==============
+The VRF Device(VRF 设备)
+========================
 
 The VRF device combined with ip rules provides the ability to create virtual
 routing and forwarding domains (aka VRFs, VRF-lite to be specific) in the
@@ -40,14 +37,11 @@ and then VRF devices provide L3 separation.
 提供网络接口的隔离，命名空间内接口上的 VLAN 提供 L2 隔离，然后 VRF 设备
 提供 L3 隔离。)
 
-Design
-(设计)
-------
+Design(设计)
+------------
 
 A VRF device is created with an associated route table. Network interfaces
 are then enslaved to a VRF device::
-(创建 VRF 设备时会关联一个路由表。然后，网络接口被 enslave (捆绑) 到
-VRF 设备上：)
 
 	 +-----------------------------+
 	 |           vrf-blue          |  ===> route table 10
@@ -60,6 +54,9 @@ VRF 设备上：)
 			      +------+ +------+
 			      | eth8 | | eth9 |
 			      +------+ +------+
+
+(创建 VRF 设备时会关联一个路由表。然后，网络接口被 enslave (捆绑) 到
+VRF 设备上：)
 
 Packets received on an enslaved device and are switched to the VRF device
 in the IPv4 and IPv6 processing stacks giving the impression that packets
@@ -91,9 +88,8 @@ VRF 设备上的 tcpdump 能够捕获整个 VRF 进出的所有数据包\ [1]_ �
        出口方向，POSTROUTING 和 OUTPUT 规则可以使用 VRF 设备或真实出口设备
        来编写。)
 
-Setup
-(设置)
------
+Setup(设置)
+-----------
 
 1. VRF device is created with an association to a FIB table.
    e.g,::
@@ -158,9 +154,8 @@ Setup
        ip route add table 10 ...
 
 
-Applications
-(应用程序)
-------------
+Applications(应用程序)
+----------------------
 
 Applications that are to work within a VRF need to bind their socket to the
 VRF device::
@@ -236,9 +231,8 @@ VRF based on the ingress interface, as documented earlier.
 
 --------------------------------------------------------------------------------
 
-Using iproute2 for VRFs
-(使用 iproute2 管理 VRF)
-=======================
+Using iproute2 for VRFs(使用 iproute2 管理 VRF)
+===============================================
 
 iproute2 supports the vrf keyword as of v4.7. For backwards compatibility this
 section lists both commands where appropriate -- with the vrf keyword and the

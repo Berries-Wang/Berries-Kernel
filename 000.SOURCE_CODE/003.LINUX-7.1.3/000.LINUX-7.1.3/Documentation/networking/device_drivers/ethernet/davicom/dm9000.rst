@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=====================
-DM9000 Network driver
-=====================
-
-(DM9000 网络驱动)
+======================================
+DM9000 Network driver(DM9000 网络驱动)
+======================================
 
 Copyright 2008 Simtec Electronics,
 (版权所有 2008 Simtec Electronics，)
@@ -13,9 +11,8 @@ Copyright 2008 Simtec Electronics,
 	  (Ben Dooks <ben@simtec.co.uk> <ben-linux@fluff.org>)
 
 
-Introduction
-(简介)
-------------
+Introduction(简介)
+------------------
 
 This file describes how to use the DM9000 platform-device based network driver
 that is contained in the files drivers/net/dm9000.c and drivers/net/dm9000.h.
@@ -28,9 +25,8 @@ driver.
 (该驱动支持三种 DM9000 变体：最早支持的芯片 DM9000E，以及较新的 DM9000A 和 DM9000B 设备。它目前由 Ben Dooks 维护和测试，任何针对此驱动的补丁都应抄送 (CC:) 给他。)
 
 
-Defining the platform device
-(定义平台设备)
-----------------------------
+Defining the platform device(定义平台设备)
+------------------------------------------
 
 The minimum set of resources attached to the platform device are as follows:
 (平台设备所需的最小资源集如下：)
@@ -104,9 +100,8 @@ The platform data is defined in include/linux/dm9000.h and described below.
 (平台数据定义在 include/linux/dm9000.h 中，并在下文描述。)
 
 
-Platform data
-(平台数据)
--------------
+Platform data(平台数据)
+-----------------------
 
 Extra platform data for the DM9000 can describe the IO bus width to the
 device, whether or not an external PHY is attached to the device and
@@ -162,9 +157,8 @@ DM9000_PLATF_SIMPLE_PHY
 	(配置符号 DM9000_FORCE_SIMPLE_PHY_POLL（Kconfig 条目 "Force simple NSR based PHY polling"）允许在构建时强制开启此标志。)
 
 
-PHY Link state polling
-(PHY 链路状态轮询)
-----------------------
+PHY Link state polling(PHY 链路状态轮询)
+----------------------------------------
 
 The driver keeps track of the link state and informs the network core
 about link (carrier) availability. This is managed by several methods

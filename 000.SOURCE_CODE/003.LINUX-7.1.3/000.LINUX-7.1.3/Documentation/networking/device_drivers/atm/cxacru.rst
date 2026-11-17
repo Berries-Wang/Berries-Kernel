@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-========================
-ATM cxacru device driver
-========================
-
-(ATM cxacru 设备驱动)
+=============================================
+ATM cxacru device driver(ATM cxacru 设备驱动)
+=============================================
 
 Firmware is required for this device: http://accessrunner.sourceforge.net/
 (此设备需要固件： http://accessrunner.sourceforge.net/)

@@ -41,9 +41,8 @@ described in the man pages included in the package.
 :List info:           http://vger.kernel.org/vger-lists.html#linux-nilfs
    (邮件列表信息: http://vger.kernel.org/vger-lists.html#linux-nilfs)
 
-Caveats
-(注意事项)
-=======
+Caveats(注意事项)
+=================
 
 Features which NILFS2 does not support yet:
 (NILFS2 尚不支持的特性：)
@@ -61,9 +60,8 @@ Features which NILFS2 does not support yet:
 	- defragmentation
 	  (碎片整理)
 
-Mount options
-(挂载选项)
-=============
+Mount options(挂载选项)
+=======================
 
 NILFS2 supports the following mount options:
 (NILFS2 支持以下挂载选项：)
@@ -105,9 +103,8 @@ nodiscard(*)		The discard/TRIM commands are sent to the underlying
 			for SSD devices and sparse/thinly-provisioned LUNs. (启用/禁用 discard/TRIM 命令的使用。当块被释放时，discard/TRIM 命令会被发送到底层块设备。这对 SSD 设备和稀疏/精简配置(sparse/thinly-provisioned)的 LUN 很有用。)
 ======================= =======================================================
 
-Ioctls
-(Ioctls)
-======
+Ioctls(Ioctls)
+==============
 
 There is some NILFS2 specific functionality which can be accessed by applications
 through the system call interfaces. The list of all NILFS2 specific ioctls are
@@ -174,9 +171,8 @@ Table of NILFS2 specific ioctls:
 			        is used by nilfs_resize utility. (以字节为单位定义段的下限和上限。该 ioctl 由 nilfs_resize 工具使用。)
  ============================== ===============================================
 
-NILFS2 usage
-(NILFS2 的使用)
-============
+NILFS2 usage(NILFS2 的使用)
+===========================
 
 To use nilfs2 as a local file system, simply::
 (要把 nilfs2 用作本地文件系统，只需执行以下命令：)
@@ -216,9 +212,8 @@ Then, the cleaner daemon is automatically shut down by the umount
 helper program (umount.nilfs2).
 (随后，清理器守护进程会被卸载辅助程序(umount.nilfs2)自动关闭。)
 
-Disk format
-(磁盘格式)
-===========
+Disk format(磁盘格式)
+=====================
 
 A nilfs2 volume is equally divided into a number of segments except
 for the super block (SB) and segment #0.  A segment is the container

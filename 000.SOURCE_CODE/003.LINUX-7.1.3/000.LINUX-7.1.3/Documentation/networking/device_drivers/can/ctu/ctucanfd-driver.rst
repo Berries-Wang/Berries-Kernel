@@ -1,18 +1,14 @@
 .. SPDX-License-Identifier: GPL-2.0-or-later
 
-CTU CAN FD Driver
-=================
-
-(CTU CAN FD 驱动)
+CTU CAN FD Driver(CTU CAN FD 驱动)
+==================================
 
 Author: Martin Jerabek <martin.jerabek01@gmail.com>
 (作者: Martin Jerabek <martin.jerabek01@gmail.com>)
 
 
-About CTU CAN FD IP Core
-------------------------
-
-(关于 CTU CAN FD IP 核)
+About CTU CAN FD IP Core(关于 CTU CAN FD IP 核)
+-----------------------------------------------
 
 `CTU CAN FD <https://gitlab.fel.cvut.cz/canbus/ctucanfd_ip_core>`_
 is an open source soft core written in VHDL.
@@ -50,10 +46,8 @@ development `repository <https://gitlab.fel.cvut.cz/canbus/qemu-canbus>`_.
 支持的开发版可从 QEMU 本地开发仓库的 ctu-canfd 分支克隆。)
 
 
-About SocketCAN
----------------
-
-(关于 SocketCAN)
+About SocketCAN(关于 SocketCAN)
+-------------------------------
 
 SocketCAN is a standard common interface for CAN devices in the Linux
 kernel. As the name suggests, the bus is accessed via sockets, similarly
@@ -67,10 +61,8 @@ in the same way as, e.g., UDP/IP over Ethernet.
 中有深入阐述。简而言之，它提供了一种在 CAN 之上实现和使用更高层协议的
 自然方式，就像以太网之上的 UDP/IP 一样。)
 
-Device probe
-~~~~~~~~~~~~
-
-(设备探测)
+Device probe(设备探测)
+~~~~~~~~~~~~~~~~~~~~~~
 
 Before going into detail about the structure of a CAN bus device driver,
 let's reiterate how the kernel gets to know about the device at all.
@@ -96,10 +88,8 @@ Device Tree was made for.
 情况则不同。这些总线不支持枚举，因此内核必须从别处获知设备的存在。设备树
 (Device Tree) 正是为此而生。)
 
-Device tree
-~~~~~~~~~~~
-
-(设备树)
+Device tree(设备树)
+~~~~~~~~~~~~~~~~~~~
 
 An entry in device tree states that a device exists in the system, how
 it is reachable (on which bus it resides) and its configuration –
@@ -130,10 +120,8 @@ tree is given in .
 
 .. _sec:socketcan:drv:
 
-Driver structure
-~~~~~~~~~~~~~~~~
-
-(驱动结构)
+Driver structure(驱动结构)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The driver can be divided into two parts – platform-dependent device
 discovery and set up, and platform-independent CAN network device
@@ -143,10 +131,8 @@ implementation.
 
 .. _sec:socketcan:platdev:
 
-Platform device driver
-^^^^^^^^^^^^^^^^^^^^^^
-
-(平台设备驱动)
+Platform device driver(平台设备驱动)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In the case of Zynq, the core is connected via the AXI system bus, which
 does not have enumeration support, and the device must be specified in
@@ -220,10 +206,8 @@ against the tables of all *platform drivers*.
 
 .. _sec:socketcan:netdev:
 
-Network device driver
-^^^^^^^^^^^^^^^^^^^^^
-
-(网络设备驱动)
+Network device driver(网络设备驱动)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Each network device must support at least these operations:
 (每个网络设备至少必须支持以下操作：)
@@ -325,10 +309,8 @@ ISR 中处理到来的 IRQ、重新启用 softirq、再把上下文切换回 sof
 See :ref:`Documentation/networking/napi.rst <napi>` for more information.
 (更多信息参见 :ref:`Documentation/networking/napi.rst <napi>`。)
 
-Integrating the core to Xilinx Zynq
------------------------------------
-
-(将核集成到 Xilinx Zynq)
+Integrating the core to Xilinx Zynq(将核集成到 Xilinx Zynq)
+-----------------------------------------------------------
 
 The core interfaces a simple subset of the Avalon
 (search for Intel **Avalon Interface Specifications**)
@@ -367,10 +349,8 @@ Vivado component.
 (最后，为了能把该核作为自定义 IP 放进框图，该核连同 APB 接口一起被封装
 成了 Vivado 组件。)
 
-CTU CAN FD Driver design
-------------------------
-
-(CTU CAN FD 驱动设计)
+CTU CAN FD Driver design(CTU CAN FD 驱动设计)
+---------------------------------------------
 
 The general structure of a CAN device driver has already been examined
 in . The next paragraphs provide a more detailed description of the CTU
@@ -378,10 +358,8 @@ CAN FD core driver in particular.
 (CAN 设备驱动的一般结构已在前文讨论过。接下来几段将对 CTU CAN FD 核驱动
 作更详细的描述。)
 
-Low-level driver
-~~~~~~~~~~~~~~~~
-
-(低层驱动)
+Low-level driver(低层驱动)
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The core is not intended to be used solely with SocketCAN, and thus it
 is desirable to have an OS-independent low-level driver. This low-level
@@ -402,10 +380,8 @@ on.
 低层驱动支持的操作包括：设置位时序、设置控制器模式、启用/禁用、读取
 RX 帧、写入 TX 帧等。)
 
-Configuring bit timing
-~~~~~~~~~~~~~~~~~~~~~~
-
-(配置位时序)
+Configuring bit timing(配置位时序)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 On CAN, each bit is divided into four segments: SYNC, PROP, PHASE1, and
 PHASE2. Their duration is expressed in multiples of a Time Quantum
@@ -463,10 +439,8 @@ widths (6 and 7 bits, respectively), so the auto-computed values might
 overflow the shorter register and must thus be redistributed among the
 two [4]_.
 
-Handling RX
-~~~~~~~~~~~
-
-(接收处理)
+Handling RX(接收处理)
+~~~~~~~~~~~~~~~~~~~~~
 
 Frame reception is handled in NAPI queue, which is enabled from ISR when
 the RXNE (RX FIFO Not Empty) bit is set. Frames are read one by one
@@ -539,10 +513,8 @@ selected [5]_.
 
 .. _subsec:ctucanfd:rxtimestamp:
 
-Timestamping RX frames
-^^^^^^^^^^^^^^^^^^^^^^
-
-(接收帧的时间戳)
+Timestamping RX frames(接收帧的时间戳)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The CTU CAN FD core reports the exact timestamp when the frame has been
 received. The timestamp is by default captured at the sample point of
@@ -555,10 +527,8 @@ userspace is not yet implemented, but is planned in the future.
 宽度最多可达 64 位。撰写本文时，从内核向用户空间传递时间戳尚未实现，
 但已计划在将来实现。)
 
-Handling TX
-~~~~~~~~~~~
-
-(发送处理)
+Handling TX(发送处理)
+~~~~~~~~~~~~~~~~~~~~~
 
 The CTU CAN FD core has 4 independent TX buffers, each with its own
 state and priority. When the core wants to transmit, a TX buffer in
@@ -637,10 +607,8 @@ txb_head ≡ txb_tail (mod 4)。下面以示例形式描绘了 FIFO 的维护方
 
 .. _subsec:ctucanfd:txtimestamp:
 
-Timestamping TX frames
-^^^^^^^^^^^^^^^^^^^^^^
-
-(发送帧的时间戳)
+Timestamping TX frames(发送帧的时间戳)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 When submitting a frame to a TX buffer, one may specify the timestamp at
 which the frame should be transmitted. The frame transmission may start
@@ -665,10 +633,8 @@ to timestamping RX frames and are described in .
 (与获取 RX 帧时间戳类似，该核也支持获取 TX 帧的时间戳——即帧被成功送达
 的时间。其细节与 RX 帧时间戳非常相似，在中有所描述。)
 
-Handling RX buffer overrun
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-(处理 RX 缓冲区溢出)
+Handling RX buffer overrun(处理 RX 缓冲区溢出)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When a received frame does no more fit into the hardware RX FIFO in its
 entirety, RX FIFO overrun flag (STATUS[DOR]) is set and Data Overrun
@@ -699,10 +665,8 @@ the Set/Reset priority (see issue #187).
 DOI 标志不会被复位。通过交换 Set/Reset 的优先级，此问题已得到修复
 (参见 issue #187)。)
 
-Reporting Error Passive and Bus Off conditions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-(上报 Error Passive 与 Bus Off 状态)
+Reporting Error Passive and Bus Off conditions(上报 Error Passive 与 Bus Off 状态)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 It may be desirable to report when the node reaches *Error Passive*,
 *Error Warning*, and *Bus Off* conditions. The driver is notified about
@@ -732,10 +696,8 @@ Bus Off。如果节点进入 Bus Off，它显然会保持该状态直到被复�
 检测到的状态却是 Error Passive 时，应上报 Error Passive。)
 
 
-CTU CAN FD Driver Sources Reference
------------------------------------
-
-(CTU CAN FD 驱动源码参考)
+CTU CAN FD Driver Sources Reference(CTU CAN FD 驱动源码参考)
+------------------------------------------------------------
 
 .. kernel-doc:: drivers/net/can/ctucanfd/ctucanfd.h
    :internal:
@@ -749,10 +711,8 @@ CTU CAN FD Driver Sources Reference
 .. kernel-doc:: drivers/net/can/ctucanfd/ctucanfd_platform.c
    :internal:
 
-CTU CAN FD IP Core and Driver Development Acknowledgment
----------------------------------------------------------
-
-(CTU CAN FD IP 核与驱动开发致谢)
+CTU CAN FD IP Core and Driver Development Acknowledgment(CTU CAN FD IP 核与驱动开发致谢)
+----------------------------------------------------------------------------------------
 
 * Odrej Ille <ondrej.ille@gmail.com>
 
@@ -853,10 +813,8 @@ CTU CAN FD IP Core and Driver Development Acknowledgment
    (学士学位论文 "Model of CAN FD Communication Controller for QEMU
    Emulator")
 
-Notes
------
-
-(注释)
+Notes(注释)
+-----------
 
 
 .. [1]

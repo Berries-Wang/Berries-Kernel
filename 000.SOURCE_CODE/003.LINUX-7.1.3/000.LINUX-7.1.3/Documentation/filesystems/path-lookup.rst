@@ -1,8 +1,6 @@
-===============
-Pathname lookup
-===============
-
-(路径名查找)
+===========================
+Pathname lookup(路径名查找)
+===========================
 
 This write-up is based on three articles published at lwn.net:
 (本文基于发表于 lwn.net 的三篇文章：)
@@ -24,9 +22,8 @@ including:
 - ``openat2()`` resolution restriction flags.
   (openat2() 的解析限制标志。)
 
-Introduction to pathname lookup
-(路径名查找简介)
-===============================
+Introduction to pathname lookup(路径名查找简介)
+===============================================
 
 The most obvious aspect of pathname lookup, which very little
 exploration is needed to discover, is that it is complex.  There are
@@ -42,9 +39,8 @@ are getting ahead of ourselves.  There are some important low level
 distinctions we need to clarify first.
 (路径名查找最明显的一点——几乎不需要什么探索就能发现——就是它非常复杂。有许多规则、特殊情况以及各种实现上的备选方案，它们组合在一起足以让不设防的读者感到困惑。计算机科学早已见识过这种复杂性，并拥有帮助管理它的工具。我们将广泛使用的一个工具是"分而治之"。在分析的早期部分，我们将把符号链接划分出去——留到最后部分再处理。在讲到符号链接之前很久，我们还有另一个基于 VFS 加锁方法的重大划分，它使我们能够分别考察"REF-walk"和"RCU-walk"。不过我们有点操之过急了。首先需要澄清一些重要的低层区别。)
 
-There are two sorts of ...
-(有两类……)
---------------------------
+There are two sorts of ...(有两类……)
+------------------------------------
 
 .. _openat: http://man7.org/linux/man-pages/man2/openat.2.html
 
@@ -122,9 +118,8 @@ of the possible races are seen most clearly in the context of the
 pathname lookup.
 (当一个进程正在查找路径名时，另一个进程可能正在做出影响该查找的更改。一个相当极端的例子是：如果"a/b"在另一个进程正在查找"a/b/.."时被重命名为"a/c/b"，那么该进程可能会成功地解析到"a/c"。大多数竞争要微妙得多，路径名查找任务的一大部分就是防止它们产生破坏性影响。许多可能的竞争在"dcache"的上下文中看得最清楚，理解 dcache 是理解路径名查找的核心。)
 
-More than just a cache
-(不仅仅是缓存)
-----------------------
+More than just a cache(不仅仅是缓存)
+------------------------------------
 
 The "dcache" caches information about names in each filesystem to
 make them quickly available for lookup.  Each entry (known as a
@@ -165,9 +160,8 @@ awkward races.  The VFS can detect these filesystems by the
 ``DCACHE_OP_REVALIDATE`` flag being set in the dentry.
 (其他文件系统无法提供这种保证，因为它们做不到。它们通常是通过网络共享的文件系统，无论是像 NFS 和 9P 这样的远程文件系统，还是像 ocfs2 或 cephfs 这样的集群文件系统。这些文件系统允许 VFS 重新验证缓存的信息，并且必须针对棘手的竞争提供自己的保护。VFS 可以通过 dentry 中设置的 DCACHE_OP_REVALIDATE 标志检测出这些文件系统。)
 
-REF-walk: simple concurrency management with refcounts and spinlocks
-(REF-walk：基于引用计数和自旋锁的简单并发管理)
---------------------------------------------------------------------
+REF-walk: simple concurrency management with refcounts and spinlocks(REF-walk：基于引用计数和自旋锁的简单并发管理)
+------------------------------------------------------------------------------------------------------------------
 
 With all of those divisions carefully classified, we can now start
 looking at the actual process of walking along a path.  In particular
@@ -430,9 +424,8 @@ In particular it is held while scanning chains in the dcache hash
 table, and the mount point hash table.
 (特别是在扫描 dcache 哈希表和挂载点哈希表中的链时会持有它。)
 
-Bringing it together with ``struct nameidata``
-(用 struct nameidata 将其整合在一起)
-----------------------------------------------
+Bringing it together with ``struct nameidata``(用 struct nameidata 将其整合在一起)
+----------------------------------------------------------------------------------
 
 .. _First edition Unix: https://minnie.tuhs.org/cgi-bin/utree.pl?file=V1/u2.s
 
@@ -535,9 +528,8 @@ seem obvious, but is worth pointing out so that we will recognize its
 analogue in the "RCU-walk" version.
 (这种"手把手交接"(hand-over-hand)式的顺序——在放下对前一个 dentry 的引用之前先获取对新 dentry 的引用——看似显而易见，但值得指出，以便我们能在"RCU-walk"版本中认出它的对应物。)
 
-Handling the final component
-(处理最后一个组件)
-----------------------------
+Handling the final component(处理最后一个组件)
+----------------------------------------------
 
 ``link_path_walk()`` only walks as far as setting ``nd->last`` and
 ``nd->last_type`` to refer to the final component of the path.  It does
@@ -587,9 +579,8 @@ by testing ``last.name[last.len]``.  If there is any character beyond
 the final component, it must be a trailing slash.
 (这些函数，或者调用它们的函数，都需要警惕最后组件不是 LAST_NORM 的可能性。如果查找的目标是创建某个东西，那么 last_type 的任何非 LAST_NORM 值都会导致错误。例如，如果 path_parentat() 报告 LAST_DOTDOT，那么调用者就不会尝试创建那个名称。它们还通过测试 last.name[last.len] 来检查结尾斜杠。如果最后组件之外还有任何字符，那必然是结尾斜杠。)
 
-Revalidation and automounts
-(重新验证与自动挂载)
----------------------------
+Revalidation and automounts(重新验证与自动挂载)
+-----------------------------------------------
 
 Apart from symbolic links, there are only two parts of the "REF-walk"
 process not yet covered.  One is the handling of stale cache entries
@@ -682,9 +673,8 @@ This will become more important next time when we examine RCU-walk
 which is particularly sensitive to delays.
 (这里没有新的重要加锁；而且很重要的一点是，在这一处理期间不持有任何锁(只有计数引用)，因为出现长时间延时的可能性非常真实。当我们下次考察对延时特别敏感的 RCU-walk 时，这一点将变得更加重要。)
 
-RCU-walk - faster pathname lookup in Linux
-(RCU-walk——Linux 中更快的路径名查找)
-==========================================
+RCU-walk - faster pathname lookup in Linux(RCU-walk——Linux 中更快的路径名查找)
+==============================================================================
 
 RCU-walk is another algorithm for performing pathname lookup in Linux.
 It is in many ways similar to REF-walk and the two share quite a bit
@@ -701,9 +691,8 @@ quite different from traditional locking, so we will spend a little extra
 time when we come to those.
 (我们注意到 REF-walk 复杂是因为有大量细节和特殊情况。RCU-walk 通过干脆拒绝处理若干情况来降低这种复杂性——它转而退回到 REF-walk。RCU-walk 的困难来自另一个方向：不熟悉。依赖 RCU 时的加锁规则与传统加锁相当不同，所以当我们讲到那些规则时会多花一点时间。)
 
-Clear demarcation of roles
-(角色的清晰划分)
---------------------------
+Clear demarcation of roles(角色的清晰划分)
+------------------------------------------
 
 The easiest way to manage concurrency is to forcibly stop any other
 thread from changing the data structures that a given thread is
@@ -771,9 +760,8 @@ so it is very unlikely that there will be much, if any, benefit from
 switching back.
 (LOOKUP_RCU 尝试可能在内部放下该标志并切换到 REF-walk，但之后绝不会尝试切换回 RCU-walk。让 RCU-walk 绊倒的地方更可能靠近叶子，因此切换回去即使有收益也极可能微乎其微。)
 
-RCU and seqlocks: fast and light
-(RCU 与顺序锁：快速而轻量)
---------------------------------
+RCU and seqlocks: fast and light(RCU 与顺序锁：快速而轻量)
+----------------------------------------------------------
 
 RCU is, unsurprisingly, critical to RCU-walk mode.  The
 ``rcu_read_lock()`` is held for the entire time that RCU-walk is walking
@@ -834,9 +822,8 @@ With that little refresher on seqlocks out of the way we can look at
 the bigger picture of how RCU-walk uses seqlocks.
 (在简单重温了顺序锁之后，我们可以从更大的图景来看 RCU-walk 如何使用顺序锁。)
 
-``mount_lock`` and ``nd->m_seq``
-(mount_lock 与 nd->m_seq)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``mount_lock`` and ``nd->m_seq``(mount_lock 与 nd->m_seq)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We already met the ``mount_lock`` seqlock when REF-walk used it to
 ensure that crossing a mount point is performed safely.  RCU-walk uses
@@ -868,9 +855,8 @@ results would have been the same.  This ensures the invariant holds,
 at least for vfsmount structures.
 (如果 RCU-walk 发现 mount_lock 没有变化，那么它可以确信：假如 REF-walk 对每个 vfsmount 都获取了计数引用，结果也会相同。这确保了不变式成立，至少对 vfsmount 结构而言。)
 
-``dentry->d_seq`` and ``nd->seq``
-(dentry->d_seq 与 nd->seq)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+``dentry->d_seq`` and ``nd->seq``(dentry->d_seq 与 nd->seq)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In place of taking a count or lock on ``d_reflock``, RCU-walk samples
 the per-dentry ``d_seq`` seqlock, and stores the sequence number in the
@@ -922,9 +908,8 @@ getting a counted reference to the new dentry before dropping that for
 the old dentry which we saw in REF-walk.
 (当前 dentry 和当前 seq 号被传给 __d_lookup_rcu()，后者在成功时返回新的 dentry 和新的 seq 号。然后 lookup_fast() 复制 inode 指针并重新验证新的 seq 号。接着它用旧的 seq 号对旧 dentry 做最后一次验证，然后才继续。这个先获取新 dentry 的 seq 号、再检查旧 dentry 的 seq 号的过程，恰好对应于我们在 REF-walk 中看到的、在放下旧 dentry 的引用之前先获取新 dentry 计数引用的过程。)
 
-No ``inode->i_rwsem`` or even ``rename_lock``
-(不用 inode->i_rwsem，甚至连 rename_lock 也不用)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+No ``inode->i_rwsem`` or even ``rename_lock``(不用 inode->i_rwsem，甚至连 rename_lock 也不用)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A semaphore is a fairly heavyweight lock that can only be taken when it is
 permissible to sleep.  As ``rcu_read_lock()`` forbids sleeping,
@@ -947,9 +932,8 @@ locking.  This neatly handles all cases, so adding extra checks on
 rename_lock would bring no significant value.
 (虽然 rename_lock 不需要任何睡眠、本可以被 RCU-walk 使用，但 RCU-walk 没有这样做。REF-walk 使用 rename_lock 来防范 dcache 中的哈希链在被搜索期间发生变化的可能性。这可能导致找不到实际存在的东西。当 RCU-walk 在 dentry 缓存中找不到某个东西时——无论它是否真的在那里——它本来就会降级到 REF-walk 并以适当的加锁重试。这已经巧妙地处理了所有情况，所以对 rename_lock 增加额外检查不会带来什么显著价值。)
 
-``unlazy walk()`` and ``complete_walk()``
-(unlazy walk() 与 complete_walk())
------------------------------------------
+``unlazy walk()`` and ``complete_walk()``(unlazy walk() 与 complete_walk())
+---------------------------------------------------------------------------
 
 That "dropping down to REF-walk" typically involves a call to
 ``unlazy_walk()``, so named because "RCU-walk" is also sometimes
@@ -1002,9 +986,8 @@ correct, or if it should just decrement the count and pretend none of
 this ever happened.
 (对于 mnt->mnt_count，只要随后用 mount_lock 验证该引用，获取引用就是安全的。如果验证失败，以调用 mnt_put() 的标准方式放下该引用可能*不*安全——卸载可能已经进行得太远。所以当 legitimize_mnt() 中的代码发现它获得的引用可能不安全时，会检查 MNT_SYNC_UMOUNT 标志，以确定简单的 mnt_put() 是否正确，或者它是否应该只递减计数并假装这一切从未发生过。)
 
-Taking care in filesystems
-(在文件系统中要小心)
---------------------------
+Taking care in filesystems(在文件系统中要小心)
+----------------------------------------------
 
 RCU-walk depends almost entirely on cached information and often will
 not call into the filesystem at all.  However there are two places,
@@ -1038,9 +1021,8 @@ result is not NULL before using it.  This pattern can be seen in
 ``nfs_lookup_revalidate()``.
 (如果文件系统可能需要重新验证 dcache 条目，那么 d_op->d_revalidate 也可能在 RCU-walk 中被调用。这个接口*确实*会被传入 dentry，但无法访问 nameidata 中的 inode 或 seq 号，所以它在访问 dentry 中的字段时需要格外小心。这种"格外小心"通常包括使用 READ_ONCE() 访问字段，并在使用结果之前验证它不是 NULL。这种模式可见于 nfs_lookup_revalidate()。)
 
-A pair of patterns
-(一对模式)
-------------------
+A pair of patterns(一对模式)
+----------------------------
 
 In various places in the details of REF-walk and RCU-walk, and also in
 the big picture, there are a couple of related patterns that are worth
@@ -1071,9 +1053,8 @@ isn't.  Careful consideration of what exactly guarantees the safety of
 each access is sometimes necessary.
 (这里的重点是"快速尝试并检查"。或许应该是"快速*且小心地*尝试，然后检查"。需要检查这一事实提醒我们：系统是动态的，只有为数不多的东西才是真正安全的。这整个过程中最可能的错误原因，是想当然地认为某物安全而实际上并不安全。有时需要仔细考虑究竟是什么保证了每次访问的安全性。)
 
-A walk among the symlinks
-(符号链接之间的漫步)
-=========================
+A walk among the symlinks(符号链接之间的漫步)
+=============================================
 
 There are several basic issues that we will examine to understand the
 handling of symbolic links:  the symlink stack, together with cache
@@ -1083,9 +1064,8 @@ Then a consideration of access-time updates and summary of the various
 flags controlling lookup will finish the story.
 (为了理解符号链接的处理，我们将考察几个基本问题：符号链接栈连同缓存生命周期，将帮助我们理解符号链接的整体递归处理，并引出最后一个组件所需的特殊小心。然后，对访问时间更新的考虑以及对控制查找的各种标志的总结将为这个故事收尾。)
 
-The symlink stack
-(符号链接栈)
------------------
+The symlink stack(符号链接栈)
+-----------------------------
 
 There are only two sorts of filesystem objects that can usefully
 appear in a path prior to the final component: directories and symlinks.
@@ -1157,9 +1137,8 @@ this stack, but we need a bit more.  To see that, we need to move on to
 cache lifetimes.
 (看起来似乎名称残余就是需要存储在这个栈上的全部，但我们还需要多一点点。要理解这一点，我们需要转向缓存生命周期。)
 
-Storage and lifetime of cached symlinks
-(缓存符号链接的存储与生命周期)
----------------------------------------
+Storage and lifetime of cached symlinks(缓存符号链接的存储与生命周期)
+---------------------------------------------------------------------
 
 Like other filesystem resources, such as inodes and directory
 entries, symlinks are cached by Linux to avoid repeated costly access
@@ -1256,9 +1235,8 @@ part of the symlink that the other fields refer to.  It is the remnant
 to be followed once that symlink has been fully parsed.
 (注意，在给定的栈帧中，路径残余(name)并不是其他字段所指的那个符号链接的一部分。它是那个符号链接被完全解析之后要跟随的残余。)
 
-Following the symlink
-(跟随符号链接)
----------------------
+Following the symlink(跟随符号链接)
+-----------------------------------
 
 The main loop in ``link_path_walk()`` iterates seamlessly over all
 components in the path and all of the non-final symlinks.  As symlinks
@@ -1300,9 +1278,8 @@ decide whether follow it when it is a symlink and call ``may_follow_link()`` to
 check if we have privilege to follow it.
 (最方便的做法是：在发现符号链接时立即在 walk_component() 中把新符号链接的引用压入栈；walk_component() 也是在走过那个最后组件时需要查看旧符号链接的最后一段代码。所以对 walk_component() 来说，在压入新符号链接的引用信息之前释放旧符号链接并弹出其引用是相当方便的。它由三个标志引导：WALK_NOFOLLOW 禁止它在发现符号链接时跟随它；WALK_MORE 表示释放当前符号链接还为时过早；WALK_TRAILING 表示它处于查找的最后组件上，因此我们会检查用户空间标志 LOOKUP_FOLLOW 来决定当它是符号链接时是否跟随，并调用 may_follow_link() 检查我们是否有跟随它的权限。)
 
-Symlinks with no final component
-(没有最后组件的符号链接)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Symlinks with no final component(没有最后组件的符号链接)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A pair of special-case symlinks deserve a little further explanation.
 Both result in a new ``struct path`` (with mount and dentry) being set
@@ -1336,9 +1313,8 @@ returns ``NULL``.  Again there is no final component and pick_link()
 returns ``NULL``.
 (任何进程中每个打开的文件描述符都在 /proc 中由看起来像符号链接的东西表示。它实际上是对目标文件的引用，而不仅仅是它的名称。当你对这些对象执行 readlink 时，会得到一个可能指向同一文件的名称——除非它已被解除链接或被挂载覆盖。当 walk_component() 跟随其中之一时，"procfs"中的 ->get_link() 方法不返回字符串名称，而是调用 nd_jump_link()，它就地更新 nameidata 使其指向那个目标。然后 ->get_link() 返回 NULL。同样，这里没有最后组件，pick_link() 返回 NULL。)
 
-Following the symlink in the final component
-(在最后组件中跟随符号链接)
---------------------------------------------
+Following the symlink in the final component(在最后组件中跟随符号链接)
+----------------------------------------------------------------------
 
 All this leads to ``link_path_walk()`` walking down every component, and
 following all symbolic links it finds, until it reaches the final
@@ -1405,9 +1381,8 @@ the code.
    open process continues on the symlink that was found.
    (将创建一个名为 /tmp/bar 的文件。如果设置了 O_EXCL 则不允许这样做，但在其他方面，对 O_CREAT 打开的处理与非创建性打开非常相似：lookup_last() 或 open_last_lookup() 返回非 NULL 值，随后调用 link_path_walk()，打开过程在发现的那个符号链接上继续。)
 
-Updating the access time
-(更新访问时间)
-------------------------
+Updating the access time(更新访问时间)
+--------------------------------------
 
 We previously said of RCU-walk that it would "take no locks, increment
 no counts, leave no footprints."  We have since seen that some
@@ -1462,9 +1437,8 @@ path walk drop down to REF-walk.  All of this is handled in the
 ``get_link()`` function.
 (在 RCU-walk 模式下很容易测试是否需要 atime 更新；如果不需要，可以跳过更新并继续 RCU-walk 模式。只有当确实需要 atime 更新时，路径遍历才会降级到 REF-walk。所有这些都在 get_link() 函数中处理。)
 
-A few flags
-(若干标志)
------------
+A few flags(若干标志)
+---------------------
 
 A suitable way to wrap up this tour of pathname walking is to list
 the various flags that can be stored in the ``nameidata`` to guide the
@@ -1479,9 +1453,8 @@ very early on.  If it is set, empty pathnames are not considered to be
 an error.
 (另外还有 LOOKUP_EMPTY，它在概念上与其他标志不合。如果未设置它，空路径名很早就会导致错误。如果设置了它，空路径名不被视为错误。)
 
-Global state flags
-(全局状态标志)
-~~~~~~~~~~~~~~~~~~
+Global state flags(全局状态标志)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We have already met two global state flags: ``LOOKUP_RCU`` and
 ``LOOKUP_REVAL``.  These select between one of three overall approaches
@@ -1509,9 +1482,8 @@ to be revalidated, so ``d_op->d_weak_revalidate()`` is called if
 final component or, when creating, unlinking, or renaming, at the penultimate component.
 (ND_JUMPED 表示选择当前 dentry 不是因为它具有正确的名称，而是由于其他原因。这发生在跟随".."时、跟随指向"/"的符号链接时、跨越挂载点时，或访问"/proc/$PID/fd/$FD"符号链接(也称为"magic link"，魔链)时。在这种情况下，文件系统没有被要求重新验证名称(通过 d_revalidate())。此时 inode 可能仍需要重新验证，所以当查找完成而设置了 ND_JUMPED 时会调用 d_op->d_weak_revalidate()——查找可能在最后组件完成，或者在创建、解除链接或重命名时在倒数第二个组件完成。)
 
-Resolution-restriction flags
-(解析限制标志)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Resolution-restriction flags(解析限制标志)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In order to allow userspace to protect itself against certain race conditions
 and attack scenarios involving changing path components, a series of flags are
@@ -1551,9 +1523,8 @@ the starting point, and ".." at the starting point will act as a no-op. As with
 attacks against ".." resolution. Magic-links are also blocked.
 (LOOKUP_IN_ROOT 解析所有路径组件时如同起点就是文件系统根。nd_jump_root() 把解析带回起点，而起点处的".."将表现为无操作。与 LOOKUP_BENEATH 一样，rename_lock 和 mount_lock 用于检测针对".."解析的攻击。magic-links 也被阻止。)
 
-Final-component flags
-(最后组件标志)
-~~~~~~~~~~~~~~~~~~~~~
+Final-component flags(最后组件标志)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Some of these flags are only set when the final component is being
 considered.  Others are only checked for when considering that final
@@ -1589,9 +1560,8 @@ These flags were previously useful for ``->lookup()`` too but with the
 introduction of ``->atomic_open()`` they are less relevant there.
 (最后，LOOKUP_OPEN、LOOKUP_CREATE、LOOKUP_EXCL 和 LOOKUP_RENAME_TARGET 不被 VFS 直接使用，而是提供给文件系统，特别是 ->d_revalidate() 方法。如果文件系统知道自己很快就会被要求打开或创建该文件，它可以选择不费心做过重的重新验证。这些标志以前对 ->lookup() 也曾有用，但随着 ->atomic_open() 的引入，它们在那里已不太相关。)
 
-End of the road
-(路的尽头)
----------------
+End of the road(路的尽头)
+-------------------------
 
 Despite its complexity, all this pathname lookup code appears to be
 in good shape - various parts are certainly easier to understand now

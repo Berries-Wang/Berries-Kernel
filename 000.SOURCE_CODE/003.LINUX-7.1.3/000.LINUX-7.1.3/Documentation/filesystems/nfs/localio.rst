@@ -1,11 +1,9 @@
-===========
-NFS LOCALIO
-===========
-(NFS LOCALIO(本地 IO))
+=================================
+NFS LOCALIO(NFS LOCALIO(本地 IO))
+=================================
 
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 The LOCALIO auxiliary RPC protocol allows the Linux NFS client and
 server to reliably handshake to determine if they are on the same
@@ -72,9 +70,8 @@ fio for 20 secs with directio, qd of 8, 1 libaio thread:
     128K read:  IOPS=24.4k, BW=3050MiB/s (3198MB/s)(59.6GiB/20001msec)
     128K write: IOPS=11.4k, BW=1430MiB/s (1500MB/s)(27.9GiB/20001msec)
 
-FAQ
-(常见问题)
-===
+FAQ(常见问题)
+=============
 
 1. What are the use cases for LOCALIO?
    (LOCALIO 的用例有哪些？)
@@ -185,9 +182,8 @@ FAQ
    See the detailed "NFS Client and Server Interlock" section below.
    (参见下文详细的"NFS Client and Server Interlock"(NFS 客户端与服务器互锁)一节。)
 
-RPC
-(RPC)
-===
+RPC(RPC)
+========
 
 The LOCALIO auxiliary RPC protocol consists of a single "UUID_IS_LOCAL"
 RPC method that allows the Linux NFS client to verify the local Linux
@@ -229,9 +225,8 @@ LOCALIO uses the same transport connection as NFS traffic. As such,
 LOCALIO is not registered with rpcbind.
 (LOCALIO 使用与 NFS 流量相同的传输连接。因此，LOCALIO 不向 rpcbind 注册。)
 
-NFS Common and Client/Server Handshake
-(NFS Common 与客户端/服务器握手)
-======================================
+NFS Common and Client/Server Handshake(NFS Common 与客户端/服务器握手)
+======================================================================
 
 fs/nfs_common/nfslocalio.c provides interfaces that enable an NFS client
 to generate a nonce (single-use UUID) and associated short-lived
@@ -253,9 +248,8 @@ instances that are connected to nfs client's running on the same local
 host.
 (nfs_common 的 nfs_uuids 列表是启用 LOCALIO 的基础，因此它包含一些指向 nfsd 内存、供客户端直接使用的成员(例如 'net' 是服务器的网络命名空间，通过它可以以恰当的 rcu 读访问来访问 nn->nfsd_serv)。正是这种客户端与服务器的同步，使得高级用法和对象的生命周期可以跨越主机内核的 nfsd，延伸到与运行在同一本地主机上的 NFS 客户端相连的每容器 knfsd 实例。)
 
-NFS Client and Server Interlock
-(NFS 客户端与服务器互锁)
-===============================
+NFS Client and Server Interlock(NFS 客户端与服务器互锁)
+=======================================================
 
 LOCALIO provides the nfs_uuid_t object and associated interfaces to
 allow proper network namespace (net-ns) and NFSD object refcounting.
@@ -288,9 +282,8 @@ attempting to nfsd_open_local_fh() without having a proper reference on
 NFSD's net-ns.
 (经验证，NFS 客户端与服务器的这种互锁修复了一个容易触发的崩溃：当运行在容器中并挂载着 LOCALIO 客户端的 NFSD 实例被关闭时会发生该崩溃。在容器及关联的 NFSD 重启之后，客户端会因空指针解引用而继续崩溃，其原因正是 LOCALIO 客户端在没有持有对 NFSD net-ns 的恰当引用的情况下尝试调用 nfsd_open_local_fh()。)
 
-NFS Client issues IO instead of Server
-(由 NFS 客户端代替服务器发起 IO)
-======================================
+NFS Client issues IO instead of Server(由 NFS 客户端代替服务器发起 IO)
+======================================================================
 
 Because LOCALIO is focused on protocol bypass to achieve improved IO
 performance, alternatives to the traditional NFS wire protocol (SUNRPC
@@ -340,9 +333,8 @@ Once enabled, it will cause LOCALIO to use end-to-end O_DIRECT semantics
 align their IO).
 (启用后，它将使 LOCALIO 使用端到端的 O_DIRECT 语义(但再次强调，如果应用程序没有正确对齐其 IO，这可能导致 IO 失败)。)
 
-Security
-(安全性)
-========
+Security(安全性)
+================
 
 LOCALIO is only supported when UNIX-style authentication (AUTH_UNIX, aka
 AUTH_SYS) is used.
@@ -362,9 +354,8 @@ protocol via SUNRPC). No other namespaces (user, mount, etc) have been
 altered or purposely extended from the server to the client.
 (就容器而言，LOCALIO 让客户端可以访问服务器所拥有的网络命名空间。要允许客户端访问服务器的按命名空间划分的 nfsd_net 结构体，这是必需的。在传统 NFS 下，客户端也被给予同样级别的访问(尽管是以通过 SUNRPC 的 NFS 协议形式)。没有其他命名空间(用户、挂载等)被改动或被有意地从服务器扩展到客户端。)
 
-Module Parameters
-(模块参数)
-=================
+Module Parameters(模块参数)
+===========================
 
 /sys/module/nfs/parameters/localio_enabled (bool)
 controls if LOCALIO is enabled, defaults to Y. If client and server are
@@ -384,9 +375,8 @@ LOCALIO every N (nfs3_localio_probe_throttle) IOs, defaults to 0
 misconfigure (too low a value or non-power-of-2).
 (/sys/module/nfsv3/parameters/nfs3_localio_probe_throttle (uint)控制 NFSv3 读写 IO 是否每 N 个(nfs3_localio_probe_throttle)IO 触发一次(重新)启用 LOCALIO，默认为 0(禁用)。必须是 2 的幂；如果管理员配置错误(值过低或不是 2 的幂)，一切后果自负。)
 
-Testing
-(测试)
-=======
+Testing(测试)
+=============
 
 The LOCALIO auxiliary protocol and associated NFS LOCALIO read, write
 and commit access have proven stable against various test scenarios:

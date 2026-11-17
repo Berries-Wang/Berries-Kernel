@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-====================================================================
-Miscellaneous Device control operations for the autofs kernel module
-====================================================================
+=======================================================================================================
+Miscellaneous Device control operations for the autofs kernel module(autofs 内核模块的杂项设备控制操作)
+=======================================================================================================
 
-(autofs 内核模块的杂项设备控制操作)
-
-The problem
-(问题)
-===========
+The problem(问题)
+=================
 
 There is a problem with active restarts in autofs (that is to say
 restarting autofs when there are busy mounts).
@@ -130,9 +127,8 @@ retained.
 (当前的 autofs 实现使用在挂载点上打开的 ioctl 文件描述符来执行控制操作。该描述符持有的引用会在确定挂载是否正在使用的检查中被计入，并且还用于访问挂载超级块中保存的 autofs 文件系统信息。因此，需要保留文件句柄的使用。)
 
 
-The Solution
-(解决方案)
-============
+The Solution(解决方案)
+======================
 
 To be able to restart autofs leaving existing direct, indirect and
 offset mounts in place we need to be able to obtain a file handle
@@ -189,9 +185,8 @@ message bus architecture.
 (当前的内核开发政策建议避免使用 ioctl 机制，而倾向于使用 Netlink 之类的系统。我们尝试了一种使用该系统的实现来评估其适用性，发现在这种情况下它并不合适。这里使用的是 Generic Netlink 系统，因为原始 Netlink 会导致复杂性显著增加。毫无疑问，Generic Netlink 系统对于常见情况的 ioctl 函数是一个优雅的解决方案，但它并不是一个完全的替代品，可能是因为它的首要用途是作为一个消息总线实现，而不是专门的 ioctl 替代品。虽然可以绕过这一点，但有一个顾虑导致了不使用它的决定。这就是 daemon 中的 autofs 过期处理已变得过于复杂，因为枚举卸载候选者几乎只是为了"计数"调用过期 ioctl 的次数。这涉及扫描挂载表，事实证明这对拥有大映射的用户来说是一个很大的开销。改进这一点的最佳方法是尽量回到很久以前进行过期处理的方式。也就是说，当对一个挂载(文件句柄)发出过期请求时，我们应该持续回调 daemon，直到我们不能再卸载任何挂载，然后向 daemon 返回适当的状态。目前我们一次只使一个挂载过期。由于消息总线架构的要求，Generic Netlink 实现会排除这种未来开发的可能性。)
 
 
-autofs Miscellaneous Device mount control interface
-(autofs 杂项设备挂载控制接口)
-====================================================
+autofs Miscellaneous Device mount control interface(autofs 杂项设备挂载控制接口)
+================================================================================
 
 The control interface is opening a device node, typically /dev/autofs.
 (控制接口就是打开一个设备节点，通常是 /dev/autofs。)
@@ -263,9 +258,8 @@ returned.
 (所有 ioctl 都会执行一次将此结构从用户空间复制到内核空间的操作，如果 size 参数小于结构本身的大小则返回 -EINVAL，如果内核内存分配失败则返回 -ENOMEM，如果复制本身失败则返回 -EFAULT。其他检查包括将编译进来的用户空间版本与模块版本进行版本检查，不匹配会导致返回 -EINVAL。如果 size 字段大于结构大小，则假定存在一个路径，并检查它以确保它以 "/" 开头并且以 NULL 结尾，否则返回 -EINVAL。在这些检查之后，对于除 AUTOFS_DEV_IOCTL_VERSION_CMD、AUTOFS_DEV_IOCTL_OPENMOUNT_CMD 和 AUTOFS_DEV_IOCTL_CLOSEMOUNT_CMD 之外的所有 ioctl 命令，都会验证 ioctlfd，如果它不是有效的描述符或不对应于 autofs 挂载点，则返回错误 -EBADF、-ENOTTY 或 -EINVAL(不是 autofs 描述符)。)
 
 
-The ioctls
-(ioctl 列表)
-==========
+The ioctls(ioctl 列表)
+======================
 
 An example of an implementation which uses this interface can be seen
 in autofs version 5.0.4 and later in file lib/dev-ioctl-lib.c of the

@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===============
-Ext3 Filesystem
-===============
-
-(Ext3 文件系统)
+==============================
+Ext3 Filesystem(Ext3 文件系统)
+==============================
 
 Ext3 was originally released in September 1999. Written by Stephen Tweedie
 for the 2.2 branch, and ported to 2.4 kernels by Peter Braam, Andreas Dilger,

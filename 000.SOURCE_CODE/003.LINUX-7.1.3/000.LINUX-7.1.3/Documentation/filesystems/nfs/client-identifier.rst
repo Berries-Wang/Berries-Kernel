@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=======================
-NFSv4 client identifier
-=======================
-
-(NFSv4 客户端标识符)
+===========================================
+NFSv4 client identifier(NFSv4 客户端标识符)
+===========================================
 
 This document explains how the NFSv4 protocol identifies client
 instances in order to maintain file open and lock state during
@@ -19,9 +17,8 @@ are not chosen carefully.
 (如果客户端的 NFSv4 标识符及其 principal 未经慎重选择，则会存在风险。)
 
 
-Introduction
-(简介)
-------------
+Introduction(简介)
+------------------
 
 The NFSv4 protocol uses "lease-based file locking". Leases help
 NFSv4 servers provide file lock guarantees and manage their
@@ -54,9 +51,8 @@ sending fresh OPEN and LOCK requests. This enables file locks to
 persist safely across server restarts.
 (此外，每个 NFSv4 服务器都管理一个持久的客户端租约列表。当服务器重启且客户端尝试恢复其状态时，服务器使用该列表来区分在服务器重启前持有状态的客户端与发送全新 OPEN 和 LOCK 请求的客户端。这使文件锁能够在服务器重启期间安全地持续存在。)
 
-NFSv4 client identifiers
-(NFSv4 客户端标识符)
-------------------------
+NFSv4 client identifiers(NFSv4 客户端标识符)
+--------------------------------------------
 
 Each NFSv4 client presents an identifier to NFSv4 servers so that
 they can associate the client with its lease. Each client's
@@ -106,9 +102,8 @@ As part of the identity presented to servers, a good
     "co_ownerid" string.
     (NFSv4 协议对 "co_ownerid" 字符串的大小施加了 1024 字节的限制。)
 
-Protecting NFSv4 lease state
-(保护 NFSv4 租约状态)
-----------------------------
+Protecting NFSv4 lease state(保护 NFSv4 租约状态)
+-------------------------------------------------
 
 NFSv4 servers utilize the "client_owner4" as described above to
 assign a unique lease to each client. Under this scheme, there are
@@ -149,9 +144,8 @@ Lease stealing and lock stealing increase the potential for denial
 of service and in rare cases even data corruption.
 (租约窃取和锁窃取会增加拒绝服务的可能性，在极少数情况下甚至会导致数据损坏。)
 
-Selecting an appropriate client identifier
-(选择合适的客户端标识符)
-------------------------------------------
+Selecting an appropriate client identifier(选择合适的客户端标识符)
+------------------------------------------------------------------
 
 By default, the Linux NFSv4 client implementation constructs its
 "co_ownerid" string starting with the words "Linux NFS" followed by
@@ -204,9 +198,8 @@ be formed at boot using the container's internal identifier:
     sha256sum /etc/machine-id | awk '{print $1}' \\
         > /sys/fs/nfs/net/nfs_client/identifier
 
-Security considerations
-(安全考虑)
------------------------
+Security considerations(安全考虑)
+---------------------------------
 
 The use of cryptographic security for lease management operations
 is strongly encouraged.
@@ -236,9 +229,8 @@ flavor with Kerberos and the integrity QOS to prevent in-transit
 modification of lease modification requests.
 (为此目的使用 Kerberos 可以让客户端和服务器对所有 "sec=" 设置所涵盖的操作使用同一个租约。此外，Linux NFS 客户端将 RPCSEC_GSS 安全机制(security flavor)与 Kerberos 以及完整性 QOS 结合使用，以防止租约修改请求在传输途中被篡改。)
 
-Additional notes
-(其他说明)
-----------------
+Additional notes(其他说明)
+--------------------------
 The Linux NFSv4 client establishes a single lease on each NFSv4
 server it accesses. NFSv4 mounts from a Linux NFSv4 client of a
 particular server then share that lease.
@@ -252,11 +244,9 @@ migration by presenting the same "client_owner4" to all servers it
 encounters.
 (一旦客户端建立了打开和锁定状态，NFSv4 协议就允许租约状态随已迁移的数据一起迁移到其他服务器。这对正在运行的应用程序完全隐藏了数据迁移。Linux NFSv4 客户端通过向其接触到的所有服务器出示相同的 "client_owner4" 来促进状态迁移。)
 
-========
-See Also
-========
-
-(参见)
+==============
+See Also(参见)
+==============
 
   - nfs(5)
   - kerberos(7)

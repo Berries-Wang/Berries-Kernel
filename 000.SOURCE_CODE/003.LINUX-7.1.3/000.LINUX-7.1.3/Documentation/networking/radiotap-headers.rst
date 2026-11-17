@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===========================
-How to use radiotap headers
-===========================
+=================================================
+How to use radiotap headers(如何使用 radiotap 头)
+=================================================
 
-(如何使用 radiotap 头)
-
-Pointer to the radiotap include file
-(radiotap 头文件位置的指引)
-------------------------------------
+Pointer to the radiotap include file(radiotap 头文件位置的指引)
+---------------------------------------------------------------
 
 Radiotap headers are variable-length and extensible, you can get most of the
 information you need to know on them from::
@@ -20,9 +17,8 @@ This document gives an overview and warns on some corner cases.
 (本文档给出一个概述，并对一些边角情况提出警告。)
 
 
-Structure of the header
-(头部的结构)
------------------------
+Structure of the header(头部的结构)
+-----------------------------------
 
 There is a fixed portion at the start which contains a u32 bitmap that defines
 if the possible argument associated with that bit is present or not.  So if b0
@@ -54,9 +50,8 @@ covered by the ieee80211_radiotap_header and any arguments following.
 所覆盖的总字节数。)
 
 
-Requirements for arguments
-(参数的要求)
---------------------------
+Requirements for arguments(参数的要求)
+--------------------------------------
 
 After the fixed part of the header, the arguments follow for each argument
 index whose matching bit is set in the it_present member of
@@ -111,9 +106,8 @@ ieee80211_radiotap_header.
    4 字节的单一实体处理。)
 
 
-Example valid radiotap header
-(有效 radiotap 头示例)
------------------------------
+Example valid radiotap header(有效 radiotap 头示例)
+---------------------------------------------------
 
 ::
 
@@ -125,9 +119,8 @@ Example valid radiotap header
 	0x01 //<-- antenna
 
 
-Using the Radiotap Parser
-(使用 radiotap 解析器)
--------------------------
+Using the Radiotap Parser(使用 radiotap 解析器)
+-----------------------------------------------
 
 If you are having to parse a radiotap struct, you can radically simplify the
 job by using the radiotap parser that lives in net/wireless/radiotap.c and has

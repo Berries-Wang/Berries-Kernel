@@ -1,17 +1,14 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=====================================
-OCFS2 file system - online file check
-=====================================
-
-(OCFS2 文件系统 - 在线文件检查)
+====================================================================
+OCFS2 file system - online file check(OCFS2 文件系统 - 在线文件检查)
+====================================================================
 
 This document will describe OCFS2 online file check feature.
 (本文档将描述 OCFS2 在线文件检查特性。)
 
-Introduction
-(简介)
-============
+Introduction(简介)
+==================
 OCFS2 is often used in high-availability systems. However, OCFS2 usually
 converts the filesystem to read-only when encounters an error. This may not be
 necessary, since turning the filesystem read-only would affect other running
@@ -23,9 +20,8 @@ read-only, and the problematic file's inode number is reported in the kernel
 log. The user can try to check/fix this file via online filecheck feature.
 (OCFS2 常用于高可用系统。然而，OCFS2 在遇到错误时通常会将文件系统转换为只读。这可能是没有必要的，因为将文件系统转为只读也会影响其他正在运行的进程，降低可用性。于是引入了一个挂载选项(errors=continue)，它会向调用进程返回 -EIO errno 并终止后续处理，使文件系统不会进一步损坏。文件系统不会被转换为只读，出问题的文件的 inode 号会被记录到内核日志中。用户可以尝试通过在线文件检查(online filecheck)特性来检查/修复此文件。)
 
-Scope
-(范围)
-=====
+Scope(范围)
+===========
 This effort is to check/fix small issues which may hinder day-to-day operations
 of a cluster filesystem by turning the filesystem read-only. The scope of
 checking/fixing is at the file level, initially for regular files and eventually
@@ -47,9 +43,8 @@ may end up with more damage than before the repair attempt. So, this has to
 be performed using user interaction and consent.
 (最后，这样的操作/特性不应被自动化，以免文件系统最终遭受比修复尝试之前更多的损坏。因此，这必须在用户交互和同意的情况下进行。)
 
-User interface
-(用户接口)
-==============
+User interface(用户接口)
+========================
 When there are errors in the OCFS2 filesystem, they are usually accompanied
 by the inode number which caused the error. This inode number would be the
 input to check/fix the file.
@@ -107,9 +102,8 @@ inode, fixing inode and setting the size of result record history.
 
     # echo "<size>" > /sys/fs/ocfs2/<devname>/filecheck/set
 
-Fixing stuff
-(修复相关内容)
-============
+Fixing stuff(修复相关内容)
+==========================
 On receiving the inode, the filesystem would read the inode and the
 file metadata. In case of errors, the filesystem would fix the errors
 and report the problems it fixed in the kernel log. As a precautionary measure,

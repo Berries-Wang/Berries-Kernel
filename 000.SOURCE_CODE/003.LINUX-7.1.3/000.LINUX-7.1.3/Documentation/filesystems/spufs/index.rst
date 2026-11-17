@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==============
-SPU Filesystem
-==============
-
-(SPU 文件系统)
+============================
+SPU Filesystem(SPU 文件系统)
+============================
 
 
 .. toctree::

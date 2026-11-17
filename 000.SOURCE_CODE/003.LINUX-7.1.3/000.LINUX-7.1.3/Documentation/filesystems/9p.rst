@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=======================================
-v9fs: Plan 9 Resource Sharing for Linux
-=======================================
+============================================================================
+v9fs: Plan 9 Resource Sharing for Linux(v9fs：面向 Linux 的 Plan 9 资源共享)
+============================================================================
 
-(v9fs：面向 Linux 的 Plan 9 资源共享)
-
-About
-(关于)
-=====
+About(关于)
+===========
 
 v9fs is a Unix implementation of the Plan 9 9p remote filesystem protocol.
 (v9fs 是 Plan 9 9p 远程文件系统协议的一个 Unix 实现。)
@@ -45,9 +42,8 @@ Other applications are described in the following papers:
 	  https://kernel.org/doc/ols/2010/ols2010-pages-109-120.pdf
 	  (VirtFS：一种支持虚拟化的文件系统直通)
 
-Usage
-(用法)
-=====
+Usage(用法)
+===========
 
 For remote file server::
 (用于远程文件服务器：)
@@ -70,9 +66,8 @@ associated "mount_tag" property. Available mount tags can be
 seen by reading /sys/bus/virtio/drivers/9pnet_virtio/virtio<n>/mount_tag files.
 (其中 mount_tag 是服务器为每个导出的挂载点所生成的标签。每个 9P 导出在客户端看来都是一个带有关联 "mount_tag" 属性的 virtio 设备。通过读取 /sys/bus/virtio/drivers/9pnet_virtio/virtio<n>/mount_tag 文件可以看到可用的挂载标签。)
 
-USBG Usage
-(USBG 用法)
-==========
+USBG Usage(USBG 用法)
+=====================
 
 To mount a 9p FS on a USB Host accessible via the gadget at runtime::
 (要在运行时通过 gadget 在可访问的 USB 主机上挂载 9p 文件系统：)
@@ -88,9 +83,8 @@ where <device> is the tag associated by the usb gadget transport.
 It is defined by the configfs instance name.
 (其中 <device> 是由 usb gadget transport 所关联的标签。它由 configfs 实例名定义。)
 
-USBG Example
-(USBG 示例)
-============
+USBG Example(USBG 示例)
+=======================
 
 The USB host exports a filesystem, while the gadget on the USB device
 side makes it mountable.
@@ -139,9 +133,8 @@ One use-case is to use it as an alternative to NFS root booting during
 the development of embedded Linux devices.
 (一个用例是在嵌入式 Linux 设备的开发过程中，用它来替代 NFS 根文件系统启动。)
 
-Options
-(选项)
-=======
+Options(选项)
+=============
 
   ============= ===============================================================
   trans=name	select an alternative transport.  Valid options are
@@ -272,9 +265,8 @@ Options
 		/sys/fs/9p/caches. (applies only to cache=fscache) (使用指定持久缓存的缓存标签。现有缓存会话的缓存标签可以在 /sys/fs/9p/caches 处列出。(仅适用于 cache=fscache))
   ============= ===============================================================
 
-Behavior
-(行为)
-========
+Behavior(行为)
+==============
 
 This section aims at describing 9p 'quirks' that can be different
 from a local filesystem behaviors.
@@ -285,9 +277,8 @@ from a local filesystem behaviors.
    buffer with the requested amount of bytes or end of file is reached.
    (对文件设置 O_NONBLOCK 后，只要服务器返回了一些数据，客户端的读取就会尽早返回，而不是试图把读缓冲填满所请求的字节数，也不必等到到达文件末尾。)
 
-Resources
-(资源)
-=========
+Resources(资源)
+===============
 
 Protocol specifications are maintained on github:
 http://ericvh.github.com/9p-rfc/

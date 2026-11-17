@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==========================
-General Filesystem Caching
-==========================
+============================================
+General Filesystem Caching(通用文件系统缓存)
+============================================
 
-(通用文件系统缓存)
-
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 This facility is a general purpose cache for network filesystems, though it
 could be used for caching other things such as ISO9660 filesystems too.
@@ -179,9 +176,8 @@ The cache backend API to FS-Cache can be found in:
 	Documentation/filesystems/caching/backend-api.rst
 
 
-Statistical Information
-(统计信息)
-=======================
+Statistical Information(统计信息)
+=================================
 
 If FS-Cache is compiled with the following options enabled::
 (如果 FS-Cache 编译时启用了以下选项：)
@@ -252,9 +248,8 @@ Netfslib will also add some stats counters of its own.
 (Netfslib 还会添加它自己的一些统计计数器。)
 
 
-Cache List
-(缓存列表)
-==========
+Cache List(缓存列表)
+====================
 
 FS-Cache provides a list of cache cookies:
 (FS-Cache 提供缓存 cookie 的列表：)
@@ -288,9 +283,8 @@ The state can be (-) Inactive, (P)reparing, (A)ctive, (E)rror or (W)ithdrawing.
 (状态可以是 (-) 非活动(Inactive)、(P) 准备中(Preparing)、(A) 活动(Active)、(E) 错误(Error)或 (W) 正在退出(Withdrawing)。)
 
 
-Volume List
-(卷列表)
-===========
+Volume List(卷列表)
+===================
 
 FS-Cache provides a list of volume cookies:
 (FS-Cache 提供卷 cookie 的列表：)
@@ -320,9 +314,8 @@ where the columns are:
 	=======	===============================================================
 
 
-Cookie List
-(cookie 列表)
-===========
+Cookie List(cookie 列表)
+========================
 
 FS-Cache provides a list of cookies:
 (FS-Cache 提供 cookie 的列表：)
@@ -361,9 +354,8 @@ where the columns are:
 	=======	===============================================================
 
 
-Debugging
-(调试)
-=========
+Debugging(调试)
+===============
 
 If CONFIG_NETFS_DEBUG is enabled, the FS-Cache facility and NETFS support can
 have runtime debugging enabled by adjusting the value in::

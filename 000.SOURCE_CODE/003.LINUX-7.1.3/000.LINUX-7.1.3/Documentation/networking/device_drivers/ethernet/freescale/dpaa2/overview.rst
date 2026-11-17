@@ -1,10 +1,8 @@
 .. include:: <isonum.txt>
 
-=========================================================
-DPAA2 (Data Path Acceleration Architecture Gen2) Overview
-=========================================================
-
-(DPAA2 (数据路径加速体系结构第二代) 概述)
+==================================================================================================
+DPAA2 (Data Path Acceleration Architecture Gen2) Overview(DPAA2 (数据路径加速体系结构第二代) 概述)
+==================================================================================================
 
 :Copyright: |copy| 2015 Freescale Semiconductor Inc.
 (|copy| 2015 Freescale Semiconductor Inc. 版权所有)
@@ -15,9 +13,8 @@ This document provides an overview of the Freescale DPAA2 architecture
 and how it is integrated into the Linux kernel.
 (本文档概述 Freescale DPAA2 体系结构及其如何集成到 Linux 内核中。)
 
-Introduction
-(简介)
-============
+Introduction(简介)
+==================
 
 DPAA2 is a hardware architecture designed for high-speeed network
 packet processing.  DPAA2 consists of sophisticated mechanisms for
@@ -45,7 +42,6 @@ DPAA2 对象进行操作。)
 
 The diagram below shows an overview of the DPAA2 resource management
 architecture::
-(下图展示了 DPAA2 资源管理体系的概况：)
 
 	+--------------------------------------+
 
@@ -109,6 +105,7 @@ architecture::
 
 	+--------------------------------------+
 
+(下图展示了 DPAA2 资源管理体系的概况：)
 
 The MC mediates operations such as create, discover,
 connect, configuration, and destroy.  Fast-path operations
@@ -119,9 +116,8 @@ DPIO objects.
 (configuration) 与销毁 (destroy) 等操作。数据上的快速路径操作，例如数据包的
 发送/接收，不经 MC 调解，而是直接使用 DPIO 对象中的内存映射区域完成。)
 
-Overview of DPAA2 Objects
-(DPAA2 对象概述)
-=========================
+Overview of DPAA2 Objects(DPAA2 对象概述)
+=========================================
 
 The section provides a brief overview of some key DPAA2 objects.
 A simple scenario is described illustrating the objects involved
@@ -129,9 +125,8 @@ in creating a network interfaces.
 (本节简要概述几个关键的 DPAA2 对象，并通过一个简单场景说明创建网络接口时所
 涉及的对象。)
 
-DPRC (Datapath Resource Container)
-(DPRC，数据路径资源容器)
-----------------------------------
+DPRC (Datapath Resource Container)(DPRC，数据路径资源容器)
+----------------------------------------------------------
 
 A DPRC is a container object that holds all the other
 types of DPAA2 objects.  In the example diagram below there
@@ -192,9 +187,8 @@ DPRCs can be defined statically and populated with objects
 via a config file passed to the MC when firmware starts it.
 (DPRC 可以静态定义，并在固件启动 MC 时通过传递给 MC 的配置文件来填充对象。)
 
-DPAA2 Objects for an Ethernet Network Interface
-(以太网网络接口的 DPAA2 对象)
------------------------------------------------
+DPAA2 Objects for an Ethernet Network Interface(以太网网络接口的 DPAA2 对象)
+----------------------------------------------------------------------------
 
 A typical Ethernet NIC is monolithic-- the NIC device contains TX/RX
 queuing mechanisms, configuration mechanisms, buffer management,
@@ -243,9 +237,8 @@ and IRQs).
 (下面对这些对象逐一描述。每个对象都附有简要说明、该对象支持的操作类型摘要，
 以及对象关键资源 (MMIO 区域与 IRQ) 的摘要。)
 
-DPMAC (Datapath Ethernet MAC)
-(DPMAC，数据路径以太网 MAC)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+DPMAC (Datapath Ethernet MAC)(DPMAC，数据路径以太网 MAC)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Represents an Ethernet MAC, a hardware device that connects to an Ethernet
 PHY and allows physical transmission and reception of Ethernet frames.
@@ -260,9 +253,8 @@ PHY and allows physical transmission and reception of Ethernet frames.
   IRQ config, enable, reset
   (命令：设置链路 up/down、链路配置、获取统计信息、IRQ 配置、使能、复位)
 
-DPNI (Datapath Network Interface)
-(DPNI，数据路径网络接口)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+DPNI (Datapath Network Interface)(DPNI，数据路径网络接口)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Contains TX/RX queues, network interface configuration, and RX buffer pool
 configuration mechanisms.  The TX/RX queues are in memory and are identified
@@ -278,9 +270,8 @@ by queue number.
   parse/classify config, IRQ config, enable, reset
   (命令：端口配置、卸载配置、队列配置、解析/分类配置、IRQ 配置、使能、复位)
 
-DPIO (Datapath I/O)
-(DPIO，数据路径 I/O)
-~~~~~~~~~~~~~~~~~~~
+DPIO (Datapath I/O)(DPIO，数据路径 I/O)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Provides interfaces to enqueue and dequeue
 packets and do hardware buffer pool management operations.  The DPAA2
@@ -305,9 +296,8 @@ expected to be shared by different DPAA2 drivers.
 - commands: IRQ config, enable, reset
   (命令：IRQ 配置、使能、复位)
 
-DPBP (Datapath Buffer Pool)
-(DPBP，数据路径缓冲区池)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+DPBP (Datapath Buffer Pool)(DPBP，数据路径缓冲区池)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Represents a hardware buffer pool.
 (表示一个硬件缓冲区池。)
@@ -319,9 +309,8 @@ Represents a hardware buffer pool.
 - commands: enable, reset
   (命令：使能、复位)
 
-DPMCP (Datapath MC Portal)
-(DPMCP，数据路径 MC portal)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+DPMCP (Datapath MC Portal)(DPMCP，数据路径 MC portal)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Provides an MC command portal.
 Used by drivers to send commands to the MC to manage
@@ -335,9 +324,8 @@ objects.
 - commands: IRQ config, enable, reset
   (命令：IRQ 配置、使能、复位)
 
-Object Connections
-(对象连接)
-==================
+Object Connections(对象连接)
+============================
 
 Some objects have explicit relationships that must
 be configured:
@@ -376,9 +364,8 @@ be configured:
     到的以太网数据将被复制到这些内存中。以太网驱动配置与该网络接口关联的
     DPBP。)
 
-Interrupts
-(中断)
-==========
+Interrupts(中断)
+================
 
 All interrupts generated by DPAA2 objects are message
 interrupts.  At the hardware level message interrupts
@@ -396,9 +383,8 @@ For ARM-based SoC this is the same as the stream ID.
 "device-id"。对于基于 ARM 的 SoC，它与 stream ID 相同。)
 
 
-DPAA2 Linux Drivers Overview
-(DPAA2 Linux 驱动概述)
-============================
+DPAA2 Linux Drivers Overview(DPAA2 Linux 驱动概述)
+==================================================
 
 This section provides an overview of the Linux kernel drivers for
 DPAA2-- 1) the bus driver and associated "DPAA2 infrastructure"
@@ -457,9 +443,8 @@ DPRC 中的每个对象都是一个 Linux "设备"，并绑定到一个驱动。
 A brief description of each driver is provided below.
 (下面对每个驱动做简要说明。)
 
-MC-bus driver
-(MC 总线驱动)
--------------
+MC-bus driver(MC 总线驱动)
+--------------------------
 
 The MC-bus driver is a platform driver and is probed from a
 node in the device tree (compatible "fsl,qoriq-mc") passed in by boot
@@ -492,9 +477,8 @@ The sysfs bind/unbind interfaces for the MC-bus can be consulted at
 MC 总线的 sysfs bind/unbind 接口可参阅
 *Documentation/ABI/testing/sysfs-bus-fsl-mc*。)
 
-DPRC driver
-(DPRC 驱动)
------------
+DPRC driver(DPRC 驱动)
+----------------------
 
 The DPRC driver is bound to DPRC objects and does runtime management
 of a bus instance.  It performs the initial bus scan of the DPRC
@@ -503,9 +487,8 @@ re-scanning the DPRC.
 (DPRC 驱动绑定到 DPRC 对象，负责总线实例的运行时管理。它对 DPRC 执行初始
 总线扫描，并通过重新扫描 DPRC 来处理热插拔等容器事件的中断。)
 
-Allocator
-(分配器)
----------
+Allocator(分配器)
+-----------------
 
 Certain objects such as DPMCP and DPBP are generic and fungible,
 and are intended to be used by other drivers.  For example,
@@ -525,9 +508,8 @@ allocation by other DPAA2 drivers.
 (分配器驱动注册这些可分配的对象类型，总线被探测时这些对象便绑定到分配器。
 分配器维护一个对象池，供其他 DPAA2 驱动分配使用。)
 
-DPIO driver
-(DPIO 驱动)
------------
+DPIO driver(DPIO 驱动)
+----------------------
 
 The DPIO driver is bound to DPIO objects and provides services that allow
 other drivers such as the Ethernet driver to enqueue and dequeue data for
@@ -562,9 +544,8 @@ etc.
 (DPIO 驱动代表内核中所有处于活动状态的 DPAA2 驱动工作——以太网、加密、压缩
 等。)
 
-Ethernet driver
-(以太网驱动)
----------------
+Ethernet driver(以太网驱动)
+---------------------------
 
 The Ethernet driver is bound to a DPNI and implements the kernel
 interfaces needed to connect the DPAA2 network interface to
@@ -574,9 +555,8 @@ Each DPNI corresponds to a Linux network interface.
 内核接口。
 每个 DPNI 对应一个 Linux 网络接口。)
 
-MAC driver
-(MAC 驱动)
-----------
+MAC driver(MAC 驱动)
+--------------------
 
 An Ethernet PHY is an off-chip, board specific component and is managed
 by the appropriate PHY driver via an mdio bus.  The MAC driver

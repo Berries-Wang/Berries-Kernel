@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===================================
-Network Filesystem Services Library
-===================================
-
-(网络文件系统服务库)
+=======================================================
+Network Filesystem Services Library(网络文件系统服务库)
+=======================================================
 
 .. Contents:
 
@@ -35,9 +33,8 @@ Network Filesystem Services Library
  - API function reference.
 
 
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 The network filesystem services library, netfslib, is a set of functions
 designed to aid a network filesystem in implementing VM/VFS API operations.  It
@@ -73,9 +70,8 @@ The way I/O is organised inside netfslib consists of a number of objects:
    filesystem and the cache to perform.
    (一个 *subrequest* (子请求)。这是 I/O 的基本单位。它代表单个 RPC 调用或单个缓存 I/O 操作。库将这些子请求传递给文件系统和缓存去执行。)
 
-Requests and Streams
-(请求与流)
---------------------
+Requests and Streams(请求与流)
+------------------------------
 
 When actually performing I/O (as opposed to just copying into the pagecache),
 netfslib will create one or more requests to track the progress of the I/O and
@@ -106,9 +102,8 @@ folios or vectors in the source/destination buffer.  The library handles the
 collection of results and the wrangling of folio flags and references.
 (此外，子请求不需要对应源/目标缓冲区中 folio 或向量的边界。该库会处理结果的收集以及 folio 标志和引用的打理。)
 
-Subrequests
-(子请求)
------------
+Subrequests(子请求)
+-------------------
 
 Subrequests are at the heart of the interaction between netfslib and the
 filesystem using it.  Each subrequest is expected to correspond to a single
@@ -146,9 +141,8 @@ request is synchronous or asynchronous, the collection of results will be done
 in either the application thread or in a work queue.
 (一旦子请求完成，文件系统或缓存会将完成情况通知该库，然后调用收集(collection)。根据请求是同步还是异步，结果收集将在应用程序线程或工作队列中完成。)
 
-Result Collection and Retry
-(结果收集与重试)
----------------------------
+Result Collection and Retry(结果收集与重试)
+-------------------------------------------
 
 As subrequests complete, the results are collected and collated by the library
 and folio unlocking is performed progressively (if appropriate).  Once the
@@ -175,9 +169,8 @@ them as necessary to fit with the filesystem's parameters rather than those of
 the cache.
 (此外，如果一个或多个连续的缓存读子请求失败，该库会将它们转交给文件系统来执行，并根据文件系统的参数(而非缓存的参数)按需重新协商和重新平铺它们。)
 
-Local Caching
-(本地缓存)
--------------
+Local Caching(本地缓存)
+-----------------------
 
 One of the services netfslib provides, via ``fscache``, is the option to cache
 on local disk a copy of the data obtained from/written to a network filesystem.
@@ -205,9 +198,8 @@ to the server.  The server stream will have gaps in it corresponding to those
 folios.
 (当回写发生时，如此标记的 folio 将只写入缓存而不写入服务器。回写通过使用两个流来处理混合的仅缓存写入和服务器与缓存同时写入，一个流发送到缓存，另一个流发送到服务器。服务器流中将存在与这些 folio 对应的空隙。)
 
-Content Encryption (fscrypt)
-(内容加密 (fscrypt))
-----------------------------
+Content Encryption (fscrypt)(内容加密 (fscrypt))
+------------------------------------------------
 
 Though it does not do so yet, at some point netfslib will acquire the ability
 to do client-side content encryption on behalf of the network filesystem (Ceph,
@@ -221,9 +213,8 @@ buffering and RMW cycles as necessary.
 (数据将以与写入服务器的数据相同的加密方式加密存储在本地缓存中，并且该库会根据需要施加缓冲中转(bounce buffering)和读改写(RMW)循环。)
 
 
-Per-Inode Context
-(每 inode 上下文)
-=================
+Per-Inode Context(每 inode 上下文)
+==================================
 
 The network filesystem helper library needs a place to store a bit of state for
 its use on each netfs inode it is helping to manage.  To this end, a context
@@ -310,9 +301,8 @@ filesystem:
      cached (e.g. AFS directories).
      (如果文件具有必须一次性完整读取的单体内容、且不得写回服务器，则设置此标志，尽管它可以被缓存(例如 AFS 目录)。)
 
-Inode Context Helper Functions
-(inode 上下文辅助函数)
-------------------------------
+Inode Context Helper Functions(inode 上下文辅助函数)
+----------------------------------------------------
 
 To help deal with the per-inode context, a number helper functions are
 provided.  Firstly, a function to perform basic initialisation on a context and
@@ -330,9 +320,8 @@ attached to an inode (or NULL if fscache is disabled) (最后，是一个从附�
 
 	struct fscache_cookie *netfs_i_cookie(struct netfs_inode *ctx);
 
-Inode Locking
-(inode 锁定)
--------------
+Inode Locking(inode 锁定)
+-------------------------
 
 A number of functions are provided to manage the locking of i_rwsem for I/O and
 to effectively extend it to provide more separate classes of exclusion (提供了一些函数来管理用于 I/O 的 i_rwsem 锁定，并有效地扩展它以提供更多单独的排除类别)::
@@ -377,9 +366,8 @@ The exclusion breaks down into four separate classes:
     might be permitted on unbuffered files.
     (mmap 的访问可以与任何其他类别并发操作。它们可能构成文件内回环 DIO 读/写的缓冲区。它们可能在无缓冲文件上被允许。)
 
-Inode Writeback
-(inode 回写)
----------------
+Inode Writeback(inode 回写)
+---------------------------
 
 Netfslib will pin resources on an inode for future writeback (such as pinning
 use of an fscache cookie) when an inode is dirtied.  However, this pinning
@@ -425,9 +413,8 @@ must be called from ``->evict_inode()`` *before* ``clear_inode()`` is called.
 (必须在调用 ``clear_inode()`` *之前*，从 ``->evict_inode()`` 中调用它。)
 
 
-High-Level VFS API
-(高层 VFS API)
-==================
+High-Level VFS API(高层 VFS API)
+================================
 
 Netfslib provides a number of sets of API calls for the filesystem to delegate
 VFS operations to.  Netfslib, in turn, will call out to the filesystem and the
@@ -435,9 +422,8 @@ cache to negotiate I/O sizes, issue RPCs and provide places for it to intervene
 at various times.
 (netfslib 提供了多组 API 调用，供文件系统将 VFS 操作委托给它。而 netfslib 反过来会调用文件系统和缓存来协商 I/O 大小、下发 RPC，并提供可在不同时间介入的位置。)
 
-Unlocked Read/Write Iter
-(未锁定读/写 iter)
-------------------------
+Unlocked Read/Write Iter(未锁定读/写 iter)
+------------------------------------------
 
 The first API set is for the delegation of operations to netfslib when the
 filesystem is called through the standard VFS read/write_iter methods (第一组 API 用于当文件系统通过标准 VFS read/write_iter 方法被调用时，将操作委托给 netfslib)::
@@ -453,9 +439,8 @@ perform the inode locking themselves and the first two will switch between
 buffered I/O and DIO as appropriate.
 (它们可以直接赋给 ``.read_iter`` 和 ``.write_iter``。它们自己执行 inode 锁定，并且前两个会在缓冲 I/O 和 DIO 之间酌情切换。)
 
-Pre-Locked Read/Write Iter
-(预锁定读/写 iter)
---------------------------
+Pre-Locked Read/Write Iter(预锁定读/写 iter)
+--------------------------------------------
 
 The second API set is for the delegation of operations to netfslib when the
 filesystem is called through the standard VFS methods, but needs to do some
@@ -495,9 +480,8 @@ a different group, it is flushed first.  The writeback API allows writing back
 of a specific group.
 (在所有这三个写函数上，都有一个回写组指针(如果文件系统不使用它，则应为 NULL)。回写组在 folio 被修改时设置到 folio 上。如果要修改的 folio 已被标记了不同的组，则会先将其刷写。回写 API 允许写回特定的组。)
 
-Memory-Mapped I/O API
-(内存映射 I/O API)
----------------------
+Memory-Mapped I/O API(内存映射 I/O API)
+---------------------------------------
 
 An API for support of mmap()'d I/O is provided (提供了用于支持 mmap I/O 的 API)::
 
@@ -509,9 +493,8 @@ locked write functions above, this does take a writeback group pointer.  If the
 page to be made writable is in a different group, it will be flushed first.
 (这允许文件系统将 ``.page_mkwrite`` 委托给 netfslib。文件系统在调用它之前不应获取 inode 锁，但与上面的锁定写函数一样，它确实接受一个回写组指针。如果将要变为可写的页位于不同的组中，则会先将其刷写。)
 
-Monolithic Files API
-(单体文件 API)
---------------------
+Monolithic Files API(单体文件 API)
+----------------------------------
 
 There is also a special API set for files for which the content must be read in
 a single RPC (and not written back) and is maintained as a monolithic blob
@@ -534,9 +517,8 @@ The inode should be marked ``NETFS_ICTX_SINGLE_NO_UPLOAD`` if this API is to be
 used.  The writeback function requires the buffer to be of ITER_FOLIOQ type.
 (如果要使用此 API，inode 应被标记为 ``NETFS_ICTX_SINGLE_NO_UPLOAD``。回写函数要求缓冲区为 ITER_FOLIOQ 类型。)
 
-High-Level VM API
-(高层 VM API)
-==================
+High-Level VM API(高层 VM API)
+==============================
 
 Netfslib also provides a number of sets of API calls for the filesystem to
 delegate VM operations to.  Again, netfslib, in turn, will call out to the
@@ -555,9 +537,8 @@ These are ``address_space_operations`` methods and can be set directly in the
 operations table.
 (这些是 ``address_space_operations`` 方法，可以直接在操作表中设置。)
 
-Deprecated PG_private_2 API
-(已弃用的 PG_private_2 API)
----------------------------
+Deprecated PG_private_2 API(已弃用的 PG_private_2 API)
+------------------------------------------------------
 
 There is also a deprecated function for filesystems that still use the
 ``->write_begin`` method (还有一个已弃用的函数，供仍在使用 ``->write_begin`` 方法的文件系统使用)::
@@ -570,17 +551,15 @@ It uses the deprecated PG_private_2 flag and so should not be used.
 (它使用已弃用的 PG_private_2 标志，因此不应使用。)
 
 
-I/O Request API
-(I/O 请求 API)
-===============
+I/O Request API(I/O 请求 API)
+=============================
 
 The I/O request API comprises a number of structures and a number of functions
 that the filesystem may need to use.
 (I/O 请求 API 包含若干结构以及文件系统可能需要使用的若干函数。)
 
-Request Structure
-(请求结构)
------------------
+Request Structure(请求结构)
+---------------------------
 
 The request structure manages the request as a whole, holding some resources
 and state on behalf of the filesystem and tracking the collection of results (请求结构对请求进行整体管理，代表文件系统持有一些资源和状态，并跟踪结果的收集)::
@@ -691,9 +670,8 @@ If the filesystem wants more private data than is afforded by this structure,
 then it should wrap it and provide its own allocator.
 (如果文件系统需要比此结构所能提供的更多的私有数据，则应包装该结构并提供自己的分配器。)
 
-Stream Structure
-(流结构)
-----------------
+Stream Structure(流结构)
+------------------------
 
 A request is comprised of one or more parallel streams and each stream may be
 aimed at a different target.
@@ -748,9 +726,8 @@ A number of members are available for access/use by the filesystem:
    or write that straddles the EOF marker.
    (在给定可用缓冲区的情况下，子请求可以向上取整超出 EOF 的部分的大小。这允许缓存判断它是否可以执行跨越 EOF 标记的 DIO 读或写。)
 
-Subrequest Structure
-(子请求结构)
---------------------
+Subrequest Structure(子请求结构)
+--------------------------------
 
 Individual units of I/O are managed by the subrequest structure.  These
 represent slices of the overall request and run independently (I/O 的各个单独单元由子请求结构管理。它们代表整体请求的切片并独立运行)::
@@ -863,9 +840,8 @@ as once control of the subrequest is returned to netfslib, the same subrequest
 can be reissued/retried.
 (使用 netfs 跟踪代码来指示原因。但必须小心，因为一旦子请求的控制权返回给 netfslib，同一个子请求可能会被重新下发/重试。)
 
-Filesystem Methods
-(文件系统方法)
-------------------
+Filesystem Methods(文件系统方法)
+--------------------------------
 
 The filesystem sets a table of operations in ``netfs_inode`` for netfslib to
 use (文件系统在 ``netfs_inode`` 中设置一个操作表供 netfslib 使用)::
@@ -1039,9 +1015,8 @@ The methods defined in the table are:
    coherency data that netfs can't provide.
    ([可选] 在写入本地缓存失败的情况下，netfslib 调用此方法来使存储在本地缓存中的数据失效，提供 netfs 无法提供的更新后的一致性数据。)
 
-Terminating a subrequest
-(终止子请求)
-------------------------
+Terminating a subrequest(终止子请求)
+------------------------------------
 
 When a subrequest completes, there are a number of functions that the cache or
 subrequest can call to inform netfslib of the status change.  One function is
@@ -1083,9 +1058,8 @@ The other functions are used for subrequests that got as far as being issued:
    updated.
    (提供此函数是为了可选择地向 netfslib 更新一次读取的增量进度，允许一些 folio 提前解锁，并且它实际上并不终止子请求。``transferred`` 域应该已被更新。)
 
-Local Cache API
-(本地缓存 API)
----------------
+Local Cache API(本地缓存 API)
+-----------------------------
 
 Netfslib provides a separate API for a local cache to implement, though it
 provides some somewhat similar routines to the filesystem request API.
@@ -1217,9 +1191,8 @@ The methods defined in the table are:
    (没有返回值；应调用 ``netfs_write_subreq_terminated()`` 函数来指示子请求无论如何都已完成。->error、->transferred 和 ->flags 应在完成之前更新。终止可以异步进行。)
 
 
-API Function Reference
-(API 函数参考)
-======================
+API Function Reference(API 函数参考)
+====================================
 
 .. kernel-doc:: include/linux/netfs.h
 .. kernel-doc:: fs/netfs/buffered_read.c

@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-========================
-BFS Filesystem for Linux
-========================
-
-(Linux 的 BFS 文件系统)
+===============================================
+BFS Filesystem for Linux(Linux 的 BFS 文件系统)
+===============================================
 
 The BFS filesystem is used by SCO UnixWare OS for the /stand slice, which
 usually contains the kernel image and a few other files required for the

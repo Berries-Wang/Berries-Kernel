@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===========================
-mmap_prepare callback HOWTO
-===========================
+====================================================
+mmap_prepare callback HOWTO(mmap_prepare 回调 HOWTO)
+====================================================
 
-(mmap_prepare 回调 HOWTO)
-
-Introduction
-(简介)
-============
+Introduction(简介)
+==================
 
 The ``struct file->f_op->mmap()`` callback has been deprecated as it is both a
 stability and security risk, and doesn't always permit the merging of adjacent
@@ -33,9 +30,8 @@ mapping has been established, as the mapping may either be merged, or fail to be
 mapped after the callback is complete.
 (也就是说——不应分配任何资源，也不应更新状态来表明映射已经建立，因为在回调完成之后，该映射既可能被合并，也可能映射失败。)
 
-Mapped callback
-(已映射回调)
----------------
+Mapped callback(已映射回调)
+---------------------------
 
 If resources need to be allocated per-mapping, or state such as a reference
 count needs to be manipulated, this should be done using the ``vm_ops->mapped``
@@ -52,9 +48,8 @@ become unmapped and an error returned to the mmap() caller. This is useful if
 resources need to be allocated, and that allocation might fail.
 (你可以直接向回调本身返回一个错误，这将导致该映射被解除映射，并向 mmap() 调用者返回一个错误。如果需要分配资源而该分配可能失败，这就很有用。)
 
-How To Use
-(如何使用)
-==========
+How To Use(如何使用)
+====================
 
 In your driver's struct file_operations struct, specify an ``mmap_prepare``
 callback rather than an ``mmap`` one, e.g. for ext4:
@@ -127,9 +122,8 @@ when updating these fields - **you can simply go ahead and change them**.
 Everything is taken care of by the mapping code.
 (一切都由映射代码处理好了。)
 
-VMA Flags
-(VMA 标志)
----------
+VMA Flags(VMA 标志)
+-------------------
 
 Along with ``mmap_prepare``, VMA flags have undergone an overhaul. Where before
 you would invoke one of vm_flags_init(), vm_flags_reset(), vm_flags_set(),
@@ -150,7 +144,7 @@ and use one of (where ``desc`` is a pointer to struct vm_area_desc):
   you wish to test for (whether _any_ are set), e.g. - ``vma_desc_test_any(
   desc, VMA_WRITE_BIT, VMA_MAYWRITE_BIT)`` - returns ``true`` if either are set,
   otherwise ``false``.
-  (``vma_desc_test_any(desc, ...)``——指定一个以逗号分隔的、你想要测试的标志列表(测试是否设置了_任意一个_)，例如——``vma_desc_test_any(desc, VMA_WRITE_BIT, VMA_MAYWRITE_BIT)``——如果其中任一标志已设置则返回 ``true``，否则返回 ``false``。)
+  (``vma_desc_test_any(desc, ...)``——指定一个以逗号分隔的、你想要测试的标志列表(测试是否设置了*任意一个*)，例如——``vma_desc_test_any(desc, VMA_WRITE_BIT, VMA_MAYWRITE_BIT)``——如果其中任一标志已设置则返回 ``true``，否则返回 ``false``。)
 * ``vma_desc_set_flags(desc, ...)`` - Update the VMA descriptor flags to set
   additional flags specified by a comma-separated list,
   e.g. - ``vma_desc_set_flags(desc, VMA_PFNMAP_BIT, VMA_IO_BIT)``.
@@ -160,9 +154,8 @@ and use one of (where ``desc`` is a pointer to struct vm_area_desc):
   desc, VMA_WRITE_BIT, VMA_MAYWRITE_BIT)``.
   (``vma_desc_clear_flags(desc, ...)``——更新 VMA 描述符标志，以清除由逗号分隔列表所指定的标志，例如——``vma_desc_clear_flags(desc, VMA_WRITE_BIT, VMA_MAYWRITE_BIT)``。)
 
-Actions
-(操作)
-=======
+Actions(操作)
+=============
 
 You can now very easily have actions be performed upon a mapping once set up by
 utilising simple helper functions invoked upon the struct vm_area_desc

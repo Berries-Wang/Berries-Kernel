@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-======================
-The seq_file Interface
-======================
-
-(seq_file 接口)
+=====================================
+The seq_file Interface(seq_file 接口)
+=====================================
 
 	Copyright 2003 Jonathan Corbet <corbet@lwn.net>
 	(版权所有 2003 Jonathan Corbet <corbet@lwn.net>)
@@ -72,9 +70,8 @@ wanting to see the full source for this module can find it at
 https://lwn.net/Articles/22359/).
 (然后把输出文件 out1 和 out2 拼接起来就能得到正确的结果。是的，这是一个完全无用的模块，但重点是在不陷入其他细节的情况下展示这个机制是如何工作的。(想查看该模块完整源码的人可以在 https://lwn.net/Articles/22359/ 找到它。)
 
-Deprecated create_proc_entry
-(已弃用的 create_proc_entry)
-============================
+Deprecated create_proc_entry(已弃用的 create_proc_entry)
+========================================================
 
 Note that the above article uses create_proc_entry which was removed in
 kernel 3.10. Current versions require the following update::
@@ -85,9 +82,8 @@ kernel 3.10. Current versions require the following update::
     -		entry->proc_fops = &ct_file_ops;
     +	entry = proc_create("sequence", 0, NULL, &ct_file_ops);
 
-The iterator interface
-(迭代器接口)
-======================
+The iterator interface(迭代器接口)
+==================================
 
 Modules implementing a virtual file with seq_file must implement an
 iterator object that allows stepping through the data of interest
@@ -258,9 +254,8 @@ it often will be.
 (start() 或 next() 返回的迭代器值保证会被传递给后续的某个 next() 或 stop() 调用。这使得已获取的锁等资源能够被可靠地释放。迭代器*没有*保证会被传递给 show()，尽管在实践中通常会是。)
 
 
-Formatted output
-(格式化输出)
-================
+Formatted output(格式化输出)
+============================
 
 The seq_file code manages positioning within the output created by the
 iterator and getting it into the user's buffer. But, for that to work, that
@@ -313,9 +308,8 @@ buffer and retry printing.
 (seq_has_overflowed 返回 true 意味着 seq_file 缓冲区将被丢弃，seq_show 函数会尝试分配一个更大的缓冲区并重新尝试打印。)
 
 
-Making it all work
-(让这一切运作起来)
-==================
+Making it all work(让这一切运作起来)
+====================================
 
 So far, we have a nice set of functions which can produce output within the
 seq_file system, but we have not yet turned them into a file that a user
@@ -414,9 +408,8 @@ And that is pretty much it.
 (基本就是这样了。)
 
 
-seq_list
-(seq_list(序列链表))
-========
+seq_list(seq_list(序列链表))
+============================
 
 If your file will be iterating through a linked list, you may find these
 routines useful::
@@ -435,9 +428,8 @@ accordingly.  Your start() and next() functions need only invoke the
 (这些辅助函数会把 pos 解释为链表中的位置并据此进行迭代。你的 start() 和 next() 函数只需用指向相应 list_head 结构体的指针调用 ``seq_list_*`` 辅助函数即可。)
 
 
-The extra-simple version
-(额外简单的版本)
-========================
+The extra-simple version(额外简单的版本)
+========================================
 
 For extremely simple virtual files, there is an even easier interface.  A
 module can define only the show() function, which should create all the

@@ -12,9 +12,8 @@ Switchdev
 
 .. _mlx5_bridge_offload:
 
-Bridge offload
-(桥卸载)
-==============
+Bridge offload(桥卸载)
+======================
 
 The mlx5 driver implements support for offloading bridge rules when in switchdev
 mode. Linux bridge FDBs are automatically offloaded when mlx5 switchdev
@@ -31,9 +30,8 @@ representor is attached to bridge.
 
     $ ip link set enp8s0f0 master bridge1
 
-VLANs
-(VLAN)
------
+VLANs(VLAN)
+-----------
 
 Following bridge VLAN functions are supported by mlx5:
 (mlx5 支持以下桥 VLAN 功能：)
@@ -54,9 +52,8 @@ Following bridge VLAN functions are supported by mlx5:
 
     $ bridge vlan add dev enp8s0f0 vid 3 untagged
 
-Subfunction
-(子功能)
-===========
+Subfunction(子功能)
+===================
 
 Subfunction which are spawned over the E-switch are created only with devlink
 device, and by default all the SF auxiliary devices are disabled.
@@ -114,7 +111,6 @@ other subfunctions and/or with its parent PCI function.
 (子功能与其他子功能和/或其父 PCI 函数共享 PCI 层面的资源，例如 PCI MSI-X 中断。)
 
 Example mlx5 software, system, and device view::
-(mlx5 软件、系统和设备视图示例：)
 
        _______
       | admin |
@@ -156,6 +152,8 @@ Example mlx5 software, system, and device view::
      |__________|                                  | (mlx5_core) |
                                                    |_____________|
 
+(mlx5 软件、系统和设备视图示例：)
+
 Subfunction is created using devlink port interface.
 (子功能使用 devlink port 接口创建。)
 
@@ -185,9 +183,8 @@ Subfunction is created using devlink port interface.
 
     $ devlink port del pci/0000:06:00.0/32768
 
-Function attributes
-(函数属性)
-===================
+Function attributes(函数属性)
+=============================
 
 The mlx5 driver provides a mechanism to setup PCI VF/SF function attributes in
 a unified way for SmartNIC and non-SmartNIC.
@@ -201,17 +198,15 @@ Port function attributes should be set before PCI VF/SF is enumerated by the
 driver.
 (应在驱动枚举 PCI VF/SF 之前设置端口函数属性。)
 
-MAC address setup
-(MAC 地址设置)
------------------
+MAC address setup(MAC 地址设置)
+-------------------------------
 
 mlx5 driver support devlink port function attr mechanism to setup MAC
 address. (refer to Documentation/networking/devlink/devlink-port.rst)
 (mlx5 驱动支持 devlink 端口函数属性机制来设置 MAC 地址。（参见 Documentation/networking/devlink/devlink-port.rst）)
 
-RoCE capability setup
-(RoCE 能力设置)
-~~~~~~~~~~~~~~~~~~~~~
+RoCE capability setup(RoCE 能力设置)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Not all mlx5 PCI devices/SFs require RoCE capability.
 (并非所有 mlx5 PCI 设备/SF 都需要 RoCE 能力。)
@@ -224,9 +219,8 @@ mlx5 driver support devlink port function attr mechanism to setup RoCE
 capability. (refer to Documentation/networking/devlink/devlink-port.rst)
 (mlx5 驱动支持 devlink 端口函数属性机制来设置 RoCE 能力。（参见 Documentation/networking/devlink/devlink-port.rst）)
 
-migratable capability setup
-(可迁移 (migratable) 能力设置)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+migratable capability setup(可迁移 (migratable) 能力设置)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 User who wants mlx5 PCI VFs to be able to perform live migration need to
 explicitly enable the VF migratable capability.
@@ -236,9 +230,8 @@ mlx5 driver support devlink port function attr mechanism to setup migratable
 capability. (refer to Documentation/networking/devlink/devlink-port.rst)
 (mlx5 驱动支持 devlink 端口函数属性机制来设置 migratable 能力。（参见 Documentation/networking/devlink/devlink-port.rst）)
 
-IPsec crypto capability setup
-(IPsec 加密 (crypto) 能力设置)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+IPsec crypto capability setup(IPsec 加密 (crypto) 能力设置)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 User who wants mlx5 PCI VFs to be able to perform IPsec crypto offloading need
 to explicitly enable the VF ipsec_crypto capability. Enabling IPsec capability
@@ -250,9 +243,8 @@ mlx5 driver support devlink port function attr mechanism to setup ipsec_crypto
 capability. (refer to Documentation/networking/devlink/devlink-port.rst)
 (mlx5 驱动支持 devlink 端口函数属性机制来设置 ipsec_crypto 能力。（参见 Documentation/networking/devlink/devlink-port.rst）)
 
-IPsec packet capability setup
-(IPsec 包 (packet) 能力设置)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+IPsec packet capability setup(IPsec 包 (packet) 能力设置)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 User who wants mlx5 PCI VFs to be able to perform IPsec packet offloading need
 to explicitly enable the VF ipsec_packet capability. Enabling IPsec capability
@@ -264,9 +256,8 @@ mlx5 driver support devlink port function attr mechanism to setup ipsec_packet
 capability. (refer to Documentation/networking/devlink/devlink-port.rst)
 (mlx5 驱动支持 devlink 端口函数属性机制来设置 ipsec_packet 能力。（参见 Documentation/networking/devlink/devlink-port.rst）)
 
-SF state setup
-(SF 状态设置)
---------------
+SF state setup(SF 状态设置)
+---------------------------
 
 To use the SF, the user must activate the SF using the SF function state
 attribute.

@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=================
-Devlink Line card
-=================
+===============================
+Devlink Line card(devlink 线卡)
+===============================
 
-(devlink 线卡)
-
-Background
-(背景)
-==========
+Background(背景)
+================
 
 The ``devlink-linecard`` mechanism is targeted for manipulation of
 line cards that serve as a detachable PHY modules for modular switch
@@ -31,9 +28,8 @@ the switch ASIC modules and physical front panel ports.
 到具有不同速率通道的多个端口上。线卡确保交换 ASIC 模块与物理前面板
 端口之间的 N:M 映射。)
 
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 Each line card devlink object is created by device driver,
 according to the physical line card slots available on the device.
@@ -84,9 +80,8 @@ Netdevice carrier is decided as follows:
     - The carrier is decided as for ordinary port netdevice
       (载波状态按普通端口 netdevice 的方式判定)
 
-Line card state
-(线卡状态)
-===============
+Line card state(线卡状态)
+=========================
 
 The ``devlink-linecard`` mechanism supports the following line card states:
 (``devlink-linecard`` 机制支持以下线卡状态：)
@@ -107,7 +102,6 @@ The ``devlink-linecard`` mechanism supports the following line card states:
 
 The following diagram provides a general overview of ``devlink-linecard``
 state transitions::
-(下图给出了 ``devlink-linecard`` 状态转换的总体概览：)
 
                                           +-------------------------+
                                           |                         |
@@ -141,10 +135,10 @@ state transitions::
        |                                               |
        +-----------------------------------------------+
 
+(下图给出了 ``devlink-linecard`` 状态转换的总体概览：)
 
-Example usage
-(用法示例)
-=============
+Example usage(用法示例)
+=======================
 
 .. code:: shell
 

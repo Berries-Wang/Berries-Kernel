@@ -1,15 +1,12 @@
-============
-SNMP counter
-============
-
-(SNMP 计数器)
+=========================
+SNMP counter(SNMP 计数器)
+=========================
 
 This document explains the meaning of SNMP counters.
 (本文档解释 SNMP 计数器的含义。)
 
-General IPv4 counters
-(常规 IPv4 计数器)
-=====================
+General IPv4 counters(常规 IPv4 计数器)
+=======================================
 All layer 4 packets and ICMP packets will change these counters, but
 these counters won't be changed by layer 2 packets (such as STP) or
 ARP packets.
@@ -148,9 +145,8 @@ dropped in the IP sending path and no route is found for it.
 
 .. _RFC1213 ipOutNoRoutes: https://tools.ietf.org/html/rfc1213#page-29
 
-ICMP counters
-(ICMP 计数器)
-=============
+ICMP counters(ICMP 计数器)
+==========================
 
 * IcmpInMsgs and IcmpOutMsgs
   (IcmpInMsgs 和 IcmpOutMsgs)
@@ -265,9 +261,8 @@ and the sending packet path use IcmpOutErrors. When IcmpInCsumErrors
 is increased, IcmpInErrors would always be increased too.
 (当 ICMP 数据包处理路径中发生错误时，这两个计数器会被更新。接收数据包路径使用 IcmpInErrors，发送数据包路径使用 IcmpOutErrors。当 IcmpInCsumErrors 增加时，IcmpInErrors 也总是会增加。)
 
-relationship of the ICMP counters
-(ICMP 计数器之间的关系)
----------------------------------
+relationship of the ICMP counters(ICMP 计数器之间的关系)
+--------------------------------------------------------
 The sum of IcmpMsgOutType[N] is always equal to IcmpOutMsgs, as they
 are updated at the same time. The sum of IcmpMsgInType[N] plus
 IcmpInErrors should be equal or larger than IcmpInMsgs. When kernel
@@ -292,9 +287,8 @@ IcmpInMsgs should be less than the sum of IcmpMsgOutType[N] plus
 IcmpInErrors.
 (因此，如果所有错误都发生在步骤 (2)，IcmpInMsgs 应等于 IcmpMsgOutType[N] 之和加上 IcmpInErrors。如果所有错误都发生在步骤 (4)，IcmpInMsgs 应等于 IcmpMsgOutType[N] 之和。如果错误同时发生在步骤 (2) 和步骤 (4)，IcmpInMsgs 应小于 IcmpMsgOutType[N] 之和加上 IcmpInErrors。)
 
-General TCP counters
-(常规 TCP 计数器)
-====================
+General TCP counters(常规 TCP 计数器)
+=====================================
 * TcpInSegs
 
 Defined in `RFC1213 tcpInSegs`_
@@ -480,9 +474,8 @@ algorithm.
 
 .. _F-RTO: https://tools.ietf.org/html/rfc5682
 
-TCP Fast Path
-(TCP 快速路径)
-=============
+TCP Fast Path(TCP 快速路径)
+===========================
 When kernel receives a TCP packet, it has two paths to handler the
 packet, one is fast path, another is slow path. The comment in kernel
 code provides a good explanation of them, I pasted them below::
@@ -533,9 +526,8 @@ increase 1.
 (如果一个 TCP 数据包带有数据(即它不是纯 ACK 数据包)，并且该数据包在快速路径中被处理，TcpExtTCPHPHits 会增加 1。)
 
 
-TCP abort
-(TCP 连接中止)
-=========
+TCP abort(TCP 连接中止)
+=======================
 * TcpExtTCPAbortOnData
 
 It means TCP layer has data in flight, but need to close the
@@ -613,9 +605,8 @@ TcpExtTCPAbortFailed will be increased.
 
 .. _RFC2525 2.17 section: https://tools.ietf.org/html/rfc2525#page-50
 
-TCP Hybrid Slow Start
-(TCP 混合慢启动)
-=====================
+TCP Hybrid Slow Start(TCP 混合慢启动)
+=====================================
 The Hybrid Slow Start algorithm is an enhancement of the traditional
 TCP congestion window Slow Start algorithm. It uses two pieces of
 information to detect whether the max bandwidth of the TCP path is
@@ -655,9 +646,8 @@ TcpExtTCPHystartDelayDetect is the average CWND which detected by the
 packet delay.
 (由数据包延迟检测到的 CWND 之和。该值除以 TcpExtTCPHystartDelayDetect 就是数据包延迟检测到的平均 CWND。)
 
-TCP retransmission and congestion control
-(TCP 重传与拥塞控制)
-=========================================
+TCP retransmission and congestion control(TCP 重传与拥塞控制)
+=============================================================
 The TCP protocol has two retransmission mechanisms: SACK and fast
 recovery. They are exclusive with each other. When SACK is enabled,
 the kernel TCP stack would use SACK, or kernel would use fast
@@ -799,9 +789,8 @@ The TCP stack receives a DSACK, which indicate an out of order
 duplicate packet is received.
 (TCP 协议栈收到一个 DSACK，表明收到了一个乱序的重复数据包。)
 
-invalid SACK and DSACK
-(无效的 SACK 与 DSACK)
-======================
+invalid SACK and DSACK(无效的 SACK 与 DSACK)
+============================================
 When a SACK (or DSACK) block is invalid, a corresponding counter would
 be updated. The validation method is base on the start/end sequence
 number of the SACK block. For more details, please refer the comment
@@ -833,9 +822,8 @@ will be updated. If the undo_marker is set, TcpExtTCPDSACKIgnoredOld
 will be updated. As implied in its name, it might be an old packet.
 (当一个 DSACK 块无效时，这两个计数器之一会被更新。更新哪一个取决于 TCP 套接字的 undo_marker 标志。如果 undo_marker 未设置，TCP 协议栈不太可能重传任何数据包，而我们仍然收到了一个无效的 DSACK 块，原因可能是数据包在网络中间被复制了。在这种情况下，TcpExtTCPDSACKIgnoredNoUndo 会被更新。如果 undo_marker 已设置，TcpExtTCPDSACKIgnoredOld 会被更新。正如其名字所暗示的，它可能是一个旧数据包。)
 
-SACK shift
-(SACK 移位)
-==========
+SACK shift(SACK 移位)
+=====================
 The linux networking stack stores data in sk_buff struct (skb for
 short). If a SACK block acrosses multiple skb, the TCP stack will try
 to re-arrange data in these skb. E.g. if a SACK block acknowledges seq
@@ -862,9 +850,8 @@ A skb should be shifted or merged, but the TCP stack doesn't do it for
 some reasons.
 (一个 skb 本应被移位或合并，但 TCP 协议栈由于某些原因没有这样做。)
 
-TCP out of order
-(TCP 乱序)
-================
+TCP out of order(TCP 乱序)
+==========================
 * TcpExtTCPOFOQueue
 
 The TCP layer receives an out of order packet and has enough memory
@@ -906,9 +893,8 @@ Packets are dropped by PAWS in Syn-Sent status.
 Packets are dropped by PAWS in any status other than Syn-Sent.
 (在 Syn-Sent 以外的任何状态下被 PAWS 丢弃的数据包。)
 
-TCP ACK skip
-(TCP ACK 跳过)
-============
+TCP ACK skip(TCP ACK 跳过)
+==========================
 In some scenarios, kernel would avoid sending duplicate ACKs too
 frequently. Please find more details in the tcp_invalid_ratelimit
 section of the `sysctl document`_. When kernel decides to skip an ACK
@@ -977,9 +963,8 @@ unacknowledged number (more strict than `RFC 5961 section 5.2`_).
 .. _RFC 5961 section 4.2: https://tools.ietf.org/html/rfc5961#page-9
 .. _RFC 5961 section 5.2: https://tools.ietf.org/html/rfc5961#page-11
 
-TCP receive window
-(TCP 接收窗口)
-==================
+TCP receive window(TCP 接收窗口)
+================================
 * TcpExtTCPWantZeroWindowAdv
 
 Depending on current memory usage, the TCP stack tries to set receive
@@ -1000,9 +985,8 @@ The TCP receive window is set to no-zero value from zero.
 (TCP 接收窗口从零被设置为非零值。)
 
 
-Delayed ACK
-(延迟 ACK)
-===========
+Delayed ACK(延迟 ACK)
+=====================
 The TCP Delayed ACK is a technique which is used for reducing the
 packet count in the network. For more details, please refer the
 `Delayed ACK wiki`_
@@ -1034,9 +1018,8 @@ triggered by other reasons, such as a packet is duplicated in the
 network.
 (当 TCP 协议栈收到一个已被 ACK 过的数据包时，该计数器会被更新。延迟确认丢失可能导致这种情况，但它也可能由其他原因触发，例如数据包在网络中被复制。)
 
-Tail Loss Probe (TLP)
-(尾丢失探测 (TLP))
-=====================
+Tail Loss Probe (TLP)(尾丢失探测 (TLP))
+=======================================
 TLP is an algorithm which is used to detect TCP packet loss. For more
 details, please refer the `TLP paper`_.
 (TLP 是一种用于检测 TCP 数据包丢失的算法。更多细节请参阅 `TLP paper`_。)
@@ -1053,9 +1036,8 @@ A TLP probe packet is sent.
 A packet loss is detected and recovered by TLP.
 (通过 TLP 检测到一次数据包丢失并将其恢复。)
 
-TCP Fast Open description
-(TCP Fast Open 描述)
-=========================
+TCP Fast Open description(TCP Fast Open 描述)
+=============================================
 TCP Fast Open is a technology which allows data transfer before the
 3-way handshake complete. Please refer the `TCP Fast Open wiki`_ for a
 general description.
@@ -1139,9 +1121,8 @@ updated, the received packet won't be treated as a SYN cookie and the
 TcpExtSyncookiesRecv counter won't be updated.
 (从 SYN cookie 中解出的 MSS 无效。该计数器被更新时，收到的数据包不会被当作 SYN cookie 处理，TcpExtSyncookiesRecv 计数器也不会被更新。)
 
-Challenge ACK
-(挑战 ACK)
-=============
+Challenge ACK(挑战 ACK)
+=======================
 For details of challenge ACK, please refer the explanation of
 TcpExtTCPACKSkippedChallenge.
 (关于挑战 ACK 的详细信息，请参阅 TcpExtTCPACKSkippedChallenge 的解释。)
@@ -1159,9 +1140,8 @@ update the TcpExtTCPChallengeACK counter, or it might also skip to
 send the challenge and update the TcpExtTCPACKSkippedChallenge.
 (为响应 SYN 数据包而发送的挑战 ACK 的数量。更新该计数器后，TCP 协议栈可能发送一个挑战 ACK 并更新 TcpExtTCPChallengeACK 计数器，也可能跳过发送挑战并更新 TcpExtTCPACKSkippedChallenge。)
 
-prune
-(修剪)
-=====
+prune(修剪)
+===========
 When a socket is under memory pressure, the TCP stack will try to
 reclaim memory from the receiving queue and out of order queue. One of
 the reclaiming method is 'collapse', which means allocate a big skb,
@@ -1195,13 +1175,11 @@ this counter will be updated. It means the 'prune' fails.
 This counter indicates how many skbs are freed during 'collapse'.
 (该计数器表示在 "collapse" 过程中释放了多少个 skb。)
 
-examples
-(示例)
-========
+examples(示例)
+==============
 
-ping test
-(ping 测试)
----------
+ping test(ping 测试)
+--------------------
 Run the ping command against the public dns server 8.8.8.8::
 (对公共 DNS 服务器 8.8.8.8 执行 ping 命令：)
 
@@ -1252,9 +1230,8 @@ and its corresponding Echo Reply packet are constructed by:
 So the IpExtInOctets and IpExtOutOctets are 20+16+48=84.
 (所以 IpExtInOctets 和 IpExtOutOctets 为 20+16+48=84。)
 
-tcp 3-way handshake
-(TCP 三次握手)
--------------------
+tcp 3-way handshake(TCP 三次握手)
+---------------------------------
 On server side, we run::
 (在服务器端，我们运行：)
 
@@ -1302,9 +1279,8 @@ ACK, so client sent 2 packets, received 1 packet, TcpInSegs increased
 1, TcpOutSegs increased 2.
 (客户端发送 SYN 后进入 SYN-SENT 状态，因此 TcpActiveOpens 增加 1。客户端发送了 SYN、收到了 SYN+ACK、又发送了 ACK，所以客户端发送了 2 个数据包、接收了 1 个数据包，TcpInSegs 增加 1，TcpOutSegs 增加 2。)
 
-TCP normal traffic
-(TCP 正常流量)
-------------------
+TCP normal traffic(TCP 正常流量)
+--------------------------------
 Run nc on server::
 (在服务器上运行 nc：)
 
@@ -1479,9 +1455,8 @@ If we run tcpdump on the server side, we could find the server sent a
 RST after we type Ctrl-C.
 (如果我们在服务器端运行 tcpdump，可以发现键入 Ctrl-C 之后服务器发送了一个 RST。)
 
-TcpExtTCPAbortOnMemory and TcpExtTCPAbortOnTimeout
-(TcpExtTCPAbortOnMemory 和 TcpExtTCPAbortOnTimeout)
----------------------------------------------------
+TcpExtTCPAbortOnMemory and TcpExtTCPAbortOnTimeout(TcpExtTCPAbortOnMemory 和 TcpExtTCPAbortOnTimeout)
+-----------------------------------------------------------------------------------------------------
 Below is an example which let the orphan socket count be higher than
 net.ipv4.tcp_max_orphans.
 Change tcp_max_orphans to a smaller value on client::
@@ -1733,9 +1708,8 @@ the receiving queue. So the TCP layer merged the two packets, and we
 could find the TcpExtTCPRcvCoalesce increased 1.
 (客户端发送了两个数据包，服务器没有读取任何数据。当第二个数据包到达服务器时，第一个数据包还在接收队列中。因此 TCP 层合并了这两个数据包，我们可以看到 TcpExtTCPRcvCoalesce 增加了 1。)
 
-TcpExtListenOverflows and TcpExtListenDrops
-(TcpExtListenOverflows 和 TcpExtListenDrops)
--------------------------------------------
+TcpExtListenOverflows and TcpExtListenDrops(TcpExtListenOverflows 和 TcpExtListenDrops)
+---------------------------------------------------------------------------------------
 On server, run the nc command, listen on port 9000::
 (在服务器上运行 nc 命令，监听 9000 端口：)
 
@@ -1789,9 +1763,8 @@ TcpExtListenOverflows and TcpExtListenDrops would be larger, because
 the SYN of the 4th nc was dropped, the client was retrying.
 (TcpExtListenOverflows 和 TcpExtListenDrops 都是 4。如果第 4 个 nc 与 nstat 之间的时间间隔更长，TcpExtListenOverflows 和 TcpExtListenDrops 的值会更大，因为第 4 个 nc 的 SYN 被丢弃后客户端在不断重试。)
 
-IpInAddrErrors, IpExtInNoRoutes and IpOutNoRoutes
-(IpInAddrErrors、IpExtInNoRoutes 和 IpOutNoRoutes)
--------------------------------------------------
+IpInAddrErrors, IpExtInNoRoutes and IpOutNoRoutes(IpInAddrErrors、IpExtInNoRoutes 和 IpOutNoRoutes)
+---------------------------------------------------------------------------------------------------
 server A IP address: 192.168.122.250
 server B IP address: 192.168.122.251
 Prepare on server A, add a route to server B::

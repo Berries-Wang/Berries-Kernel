@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===============================================
-Generic networking statistics for netlink users
-===============================================
-
-(面向 netlink 用户的通用网络统计)
+================================================================================
+Generic networking statistics for netlink users(面向 netlink 用户的通用网络统计)
+================================================================================
 
 Statistic counters are grouped into structs:
 (统计计数器被组织成若干结构体：)
@@ -19,9 +17,8 @@ none                 TCA_STATS_APP         Application specific (应用特定)
 ==================== ===================== =====================
 
 
-Collecting:
-(收集：)
------------
+Collecting:(收集：)
+-------------------
 
 Declare the statistic structs you need::
 (声明你所需的统计结构体：)
@@ -39,9 +36,8 @@ Update statistics, in dequeue() methods only, (while owning qdisc->running)::
 	mystruct->qstats.backlog += skb->pkt_len;
 
 
-Export to userspace (Dump):
-(导出到用户空间 (Dump)：)
----------------------------
+Export to userspace (Dump):(导出到用户空间 (Dump)：)
+----------------------------------------------------
 
 ::
 
@@ -63,9 +59,8 @@ Export to userspace (Dump):
 	    ...
     }
 
-TCA_STATS/TCA_XSTATS backward compatibility:
-(TCA_STATS/TCA_XSTATS 向后兼容：)
---------------------------------------------
+TCA_STATS/TCA_XSTATS backward compatibility:(TCA_STATS/TCA_XSTATS 向后兼容：)
+-----------------------------------------------------------------------------
 
 Prior users of struct tc_stats and xstats can maintain backward
 compatibility by calling the compat wrappers to keep providing the
@@ -89,9 +84,8 @@ was called.
 skb 上。如果调用了 gnet_stats_copy_app，则会提供 TCA_XSTATS。)
 
 
-Locking:
-(加锁：)
---------
+Locking:(加锁：)
+----------------
 
 Locks are taken before writing and released once all statistics have
 been written. Locks are always released in case of an error. You
@@ -100,9 +94,8 @@ are responsible for making sure that the lock is initialized.
 你需要负责确保该锁已被初始化。)
 
 
-Rate Estimator:
-(速率估计器：)
----------------
+Rate Estimator:(速率估计器：)
+-----------------------------
 
 0) Prepare an estimator attribute. Most likely this would be in user
    space. The value of this TLV should contain a tc_estimator structure.
@@ -155,8 +148,7 @@ are still valid (i.e still exist) at the time of making this call.
 (即仍然存在)。)
 
 
-Authors:
-(作者：)
---------
+Authors:(作者：)
+----------------
 - Thomas Graf <tgraf@suug.ch>
 - Jamal Hadi Salim <hadi@cyberus.ca>

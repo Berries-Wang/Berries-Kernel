@@ -1,8 +1,6 @@
-=================
-Directory Locking
-=================
-
-(目录加锁)
+===========================
+Directory Locking(目录加锁)
+===========================
 
 
 Locking scheme used for directory operations is based on two
@@ -16,9 +14,8 @@ that "inode pointer" order in the following.
 (当对多个非目录对象获取 i_rwsem 时，我们总是按地址递增的顺序获取这些锁。下文中我们将称之为"inode 指针"顺序。)
 
 
-Primitives
-(原语)
-==========
+Primitives(原语)
+================
 
 For our purposes all operations fall in 6 classes:
 (就我们的目的而言，所有操作分为 6 类：)
@@ -98,9 +95,8 @@ to be read, modified or removed by method will be locked by the caller.
 (上述规则显然保证了所有将被该方法读取、修改或删除的目录都会被调用者锁定。)
 
 
-Splicing
-(拼接)
-========
+Splicing(拼接)
+==============
 
 There is one more thing to consider - splicing.  It's not an operation
 in its own right; it may happen as part of lookup.  We speak of the
@@ -147,9 +143,8 @@ parents have a common ancestor.
 (注意，拼接*不*涉及对文件系统的任何修改；我们改变的只是 dcache 中的视图。而且，以独占方式持有一个目录的锁可以防止涉及它的孩子的这类改动，持有文件系统锁则可以防止树拓扑的任何改动——除了一棵树的根变成另一棵树中目录的孩子这种情况之外。特别地，如果在获取文件系统锁之后发现两个 dentry 有共同祖先，那么在锁被释放之前它们的关系将保持不变。所以从目录操作的角度来看，拼接几乎是无关的——它唯一有影响的地方是跨目录重命名中的一个步骤；在检查父目录是否有共同祖先时我们需要小心。)
 
 
-Multiple-filesystem stuff
-(多文件系统相关的问题)
-=========================
+Multiple-filesystem stuff(多文件系统相关的问题)
+===============================================
 
 For some filesystems a method can involve a directory operation on
 another filesystem; it may be ecryptfs doing operation in the underlying
@@ -165,9 +160,8 @@ filesystem ranks lower than whatever it caches on, etc.)
 (对某些文件系统来说，一个方法可能涉及在另一个文件系统上的目录操作；例如 ecryptfs 在底层文件系统中执行操作，overlayfs 对它的各层做些什么，网络文件系统把本地文件系统用作缓存，等等。在所有这类情况下，对其他文件系统的操作必须遵循相同的加锁规则。此外，"在这个文件系统上的目录操作可能会涉及那个文件系统上的目录操作"应当是一个非对称关系(或者说，应当能够对这些文件系统排出等级，使得在某个文件系统上的目录操作只能触发对更高级别文件系统的目录操作——按这种说法，overlayfs 的级别低于它的各层，网络文件系统的级别低于它以其为缓存的任何文件系统，等等)。)
 
 
-Deadlock avoidance
-(避免死锁)
-==================
+Deadlock avoidance(避免死锁)
+============================
 
 If no directory is its own ancestor, the scheme above is deadlock-free.
 (如果没有目录是它自身的祖先，那么上述方案就是无死锁的。)
@@ -318,9 +312,8 @@ in between (all of those would fail with -ENOTEMPTY, had they ever gotten
 the locks) and voila - we have a deadlock.
 (注意，跨目录重命名中对拥有共同祖先的检查是至关重要的——没有它，死锁就会成为可能。确实，假设两个父目录最初位于不同的树中；我们会锁定源的父目录，然后尝试锁定目标的父目录，结果却让一个无关的查找把源的某个远祖拼接成目标父目录的某个远端后代。在那一刻，我们的跨目录重命名持有源父目录的锁，并试图锁定它的远祖。再加上对介于其间的所有目录发起的一堆 rmdir() 尝试(即便它们曾拿到过锁，这些尝试也都会以 -ENOTEMPTY 失败)，瞧——我们就得到了一个死锁。)
 
-Loop avoidance
-(避免成环)
-==============
+Loop avoidance(避免成环)
+========================
 
 These operations are guaranteed to avoid loop creation.  Indeed,
 the only operation that could introduce loops is cross-directory rename.

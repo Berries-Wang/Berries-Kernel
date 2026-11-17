@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-======================================================
-cdc_mbim - Driver for CDC MBIM Mobile Broadband modems
-======================================================
-
-(cdc_mbim - CDC MBIM 移动宽带调制解调器驱动程序)
+======================================================================================================
+cdc_mbim - Driver for CDC MBIM Mobile Broadband modems(cdc_mbim - CDC MBIM 移动宽带调制解调器驱动程序)
+======================================================================================================
 
 The cdc_mbim driver supports USB devices conforming to the "Universal
 Serial Bus Communications Class Subclass Specification for Mobile
@@ -15,9 +13,8 @@ devices, aka "3G/LTE modems".
 (cdc_mbim 驱动程序支持符合 "Universal Serial Bus Communications Class Subclass Specification for Mobile Broadband Interface Model" (移动宽带接口模型 USB 通信类子类规范) [1] 的 USB 设备。该规范是 "Universal Serial Bus Communications Class Subclass Specifications for Network Control Model Devices" (网络控制模型设备 USB 通信类子类规范) [2] 的进一步发展，针对移动宽带设备 (即俗称的 "3G/LTE 调制解调器") 进行了优化。)
 
 
-Command Line Parameters
-(命令行参数)
-=======================
+Command Line Parameters(命令行参数)
+===================================
 
 The cdc_mbim driver has no parameters of its own.  But the probing
 behaviour for NCM 1.0 backwards compatible MBIM functions (an
@@ -25,9 +22,8 @@ behaviour for NCM 1.0 backwards compatible MBIM functions (an
 by a cdc_ncm driver parameter:
 (cdc_mbim 驱动程序自身没有参数。但是，NCM 1.0 向后兼容的 MBIM 功能 (即 [1] 第 3.2 节定义的 "NCM/MBIM function") 的探测行为会受一个 cdc_ncm 驱动程序参数的影响：)
 
-prefer_mbim
-(prefer_mbim 参数)
------------
+prefer_mbim(prefer_mbim 参数)
+-----------------------------
 
 :Type:          Boolean
   (类型：Boolean (布尔值))
@@ -49,9 +45,8 @@ functions bound to the "wrong" driver
 (此参数可写，可随时修改。要让修改对已绑定到"错误"驱动程序的 NCM/MBIM 功能生效，需要手动执行一次 unbind/bind)
 
 
-Basic usage
-(基本用法)
-===========
+Basic usage(基本用法)
+=====================
 
 MBIM functions are inactive when unmanaged. The cdc_mbim driver only
 provides a userspace interface to the MBIM control channel, and will
@@ -81,22 +76,19 @@ management application:
  - configure IP interface
    (配置 IP 接口)
 
-Management application development
-(管理应用开发)
-----------------------------------
+Management application development(管理应用开发)
+------------------------------------------------
 
 The driver <-> userspace interfaces are described below.  The MBIM
 control channel protocol is described in [1].
 (下面介绍驱动程序 <-> 用户态接口。MBIM 控制通道协议在 [1] 中描述。)
 
 
-MBIM control channel userspace ABI
-(MBIM 控制通道用户态 ABI)
-==================================
+MBIM control channel userspace ABI(MBIM 控制通道用户态 ABI)
+===========================================================
 
-/dev/cdc-wdmX character device
-(/dev/cdc-wdmX 字符设备)
-------------------------------
+/dev/cdc-wdmX character device(/dev/cdc-wdmX 字符设备)
+------------------------------------------------------
 
 The driver creates a two-way pipe to the MBIM function control channel
 using the cdc-wdm driver as a subdriver.  The userspace end of the
@@ -121,9 +113,8 @@ MBIM function can be looked up using sysfs.  For example::
  180:0
 
 
-USB configuration descriptors
-(USB 配置描述符)
------------------------------
+USB configuration descriptors(USB 配置描述符)
+---------------------------------------------
 
 The wMaxControlMessage field of the CDC MBIM functional descriptor
 limits the maximum control message size. The management application is
@@ -141,36 +132,32 @@ See also the ioctl documentation below.
 (另请参阅下文的 ioctl 文档。)
 
 
-Fragmentation
-(分片)
--------------
+Fragmentation(分片)
+-------------------
 
 The userspace application is responsible for all control message
 fragmentation and defragmentaion, as described in section 9.5 of [1].
 (用户态应用负责所有控制消息的分片与重组，如 [1] 第 9.5 节所述。)
 
 
-/dev/cdc-wdmX write()
-(/dev/cdc-wdmX write())
----------------------
+/dev/cdc-wdmX write()(/dev/cdc-wdmX write())
+--------------------------------------------
 
 The MBIM control messages from the management application *must not*
 exceed the negotiated control message size.
 (来自管理应用的 MBIM 控制消息 *不得超过* 协商好的控制消息大小。)
 
 
-/dev/cdc-wdmX read()
-(/dev/cdc-wdmX read())
---------------------
+/dev/cdc-wdmX read()(/dev/cdc-wdmX read())
+------------------------------------------
 
 The management application *must* accept control messages of up the
 negotiated control message size.
 (管理应用 *必须* 能接受最大达到协商控制消息大小的控制消息。)
 
 
-/dev/cdc-wdmX ioctl()
-(/dev/cdc-wdmX ioctl())
----------------------
+/dev/cdc-wdmX ioctl()(/dev/cdc-wdmX ioctl())
+--------------------------------------------
 IOCTL_WDM_MAX_COMMAND: Get Maximum Command Size
 (IOCTL_WDM_MAX_COMMAND：获取最大命令大小)
 This ioctl returns the wMaxControlMessage field of the CDC MBIM
@@ -195,9 +182,8 @@ userspace.
 	}
 
 
-Custom device services
-(自定义设备服务)
-----------------------
+Custom device services(自定义设备服务)
+--------------------------------------
 
 The MBIM specification allows vendors to freely define additional
 services.  This is fully supported by the cdc_mbim driver.
@@ -213,13 +199,11 @@ New services should be registered in the MBIM Registry [5].
 
 
 
-MBIM data channel userspace ABI
-(MBIM 数据通道用户态 ABI)
-===============================
+MBIM data channel userspace ABI(MBIM 数据通道用户态 ABI)
+========================================================
 
-wwanY network device
-(wwanY 网络设备)
---------------------
+wwanY network device(wwanY 网络设备)
+------------------------------------
 
 The cdc_mbim driver represents the MBIM data channel as a single
 network device of the "wwan" type. This network device is initially
@@ -227,9 +211,8 @@ mapped to MBIM IP session 0.
 (cdc_mbim 驱动程序把 MBIM 数据通道表示为一个 "wwan" 类型的单一网络设备。该网络设备最初映射到 MBIM IP 会话 0。)
 
 
-Multiplexed IP sessions (IPS)
-(多路复用 IP 会话 (IPS))
------------------------------
+Multiplexed IP sessions (IPS)(多路复用 IP 会话 (IPS))
+-----------------------------------------------------
 
 MBIM allows multiplexing up to 256 IP sessions over a single USB data
 channel.  The cdc_mbim driver models such IP sessions as 802.1q VLAN
@@ -257,9 +240,8 @@ IP session 3.
 (驱动程序会自动把 "wwan0.3" 网络设备映射到 MBIM IP 会话 3。)
 
 
-Device Service Streams (DSS)
-(设备服务流 (DSS))
-----------------------------
+Device Service Streams (DSS)(设备服务流 (DSS))
+----------------------------------------------
 
 MBIM also allows up to 256 non-IP data streams to be multiplexed over
 the same shared USB data channel.  The cdc_mbim driver models these
@@ -343,9 +325,8 @@ example::
 
 
 
-Tagged IP session 0 VLAN
-(带标签的 IP 会话 0 VLAN)
-------------------------
+Tagged IP session 0 VLAN(带标签的 IP 会话 0 VLAN)
+-------------------------------------------------
 
 As described above, MBIM IP session 0 is treated as special by the
 driver.  It is initially mapped to untagged frames on the wwanY
@@ -379,14 +360,12 @@ example::
   ip link add link wwan0 name wwan0.0 type vlan id 4094
 
 
-VLAN mapping
-(VLAN 映射)
-------------
+VLAN mapping(VLAN 映射)
+-----------------------
 
 Summarizing the cdc_mbim driver mapping described above, we have this
 relationship between VLAN tags on the wwanY network device and MBIM
 sessions on the shared USB data channel::
-(总结上述 cdc_mbim 驱动程序的映射：wwanY 网络设备上的 VLAN 标签与共享 USB 数据通道上的 MBIM 会话之间有以下关系。)
 
   VLAN ID       MBIM type   MBIM SessionID           Notes
   ---------------------------------------------------------
@@ -400,12 +379,10 @@ sessions on the shared USB data channel::
     b) unsupported VLAN range, unconditionally dropped
     c) if a VLAN ID 4094 link exists, else dropped
 
+(总结上述 cdc_mbim 驱动程序的映射：wwanY 网络设备上的 VLAN 标签与共享 USB 数据通道上的 MBIM 会话之间有以下关系。)
 
-
-
-References
-(参考文献)
-==========
+References(参考文献)
+====================
 
  1) USB Implementers Forum, Inc. - "Universal Serial Bus
     Communications Class Subclass Specification for Mobile Broadband

@@ -2,11 +2,9 @@
 
 .. _devlink_flash:
 
-=============
-Devlink Flash
-=============
-
-(devlink 固件刷写)
+===============================
+Devlink Flash(devlink 固件刷写)
+===============================
 
 The ``devlink-flash`` API allows updating device firmware. It replaces the
 older ``ethtool-flash`` mechanism, and doesn't require taking any
@@ -22,9 +20,8 @@ user space about the progress of the update operation.
 (注意，文件名是相对于固件加载路径 (通常为 ``/lib/firmware/``) 的路径。
 驱动可以发送状态更新，向用户空间告知更新操作的进度。)
 
-Overwrite Mask
-(覆盖掩码)
-==============
+Overwrite Mask(覆盖掩码)
+========================
 
 The ``devlink-flash`` command allows optionally specifying a mask indicating
 how the device should handle subsections of flash components when updating.
@@ -59,9 +56,8 @@ faithfully implemented.
 组件中的固件二进制文件。设置和标识符预期在整个更新过程中保持不变。设备
 可能不支持所有组合，此类设备的驱动必须拒绝任何无法忠实实现的组合。)
 
-Firmware Loading
-(固件加载)
-================
+Firmware Loading(固件加载)
+==========================
 
 Devices which require firmware to operate usually store it in non-volatile
 memory on the board, e.g. flash. Some devices store only basic firmware on
@@ -83,9 +79,8 @@ devlink parameter can be used to control this behavior
 On-disk firmware files are usually stored in ``/lib/firmware/``.
 (磁盘上的固件文件通常存储在 ``/lib/firmware/`` 中。)
 
-Firmware Version Management
-(固件版本管理)
-===========================
+Firmware Version Management(固件版本管理)
+=========================================
 
 Drivers are expected to implement ``devlink-flash`` and ``devlink-info``
 functionality, which together allow for implementing vendor-independent

@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=============================================
-Open vSwitch datapath developer documentation
-=============================================
-
-(Open vSwitch 数据路径开发者文档)
+==============================================================================
+Open vSwitch datapath developer documentation(Open vSwitch 数据路径开发者文档)
+==============================================================================
 
 The Open vSwitch kernel module allows flexible userspace control over
 flow-level packet processing on selected network devices.  It can be
@@ -31,9 +29,8 @@ packets of the same type entirely in-kernel).
 (当数据包到达某个 vport 时，内核模块会提取其流键并在流表中查找。如果存在匹配的流，则执行相关联的动作。如果没有匹配，则将数据包排入用户空间进行处理（作为处理的一部分，用户空间很可能会设置一个流，使同一类型的后续数据包完全在内核中处理）。)
 
 
-Flow key compatibility
-(流键兼容性)
-----------------------
+Flow key compatibility(流键兼容性)
+----------------------------------
 
 Network protocols evolve over time.  New protocols become important
 and existing protocols lose their prominence.  For the Open vSwitch
@@ -86,9 +83,8 @@ the following sections go into detail.
 (流键如何随时间演进对实现这一点至关重要，因此以下各节将详细说明。)
 
 
-Flow key format
-(流键格式)
----------------
+Flow key format(流键格式)
+-------------------------
 
 A flow key is passed over a Netlink socket as a sequence of Netlink
 attributes.  Some attributes represent packet metadata, defined as any
@@ -116,9 +112,8 @@ Often we ellipsize arguments not important to the discussion, e.g.::
     in_port(1), eth(...), eth_type(0x0800), ipv4(...), tcp(...)
 
 
-Wildcarded flow key format
-(通配流键格式)
---------------------------
+Wildcarded flow key format(通配流键格式)
+----------------------------------------
 
 A wildcarded flow is described with two sequences of Netlink attributes
 passed over the Netlink socket. A flow key, exactly as described above, and an
@@ -174,9 +169,8 @@ some but not all of them. However, this behavior may change in future versions.
 并可能拒绝其中一部分（而非全部）。不过，这一行为在未来的版本中可能会改变。)
 
 
-Unique flow identifiers
-(唯一流标识符)
------------------------
+Unique flow identifiers(唯一流标识符)
+-------------------------------------
 
 An alternative to using the original match portion of a key as the handle for
 flow identification is a unique flow identifier, or "UFID". UFIDs are optional
@@ -193,9 +187,8 @@ flow key if a UFID is specified.
 索引。)
 
 
-Basic rule for evolving flow keys
-(流键演进的基本规则)
----------------------------------
+Basic rule for evolving flow keys(流键演进的基本规则)
+-----------------------------------------------------
 
 Some care is needed to really maintain forward and backward
 compatibility for applications that follow the rules listed under
@@ -204,13 +197,14 @@ compatibility for applications that follow the rules listed under
 应用程序保持向前和向后兼容，还需要一些细心处理。)
 
 The basic rule is obvious::
-(基本规则显而易见：)
 
     ==================================================================
     New network protocol support must only supplement existing flow
     key attributes.  It must not change the meaning of already defined
     flow key attributes.
     ==================================================================
+
+(基本规则显而易见：)
 
 This rule does have less-obvious consequences so it is worth working
 through a few examples.  Suppose, for example, that the kernel module
@@ -268,9 +262,8 @@ is still 0x8100, not changed to 0x0800.)
 这样，不理解 "vlan" 键的应用程序将看不到这些属性中的任何一个，因此不会误解
 它们。（此外，外层 eth_type 仍为 0x8100，不会改为 0x0800。）)
 
-Handling malformed packets
-(处理畸形数据包)
---------------------------
+Handling malformed packets(处理畸形数据包)
+------------------------------------------
 
 Don't drop packets in the kernel for malformed protocol headers, bad
 checksums, etc.  This would prevent userspace from implementing a
@@ -319,9 +312,8 @@ missing or malformed VLAN TCI.
 以便能够区分这种情况。因此，第二个例子中的流键明确指示 VLAN TCI 缺失或
 畸形。)
 
-Other rules
-(其他规则)
------------
+Other rules(其他规则)
+---------------------
 
 The other rules for flow keys are much less subtle:
 (关于流键的其他规则则直白得多：)

@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==================================
-Netmem Support for Network Drivers
-==================================
-
-(网络驱动的 netmem 支持)
+==========================================================
+Netmem Support for Network Drivers(网络驱动的 netmem 支持)
+==========================================================
 
 This document outlines the requirements for network drivers to support netmem,
 an abstract memory type that enables features like device memory TCP. By
@@ -29,9 +27,8 @@ Benefits of Netmem :
   regardless of the underlying memory implementation.
   (简化开发： 无论底层内存实现如何，驱动都与一致的 API 交互。)
 
-Driver RX Requirements
-(驱动 RX 要求)
-======================
+Driver RX Requirements(驱动 RX 要求)
+====================================
 
 1. The driver must support page_pool.
    (驱动必须支持 page_pool。)
@@ -125,9 +122,8 @@ Driver RX Requirements
    持有 page_pool 引用，但要注意某些 netmem 类型的流转时间可能更长，
    例如在 zerocopy 场景中用户空间持有引用时。)
 
-Driver TX Requirements
-(驱动 TX 要求)
-======================
+Driver TX Requirements(驱动 TX 要求)
+====================================
 
 1. The Driver must not pass the netmem dma_addr to any of the dma-mapping APIs
    directly. This is because netmem dma_addrs may come from a source like

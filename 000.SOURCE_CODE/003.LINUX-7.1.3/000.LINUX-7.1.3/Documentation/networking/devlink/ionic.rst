@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=====================
-ionic devlink support
-=====================
-
-(ionic devlink 支持)
+=========================================
+ionic devlink support(ionic devlink 支持)
+=========================================
 
 This document describes the devlink features implemented by the ``ionic``
 device driver.
 (本文档描述 ``ionic`` 设备驱动所实现的 devlink 功能。)
 
-Info versions
-=============
-(Info 版本)
+Info versions(Info 版本)
+========================
 
 The ``ionic`` driver reports the following versions
 (``ionic`` 驱动报告以下版本)

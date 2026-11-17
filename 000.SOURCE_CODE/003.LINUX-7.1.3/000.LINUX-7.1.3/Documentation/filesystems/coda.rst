@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===========================
-Coda Kernel-Venus Interface
-===========================
-
-(Coda 内核-Venus 接口)
+=================================================
+Coda Kernel-Venus Interface(Coda 内核-Venus 接口)
+=================================================
 
 .. Note::
 
@@ -147,9 +145,8 @@ kernel support.
      6.1 Requirements
      (6.1 需求)
 
-1. Introduction
-(1. 引言)
-===============
+1. Introduction(1. 引言)
+========================
 
   A key component in the Coda Distributed File System is the cache
   manager, Venus.
@@ -195,9 +192,8 @@ kernel support.
   document.
   (要在这些系统上实现 Coda，需要对 Venus/内核协议做一些逆向工程。此外人们还发现，对协议进行某些小的优化和修改可以使其他系统显著获益。为了便利这项工作并使未来的移植更容易，Venus 与内核之间的通信应当被非常详尽地记录下来。这正是本文档的目标。)
 
-2.  Servicing Coda filesystem calls
-(2. 处理 Coda 文件系统调用)
-===================================
+2.  Servicing Coda filesystem calls(2. 处理 Coda 文件系统调用)
+==============================================================
 
   The service of a request for a Coda file system service originates in
   a process P which accessing a Coda file. It makes a system call which
@@ -269,9 +265,8 @@ kernel support.
   (在这些接口中，VFS 接口以及存放、接收消息并获知消息到达的机制是平台相关的。我们不会深入讨论导出给 VFS 层的调用，但会说明消息交换机制的需求。)
 
 
-3.  The message layer
-(3. 消息层)
-=====================
+3.  The message layer(3. 消息层)
+================================
 
   At the lowest level the communication between Venus and the FS driver
   proceeds through messages.  The synchronization between processes
@@ -368,9 +363,8 @@ kernel support.
 
 
 
-3.1.  Implementation details
-(3.1. 实现细节)
-----------------------------
+3.1.  Implementation details(3.1. 实现细节)
+-------------------------------------------
 
   The Unix implementation of this mechanism has been through the
   implementation of a character device associated with Coda.  Venus
@@ -390,9 +384,8 @@ kernel support.
   (在 Windows NT 和 DPMI Windows 95 实现中使用 DeviceIoControl 调用。DeviceIoControl 调用被设计为用操作码(OPCODE)复制用户内存与内核内存之间的缓冲区。sendmsg_to_kernel 以同步调用的方式发起，而 getmsg_from_kernel 调用是异步的。消息到达的通知使用 Windows 事件对象(EventObject)。进程 P 在 NT 中被保持在一个 KernelEvent 对象上等待，在 Windows 95 中则是一个信号量。)
 
 
-4.  The interface at the call level
-(4. 调用层面的接口)
-===================================
+4.  The interface at the call level(4. 调用层面的接口)
+======================================================
 
 
   This section describes the upcalls a Coda FS driver can make to Venus.
@@ -438,9 +431,8 @@ kernel support.
 
 
 
-4.1.  Data structures shared by the kernel and Venus
-(4.1. 内核与 Venus 共享的数据结构)
-----------------------------------------------------
+4.1.  Data structures shared by the kernel and Venus(4.1. 内核与 Venus 共享的数据结构)
+--------------------------------------------------------------------------------------
 
 
   The CodaCred structure defines a variety of user and group ids as
@@ -523,9 +515,8 @@ kernel support.
 	};
 
 
-4.2.  The pioctl interface
-(4.2. pioctl 接口)
---------------------------
+4.2.  The pioctl interface(4.2. pioctl 接口)
+--------------------------------------------
 
 
   Coda specific requests can be made by application through the pioctl
@@ -574,9 +565,8 @@ kernel support.
 (**下面我们开始逐个记录这些调用**)
 
 
-4.3.  root
-(4.3. root(根目录))
-----------
+4.3.  root(4.3. root(根目录))
+-----------------------------
 
 
   Arguments
@@ -606,9 +596,8 @@ kernel support.
     the Coda filesystem.
     (此调用在 Coda 文件系统初始化期间向 Venus 发起。如果结果为零，cfs_root 结构包含 Coda 文件系统根的 ViceFid。如果产生了非零结果，其值是一个平台相关的错误码，指示 Venus 在定位 Coda 文件系统根时遇到的困难。)
 
-4.4.  lookup
-(4.4. lookup(查找))
-------------
+4.4.  lookup(4.4. lookup(查找))
+-------------------------------
 
 
   Summary
@@ -666,9 +655,8 @@ kernel support.
      (vtype 的类型目前是错误的。它应当是 coda_vtype。Linux 没有注意到 CFS_NOCACHE。它应该注意。)
 
 
-4.5.  getattr
-(4.5. getattr(获取属性))
--------------
+4.5.  getattr(4.5. getattr(获取属性))
+-------------------------------------
 
 
   Summary Get the attributes of a file.
@@ -721,9 +709,8 @@ kernel support.
   (输入参数中包含的 vattr 结构是多余的，应当移除。)
 
 
-4.6.  setattr
-(4.6. setattr(设置属性))
--------------
+4.6.  setattr(4.6. setattr(设置属性))
+-------------------------------------
 
 
   Summary
@@ -767,9 +754,8 @@ kernel support.
     (可能发生多种错误。对象可能不存在、可能不可访问，或者 Venus 可能不授予权限。)
 
 
-4.7.  access
-(4.7. access(访问权限))
-------------
+4.7.  access(4.7. access(访问权限))
+-----------------------------------
 
 
   Arguments
@@ -807,9 +793,8 @@ kernel support.
     (对象可能不存在，或者描述保护的 ACL 可能不可访问。)
 
 
-4.8.  create
-(4.8. create(创建文件))
-------------
+4.8.  create(4.8. create(创建文件))
+-----------------------------------
 
 
   Summary
@@ -882,9 +867,8 @@ kernel support.
   (目录的属性也应当返回，因为其大小和 mtime 已改变。)
 
 
-4.9.  mkdir
-(4.9. mkdir(创建目录))
------------
+4.9.  mkdir(4.9. mkdir(创建目录))
+---------------------------------
 
 
   Summary
@@ -940,9 +924,8 @@ kernel support.
   (应当返回父目录的属性，因为其大小和 mtime 会改变。)
 
 
-4.10.  link
-(4.10. link(创建硬链接))
------------
+4.10.  link(4.10. link(创建硬链接))
+-----------------------------------
 
 
   Summary
@@ -984,9 +967,8 @@ kernel support.
     (可能发生通常的错误。)
 
 
-4.11.  symlink
-(4.11. symlink(创建符号链接))
---------------
+4.11.  symlink(4.11. symlink(创建符号链接))
+-------------------------------------------
 
 
   Summary
@@ -1029,9 +1011,8 @@ kernel support.
      (应当返回目标目录的属性，因为其大小改变了。)
 
 
-4.12.  remove
-(4.12. remove(删除文件))
--------------
+4.12.  remove(4.12. remove(删除文件))
+-------------------------------------
 
 
   Summary
@@ -1071,9 +1052,8 @@ kernel support.
      (应当返回该目录的属性，因为其 mtime 和大小可能改变。)
 
 
-4.13.  rmdir
-(4.13. rmdir(删除目录))
-------------
+4.13.  rmdir(4.13. rmdir(删除目录))
+-----------------------------------
 
 
   Summary
@@ -1110,9 +1090,8 @@ kernel support.
 	    (应当返回父目录的属性，因为其 mtime 和大小可能改变。)
 
 
-4.14.  readlink
-(4.14. readlink(读取符号链接))
----------------
+4.14.  readlink(4.14. readlink(读取符号链接))
+---------------------------------------------
 
 
   Summary
@@ -1154,9 +1133,8 @@ kernel support.
     (没有不寻常的错误。)
 
 
-4.15.  open
-(4.15. open(打开))
------------
+4.15.  open(4.15. open(打开))
+-----------------------------
 
 
   Summary
@@ -1207,9 +1185,8 @@ kernel support.
      (目前的 cfs_open_out 结构尚未恰当地适配以处理 Windows 的情况。最好实现两个上行调用：一个打开时以容器文件名为目标，另一个以容器文件 inode 为目标。)
 
 
-4.16.  close
-(4.16. close(关闭))
-------------
+4.16.  close(4.16. close(关闭))
+-------------------------------
 
 
   Summary
@@ -1254,9 +1231,8 @@ kernel support.
      (flags 参数是虚假的且未被使用。不过，Venus 的代码留有处理 execp 输入字段的余地，或许应当用这个字段告知 Venus：文件已关闭但仍为执行而保持内存映射。在 Venus 的 vproc_vfscalls 中有一些关于取回还是不取回数据的注释。这看起来很愚蠢。如果要关闭一个文件，容器文件中的数据就应当是新数据。这里 execp 标志可能又会造成混淆：目前当文件仍处于内存映射状态时，Venus 可能会认为它可以被从缓存中清除。这一点需要弄清楚。)
 
 
-4.17.  ioctl
-(4.17. ioctl(设备控制))
-------------
+4.17.  ioctl(4.17. ioctl(设备控制))
+-----------------------------------
 
 
   Summary
@@ -1304,9 +1280,8 @@ kernel support.
 
 
 
-4.18.  rename
-(4.18. rename(重命名))
--------------
+4.18.  rename(4.18. rename(重命名))
+-----------------------------------
 
 
   Summary
@@ -1343,9 +1318,8 @@ kernel support.
     (将 sourceFid 目录中名为 srcname 的对象重命名为 destFid 中的 destname。重要的是 srcname 和 destname 必须是以 0 结尾的字符串。Unix 内核中的字符串并不总是以空字符结尾。)
 
 
-4.19.  readdir
-(4.19. readdir(读取目录))
---------------
+4.19.  readdir(4.19. readdir(读取目录))
+---------------------------------------
 
 
   Summary
@@ -1393,9 +1367,8 @@ kernel support.
      (此调用未被使用。readdir 操作利用容器文件完成。在即将进行的目录改造期间，我们将重新评估这一点。)
 
 
-4.20.  vget
-(4.20. vget(获取 vnode))
------------
+4.20.  vget(4.20. vget(获取 vnode))
+-----------------------------------
 
 
   Summary
@@ -1439,9 +1412,8 @@ kernel support.
      (此操作未被使用。然而它极其有用，因为它可用于处理读/写内存映射文件。这些文件可以用 vget 在 Venus 缓存中"钉住"，并用 inactive 释放。)
 
 
-4.21.  fsync
-(4.21. fsync(同步文件))
-------------
+4.21.  fsync(4.21. fsync(同步文件))
+-----------------------------------
 
 
   Summary
@@ -1477,9 +1449,8 @@ kernel support.
      (Linux 没有实现此调用。它应该实现。)
 
 
-4.22.  inactive
-(4.22. inactive(释放))
----------------
+4.22.  inactive(4.22. inactive(释放))
+-------------------------------------
 
 
   Summary
@@ -1513,9 +1484,8 @@ kernel support.
      (或许应该将此调用移除。)
 
 
-4.23.  rdwr
-(4.23. rdwr(读写))
------------
+4.23.  rdwr(4.23. rdwr(读写))
+-----------------------------
 
 
   Summary
@@ -1566,9 +1536,8 @@ kernel support.
 
 
 
-4.24.  odymount
-(4.24. odymount(动态挂载))
----------------
+4.24.  odymount(4.24. odymount(动态挂载))
+-----------------------------------------
 
 
   Summary
@@ -1610,9 +1579,8 @@ kernel support.
      (此调用曾被 David 用于动态集。它应当被移除，因为它会在 VFS 挂载区域造成一堆指针的纠缠。正式的 Coda 并不使用它。Venus 未实现该调用。)
 
 
-4.25.  ody_lookup
-(4.25. ody_lookup(动态集查找))
------------------
+4.25.  ody_lookup(4.25. ody_lookup(动态集查找))
+-----------------------------------------------
 
 
   Summary
@@ -1640,9 +1608,8 @@ kernel support.
      (将其掏空。Venus 未实现该调用。)
 
 
-4.26.  ody_expand
-(4.26. ody_expand(动态集展开))
------------------
+4.26.  ody_expand(4.26. ody_expand(动态集展开))
+-----------------------------------------------
 
 
   Summary
@@ -1668,9 +1635,8 @@ kernel support.
      (将其掏空。Venus 未实现该调用。)
 
 
-4.27.  prefetch
-(4.27. prefetch(预取))
----------------
+4.27.  prefetch(4.27. prefetch(预取))
+-------------------------------------
 
 
   Summary
@@ -1706,9 +1672,8 @@ kernel support.
 
 
 
-4.28.  signal
-(4.28. signal(信号))
--------------
+4.28.  signal(4.28. signal(信号))
+---------------------------------
 
 
   Summary
@@ -1754,9 +1719,8 @@ kernel support.
      (我们需要更好地理解 Venus 需要清理什么，以及它是否在正确地做这件事。我们还需要正确处理每次系统调用中有多个上行调用的情况。了解在一次上行调用之后 Venus 中发生了哪些状态变化也很重要，对于这些变化，内核有责任通知 Venus 进行清理(例如 open 肯定是这样的状态变化，但许多其他的也许不是)。)
 
 
-5.  The minicache and downcalls
-(5. minicache 与下行调用)
-===============================
+5.  The minicache and downcalls(5. minicache 与下行调用)
+========================================================
 
 
   The Coda FS Driver can cache results of lookup and access upcalls, to
@@ -1805,18 +1769,16 @@ kernel support.
   (当 Venus 获得表明缓存条目不再有效的信息时，它会向内核发起一次下行调用(downcall)。下行调用由 Coda 文件系统驱动截获，并导致如下所述的缓存失效。除非下行调用数据无法读入内核内存，否则 Coda 文件系统驱动不会返回错误。)
 
 
-5.1.  INVALIDATE
-(5.1. INVALIDATE(使无效))
-----------------
+5.1.  INVALIDATE(5.1. INVALIDATE(使无效))
+-----------------------------------------
 
 
   No information is available on this call.
   (关于此调用没有可用的信息。)
 
 
-5.2.  FLUSH
-(5.2. FLUSH(刷新))
------------
+5.2.  FLUSH(5.2. FLUSH(刷新))
+-----------------------------
 
 
 
@@ -1839,9 +1801,8 @@ kernel support.
     (Venus 在启动时和消亡时发出此调用。这是为了防止持有过期的缓存信息。某些操作系统允许动态关闭内核名称缓存。当这样做时，就会进行此下行调用。)
 
 
-5.3.  PURGEUSER
-(5.3. PURGEUSER(清除用户))
----------------
+5.3.  PURGEUSER(5.3. PURGEUSER(清除用户))
+-----------------------------------------
 
 
   Arguments
@@ -1861,9 +1822,8 @@ kernel support.
     (移除缓存中所有携带该 Cred 的条目。当用户的令牌过期或被清除时发出此调用。)
 
 
-5.4.  ZAPFILE
-(5.4. ZAPFILE(清除文件缓存项))
--------------
+5.4.  ZAPFILE(5.4. ZAPFILE(清除文件缓存项))
+-------------------------------------------
 
 
   Arguments
@@ -1892,9 +1852,8 @@ kernel support.
 
 
 
-5.5.  ZAPDIR
-(5.5. ZAPDIR(清除目录缓存项))
-------------
+5.5.  ZAPDIR(5.5. ZAPDIR(清除目录缓存项))
+-----------------------------------------
 
 
   Arguments
@@ -1915,9 +1874,8 @@ kernel support.
     (移除缓存中位于目录 CodaFid 内的所有条目，以及该目录的所有子项。当 Venus 收到关于该目录的回调时发出此调用。)
 
 
-5.6.  ZAPVNODE
-(5.6. ZAPVNODE(清除 vnode 缓存项))
---------------
+5.6.  ZAPVNODE(5.6. ZAPVNODE(清除 vnode 缓存项))
+------------------------------------------------
 
 
 
@@ -1939,9 +1897,8 @@ kernel support.
     (移除缓存中所有携带与参数相同的 cred 和 VFid 的条目。此下行调用可能从未被发出。)
 
 
-5.7.  PURGEFID
-(5.7. PURGEFID(清除 fid))
---------------
+5.7.  PURGEFID(5.7. PURGEFID(清除 fid))
+---------------------------------------
 
 
   Arguments
@@ -1963,9 +1920,8 @@ kernel support.
 
 
 
-5.8.  REPLACE
-(5.8. REPLACE(替换))
--------------
+5.8.  REPLACE(5.8. REPLACE(替换))
+---------------------------------
 
 
   Summary
@@ -1993,9 +1949,8 @@ kernel support.
     (此例程将名称缓存中的一个 ViceFid 替换为另一个。增加它是为了允许 Venus 在重新集成(reintegration)期间，将断连时本地分配的临时 fid 替换为全局 fid，即使这些 fid 上的引用计数不为零。)
 
 
-6.  Initialization and cleanup
-(6. 初始化与清理)
-==============================
+6.  Initialization and cleanup(6. 初始化与清理)
+===============================================
 
 
   This section gives brief hints as to desirable features for the Coda
@@ -2038,9 +1993,8 @@ kernel support.
      (目前 pioctl 要经过 Coda 的 VFS，因此我们可以对它们做类似的处理。)
 
 
-6.1.  Requirements
-(6.1. 需求)
-------------------
+6.1.  Requirements(6.1. 需求)
+-----------------------------
 
 
   The following requirements should be accommodated:

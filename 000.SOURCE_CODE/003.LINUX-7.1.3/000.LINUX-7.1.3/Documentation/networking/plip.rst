@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-================================================
-PLIP: The Parallel Line Internet Protocol Device
-================================================
-
-(PLIP：并行线路 Internet 协议设备)
+==================================================================================
+PLIP: The Parallel Line Internet Protocol Device(PLIP：并行线路 Internet 协议设备)
+==================================================================================
 
 Donald Becker (becker@super.org)
 I.D.A. Supercomputing Research Center, Bowie MD 20715
@@ -14,18 +12,16 @@ At some point T. Thorn will probably contribute text,
 Tommy Thorn (tthorn@daimi.aau.dk)
 (T. Thorn (Tommy Thorn，tthorn@daimi.aau.dk) 日后可能会贡献一些文字。)
 
-PLIP Introduction
-(PLIP 简介)
------------------
+PLIP Introduction(PLIP 简介)
+----------------------------
 
 This document describes the parallel port packet pusher for Net/LGX.
 This device interface allows a point-to-point connection between two
 parallel ports to appear as a IP network interface.
 (本文档描述 Net/LGX 的并行端口数据包推送器。这种设备接口使两个并行端口之间的点对点连接表现为一个 IP 网络接口。)
 
-What is PLIP?
-(什么是 PLIP？)
-=============
+What is PLIP?(什么是 PLIP？)
+============================
 
 PLIP is Parallel Line IP, that is, the transportation of IP packages
 over a parallel port. In the case of a PC, the obvious choice is the
@@ -35,9 +31,8 @@ cable]. [The protocol used to pack IP packages, is a simple one
 initiated by Crynwr.]
 (PLIP 即 Parallel Line IP，也就是通过并行端口传输 IP 包。就 PC 而言，显而易见的选择是打印机端口。PLIP 是非标准的，但 [可以] 使用标准的 LapLink 空打印机电缆 [也可以配合 PLIP 电缆在 turbo 模式下工作]。[用于封装 IP 包的协议是一个由 Crynwr 发起的简单协议。])
 
-Advantages of PLIP
-(PLIP 的优点)
-==================
+Advantages of PLIP(PLIP 的优点)
+===============================
 
 It's cheap, it's available everywhere, and it's easy.
 (它便宜，随处可得，而且简单。)
@@ -57,9 +52,8 @@ cables, everything else is software configuration [which in principle
 could be made very easy.]
 (不需要网卡还意味着，除了连接电缆之外，其余一切都是软件配置 [原则上这可以做得非常简单。])
 
-Disadvantages of PLIP
-(PLIP 的缺点)
-=====================
+Disadvantages of PLIP(PLIP 的缺点)
+==================================
 
 Doesn't work over a modem, like SLIP and PPP. Limited range, 15 m.
 Can only be used to connect three (?) Linux boxes. Doesn't connect to
@@ -67,26 +61,23 @@ an existing Ethernet. Isn't standard (not even de facto standard, like
 SLIP).
 (不能像 SLIP 和 PPP 那样通过调制解调器工作。距离受限，15 米。最多只能用来连接三台 (?) Linux 机器。不能接入现有的以太网。不是标准（甚至不像 SLIP 那样是事实上的标准）。)
 
-Performance
-(性能)
-===========
+Performance(性能)
+=================
 
 PLIP easily outperforms Ethernet cards....(ups, I was dreaming, but
 it *is* getting late. EOB)
 (PLIP 轻松超越以太网卡……(哎呀，我在做梦呢，不过天色确实已经晚了。EOB))
 
-PLIP driver details
-(PLIP 驱动细节)
--------------------
+PLIP driver details(PLIP 驱动细节)
+----------------------------------
 
 The Linux PLIP driver is an implementation of the original Crynwr protocol,
 that uses the parallel port subsystem of the kernel in order to properly
 share parallel ports between PLIP and other services.
 (Linux PLIP 驱动是原始 Crynwr 协议的一种实现，它使用内核的并行端口子系统，以便在 PLIP 与其他服务之间正确地共享并行端口。)
 
-IRQs and trigger timeouts
-(IRQ 与触发超时)
-=========================
+IRQs and trigger timeouts(IRQ 与触发超时)
+=========================================
 
 When a parallel port used for a PLIP driver has an IRQ configured to it, the
 PLIP driver is signaled whenever data is sent to it via the cable, such that
@@ -136,9 +127,8 @@ Documentation/Changes file). An example command would be
 PLIP device.
 (在 Linux 中可以执行此项修改的工具是 plipconfig，它是 net-tools 软件包的一部分（其位置可以在 Documentation/Changes 文件中找到）。示例命令为 'plipconfig plipX trigger 10000'，其中 plipX 是相应的 PLIP 设备。)
 
-PLIP hardware interconnection
-(PLIP 硬件互连)
------------------------------
+PLIP hardware interconnection(PLIP 硬件互连)
+--------------------------------------------
 
 PLIP uses several different data transfer methods.  The first (and the
 only one implemented in the early version of the code) uses a standard
@@ -152,9 +142,8 @@ ports.  This allows byte-wide transfers and avoids reconstructing
 nibbles into bytes, leading to much faster transfers.
 (第二种数据传输方法依赖于两台机器都拥有双向并行端口，而不是只能输出的 ``printer`` 端口。这样可以按字节宽传输，避免把半字节重组为字节，从而实现快得多的传输。)
 
-Parallel Transfer Mode 0 Cable
-(并行传输模式 0 电缆)
-==============================
+Parallel Transfer Mode 0 Cable(并行传输模式 0 电缆)
+===================================================
 
 The cable for the first transfer mode is a standard
 printer "null" cable which transfers data four bits at a time using
@@ -189,9 +178,8 @@ If the cable you are using has a metallic shield it should be
 connected to the metallic DB-25 shell at one end only.
 (如果你使用的电缆带有金属屏蔽层，它应当只在一端连接到金属 DB-25 外壳。)
 
-Parallel Transfer Mode 1
-(并行传输模式 1)
-========================
+Parallel Transfer Mode 1(并行传输模式 1)
+========================================
 
 The second data transfer method relies on both machines having
 bi-directional parallel ports, rather than output-only ``printer``
@@ -227,9 +215,8 @@ Once again, if the cable you are using has a metallic shield it should
 be connected to the metallic DB-25 shell at one end only.
 (再次强调，如果你使用的电缆带有金属屏蔽层，它应当只在一端连接到金属 DB-25 外壳。)
 
-PLIP Mode 0 transfer protocol
-(PLIP 模式 0 传输协议)
-=============================
+PLIP Mode 0 transfer protocol(PLIP 模式 0 传输协议)
+===================================================
 
 The PLIP driver is compatible with the "Crynwr" parallel port transfer
 standard in Mode 0.  That standard specifies the following protocol::

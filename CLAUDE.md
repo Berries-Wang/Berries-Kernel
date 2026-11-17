@@ -44,3 +44,34 @@
 
 - Neoverse V3（AGI CPU 核心）：[arm_neoverse_v3_core_technical_reference_manual_107734_0002_06_en.pdf](007.BOOKs/arm_neoverse_v3_core_technical_reference_manual_107734_0002_06_en.pdf)；互连/SLC 另见 [arm_neoverse_cmn_700_trm_102308_0307_08_en.pdf](007.BOOKs/arm_neoverse_cmn_700_trm_102308_0307_08_en.pdf)
 - Cortex-A725：[arm_cortex_a725_core_trm_107652_0001_04_en.pdf](007.BOOKs/arm_cortex_a725_core_trm_107652_0001_04_en.pdf)；Cortex-A520：[arm_cortex_a520_core_trm_102517_0001_04_en.pdf](007.BOOKs/arm_cortex_a520_core_trm_102517_0001_04_en.pdf)
+
+## 内核文档双语翻译规范（Documentation/ 就地翻译）
+
+对象：`000.SOURCE_CODE/003.LINUX-7.1.3/000.LINUX-7.1.3/Documentation/` 下英文内核文档的就地中英双语化。风格基线 = `arch/arm64/sve.rst`。**translations/ 下的 zh_CN/zh_TW/ja_JP 等原生译档不碰**（它们独立成段落的中文是正文，不是注释）。
+
+### 基本格式
+
+- **段落**：英文段末尾**同段**追加 `(中文译文。)`，不另起段；
+- **列表**：译文与条目文本对齐，放条目内；
+- **代码块/ASCII 图/`::` 字面块内容/内核源码**：一律不译；
+- **表格**：grid 表单元格内补中文、简单表行尾补中文（允许破坏列对齐，**禁止增删边框行**）；
+- `.. toctree::` / `.. kernel-doc::` / SPDX 行整块不动；
+- **标题（含文档主标题与所有小节，定稿风格）**：中文并入标题行 —— `Title(中文)`，且**下划线（及 overline）必须按新标题的东亚列宽补长**：CJK 字符按 2 列计（`unicodedata.east_asian_width`），标题含 TAB 时先按 `expandtabs(8)` 展开再计宽。
+
+### 高危禁忌（每条都踩过真实坑）
+
+1. **严禁把中文行插在"标题行与下划线之间"**（`Title` / `(中文)` / `====`）。docutils 会**静默**把三行降级成普通段落——零报错零警告，标题节点消失、页面 `<title>` 变 `<no title>`、正文小节标题全部变成正文文字；Sphinx 对无标题 toctree 条目**直接丢弃**（仅一条 WARNING），父级 index 页于是"只剩标题"。旧批次已产生 3357 处此缺陷，2026-11-18 才全量修复；
+2. **1-2 字符短下划线也是标题**（`TX` / `--`）。漏改它们会破坏 docutils 的**标题样式注册顺序**，后面某节突然报 SEVERE "Title level inconsistent"（tls-offload.rst 实例）；
+3. **`::` 行后禁止直接跟中文注释**——字面块降级为 block quote（代码失去等宽格式），块内含 `----`/`====` 分隔行时直接 **SEVERE 中止构建**（squashfs.rst 实例）。正确做法："译文移块后"——注释放到字面块结束之后（空行隔开）；
+4. **改了标题，隐式引用必须同步**：`` `Overview`_ `` / `Overview_` 这类引用的目标名 = 完整标题文本，inline 改名后失配报 `Unknown target name`。改写方案：**引用文本 = 目标节的完整双语标题**（`` `Overview(概述)`_ ``），链接文字与跳转后的标题一字不差；不要用插 `.. _label:` 的方案；
+5. **中文注释行里不要复制英文引用标记**：`(使用 \`DIRECT_KEY policies\`_ 时...)` 这种注释内的英文引用会对不上改名后的目标——要么不带引用，要么用完整双语标题；
+6. **脚注/尾注引用不要在中文注释里重复**：表格单元格英文含 `[#]_` 时，中文注释直接写"……"即可，再写一个 `[#]_` 就变成 2 引用对 1 定义（proc.rst 实例）；
+7. **reST 标记不要照搬直译**：`_any_` 不是斜体语义，会被解析成引用标记（mmap_prepare.rst 报 Unknown target）——斜体用 `*任意一个*`；
+8. **中文行紧贴上一节下划线（相邻节无空行）是合法构造**，不要当成坏标题去"修"；zh_CN 原生档的 overline 中文标题（`===` / `标题` / `===`）同样合法。
+
+### 质检门（每批完成必过）
+
+- **oracle = 真实构建，且必须 `gmake O=kernel-docs-output cleandocs` 后全量重建**。增量构建对未变更文件复用缓存 doctree 且**不重新输出警告**——"错误变少"是假象（364→18 的假修复教训）；
+- 构建日志 grep 清零项：`SEVERE`、`toc.no_title`、`Unknown target name`、`Title level inconsistent`、`Title underline too short`；`Unexpected indentation`/`Malformed table` 属 `::`-家族遗留（存量约 405 条，round-2 QA 统一"译文移块后"处理，新批次不得新增）；
+- 辅助扫描脚本在 [009.IGNORE/net-trans-tools/qa/](009.IGNORE/net-trans-tools/qa/)：`scan-broken-titles.py`（坏标题形状）、`fix-broken-titles.py`（机械修复，幂等）、`scan-colon-shape.py`（`::` 形状清单）；
+- docutils 单机诊断会误报 `include::` 路径、未知指令/角色（sphinx 扩展），过滤后再看，最终以 sphinx 构建为准。

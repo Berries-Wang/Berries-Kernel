@@ -1,17 +1,14 @@
 .. SPDX-License-Identifier: GPL-2.0+
 
-========================================================
-Linux Driver for the AMD/Pensando(R) DSC adapter family
-========================================================
-
-(AMD/Pensando(R) DSC 适配器家族的 Linux 驱动)
+====================================================================================================
+Linux Driver for the AMD/Pensando(R) DSC adapter family(AMD/Pensando(R) DSC 适配器家族的 Linux 驱动)
+====================================================================================================
 
 Copyright(c) 2023 Advanced Micro Devices, Inc
 (版权所有 (c) 2023 Advanced Micro Devices, Inc)
 
-Identifying the Adapter
-(识别适配器)
-=======================
+Identifying the Adapter(识别适配器)
+===================================
 
 To find if one or more AMD/Pensando PCI Core devices are installed on the
 host, check for the PCI devices::
@@ -52,9 +49,8 @@ Driver and firmware version information can be gathered with devlink::
           fw.mainfwa 1.60.0-73
           fw.mainfwb 1.60.0-57
 
-Info versions
-(信息版本)
-=============
+Info versions(信息版本)
+=======================
 
 The ``pds_core`` driver reports the following versions
 (``pds_core`` 驱动报告以下版本)
@@ -90,9 +86,8 @@ The ``pds_core`` driver reports the following versions
      - The revision of the ASIC for this device
        (此设备 ASIC 的版本号)
 
-Parameters
-(参数)
-==========
+Parameters(参数)
+================
 
 The ``pds_core`` driver implements the following generic
 parameters for controlling the functionality to be made available
@@ -113,9 +108,8 @@ as auxiliary_bus devices.
      - Enables vDPA functionality through an auxiliary_bus device
        (通过 auxiliary_bus 设备启用 vDPA 功能)
 
-Firmware Management
-(固件管理)
-===================
+Firmware Management(固件管理)
+=============================
 
 The ``flash`` command can update a the DSC firmware.  The downloaded firmware
 will be saved into either of firmware bank 1 or bank 2, whichever is not
@@ -126,9 +120,8 @@ currently in use, and that bank will used for the next boot::
   # devlink dev flash pci/0000:b5:00.0 \
             file pensando/dsc_fw_1.63.0-22.tar
 
-Health Reporters
-(健康报告器)
-================
+Health Reporters(健康报告器)
+============================
 
 The driver supports a devlink health reporter for FW status::
 (驱动支持用于固件状态的 devlink health reporter：)
@@ -140,9 +133,8 @@ The driver supports a devlink health reporter for FW status::
   # devlink health diagnose pci/0000:2b:00.0 reporter fw
    Status: healthy State: 1 Generation: 0 Recoveries: 0
 
-Enabling the driver
-(启用驱动)
-===================
+Enabling the driver(启用驱动)
+=============================
 
 The driver is enabled via the standard kernel configuration system,
 using the make command::
@@ -159,9 +151,8 @@ The driver is located in the menu structure at:
         -> AMD devices
           -> AMD/Pensando Ethernet PDS_CORE Support
 
-Support
-(支持)
-=======
+Support(支持)
+=============
 
 For general Linux networking support, please use the netdev mailing
 list, which is monitored by AMD/Pensando personnel::

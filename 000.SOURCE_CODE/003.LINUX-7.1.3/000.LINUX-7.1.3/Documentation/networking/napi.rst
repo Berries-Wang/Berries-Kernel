@@ -30,9 +30,8 @@ All in all NAPI abstracts away from the drivers the context and configuration
 of event (packet Rx and Tx) processing.
 (总而言之，NAPI 为驱动程序抽象掉了事件 (数据包收发) 处理的上下文和配置。)
 
-Driver API
-==========
-(驱动程序 API)
+Driver API(驱动程序 API)
+========================
 
 The two most important elements of NAPI are the struct napi_struct
 and the associated poll method. struct napi_struct holds the state
@@ -43,9 +42,8 @@ transmitted and process newly received packets.
 
 .. _drv_ctrl:
 
-Control API
------------
-(控制 API)
+Control API(控制 API)
+---------------------
 
 netif_napi_add() and netif_napi_del() add/remove a NAPI instance
 from the system. The instances are attached to the netdevice passed
@@ -65,9 +63,8 @@ calls may result in crashes, deadlocks, or race conditions. For example,
 calling napi_disable() multiple times in a row will deadlock.
 (控制 API 不是幂等的。控制 API 调用与数据路径 API 的并发使用是安全的，但控制 API 调用顺序不正确可能导致崩溃、死锁或竞态条件。例如，连续多次调用 napi_disable() 会导致死锁。)
 
-Datapath API
-------------
-(数据路径 API)
+Datapath API(数据路径 API)
+--------------------------
 
 napi_schedule() is the basic method of scheduling a NAPI poll.
 Drivers should call this function in their interrupt handler
@@ -120,9 +117,8 @@ of the instance.
    If the ``budget`` is 0 napi_complete_done() should never be called.
    (如果 ``budget`` 为 0，则绝不应调用 napi_complete_done()。)
 
-Call sequence
--------------
-(调用顺序)
+Call sequence(调用顺序)
+-----------------------
 
 Drivers should not make assumptions about the exact sequencing
 of calls. The poll method may be called without the driver scheduling
@@ -140,9 +136,8 @@ napi_complete_done().
 
 .. _drv_sched:
 
-Scheduling and IRQ masking
---------------------------
-(调度与 IRQ 屏蔽)
+Scheduling and IRQ masking(调度与 IRQ 屏蔽)
+-------------------------------------------
 
 Drivers should keep the interrupts masked after scheduling
 the NAPI instance - until NAPI polling finishes any further
@@ -178,9 +173,8 @@ mask interrupts). napi_schedule_irqoff() will fall back to napi_schedule() if
 IRQs are threaded (such as if ``PREEMPT_RT`` is enabled).
 (napi_schedule_irqoff() 是 napi_schedule() 的一种变体，它利用了在中断上下文中被调用所带来的保证 (无需屏蔽中断)。如果 IRQ 是线程化的 (例如启用了 ``PREEMPT_RT``)，napi_schedule_irqoff() 会退回到 napi_schedule()。)
 
-Instance to queue mapping
--------------------------
-(实例与队列的映射)
+Instance to queue mapping(实例与队列的映射)
+-------------------------------------------
 
 Modern devices have multiple NAPI instances (struct napi_struct) per
 interface. There is no strong requirement on how the instances are
@@ -207,9 +201,8 @@ a configuration of 1 ``rx``, 1 ``tx`` and 1 ``combined`` channel is expected
 to utilize 3 interrupts, 2 Rx and 2 Tx queues.
 (值得注意的是，ethtool API 使用 "channel (通道)" 这一术语，每个通道可以是 ``rx`` 、``tx`` 或 ``combined`` 。通道由什么构成并不明确；建议的解释是将通道理解为服务于给定类型队列的 IRQ/NAPI。例如，1 个 ``rx`` 、1 个 ``tx`` 和 1 个 ``combined`` 通道的配置预期会使用 3 个中断、2 个 Rx 队列和 2 个 Tx 队列。)
 
-Persistent NAPI config
-----------------------
-(持久化 NAPI 配置)
+Persistent NAPI config(持久化 NAPI 配置)
+----------------------------------------
 
 Drivers often allocate and free NAPI instances dynamically. This leads to loss
 of NAPI-related user configuration each time NAPI instances are reallocated.
@@ -226,9 +219,8 @@ sections below for other NAPI configuration settings.
 Drivers should try to use netif_napi_add_config() whenever possible.
 (驱动程序应尽可能尝试使用 netif_napi_add_config()。)
 
-User API
-========
-(用户 API)
+User API(用户 API)
+==================
 
 User interactions with NAPI depend on NAPI instance ID. The instance IDs
 are only visible to the user thru the ``SO_INCOMING_NAPI_ID`` socket option.
@@ -254,9 +246,8 @@ See ``Documentation/netlink/specs/netdev.yaml`` for more details on
 available operations and attributes.
 (有关可用操作和属性的更多细节，参见 ``Documentation/netlink/specs/netdev.yaml`` 。)
 
-Software IRQ coalescing
------------------------
-(软件 IRQ 合并)
+Software IRQ coalescing(软件 IRQ 合并)
+--------------------------------------
 
 NAPI does not perform any explicit event coalescing by default.
 In most scenarios batching happens due to IRQ coalescing which is done
@@ -305,9 +296,8 @@ which can be set on a per-epoll context basis with ``EPIOCSPARAMS`` ioctl.
 
 .. _poll:
 
-Busy polling
-------------
-(忙轮询)
+Busy polling(忙轮询)
+--------------------
 
 Busy polling allows a user process to check for incoming packets before
 the device interrupt fires. As is the case with any busy polling it trades
@@ -323,9 +313,8 @@ packets (:ref:`threaded busy polling<threaded_busy_poll>`) using the NAPI
 processing kthread.
 (通过在选定的套接字上设置 ``SO_BUSY_POLL`` ，或使用全局的 ``net.core.busy_poll`` 和 ``net.core.busy_read`` sysctl，可以启用忙轮询。还存在用于 NAPI 忙轮询的 io_uring API。NAPI 的线程化轮询也有一种使用 NAPI 处理 kthread 对数据包进行忙轮询的模式 (:ref:`threaded busy polling<threaded_busy_poll>`)。)
 
-epoll-based busy polling
-------------------------
-(基于 epoll 的忙轮询)
+epoll-based busy polling(基于 epoll 的忙轮询)
+---------------------------------------------
 
 It is possible to trigger packet processing directly from calls to
 ``epoll_wait``. In order to use this feature, a user application must ensure
@@ -370,9 +359,8 @@ In order to enable busy polling, there are two choices:
       uint8_t __pad;
   };
 
-IRQ mitigation
---------------
-(IRQ 缓解)
+IRQ mitigation(IRQ 缓解)
+------------------------
 
 While busy polling is supposed to be used by low latency applications,
 a similar mechanism can be used for IRQ mitigation.
@@ -417,9 +405,8 @@ Users may want to consider an alternate approach, IRQ suspension, to help deal
 with these tradeoffs.
 (用户可能需要考虑另一种方法 —— IRQ 挂起，以帮助应对这些权衡。)
 
-IRQ suspension
---------------
-(IRQ 挂起)
+IRQ suspension(IRQ 挂起)
+------------------------
 
 IRQ suspension is a mechanism wherein device IRQs are masked while epoll
 triggers NAPI packet processing.
@@ -524,9 +511,8 @@ might not have any discernible effect.
 
 .. _threaded_busy_poll:
 
-Threaded NAPI busy polling
---------------------------
-(线程化 NAPI 忙轮询)
+Threaded NAPI busy polling(线程化 NAPI 忙轮询)
+----------------------------------------------
 
 Threaded NAPI busy polling extends threaded NAPI and adds support to do
 continuous busy polling of the NAPI. This can be useful for forwarding or
@@ -579,9 +565,8 @@ kthread that is polling this NAPI.
 
 .. _threaded:
 
-Threaded NAPI
--------------
-(线程化 NAPI)
+Threaded NAPI(线程化 NAPI)
+--------------------------
 
 Threaded NAPI is an operating mode that uses dedicated kernel
 threads rather than software IRQ context for NAPI processing.

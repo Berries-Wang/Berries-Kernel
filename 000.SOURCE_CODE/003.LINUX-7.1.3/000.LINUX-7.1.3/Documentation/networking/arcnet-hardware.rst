@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===============
-ARCnet Hardware
-===============
-
-(ARCnet 硬件)
+============================
+ARCnet Hardware(ARCnet 硬件)
+============================
 
 :Author: Avery Pennarun <apenwarr@worldvisions.ca>
 (作者: Avery Pennarun <apenwarr@worldvisions.ca>)
@@ -28,9 +26,8 @@ have, do not hesitate to :ref:`email to netdev <arcnet-netdev>`.
 设置和/或任何其他信息，请随时 :ref:`email to netdev <arcnet-netdev>`。)
 
 
-Introduction to ARCnet
-(ARCnet 简介)
-======================
+Introduction to ARCnet(ARCnet 简介)
+===================================
 
 ARCnet is a network type which works in a way similar to popular Ethernet
 networks but which is also different in some very important ways.
@@ -117,9 +114,8 @@ WWW page at:
 	https://www.arcnet.cc
 
 
-Cabling ARCnet Networks
-(ARCnet 网络布线)
-=======================
+Cabling ARCnet Networks(ARCnet 网络布线)
+========================================
 
 This section was rewritten by
 (本节由以下人士重写：)
@@ -163,14 +159,15 @@ equal to a high impedance one with a terminator installed.
 Usually, the ARCnet networks are built up from STAR cards and hubs.  There
 are two types of hubs - active and passive.  Passive hubs are small boxes
 with four BNC connectors containing four 47 Ohm resistors::
-(通常，ARCnet 网络由 STAR 卡和集线器搭建而成。集线器有两种——有源和无源。无源
-集线器是带有四个 BNC 插头、内含四个 47 Ohm 电阻的小盒子：)
 
 	   |         | wires
 	   R         + junction
 	-R-+-R-      R 47 Ohm resistors
 	   R
 	   |
+
+(通常，ARCnet 网络由 STAR 卡和集线器搭建而成。集线器有两种——有源和无源。无源
+集线器是带有四个 BNC 插头、内含四个 47 Ohm 电阻的小盒子：)
 
 The shielding is connected together.  Active hubs are much more complicated;
 they are powered and contain electronics to amplify the signal and send it
@@ -222,7 +219,6 @@ implied by such a connection is too high for the net to operate reliably.
 工作。)
 
 An example of a typical ARCnet network::
-(一个典型 ARCnet 网络的例子：)
 
 	   R                     S - STAR type card
     S------H--------A-------S    R - Terminator
@@ -233,14 +229,13 @@ An example of a typical ARCnet network::
 		    |
 		    S
 
+(一个典型 ARCnet 网络的例子：)
+
 The BUS topology is very similar to the one used by Ethernet.  The only
 difference is in cable and terminators: they should be 93 Ohm.  Ethernet
 uses 50 Ohm impedance. You use T connectors to put the computers on a single
 line of cable, the bus. You have to put terminators at both ends of the
 cable. A typical BUS ARCnet network looks like::
-(BUS 拓扑与以太网所用的非常相似。区别只在电缆和端接器：应为 93 Ohm，而以太网使用
-50 Ohm 阻抗。用 T 形连接器把各台计算机接到同一条电缆线上，即总线。必须在电缆
-两端安装端接器。典型的 BUS 型 ARCnet 网络如下：)
 
     RT----T------T------T------T------TR
      B    B      B      B      B      B
@@ -249,11 +244,13 @@ cable. A typical BUS ARCnet network looks like::
   R - Terminator
   T - T connector
 
+(BUS 拓扑与以太网所用的非常相似。区别只在电缆和端接器：应为 93 Ohm，而以太网使用
+50 Ohm 阻抗。用 T 形连接器把各台计算机接到同一条电缆线上，即总线。必须在电缆
+两端安装端接器。典型的 BUS 型 ARCnet 网络如下：)
+
 But that is not all! The two types can be connected together.  According to
 the official documentation the only way of connecting them is using an active
 hub::
-(但这还不是全部！两种类型可以连接在一起。按照官方文档，唯一的连接方式是使用
-有源集线器：)
 
 	 A------T------T------TR
 	 |      B      B      B
@@ -261,21 +258,22 @@ hub::
 	 |
 	 S
 
+(但这还不是全部！两种类型可以连接在一起。按照官方文档，唯一的连接方式是使用
+有源集线器：)
+
 The official docs also state that you can use STAR cards at the ends of
 BUS network in place of a BUS card and a terminator::
-(官方文档还说，可以把 STAR 卡用在 BUS 网络的两端，代替 BUS 卡加端接器：)
 
      S------T------T------S
 	    B      B
+
+(官方文档还说，可以把 STAR 卡用在 BUS 网络的两端，代替 BUS 卡加端接器：)
 
 But, according to my own experiments, you can simply hang a BUS type card
 anywhere in middle of a cable in a STAR topology network.  And more - you
 can use the bus card in place of any star card if you use a terminator. Then
 you can build very complicated networks fulfilling all your needs!  An
 example::
-(不过，根据我自己的实验，你可以把 BUS 型卡直接挂到 STAR 拓扑网络中一段电缆的中间
-任何位置。而且——只要使用端接器，还可以用总线卡代替任何星型卡。这样你就能搭建
-各种满足自己需要的复杂网络！一个例子：)
 
 				  S
 				  |
@@ -290,14 +288,15 @@ example::
 	   |   |      S------T----H---S   |
 	   S   S             B    R       S
 
+(不过，根据我自己的实验，你可以把 BUS 型卡直接挂到 STAR 拓扑网络中一段电缆的中间
+任何位置。而且——只要使用端接器，还可以用总线卡代替任何星型卡。这样你就能搭建
+各种满足自己需要的复杂网络！一个例子：)
+
 A basically different cabling scheme is used with Twisted Pair cabling. Each
 of the TP cards has two RJ (phone-cord style) connectors.  The cards are
 then daisy-chained together using a cable connecting every two neighboring
 cards.  The ends are terminated with RJ 93 Ohm terminators which plug into
 the empty connectors of cards on the ends of the chain.  An example::
-(双绞线(Twisted Pair)布线采用一种截然不同的方案。每张 TP 卡有两个 RJ(电话线式)
-插口。然后用电缆把相邻两张卡依次串接(daisy-chain)起来。链条两端用 RJ 93 Ohm
-端接器端接，插在链条两端卡片的空余插口上。一个例子：)
 
 	  ___________   ___________
       _R_|_         _|_|_         _|_R_
@@ -305,15 +304,15 @@ the empty connectors of cards on the ends of the chain.  An example::
      |Card |       |Card |       |Card |
      |_____|       |_____|       |_____|
 
+(双绞线(Twisted Pair)布线采用一种截然不同的方案。每张 TP 卡有两个 RJ(电话线式)
+插口。然后用电缆把相邻两张卡依次串接(daisy-chain)起来。链条两端用 RJ 93 Ohm
+端接器端接，插在链条两端卡片的空余插口上。一个例子：)
 
 There are also hubs for the TP topology.  There is nothing difficult
 involved in using them; you just connect a TP chain to a hub on any end or
 even at both.  This way you can create almost any network configuration.
 The maximum of 11 hubs between any two computers on the net applies here as
 well.  An example::
-(TP 拓扑也有集线器。使用它们毫无难度；只要把 TP 链条的任意一端、甚至两端接到
-集线器上即可。这样几乎可以创建任何网络配置。"任意两台计算机之间最多 11 个集线器"
-的规则在这里同样适用。一个例子：)
 
     RP-------P--------P--------H-----P------P-----PR
 			       |
@@ -324,6 +323,10 @@ well.  An example::
     R - RJ Terminator
     P - TP Card
     H - TP Hub
+
+(TP 拓扑也有集线器。使用它们毫无难度；只要把 TP 链条的任意一端、甚至两端接到
+集线器上即可。这样几乎可以创建任何网络配置。"任意两台计算机之间最多 11 个集线器"
+的规则在这里同样适用。一个例子：)
 
 Like any network, ARCnet has a limited cable length.  These are the maximum
 cable lengths between two active ends (an active end being an active hub or
@@ -351,9 +354,8 @@ of a TP cable between two cards/hubs is 650 meters.
 两块卡/集线器之间 TP 电缆的最大长度为 650 米。)
 
 
-Setting the Jumpers
-(跳线设置)
-===================
+Setting the Jumpers(跳线设置)
+=============================
 
 All ARCnet cards should have a total of four or five different settings:
 (所有 ARCnet 卡总共应当有四到五种不同的设置：)
@@ -587,15 +589,13 @@ Cards Listed in this file (in this order, mostly):
 * CNet Tech = CNet Technology, Inc.
 (CNet Tech = CNet Technology, Inc.，即 CNet 技术公司)
 
-Unclassified Stuff
-(未分类内容)
-==================
+Unclassified Stuff(未分类内容)
+==============================
 
   - Please send any other information you can find.
     (请把你找到的任何其他信息都发给我。)
 
   - And some other stuff (more info is welcome!)::
-    (还有一些其他内容(欢迎补充更多信息！)：)
 
      From: root@ultraworld.xs4all.nl (Timo Hilbrink)
      To: apenwarr@foxnet.net (Avery Pennarun)
@@ -614,13 +614,13 @@ Unclassified Stuff
 
      --- CUT ---
 
-Standard Microsystems Corp (SMC)
-(SMC，标准微系统公司)
-================================
+    (还有一些其他内容(欢迎补充更多信息！)：)
 
-PC100, PC110, PC120, PC130 (8-bit cards) and PC500, PC600 (16-bit cards)
-(PC100、PC110、PC120、PC130(8 位卡)与 PC500、PC600(16 位卡))
-------------------------------------------------------------------------
+Standard Microsystems Corp (SMC)(SMC，标准微系统公司)
+=====================================================
+
+PC100, PC110, PC120, PC130 (8-bit cards) and PC500, PC600 (16-bit cards)(PC100、PC110、PC120、PC130(8 位卡)与 PC500、PC600(16 位卡))
+------------------------------------------------------------------------------------------------------------------------------------
 
   - mainly from Avery Pennarun <apenwarr@worldvisions.ca>.  Values depicted
     are from Avery's setup.
@@ -718,9 +718,8 @@ PC100, PC110, PC120, PC130 (8-bit cards) and PC500, PC600 (16-bit cards)
 			DO NOT SET THIS TO 0 OR 255 (0xFF)!
 
 
-PC130E/PC270E (8-bit cards)
-(PC130E/PC270E(8 位卡))
----------------------------
+PC130E/PC270E (8-bit cards)(PC130E/PC270E(8 位卡))
+--------------------------------------------------
 
   - from Juergen Seifert <seifert@htwm.de>
     (来自 Juergen Seifert <seifert@htwm.de>)
@@ -786,7 +785,6 @@ It can be used in a star or a daisy-chained network.
        |_____________________________________________|
 
 Legend::
-(图例：)
 
   SMC 90C63	ARCNET Controller / Transceiver /Logic
   S1	1-3:	I/O Base Address Select
@@ -802,13 +800,14 @@ Legend::
   J1		6-position Telephone Jack	(PC270E only)
   J2		6-position Telephone Jack	(PC270E only)
 
+(图例：)
+
 Setting one of the switches to Off/Open means "1", On/Closed means "0".
 (把某个开关拨到 Off/Open(断开)表示 "1"，拨到 On/Closed(接通)表示 "0"。)
 
 
-Setting the Node ID
-(设置节点 ID)
-^^^^^^^^^^^^^^^^^^^
+Setting the Node ID(设置节点 ID)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The eight switches in group S2 are used to set the node ID.
 These switches work in a way similar to the PC100-series cards; see that
@@ -817,14 +816,11 @@ entry for more information.
 信息参见该条目。)
 
 
-Setting the I/O Base Address
-(设置 I/O 基址)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the I/O Base Address(设置 I/O 基址)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The first three switches in switch group S1 are used to select one
 of eight possible I/O Base addresses using the following table::
-(S1 开关组的前三个开关用于按下表从八个可能的 I/O 基址中选择一个：)
-
 
    Switch | Hex I/O
    1 2 3  | Address
@@ -838,10 +834,10 @@ of eight possible I/O Base addresses using the following table::
    1 1 0  |  380
    1 1 1  |  3E0
 
+(S1 开关组的前三个开关用于按下表从八个可能的 I/O 基址中选择一个：)
 
-Setting the Base Memory (RAM) buffer Address
-(设置内存(RAM)缓冲区基址)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the Base Memory (RAM) buffer Address(设置内存(RAM)缓冲区基址)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The memory buffer requires 2K of a 16K block of RAM. The base of this
 16K block can be located in any of eight positions.
@@ -902,9 +898,8 @@ S1 组的开关 7 和 8 决定的偏移量，可指派到四个位置中的任�
   (要启用 8K Boot PROM，请安装标有 ROM 的跳线。默认情况下未安装跳线。)
 
 
-Setting the Timeouts and Interrupt
-(设置超时与中断)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the Timeouts and Interrupt(设置超时与中断)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The jumpers labeled EXT1 and EXT2 are used to determine the timeout
 parameters. These two jumpers are normally left open.
@@ -916,9 +911,8 @@ IRQ2, IRQ3, IRQ4, IRQ5, IRQ7. The Manufacturer's default is IRQ2.
 一个！)。厂商默认值为 IRQ2。)
 
 
-Configuring the PC130E for Star or Bus Topology
-(把 PC130E 配置为星型或总线拓扑)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Configuring the PC130E for Star or Bus Topology(把 PC130E 配置为星型或总线拓扑)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The single jumper labeled STAR is used to configure the PC130E board for
 star or bus topology.
@@ -928,15 +922,12 @@ it is removed, the board can be used in a bus topology.
 星型网络；取下跳线时，板可用于总线拓扑。)
 
 
-Diagnostic LEDs
-(诊断 LED)
-^^^^^^^^^^^^^^^
+Diagnostic LEDs(诊断 LED)
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Two diagnostic LEDs are visible on the rear bracket of the board.
 The green LED monitors the network activity: the red one shows the
 board activity::
-(板上后挡板处可以看到两个诊断 LED。绿色 LED 监视网络活动，红色 LED 显示板卡
-活动：)
 
  Green  | Status               Red      | Status
  -------|-------------------   ---------|-------------------
@@ -945,10 +936,11 @@ board activity::
   off   | defective board or            | incorrect memory or
 	| node ID is zero               | I/O address
 
+(板上后挡板处可以看到两个诊断 LED。绿色 LED 监视网络活动，红色 LED 显示板卡
+活动：)
 
-PC500/PC550 Longboard (16-bit cards)
-(PC500/PC550 长卡(16 位卡))
-------------------------------------
+PC500/PC550 Longboard (16-bit cards)(PC500/PC550 长卡(16 位卡))
+---------------------------------------------------------------
 
   - from Juergen Seifert <seifert@htwm.de>
     (来自 Juergen Seifert <seifert@htwm.de>)
@@ -1034,7 +1026,6 @@ It can be used in a star or a daisy-chained (BUS) network.
    <____|  |_____________________________________________|
 
 Legend::
-(图例：)
 
   SW1	1-6:	I/O Base Address Select
 	7-10:	Interrupt Select
@@ -1049,13 +1040,14 @@ Legend::
   J1		6-position Telephone Jack	(PC550 only)
   J2		6-position Telephone Jack	(PC550 only)
 
+(图例：)
+
 Setting one of the switches to Off/Open means "1", On/Closed means "0".
 (把某个开关拨到 Off/Open 表示 "1"，拨到 On/Closed 表示 "0"。)
 
 
-Setting the Node ID
-(设置节点 ID)
-^^^^^^^^^^^^^^^^^^^
+Setting the Node ID(设置节点 ID)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The eight switches in group SW3 are used to set the node ID. Each node
 attached to the network must have an unique node ID which must be
@@ -1066,7 +1058,6 @@ Switch 1 serves as the least significant bit (LSB).
 
 The node ID is the sum of the values of all switches set to "1"
 These values are::
-(节点 ID 是所有拨到 "1" 的开关取值之和。这些取值为：)
 
     Switch | Value
     -------|-------
@@ -1079,8 +1070,9 @@ These values are::
       7    |  64
       8    | 128
 
+(节点 ID 是所有拨到 "1" 的开关取值之和。这些取值为：)
+
 Some Examples::
-(一些例子：)
 
     Switch         | Hex     | Decimal
    8 7 6 5 4 3 2 1 | Node ID | Node ID
@@ -1098,14 +1090,13 @@ Some Examples::
    1 1 1 1 1 1 1 0 |   FE    |  254
    1 1 1 1 1 1 1 1 |   FF    |  255
 
+(一些例子：)
 
-Setting the I/O Base Address
-(设置 I/O 基址)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the I/O Base Address(设置 I/O 基址)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The first six switches in switch group SW1 are used to select one
 of 32 possible I/O Base addresses using the following table::
-(SW1 开关组的前六个开关用于按下表从 32 个可能的 I/O 基址中选择一个：)
 
    Switch       | Hex I/O
    6 5  4 3 2 1 | Address
@@ -1143,10 +1134,10 @@ of 32 possible I/O Base addresses using the following table::
    1 1  1 1 1 0 |  3E0
    1 1  1 1 1 1 |  3F0
 
+(SW1 开关组的前六个开关用于按下表从 32 个可能的 I/O 基址中选择一个：)
 
-Setting the Interrupt
-(设置中断)
-^^^^^^^^^^^^^^^^^^^^^
+Setting the Interrupt(设置中断)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Switches seven through ten of switch group SW1 are used to select the
 interrupt level. The interrupt level is binary coded, so selections
@@ -1170,9 +1161,8 @@ be supported: 3, 4, 5, 7, 9, 10, 11, 12.
     1 1 0 0 | 12
 
 
-Setting the Timeouts
-(设置超时)
-^^^^^^^^^^^^^^^^^^^^
+Setting the Timeouts(设置超时)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The two jumpers JP2 (1-4) are used to determine the timeout parameters.
 These two jumpers are normally left open.
@@ -1181,9 +1171,8 @@ Refer to the COM9026 Data Sheet for alternate configurations.
 COM9026 数据手册。)
 
 
-Configuring the PC500 for Star or Bus Topology
-(把 PC500 配置为星型或总线拓扑)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Configuring the PC500 for Star or Bus Topology(把 PC500 配置为星型或总线拓扑)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The single jumper labeled JP6 is used to configure the PC500 board for
 star or bus topology.
@@ -1193,15 +1182,12 @@ it is removed, the board can be used in a bus topology.
 星型网络；取下跳线时，板可用于总线拓扑。)
 
 
-Diagnostic LEDs
-(诊断 LED)
-^^^^^^^^^^^^^^^
+Diagnostic LEDs(诊断 LED)
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Two diagnostic LEDs are visible on the rear bracket of the board.
 The green LED monitors the network activity: the red one shows the
 board activity::
-(板上后挡板处可以看到两个诊断 LED。绿色 LED 监视网络活动，红色 LED 显示板卡
-活动：)
 
  Green  | Status               Red      | Status
  -------|-------------------   ---------|-------------------
@@ -1210,10 +1196,11 @@ board activity::
   off   | defective board or            | incorrect memory or
 	| node ID is zero               | I/O address
 
+(板上后挡板处可以看到两个诊断 LED。绿色 LED 监视网络活动，红色 LED 显示板卡
+活动：)
 
-PC710 (8-bit card)
-(PC710(8 位卡))
-------------------
+PC710 (8-bit card)(PC710(8 位卡))
+---------------------------------
 
   - from J.S. van Oosten <jvoosten@compiler.tdcnet.nl>
     (来自 J.S. van Oosten <jvoosten@compiler.tdcnet.nl>)
@@ -1225,8 +1212,6 @@ cards. However, I'm sure I got 99% of the settings right.
 
 The SMC710 card resembles the PC270 card, but is much more basic (i.e. no
 LEDs, RJ11 jacks, etc.) and 8 bit. Here's a little drawing::
-(SMC710 卡与 PC270 卡相似，但要简陋得多(即没有 LED、RJ11 插口等)，而且是 8 位的。
-下面是一张小图：)
 
     _______________________________________
    | +---------+  +---------+              |____
@@ -1247,6 +1232,9 @@ LEDs, RJ11 jacks, etc.) and 8 bit. Here's a little drawing::
     -------                     -----------
 	   |||||||||||||||||||||
 
+(SMC710 卡与 PC270 卡相似，但要简陋得多(即没有 LED、RJ11 插口等)，而且是 8 位的。
+下面是一张小图：)
+
 The row of jumpers at JP1 actually consists of 8 jumpers, (sometimes
 labelled) the same as on the PC270, from top to bottom: EXT2, EXT1, ROM,
 IRQ7, IRQ5, IRQ4, IRQ3, IRQ2 (gee, wonder what they would do? :-) )
@@ -1265,13 +1253,11 @@ I know it works when connected to a PC110 type ARCnet board.
 
 *****************************************************************************
 
-Possibly SMC
-(疑为 SMC)
-============
+Possibly SMC(疑为 SMC)
+======================
 
-LCS-8830(-T) (8 and 16-bit cards)
-(LCS-8830(-T)(8 位和 16 位卡))
----------------------------------
+LCS-8830(-T) (8 and 16-bit cards)(LCS-8830(-T)(8 位和 16 位卡))
+---------------------------------------------------------------
 
   - from Mathias Katzer <mkatzer@HRZ.Uni-Bielefeld.DE>
     (来自 Mathias Katzer <mkatzer@HRZ.Uni-Bielefeld.DE>)
@@ -1288,7 +1274,6 @@ nowhere else, not even on the few Xeroxed sheets from the manual).
 都没有，甚至连手册的几页复印件上也没有)。)
 
 SMC ARCnet Board Type LCS-8830-T::
-(由 SMC 制造的 LCS-8830-T 型 ARCnet 板：)
 
      ------------------------------------
     |                                    |
@@ -1342,6 +1327,8 @@ SMC ARCnet Board Type LCS-8830-T::
 
   (DIP-Switch downwards means "0")
   (DIP 开关拨向下表示 "0")
+
+(由 SMC 制造的 LCS-8830-T 型 ARCnet 板：)
 
 The station address is binary-coded with SW1.
 (站点地址由 SW1 按二进制编码。)
@@ -1406,13 +1393,11 @@ Switches        RAM           ROM
 ========        ============= ================
 
 
-PureData Corp
-(PureData 公司)
-=============
+PureData Corp(PureData 公司)
+============================
 
-PDI507 (8-bit card)
-(PDI507(8 位卡))
---------------------
+PDI507 (8-bit card)(PDI507(8 位卡))
+-----------------------------------
 
   - from Mark Rejhon <mdrejhon@magi.com> (slight modifications by Avery)
     (来自 Mark Rejhon <mdrejhon@magi.com>(Avery 略作修改))
@@ -1445,8 +1430,6 @@ Jumpers:
 	but there were already two jumpers on it when I got the card.  It's
 	a six pin grid in a two-by-three fashion.  The jumpers were
 	configured as follows::
-	(J3 是一个两跳线阵列。我不知道它是干什么用的，但我拿到卡时上面已经插着
-	两个跳线帽。它是一个两行三列的六引脚阵列。跳线的配置如下：)
 
 	   .-------.
 	 o | o   o |
@@ -1454,13 +1437,18 @@ Jumpers:
 	 o | o   o |             in this direction ------->
 	   `-------'
 
+	(J3 是一个两跳线阵列。我不知道它是干什么用的，但我拿到卡时上面已经插着
+	两个跳线帽。它是一个两行三列的六引脚阵列。跳线的配置如下：)
+
 Carl de Billy <CARL@carainfo.com> explains J3 and J4:
 (Carl de Billy <CARL@carainfo.com> 对 J3 和 J4 的解释如下：)
 
    J3 Diagram::
-   (J3 示意图：)
 
 	   .-------.
+
+   (J3 示意图：)
+
 	 o | o   o |
 	   :-------:    TWIST Technology
 	 o | o   o |
@@ -1601,13 +1589,11 @@ DIP Switches:
 	11111           0xC400 (guessed - crashes tested system) (猜测值，会使被测系统崩溃)
 	=============   ============================================
 
-CNet Technology Inc. (8-bit cards)
-(CNet Technology Inc.(8 位卡))
-==================================
+CNet Technology Inc. (8-bit cards)(CNet Technology Inc.(8 位卡))
+================================================================
 
-120 Series (8-bit cards)
-(120 系列(8 位卡))
-------------------------
+120 Series (8-bit cards)(120 系列(8 位卡))
+------------------------------------------
 
   - from Juergen Seifert <seifert@htwm.de>
     (来自 Juergen Seifert <seifert@htwm.de>)
@@ -1669,7 +1655,6 @@ ARCNET is a registered trademark of the Datapoint Corporation
 	 |_____________________________________________|
 
 Legend::
-(图例：)
 
   90C65       ARCNET Probe
   S1  1-5:    Base Memory Address Select
@@ -1687,13 +1672,14 @@ Legend::
   J1      BNC RG62/U Connector        (all except CN120TP)
   J2      Two 6-position Telephone Jack   (CN120TP/ST/SBT only)
 
+(图例：)
+
 Setting one of the switches to Off means "1", On means "0".
 (把某个开关拨到 Off 表示 "1"，拨到 On 表示 "0"。)
 
 
-Setting the Node ID
-(设置节点 ID)
-^^^^^^^^^^^^^^^^^^^
+Setting the Node ID(设置节点 ID)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The eight switches in SW2 are used to set the node ID. Each node attached
 to the network must have an unique node ID which must be different from 0.
@@ -1719,7 +1705,6 @@ These values are:
    =======  ======  =====
 
 Some Examples::
-(一些例子：)
 
     Switch         | Hex     | Decimal
    8 7 6 5 4 3 2 1 | Node ID | Node ID
@@ -1737,15 +1722,13 @@ Some Examples::
    1 1 1 1 1 1 1 0 |   FE    |  254
    1 1 1 1 1 1 1 1 |   FF    |  255
 
+(一些例子：)
 
-Setting the I/O Base Address
-(设置 I/O 基址)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the I/O Base Address(设置 I/O 基址)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The last three switches in switch block SW1 are used to select one
 of eight possible I/O Base addresses using the following table::
-(SW1 开关组的最后三个开关用于按下表从八个可能的 I/O 基址中选择一个：)
-
 
    Switch      | Hex I/O
     6   7   8  | Address
@@ -1759,10 +1742,10 @@ of eight possible I/O Base addresses using the following table::
    ON  OFF OFF |  380
    OFF OFF OFF |  3E0
 
+(SW1 开关组的最后三个开关用于按下表从八个可能的 I/O 基址中选择一个：)
 
-Setting the Base Memory (RAM) buffer Address
-(设置内存(RAM)缓冲区基址)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the Base Memory (RAM) buffer Address(设置内存(RAM)缓冲区基址)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The memory buffer (RAM) requires 2K. The base of this buffer can be
 located in any of eight positions. The address of the Boot Prom is
@@ -1798,14 +1781,11 @@ Switches 1-5 of switch block SW1 select the Memory Base address.
       6K 的偏移量，但手册没有记载这一特性，我也还没测试过。)
 
 
-Setting the Interrupt Line
-(设置中断线)
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the Interrupt Line(设置中断线)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To select a hardware interrupt level install one (only one!) of the jumpers
 JP2, JP3, JP4, JP5, JP6. JP2 is the default::
-(要选择硬件中断级别，请安装 JP2、JP3、JP4、JP5、JP6 跳线中的一个(仅限一个！)。
-JP2 为默认值：)
 
    Jumper | IRQ
    -------|-----
@@ -1815,13 +1795,13 @@ JP2 为默认值：)
      5    |  5
      6    |  7
 
+(要选择硬件中断级别，请安装 JP2、JP3、JP4、JP5、JP6 跳线中的一个(仅限一个！)。
+JP2 为默认值：)
 
-Setting the Internal Terminator on CN120AB/TP/SBT
-(设置 CN120AB/TP/SBT 的内部端接器)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the Internal Terminator on CN120AB/TP/SBT(设置 CN120AB/TP/SBT 的内部端接器)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The jumper JP12 is used to enable the internal terminator::
-(跳线 JP12 用于启用内部端接器：)
 
 			 -----
        0                |  0  |
@@ -1833,10 +1813,10 @@ The jumper JP12 is used to enable the internal terminator::
    Terminator          Terminator
     disabled            enabled
 
+(跳线 JP12 用于启用内部端接器：)
 
-Selecting the Connector Type on CN120ST/SBT
-(在 CN120ST/SBT 上选择连接器类型)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Selecting the Connector Type on CN120ST/SBT(在 CN120ST/SBT 上选择连接器类型)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -1852,22 +1832,19 @@ Selecting the Connector Type on CN120ST/SBT
        (Default)
 
 
-Setting the Timeout Parameters
-(设置超时参数)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the Timeout Parameters(设置超时参数)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The jumpers labeled EXT1 and EXT2 are used to determine the timeout
 parameters. These two jumpers are normally left open.
 (标有 EXT1 和 EXT2 的跳线用于确定超时参数。这两个跳线通常保持断开。)
 
 
-CNet Technology Inc. (16-bit cards)
-(CNet Technology Inc.(16 位卡))
-===================================
+CNet Technology Inc. (16-bit cards)(CNet Technology Inc.(16 位卡))
+==================================================================
 
-160 Series (16-bit cards)
-(160 系列(16 位卡))
--------------------------
+160 Series (16-bit cards)(160 系列(16 位卡))
+--------------------------------------------
 
   - from Juergen Seifert <seifert@htwm.de>
     (来自 Juergen Seifert <seifert@htwm.de>)
@@ -1920,7 +1897,6 @@ ARCNET is a registered trademark of the Datapoint Corporation
   <____________|  |_______________________________________|
 
 Legend::
-(图例：)
 
   9026            ARCNET Probe
   SW1 1-6:    Base I/O Address Select
@@ -1932,13 +1908,14 @@ Legend::
   J1      Two 6-position Telephone Jack   (CN160TP only)
   LED
 
+(图例：)
+
 Setting one of the switches to Off means "1", On means "0".
 (把某个开关拨到 Off 表示 "1"，拨到 On 表示 "0"。)
 
 
-Setting the Node ID
-(设置节点 ID)
-^^^^^^^^^^^^^^^^^^^
+Setting the Node ID(设置节点 ID)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The eight switches in SW2 are used to set the node ID. Each node attached
 to the network must have an unique node ID which must be different from 0.
@@ -1948,7 +1925,6 @@ Switch 1 (ID0) serves as the least significant bit (LSB).
 
 The node ID is the sum of the values of all switches set to "1"
 These values are::
-(节点 ID 是所有拨到 "1" 的开关取值之和。这些取值为：)
 
    Switch | Label | Value
    -------|-------|-------
@@ -1961,8 +1937,9 @@ These values are::
      7    | ID6   |  64
      8    | ID7   | 128
 
+(节点 ID 是所有拨到 "1" 的开关取值之和。这些取值为：)
+
 Some Examples::
-(一些例子：)
 
     Switch         | Hex     | Decimal
    8 7 6 5 4 3 2 1 | Node ID | Node ID
@@ -1980,14 +1957,13 @@ Some Examples::
    1 1 1 1 1 1 1 0 |   FE    |  254
    1 1 1 1 1 1 1 1 |   FF    |  255
 
+(一些例子：)
 
-Setting the I/O Base Address
-(设置 I/O 基址)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the I/O Base Address(设置 I/O 基址)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The first six switches in switch block SW1 are used to select the I/O Base
 address using the following table::
-(SW1 开关组的前六个开关用于按下表选择 I/O 基址：)
 
 	     Switch        | Hex I/O
     1   2   3   4   5   6  | Address
@@ -2001,18 +1977,18 @@ address using the following table::
    OFF OFF OFF ON  ON  ON  |  380
    OFF OFF OFF OFF OFF ON  |  3E0
 
+(SW1 开关组的前六个开关用于按下表选择 I/O 基址：)
+
 Note: Other IO-Base addresses seem to be selectable, but only the above
       combinations are documented.
 (注意：其他 IO 基址似乎也可以选择，但只有上述组合在文档中有记载。)
 
 
-Setting the Base Memory (RAM) buffer Address
-(设置内存(RAM)缓冲区基址)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the Base Memory (RAM) buffer Address(设置内存(RAM)缓冲区基址)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The switches 7-10 of switch block SW1 are used to select the Memory
 Base address of the RAM (2K) and the PROM::
-(SW1 开关组的开关 7-10 用于选择 RAM(2K)和 PROM 的内存基址：)
 
    Switch          | Hex RAM | Hex ROM
     7   8   9  10  | Address | Address
@@ -2021,6 +1997,8 @@ Base address of the RAM (2K) and the PROM::
    OFF OFF ON  OFF |  D0000  |  D8000 (Default)
    OFF OFF OFF ON  |  E0000  |  E8000
 
+(SW1 开关组的开关 7-10 用于选择 RAM(2K)和 PROM 的内存基址：)
+
 .. note::
 
       Other MEM-Base addresses seem to be selectable, but only the above
@@ -2028,13 +2006,11 @@ Base address of the RAM (2K) and the PROM::
       (注意：其他 MEM 基址似乎也可以选择，但只有上述组合在文档中有记载。)
 
 
-Setting the Interrupt Line
-(设置中断线)
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the Interrupt Line(设置中断线)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To select a hardware interrupt level install one (only one!) of the jumpers
 JP3 through JP13 using the following table::
-(要选择硬件中断级别，请按下表安装 JP3 到 JP13 跳线中的一个(仅限一个！)：)
 
    Jumper | IRQ
    -------|-----------------
@@ -2050,6 +2026,8 @@ JP3 through JP13 using the following table::
     12    |   7
     13    |   2 (=9) Default!
 
+(要选择硬件中断级别，请按下表安装 JP3 到 JP13 跳线中的一个(仅限一个！)：)
+
 .. note::
 
        - Do not use JP11=IRQ6, it may conflict with your Floppy Disk
@@ -2061,22 +2039,19 @@ JP3 through JP13 using the following table::
        冲突)
 
 
-Setting the Timeout Parameters
-(设置超时参数)
--------------------------------
+Setting the Timeout Parameters(设置超时参数)
+--------------------------------------------
 
 The jumpers labeled JP1 and JP2 are used to determine the timeout
 parameters. These two jumpers are normally left open.
 (标有 JP1 和 JP2 的跳线用于确定超时参数。这两个跳线通常保持断开。)
 
 
-Lantech
-(Lantech 公司)
-=======
+Lantech(Lantech 公司)
+=====================
 
-8-bit card, unknown model
-(8 位卡，型号未知)
--------------------------
+8-bit card, unknown model(8 位卡，型号未知)
+-------------------------------------------
 
   - from Vlad Lungu <vlungu@ugal.ro> - his e-mail address seemed broken at
     the time I tried to reach him.  Sorry Vlad, if you didn't get my reply.
@@ -2166,13 +2141,11 @@ you.
   (JP 6：IRQ 设置(1-5 上只能插一个跳线帽，对应 IRQ 2-6))
 
 
-Acer
-(Acer 宏碁)
-====
+Acer(Acer 宏碁)
+===============
 
-8-bit card, Model 5210-003
-(8 位卡，型号 5210-003)
---------------------------
+8-bit card, Model 5210-003(8 位卡，型号 5210-003)
+-------------------------------------------------
 
   - from Vojtech Pavlik <vojtech@suse.cz> using portions of the existing
     arcnet-hardware file.
@@ -2236,7 +2209,6 @@ PC100, but has some additional jumpers I don't know the meaning of.
 
 
 Legend::
-(图例：)
 
   90C26       ARCNET Chip
   XTL         20 MHz Crystal
@@ -2251,10 +2223,10 @@ Legend::
   ROM         Boot ROM socket
   UFS         Unidentified Flying Sockets
 
+(图例：)
 
-Setting the Node ID
-(设置节点 ID)
-^^^^^^^^^^^^^^^^^^^
+Setting the Node ID(设置节点 ID)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The eight switches in SW2 are used to set the node ID. Each node attached
 to the network must have an unique node ID which must not be 0.
@@ -2267,7 +2239,6 @@ Setting one of the switches to OFF means "1", ON means "0".
 
 The node ID is the sum of the values of all switches set to "1"
 These values are::
-(节点 ID 是所有拨到 "1" 的开关取值之和。这些取值为：)
 
    Switch | Value
    -------|-------
@@ -2280,17 +2251,17 @@ These values are::
      7    |  64
      8    | 128
 
+(节点 ID 是所有拨到 "1" 的开关取值之和。这些取值为：)
+
 Don't set this to 0 or 255; these values are reserved.
 (不要把它设为 0 或 255；这些值是保留的。)
 
 
-Setting the I/O Base Address
-(设置 I/O 基址)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the I/O Base Address(设置 I/O 基址)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The switches 1 to 6 of switch block SW1 are used to select one
 of 32 possible I/O Base addresses using the following tables::
-(SW1 开关组的开关 1 到 6 用于按下表从 32 个可能的 I/O 基址中选择一个：)
 
 	  | Hex
    Switch | Value
@@ -2302,6 +2273,8 @@ of 32 possible I/O Base addresses using the following tables::
      5    |  20
      6    |  10
 
+(SW1 开关组的开关 1 到 6 用于按下表从 32 个可能的 I/O 基址中选择一个：)
+
 The I/O address is sum of all switches set to "1". Remember that
 the I/O address space below 0x200 is RESERVED for mainboard, so
 switch 1 should be ALWAYS SET TO OFF.
@@ -2309,9 +2282,8 @@ switch 1 should be ALWAYS SET TO OFF.
 保留，因此开关 1 应当始终设为 OFF。)
 
 
-Setting the Base Memory (RAM) buffer Address
-(设置内存(RAM)缓冲区基址)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the Base Memory (RAM) buffer Address(设置内存(RAM)缓冲区基址)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The memory buffer (RAM) requires 2K. The base of this buffer can be
 located in any of sixteen positions. However, the addresses below
@@ -2320,7 +2292,6 @@ A0000 are likely to cause system hang because there's main RAM.
 A0000 的地址很可能导致系统挂起，因为那里是主内存。)
 
 Jumpers 7-10 of switch block SW1 select the Memory Base address::
-(SW1 开关组的跳线 7-10 选择内存基址：)
 
    Switch          | Hex RAM
     7   8   9  10  | Address
@@ -2332,14 +2303,13 @@ Jumpers 7-10 of switch block SW1 select the Memory Base address::
    OFF ON  OFF OFF |  B0000 (conflicts with mono video)
    OFF ON  OFF ON  |  A0000 (conflicts with graphics)
 
+(SW1 开关组的跳线 7-10 选择内存基址：)
 
-Setting the Interrupt Line
-(设置中断线)
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the Interrupt Line(设置中断线)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Jumpers 1-5 of the jumper block J1 control the IRQ level. ON means
 shorted, OFF means open::
-(跳线块 J1 的跳线 1-5 控制 IRQ 级别。ON 表示短接，OFF 表示断开：)
 
     Jumper              |  IRQ
     1   2   3   4   5   |
@@ -2350,10 +2320,10 @@ shorted, OFF means open::
     OFF OFF OFF ON  OFF |  3
     OFF OFF OFF OFF ON  |  2
 
+(跳线块 J1 的跳线 1-5 控制 IRQ 级别。ON 表示短接，OFF 表示断开：)
 
-Unknown jumpers & sockets
-(未知的跳线与插座)
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Unknown jumpers & sockets(未知的跳线与插座)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 I know nothing about these. I just guess that J16&J17 are timeout
 jumpers and maybe one of J18-J21 selects ROM. Also J6-J10 and
@@ -2363,13 +2333,11 @@ guess the purpose.
 选择 ROM。另外 J6-J10 和 J11-J15 把 IRQ2-7 连接到 UFS 的一些引脚上。我猜不出
 它们的用途。)
 
-Datapoint?
-(可能是 Datapoint？)
-==========
+Datapoint?(可能是 Datapoint？)
+==============================
 
-LAN-ARC-8, an 8-bit card
-(LAN-ARC-8，8 位卡)
-------------------------
+LAN-ARC-8, an 8-bit card(LAN-ARC-8，8 位卡)
+-------------------------------------------
 
   - from Vojtech Pavlik <vojtech@suse.cz>
     (来自 Vojtech Pavlik <vojtech@suse.cz>)
@@ -2408,7 +2376,6 @@ original arcNet logo in its upper right corner.
 	 |________________________________________|
 
 Legend::
-(图例：)
 
   90C65       ARCNET Chip
   SW1 1-5:    Base Memory Address Select
@@ -2420,10 +2387,10 @@ Legend::
   BNC         Coax connector
   XTAL        20 MHz Crystal
 
+(图例：)
 
-Setting the Node ID
-(设置节点 ID)
-^^^^^^^^^^^^^^^^^^^
+Setting the Node ID(设置节点 ID)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The eight switches in SW3 are used to set the node ID. Each node attached
 to the network must have an unique node ID which must not be 0.
@@ -2436,7 +2403,6 @@ Setting one of the switches to Off means "1", On means "0".
 
 The node ID is the sum of the values of all switches set to "1"
 These values are::
-(节点 ID 是所有拨到 "1" 的开关取值之和。这些取值为：)
 
    Switch | Value
    -------|-------
@@ -2449,15 +2415,13 @@ These values are::
      7    |  64
      8    | 128
 
+(节点 ID 是所有拨到 "1" 的开关取值之和。这些取值为：)
 
-Setting the I/O Base Address
-(设置 I/O 基址)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the I/O Base Address(设置 I/O 基址)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The last three switches in switch block SW1 are used to select one
 of eight possible I/O Base addresses using the following table::
-(SW1 开关组的最后三个开关用于按下表从八个可能的 I/O 基址中选择一个：)
-
 
    Switch      | Hex I/O
     6   7   8  | Address
@@ -2471,10 +2435,10 @@ of eight possible I/O Base addresses using the following table::
    ON  OFF OFF |  380
    OFF OFF OFF |  3E0
 
+(SW1 开关组的最后三个开关用于按下表从八个可能的 I/O 基址中选择一个：)
 
-Setting the Base Memory (RAM) buffer Address
-(设置内存(RAM)缓冲区基址)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the Base Memory (RAM) buffer Address(设置内存(RAM)缓冲区基址)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The memory buffer (RAM) requires 2K. The base of this buffer can be
 located in any of eight positions. The address of the Boot Prom is
@@ -2506,12 +2470,10 @@ The switches 1 and 2 probably add 0x0800 and 0x1000 to RAM base address.
 (开关 1 和 2 可能分别给 RAM 基址加上 0x0800 和 0x1000。)
 
 
-Setting the Interrupt Line
-(设置中断线)
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the Interrupt Line(设置中断线)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Switches 1-5 of the switch block SW3 control the IRQ level::
-(SW3 开关组的开关 1-5 控制 IRQ 级别：)
 
     Jumper              |  IRQ
     1   2   3   4   5   |
@@ -2522,23 +2484,21 @@ Switches 1-5 of the switch block SW3 control the IRQ level::
     OFF OFF OFF ON  OFF |  7
     OFF OFF OFF OFF ON  |  2
 
+(SW3 开关组的开关 1-5 控制 IRQ 级别：)
 
-Setting the Timeout Parameters
-(设置超时参数)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the Timeout Parameters(设置超时参数)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The switches 6-7 of the switch block SW3 are used to determine the timeout
 parameters.  These two switches are normally left in the OFF position.
 (SW3 开关组的开关 6-7 用于确定超时参数。这两个开关通常保持在 OFF 位置。)
 
 
-Topware
-(Topware 公司)
-=======
+Topware(Topware 公司)
+=====================
 
-8-bit card, TA-ARC/10
-(8 位卡，TA-ARC/10)
----------------------
+8-bit card, TA-ARC/10(8 位卡，TA-ARC/10)
+----------------------------------------
 
   - from Vojtech Pavlik <vojtech@suse.cz>
     (来自 Vojtech Pavlik <vojtech@suse.cz>)
@@ -2575,7 +2535,6 @@ are the same as on other clones.
 	   |_____________________________________________|
 
 Legend::
-(图例：)
 
   90C65       ARCNET Chip
   XTAL        20 MHz Crystal
@@ -2589,10 +2548,10 @@ Legend::
   BNC         Coax connector (BUS ARCnet)
   RJ          Twisted Pair Connector (daisy chain)
 
+(图例：)
 
-Setting the Node ID
-(设置节点 ID)
-^^^^^^^^^^^^^^^^^^^
+Setting the Node ID(设置节点 ID)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The eight switches in SW2 are used to set the node ID. Each node attached to
 the network must have an unique node ID which must not be 0.  Switch 1 (ID0)
@@ -2605,7 +2564,6 @@ Setting one of the switches to Off means "1", On means "0".
 
 The node ID is the sum of the values of all switches set to "1"
 These values are::
-(节点 ID 是所有拨到 "1" 的开关取值之和。这些取值为：)
 
    Switch | Label | Value
    -------|-------|-------
@@ -2618,14 +2576,13 @@ These values are::
      7    | ID6   |  64
      8    | ID7   | 128
 
-Setting the I/O Base Address
-(设置 I/O 基址)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(节点 ID 是所有拨到 "1" 的开关取值之和。这些取值为：)
+
+Setting the I/O Base Address(设置 I/O 基址)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The last three switches in switch block SW1 are used to select one
 of eight possible I/O Base addresses using the following table::
-(SW1 开关组的最后三个开关用于按下表从八个可能的 I/O 基址中选择一个：)
-
 
    Switch      | Hex I/O
     6   7   8  | Address
@@ -2639,10 +2596,10 @@ of eight possible I/O Base addresses using the following table::
    ON  OFF OFF |  380
    OFF OFF OFF |  3E0
 
+(SW1 开关组的最后三个开关用于按下表从八个可能的 I/O 基址中选择一个：)
 
-Setting the Base Memory (RAM) buffer Address
-(设置内存(RAM)缓冲区基址)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the Base Memory (RAM) buffer Address(设置内存(RAM)缓冲区基址)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The memory buffer (RAM) requires 2K. The base of this buffer can be
 located in any of eight positions. The address of the Boot Prom is
@@ -2673,13 +2630,11 @@ The jumpers 1 and 2 probably add 0x0800 and 0x1000 to RAM address.
 (跳线 1 和 2 可能分别给 RAM 地址加上 0x0800 和 0x1000。)
 
 
-Setting the Interrupt Line
-(设置中断线)
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the Interrupt Line(设置中断线)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Jumpers 1-5 of the jumper block J1 control the IRQ level.  ON means
 shorted, OFF means open::
-(跳线块 J1 的跳线 1-5 控制 IRQ 级别。ON 表示短接，OFF 表示断开：)
 
     Jumper              |  IRQ
     1   2   3   4   5   |
@@ -2690,23 +2645,21 @@ shorted, OFF means open::
     OFF OFF OFF ON  OFF |  5
     OFF OFF OFF OFF ON  |  7
 
+(跳线块 J1 的跳线 1-5 控制 IRQ 级别。ON 表示短接，OFF 表示断开：)
 
-Setting the Timeout Parameters
-(设置超时参数)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the Timeout Parameters(设置超时参数)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The jumpers J3 are used to set the timeout parameters. These two
 jumpers are normally left open.
 (跳线 J3 用于设置超时参数。这两个跳线通常保持断开。)
 
 
-Thomas-Conrad
-(Thomas-Conrad 公司)
-=============
+Thomas-Conrad(Thomas-Conrad 公司)
+=================================
 
-Model #500-6242-0097 REV A (8-bit card)
-(型号 #500-6242-0097 REV A(8 位卡))
-----------------------------------------
+Model #500-6242-0097 REV A (8-bit card)(型号 #500-6242-0097 REV A(8 位卡))
+--------------------------------------------------------------------------
 
   - from Lars Karlsson <100617.3473@compuserve.com>
     (来自 Lars Karlsson <100617.3473@compuserve.com>)
@@ -2808,13 +2761,11 @@ just use "compatible" mode instead.]
 禁用 IO 端口(改用内存地址)。具体取决于卡的类型。我看不出这两者究竟"增强"了
 什么。请给我发来关于这种模式的更详细信息，或者干脆改用 "compatible" 模式。)
 
-Waterloo Microsystems Inc. ??
-(Waterloo 微系统公司？？)
-=============================
+Waterloo Microsystems Inc. ??(Waterloo 微系统公司？？)
+======================================================
 
-8-bit card (C) 1985
-(8 位卡 (C) 1985)
--------------------
+8-bit card (C) 1985(8 位卡 (C) 1985)
+------------------------------------
 
   - from Robert Michael Best <rmb117@cs.usask.ca>
     (来自 Robert Michael Best <rmb117@cs.usask.ca>)
@@ -2930,13 +2881,11 @@ Below that "MADE IN CANADA"
 下方印有 "ASS 'Y 300163" 和 "@1986 CORMAN CUSTOM ELECTRONICS CORP."。再往下
 是 "MADE IN CANADA"。)
 
-No Name
-(无名牌)
-=======
+No Name(无名牌)
+===============
 
-8-bit cards, 16-bit cards
-(8 位卡，16 位卡)
--------------------------
+8-bit cards, 16-bit cards(8 位卡，16 位卡)
+------------------------------------------
 
   - from Juergen Seifert <seifert@htwm.de>
     (来自 Juergen Seifert <seifert@htwm.de>)
@@ -2983,7 +2932,6 @@ using information from the Original
        |__________________1_2_M______________________|
 
 Legend::
-(图例：)
 
   COM90C65:       ARCnet Probe
   S1  1-8:    Node ID Select
@@ -2996,13 +2944,14 @@ Legend::
   STAR| BUS | T/P Three fields for placing a sign (colored circle)
 		  indicating the topology of the card
 
+(图例：)
+
 Setting one of the switches to Off means "1", On means "0".
 (把某个开关拨到 Off 表示 "1"，拨到 On 表示 "0"。)
 
 
-Setting the Node ID
-(设置节点 ID)
-^^^^^^^^^^^^^^^^^^^
+Setting the Node ID(设置节点 ID)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The eight switches in group SW1 are used to set the node ID.
 Each node attached to the network must have an unique node ID which
@@ -3013,7 +2962,6 @@ Switch 8 serves as the least significant bit (LSB).
 
 The node ID is the sum of the values of all switches set to "1"
 These values are::
-(节点 ID 是所有拨到 "1" 的开关取值之和。这些取值为：)
 
     Switch | Value
     -------|-------
@@ -3026,8 +2974,9 @@ These values are::
       2    |  64
       1    | 128
 
+(节点 ID 是所有拨到 "1" 的开关取值之和。这些取值为：)
+
 Some Examples::
-(一些例子：)
 
     Switch         | Hex     | Decimal
    1 2 3 4 5 6 7 8 | Node ID | Node ID
@@ -3045,14 +2994,13 @@ Some Examples::
    1 1 1 1 1 1 1 0 |   FE    |  254
    1 1 1 1 1 1 1 1 |   FF    |  255
 
+(一些例子：)
 
-Setting the I/O Base Address
-(设置 I/O 基址)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the I/O Base Address(设置 I/O 基址)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The first three switches in switch group SW2 are used to select one
 of eight possible I/O Base addresses using the following table::
-(SW2 开关组的前三个开关用于按下表从八个可能的 I/O 基址中选择一个：)
 
    Switch      | Hex I/O
     1   2   3  | Address
@@ -3066,10 +3014,10 @@ of eight possible I/O Base addresses using the following table::
    OFF OFF ON  |  380
    OFF OFF OFF |  3E0
 
+(SW2 开关组的前三个开关用于按下表从八个可能的 I/O 基址中选择一个：)
 
-Setting the Base Memory (RAM) buffer Address
-(设置内存(RAM)缓冲区基址)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the Base Memory (RAM) buffer Address(设置内存(RAM)缓冲区基址)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The memory buffer requires 2K of a 16K block of RAM. The base of this
 16K block can be located in any of eight positions.
@@ -3129,9 +3077,8 @@ SW2 组的开关 7 和 8 决定的偏移量，可指派到四个位置中的任�
       The default is jumper ROM not installed.
 
 
-Setting Interrupt Request Lines (IRQ)
-(设置中断请求线(IRQ))
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting Interrupt Request Lines (IRQ)(设置中断请求线(IRQ))
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To select a hardware interrupt level set one (only one!) of the jumpers
 IRQ2, IRQ3, IRQ4, IRQ5 or IRQ7. The manufacturer's default is IRQ2.
@@ -3139,9 +3086,8 @@ IRQ2, IRQ3, IRQ4, IRQ5 or IRQ7. The manufacturer's default is IRQ2.
 (仅限一个！)。厂商默认值为 IRQ2。)
 
 
-Setting the Timeouts
-(设置超时)
-^^^^^^^^^^^^^^^^^^^^
+Setting the Timeouts(设置超时)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The two jumpers labeled ET1 and ET2 are used to determine the timeout
 parameters (response and reconfiguration time). Every node in a network
@@ -3162,9 +3108,8 @@ On means jumper installed, Off means jumper not installed
 (On 表示已安装跳线，Off 表示未安装跳线)
 
 
-16-BIT ARCNET
-(16 位 ARCNET)
--------------
+16-BIT ARCNET(16 位 ARCNET)
+---------------------------
 
 The manual of my 8-Bit NONAME ARCnet Card contains another description
 of a 16-Bit Coax / Twisted Pair Card. This description is incomplete,
@@ -3224,9 +3169,8 @@ Setting one of the switches to Off means "1", On means "0".
 (把某个开关拨到 Off 表示 "1"，拨到 On 表示 "0"。)
 
 
-Setting the Node ID
-(设置节点 ID)
-^^^^^^^^^^^^^^^^^^^
+Setting the Node ID(设置节点 ID)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The eight switches in group SW2 are used to set the node ID.
 Each node attached to the network must have an unique node ID which
@@ -3237,7 +3181,6 @@ Switch 8 serves as the least significant bit (LSB).
 
 The node ID is the sum of the values of all switches set to "1"
 These values are::
-(节点 ID 是所有拨到 "1" 的开关取值之和。这些取值为：)
 
     Switch | Value
     -------|-------
@@ -3250,8 +3193,9 @@ These values are::
       2    |  64
       1    | 128
 
+(节点 ID 是所有拨到 "1" 的开关取值之和。这些取值为：)
+
 Some Examples::
-(一些例子：)
 
     Switch         | Hex     | Decimal
    1 2 3 4 5 6 7 8 | Node ID | Node ID
@@ -3269,14 +3213,13 @@ Some Examples::
    1 1 1 1 1 1 1 0 |   FE    |  254
    1 1 1 1 1 1 1 1 |   FF    |  255
 
+(一些例子：)
 
-Setting the I/O Base Address
-(设置 I/O 基址)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the I/O Base Address(设置 I/O 基址)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The first three switches in switch group SW1 are used to select one
 of eight possible I/O Base addresses using the following table::
-(SW1 开关组的前三个开关用于按下表从八个可能的 I/O 基址中选择一个：)
 
    Switch      | Hex I/O
     3   2   1  | Address
@@ -3290,19 +3233,16 @@ of eight possible I/O Base addresses using the following table::
    OFF OFF ON  |  380
    OFF OFF OFF |  3E0
 
+(SW1 开关组的前三个开关用于按下表从八个可能的 I/O 基址中选择一个：)
 
-Setting the Base Memory (RAM) buffer Address
-(设置内存(RAM)缓冲区基址)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the Base Memory (RAM) buffer Address(设置内存(RAM)缓冲区基址)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The memory buffer requires 2K of a 16K block of RAM. The base of this
 16K block can be located in any of eight positions.
 Switches 6-8 of switch group SW1 select the Base of the 16K block.
 Within that 16K address space, the buffer may be assigned any one of four
 positions, determined by the offset, switches 4 and 5 of group SW1::
-(内存缓冲区需要 16K RAM 块中的 2K。这个 16K 块的基址可以位于八个位置中的任意
-一个。SW1 开关组的开关 6-8 选择该 16K 块的基址。在这 16K 地址空间内，缓冲区由
-SW1 组的开关 4 和 5 决定的偏移量，可指派到四个位置中的任意一个。)
 
    Switch     | Hex RAM | Hex ROM
    8 7 6  5 4 | Address | Address
@@ -3347,24 +3287,24 @@ SW1 组的开关 4 和 5 决定的偏移量，可指派到四个位置中的任�
    1 1 1  1 0 |  E1000  |  E2000
    1 1 1  1 1 |  E1800  |  E2000
 
+(内存缓冲区需要 16K RAM 块中的 2K。这个 16K 块的基址可以位于八个位置中的任意
+一个。SW1 开关组的开关 6-8 选择该 16K 块的基址。在这 16K 地址空间内，缓冲区由
+SW1 组的开关 4 和 5 决定的偏移量，可指派到四个位置中的任意一个。)
 
-Setting Interrupt Request Lines (IRQ)
-(设置中断请求线(IRQ))
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-??????????????????????????????????????
-
-
-Setting the Timeouts
-(设置超时)
-^^^^^^^^^^^^^^^^^^^^
+Setting Interrupt Request Lines (IRQ)(设置中断请求线(IRQ))
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ??????????????????????????????????????
 
 
-8-bit cards ("Made in Taiwan R.O.C.")
-(8 位卡("Made in Taiwan R.O.C."))
--------------------------------------
+Setting the Timeouts(设置超时)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+??????????????????????????????????????
+
+
+8-bit cards ("Made in Taiwan R.O.C.")(8 位卡("Made in Taiwan R.O.C."))
+----------------------------------------------------------------------
 
   - from Vojtech Pavlik <vojtech@suse.cz>
     (来自 Vojtech Pavlik <vojtech@suse.cz>)
@@ -3403,7 +3343,6 @@ no manual at all and the only text identifying the manufacturer is
 	 |_____________________________________________|
 
 Legend::
-(图例：)
 
   90C65       ARCNET Chip
   SW1 1-5:    Base Memory Address Select
@@ -3415,6 +3354,8 @@ Legend::
   JP1         Led connector
   BNC         Coax connector
 
+(图例：)
+
 Although the jumpers SW1 and SW3 are marked SW, not JP, they are jumpers, not
 switches.
 (尽管 SW1 和 SW3 标记为 SW 而非 JP，它们是跳线而不是拨码开关。)
@@ -3424,9 +3365,8 @@ two - or - in case of IRQ setting, connecting none of them at all.
 (把跳线设为 ON 表示连接上面两个引脚，OFF 表示连接下面两个引脚——或者——在设置
 IRQ 的情况下，一个都不连。)
 
-Setting the Node ID
-(设置节点 ID)
-^^^^^^^^^^^^^^^^^^^
+Setting the Node ID(设置节点 ID)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The eight switches in SW2 are used to set the node ID. Each node attached
 to the network must have an unique node ID which must not be 0.
@@ -3439,7 +3379,6 @@ Setting one of the switches to Off means "1", On means "0".
 
 The node ID is the sum of the values of all switches set to "1"
 These values are::
-(节点 ID 是所有拨到 "1" 的开关取值之和。这些取值为：)
 
    Switch | Label | Value
    -------|-------|-------
@@ -3452,8 +3391,9 @@ These values are::
      7    | ID6   |  64
      8    | ID7   | 128
 
+(节点 ID 是所有拨到 "1" 的开关取值之和。这些取值为：)
+
 Some Examples::
-(一些例子：)
 
     Switch         | Hex     | Decimal
    8 7 6 5 4 3 2 1 | Node ID | Node ID
@@ -3471,15 +3411,13 @@ Some Examples::
    1 1 1 1 1 1 1 0 |   FE    |  254
    1 1 1 1 1 1 1 1 |   FF    |  255
 
+(一些例子：)
 
-Setting the I/O Base Address
-(设置 I/O 基址)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the I/O Base Address(设置 I/O 基址)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The last three switches in switch block SW1 are used to select one
 of eight possible I/O Base addresses using the following table::
-(SW1 开关组的最后三个开关用于按下表从八个可能的 I/O 基址中选择一个：)
-
 
    Switch      | Hex I/O
     6   7   8  | Address
@@ -3493,10 +3431,10 @@ of eight possible I/O Base addresses using the following table::
    ON  OFF OFF |  380
    OFF OFF OFF |  3E0
 
+(SW1 开关组的最后三个开关用于按下表从八个可能的 I/O 基址中选择一个：)
 
-Setting the Base Memory (RAM) buffer Address
-(设置内存(RAM)缓冲区基址)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the Base Memory (RAM) buffer Address(设置内存(RAM)缓冲区基址)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The memory buffer (RAM) requires 2K. The base of this buffer can be
 located in any of eight positions. The address of the Boot Prom is
@@ -3527,12 +3465,10 @@ Jumpers 3-5 of jumper block SW1 select the Memory Base address.
 The jumpers 1 and 2 probably add 0x0800, 0x1000 and 0x1800 to RAM adders.
 (跳线 1 和 2 可能分别给 RAM 地址加上 0x0800、0x1000 和 0x1800。)
 
-Setting the Interrupt Line
-(设置中断线)
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the Interrupt Line(设置中断线)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Jumpers 1-5 of the jumper block SW3 control the IRQ level::
-(跳线块 SW3 的跳线 1-5 控制 IRQ 级别：)
 
     Jumper              |  IRQ
     1   2   3   4   5   |
@@ -3543,10 +3479,10 @@ Jumpers 1-5 of the jumper block SW3 control the IRQ level::
     OFF OFF OFF ON  OFF |  5
     OFF OFF OFF OFF ON  |  7
 
+(跳线块 SW3 的跳线 1-5 控制 IRQ 级别：)
 
-Setting the Timeout Parameters
-(设置超时参数)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the Timeout Parameters(设置超时参数)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The jumpers 6-7 of the jumper block SW3 are used to determine the timeout
 parameters. These two jumpers are normally left in the OFF position.
@@ -3554,9 +3490,8 @@ parameters. These two jumpers are normally left in the OFF position.
 
 
 
-(Generic Model 9058)
-(通用型号 9058)
---------------------
+(Generic Model 9058)(通用型号 9058)
+-----------------------------------
 
   - from Andrew J. Kroll <ag784@freenet.buffalo.edu>
     (来自 Andrew J. Kroll <ag784@freenet.buffalo.edu>)
@@ -3598,7 +3533,6 @@ parameters. These two jumpers are normally left in the OFF position.
 								      \|
 
 Legend::
-(图例：)
 
   SL90C65 	ARCNET Controller / Transceiver /Logic
   SW1	1-5:	IRQ Select
@@ -3612,9 +3546,10 @@ Legend::
 		*I* have had success using RG59B/U with *NO* terminators!
 		What gives?!
 
-SW1: Timeouts, Interrupt and ROM
-(SW1：超时、中断与 ROM)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+(图例：)
+
+SW1: Timeouts, Interrupt and ROM(SW1：超时、中断与 ROM)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To select a hardware interrupt level set one (only one!) of the dip switches
 up (on) SW1...(switches 1-5)
@@ -3634,14 +3569,11 @@ are normally left off (down).
    情况下未安装 ROM。)
 
 
-Setting the I/O Base Address
-(设置 I/O 基址)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the I/O Base Address(设置 I/O 基址)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The last three switches in switch group SW2 are used to select one
 of eight possible I/O Base addresses using the following table::
-(SW2 开关组的最后三个开关用于按下表从八个可能的 I/O 基址中选择一个：)
-
 
    Switch | Hex I/O
    4 5 6  | Address
@@ -3655,10 +3587,10 @@ of eight possible I/O Base addresses using the following table::
    1 1 0  |  380
    1 1 1  |  3E0
 
+(SW2 开关组的最后三个开关用于按下表从八个可能的 I/O 基址中选择一个：)
 
-Setting the Base Memory Address (RAM & ROM)
-(设置内存基址(RAM 与 ROM))
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Setting the Base Memory Address (RAM & ROM)(设置内存基址(RAM 与 ROM))
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The memory buffer requires 2K of a 16K block of RAM. The base of this
 16K block can be located in any of eight positions.
@@ -3685,9 +3617,8 @@ I could, however, only verify two settings...
    1 1 1 |  ?????  |  ?????
 
 
-Setting the Node ID
-(设置节点 ID)
-^^^^^^^^^^^^^^^^^^^
+Setting the Node ID(设置节点 ID)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The eight switches in group SW3 are used to set the node ID.
 Each node attached to the network must have an unique node ID which
@@ -3700,7 +3631,6 @@ switches in the DOWN position are OFF (0) and in the UP position are ON (1)
 
 The node ID is the sum of the values of all switches set to "1"
 These values are::
-(节点 ID 是所有拨到 "1" 的开关取值之和。这些取值为：)
 
     Switch | Value
     -------|-------
@@ -3713,8 +3643,9 @@ These values are::
       7    |  64
       8    | 128
 
+(节点 ID 是所有拨到 "1" 的开关取值之和。这些取值为：)
+
 Some Examples::
-(一些例子：)
 
       Switch#     |   Hex   | Decimal
   8 7 6 5 4 3 2 1 | Node ID | Node ID
@@ -3732,22 +3663,19 @@ Some Examples::
   1 1 1 1 1 1 1 0 |   FE    |  254    |
   1 1 1 1 1 1 1 1 |   FF    |  255  <-'
 
+(一些例子：)
 
-Tiara
-(Tiara 公司)
-=====
+Tiara(Tiara 公司)
+=================
 
-(model unknown)
-(型号未知)
----------------
+(model unknown)(型号未知)
+-------------------------
 
   - from Christoph Lameter <cl@gentwo.org>
     (来自 Christoph Lameter <cl@gentwo.org>)
 
 
 Here is information about my card as far as I could figure it out::
-(以下是我尽力弄清的关于我这张卡的信息：)
-
 
   ----------------------------------------------- tiara
   Tiara LanCard of Tiara Computer Systems.
@@ -3766,6 +3694,8 @@ Here is information about my card as far as I could figure it out::
   !         234567 <- IRQ                      !
   +------------!!!!!!!!!!!!!!!!!!!!!!!!--------+
 	       !!!!!!!!!!!!!!!!!!!!!!!!
+
+(以下是我尽力弄清的关于我这张卡的信息：)
 
 - 0 = Jumper Installed
   (0 = 已安装跳线)
@@ -3820,9 +3750,8 @@ Settings for IRQ Selection (Lower Jumper Line)
 111110 IRQ 7
 ====== =====
 
-Other Cards
-(其他卡)
-===========
+Other Cards(其他卡)
+===================
 
 I have no information on other models of ARCnet cards at the moment.
 (目前我没有关于其他型号 ARCnet 卡的信息。)

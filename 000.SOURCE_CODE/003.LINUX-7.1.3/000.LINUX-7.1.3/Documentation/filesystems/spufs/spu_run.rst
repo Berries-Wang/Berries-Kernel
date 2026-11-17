@@ -7,16 +7,14 @@ spu_run
 (spu_run)
 
 
-Name
-(名称)
-====
+Name(名称)
+==========
        spu_run - execute an spu context
        (spu_run - 执行一个 SPU 上下文)
 
 
-Synopsis
-(概要)
-========
+Synopsis(概要)
+==============
 
        ::
 
@@ -24,9 +22,8 @@ Synopsis
 
 	    int spu_run(int fd, unsigned int *npc, unsigned int *event);
 
-Description
-(描述)
-===========
+Description(描述)
+=================
        The  spu_run system call is used on PowerPC machines that implement the
        Cell Broadband Engine Architecture in order to access Synergistic  Pro-
        cessor  Units  (SPUs).  It  uses the fd that was returned from spu_cre-
@@ -68,9 +65,8 @@ Description
        signal delivered to the calling process.
        (如果 event 参数传入 NULL，这些错误将导致向调用进程递送一个信号。)
 
-Return Value
-(返回值)
-============
+Return Value(返回值)
+====================
        spu_run  returns the value of the spu_status register or -1 to indicate
        an error and set errno to one of the error  codes  listed  below.   The
        spu_status  register  value  contains  a  bit  mask of status codes and
@@ -111,9 +107,8 @@ Return Value
        code is returned from spu_run.
        (低八位中总是至少有一位置位，否则 spu_run 会返回一个错误码。)
 
-Errors
-(错误)
-======
+Errors(错误)
+============
        EAGAIN or EWOULDBLOCK
               fd is in non-blocking mode and spu_run would block.
               (fd 处于非阻塞模式且 spu_run 将会阻塞。)
@@ -142,9 +137,8 @@ Errors
               (当前系统不提供该功能，因为硬件不提供 SPU，或者 spufs 模块未加载。)
 
 
-Notes
-(注)
-=====
+Notes(注)
+=========
        spu_run  is  meant  to  be  used  from  libraries that implement a more
        abstract interface to SPUs, not to be used from  regular  applications.
        See  http://www.bsc.es/projects/deepcomputing/linuxoncell/ for the rec-
@@ -152,27 +146,23 @@ Notes
        (spu_run 旨在由为 SPU 实现了更抽象接口的库来使用，而不是供常规应用程序使用。推荐的库请参见 http://www.bsc.es/projects/deepcomputing/linuxoncell/。)
 
 
-Conforming to
-(遵循标准)
-=============
+Conforming to(遵循标准)
+=======================
        This call is Linux specific and only implemented by the ppc64
        architecture. Programs using this system call are not portable.
        (该调用是 Linux 特有的，仅由 ppc64 架构实现。使用该系统调用的程序不具备可移植性。)
 
 
-Bugs
-(缺陷)
-====
+Bugs(缺陷)
+==========
        The code does not yet fully implement all features lined out here.
        (该代码尚未完全实现这里列出的所有功能。)
 
 
-Author
-(作者)
-======
+Author(作者)
+============
        Arnd Bergmann <arndb@de.ibm.com>
 
-See Also
-(另请参阅)
-========
+See Also(另请参阅)
+==================
        capabilities(7), close(2), spu_create(2), spufs(7)

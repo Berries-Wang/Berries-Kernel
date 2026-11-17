@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-====================================
-Netfilter's flowtable infrastructure
-====================================
-
-(Netfilter 的 flowtable 基础设施)
+=====================================================================
+Netfilter's flowtable infrastructure(Netfilter 的 flowtable 基础设施)
+=====================================================================
 
 This documentation describes the Netfilter flowtable infrastructure which allows
 you to define a fastpath through the flowtable datapath. This infrastructure
@@ -12,9 +10,8 @@ also provides hardware offload support. The flowtable supports for the layer 3
 IPv4 and IPv6 and the layer 4 TCP and UDP protocols.
 (本文档描述 Netfilter 的 flowtable 基础设施，它允许你通过 flowtable 数据路径定义一条快速路径 (fastpath)。该基础设施还提供硬件卸载支持。flowtable 支持三层的 IPv4 与 IPv6 以及四层的 TCP 与 UDP 协议。)
 
-Overview
-(概述)
---------
+Overview(概述)
+--------------
 
 Once the first packet of the flow successfully goes through the IP forwarding
 path, from the second packet on, you might decide to offload the flow to the
@@ -88,9 +85,8 @@ release the flow gracefully. Packets that exceed the MTU are also passed up to
 the classic forwarding path to report packet-too-big ICMP errors to the sender.
 (flowtable 表项还保存 NAT 配置，因此所有数据包都会按照经典 IP 转发路径中指定的 NAT 策略进行改写。在调用 neigh_xmit() 之前 TTL 会被递减。分片流量会被向上传递、走经典 IP 转发路径，因为传输层报头缺失，在这种情况下无法进行 flowtable 查找。TCP RST 和 FIN 数据包也会被向上传递到经典 IP 转发路径，以便优雅地释放流。超过 MTU 的数据包同样会被向上传递到经典转发路径，以便向发送方报告 packet-too-big ICMP 错误。)
 
-Example configuration
-(配置示例)
----------------------
+Example configuration(配置示例)
+-------------------------------
 
 Enabling the flowtable bypass is relatively easy, you only need to create a
 flowtable and add one rule to your forward chain::
@@ -132,9 +128,8 @@ connection tracking table.
 	tcp      6 src=10.141.10.2 dst=192.168.10.2 sport=52728 dport=5201 src=192.168.10.2 dst=192.168.10.1 sport=5201 dport=52728 [OFFLOAD] mark=0 use=2
 
 
-Layer 2 encapsulation
-(二层封装)
----------------------
+Layer 2 encapsulation(二层封装)
+-------------------------------
 
 Since Linux kernel 5.13, the flowtable infrastructure discovers the real
 netdevice behind VLAN and PPPoE netdevices. The flowtable software datapath
@@ -147,9 +142,8 @@ You do not need to add the PPPoE and the VLAN devices to your flowtable,
 instead the real device is sufficient for the flowtable to track your flows.
 (你无需把 PPPoE 和 VLAN 设备加入你的 flowtable，只要有真实设备就足以让 flowtable 跟踪你的流。)
 
-Bridge and IP forwarding
-(网桥与 IP 转发)
-------------------------
+Bridge and IP forwarding(网桥与 IP 转发)
+----------------------------------------
 
 Since Linux kernel 5.13, you can add bridge ports to the flowtable. The
 flowtable infrastructure discovers the topology behind the bridge device. This
@@ -184,9 +178,8 @@ ports and your IP forwarding path, you have to add your bridge ports (as
 represented by the real netdevice) to your flowtable definition.
 (如果你希望 flowtable 在你的网桥端口与 IP 转发路径之间定义一条快速路径，你必须把网桥端口（以真实网络设备表示）添加到你的 flowtable 定义中。)
 
-Counters
-(计数器)
---------
+Counters(计数器)
+----------------
 
 The flowtable can synchronize packet and byte counters with the existing
 connection tracking entry by specifying the counter statement in your flowtable
@@ -205,9 +198,8 @@ definition, e.g.
 Counter support is available since Linux kernel 5.7.
 (自 Linux 内核 5.7 起提供计数器支持。)
 
-Hardware offload
-(硬件卸载)
-----------------
+Hardware offload(硬件卸载)
+--------------------------
 
 If your network device provides hardware offload support, you can turn it on by
 means of the 'offload' flag in your flowtable definition, e.g.
@@ -238,9 +230,8 @@ The flowtable hardware offload infrastructure also supports for the DSA
 (Distributed Switch Architecture).
 (flowtable 硬件卸载基础设施还支持 DSA（分布式交换架构）。)
 
-Limitations
-(限制)
------------
+Limitations(限制)
+-----------------
 
 The flowtable behaves like a cache. The flowtable entries might get stale if
 either the destination MAC address or the egress netdevice that is used for
@@ -256,9 +247,8 @@ This might be a problem if:
 - Hardware offload is enabled.
   (启用了硬件卸载。)
 
-More reading
-(延伸阅读)
-------------
+More reading(延伸阅读)
+----------------------
 
 This documentation is based on the LWN.net articles [1]_\ [2]_. Rafal Milecki
 also made a very complete and comprehensive summary called "A state of network

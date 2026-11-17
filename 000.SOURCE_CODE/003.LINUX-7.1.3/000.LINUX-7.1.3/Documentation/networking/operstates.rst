@@ -1,15 +1,12 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==================
-Operational States
-==================
-
-(运行状态)
+============================
+Operational States(运行状态)
+============================
 
 
-1. Introduction
-===============
-(1. 简介)
+1. Introduction(1. 简介)
+========================
 
 Linux distinguishes between administrative and operational state of an
 interface. Administrative state is the result of "ip link set dev
@@ -32,9 +29,8 @@ and changeable from userspace under certain rules.
 (由于 802.1X 的存在，必须允许用户态影响运行状态。为此，运行状态被拆分为两部分：两个只能由驱动设置的标志，以及一个与 RFC2863 兼容的状态——该状态由这两个标志和一项策略推导得出，并可在一定规则下由用户态修改。)
 
 
-2. Querying from userspace
-==========================
-(2. 从用户态查询)
+2. Querying from userspace(2. 从用户态查询)
+===========================================
 
 Both admin and operational state can be queried via the netlink
 operation RTM_GETLINK. It is also possible to subscribe to RTNLGRP_LINK
@@ -141,9 +137,8 @@ This TLV can also be queried via sysfs.
 (此 TLV 也可以通过 sysfs 查询。)
 
 
-3. Kernel driver API
-====================
-(3. 内核驱动 API)
+3. Kernel driver API(3. 内核驱动 API)
+=====================================
 
 Kernel drivers have access to two flags that map to IFF_LOWER_UP and
 IFF_DORMANT. These flags can be set from everywhere, even from
@@ -212,9 +207,8 @@ netif_carrier_ok() && !netif_dormant():
  (若禁用了用户态交互则为 IF_OPER_UP。否则为 IF_OPER_DORMANT，之后用户态可以发起向 IF_OPER_UP 的转换。)
 
 
-4. Setting from userspace
-=========================
-(4. 从用户态设置)
+4. Setting from userspace(4. 从用户态设置)
+==========================================
 
 Applications have to use the netlink interface to influence the
 RFC2863 operational state of an interface. Setting IFLA_LINKMODE to 1

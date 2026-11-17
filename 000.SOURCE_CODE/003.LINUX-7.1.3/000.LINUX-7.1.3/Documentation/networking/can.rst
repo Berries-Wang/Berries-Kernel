@@ -1,12 +1,9 @@
-===================================
-SocketCAN - Controller Area Network
-===================================
+=============================================================
+SocketCAN - Controller Area Network(SocketCAN - 控制器局域网)
+=============================================================
 
-(SocketCAN - 控制器局域网)
-
-Overview / What is SocketCAN
-(概述 / 什么是 SocketCAN)
-============================
+Overview / What is SocketCAN(概述 / 什么是 SocketCAN)
+=====================================================
 
 The socketcan package is an implementation of CAN protocols
 (Controller Area Network) for Linux.  CAN is a networking technology
@@ -28,9 +25,8 @@ Network）的一种实现。CAN 是一种在自动化、嵌入式设备和汽车
 
 .. _socketcan-motivation:
 
-Motivation / Why Using the Socket API
-(动机 / 为什么使用套接字 API)
-=====================================
+Motivation / Why Using the Socket API(动机 / 为什么使用套接字 API)
+==================================================================
 
 There have been CAN implementations for Linux before SocketCAN so the
 question arises, why we have started another project.  Most existing
@@ -153,9 +149,8 @@ natural and most appropriate way to implement CAN for Linux.
 
 .. _socketcan-concept:
 
-SocketCAN Concept
-(SocketCAN 概念)
-=================
+SocketCAN Concept(SocketCAN 概念)
+=================================
 
 As described in :ref:`socketcan-motivation` the main goal of SocketCAN is to
 provide a socket interface to user space applications which builds
@@ -176,9 +171,8 @@ For this reason a CAN-ID can be treated best as a kind of source address.
 
 .. _socketcan-receive-lists:
 
-Receive Lists
-(接收列表)
--------------
+Receive Lists(接收列表)
+-----------------------
 
 The network transparent access of multiple applications leads to the
 problem that different applications may be interested in the same
@@ -207,9 +201,8 @@ can_rx_(un)register() 函数完成（见 :ref:`socketcan-core-module`）。为�
 
 .. _socketcan-local-loopback1:
 
-Local Loopback of Sent Frames
-(发送帧的本地回环)
------------------------------
+Local Loopback of Sent Frames(发送帧的本地回环)
+-----------------------------------------------
 
 As known from other networking concepts the data exchanging
 applications may run on the same or different nodes without any
@@ -265,9 +258,8 @@ separate socket. See sockopts from the CAN RAW sockets in :ref:`socketcan-raw-so
 
 .. _socketcan-network-problem-notifications:
 
-Network Problem Notifications
-(网络问题通知)
------------------------------
+Network Problem Notifications(网络问题通知)
+-------------------------------------------
 
 The use of the CAN bus may lead to several problems on the physical
 and media access control layer. Detecting and logging of these lower
@@ -298,9 +290,8 @@ Message Frames），它们可以选择性地以与其他 CAN 帧相同的方式�
 "include/uapi/linux/can/error.h" 中有简要描述。)
 
 
-How to use SocketCAN
-(如何使用 SocketCAN)
-====================
+How to use SocketCAN(如何使用 SocketCAN)
+========================================
 
 Like TCP/IP, you first need to open a socket for communicating over a
 CAN network. Since SocketCAN implements a new protocol family, you
@@ -597,9 +588,8 @@ definitions are specified for CAN specific MTUs in include/linux/can.h:
   #define CANFD_MTU (sizeof(struct canfd_frame)) == 72  => CAN FD frame
 
 
-Returned Message Flags
-(返回的消息标志)
-----------------------
+Returned Message Flags(返回的消息标志)
+--------------------------------------
 
 When using the system call recvmsg(2) on a RAW or a BCM socket, the
 msg->msg_flags field may contain the following flags:
@@ -629,9 +619,8 @@ MSG_CONFIRM:
 
 .. _socketcan-raw-sockets:
 
-RAW Protocol Sockets with can_filters (SOCK_RAW)
-(带 can_filters 的 RAW 协议套接字（SOCK_RAW）)
-------------------------------------------------
+RAW Protocol Sockets with can_filters (SOCK_RAW)(带 can_filters 的 RAW 协议套接字（SOCK_RAW）)
+----------------------------------------------------------------------------------------------
 
 Using CAN_RAW sockets is extensively comparable to the commonly
 known access to CAN character devices. To meet the new possibilities
@@ -659,9 +648,8 @@ sockets, include <linux/can/raw.h>.
 
 .. _socketcan-rawfilter:
 
-RAW socket option CAN_RAW_FILTER
-(RAW 套接字选项 CAN_RAW_FILTER)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+RAW socket option CAN_RAW_FILTER(RAW 套接字选项 CAN_RAW_FILTER)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The reception of CAN frames using CAN_RAW sockets can be controlled
 by defining 0 .. n filters with the CAN_RAW_FILTER socket option.
@@ -776,9 +764,8 @@ filter has to be defined in this way to benefit from the optimized filters:
     setsockopt(s, SOL_CAN_RAW, CAN_RAW_FILTER, &rfilter, sizeof(rfilter));
 
 
-RAW Socket Option CAN_RAW_ERR_FILTER
-(RAW 套接字选项 CAN_RAW_ERR_FILTER)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+RAW Socket Option CAN_RAW_ERR_FILTER(RAW 套接字选项 CAN_RAW_ERR_FILTER)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 As described in :ref:`socketcan-network-problem-notifications` the CAN interface driver can generate so
 called Error Message Frames that can optionally be passed to the user
@@ -801,9 +788,8 @@ CAN_ERR_MASK 作为错误掩码的值。错误掩码的取值定义在 linux/can
                &err_mask, sizeof(err_mask));
 
 
-RAW Socket Option CAN_RAW_LOOPBACK
-(RAW 套接字选项 CAN_RAW_LOOPBACK)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+RAW Socket Option CAN_RAW_LOOPBACK(RAW 套接字选项 CAN_RAW_LOOPBACK)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To meet multi user needs the local loopback is enabled by default
 (see :ref:`socketcan-local-loopback1` for details). But in some embedded use-cases
@@ -820,9 +806,8 @@ functionality can be disabled (separately for each socket):
     setsockopt(s, SOL_CAN_RAW, CAN_RAW_LOOPBACK, &loopback, sizeof(loopback));
 
 
-RAW socket option CAN_RAW_RECV_OWN_MSGS
-(RAW 套接字选项 CAN_RAW_RECV_OWN_MSGS)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+RAW socket option CAN_RAW_RECV_OWN_MSGS(RAW 套接字选项 CAN_RAW_RECV_OWN_MSGS)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When the local loopback is enabled, all the sent CAN frames are
 looped back to the open CAN sockets that registered for the CAN
@@ -850,9 +835,8 @@ filtering as other CAN frames (see :ref:`socketcan-rawfilter`).
 
 .. _socketcan-rawfd:
 
-RAW Socket Option CAN_RAW_FD_FRAMES
-(RAW 套接字选项 CAN_RAW_FD_FRAMES)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+RAW Socket Option CAN_RAW_FD_FRAMES(RAW 套接字选项 CAN_RAW_FD_FRAMES)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 CAN FD support in CAN_RAW sockets can be enabled with a new socket option
 CAN_RAW_FD_FRAMES which is off by default. When the new socket option is
@@ -932,9 +916,8 @@ The CAN device MTU can be retrieved e.g. with a SIOCGIFMTU ioctl() syscall.
 统调用获取。)
 
 
-RAW socket option CAN_RAW_JOIN_FILTERS
-(RAW 套接字选项 CAN_RAW_JOIN_FILTERS)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+RAW socket option CAN_RAW_JOIN_FILTERS(RAW 套接字选项 CAN_RAW_JOIN_FILTERS)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The CAN_RAW socket can set multiple CAN identifier specific filters that
 lead to multiple filters in the af_can.c filter processing. These filters
@@ -958,9 +941,8 @@ CAN ID ranges from the incoming traffic.
 中剔除单个 CAN ID 或 CAN ID 范围时，此选项尤其有用。)
 
 
-Broadcast Manager Protocol Sockets (SOCK_DGRAM)
-(广播管理器协议套接字（SOCK_DGRAM）)
------------------------------------------------
+Broadcast Manager Protocol Sockets (SOCK_DGRAM)(广播管理器协议套接字（SOCK_DGRAM）)
+-----------------------------------------------------------------------------------
 
 The Broadcast Manager protocol provides a command based configuration
 interface to filter and send (e.g. cyclic) CAN messages in kernel space.
@@ -1052,9 +1034,8 @@ recvfrom() 而不是 read() 来获取 BCM 套接字消息时，发起该消息�
 在 can_ifindex 中提供。)
 
 
-Broadcast Manager Operations
-(广播管理器操作)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Broadcast Manager Operations(广播管理器操作)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The opcode defines the operation for the broadcast manager to carry out,
 or details the broadcast managers response to several events, including
@@ -1151,9 +1132,8 @@ RX_CHANGED:
 	收到修订后的 CAN 消息时发送。)
 
 
-Broadcast Manager Message Flags
-(广播管理器消息标志)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Broadcast Manager Message Flags(广播管理器消息标志)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When sending a message to the broadcast manager the 'flags' element may
 contain the following flag definitions which influence the behaviour:
@@ -1240,9 +1220,8 @@ CAN_FD_FRAME:
 	The CAN frames following the bcm_msg_head are struct canfd_frame's
 	( bcm_msg_head 之后的 CAN 帧为 struct canfd_frame 类型)
 
-Broadcast Manager Transmission Timers
-(广播管理器发送定时器)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Broadcast Manager Transmission Timers(广播管理器发送定时器)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Periodic transmission configurations may use up to two interval timers.
 In this case the BCM sends a number of messages ('count') at an interval
@@ -1257,9 +1236,8 @@ SET_TIMER 和 START_TIMER 标志时，定时器被激活。当只设置了 SET_T
 定时器的值可以在运行时更改。)
 
 
-Broadcast Manager message sequence transmission
-(广播管理器消息序列发送)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Broadcast Manager message sequence transmission(广播管理器消息序列发送)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Up to 256 CAN frames can be transmitted in a sequence in the case of a cyclic
 TX task configuration. The number of CAN frames is provided in the 'nframes'
@@ -1288,9 +1266,8 @@ and set to zero at index overflow.
 (每发送一次，CAN 帧数组中的索引就会加一，并在索引溢出时归零。)
 
 
-Broadcast Manager Receive Filter Timers
-(广播管理器接收过滤器定时器)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Broadcast Manager Receive Filter Timers(广播管理器接收过滤器定时器)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The timer values ival1 or ival2 may be set to non-zero values at RX_SETUP.
 When the SET_TIMER flag is set the timers are enabled:
@@ -1318,9 +1295,8 @@ ival2:
 	有助于减少应用程序收到的消息数量，因为 ival2 周期内的状态变化可能会
 	丢失。)
 
-Broadcast Manager Multiplex Message Receive Filter
-(广播管理器多路复用消息接收过滤器)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Broadcast Manager Multiplex Message Receive Filter(广播管理器多路复用消息接收过滤器)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To filter for content changes in multiplex message sequences an array of more
 than one CAN frames can be passed in a RX_SETUP configuration message. The
@@ -1360,9 +1336,8 @@ CAN 帧与接收到的 CAN 帧必须在这些位上匹配。如果某个后续 C
     write(s, &msg, sizeof(msg));
 
 
-Broadcast Manager CAN FD Support
-(广播管理器 CAN FD 支持)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Broadcast Manager CAN FD Support(广播管理器 CAN FD 支持)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The programming API of the CAN_BCM depends on struct can_frame which is
 given as array directly behind the bcm_msg_head structure. To follow this
@@ -1393,17 +1368,15 @@ expected in the first 64 bit of the struct canfd_frame data section.
 数据段的前 64 位中。)
 
 
-Connected Transport Protocols (SOCK_SEQPACKET)
-(面向连接的传输协议（SOCK_SEQPACKET）)
-----------------------------------------------
+Connected Transport Protocols (SOCK_SEQPACKET)(面向连接的传输协议（SOCK_SEQPACKET）)
+------------------------------------------------------------------------------------
 
 (to be written)
 (待编写。)
 
 
-Unconnected Transport Protocols (SOCK_DGRAM)
-(无连接的传输协议（SOCK_DGRAM）)
---------------------------------------------
+Unconnected Transport Protocols (SOCK_DGRAM)(无连接的传输协议（SOCK_DGRAM）)
+----------------------------------------------------------------------------
 
 (to be written)
 (待编写。)
@@ -1411,9 +1384,8 @@ Unconnected Transport Protocols (SOCK_DGRAM)
 
 .. _socketcan-core-module:
 
-SocketCAN Core Module
-(SocketCAN 核心模块)
-=====================
+SocketCAN Core Module(SocketCAN 核心模块)
+=========================================
 
 The SocketCAN core module implements the protocol family
 PF_CAN. CAN protocol modules are loaded by the core module at
@@ -1424,9 +1396,8 @@ modules to subscribe needed CAN IDs (see :ref:`socketcan-receive-lists`).
 （见 :ref:`socketcan-receive-lists`）。)
 
 
-can.ko Module Params
-(can.ko 模块参数)
---------------------
+can.ko Module Params(can.ko 模块参数)
+-------------------------------------
 
 - **stats_timer**:
   To calculate the SocketCAN core statistics
@@ -1442,9 +1413,8 @@ can.ko Module Params
   (自 SocketCAN SVN r546 起已移除。)
 
 
-procfs content
-(procfs 内容)
---------------
+procfs content(procfs 内容)
+---------------------------
 
 As described in :ref:`socketcan-receive-lists` the SocketCAN core uses several filter
 lists to deliver received CAN frames to CAN protocol modules. These
@@ -1487,9 +1457,8 @@ Additional procfs files in /proc/net/can::
     version     - prints SocketCAN core and ABI version (removed in Linux 5.10)
 
 
-Writing Own CAN Protocol Modules
-(编写自己的 CAN 协议模块)
---------------------------------
+Writing Own CAN Protocol Modules(编写自己的 CAN 协议模块)
+---------------------------------------------------------
 
 To implement a new protocol in the protocol family PF_CAN a new
 protocol has to be defined in include/linux/can.h .
@@ -1513,9 +1482,8 @@ the source code of net/can/raw.c or net/can/bcm.c .
 net/can/bcm.c 的源代码。)
 
 
-CAN Network Drivers
-(CAN 网络驱动)
-===================
+CAN Network Drivers(CAN 网络驱动)
+=================================
 
 Writing a CAN network device driver is much easier than writing a
 CAN character device driver. Similar to other known network device
@@ -1534,9 +1502,8 @@ for writing CAN network device driver are described below:
 的不同之处如下所述：)
 
 
-General Settings
-(常规设置)
-----------------
+General Settings(常规设置)
+--------------------------
 
 CAN network device drivers can use alloc_candev_mqs() and friends instead of
 alloc_netdev_mqs(), to automatically take care of CAN-specific setup:
@@ -1555,9 +1522,8 @@ buffer (skbuff) in the protocol family PF_CAN.
 
 .. _socketcan-local-loopback2:
 
-Local Loopback of Sent Frames
-(发送帧的本地回环)
------------------------------
+Local Loopback of Sent Frames(发送帧的本地回环)
+-----------------------------------------------
 
 As described in :ref:`socketcan-local-loopback1` the CAN network device driver should
 support a local loopback functionality similar to the local echo
@@ -1571,9 +1537,8 @@ set to prevent the PF_CAN core from locally echoing sent frames
     dev->flags = (IFF_NOARP | IFF_ECHO);
 
 
-CAN Controller Hardware Filters
-(CAN 控制器硬件过滤器)
--------------------------------
+CAN Controller Hardware Filters(CAN 控制器硬件过滤器)
+-----------------------------------------------------
 
 To reduce the interrupt load on deep embedded systems some CAN
 controllers support the filtering of CAN IDs or ranges of CAN IDs.
@@ -1598,9 +1563,8 @@ MPC603e 上运行四个 SJA1000 CAN 控制器，即使在沉重的总线负载�
 任何问题……)
 
 
-Switchable Termination Resistors
-(可切换的终端电阻)
---------------------------------
+Switchable Termination Resistors(可切换的终端电阻)
+--------------------------------------------------
 
 CAN bus requires a specific impedance across the differential pair,
 typically provided by two 120Ohm resistors on the farthest nodes of
@@ -1642,9 +1606,8 @@ Documentation/devicetree/bindings/net/can/can-controller.yaml
 中的设备树条目添加 GPIO 控制。)
 
 
-The Virtual CAN Driver (vcan)
-(虚拟 CAN 驱动（vcan）)
------------------------------
+The Virtual CAN Driver (vcan)(虚拟 CAN 驱动（vcan）)
+----------------------------------------------------
 
 Similar to the network loopback devices, vcan offers a virtual local
 CAN interface. A full qualified address on CAN consists of
@@ -1683,9 +1646,8 @@ removal of vcan network devices can be managed with the ip(8) tool::
        $ ip link del vcan42
 
 
-The CAN Network Device Driver Interface
-(CAN 网络设备驱动接口)
----------------------------------------
+The CAN Network Device Driver Interface(CAN 网络设备驱动接口)
+-------------------------------------------------------------
 
 The CAN network device driver interface provides a generic interface
 to setup, configure and monitor CAN network devices. The user can then
@@ -1704,9 +1666,8 @@ understand how to use them. The name of the module is can-dev.ko.
 can-dev.ko。)
 
 
-Netlink interface to set/get devices properties
-(设置/获取设备属性的 netlink 接口)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Netlink interface to set/get devices properties(设置/获取设备属性的 netlink 接口)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The CAN device must be configured via netlink interface. The supported
 netlink message types are defined and briefly described in
@@ -1855,9 +1816,8 @@ More info to the above output:
 	error-passive 和 bus-off 状态的状态变化。RX 溢出错误列在标准网络统计信
 	息的 "overrun" 字段中。)
 
-Setting the CAN Bit-Timing
-(设置 CAN 位时序)
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+Setting the CAN Bit-Timing(设置 CAN 位时序)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The CAN bit-timing parameters can always be defined in a hardware
 independent format as proposed in the Bosch CAN 2.0 specification
@@ -1895,9 +1855,8 @@ following command::
       sja1000: clock 8000000 tseg1 1..16 tseg2 1..8 sjw 1..4 brp 1..64 brp-inc 1
 
 
-Starting and Stopping the CAN Network Device
-(启动与停止 CAN 网络设备)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Starting and Stopping the CAN Network Device(启动与停止 CAN 网络设备)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A CAN network device is started or stopped as usual with the command
 "ifconfig canX up/down" or "ip link set canX up/down". Be aware that
@@ -1935,9 +1894,8 @@ also :ref:`socketcan-network-problem-notifications`).
 
 .. _socketcan-can-fd-driver:
 
-CAN FD (Flexible Data Rate) Driver Support
-(CAN FD（灵活数据速率）驱动支持)
-------------------------------------------
+CAN FD (Flexible Data Rate) Driver Support(CAN FD（灵活数据速率）驱动支持)
+--------------------------------------------------------------------------
 
 CAN FD capable CAN controllers support two different bitrates for the
 arbitration phase and the payload phase of the CAN FD frame. Therefore a
@@ -2046,9 +2004,8 @@ Example when 'fd-non-iso on' is added on this switchable CAN FD adapter::
    can <FD,FD-NON-ISO> state ERROR-ACTIVE (berr-counter tx 0 rx 0) restart-ms 0
 
 
-Transmitter Delay Compensation
-(发送器延迟补偿)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Transmitter Delay Compensation(发送器延迟补偿)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 At high bit rates, the propagation delay from the TX pin to the RX pin of
 the transceiver might become greater than the actual bit time causing
@@ -2143,9 +2100,8 @@ by the device::
           clock 80000000
 
 
-Supported CAN Hardware
-(支持的 CAN 硬件)
-----------------------
+Supported CAN Hardware(支持的 CAN 硬件)
+---------------------------------------
 
 Please check the "Kconfig" file in "drivers/net/can" to get an actual
 list of the support CAN hardware. On the SocketCAN project website
@@ -2158,9 +2114,8 @@ older kernel versions.
 
 .. _socketcan-resources:
 
-SocketCAN Resources
-(SocketCAN 资源)
-===================
+SocketCAN Resources(SocketCAN 资源)
+===================================
 
 The Linux CAN / SocketCAN project resources (project site / mailing list)
 are referenced in the MAINTAINERS file in the Linux source tree.
@@ -2168,9 +2123,8 @@ Search for CAN NETWORK [LAYERS|DRIVERS].
 (Linux CAN / SocketCAN 项目资源（项目网站 / 邮件列表）在 Linux 源码树的
 MAINTAINERS 文件中列出。搜索 CAN NETWORK [LAYERS|DRIVERS]。)
 
-Credits
-(致谢)
-=======
+Credits(致谢)
+=============
 
 - Oliver Hartkopp (PF_CAN core, filters, drivers, bcm, SJA1000 driver)
   (Oliver Hartkopp（PF_CAN 核心、过滤器、驱动、bcm、SJA1000 驱动）)

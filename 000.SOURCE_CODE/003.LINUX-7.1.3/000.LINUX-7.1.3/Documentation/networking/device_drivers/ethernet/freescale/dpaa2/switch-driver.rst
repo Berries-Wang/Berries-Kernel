@@ -1,11 +1,9 @@
 .. SPDX-License-Identifier: GPL-2.0
 .. include:: <isonum.txt>
 
-===================
-DPAA2 Switch driver
-===================
-
-(DPAA2 交换机驱动)
+=====================================
+DPAA2 Switch driver(DPAA2 交换机驱动)
+=====================================
 
 :Copyright: |copy| 2021 NXP
 (版权所有: |copy| 2021 NXP)
@@ -40,9 +38,8 @@ The DPSW can have ports connected to DPNIs or to DPMACs for external access.
                                                         |          |
                                                       [PHY]      [PHY]
 
-Creating an Ethernet Switch
-(创建以太网交换机)
-===========================
+Creating an Ethernet Switch(创建以太网交换机)
+=============================================
 
 The dpaa2-switch driver probes on DPSW devices found on the fsl-mc bus. These
 devices can be either created statically through the boot time configuration
@@ -104,9 +101,8 @@ will need the following DPAA2 objects:
    (要在控制接口队列上执行任何入队/出队操作，都需要访问至少一个 DPIO 对象（软件门户）。该 DPIO 对象是共享
    的，无需私有的。)
 
-Switching features
-(交换功能)
-==================
+Switching features(交换功能)
+============================
 
 The driver supports the configuration of L2 forwarding rules in hardware for
 port bridging as well as standalone usage of the independent switch interfaces.
@@ -154,13 +150,11 @@ Broadcast flooding on a switch port can be disabled/enabled through the brport s
 
         $ echo 0 > /sys/bus/fsl-mc/devices/dpsw.Y/net/ethX/brport/broadcast_flood
 
-Offloads
-(卸载)
-========
+Offloads(卸载)
+==============
 
-Routing actions (redirect, trap, drop)
-(路由动作（重定向、陷阱、丢弃）)
---------------------------------------
+Routing actions (redirect, trap, drop)(路由动作（重定向、陷阱、丢弃）)
+----------------------------------------------------------------------
 
 The DPAA2 switch is able to offload flow-based redirection of packets making
 use of ACL tables. Shared filter blocks are supported by sharing a single ACL
@@ -225,9 +219,8 @@ Example 4: Use a single shared filter block on both eth5 and eth6::
         $ tc filter add block 1 ingress protocol ipv4 flower src_ip 192.168.1.1 skip_sw \
                 action mirred egress redirect dev eth3
 
-Mirroring
-(镜像)
-~~~~~~~~~
+Mirroring(镜像)
+~~~~~~~~~~~~~~~
 
 The DPAA2 switch supports only per port mirroring and per VLAN mirroring.
 Adding mirroring filters in shared blocks is also supported.

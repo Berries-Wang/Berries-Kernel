@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-====
-IPv6
-====
-
-(IPv6，即互联网协议第 6 版)
+===============================
+IPv6(IPv6，即互联网协议第 6 版)
+===============================
 
 
 Options for the ipv6 module are supplied as parameters at load time.

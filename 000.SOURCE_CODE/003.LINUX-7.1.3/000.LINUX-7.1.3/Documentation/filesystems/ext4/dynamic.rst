@@ -1,8 +1,7 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-Dynamic Structures
-(动态结构)
-==================
+Dynamic Structures(动态结构)
+============================
 
 Dynamic metadata are created on the fly when files and blocks are
 allocated to files.

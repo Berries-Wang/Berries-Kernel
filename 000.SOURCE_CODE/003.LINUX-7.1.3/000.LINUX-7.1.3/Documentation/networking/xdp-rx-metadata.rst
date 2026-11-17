@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===============
-XDP RX Metadata
-===============
-
-(XDP RX 元数据)
+==============================
+XDP RX Metadata(XDP RX 元数据)
+==============================
 
 This document describes how an eXpress Data Path (XDP) program can access
 hardware metadata related to a packet using a set of helper functions,
@@ -12,9 +10,8 @@ and how it can pass that metadata on to other consumers.
 (本文档描述 eXpress Data Path (XDP) 程序如何使用一组辅助函数访问与数据包相关的硬件元
 数据，以及它如何将这些元数据传递给其他使用者。)
 
-General Design
-(总体设计)
-==============
+General Design(总体设计)
+========================
 
 XDP has access to a set of kfuncs to manipulate the metadata in an XDP frame.
 Every device driver that wishes to expose additional packet metadata can
@@ -55,7 +52,6 @@ to indicate the device driver have not implemented this kfunc.
 
 Within an XDP frame, the metadata layout (accessed via ``xdp_buff``) is
 as follows::
-(在 XDP 帧内，元数据布局(通过 ``xdp_buff`` 访问)如下：)
 
   +----------+-----------------+------+
   | headroom | custom metadata | data |
@@ -64,6 +60,8 @@ as follows::
              |                 |
    xdp_buff->data_meta   xdp_buff->data
 
+(在 XDP 帧内，元数据布局(通过 ``xdp_buff`` 访问)如下：)
+
 An XDP program can store individual metadata items into this ``data_meta``
 area in whichever format it chooses. Later consumers of the metadata
 will have to agree on the format by some out of band contract (like for
@@ -71,9 +69,8 @@ the AF_XDP use case, see below).
 (XDP 程序可以以自己选择的任意格式将各个元数据条目存储到这个 ``data_meta`` 区域中。
 元数据的后续使用者必须通过某种带外约定就格式达成一致(例如 AF_XDP 用例，见下文)。)
 
-AF_XDP
-(AF_XDP)
-======
+AF_XDP(AF_XDP)
+==============
 
 :doc:`af_xdp` use-case implies that there is a contract between the BPF
 program that redirects XDP frames into the ``AF_XDP`` socket (``XSK``) and
@@ -92,7 +89,6 @@ descriptor does _not_ explicitly carry the size of the metadata).
 常量(``AF_XDP`` 接收描述符并不会显式携带元数据的大小)。)
 
 Here is the ``AF_XDP`` consumer layout (note missing ``data_meta`` pointer)::
-(下面是 ``AF_XDP`` 使用者的布局(注意缺少 ``data_meta`` 指针)：)
 
   +----------+-----------------+------+
   | headroom | custom metadata | data |
@@ -101,9 +97,10 @@ Here is the ``AF_XDP`` consumer layout (note missing ``data_meta`` pointer)::
                                |
                         rx_desc->address
 
-XDP_PASS
-(XDP_PASS)
-========
+(下面是 ``AF_XDP`` 使用者的布局(注意缺少 ``data_meta`` 指针)：)
+
+XDP_PASS(XDP_PASS)
+==================
 
 This is the path where the packets processed by the XDP program are passed
 into the kernel. The kernel creates the ``skb`` out of the ``xdp_buff``
@@ -121,9 +118,8 @@ In the future, we'd like to support a case where an XDP program
 can override some of the metadata used for building ``skbs``.
 (将来，我们希望支持这样一种场景：XDP 程序可以覆盖用于构建 ``skbs`` 的部分元数据。)
 
-bpf_redirect_map
-(bpf_redirect_map)
-================
+bpf_redirect_map(bpf_redirect_map)
+==================================
 
 ``bpf_redirect_map`` can redirect the frame to a different device.
 Some devices (like virtual ethernet links) support running a second XDP
@@ -145,17 +141,15 @@ that will also only have access to the custom metadata.
 重定向之前准备好。如果该帧最终被传递给内核，由这样的帧创建的 ``skb`` 将不会填充任何
 硬件元数据。如果这样的数据包稍后被重定向到 ``XSK``，同样也只能访问自定义元数据。)
 
-bpf_tail_call
-(bpf_tail_call)
-=============
+bpf_tail_call(bpf_tail_call)
+============================
 
 Adding programs that access metadata kfuncs to the ``BPF_MAP_TYPE_PROG_ARRAY``
 is currently not supported.
 (目前不支持将访问元数据 kfunc 的程序添加到 ``BPF_MAP_TYPE_PROG_ARRAY`` 中。)
 
-Supported Devices
-(受支持的设备)
-=================
+Supported Devices(受支持的设备)
+===============================
 
 It is possible to query which kfunc the particular netdev implements via
 netlink. See ``xdp-rx-metadata-features`` attribute set in
@@ -164,9 +158,8 @@ netlink. See ``xdp-rx-metadata-features`` attribute set in
 ``Documentation/netlink/specs/netdev.yaml`` 中的 ``xdp-rx-metadata-features``
 属性集。)
 
-Driver Implementation
-(驱动程序实现)
-=====================
+Driver Implementation(驱动程序实现)
+===================================
 
 Certain devices may prepend metadata to received packets. However, as of now,
 ``AF_XDP`` lacks the ability to communicate the size of the ``data_meta`` area
@@ -184,7 +177,6 @@ address using ``METADATA_SIZE`` offset.
 
 The following diagram shows how custom metadata is positioned relative to the
 packet data and how pointers are adjusted for metadata access::
-(下图展示了自定义元数据相对于数据包数据的位置，以及为访问元数据而进行的指针调整：)
 
               |<-- bpf_xdp_adjust_meta(xdp_buff, -METADATA_SIZE) --|
   new xdp_buff->data_meta                              old xdp_buff->data_meta
@@ -198,6 +190,8 @@ packet data and how pointers are adjusted for metadata access::
               |                                            xdp_desc->addr
               |<------ xsk_umem__get_data() - METADATA_SIZE -------|
 
+(下图展示了自定义元数据相对于数据包数据的位置，以及为访问元数据而进行的指针调整：)
+
 ``bpf_xdp_adjust_meta`` ensures that ``METADATA_SIZE`` is aligned to 4 bytes,
 does not exceed 252 bytes, and leaves sufficient space for building the
 xdp_frame. If these conditions are not met, it returns a negative error. In this
@@ -207,9 +201,8 @@ area.
 构建 xdp_frame 留出足够的空间。如果不满足这些条件，它会返回一个负数错误。在这种情况下，
 BPF 程序不应继续向 ``data_meta`` 区域填充数据。)
 
-Example
-(示例)
-=======
+Example(示例)
+=============
 
 See ``tools/testing/selftests/bpf/progs/xdp_metadata.c`` and
 ``tools/testing/selftests/bpf/prog_tests/xdp_metadata.c`` for an example of

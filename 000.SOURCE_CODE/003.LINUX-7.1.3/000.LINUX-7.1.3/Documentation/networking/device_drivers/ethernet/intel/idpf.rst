@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0+
 
-==========================================================================
-idpf Linux* Base Driver for the Intel(R) Infrastructure Data Path Function
-==========================================================================
-
-(Intel(R) Infrastructure Data Path Function 的 idpf Linux* 基础驱动程序)
+==================================================================================================================================================
+idpf Linux* Base Driver for the Intel(R) Infrastructure Data Path Function(Intel(R) Infrastructure Data Path Function 的 idpf Linux* 基础驱动程序)
+==================================================================================================================================================
 
 Intel idpf Linux driver.
 Copyright(C) 2023 Intel Corporation.
@@ -28,9 +26,8 @@ with Linux.
 于 Linux 环境。)
 
 
-Identifying Your Adapter
-(识别你的适配器)
-========================
+Identifying Your Adapter(识别你的适配器)
+========================================
 
 For information on how to identify your adapter, and for the latest Intel
 network drivers, refer to the Intel Support website:
@@ -39,13 +36,11 @@ http://www.intel.com/support
 http://www.intel.com/support)
 
 
-Additional Features and Configurations
-(附加功能与配置)
-======================================
+Additional Features and Configurations(附加功能与配置)
+======================================================
 
-ethtool
-(ethtool)
--------
+ethtool(ethtool)
+----------------
 
 The driver utilizes the ethtool interface for driver configuration and
 diagnostics, as well as displaying statistical information. The latest ethtool
@@ -57,9 +52,8 @@ https://kernel.org/pub/software/network/ethtool/
 https://kernel.org/pub/software/network/ethtool/)
 
 
-Viewing Link Messages
-(查看链路消息)
----------------------
+Viewing Link Messages(查看链路消息)
+-----------------------------------
 
 Link messages will not be displayed to the console if the distribution is
 restricting system messages. In order to see network driver link messages on
@@ -74,9 +68,8 @@ your console, set dmesg to eight by entering the following::
    (该设置在重启后不会保存。)
 
 
-Jumbo Frames
-(巨型帧)
-------------
+Jumbo Frames(巨型帧)
+--------------------
 
 Jumbo Frames support is enabled by changing the Maximum Transmission Unit (MTU)
 to a value larger than the default value of 1500.
@@ -109,9 +102,8 @@ where <ethX> is the interface number::
    启用流控制可能会缓解该问题。)
 
 
-Performance Optimization
-(性能优化)
-========================
+Performance Optimization(性能优化)
+==================================
 
 Driver defaults are meant to fit a wide variety of workloads, but if further
 optimization is required, we recommend experimenting with the following
@@ -120,9 +112,8 @@ settings.
 试验。)
 
 
-Interrupt Rate Limiting
-(中断速率限制)
------------------------
+Interrupt Rate Limiting(中断速率限制)
+-------------------------------------
 
 This driver supports an adaptive interrupt throttle rate (ITR) mechanism that
 is tuned for general workloads. The user can customize the interrupt rate
@@ -182,9 +173,8 @@ Per-queue interrupt rate settings:
 
 
 
-Virtualized Environments
-(虚拟化环境)
-------------------------
+Virtualized Environments(虚拟化环境)
+------------------------------------
 
 In addition to the other suggestions in this section, the following may be
 helpful to optimize performance in VMs.
@@ -205,9 +195,8 @@ helpful to optimize performance in VMs.
      # ethtool -L <virt_interface> rx <max> tx <max>
 
 
-Support
-(支持)
-=======
+Support(支持)
+=============
 
 For general information, go to the Intel support website at:
 http://www.intel.com/support/
@@ -221,9 +210,8 @@ to intel-wired-lan@lists.osuosl.org.
 的具体信息通过电子邮件发送至 intel-wired-lan@lists.osuosl.org。)
 
 
-Trademarks
-(商标)
-==========
+Trademarks(商标)
+================
 
 Intel is a trademark or registered trademark of Intel Corporation or its
 subsidiaries in the United States and/or other countries.

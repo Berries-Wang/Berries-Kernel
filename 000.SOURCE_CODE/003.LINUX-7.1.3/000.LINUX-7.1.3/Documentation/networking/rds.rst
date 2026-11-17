@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===
-RDS
-===
+==========================
+RDS(RDS——可靠数据报套接字)
+==========================
 
-(RDS——可靠数据报套接字)
-
-Overview
-(概述)
-========
+Overview(概述)
+==============
 
 This readme tries to provide some background on the hows and whys of RDS,
 and will hopefully help you find your way around the code.
@@ -20,9 +17,8 @@ http://oss.oracle.com/pipermail/rds-devel/2007-November/000228.html
 (此外，请参阅这封关于 RDS 起源的邮件：
 http://oss.oracle.com/pipermail/rds-devel/2007-November/000228.html。)
 
-RDS Architecture
-(RDS 架构)
-================
+RDS Architecture(RDS 架构)
+==========================
 
 RDS provides reliable, ordered datagram delivery by using a single
 reliable connection between any two nodes in the cluster. This allows
@@ -96,9 +92,8 @@ The high-level semantics of RDS from the application's point of view are
 	(RDS 在 /proc/sys/net/rds 中支持若干 sysctl。)
 
 
-Socket Interface
-(套接字接口)
-================
+Socket Interface(套接字接口)
+============================
 
   AF_RDS, PF_RDS, SOL_RDS
 	AF_RDS and PF_RDS are the domain type to be used with socket(2)
@@ -247,25 +242,22 @@ Socket Interface
 	SO_RDS_TRANSPORT，会返回 EOPNOTSUPP 错误。尝试把 SO_RDS_TRANSPORT 设置为
 	RDS_TRANS_NONE 总是返回 EINVAL。)
 
-RDMA for RDS
-(RDS 的 RDMA)
-============
+RDMA for RDS(RDS 的 RDMA)
+=========================
 
   see rds-rdma(7) manpage (available in rds-tools)
   (参见 rds-rdma(7) 手册页（可在 rds-tools 中找到）)
 
 
-Congestion Notifications
-(拥塞通知)
-========================
+Congestion Notifications(拥塞通知)
+==================================
 
   see rds(7) manpage
   (参见 rds(7) 手册页)
 
 
-RDS Protocol
-(RDS 协议)
-============
+RDS Protocol(RDS 协议)
+======================
 
   Message header
   (消息头)
@@ -394,9 +386,8 @@ RDS Protocol
       非常廉价的位测试，即可判断它即将发送到的端口是否拥塞。)
 
 
-RDS Transport Layer
-(RDS 传输层)
-===================
+RDS Transport Layer(RDS 传输层)
+===============================
 
   As mentioned above, RDS is not IB-specific. Its code is divided
   into a general RDS layer and a transport layer.
@@ -414,9 +405,8 @@ RDS Transport Layer
   事件处理程序以及其他 Infiniband 细节。)
 
 
-RDS Kernel Structures
-(RDS 内核结构)
-=====================
+RDS Kernel Structures(RDS 内核结构)
+===================================
 
   struct rds_message
     aka possibly "rds_outgoing", the generic RDS layer copies data to
@@ -456,9 +446,8 @@ RDS Kernel Structures
     wraps the raw congestion bitmap, contains rbnode, waitq, etc.
     (封装原始拥塞位图，包含 rbnode、waitq 等)
 
-Connection management
-(连接管理)
-=====================
+Connection management(连接管理)
+===============================
 
   Connections may be in UP, DOWN, CONNECTING, DISCONNECTING, and
   ERROR states.
@@ -478,9 +467,8 @@ Connection management
   重新建立后被重传。)
 
 
-The send path
-(发送路径)
-=============
+The send path(发送路径)
+=======================
 
   rds_sendmsg()
     - struct rds_message built from incoming data
@@ -521,9 +509,8 @@ The send path
     - post send to connection's queue pair
       (把发送投递到连接的队列对)
 
-The recv path
-(接收路径)
-=============
+The recv path(接收路径)
+=======================
 
   rds_ib_recv_cq_comp_handler()
     - looks at write completions
@@ -573,9 +560,8 @@ The recv path
     - return to application
       (返回给应用程序)
 
-Multipath RDS (mprds)
-(多路径 RDS (mprds))
-=====================
+Multipath RDS (mprds)(多路径 RDS (mprds))
+=========================================
 
   Mprds is multipathed-RDS, primarily intended for RDS-over-TCP
   (though the concept can be extended to other transports). The classical

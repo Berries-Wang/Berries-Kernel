@@ -1,8 +1,6 @@
-=========================================
-rpcsec_gss support for kernel RPC servers
-=========================================
-
-(内核 RPC 服务器的 rpcsec_gss 支持)
+============================================================================
+rpcsec_gss support for kernel RPC servers(内核 RPC 服务器的 rpcsec_gss 支持)
+============================================================================
 
 This document gives references to the standards and protocols used to
 implement RPCGSS authentication in kernel RPC servers such as the NFS
@@ -22,9 +20,8 @@ There is a third version that we don't currently implement:
 
  - RFC7861 v3: https://tools.ietf.org/rfc/rfc7861.txt
 
-Background
-(背景)
-==========
+Background(背景)
+================
 
 The RPCGSS Authentication method describes a way to perform GSSAPI
 Authentication for NFS.  Although GSSAPI is itself completely mechanism
@@ -56,9 +53,8 @@ kernel, but leave the initial context establishment to userspace.  We
 need upcalls to request userspace to perform context establishment.
 (因此，我们在内核中执行每数据包的完整性和隐私保护，而把初始上下文建立留给用户空间。我们需要通过上行调用(upcall)请求用户空间执行上下文建立。)
 
-NFS Server Legacy Upcall Mechanism
-(NFS 服务器旧式上行调用机制)
-==================================
+NFS Server Legacy Upcall Mechanism(NFS 服务器旧式上行调用机制)
+==============================================================
 
 The classic upcall mechanism uses a custom text based upcall mechanism
 to talk to a custom daemon called rpc.svcgssd that is provide by the
@@ -83,9 +79,8 @@ groups) due to limitation on the size of the buffer that can be send
 back to the kernel (4KiB).
 (B) 由于能发回内核的缓冲区大小受限(4KiB)，它无法正确处理用户所属组数超过几千个的 creds(内核中当前的硬性上限为 65K 个组)。)
 
-NFS Server New RPC Upcall Mechanism
-(NFS 服务器新式 RPC 上行调用机制)
-===================================
+NFS Server New RPC Upcall Mechanism(NFS 服务器新式 RPC 上行调用机制)
+====================================================================
 
 The newer upcall mechanism uses RPC over a unix socket to a daemon
 called gss-proxy, implemented by a userspace program called Gssproxy.
@@ -100,9 +95,8 @@ userspace program over a regular unix socket. The gssproxy protocol does not
 suffer from the size limitations of the legacy protocol.
 (该上行调用机制使用内核 rpc 客户端，通过普通的 unix 套接字连接到 gssproxy 用户空间程序。gssproxy 协议不受旧式协议大小限制的困扰。)
 
-Negotiating Upcall Mechanisms
-(协商上行调用机制)
-=============================
+Negotiating Upcall Mechanisms(协商上行调用机制)
+===============================================
 
 To provide backward compatibility, the kernel defaults to using the
 legacy mechanism.  To switch to the new mechanism, gss-proxy must bind

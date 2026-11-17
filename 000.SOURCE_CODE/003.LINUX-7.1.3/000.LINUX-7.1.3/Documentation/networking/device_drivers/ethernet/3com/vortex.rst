@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=========================
-3Com Vortex device driver
-=========================
-
-(3Com Vortex 设备驱动程序)
+===================================================
+3Com Vortex device driver(3Com Vortex 设备驱动程序)
+===================================================
 
 Andrew Morton
 (作者：Andrew Morton)
@@ -82,9 +80,8 @@ This driver supports the following hardware:
 	- 3c905B-T4
 	- 3c920B-EMB-WNM Tornado
 
-Module parameters
-(模块参数)
-=================
+Module parameters(模块参数)
+===========================
 
 There are several parameters which may be provided to the driver when
 its module is loaded.  These are usually placed in ``/etc/modprobe.d/*.conf``
@@ -335,9 +332,8 @@ global_enable_wol=N
   (为机器中所有 3c59x 网卡设置 enable_wol 模式。上面 ``enable_wol`` 数组
   中的条目会覆盖此项的任何设置。)
 
-Media selection
-(介质选择)
----------------
+Media selection(介质选择)
+-------------------------
 
 A number of the older NICs such as the 3c590 and 3c900 series have
 10base2 and AUI interfaces.
@@ -364,9 +360,8 @@ other media types does not occur.
 (它将永久性地选择 10baseT 端口。不会再自动选择其他介质类型。)
 
 
-Transmit error, Tx status register 82
-(发送错误，Tx 状态寄存器 82)
--------------------------------------
+Transmit error, Tx status register 82(发送错误，Tx 状态寄存器 82)
+-----------------------------------------------------------------
 
 This is a common error which is almost always caused by another host on
 the same network being in full-duplex mode, while this host is in
@@ -388,9 +383,8 @@ should only really be used for equipment which cannot autonegotiate.
 的设备。)
 
 
-Additional resources
-(其他资源)
---------------------
+Additional resources(其他资源)
+------------------------------
 
 Details of the device driver implementation are at the top of the source file.
 (设备驱动程序实现的细节位于源文件的顶部。)
@@ -428,9 +422,8 @@ Donald's wake-on-LAN page:
 	ftp://ftp.3com.com/pub/nic/3c90x/3c90xx2.exe
 
 
-Autonegotiation notes
-(自动协商说明)
----------------------
+Autonegotiation notes(自动协商说明)
+-----------------------------------
 
   The driver uses a one-minute heartbeat for adapting to changes in
   the external LAN environment if link is up and 5 seconds if link is down.
@@ -476,9 +469,8 @@ Autonegotiation notes
     会变得非常混乱。)
 
 
-Reporting and diagnosing problems
-(报告和诊断问题)
----------------------------------
+Reporting and diagnosing problems(报告和诊断问题)
+-------------------------------------------------
 
 Maintainers find that accurate and complete problem reports are
 invaluable in resolving driver problems.  We are frequently not able to

@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-================================================
-Cirrus Logic LAN CS8900/CS8920 Ethernet Adapters
-================================================
-
-(Cirrus Logic LAN CS8900/CS8920 以太网适配器)
+=============================================================================================
+Cirrus Logic LAN CS8900/CS8920 Ethernet Adapters(Cirrus Logic LAN CS8900/CS8920 以太网适配器)
+=============================================================================================
 
 .. note::
 
@@ -64,16 +62,12 @@ Linux Network Interface Driver ver. 2.00 <kernel 2.3.48>
 	6.5 Kernel boot parameters
 
 
-1. Cirrus Logic LAN CS8900/CS8920 Ethernet Adapters
-===================================================
-
-(1. Cirrus Logic LAN CS8900/CS8920 以太网适配器)
+1. Cirrus Logic LAN CS8900/CS8920 Ethernet Adapters(1. Cirrus Logic LAN CS8900/CS8920 以太网适配器)
+===================================================================================================
 
 
-1.1. Product Overview
-=====================
-
-(1.1. 产品概述)
+1.1. Product Overview(1.1. 产品概述)
+====================================
 
 The CS8900-based ISA Ethernet Adapters from Cirrus Logic follow
 IEEE 802.3 standards and support half or full-duplex operation in ISA bus
@@ -96,10 +90,8 @@ configuring both types of adapters.
 配置这两类适配器的详细信息，请参阅 "适配器配置" 一节。)
 
 
-1.2. Driver Description
-=======================
-
-(1.2. 驱动描述)
+1.2. Driver Description(1.2. 驱动描述)
+======================================
 
 The CS8900/CS8920 Ethernet Adapter driver for Linux supports the Linux
 v2.3.48 or greater kernel.  It can be compiled directly into the kernel
@@ -129,10 +121,8 @@ The files in the driver at Cirrus' website include:
 
 
 
-1.3. System Requirements
-------------------------
-
-(1.3. 系统需求)
+1.3. System Requirements(1.3. 系统需求)
+---------------------------------------
 
 The following hardware is required:
 (需要以下硬件：)
@@ -174,10 +164,8 @@ The following software is required:
 
 
 
-1.4. Licensing Information
---------------------------
-
-(1.4. 许可信息)
+1.4. Licensing Information(1.4. 许可信息)
+-----------------------------------------
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -199,10 +187,8 @@ Inc., 675 Mass Ave, Cambridge, MA 02139, USA。)
 
 
 
-2. Adapter Installation and Configuration
-=========================================
-
-(2. 适配器的安装与配置)
+2. Adapter Installation and Configuration(2. 适配器的安装与配置)
+================================================================
 
 Both the CS8900 and CS8920-based adapters can be configured using parameters
 stored in an on-board EEPROM. You must use the DOS-based CS8900/20 Setup
@@ -229,10 +215,8 @@ LINUX 系统之前，你必须先在基于 DOS 的系统中使用 CS8900/20 设�
 如此。))
 
 
-2.1. CS8900-based Adapter Configuration
----------------------------------------
-
-(2.1. 基于 CS8900 的适配器配置)
+2.1. CS8900-based Adapter Configuration(2.1. 基于 CS8900 的适配器配置)
+----------------------------------------------------------------------
 
 CS8900-based adapters shipped from Cirrus Logic have been configured
 with the following "default" settings::
@@ -256,10 +240,8 @@ CS8900/20 Setup Utility.
 配置，请运行 CS8900/20 设置工具。)
 
 
-2.2. CS8920-based Adapter Configuration
----------------------------------------
-
-(2.2. 基于 CS8920 的适配器配置)
+2.2. CS8920-based Adapter Configuration(2.2. 基于 CS8920 的适配器配置)
+----------------------------------------------------------------------
 
 CS8920-based adapters are shipped from Cirrus Logic configured as Plug
 and Play (PnP) enabled.  However, since the cs89x0 driver does NOT
@@ -288,10 +270,8 @@ communicate with the adapter.
 
 
 
-3. Loading the Driver as a Module
-=================================
-
-(3. 以模块方式加载驱动)
+3. Loading the Driver as a Module(3. 以模块方式加载驱动)
+========================================================
 
 If the driver is compiled as a loadable module, you can load the driver module
 with the 'modprobe' command.  Many of the adapter's configuration parameters can
@@ -476,10 +456,8 @@ n) If the cs89x0 driver is compiled directly into the kernel, DMA
    (此模式下 DMA 接收缓冲区大小被硬编码为 16 KB。(64K 模式不可用。))
 
 
-4. Compiling the Driver
-=======================
-
-(4. 编译驱动)
+4. Compiling the Driver(4. 编译驱动)
+====================================
 
 The cs89x0 driver can be compiled directly into the kernel or compiled into
 a loadable device driver module.
@@ -489,10 +467,8 @@ Just use the standard way to configure the driver and compile the Kernel.
 (只需按标准方式配置驱动并编译内核即可。)
 
 
-4.1. Compiling the Driver to Support Rx DMA
--------------------------------------------
-
-(4.1. 编译驱动以支持 Rx DMA)
+4.1. Compiling the Driver to Support Rx DMA(4.1. 编译驱动以支持 Rx DMA)
+-----------------------------------------------------------------------
 
 The compile-time optionality for DMA was removed in the 2.3 kernel
 series.  DMA support is now unconditionally part of the driver.  It is
@@ -501,15 +477,11 @@ enabled by the 'use_dma=1' module option.
 一部分，由 'use_dma=1' 模块选项启用。)
 
 
-5. Testing and Troubleshooting
-==============================
+5. Testing and Troubleshooting(5. 测试与故障排查)
+=================================================
 
-(5. 测试与故障排查)
-
-5.1. Known Defects and Limitations
-----------------------------------
-
-(5.1. 已知缺陷与限制)
+5.1. Known Defects and Limitations(5.1. 已知缺陷与限制)
+-------------------------------------------------------
 
 Refer to the RELEASE.TXT file distributed as part of this archive for a list of
 known defects, driver limitations, and work arounds.
@@ -517,10 +489,8 @@ known defects, driver limitations, and work arounds.
 解决方法。)
 
 
-5.2. Testing the Adapter
-------------------------
-
-(5.2. 测试适配器)
+5.2. Testing the Adapter(5.2. 测试适配器)
+-----------------------------------------
 
 Once the adapter has been installed and configured, the diagnostic option of
 the CS8900/20 Setup Utility can be used to test the functionality of the
@@ -566,10 +536,8 @@ To run the diagnostics tests on the CS8900/20 adapter:
          (选择 'Network Test'(网络测试)以测试网络连接和布线。)
 
 
-5.2.1. Diagnostic Self-test
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-(5.2.1. 诊断自检)
+5.2.1. Diagnostic Self-test(5.2.1. 诊断自检)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The diagnostic self-test checks the adapter's basic functionality as well as
 its ability to communicate across the ISA bus based on the system resources
@@ -645,10 +613,8 @@ resource that failed.
 重新配置适配器。)
 
 
-5.2.2. Diagnostic Network Test
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-(5.2.2. 诊断网络测试)
+5.2.2. Diagnostic Network Test(5.2.2. 诊断网络测试)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The Diagnostic Network Test verifies a working network connection by
 transferring data between two CS8900/20 adapters installed in different PCs
@@ -705,10 +671,8 @@ PC，在另一台 PC 上启动发起方来测试它们，而无需停止/重启�
 
 
 
-5.3. Using the Adapter's LEDs
------------------------------
-
-(5.3. 使用适配器的 LED 指示灯)
+5.3. Using the Adapter's LEDs(5.3. 使用适配器的 LED 指示灯)
+-----------------------------------------------------------
 
 The 2 and 3-media adapters have two LEDs visible on the back end of the board
 located near the 10Base-T connector.
@@ -727,10 +691,8 @@ receives data. (The yellow LED will appear to "flicker" on a typical network.)
 网络上，黄色 LED 看起来会 "闪烁"。))
 
 
-5.4. Resolving I/O Conflicts
-----------------------------
-
-(5.4. 解决 I/O 冲突)
+5.4. Resolving I/O Conflicts(5.4. 解决 I/O 冲突)
+------------------------------------------------
 
 An IO conflict occurs when two or more adapter use the same ISA resource (IO
 address, memory address or IRQ).  You can usually detect an IO conflict in one
@@ -801,15 +763,11 @@ resource usage as indicated in the tables below.
 
 
 
-6. Technical Support
-====================
+6. Technical Support(6. 技术支持)
+=================================
 
-(6. 技术支持)
-
-6.1. Contacting Cirrus Logic's Technical Support
-------------------------------------------------
-
-(6.1. 联系 Cirrus Logic 技术支持)
+6.1. Contacting Cirrus Logic's Technical Support(6.1. 联系 Cirrus Logic 技术支持)
+---------------------------------------------------------------------------------
 
 Cirrus Logic's CS89XX Technical Application Support can be reached at::
 (可以通过以下方式联系 Cirrus Logic 的 CS89XX 技术应用支持：)
@@ -821,10 +779,8 @@ Cirrus Logic's CS89XX Technical Application Support can be reached at::
   WWW        :http://www.cirrus.com
 
 
-6.2. Information Required before Contacting Technical Support
--------------------------------------------------------------
-
-(6.2. 联系技术支持前所需的信息)
+6.2. Information Required before Contacting Technical Support(6.2. 联系技术支持前所需的信息)
+--------------------------------------------------------------------------------------------
 
 Before contacting Cirrus Logic for technical support, be prepared to provide as
 Much of the following information as possible.
@@ -877,10 +833,8 @@ Much of the following information as possible.
 
 
 
-6.3 Obtaining the Latest Driver Version
----------------------------------------
-
-(6.3. 获取最新的驱动版本)
+6.3 Obtaining the Latest Driver Version(6.3. 获取最新的驱动版本)
+----------------------------------------------------------------
 
 You can obtain the latest CS89XX drivers and support software from Cirrus Logic's
 Web site.  You can also contact Cirrus Logic's Technical Support (email:
@@ -896,19 +850,15 @@ latest drivers and technical publications.
 技术文档。)
 
 
-6.4. Current maintainer
------------------------
-
-(6.4. 当前维护者)
+6.4. Current maintainer(6.4. 当前维护者)
+----------------------------------------
 
 In February 2000 the maintenance of this driver was assumed by Andrew
 Morton.
 (2000 年 2 月起，该驱动的维护工作由 Andrew Morton 接手。)
 
-6.5 Kernel module parameters
-----------------------------
-
-(6.5. 内核模块参数)
+6.5 Kernel module parameters(6.5. 内核模块参数)
+-----------------------------------------------
 
 For use in embedded environments with no cs89x0 EEPROM, the kernel boot
 parameter ``cs89x0_media=`` has been implemented.  Usage is::

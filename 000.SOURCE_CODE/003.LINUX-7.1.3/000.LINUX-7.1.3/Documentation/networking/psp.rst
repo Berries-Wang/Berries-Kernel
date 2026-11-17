@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0-only
 
-=====================
-PSP Security Protocol
-=====================
+===================================
+PSP Security Protocol(PSP 安全协议)
+===================================
 
-(PSP 安全协议)
-
-Protocol
-(协议)
-========
+Protocol(协议)
+==============
 
 PSP Security Protocol (PSP) was defined at Google and published in:
 
@@ -27,9 +24,8 @@ to an average developer and is less likely to run afoul any naming
 guidelines.
 (注意，内核实现和文档使用"设备密钥" (device key) 一词代替"主密钥" (master key)，这既不容易让普通开发者混淆，也不太可能违反各种命名准则。)
 
-Derived Rx keys
-(派生 Rx 密钥)
----------------
+Derived Rx keys(派生 Rx 密钥)
+-----------------------------
 
 PSP borrows some terms and mechanisms from IPsec. PSP was designed
 with HW offloads in mind. The key feature of PSP is that Rx keys for every
@@ -45,9 +41,8 @@ memory is less likely to cause packet drops. Preferably, the Tx keys
 should be provided with the packet (e.g. as part of the descriptors).
 (Tx 密钥与其他协议一样需要存储，但 Tx 对延迟的敏感度远低于 Rx，从慢速内存取密钥的延迟不太可能导致丢包。更可取的做法是将 Tx 密钥随数据包一起提供（例如作为描述符的一部分）。)
 
-Key rotation
-(密钥轮换)
-------------
+Key rotation(密钥轮换)
+----------------------
 
 The device key known only to the receiver is fundamental to the design.
 Per specification this state cannot be directly accessible (it must be
@@ -60,9 +55,8 @@ carried in the packet headers indicates which generation of device key
 the packet has been encrypted with.
 (只有接收方知道的设备密钥是设计的基础。按照规范，该状态不能被直接访问（必须无法从接收方网卡的硬件中读出）。此外，它必须定期"轮换"（通常每天一次）。轮换意味着生成新的设备密钥（由设备的随机数生成器生成）并用于所有新连接。为避免干扰旧连接，旧设备密钥仍保留在网卡中。数据包头中携带的一个相位位 (phase bit) 指示该数据包是用哪一代设备密钥加密的。)
 
-User facing API
-(面向用户 API)
-===============
+User facing API(面向用户 API)
+=============================
 
 PSP is designed primarily for hardware offloads. There is currently
 no software fallback for systems which do not have PSP capable NICs.
@@ -79,18 +73,16 @@ are PSP-capable.
 All configuration of PSP is performed via the PSP netlink family.
 (PSP 的所有配置都通过 PSP netlink 族执行。)
 
-Device discovery
-(设备发现)
-----------------
+Device discovery(设备发现)
+--------------------------
 
 The PSP netlink family defines operations to retrieve information
 about the PSP devices available on the system, configure them and
 access PSP related statistics.
 (PSP netlink 族定义了检索系统上可用 PSP 设备信息、配置这些设备以及访问 PSP 相关统计信息的操作。)
 
-Securing a connection
-(保护一个连接)
----------------------
+Securing a connection(保护一个连接)
+-----------------------------------
 
 PSP encryption is currently only supported for TCP connections.
 Rx and Tx keys are allocated separately. First the ``rx-assoc``
@@ -157,9 +149,8 @@ the TCP stream. If userspace cares to mitigate this type of attack, a
 special "start of PSP" message should be exchanged after ``tx-assoc``.
 (由于在升级到 PSP 之前 TCP 序号没有完整性保护，中间人 (MITM) 有可能以某种方式偏移序号，从而删除 TCP 流中受 PSP 保护部分的前缀。如果用户态想缓解这类攻击，应在 ``tx-assoc`` 之后交换一条特殊的 "start of PSP" 消息。)
 
-Rotation notifications
-(轮换通知)
-----------------------
+Rotation notifications(轮换通知)
+--------------------------------
 
 The rotations of device key happen asynchronously and are usually
 performed by management daemons, not under application control.
@@ -168,13 +159,11 @@ are rotated. The applications are expected to re-establish connections
 before keys are rotated again.
 (设备密钥的轮换是异步发生的，通常由管理守护进程执行，不受应用程序控制。每当密钥轮换时，PSP netlink 族都会生成一个通知。应用程序应在密钥再次轮换之前重建连接。)
 
-Kernel implementation
-(内核实现)
-=====================
+Kernel implementation(内核实现)
+===============================
 
-Driver notes
-(驱动须知)
-------------
+Driver notes(驱动须知)
+----------------------
 
 Drivers are expected to start with no PSP enabled (``psp-versions-ena``
 in ``dev-get`` set to ``0``) whenever possible. The user space should
@@ -205,9 +194,8 @@ was requested for given skb. On Rx drivers should allocate and populate
 the ``SKB_EXT_PSP`` skb extension, and set the skb->decrypted bit to 1.
 (驱动必须使用 ``psp_skb_get_assoc_rcu()`` 来检查给定 skb 是否请求了 PSP Tx 卸载。在 Rx 方向，驱动应分配并填充 ``SKB_EXT_PSP`` skb 扩展，并将 skb->decrypted 位设为 1。)
 
-Kernel implementation notes
-(内核实现须知)
----------------------------
+Kernel implementation notes(内核实现须知)
+-----------------------------------------
 
 PSP implementation follows the TLS offload more closely than the IPsec
 offload, with per-socket state, and the use of skb->decrypted to prevent

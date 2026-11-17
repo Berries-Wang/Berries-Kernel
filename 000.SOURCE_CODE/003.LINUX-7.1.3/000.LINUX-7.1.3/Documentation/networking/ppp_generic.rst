@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-========================================
-PPP Generic Driver and Channel Interface
-========================================
-
-(PPP 通用驱动与通道接口)
+================================================================
+PPP Generic Driver and Channel Interface(PPP 通用驱动与通道接口)
+================================================================
 
 			   Paul Mackerras
 			   (作者: Paul Mackerras)
@@ -60,9 +58,8 @@ on receive.
 ppp 网络接口单元。通用层负责在发送时拆分数据报，并在接收时将其重新组合。)
 
 
-PPP channel API
-(PPP 通道 API)
----------------
+PPP channel API(PPP 通道 API)
+-----------------------------
 
 See include/linux/ppp_channel.h for the declaration of the types and
 functions used to communicate between the generic PPP layer and PPP
@@ -217,9 +214,8 @@ code does not require this but will be more efficient if this is done.
 头部空间。通用 PPP 代码并不强制要求这一点，但如果这样做，效率会更高。)
 
 
-Buffering and flow control
-(缓冲与流量控制)
---------------------------
+Buffering and flow control(缓冲与流量控制)
+------------------------------------------
 
 The generic PPP layer has been designed to minimize the amount of data
 that it buffers in the transmit direction.  It maintains a queue of
@@ -286,9 +282,8 @@ fragmentation.
 个分片发送，从而降低分片的开销。)
 
 
-SMP safety
-(SMP 安全性)
-----------
+SMP safety(SMP 安全性)
+----------------------
 
 The PPP generic layer has been designed to be SMP-safe.  Locks are
 used around accesses to the internal data structures where necessary
@@ -366,9 +361,8 @@ The generic layer provides these guarantees to the channels:
   start_xmit() 或 ioctl() 函数的调用，而且通用层此后也不会再调用这两个函数。)
 
 
-Interface to pppd
-(与 pppd 的接口)
------------------
+Interface to pppd(与 pppd 的接口)
+---------------------------------
 
 The PPP generic layer exports a character device interface called
 /dev/ppp.  This is used by pppd to control PPP interface units and

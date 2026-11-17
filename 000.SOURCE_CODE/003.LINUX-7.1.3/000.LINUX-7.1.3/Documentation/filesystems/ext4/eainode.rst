@@ -1,8 +1,7 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-Large Extended Attribute Values
-(大扩展属性值)
--------------------------------
+Large Extended Attribute Values(大扩展属性值)
+---------------------------------------------
 
 To enable ext4 to store extended attribute values that do not fit in the
 inode or in the single extended attribute block attached to an inode,

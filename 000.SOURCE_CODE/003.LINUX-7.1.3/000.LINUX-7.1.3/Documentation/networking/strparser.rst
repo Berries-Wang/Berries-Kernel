@@ -1,14 +1,11 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=========================
-Stream Parser (strparser)
-=========================
+================================================
+Stream Parser (strparser)(流解析器（strparser）)
+================================================
 
-(流解析器（strparser）)
-
-Introduction
-(简介)
-============
+Introduction(简介)
+==================
 
 The stream parser (strparser) is a utility that parses messages of an
 application layer protocol running over a data stream. The stream
@@ -33,9 +30,8 @@ processed. This modes allows strparser to be applied to arbitrary
 streams of data.
 (在一般模式下，一系列 skb 由外部来源馈送给 strparser。消息在该序列被处理的过程中得到解析并投递。此模式使 strparser 能够应用于任意的数据流。)
 
-Interface
-(接口)
-=========
+Interface(接口)
+===============
 
 The API includes a context structure, a set of callbacks, utility
 functions, and a data_ready function for receive callback mode. The
@@ -44,9 +40,8 @@ parsing (e.g.  BPF parsing in case of KCM), and a rcv_msg function
 that is called when a full message has been completed.
 (该 API 包括一个上下文结构体、一组回调、若干实用函数，以及用于接收回调模式的 data_ready 函数。回调包括一个 parse_msg 函数（用于执行解析，例如在 KCM 中是 BPF 解析），以及一个 rcv_msg 函数（在一条完整的消息完成时被调用）。)
 
-Functions
-(函数)
-=========
+Functions(函数)
+===============
 
      ::
 
@@ -138,9 +133,8 @@ Functions
     (strp_check_rcv 用于检查套接字上的新消息。它通常在流解析器实例初始
     化时或在 strp_unpause 之后调用。)
 
-Callbacks
-(回调)
-=========
+Callbacks(回调)
+===============
 
 There are seven callbacks:
 (共有七个回调：)
@@ -270,9 +264,8 @@ There are seven callbacks:
      并且如果解析器处于接收回调模式，还会在套接字上设置该错误。通过在
      strp_init 中把该回调设置为非 NULL，可以更改默认函数。)
 
-Statistics
-(统计)
-==========
+Statistics(统计)
+================
 
 Various counters are kept for each stream parser instance. These are in
 the strp_stats structure. strp_aggr_stats is a convenience structure for
@@ -281,9 +274,8 @@ save_strp_stats and aggregate_strp_stats are helper functions to save
 and aggregate statistics.
 (每个流解析器实例都维护着各种计数器。这些计数器保存在 strp_stats 结构中。strp_aggr_stats 是用于累计多个流解析器实例统计信息的便捷结构。save_strp_stats 和 aggregate_strp_stats 是保存和汇总统计信息的辅助函数。)
 
-Message assembly limits
-(消息组装限制)
-=======================
+Message assembly limits(消息组装限制)
+=====================================
 
 The stream parser provide mechanisms to limit the resources consumed by
 message assembly.
@@ -309,9 +301,8 @@ In general mode the message length limit is passed in as an argument
 to strp_process.
 (在一般模式下，消息长度上限作为参数传入 strp_process。)
 
-Author
-(作者)
-======
+Author(作者)
+============
 
 Tom Herbert (tom@quantonium.net)
 (Tom Herbert (tom@quantonium.net))

@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-====================
-iosm devlink support
-====================
-
-(iosm devlink 支持)
+=======================================
+iosm devlink support(iosm devlink 支持)
+=======================================
 
 This document describes the devlink features implemented by the ``iosm``
 device driver.
 (本文档描述 ``iosm`` 设备驱动程序所实现的 devlink 功能。)
 
-Parameters
-(参数)
-==========
+Parameters(参数)
+================
 
 The ``iosm`` driver implements the following driver-specific parameters.
 (``iosm`` 驱动程序实现了以下驱动特定的参数。)
@@ -36,9 +33,8 @@ The ``iosm`` driver implements the following driver-specific parameters.
        擦除支持。)
 
 
-Flash Update
-(闪存更新)
-============
+Flash Update(闪存更新)
+======================
 
 The ``iosm`` driver implements support for flash update using the
 ``devlink-flash`` interface.
@@ -86,9 +82,8 @@ By default, conditional erase feature is supported.
 (如果在进行固件烧写之前必须完全擦除设备，用户应用程序需要使用 devlink param 命令设置
 erase_full_flash 参数。默认情况下支持条件擦除特性。)
 
-Flash Commands:
-(Flash 命令：)
-===============
+Flash Commands:(Flash 命令：)
+=============================
 1) When modem is in Boot ROM stage, user can use below command to inject PSI RAM
 image using devlink flash command.
 (1) 当调制解调器处于 Boot ROM 阶段时，用户可以使用下面的命令通过 devlink flash 命令
@@ -123,9 +118,8 @@ b) Flashing the Loadmap/Region file
 
 $ devlink dev flash pci/0000:02:00.0 file <Load_map_file_name>
 
-Regions
-(区域)
-=======
+Regions(区域)
+=============
 
 The ``iosm`` driver supports dumping the coredump logs.
 (``iosm`` 驱动程序支持转储 coredump 日志。)
@@ -160,9 +154,8 @@ driver. Following regions are accessed for device internal data.
         (该 region 包含引导加载程序前一个实例的日志。)
 
 
-Region commands
-(region 命令)
-===============
+Region commands(region 命令)
+============================
 
 $ devlink region show
 

@@ -1,17 +1,14 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=============
-Page Pool API
-=============
-
-(页池 (Page Pool) API)
+===================================
+Page Pool API(页池 (Page Pool) API)
+===================================
 
 .. kernel-doc:: include/net/page_pool/helpers.h
    :doc: page_pool allocator
 
-Architecture overview
-(架构概览)
-=====================
+Architecture overview(架构概览)
+===============================
 
 .. code-block:: none
 
@@ -44,17 +41,15 @@ Architecture overview
                           |   Fast cache    |     |  ptr-ring cache  |
                           +-----------------+     +------------------+
 
-Monitoring
-(监控)
-==========
+Monitoring(监控)
+================
 Information about page pools on the system can be accessed via the netdev
 genetlink family (see Documentation/netlink/specs/netdev.yaml).
 (系统中页池的相关信息可以通过 netdev generic netlink family 访问（参见
 Documentation/netlink/specs/netdev.yaml）。)
 
-API interface
-(API 接口)
-=============
+API interface(API 接口)
+=======================
 The number of pools created **must** match the number of hardware queues
 unless hardware restrictions make that impossible. This would otherwise beat the
 purpose of page pool, which is allocate pages fast from cache without locking.
@@ -81,9 +76,8 @@ a page will cause no race conditions is enough.
 .. kernel-doc:: net/core/page_pool.c
    :identifiers: page_pool_put_page_bulk page_pool_get_stats
 
-DMA sync
-(DMA 同步)
---------
+DMA sync(DMA 同步)
+------------------
 Driver is always responsible for syncing the pages for the CPU.
 Drivers may choose to take care of syncing for the device as well
 or set the ``PP_FLAG_DMA_SYNC_DEV`` flag to request that pages
@@ -130,9 +124,8 @@ with fragmented page pools.
 小于整个页。除非驱动作者真正理解页池的内部机制，否则建议在分片页池中始终使用 ``offset = 0`` 和
 ``max_len = PAGE_SIZE`` 。)
 
-Stats API and structures
-(统计 API 与结构体)
-------------------------
+Stats API and structures(统计 API 与结构体)
+-------------------------------------------
 If the kernel is configured with ``CONFIG_PAGE_POOL_STATS=y``, the API
 page_pool_get_stats() and structures described below are available.
 It takes a  pointer to a ``struct page_pool`` and a pointer to a struct
@@ -151,13 +144,11 @@ in a driver-independent fashion.
 		 struct page_pool_alloc_stats
 		 struct page_pool_stats
 
-Coding examples
-(编码示例)
-===============
+Coding examples(编码示例)
+=========================
 
-Registration
-(注册)
-------------
+Registration(注册)
+------------------
 
 .. code-block:: c
 
@@ -184,9 +175,8 @@ Registration
     if (err)
         goto err_out;
 
-NAPI poller
-(NAPI 轮询器)
------------
+NAPI poller(NAPI 轮询器)
+------------------------
 
 
 .. code-block:: c
@@ -207,9 +197,8 @@ NAPI poller
         }
     }
 
-Stats
-(统计)
------
+Stats(统计)
+-----------
 
 .. code-block:: c
 
@@ -223,9 +212,8 @@ Stats
 	}
 	#endif
 
-Driver unload
-(驱动卸载)
--------------
+Driver unload(驱动卸载)
+-----------------------
 
 .. code-block:: c
 

@@ -1,12 +1,10 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-Block Groups
-(块组)
-------------
+Block Groups(块组)
+------------------
 
-Layout
-(布局)
-~~~~~~
+Layout(布局)
+~~~~~~~~~~~~
 
 The layout of a standard block group is approximately as follows (each
 of these fields is discussed in a separate section below):
@@ -69,9 +67,8 @@ groups (flex_bg). Leftover space is used for file data blocks, indirect
 block maps, extent tree blocks, and extended attributes.
 (至于块组中各项的排列顺序，通常约定：超级块和组描述符表(如果存在)位于块组的开头。位图和 inode 表可以位于任何位置，位图完全可能出现在 inode 表之后，或者两者位于不同的组中(flex_bg)。剩余空间用于文件数据块、间接块映射、extent 树块和扩展属性。)
 
-Flexible Block Groups
-(灵活块组)
-~~~~~~~~~~~~~~~~~~~~~
+Flexible Block Groups(灵活块组)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Starting in ext4, there is a new feature called flexible block groups
 (flex_bg). In a flex_bg, several block groups are tied together as one
@@ -89,9 +86,8 @@ if flex_bg is enabled. The number of block groups that make up a
 flex_bg is given by 2 ^ ``sb.s_log_groups_per_flex``.
 (从 ext4 开始，出现了一项名为灵活块组(flex_bg)的新特性。在 flex_bg 中，若干块组被捆绑为一个逻辑块组；flex_bg 中第一个块组的位图空间和 inode 表空间会被扩展，以包含 flex_bg 中所有其他块组的位图和 inode 表。例如，如果 flex_bg 的大小为 4，那么组 0 将(按顺序)包含超级块、组描述符、组 0-3 的数据块位图、组 0-3 的 inode 位图、组 0-3 的 inode 表，而组 0 中剩余的空间用于文件数据。这样做的效果是把块组元数据聚集在一起以加快加载速度，并使大文件能够在磁盘上连续存放。超级块和组描述符的备份副本始终位于块组的开头，即使启用了 flex_bg 也是如此。组成一个 flex_bg 的块组数量由 2 ^ ``sb.s_log_groups_per_flex`` 给出。)
 
-Meta Block Groups
-(元块组)
-~~~~~~~~~~~~~~~~~
+Meta Block Groups(元块组)
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Without the option META_BG, for safety concerns, all block group
 descriptors copies are kept in the first block group. Given the default
@@ -133,9 +129,8 @@ Please see an important note about ``BLOCK_UNINIT`` in the section about
 block and inode bitmaps.
 (关于 ``BLOCK_UNINIT`` 的重要说明，请参见关于块位图与 inode 位图的小节。)
 
-Lazy Block Group Initialization
-(惰性块组初始化)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Lazy Block Group Initialization(惰性块组初始化)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A new feature for ext4 are three block group descriptor flags that
 enable mkfs to skip initializing other parts of the block group

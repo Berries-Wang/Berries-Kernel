@@ -1,8 +1,7 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-Multiple Mount Protection
-(多挂载保护)
--------------------------
+Multiple Mount Protection(多挂载保护)
+-------------------------------------
 
 Multiple mount protection (MMP) is a feature that protects the
 filesystem against multiple hosts trying to use the filesystem

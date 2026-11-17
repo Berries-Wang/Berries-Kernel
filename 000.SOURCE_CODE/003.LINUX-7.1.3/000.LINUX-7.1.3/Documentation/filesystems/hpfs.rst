@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-====================
-Read/Write HPFS 2.09
-====================
-
-(读/写 HPFS 2.09)
+=====================================
+Read/Write HPFS 2.09(读/写 HPFS 2.09)
+=====================================
 
 1998-2004, Mikulas Patocka
 (1998-2004，Mikulas Patocka)
@@ -14,9 +12,8 @@ Read/Write HPFS 2.09
 :homepage: https://artax.karlin.mff.cuni.cz/~mikulas/vyplody/hpfs/index-e.cgi
 (主页: https://artax.karlin.mff.cuni.cz/~mikulas/vyplody/hpfs/index-e.cgi)
 
-Credits
-(致谢)
-=======
+Credits(致谢)
+=============
 Chris Smith, 1993, original read-only HPFS, some code and hpfs structures file
 	is taken from it
 	(Chris Smith，1993 年，最初的只读 HPFS，其中一些代码和 hpfs 结构文件取自该实现)
@@ -75,9 +72,8 @@ timeshift=(-)nnn (default 0)
 	(把时间偏移 nnn 秒。例如，如果你在 linux 下看到的比在 os/2 下多一个小时，请使用 timeshift=-3600。)
 
 
-File names
-(文件名)
-==========
+File names(文件名)
+==================
 
 As in OS/2, filenames are case insensitive. However, shell thinks that names
 are case sensitive, so for example when you create a file FOO, you can use
@@ -92,9 +88,8 @@ access it under names 'a.', 'a..', 'a .  . . ' etc.
 (与 OS/2 一样，文件名不区分大小写。然而，shell 认为名字是区分大小写的，所以例如当你创建文件 FOO 时，可以使用 'cat FOO'、'cat Foo'、'cat foo' 或 'cat F*'，但不能用 'cat f*'。注意，你在 HPFS 上也将无法编译 linux 内核(可能还有其他东西)，因为内核会创建像 bootsect.S 和 bootsect.s 这样名字不同的文件。在查找名字含有大于等于 128 的字符的文件时，会使用代码页——见下文。OS/2 忽略文件名末尾的点号和空格，本驱动也如此。如果你创建 'a. ...'，将会创建文件 'a'，但你仍然可以用 'a.'、'a..'、'a .  . . ' 等名字访问它。)
 
 
-Extended attributes
-(扩展属性)
-===================
+Extended attributes(扩展属性)
+=============================
 
 On HPFS partitions, OS/2 can associate to each file a special information called
 extended attributes. Extended attributes are pairs of (key,value) where key is
@@ -119,9 +114,8 @@ values doesn't work.
 (在 HPFS 分区上，OS/2 可以为每个文件关联一种称为扩展属性的特殊信息。扩展属性是(key,value)对，其中 key 是标识该属性的 ascii 字符串，value 是任意长度的字节串。OS/2 在那里存储窗口和图标位置以及文件类型。那么为什么不把它用于文件属主或访问权限这类 unix 特有的信息呢？本驱动可以做到。如果你在 hpfs 分区上执行 chown/chgrp/chmod，就会创建键为 "UID"、"GID" 或 "MODE"、值为 2 字节的扩展属性。只有那些值与挂载选项中指定的默认值不同的扩展属性才会被创建。一旦创建，扩展属性永远不会被删除，只会被修改。这意味着当你的默认 uid=0 时，如果你输入类似 'chown luser file; chown root file' 的命令，文件将包含扩展属性 UID=0。而当你 umount 该文件系统并以 uid=luser_uid 重新挂载它时，文件仍然属于 root！如果你把文件 chmod 为 444，扩展属性 "MODE" 不会被设置，这种特殊情况是通过设置只读标志来完成的。当你 mknod 一个块设备或字符设备时，除 "MODE" 之外，还会创建包含设备号的特殊 4 字节扩展属性 "DEV"。目前本驱动无法调整扩展属性的大小——这意味着如果有人(我不知道是谁？)设置了大小不同的 "UID"、"GID"、"MODE" 或 "DEV" 属性，它们不会被重写，修改这些值也不起作用。)
 
 
-Symlinks
-(符号链接)
-========
+Symlinks(符号链接)
+==================
 
 You can do symlinks on HPFS partition, symlinks are achieved by setting extended
 attribute named "SYMLINK" with symlink value. Like on ext2, you can chown and
@@ -135,9 +129,8 @@ to analyze or change OS2SYS.INI.
 (你可以在 HPFS 分区上使用符号链接，符号链接是通过设置名为 "SYMLINK"、值为符号链接目标的扩展属性来实现的。与 ext2 上一样，你可以对符号链接执行 chown 和 chgrp，但我不知道这有什么用处。对符号链接执行 chmod 的结果是对符号链接所指向的文件执行 chmod。这些符号链接仅供 Linux 使用，与 OS/2 不兼容。不支持 OS/2 PmShell 的符号链接，因为它们的存储方式非常古怪。他们试图做到链接随文件移动而变化……有时能行。但这个链接一部分存储在目录扩展属性中，一部分存储在 OS2SYS.INI 中。我不想(也不知道如何)分析或修改 OS2SYS.INI。)
 
 
-Codepages
-(代码页)
-=========
+Codepages(代码页)
+=================
 
 HPFS can contain several uppercasing tables for several codepages and each
 file has a pointer to codepage its name is in. However OS/2 was created in
@@ -165,9 +158,8 @@ this codepage - if you don't try to do what I described above :-)
 (HPFS 可以针对多个代码页包含多个大写转换表，每个文件都有一个指针指向其名字所在的代码页。然而 OS/2 诞生于美国，那里的人们不太在意代码页，因此多代码页支持存在相当多的缺陷。我的磁盘上有一个运行在代码页 852 的捷克语 OS/2。有一次我启动了运行在 cp 850 的英语 OS/2，并在我的 852 分区上创建了一个文件。它把文件名代码页标记为 850——很好。但当我再次启动捷克语 OS/2 时，那个文件用任何名字都无法访问了。看来 OS/2 用它的系统代码页(852)对搜索模式进行大写转换，而用它自己的代码页(850)对要比较的文件名进行大写转换。这两者永远不可能匹配。这真的是 IBM 开发者想要的吗？问题还在继续。当我在捷克语 OS/2 中在那个目录里再创建另一个文件时，那个文件也无法访问了。OS/2 在搜索文件应放置的位置时(注意，HPFS 目录中的文件必须有序)和在搜索文件时，可能使用了不同的大写转换方法。最后，当我在 PmShell 中打开这个目录时，PmShell 崩溃了(有趣的是，重启之后 PmShell 又试图重新打开这个目录 :-)。chkdsk 毫不在意地忽略这些错误，最后只有低级别的磁盘修改救了我。尽管 HPFS 的设计允许这样做，但千万不要在一台系统上混用不同语言版本的 OS/2。好吧，我可以为本驱动实现复杂的代码页支持，但考虑到 OS/2 中如此多缺陷的实现，我认为这样做弊大于利。所以本驱动只是使用它找到的第一个代码页来进行大写和小写转换，不管文件的代码页索引是什么。通常所有文件名都在这个代码页中——只要你不去做我上面描述的那些事 :-)
 
 
-Known bugs
-(已知缺陷)
-==========
+Known bugs(已知缺陷)
+====================
 
 HPFS386 on OS/2 server is not supported. HPFS386 installed on normal OS/2 client
 should work. If you have OS/2 server, use only read-only mode. I don't know how
@@ -224,9 +216,8 @@ anybody know what does it mean?
 (编译时会得到警告：function declaration isn't a prototype。有谁知道这是什么意思吗？)
 
 
-What does "unbalanced tree" message mean?
-("unbalanced tree" 消息是什么意思？)
-=========================================
+What does "unbalanced tree" message mean?("unbalanced tree" 消息是什么意思？)
+=============================================================================
 
 Old versions of this driver created sometimes unbalanced dnode trees. OS/2
 chkdsk doesn't scream if the tree is unbalanced (and sometimes creates
@@ -240,9 +231,8 @@ whole created by this driver, it is BUG - let me know about it.
 (本驱动的旧版本有时会创建不平衡的 dnode 树。如果树不平衡，OS/2 的 chkdsk 并不会大声报错(而且它有时也会创建不平衡的树 :-)，但 HPFS 和 HPFS386 都存在这样的缺陷：当树不平衡时偶尔会崩溃。本驱动能够正确处理不平衡的树，并在发现它们时写入警告。如果你看到这条消息，很可能是由于用旧版本的本驱动创建的目录。解决办法是把那个目录中的所有文件先移到另一个目录，然后再移回来。要在 Linux 下做，而不是 OS/2！如果你在一个完全由本驱动创建的目录中看到这条消息，那就是缺陷——请告诉我。)
 
 
-Bugs in OS/2
-(OS/2 中的缺陷)
-============
+Bugs in OS/2(OS/2 中的缺陷)
+===========================
 
 When you have two (or more) lost directories pointing each to other, chkdsk
 locks up when repairing filesystem.
@@ -258,17 +248,15 @@ marks them as short (and writes "minor fs error corrected"). This bug is not in
 HPFS386.
 (像 "a .b" 这样的文件名会被 OS/2 标记为 'long'，但 chkdsk 会"纠正"它并把它们标记为 short(并写入"minor fs error corrected")。这个缺陷不存在于 HPFS386 中。)
 
-Codepage bugs described above
-(上文描述的代码页缺陷)
-=============================
+Codepage bugs described above(上文描述的代码页缺陷)
+===================================================
 
 If you don't install fixpacks, there are many, many more...
 (如果你不安装 fixpacks，还有很多、很多更多的问题……)
 
 
-History
-(历史)
-=======
+History(历史)
+=============
 
 ====== =========================================================================
 0.90   First public release (首次公开发布)

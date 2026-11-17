@@ -1,8 +1,7 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-High Level Design
-(高层设计)
-=================
+High Level Design(高层设计)
+===========================
 
 An ext4 file system is split into a series of block groups. To reduce
 performance difficulties due to fragmentation, the block allocator tries

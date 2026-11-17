@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=======================================
-efivarfs - a (U)EFI variable filesystem
-=======================================
-
-(efivarfs - 一个 (U)EFI 变量文件系统)
+============================================================================
+efivarfs - a (U)EFI variable filesystem(efivarfs - 一个 (U)EFI 变量文件系统)
+============================================================================
 
 The efivarfs filesystem was created to address the shortcomings of
 using entries in sysfs to maintain EFI variables. The old sysfs EFI

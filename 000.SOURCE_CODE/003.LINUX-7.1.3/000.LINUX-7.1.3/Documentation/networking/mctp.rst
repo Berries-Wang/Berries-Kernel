@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-==============================================
-Management Component Transport Protocol (MCTP)
-==============================================
-
-(管理组件传输协议（MCTP）)
+========================================================================
+Management Component Transport Protocol (MCTP)(管理组件传输协议（MCTP）)
+========================================================================
 
 net/mctp/ contains protocol support for MCTP, as defined by DMTF standard
 DSP0236. Physical interface drivers ("bindings" in the specification) are
@@ -17,9 +15,8 @@ messages, through an AF_MCTP, SOCK_DGRAM socket.
 (核心代码通过 AF_MCTP、SOCK_DGRAM 套接字提供基于套接字的 MCTP 消息
 收发接口。)
 
-Structure: interfaces & networks
-(结构：接口与网络)
-================================
+Structure: interfaces & networks(结构：接口与网络)
+==================================================
 
 The kernel models the local MCTP topology through two items: interfaces and
 networks.
@@ -48,13 +45,11 @@ also present on other networks.
 (如果存在多个网络，每个网络中出现的端点 ID（EID）也可能同时出现在其他
 网络中。)
 
-Sockets API
-(套接字 API)
-===========
+Sockets API(套接字 API)
+=======================
 
-Protocol definitions
-(协议定义)
---------------------
+Protocol definitions(协议定义)
+------------------------------
 
 MCTP uses ``AF_MCTP`` / ``PF_MCTP`` for the address- and protocol- families.
 Since MCTP is message-based, only ``SOCK_DGRAM`` sockets are supported.
@@ -93,9 +88,8 @@ specified with a ``sockaddr`` type, with a single-byte endpoint address:
     #define MCTP_ADDR_ANY	0xff
 
 
-Syscall behaviour
-(系统调用行为)
------------------
+Syscall behaviour(系统调用行为)
+-------------------------------
 
 The following sections describe the MCTP-specific behaviours of the standard
 socket system calls. These behaviours have been chosen to map closely to the
@@ -103,9 +97,8 @@ existing sockets APIs.
 (以下各节描述标准套接字系统调用中与 MCTP 相关的行为。这些行为经过精心
 选择，与现有的套接字 API 紧密对应。)
 
-``bind()`` : set local socket address
-(``bind()``：设置本地套接字地址)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+``bind()`` : set local socket address(``bind()``：设置本地套接字地址)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Sockets that receive incoming request packets will bind to a local address,
 using the ``bind()`` syscall.
@@ -163,9 +156,8 @@ receiving packets with and without a message integrity check footer.
 （即最高位的 IC 位不参与匹配）。因此该套接字既会接收带消息完整性校验
 尾部的数据包，也会接收不带的数据包。)
 
-``sendto()``, ``sendmsg()``, ``send()`` : transmit an MCTP message
-(``sendto()``、``sendmsg()``、``send()``：发送 MCTP 消息)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+``sendto()``, ``sendmsg()``, ``send()`` : transmit an MCTP message(``sendto()``、``sendmsg()``、``send()``：发送 MCTP 消息)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 An MCTP message is transmitted using one of the ``sendto()``, ``sendmsg()`` or
 ``send()`` syscalls. Using ``sendto()`` as the primary example:
@@ -235,9 +227,8 @@ may only respond (with TO=0) to requests they have received.
 (套接字只会接收其已发送请求（TO=1）的响应，并且只能对其已接收的请求
 （TO=0）作出响应。)
 
-``recvfrom()``, ``recvmsg()``, ``recv()`` : receive an MCTP message
-(``recvfrom()``、``recvmsg()``、``recv()``：接收 MCTP 消息)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+``recvfrom()``, ``recvmsg()``, ``recv()`` : receive an MCTP message(``recvfrom()``、``recvmsg()``、``recv()``：接收 MCTP 消息)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 An MCTP message can be received by an application using one of the
 ``recvfrom()``, ``recvmsg()``, or ``recv()`` system calls. Using ``recvfrom()``
@@ -285,9 +276,8 @@ sent (TO=1) and may only respond (TO=0) to requests they have received.
 (与发送调用一样，套接字只会接收其已发送请求（TO=1）的响应，并且只能对
 其已接收的请求（TO=0）作出响应。)
 
-``ioctl(SIOCMCTPALLOCTAG)`` and ``ioctl(SIOCMCTPDROPTAG)``
-(``ioctl(SIOCMCTPALLOCTAG)`` 与 ``ioctl(SIOCMCTPDROPTAG)``)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+``ioctl(SIOCMCTPALLOCTAG)`` and ``ioctl(SIOCMCTPDROPTAG)``(``ioctl(SIOCMCTPALLOCTAG)`` 与 ``ioctl(SIOCMCTPDROPTAG)``)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 These tags give applications more control over MCTP message tags, by allocating
 (and dropping) tag values explicitly, rather than the kernel automatically
@@ -355,9 +345,8 @@ The ``flags`` field must be zero.
 完全一致（包括 ``MCTP_TAG_OWNER`` 与 ``MCTP_TAG_PREALLOC`` 位）。``flags``
 字段必须为 0。)
 
-Kernel internals
-(内核内部实现)
-================
+Kernel internals(内核内部实现)
+==============================
 
 There are a few possible packet flows in the MCTP stack:
 (MCTP 协议栈中存在几种可能的数据包流转路径：)
@@ -407,9 +396,8 @@ There are a few possible packet flows in the MCTP stack:
 	   : appends new fragment
 	   -> sock_queue_rcv_skb()
 
-Key refcounts
-(键引用计数)
--------------
+Key refcounts(键引用计数)
+-------------------------
 
  * keys are refed by:
    (键被以下对象引用：)

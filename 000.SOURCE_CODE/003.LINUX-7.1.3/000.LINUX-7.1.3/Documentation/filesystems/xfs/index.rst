@@ -1,10 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-============================
-XFS Filesystem Documentation
-============================
-
-(XFS 文件系统文档)
+==============================================
+XFS Filesystem Documentation(XFS 文件系统文档)
+==============================================
 
 .. toctree::
    :maxdepth: 2

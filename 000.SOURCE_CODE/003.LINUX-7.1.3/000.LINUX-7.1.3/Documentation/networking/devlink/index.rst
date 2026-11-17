@@ -8,9 +8,8 @@ related to any device class, such as chip-wide/switch-ASIC-wide configuration.
 (devlink 是一个 API，用于暴露与任何设备类别没有直接关联的设备和资源信息，
 例如芯片级/交换机 ASIC 级配置。)
 
-Locking
-(加锁)
--------
+Locking(加锁)
+-------------
 
 Driver facing APIs are currently transitioning to allow more explicit
 locking. Drivers can use the existing ``devlink_*`` set of APIs, or
@@ -36,9 +35,8 @@ first, only after that RTNL lock could be taken.
 (驱动在同时获取 devlink 实例锁和 RTNL 锁时需要谨慎。必须先获取 devlink
 实例锁，只有在那之后才能获取 RTNL 锁。)
 
-Nested instances
-(嵌套实例)
-----------------
+Nested instances(嵌套实例)
+--------------------------
 
 Some objects, like linecards or port functions, could have another
 devlink instances created underneath. In that case, drivers should make
@@ -74,9 +72,8 @@ The nested devlink info is exposed to the userspace over object-specific
 attributes of devlink netlink.
 (嵌套 devlink 信息通过 devlink netlink 的对象特定属性暴露给用户空间。)
 
-Interface documentation
-(接口文档)
------------------------
+Interface documentation(接口文档)
+---------------------------------
 
 The following pages describe various interfaces available through devlink in
 general.
@@ -100,9 +97,8 @@ general.
    devlink-trap
    devlink-shared
 
-Driver-specific documentation
-(驱动特定文档)
------------------------------
+Driver-specific documentation(驱动特定文档)
+-------------------------------------------
 
 Each driver that implements ``devlink`` is expected to document what
 parameters, info versions, and other features it supports.

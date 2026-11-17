@@ -1,9 +1,7 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-PSE Power Interface (PSE PI) Documentation
-==========================================
-
-(PSE 电源接口（PSE PI）文档)
+PSE Power Interface (PSE PI) Documentation(PSE 电源接口（PSE PI）文档)
+======================================================================
 
 The Power Sourcing Equipment Power Interface (PSE PI) plays a pivotal role in
 the architecture of Power over Ethernet (PoE) systems. It is essentially a
@@ -16,9 +14,8 @@ over Ethernet cables.
 ——即通常所说的以太网 RJ45 端口。这种连接方案对于在以太网线缆上实现
 电力与数据并行传输至关重要。)
 
-Documentation and Standards
-(文档与标准)
----------------------------
+Documentation and Standards(文档与标准)
+---------------------------------------
 
 The IEEE 802.3 standard provides detailed documentation on the PSE PI.
 Specifically:
@@ -33,9 +30,8 @@ Specifically:
   ("145.2.4 PSE PI" 一节论述通过以太网线缆全部四对线供电的 PoE 系统的
   配置。)
 
-PSE PI and Single Pair Ethernet
-(PSE PI 与单对以太网)
--------------------------------
+PSE PI and Single Pair Ethernet(PSE PI 与单对以太网)
+----------------------------------------------------
 
 Single Pair Ethernet (SPE) represents a different approach to Ethernet
 connectivity, utilizing just one pair of conductors for both data and power
@@ -51,9 +47,8 @@ Ethernet, are not applicable to SPE.
 PI 中针对多对以太网所述的、在多个供电引脚分配方案之间做选择的复杂性，
 并不适用于 SPE。)
 
-Understanding PSE PI
-(理解 PSE PI)
---------------------
+Understanding PSE PI(理解 PSE PI)
+---------------------------------
 
 The Power Sourcing Equipment Power Interface (PSE PI) is a framework defining
 how Power Sourcing Equipment (PSE) delivers power to Powered Devices (PDs) over
@@ -66,9 +61,8 @@ transmission direction.
 （Alternative A）与方案 B（Alternative B）；二者不仅供电传输方式不同，
 在极性与数据传输方向上的影响也不同。)
 
-Alternative A and B Overview
-(方案 A 与方案 B 概览)
-----------------------------
+Alternative A and B Overview(方案 A 与方案 B 概览)
+--------------------------------------------------
 
 - **Alternative A:** Utilizes RJ45 conductors 1, 2, 3 and 6. In either case of
   networks 10/100BaseT or 1G/2G/5G/10GBaseT, the pairs used are carrying data.
@@ -90,9 +84,8 @@ Alternative A and B Overview
   1G/2G/5G/10GBaseT 网络则不然。Alternative B 包含两种极性不同的配置，
   分别称为变体 X 与变体 S，以适应不同的网络需求和设备规格。)
 
-Table 145-3 PSE Pinout Alternatives
-(表 145-3 PSE 引脚分配备选方案)
------------------------------------
+Table 145-3 PSE Pinout Alternatives(表 145-3 PSE 引脚分配备选方案)
+------------------------------------------------------------------
 
 The following table outlines the pin configurations for both Alternative A and
 Alternative B.
@@ -135,9 +128,8 @@ Alternative B.
       specific configuration.
       ("-" 表示在该特定配置中，此引脚不用于供电。)
 
-PSE PI compatibilities
-(PSE PI 兼容性)
-----------------------
+PSE PI compatibilities(PSE PI 兼容性)
+-------------------------------------
 
 The following table outlines the compatibility between the pinout alternative
 and the 1000/2.5G/5G/10GBaseT in the PSE 2 pairs connection.
@@ -172,9 +164,8 @@ Power on pinout Alternative B) is not compatible with a 4 pairs
 (对于 4 对线 PSE 的情形，仅支持 10/100BaseT 的 PSE（即引脚分配方案 B
 上的直接供电）与 4 对线 1000/2.5G/5G/10GBaseT 不兼容。)
 
-PSE Power Interface (PSE PI) Connection Diagram
-(PSE 电源接口（PSE PI）连接图)
------------------------------------------------
+PSE Power Interface (PSE PI) Connection Diagram(PSE 电源接口（PSE PI）连接图)
+-----------------------------------------------------------------------------
 
 The diagram below illustrates the connection architecture between the RJ45
 port, the Ethernet PHY (Physical Layer), and the PSE PI (Power Sourcing
@@ -210,9 +201,8 @@ the Ethernet PHY for data transmission and the PSE PI for power delivery.
     |                          |
     +--------------------------+
 
-Simple PSE PI Configuration for Alternative A
-(方案 A 的简单 PSE PI 配置)
----------------------------------------------
+Simple PSE PI Configuration for Alternative A(方案 A 的简单 PSE PI 配置)
+------------------------------------------------------------------------
 
 The diagram below illustrates a straightforward PSE PI (Power Sourcing
 Equipment Power Interface) configuration designed to support the Alternative A
@@ -279,9 +269,8 @@ additional power delivery capabilities such as 2-pair or 4-pair power delivery.
          |        +---+
          +-------------+
 
-Device Tree Configuration: Describing PSE PI Configurations
-(设备树配置：描述 PSE PI 配置)
------------------------------------------------------------
+Device Tree Configuration: Describing PSE PI Configurations(设备树配置：描述 PSE PI 配置)
+-----------------------------------------------------------------------------------------
 
 The necessity for a separate PSE PI node in the device tree is influenced by
 the intricacy of the Power over Ethernet (PoE) system's setup. Here are
@@ -340,9 +329,8 @@ representation of the PoE system's complexity.
 使用专用的 PSE PI 节点更有裨益。这种做法符合 IEEE 802.3 规范，可提高
 文档清晰度，并确保准确呈现 PoE 系统的复杂性。)
 
-PSE PI Node: Essential Information
-(PSE PI 节点：关键信息)
-----------------------------------
+PSE PI Node: Essential Information(PSE PI 节点：关键信息)
+---------------------------------------------------------
 
 The PSE PI (Power Sourcing Equipment Power Interface) node in a device tree can
 include several key pieces of information critical for defining the power

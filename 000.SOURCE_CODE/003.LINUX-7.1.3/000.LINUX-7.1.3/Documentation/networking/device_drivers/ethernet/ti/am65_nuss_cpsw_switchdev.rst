@@ -1,18 +1,15 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===================================================================
-Texas Instruments K3 AM65 CPSW NUSS switchdev based ethernet driver
-===================================================================
-
-(德州仪器 K3 AM65 CPSW NUSS 基于 switchdev 的以太网驱动程序)
+===============================================================================================================================
+Texas Instruments K3 AM65 CPSW NUSS switchdev based ethernet driver(德州仪器 K3 AM65 CPSW NUSS 基于 switchdev 的以太网驱动程序)
+===============================================================================================================================
 
 :Version: 1.0
 
 (版本: 1.0)
 
-Port renaming
-(端口重命名)
-=============
+Port renaming(端口重命名)
+=========================
 
 In order to rename via udev::
 (要通过 udev 重命名，可按如下方式操作：)
@@ -23,24 +20,21 @@ In order to rename via udev::
 	    ATTR{phys_port_name}!="", NAME="sw0$attr{phys_port_name}"
 
 
-Multi mac mode
-(多 MAC 模式)
-==============
+Multi mac mode(多 MAC 模式)
+===========================
 
 - The driver is operating in multi-mac mode by default, thus
   working as N individual network interfaces.
   (驱动程序默认以 multi-mac 模式运行，即作为 N 个独立的网络接口工作。)
 
-Devlink configuration parameters
-(Devlink 配置参数)
-================================
+Devlink configuration parameters(Devlink 配置参数)
+==================================================
 
 See Documentation/networking/devlink/am65-nuss-cpsw-switch.rst
 (参见 Documentation/networking/devlink/am65-nuss-cpsw-switch.rst)
 
-Enabling "switch"
-(启用 "switch")
-=================
+Enabling "switch"(启用 "switch")
+================================
 
 The Switch mode can be enabled by configuring devlink driver parameter
 "switch_mode" to 1/true::
@@ -66,9 +60,8 @@ marking packets with offload_fwd_mark flag.
 All configuration is implemented via switchdev API.
 (所有配置都通过 switchdev API 实现。)
 
-Bridge setup
-(网桥设置)
-============
+Bridge setup(网桥设置)
+======================
 
 ::
 
@@ -89,17 +82,15 @@ Bridge setup
 	Note. Steps [*] are mandatory.
 
 
-On/off STP
-(开/关 STP)
-==========
+On/off STP(开/关 STP)
+=====================
 
 ::
 
 	ip link set dev BRDEV type bridge stp_state 1/0
 
-VLAN configuration
-(VLAN 配置)
-==================
+VLAN configuration(VLAN 配置)
+=============================
 
 ::
 
@@ -108,9 +99,8 @@ VLAN configuration
 Note. This step is mandatory for bridge/default_pvid.
 (注意。对于 bridge/default_pvid，此步骤是强制性的。)
 
-Add extra VLANs
-(添加额外 VLAN)
-===============
+Add extra VLANs(添加额外 VLAN)
+==============================
 
  1. untagged::
     (未打标签：)
@@ -126,9 +116,8 @@ Add extra VLANs
 	bridge vlan add dev sw0p2 vid 100 master
 	bridge vlan add dev br0 vid 100 pvid tagged self <---- Add cpu port to VLAN100
 
-FDBs
-(FDB 条目)
-----
+FDBs(FDB 条目)
+--------------
 
 FDBs are automatically added on the appropriate switch port upon detection
 (检测到后会自动在相应的交换机端口上添加 FDB)
@@ -139,9 +128,8 @@ Manually adding FDBs::
     bridge fdb add aa:bb:cc:dd:ee:ff dev sw0p1 master vlan 100
     bridge fdb add aa:bb:cc:dd:ee:fe dev sw0p2 master <---- Add on all VLANs
 
-MDBs
-(MDB 条目)
-----
+MDBs(MDB 条目)
+--------------
 
 MDBs are automatically added on the appropriate switch port upon detection
 (检测到后会自动在相应的交换机端口上添加 MDB)
@@ -152,9 +140,8 @@ Manually adding MDBs::
   bridge mdb add dev br0 port sw0p1 grp 239.1.1.1 permanent vid 100
   bridge mdb add dev br0 port sw0p1 grp 239.1.1.1 permanent <---- Add on all VLANs
 
-Multicast flooding
-(组播泛洪)
-==================
+Multicast flooding(组播泛洪)
+============================
 
 CPU port mcast_flooding is always on
 (CPU 端口的 mcast_flooding 始终开启)
@@ -164,9 +151,8 @@ bridge link set dev sw0p1 mcast_flood on/off
 (在交换机端口上开启/关闭泛洪：
 bridge link set dev sw0p1 mcast_flood on/off)
 
-Access and Trunk port
-(Access 与 Trunk 端口)
-=====================
+Access and Trunk port(Access 与 Trunk 端口)
+===========================================
 
 ::
 

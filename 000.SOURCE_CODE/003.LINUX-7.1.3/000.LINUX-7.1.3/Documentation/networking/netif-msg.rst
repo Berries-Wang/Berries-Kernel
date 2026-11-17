@@ -1,17 +1,14 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===============
-NETIF Msg Level
-===============
-
-(NETIF 消息级别)
+===============================
+NETIF Msg Level(NETIF 消息级别)
+===============================
 
 The design of the network interface message level setting.
 (网络接口消息级别设置的设计。)
 
-History
-(历史)
--------
+History(历史)
+-------------
 
  The design of the debugging message interface was guided and
  constrained by backwards compatibility previous practice.  It is useful
@@ -112,7 +109,7 @@ The set of message levels is named
 
 
   =========   ===================	============
-  Old level   Name (名称)			Bit position
+  Old level   Name (名称)			Bit position (位位置)
   =========   ===================	============
     0         NETIF_MSG_DRV		0x0001
     1         NETIF_MSG_PROBE		0x0002
