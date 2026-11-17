@@ -5,8 +5,11 @@
 inet_sock struct fast path usage breakdown
 ==========================================
 
+(inet_sock 结构的快速路径使用情况分析)
+
 ======================== ===================== =================== =================== ======================================================================================================
 Type                     Name                  fastpath_tx_access  fastpath_rx_access  comment
+(类型)                   (名称)                (TX 快速路径访问)   (RX 快速路径访问)   (注释)
 ======================== ===================== =================== =================== ======================================================================================================
 struct sock              sk                    read_mostly         read_mostly         tcp_init_buffer_space,tcp_init_transfer,tcp_finish_connect,tcp_connect,tcp_send_rcvq,tcp_send_syn_data
 struct ipv6_pinfo*       pinet6

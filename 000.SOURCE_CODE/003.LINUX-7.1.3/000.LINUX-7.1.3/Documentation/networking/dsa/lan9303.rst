@@ -2,36 +2,49 @@
 LAN9303 Ethernet switch driver
 ==============================
 
+(LAN9303 以太网交换机驱动)
+
 The LAN9303 is a three port 10/100 Mbps ethernet switch with integrated phys for
 the two external ethernet ports. The third port is an RMII/MII interface to a
 host conduit network interface (e.g. fixed link).
+(LAN9303 是一款三端口 10/100 Mbps 以太网交换机，两个外部以太网端口带有集成 PHY。第三个端口是通往主机管道网络接口(例如 fixed link)的 RMII/MII 接口。)
 
 
 Driver details
 ==============
+(驱动细节)
 
 The driver is implemented as a DSA driver, see ``Documentation/networking/dsa/dsa.rst``.
+(该驱动以 DSA 驱动的形式实现，参见 ``Documentation/networking/dsa/dsa.rst`` 。)
 
 See ``Documentation/devicetree/bindings/net/dsa/lan9303.txt`` for device tree
 binding.
+(设备树绑定参见 ``Documentation/devicetree/bindings/net/dsa/lan9303.txt`` 。)
 
 The LAN9303 can be managed both via MDIO and I2C, both supported by this driver.
+(LAN9303 可以通过 MDIO 和 I2C 两种方式进行管理，该驱动对两者都支持。)
 
 At startup the driver configures the device to provide two separate network
 interfaces (which is the default state of a DSA device). Due to HW limitations,
 no HW MAC learning takes place in this mode.
+(启动时，驱动会把设备配置为提供两个独立的网络接口(这是 DSA 设备的默认状态)。由于硬件限制，该模式下不会进行硬件 MAC 学习。)
 
 When both user ports are joined to the same bridge, the normal HW MAC learning
 is enabled. This means that unicast traffic is forwarded in HW. Broadcast and
 multicast is flooded in HW. STP is also supported in this mode. The driver
 support fdb/mdb operations as well, meaning IGMP snooping is supported.
+(当两个 user port 都加入同一网桥时，会启用正常的硬件 MAC 学习。这意味着单播流量在硬件中转发，广播和组播在硬件中泛洪。该模式还支持 STP。驱动也支持 fdb/mdb 操作，即支持 IGMP 侦听 (snooping)。)
 
 If one of the user ports leave the bridge, the ports goes back to the initial
 separated operation.
+(如果其中一个 user port 退出网桥，端口会回到最初的分离运行状态。)
 
 
 Driver limitations
 ==================
+(驱动限制)
 
  - Support for VLAN filtering is not implemented
+   (未实现 VLAN 过滤支持)
  - The HW does not support VLAN-specific fdb entries
+   (硬件不支持特定于 VLAN 的 fdb 条目)

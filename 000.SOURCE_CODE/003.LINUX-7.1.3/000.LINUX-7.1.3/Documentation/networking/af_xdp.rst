@@ -4,7 +4,7 @@
 AF_XDP
 ======
 
-(AF_XDP)
+(AF_XDP，针对高性能数据包处理而优化的地址族)
 
 Overview
 (概述)
@@ -328,7 +328,7 @@ user. It will make your program a lot simpler.
 (我们建议您使用这个库，除非您已经成为高级用户。它会让您的程序简单得多。)
 
 XSKMAP / BPF_MAP_TYPE_XSKMAP
-(XSKMAP / BPF_MAP_TYPE_XSKMAP)
+(XSKMAP / BPF_MAP_TYPE_XSKMAP，XSK 套接字映射)
 ============================
 
 On XDP side there is a BPF map type BPF_MAP_TYPE_XSKMAP (XSKMAP) that
@@ -1053,6 +1053,7 @@ to facilitate extending a zero-copy driver with multi-buffer support.
 Sample application
 (示例应用程序)
 ==================
+
 There is a xdpsock benchmarking/test application that can be found at
 https://github.com/xdp-project/bpf-examples/tree/main/AF_XDP-example
 that demonstrates how to use AF_XDP sockets with private
@@ -1177,13 +1178,16 @@ Credits
 =======
 
 - Björn Töpel (AF_XDP core)
+  (AF_XDP 核心)
 - Magnus Karlsson (AF_XDP core)
+  (AF_XDP 核心)
 - Alexander Duyck
 - Alexei Starovoitov
 - Daniel Borkmann
 - Jesper Dangaard Brouer
 - John Fastabend
 - Jonathan Corbet (LWN coverage)
+  (LWN 报道)
 - Michael S. Tsirkin
 - Qi Z Zhang
 - Willem de Bruijn

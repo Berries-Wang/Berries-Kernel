@@ -5,8 +5,11 @@
 netns_ipv4 enum fast path usage breakdown
 ===========================================
 
+(netns_ipv4 枚举快速路径使用情况明细)
+
 ============== ===================================== =================== =================== ==================================================
 Type           Name                                  fastpath_tx_access  fastpath_rx_access  comment
+(类型)         (名称)                                (发送快速路径访问)  (接收快速路径访问)  (注释)
 ============== ===================================== =================== =================== ==================================================
 unsigned_long  LINUX_MIB_TCPKEEPALIVE                write_mostly                            tcp_keepalive_timer
 unsigned_long  LINUX_MIB_DELAYEDACKS                 write_mostly                            tcp_delack_timer_handler,tcp_delack_timer

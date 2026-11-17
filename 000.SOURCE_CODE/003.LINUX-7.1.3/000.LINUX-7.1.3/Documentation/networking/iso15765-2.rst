@@ -4,50 +4,66 @@
 ISO 15765-2 (ISO-TP)
 ====================
 
+(ISO 15765-2 (ISO-TP) 协议)
+
 Overview
+(总览)
 ========
 
 ISO 15765-2, also known as ISO-TP, is a transport protocol specifically defined
 for diagnostic communication on CAN. It is widely used in the automotive
 industry, for example as the transport protocol for UDSonCAN (ISO 14229-3) or
 emission-related diagnostic services (ISO 15031-5).
+(ISO 15765-2，也称为 ISO-TP，是一种专为 CAN 上的诊断通信而定义的传输协议。它在汽车行业应用广泛，例如用作 UDSonCAN (ISO 14229-3) 或排放相关诊断服务 (ISO 15031-5) 的传输协议。)
 
 ISO-TP can be used both on CAN CC (aka Classical CAN) and CAN FD (CAN with
 Flexible Datarate) based networks. It is also designed to be compatible with a
 CAN network using SAE J1939 as data link layer (however, this is not a
 requirement).
+(ISO-TP 既可用于基于 CAN CC (即经典 CAN) 的网络，也可用于基于 CAN FD (可变速率 CAN) 的网络。它还被设计为可与使用 SAE J1939 作为数据链路层的 CAN 网络兼容 (但这并非强制要求)。)
 
 Specifications used
+(所用规范)
 -------------------
 
 * ISO 15765-2:2024 : Road vehicles - Diagnostic communication over Controller
   Area Network (DoCAN). Part 2: Transport protocol and network layer services.
+  (ISO 15765-2:2024：道路车辆 — 控制器局域网 (DoCAN) 上的诊断通信。第 2 部分：传输协议和网络层服务。)
 
 Addressing
+(寻址)
 ----------
 
 In its simplest form, ISO-TP is based on two kinds of addressing modes for the
 nodes connected to the same network:
+(在最简单的形式下，ISO-TP 基于两种针对连接到同一网络的节点的寻址模式：)
 
 * physical addressing is implemented by two node-specific addresses and is used
   in 1-to-1 communication.
+  (物理寻址由两个节点特定的地址实现，用于一对一通信。)
 
 * functional addressing is implemented by one node-specific address and is used
   in 1-to-N communication.
+  (功能寻址由一个节点特定的地址实现，用于一对多通信。)
 
 Three different addressing formats can be employed:
+(可以使用三种不同的寻址格式：)
 
 * "normal" : each address is represented simply by a CAN ID.
+  ("normal"：每个地址仅由一个 CAN ID 表示。)
 
 * "extended": each address is represented by a CAN ID plus the first byte of
   the CAN payload; both the CAN ID and the byte inside the payload shall be
   different between two addresses.
+  ("extended"：每个地址由一个 CAN ID 加上 CAN 负载的第一个字节表示；两个地址之间的 CAN ID 和负载内的字节都必须不同。)
 
 * "mixed": each address is represented by a CAN ID plus the first byte of
   the CAN payload; the CAN ID is different between two addresses, but the
   additional byte is the same.
+  ("mixed"：每个地址由一个 CAN ID 加上 CAN 负载的第一个字节表示；两个地址之间的 CAN ID 不同，但附加的字节相同。)
 
 Transport protocol and associated frame types
+(传输协议及相关帧类型)
 ---------------------------------------------
 
 When transmitting data using the ISO-TP protocol, the payload can either fit
@@ -63,21 +79,26 @@ sender starts to send frames containing fragments of the data payload (called
 Consecutive Frames - CF), stopping after every ``blocksize``-sized block to wait
 confirmation from the receiver which should then send another Flow Control
 frame to inform the sender about its availability to receive more data.
+(使用 ISO-TP 协议传输数据时，考虑到协议本身产生的开销以及可选的扩展寻址，负载要么能放进单个 CAN 消息，要么放不进去。在前一种情况下，数据通过所谓的单帧 (Single Frame，SF) 一次性发送。在后一种情况下，ISO-TP 定义了一种多帧协议：发送方 (通过首帧 First Frame，FF) 给出要传输的 PDU 长度，并请求一个流控帧 (Flow Control，FC)，该帧提供宏数据块支持的最大尺寸 (``blocksize``) 以及组成该块的各条 CAN 消息之间的最小间隔时间 (``stmin``)。收到这些信息后，发送方开始发送包含数据负载片段的帧 (称为连续帧 Consecutive Frame，CF)，每发送完一个 ``blocksize`` 大小的块就停下来等待接收方确认，接收方随后应再发送一个流控帧，告知发送方它是否有能力接收更多数据。)
 
 How to Use ISO-TP
+(如何使用 ISO-TP)
 =================
 
 As with others CAN protocols, the ISO-TP stack support is built into the
 Linux network subsystem for the CAN bus, aka. Linux-CAN or SocketCAN, and
 thus follows the same socket API.
+(与其他 CAN 协议一样，ISO-TP 协议栈支持内置于 CAN 总线的 Linux 网络子系统 (即 Linux-CAN 或 SocketCAN) 之中，因此遵循相同的套接字 API。)
 
 Creation and basic usage of an ISO-TP socket
+(ISO-TP 套接字的创建与基本用法)
 --------------------------------------------
 
 To use the ISO-TP stack, ``#include <linux/can/isotp.h>`` shall be used. A
 socket can then be created using the ``PF_CAN`` protocol family, the
 ``SOCK_DGRAM`` type (as the underlying protocol is datagram-based by design)
 and the ``CAN_ISOTP`` protocol:
+(要使用 ISO-TP 协议栈，应使用 ``#include <linux/can/isotp.h>`` 。然后可以使用 ``PF_CAN`` 协议族、``SOCK_DGRAM`` 类型 (因为底层协议在设计上基于数据报) 以及 ``CAN_ISOTP`` 协议来创建套接字：)
 
 .. code-block:: C
 
@@ -85,12 +106,15 @@ and the ``CAN_ISOTP`` protocol:
 
 After the socket has been successfully created, ``bind(2)`` shall be called to
 bind the socket to the desired CAN interface; to do so:
+(套接字成功创建后，应调用 ``bind(2)`` 将其绑定到所需的 CAN 接口；为此：)
 
 * a TX CAN ID shall be specified as part of the sockaddr supplied to the call
   itself.
+  (应在提供给该调用的 sockaddr 中指定一个 TX CAN ID。)
 
 * a RX CAN ID shall also be specified, unless broadcast flags have been set
   through socket option (explained below).
+  (还应指定一个 RX CAN ID，除非已通过套接字选项设置了广播标志 (见下文说明)。)
 
 Once bound to an interface, the socket can be read from and written to using
 the usual ``read(2)`` and ``write(2)`` system calls, as well as ``send(2)``,
@@ -101,9 +125,11 @@ information and the protocol information are automatically filled by the ISO-TP
 stack using the configuration supplied during socket creation. In the same way,
 the stack will use the transport mechanism when required (i.e., when the size
 of the data payload exceeds the MTU of the underlying CAN bus).
+(绑定到接口之后，即可使用常用的 ``read(2)`` 和 ``write(2)`` 系统调用对该套接字进行读写，也可以使用 ``send(2)`` 、 ``sendmsg(2)`` 、 ``recv(2)`` 和 ``recvmsg(2)`` 。与 CAN_RAW 套接字 API 不同，用户态应用通过这些调用收发的只有 ISO-TP 数据字段 (即实际负载)。地址信息和协议信息由 ISO-TP 协议栈根据创建套接字时提供的配置自动填充。同样地，协议栈会在需要时 (即数据负载大小超过底层 CAN 总线的 MTU 时) 使用传输机制。)
 
 The sockaddr structure used for SocketCAN has extensions for use with ISO-TP,
 as specified below:
+(SocketCAN 所用的 sockaddr 结构为配合 ISO-TP 使用做了扩展，具体如下：)
 
 .. code-block:: C
 
@@ -118,22 +144,29 @@ as specified below:
 
 * ``can_family`` and ``can_ifindex`` serve the same purpose as for other
   SocketCAN sockets.
+  (``can_family`` 与 ``can_ifindex`` 的作用与其他 SocketCAN 套接字中的相同。)
 
 * ``can_addr.tp.rx_id`` specifies the receive (RX) CAN ID and will be used as
   a RX filter.
+  (``can_addr.tp.rx_id`` 指定接收 (RX) CAN ID，并将用作 RX 过滤器。)
 
 * ``can_addr.tp.tx_id`` specifies the transmit (TX) CAN ID
+  (``can_addr.tp.tx_id`` 指定发送 (TX) CAN ID)
 
 ISO-TP socket options
+(ISO-TP 套接字选项)
 ---------------------
 
 When creating an ISO-TP socket, reasonable defaults are set. Some options can
 be modified with ``setsockopt(2)`` and/or read back with ``getsockopt(2)``.
+(创建 ISO-TP 套接字时会设置合理的默认值。部分选项可通过 ``setsockopt(2)`` 修改，和/或通过 ``getsockopt(2)`` 读回。)
 
 General options
+(通用选项)
 ~~~~~~~~~~~~~~~
 
 General socket options can be passed using the ``CAN_ISOTP_OPTS`` optname:
+(通用套接字选项可通过 ``CAN_ISOTP_OPTS`` 选项名传递：)
 
 .. code-block:: C
 
@@ -141,6 +174,7 @@ General socket options can be passed using the ``CAN_ISOTP_OPTS`` optname:
     ret = setsockopt(s, SOL_CAN_ISOTP, CAN_ISOTP_OPTS, &opts, sizeof(opts))
 
 where the ``can_isotp_options`` structure has the following contents:
+(其中 ``can_isotp_options`` 结构的内容如下：)
 
 .. code-block:: C
 
@@ -155,76 +189,99 @@ where the ``can_isotp_options`` structure has the following contents:
 
 * ``flags``: modifiers to be applied to the default behaviour of the ISO-TP
   stack. Following flags are available:
+  (``flags``：用于修改 ISO-TP 协议栈默认行为的修饰符。可用标志如下：)
 
   * ``CAN_ISOTP_LISTEN_MODE``: listen only (do not send FC frames); normally
     used as a testing feature.
+    (``CAN_ISOTP_LISTEN_MODE``：仅监听 (不发送 FC 帧)；通常用作测试功能。)
 
   * ``CAN_ISOTP_EXTEND_ADDR``: use the byte specified in ``ext_address`` as an
     additional address component. This enables the "mixed" addressing format if
     used alone, or the "extended" addressing format if used in conjunction with
     ``CAN_ISOTP_RX_EXT_ADDR``.
+    (``CAN_ISOTP_EXTEND_ADDR``：使用 ``ext_address`` 中指定的字节作为附加地址成分。单独使用时启用 "mixed" 寻址格式；与 ``CAN_ISOTP_RX_EXT_ADDR`` 结合使用时启用 "extended" 寻址格式。)
 
   * ``CAN_ISOTP_TX_PADDING``: enable padding for transmitted frames, using
     ``txpad_content`` as value for the padding bytes.
+    (``CAN_ISOTP_TX_PADDING``：为发送的帧启用填充，使用 ``txpad_content`` 作为填充字节的值。)
 
   * ``CAN_ISOTP_RX_PADDING``: enable padding for the received frames, using
     ``rxpad_content`` as value for the padding bytes.
+    (``CAN_ISOTP_RX_PADDING``：为接收的帧启用填充，使用 ``rxpad_content`` 作为填充字节的值。)
 
   * ``CAN_ISOTP_CHK_PAD_LEN``: check for correct padding length on the received
     frames.
+    (``CAN_ISOTP_CHK_PAD_LEN``：检查接收帧的填充长度是否正确。)
 
   * ``CAN_ISOTP_CHK_PAD_DATA``: check padding bytes on the received frames
     against ``rxpad_content``; if ``CAN_ISOTP_RX_PADDING`` is not specified,
     this flag is ignored.
+    (``CAN_ISOTP_CHK_PAD_DATA``：对照 ``rxpad_content`` 检查接收帧的填充字节；如果未指定 ``CAN_ISOTP_RX_PADDING``，则忽略此标志。)
 
   * ``CAN_ISOTP_HALF_DUPLEX``: force ISO-TP socket in half duplex mode
     (that is, transport mechanism can only be incoming or outgoing at the same
     time, not both).
+    (``CAN_ISOTP_HALF_DUPLEX``：强制 ISO-TP 套接字进入半双工模式 (即传输机制同一时间只能是收或发，不能两者兼有)。)
 
   * ``CAN_ISOTP_FORCE_TXSTMIN``: ignore stmin from received FC; normally
     used as a testing feature.
+    (``CAN_ISOTP_FORCE_TXSTMIN``：忽略接收到的 FC 中的 stmin；通常用作测试功能。)
 
   * ``CAN_ISOTP_FORCE_RXSTMIN``: ignore CFs depending on rx stmin; normally
     used as a testing feature.
+    (``CAN_ISOTP_FORCE_RXSTMIN``：忽略接收 CF 时依据 rx stmin 的间隔控制；通常用作测试功能。)
 
   * ``CAN_ISOTP_RX_EXT_ADDR``: use ``rx_ext_address`` instead of ``ext_address``
     as extended addressing byte on the reception path. If used in conjunction
     with ``CAN_ISOTP_EXTEND_ADDR``, this flag effectively enables the "extended"
     addressing format.
+    (``CAN_ISOTP_RX_EXT_ADDR``：在接收路径上使用 ``rx_ext_address`` 而不是 ``ext_address`` 作为扩展寻址字节。与 ``CAN_ISOTP_EXTEND_ADDR`` 结合使用时，此标志实际上启用 "extended" 寻址格式。)
 
   * ``CAN_ISOTP_WAIT_TX_DONE``: wait until the frame is sent before returning
     from ``write(2)`` and ``send(2)`` calls (i.e., blocking write operations).
+    (``CAN_ISOTP_WAIT_TX_DONE``：等待帧发送完成后才从 ``write(2)`` 和 ``send(2)`` 调用返回 (即阻塞式写操作)。)
 
   * ``CAN_ISOTP_SF_BROADCAST``: use 1-to-N functional addressing (cannot be
     specified alongside ``CAN_ISOTP_CF_BROADCAST``).
+    (``CAN_ISOTP_SF_BROADCAST``：使用一对多功能寻址 (不能与 ``CAN_ISOTP_CF_BROADCAST`` 同时指定)。)
 
   * ``CAN_ISOTP_CF_BROADCAST``: use 1-to-N transmission without flow control
     (cannot be specified alongside ``CAN_ISOTP_SF_BROADCAST``).
     NOTE: this is not covered by the ISO 15765-2 standard.
+    (``CAN_ISOTP_CF_BROADCAST``：不使用流控的一对多传输 (不能与 ``CAN_ISOTP_SF_BROADCAST`` 同时指定)。
+    注意：这不在 ISO 15765-2 标准的涵盖范围之内。)
 
   * ``CAN_ISOTP_DYN_FC_PARMS``: enable dynamic update of flow control
     parameters.
+    (``CAN_ISOTP_DYN_FC_PARMS``：启用流控参数的动态更新。)
 
 * ``frame_txtime``: frame transmission time (defined as N_As/N_Ar inside the
   ISO standard); if ``0``, the default (or the last set value) is used.
   To set the transmission time to ``0``, the ``CAN_ISOTP_FRAME_TXTIME_ZERO``
   macro (equal to 0xFFFFFFFF) shall be used.
+  (``frame_txtime``：帧传输时间 (在 ISO 标准中定义为 N_As/N_Ar)；若为 ``0``，则使用默认值 (或上次设置的值)。要把传输时间设为 ``0``，应使用 ``CAN_ISOTP_FRAME_TXTIME_ZERO`` 宏 (等于 0xFFFFFFFF)。)
 
 * ``ext_address``: extended addressing byte, used if the
   ``CAN_ISOTP_EXTEND_ADDR`` flag is specified.
+  (``ext_address``：扩展寻址字节，在指定 ``CAN_ISOTP_EXTEND_ADDR`` 标志时使用。)
 
 * ``txpad_content``: byte used as padding value for transmitted frames.
+  (``txpad_content``：用作发送帧填充值的字节。)
 
 * ``rxpad_content``: byte used as padding value for received frames.
+  (``rxpad_content``：用作接收帧填充值的字节。)
 
 * ``rx_ext_address``: extended addressing byte for the reception path, used if
   the ``CAN_ISOTP_RX_EXT_ADDR`` flag is specified.
+  (``rx_ext_address``：接收路径的扩展寻址字节，在指定 ``CAN_ISOTP_RX_EXT_ADDR`` 标志时使用。)
 
 Flow Control options
+(流控选项)
 ~~~~~~~~~~~~~~~~~~~~
 
 Flow Control (FC) options can be passed using the ``CAN_ISOTP_RECV_FC`` optname
 to provide the communication parameters for receiving ISO-TP PDUs.
+(可通过 ``CAN_ISOTP_RECV_FC`` 选项名传递流控 (FC) 选项，以提供接收 ISO-TP PDU 所需的通信参数。)
 
 .. code-block:: C
 
@@ -232,6 +289,7 @@ to provide the communication parameters for receiving ISO-TP PDUs.
     ret = setsockopt(s, SOL_CAN_ISOTP, CAN_ISOTP_RECV_FC, &fc_opts, sizeof(fc_opts));
 
 where the ``can_isotp_fc_options`` structure has the following contents:
+(其中 ``can_isotp_fc_options`` 结构的内容如下：)
 
 .. code-block:: C
 
@@ -242,20 +300,27 @@ where the ``can_isotp_fc_options`` structure has the following contents:
     };
 
 * ``bs``: blocksize provided in flow control frames.
+  (``bs``：流控帧中提供的块大小。)
 
 * ``stmin``: minimum separation time provided in flow control frames; can
   have the following values (others are reserved):
+  (``stmin``：流控帧中提供的最小间隔时间；可取以下值 (其余值保留)：)
 
   * 0x00 - 0x7F : 0 - 127 ms
+    (0x00 - 0x7F：0 - 127 毫秒)
 
   * 0xF1 - 0xF9 : 100 us - 900 us
+    (0xF1 - 0xF9：100 微秒 - 900 微秒)
 
 * ``wftmax``: maximum number of wait frames provided in flow control frames.
+  (``wftmax``：流控帧中提供的最大等待帧数量。)
 
 Link Layer options
+(链路层选项)
 ~~~~~~~~~~~~~~~~~~
 
 Link Layer (LL) options can be passed using the ``CAN_ISOTP_LL_OPTS`` optname:
+(链路层 (LL) 选项可通过 ``CAN_ISOTP_LL_OPTS`` 选项名传递：)
 
 .. code-block:: C
 
@@ -263,6 +328,7 @@ Link Layer (LL) options can be passed using the ``CAN_ISOTP_LL_OPTS`` optname:
     ret = setsockopt(s, SOL_CAN_ISOTP, CAN_ISOTP_LL_OPTS, &ll_opts, sizeof(ll_opts));
 
 where the ``can_isotp_ll_options`` structure has the following contents:
+(其中 ``can_isotp_ll_options`` 结构的内容如下：)
 
 .. code-block:: C
 
@@ -274,21 +340,26 @@ where the ``can_isotp_ll_options`` structure has the following contents:
 
 * ``mtu``: generated and accepted CAN frame type, can be equal to ``CAN_MTU``
   for classical CAN frames or ``CANFD_MTU`` for CAN FD frames.
+  (``mtu``：生成和接受的 CAN 帧类型，经典 CAN 帧可取 ``CAN_MTU``，CAN FD 帧可取 ``CANFD_MTU``。)
 
 * ``tx_dl``: maximum payload length for transmitted frames, can have one value
   among: 8, 12, 16, 20, 24, 32, 48, 64. Values above 8 only apply to CAN FD
   traffic (i.e.: ``mtu = CANFD_MTU``).
+  (``tx_dl``：发送帧的最大负载长度，可取 8、12、16、20、24、32、48、64 之一。大于 8 的值仅适用于 CAN FD 通信 (即 ``mtu = CANFD_MTU``)。)
 
 * ``tx_flags``: flags set into ``struct canfd_frame.flags`` at frame creation.
   Only applies to CAN FD traffic (i.e.: ``mtu = CANFD_MTU``).
+  (``tx_flags``：帧创建时写入 ``struct canfd_frame.flags`` 的标志。仅适用于 CAN FD 通信 (即 ``mtu = CANFD_MTU``)。)
 
 Transmission stmin
+(发送 stmin)
 ~~~~~~~~~~~~~~~~~~
 
 The transmission minimum separation time (stmin) can be forced using the
 ``CAN_ISOTP_TX_STMIN`` optname and providing an stmin value in microseconds as
 a 32bit unsigned integer; this will overwrite the value sent by the receiver in
 flow control frames:
+(发送最小间隔时间 (stmin) 可通过 ``CAN_ISOTP_TX_STMIN`` 选项名强制指定，并以 32 位无符号整数形式提供以微秒为单位的 stmin 值；这将覆盖接收方在流控帧中发送的值：)
 
 .. code-block:: C
 
@@ -296,12 +367,14 @@ flow control frames:
     ret = setsockopt(s, SOL_CAN_ISOTP, CAN_ISOTP_TX_STMIN, &stmin, sizeof(stmin));
 
 Reception stmin
+(接收 stmin)
 ~~~~~~~~~~~~~~~
 
 The reception minimum separation time (stmin) can be forced using the
 ``CAN_ISOTP_RX_STMIN`` optname and providing an stmin value in microseconds as
 a 32bit unsigned integer; received Consecutive Frames (CF) which timestamps
 differ less than this value will be ignored:
+(接收最小间隔时间 (stmin) 可通过 ``CAN_ISOTP_RX_STMIN`` 选项名强制指定，并以 32 位无符号整数形式提供以微秒为单位的 stmin 值；时间戳间隔小于该值的已接收连续帧 (CF) 将被忽略：)
 
 .. code-block:: C
 
@@ -309,53 +382,65 @@ differ less than this value will be ignored:
     ret = setsockopt(s, SOL_CAN_ISOTP, CAN_ISOTP_RX_STMIN, &stmin, sizeof(stmin));
 
 Multi-frame transport support
+(多帧传输支持)
 -----------------------------
 
 The ISO-TP stack contained inside the Linux kernel supports the multi-frame
 transport mechanism defined by the standard, with the following constraints:
+(Linux 内核中的 ISO-TP 协议栈支持标准定义的多帧传输机制，但存在以下限制：)
 
 * the maximum size of a PDU is defined by a module parameter, with an hard
   limit imposed at build time.
+  (PDU 的最大大小由模块参数定义，并在构建时施加硬性上限。)
 
 * when a transmission is in progress, subsequent calls to ``write(2)`` will
   block, while calls to ``send(2)`` will either block or fail depending on the
   presence of the ``MSG_DONTWAIT`` flag.
+  (当一次传输正在进行时，后续的 ``write(2)`` 调用会阻塞，而 ``send(2)`` 调用则视是否设置了 ``MSG_DONTWAIT`` 标志而阻塞或失败。)
 
 * no support is present for sending "wait frames": whether a PDU can be fully
   received or not is decided when the First Frame is received.
+  (不支持发送 "wait frames" (等待帧)：PDU 能否被完整接收，在收到首帧时即已决定。)
 
 Errors
+(错误)
 ------
 
 Following errors are reported to userspace:
+(以下错误会上报给用户态：)
 
 RX path errors
+(RX 路径错误)
 ~~~~~~~~~~~~~~
 
 ============ ===============================================================
--ETIMEDOUT   timeout of data reception
--EILSEQ      sequence number mismatch during a multi-frame reception
--EBADMSG     data reception with wrong padding
+-ETIMEDOUT   timeout of data reception (数据接收超时)
+-EILSEQ      sequence number mismatch during a multi-frame reception (多帧接收期间序列号不匹配)
+-EBADMSG     data reception with wrong padding (数据接收时填充错误)
 ============ ===============================================================
 
 TX path errors
+(TX 路径错误)
 ~~~~~~~~~~~~~~
 
 ========== =================================================================
--ECOMM     flow control reception timeout
--EMSGSIZE  flow control reception overflow
--EBADMSG   flow control reception with wrong layout/padding
+-ECOMM     flow control reception timeout (流控帧接收超时)
+-EMSGSIZE  flow control reception overflow (流控帧接收溢出)
+-EBADMSG   flow control reception with wrong layout/padding (流控帧接收时布局/填充错误)
 ========== =================================================================
 
 Examples
+(示例)
 ========
 
 Basic node example
+(基础节点示例)
 ------------------
 
 Following example implements a node using "normal" physical addressing, with
 RX ID equal to 0x18DAF142 and a TX ID equal to 0x18DA42F1. All options are left
 to their default.
+(以下示例实现了一个使用 "normal" 物理寻址的节点，其 RX ID 为 0x18DAF142，TX ID 为 0x18DA42F1。所有选项均保持默认值。)
 
 .. code-block:: C
 
@@ -379,8 +464,10 @@ to their default.
   /* Data can now be received using read(s, ...) and sent using write(s, ...) */
 
 Additional examples
+(更多示例)
 -------------------
 
 More complete (and complex) examples can be found inside the ``isotp*`` userland
 tools, distributed as part of the ``can-utils`` utilities at:
+(更完整 (也更复杂) 的示例可在 ``isotp*`` 用户态工具中找到，这些工具作为 ``can-utils`` 工具集的一部分发布，网址为：)
 https://github.com/linux-can/can-utils

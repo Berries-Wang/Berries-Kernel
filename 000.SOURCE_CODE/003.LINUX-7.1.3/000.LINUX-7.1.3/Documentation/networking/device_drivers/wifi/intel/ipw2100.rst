@@ -5,16 +5,23 @@
 Intel(R) PRO/Wireless 2100 Driver for Linux
 ===========================================
 
+(Intel(R) PRO/Wireless 2100 Linux 驱动程序)
+
 Support for:
+(支持以下设备：)
 
 - Intel(R) PRO/Wireless 2100 Network Connection
+  (Intel(R) PRO/Wireless 2100 网络连接)
 
 Copyright |copy| 2003-2006, Intel Corporation
+(版权所有 |copy| 2003-2006，Intel Corporation)
 
 README.ipw2100
 
 :Version: git-1.1.5
+  (版本：git-1.1.5)
 :Date:    January 25, 2006
+  (日期：2006 年 1 月 25 日)
 
 .. Index
 
@@ -31,9 +38,11 @@ README.ipw2100
 
 
 0. IMPORTANT INFORMATION BEFORE USING THIS DRIVER
+(0. 使用本驱动前的重要信息)
 =================================================
 
 Important Notice FOR ALL USERS OR DISTRIBUTORS!!!!
+(致所有用户或发行者的重要通告!!!!)
 
 Intel wireless LAN adapters are engineered, manufactured, tested, and
 quality checked to ensure that they meet all necessary local and
@@ -50,6 +59,14 @@ software driver are designed to carefully control parameters that affect
 radio operation and to ensure electromagnetic compliance (EMC). These
 parameters include, without limitation, RF power, spectrum usage,
 channel scanning, and human exposure.
+(Intel 无线局域网适配器从设计、制造、测试到质量检验，都确保满足其指定
+和/或标注销往地区所需的全部当地及政府监管机构要求。由于无线局域网通常
+属于免许可设备，与雷达、卫星以及其他持证和免证设备共享频谱，因此有时
+需要动态地检测、规避并限制使用，以避免对这些设备造成干扰。在许多情况
+下，Intel 必须提供测试数据，以证明符合地区及地方法规，之后产品才会获得
+认证或使用批准。Intel 无线局域网的 EEPROM、固件和软件驱动程序在设计上
+会严格控制影响射频工作的参数，并确保电磁兼容性（EMC）。这些参数包括但
+不限于：射频功率、频谱使用、信道扫描以及人体暴露。)
 
 For these reasons Intel cannot permit any manipulation by third parties
 of the software provided in binary format with the wireless WLAN
@@ -64,12 +81,23 @@ with the modified products, including without limitation, claims under
 the warranty and/or issues arising from regulatory non-compliance, and
 (iii) Intel will not provide or be required to assist in providing
 support to any third parties for such modified products.
+(基于上述原因，Intel 不允许任何第三方操纵随无线 WLAN 适配器以二进制
+格式提供的软件（例如 EEPROM 和固件）。此外，如果您将任何已被未经授权
+方操纵过的补丁、工具或代码（即未经 Intel 验证的补丁、工具或代码，包括
+开源代码修改）用于 Intel 无线局域网适配器，则：(i) 您将独自负责确保
+产品的法规符合性；(ii) 对于与被修改产品相关的任何问题——包括但不限于
+保修索赔和/或因不符合法规而产生的问题——Intel 在任何责任理论下均不
+承担责任；(iii) Intel 不会提供、也无义务协助向任何第三方为此类被修改
+的产品提供支持。)
 
 Note: Many regulatory agencies consider Wireless LAN adapters to be
 modules, and accordingly, condition system-level regulatory approval
 upon receipt and review of test data documenting that the antennas and
 system configuration do not cause the EMC and radio operation to be
 non-compliant.
+(注意：许多监管机构将无线局域网适配器视为模块，因此把系统级的法规批准
+建立在收到并审查测试数据的基础上，以证明天线和系统配置不会导致 EMC 与
+射频工作不合规。)
 
 The drivers available for download from SourceForge are provided as a
 part of a development project.  Conformance to local regulatory
@@ -79,121 +107,165 @@ solution intended to be used for purposes other than development, please
 obtain a tested driver from Intel Customer Support at:
 
 https://www.intel.com/support/wireless/sb/CS-006408.htm
+(从 SourceForge 下载的驱动程序是开发项目的一部分。符合当地法规要求的
+责任由各个开发者自行承担。因此，如果您有兴趣将驱动程序作为解决方案的
+一部分进行部署或发货，且该解决方案拟用于开发以外的目的，请从 Intel
+客户支持部门获取经过测试的驱动程序，网址：
+https://www.intel.com/support/wireless/sb/CS-006408.htm)
 
 1. Introduction
+(1. 简介)
 ===============
 
 This document provides a brief overview of the features supported by the
 IPW2100 driver project.  The main project website, where the latest
 development version of the driver can be found, is:
+(本文档简要概述 IPW2100 驱动项目所支持的特性。可获取该驱动程序最新开发
+版本的主项目网站为：)
 
 	http://ipw2100.sourceforge.net
 
 There you can find the not only the latest releases, but also information about
 potential fixes and patches, as well as links to the development mailing list
 for the driver project.
+(在那里不仅可以找到最新发布版本，还能找到潜在修复与补丁的相关信息，以及
+该驱动项目开发邮件列表的链接。)
 
 
 2. Release git-1.1.5 Current Supported Features
+(2. git-1.1.5 版本当前支持的特性)
 ===============================================
 
 - Managed (BSS) and Ad-Hoc (IBSS)
+  (托管模式（BSS）与 Ad-Hoc（IBSS）)
 - WEP (shared key and open)
+  (WEP（共享密钥与开放模式）)
 - Wireless Tools support
+  (支持 Wireless Tools)
 - 802.1x (tested with XSupplicant 1.0.1)
+  (802.1x（已用 XSupplicant 1.0.1 测试）)
 
 Enabled (but not supported) features:
+(已启用（但不受官方支持）的特性：)
+
 - Monitor/RFMon mode
+  (Monitor/RFMon 模式)
 - WPA/WPA2
+  (WPA/WPA2)
 
 The distinction between officially supported and enabled is a reflection
 on the amount of validation and interoperability testing that has been
 performed on a given feature.
+("官方支持"与"已启用"的区别，反映了对某一特性所做验证与互操作性测试的
+多寡。)
 
 
 3. Command Line Parameters
+(3. 命令行参数)
 ==========================
 
 If the driver is built as a module, the following optional parameters are used
 by entering them on the command line with the modprobe command using this
 syntax::
+(如果驱动程序被构建为模块，可在命令行中使用 modprobe 命令按以下语法
+输入以下可选参数：)
 
 	modprobe ipw2100 [<option>=<VAL1><,VAL2>...]
 
 For example, to disable the radio on driver loading, enter:
+(例如，要在驱动加载时禁用无线电，请输入：)
 
 	modprobe ipw2100 disable=1
 
 The ipw2100 driver supports the following module parameters:
+(ipw2100 驱动程序支持以下模块参数：)
 
 =========	==============	============  ==============================
-Name		Value		Example       Meaning
+Name		Value		Example       Meaning (含义)
 =========	==============	============  ==============================
-debug		0x0-0xffffffff	debug=1024    Debug level set to 1024
-mode		0,1,2		mode=1        AdHoc
-channel		int		channel=3     Only valid in AdHoc or Monitor
-associate	boolean		associate=0   Do NOT auto associate
-disable		boolean		disable=1     Do not power the HW
+debug		0x0-0xffffffff	debug=1024    Debug level set to 1024 (调试级别设为 1024)
+mode		0,1,2		mode=1        AdHoc (自组网模式)
+channel		int		channel=3     Only valid in AdHoc or Monitor (仅在 AdHoc 或 Monitor 模式下有效)
+associate	boolean		associate=0   Do NOT auto associate (不要自动关联)
+disable		boolean		disable=1     Do not power the HW (不要给硬件上电)
 =========	==============	============  ==============================
 
 
 4. Sysfs Helper Files
+(4. Sysfs 辅助文件)
 =====================
 
 There are several ways to control the behavior of the driver.  Many of the
 general capabilities are exposed through the Wireless Tools (iwconfig).  There
 are a few capabilities that are exposed through entries in the Linux Sysfs.
+(控制驱动程序行为有多种方式。许多通用能力通过 Wireless Tools（iwconfig）
+暴露出来，另有一些能力则通过 Linux Sysfs 中的条目暴露。)
 
 
 **Driver Level**
+(驱动程序级)
 
 For the driver level files, look in /sys/bus/pci/drivers/ipw2100/
+(驱动程序级文件位于 /sys/bus/pci/drivers/ipw2100/ 中)
 
   debug_level
 	This controls the same global as the 'debug' module parameter.  For
 	information on the various debugging levels available, run the 'dvals'
 	script found in the driver source directory.
+	(它控制的与 'debug' 模块参数控制的是同一个全局变量。有关可用的各类
+	调试级别，请运行驱动程序源代码目录中的 'dvals' 脚本。)
 
 	.. note::
 
 	      'debug_level' is only enabled if CONFIG_IPW2100_DEBUG is turn on.
+	      (注意：只有在开启 CONFIG_IPW2100_DEBUG 时 'debug_level' 才会被
+	      启用。)
 
 **Device Level**
+(设备级)
 
 For the device level files look in::
+(设备级文件位于以下目录中：)
 
 	/sys/bus/pci/drivers/ipw2100/{PCI-ID}/
 
 For example::
+(例如：)
 
 	/sys/bus/pci/drivers/ipw2100/0000:02:01.0
 
 For the device level files, see /sys/bus/pci/drivers/ipw2100:
+(设备级文件详见 /sys/bus/pci/drivers/ipw2100：)
 
   rf_kill
 	read
+	(读)
 
 	==  =========================================
-	0   RF kill not enabled (radio on)
-	1   SW based RF kill active (radio off)
-	2   HW based RF kill active (radio off)
-	3   Both HW and SW RF kill active (radio off)
+	0   RF kill not enabled (radio on) (RF kill 未启用，无线电开启)
+	1   SW based RF kill active (radio off) (基于软件的 RF kill 生效，无线电关闭)
+	2   HW based RF kill active (radio off) (基于硬件的 RF kill 生效，无线电关闭)
+	3   Both HW and SW RF kill active (radio off) (硬件与软件 RF kill 均生效，无线电关闭)
 	==  =========================================
 
 	write
+	(写)
 
 	==  ==================================================
-	0   If SW based RF kill active, turn the radio back on
-	1   If radio is on, activate SW based RF kill
+	0   If SW based RF kill active, turn the radio back on (若基于软件的 RF kill 生效，则重新打开无线电)
+	1   If radio is on, activate SW based RF kill (若无线电开启，则激活基于软件的 RF kill)
 	==  ==================================================
 
 	.. note::
 
 	   If you enable the SW based RF kill and then toggle the HW
 	   based RF kill from ON -> OFF -> ON, the radio will NOT come back on
+	   (注意：如果先启用基于软件的 RF kill，然后将基于硬件的 RF kill 从
+	   ON -> OFF -> ON 切换，无线电不会重新开启。)
 
 
 5. Radio Kill Switch
+(5. 无线电禁用开关)
 ====================
 
 Most laptops provide the ability for the user to physically disable the radio.
@@ -202,36 +274,49 @@ software to turn the radio off and on.  On other laptops, however, the switch
 is controlled through a button being pressed and a software driver then making
 calls to turn the radio off and on.  This is referred to as a "software based
 RF kill switch"
+(大多数笔记本电脑都允许用户物理性地禁用无线电。一些厂商将其实现为无需
+软件参与即可开关无线电的物理开关。但在另一些笔记本电脑上，该开关通过
+按压按键来控制，再由软件驱动程序调用相关操作来开关无线电。这被称为
+"基于软件的 RF kill 开关"。)
 
 See the Sysfs helper file 'rf_kill' for determining the state of the RF switch
 on your system.
+(要确定您系统上 RF 开关的状态，请参阅 Sysfs 辅助文件 'rf_kill'。)
 
 
 6. Dynamic Firmware
+(6. 动态固件)
 ===================
 
 As the firmware is licensed under a restricted use license, it can not be
 included within the kernel sources.  To enable the IPW2100 you will need a
 firmware image to load into the wireless NIC's processors.
+(由于该固件按照受限使用许可授权，无法包含在内核源码中。要启用 IPW2100，
+您需要一个固件镜像，加载到无线网卡的处理器中。)
 
 You can obtain these images from <http://ipw2100.sf.net/firmware.php>.
+(您可以从 <http://ipw2100.sf.net/firmware.php> 获取这些镜像。)
 
 See INSTALL for instructions on installing the firmware.
+(固件安装说明参见 INSTALL。)
 
 
 7. Power Management
+(7. 电源管理)
 ===================
 
 The IPW2100 supports the configuration of the Power Save Protocol
 through a private wireless extension interface.  The IPW2100 supports
 the following different modes:
+(IPW2100 支持通过私有的无线扩展接口配置省电协议（Power Save Protocol）。
+IPW2100 支持以下几种不同模式：)
 
 	===	===========================================================
-	off	No power management.  Radio is always on.
-	on	Automatic power management
+	off	No power management.  Radio is always on. (无电源管理。无线电始终开启。)
+	on	Automatic power management (自动电源管理)
 	1-5	Different levels of power management.  The higher the
 		number the greater the power savings, but with an impact to
-		packet latencies.
+		packet latencies. (不同的电源管理级别。数字越大越省电，但会对数据包延迟造成影响。)
 	===	===========================================================
 
 Power management works by powering down the radio after a certain
@@ -239,6 +324,9 @@ interval of time has passed where no packets are passed through the
 radio.  Once powered down, the radio remains in that state for a given
 period of time.  For higher power savings, the interval between last
 packet processed to sleep is shorter and the sleep period is longer.
+(电源管理的工作方式是：当一段时间内没有数据包经过无线电时，就把无线电
+断电。断电后，无线电会在该状态保持一段给定的时间。省电要求越高，从
+最后一个数据包处理完毕到进入休眠的间隔就越短，休眠时间则越长。)
 
 When the radio is asleep, the access point sending data to the station
 must buffer packets at the AP until the station wakes up and requests
@@ -247,24 +335,32 @@ the PSP protocol you may experience packet loss or very poor performance
 while power management is enabled.  If this is the case, you will need
 to try and find a firmware update for your AP, or disable power
 management (via ``iwconfig eth1 power off``)
+(当无线电处于休眠状态时，向该工作站发送数据的接入点必须在 AP 侧缓冲
+数据包，直到工作站唤醒并请求这些被缓冲的数据包。如果您的 AP 不能正确
+支持 PSP 协议，那么在电源管理开启期间可能出现丢包或性能极差的情况。
+若是如此，您需要尝试为 AP 寻找固件更新，或者禁用电源管理（通过
+``iwconfig eth1 power off``）。)
 
 To configure the power level on the IPW2100 you use a combination of
 iwconfig and iwpriv.  iwconfig is used to turn power management on, off,
 and set it to auto.
+(要配置 IPW2100 的电源级别，需要结合使用 iwconfig 与 iwpriv。iwconfig
+用于开启、关闭电源管理以及将其设为自动。)
 
 	=========================  ====================================
-	iwconfig eth1 power off    Disables radio power down
+	iwconfig eth1 power off    Disables radio power down (禁用无线电压降)
 	iwconfig eth1 power on     Enables radio power management to
-				   last set level (defaults to AUTO)
+				   last set level (defaults to AUTO) (启用无线电电源管理至最后设定的级别（默认为 AUTO）)
 	iwpriv eth1 set_power 0    Sets power level to AUTO and enables
 				   power management if not previously
-				   enabled.
+				   enabled. (将电源级别设为 AUTO，并在电源管理尚未启用时启用它。)
 	iwpriv eth1 set_power 1-5  Set the power level as specified,
 				   enabling power management if not
-				   previously enabled.
+				   previously enabled. (按指定值设置电源级别，并在电源管理尚未启用时启用它。)
 	=========================  ====================================
 
 You can view the current power level setting via::
+(可以使用以下命令查看当前电源级别设置：)
 
 	iwpriv eth1 get_power
 
@@ -275,49 +371,72 @@ wait before powering the radio and querying the access point for buffered
 packets), and z is the 'power level'.  If power management is turned off the
 xxxx/yyyy will be replaced with 'off' -- the level reported will be the active
 level if `iwconfig eth1 power on` is invoked.
+(它将以 xxxx/yyyy (z) 形式的字符串返回当前配置的周期或超时值：xxxx 为
+超时间隔（数据包处理之后的时长），yyyy 为休眠周期（在对无线电断电并向
+接入点查询缓冲数据包之前等待的时长），z 为"电源级别"。如果电源管理被
+关闭，xxxx/yyyy 将被替换为 'off'——若随后调用 `iwconfig eth1 power on`，
+报告的级别将是活动级别。)
 
 
 8. Support
+(8. 支持)
 ==========
 
 For general development information and support,
 go to:
+(一般开发信息与支持请访问：)
 
     http://ipw2100.sf.net/
 
 The ipw2100 1.1.0 driver and firmware can be downloaded from:
+(ipw2100 1.1.0 驱动程序和固件可从以下地址下载：)
 
     http://support.intel.com
 
 For installation support on the ipw2100 1.1.0 driver on Linux kernels
 2.6.8 or greater, email support is available from:
+(有关在 Linux 2.6.8 及以上内核上安装 ipw2100 1.1.0 驱动程序的支持，
+可通过以下地址获取邮件支持：)
 
     http://supportmail.intel.com
 
 9. License
+(9. 许可证)
 ==========
 
   Copyright |copy| 2003 - 2006 Intel Corporation. All rights reserved.
+  (版权所有 |copy| 2003 - 2006 Intel Corporation。保留所有权利。)
 
   This program is free software; you can redistribute it and/or modify it
   under the terms of the GNU General Public License (version 2) as
   published by the Free Software Foundation.
+  (本程序为自由软件；您可以根据自由软件基金会发布的 GNU 通用公共许可
+  证（第 2 版）的条款对其进行再分发和/或修改。)
 
   This program is distributed in the hope that it will be useful, but WITHOUT
   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
+  (本程序的发布是希望它能派上用场，但不提供任何担保；甚至不提供适销性
+  或特定用途适用性的默示担保。详情请参阅 GNU 通用公共许可证。)
 
   You should have received a copy of the GNU General Public License along with
   this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+  (您应该已经随本程序收到了一份 GNU 通用公共许可证的副本；如果没有，
+  请写信给 Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+  Boston, MA  02111-1307, USA。)
 
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
+  (完整的 GNU 通用公共许可证已包含在本发行版中名为 LICENSE 的文件里。)
 
   License Contact Information:
+  (许可证联系信息：)
 
   James P. Ketrenos <ipw2100-admin@linux.intel.com>
 
   Intel Corporation, 5200 N.E. Elam Young Parkway, Hillsboro, OR 97124-6497
+  (Intel Corporation, 5200 N.E. Elam Young Parkway, Hillsboro, OR
+  97124-6497)
 

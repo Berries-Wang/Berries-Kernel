@@ -3,7 +3,10 @@
 can327: ELM327 driver for Linux SocketCAN
 ==========================================
 
+(can327：面向 Linux SocketCAN 的 ELM327 驱动)
+
 Authors
+(作者)
 --------
 
 Max Staudt <max@enpas.org>
@@ -11,58 +14,81 @@ Max Staudt <max@enpas.org>
 
 
 Motivation
+(动机)
 -----------
 
 This driver aims to lower the initial cost for hackers interested in
 working with CAN buses.
+(本驱动旨在降低有意研究 CAN 总线的黑客们的入门成本。)
 
 CAN adapters are expensive, few, and far between.
 ELM327 interfaces are cheap and plentiful.
 Let's use ELM327s as CAN adapters.
+(CAN 适配器价格昂贵、种类稀少且难觅踪影，而 ELM327 接口便宜且随处可买。
+让我们把 ELM327 用作 CAN 适配器吧。)
 
 
 
 Introduction
+(简介)
 -------------
 
 This driver is an effort to turn abundant ELM327 based OBD interfaces
 into full fledged (as far as possible) CAN interfaces.
+(本驱动试图把数量众多的基于 ELM327 的 OBD 接口改造成功能完备（尽其可能）
+的 CAN 接口。)
 
 Since the ELM327 was never meant to be a stand alone CAN controller,
 the driver has to switch between its modes as quickly as possible in
 order to fake full-duplex operation.
+(由于 ELM327 从来就不是作为独立 CAN 控制器而设计的，驱动程序必须尽可能
+快地在它的各模式之间切换，以模拟全双工操作。)
 
 As such, can327 is a best effort driver. However, this is more than
 enough to implement simple request-response protocols (such as OBD II),
 and to monitor broadcast messages on a bus (such as in a vehicle).
+(因此，can327 是一个尽力而为的驱动程序。不过，这已足以实现简单的
+请求-响应协议（例如 OBD II），也足以监听总线上的广播消息（例如在车辆
+之中）。)
 
 Most ELM327s come as nondescript serial devices, attached via USB or
 Bluetooth. The driver cannot recognize them by itself, and as such it
 is up to the user to attach it in form of a TTY line discipline
 (similar to PPP, SLIP, slcan, ...).
+(大多数 ELM327 都是外观平平无奇的串口设备，通过 USB 或蓝牙连接。驱动
+程序自身无法识别它们，因此需要由用户以 TTY 线路规程（line discipline，
+类似于 PPP、SLIP、slcan 等）的形式将其挂接上来。)
 
 This driver is meant for ELM327 versions 1.4b and up, see below for
 known limitations in older controllers and clones.
+(本驱动面向 ELM327 1.4b 及以上版本；旧版控制器与克隆芯片的已知局限见
+下文。)
 
 
 
 Data sheet
+(数据手册)
 -----------
 
 The official data sheets can be found at ELM electronics' home page:
+(官方数据手册可在 ELM electronics 的主页上找到：)
 
   https://www.elmelectronics.com/
 
 
 
 How to attach the line discipline
+(如何挂接线路规程)
 ----------------------------------
 
 Every ELM327 chip is factory programmed to operate at a serial setting
 of 38400 baud/s, 8 data bits, no parity, 1 stopbit.
+(每颗 ELM327 芯片出厂时都被编程为以如下串口设置工作：38400 波特、
+8 个数据位、无校验位、1 个停止位。)
 
 If you have kept this default configuration, the line discipline can
 be attached on a command prompt as follows::
+(如果保留了这个默认配置，可以在命令提示符下按如下方式挂接线路规程：)
 
     sudo ldattach \
            --debug \
@@ -76,9 +102,12 @@ be attached on a command prompt as follows::
 
 To change the ELM327's serial settings, please refer to its data
 sheet. This needs to be done before attaching the line discipline.
+(要修改 ELM327 的串口设置，请参阅其数据手册。这一步必须在挂接线路规程
+之前完成。)
 
 Once the ldisc is attached, the CAN interface starts out unconfigured.
 Set the speed before starting it::
+(线路规程挂接之后，CAN 接口初始处于未配置状态。启动之前先设置速率：)
 
     # The interface needs to be down to change parameters
     sudo ip link set can0 down
@@ -88,18 +117,24 @@ Set the speed before starting it::
 500000 bit/s is a common rate for OBD-II diagnostics.
 If you're connecting straight to a car's OBD port, this is the speed
 that most cars (but not all!) expect.
+(500000 bit/s 是 OBD-II 诊断常用的速率。如果要直接连接到汽车的 OBD
+端口，这正是大多数汽车（但并非所有汽车！）所期望的速率。)
 
 After this, you can set out as usual with candump, cansniffer, etc.
+(之后即可像平常一样使用 candump、cansniffer 等工具开始工作。)
 
 
 
 How to check the controller version
+(如何查看控制器版本)
 ------------------------------------
 
 Use a terminal program to attach to the controller.
+(使用终端程序连接到控制器。)
 
 After issuing the "``AT WS``" command, the controller will respond with
 its version::
+(发出 "``AT WS``" 命令后，控制器会应答其版本：)
 
     >AT WS
 
@@ -110,26 +145,36 @@ its version::
 
 Note that clones may claim to be any version they like.
 It is not indicative of their actual feature set.
+(注意，克隆芯片想报什么版本就能报什么版本，这并不能代表它们实际具有的
+功能集。)
 
 
 
 
 Communication example
+(通信示例)
 ----------------------
 
 This is a short and incomplete introduction on how to talk to an ELM327.
 It is here to guide understanding of the controller's and the driver's
 limitation (listed below) as well as manual testing.
+(以下是对如何与 ELM327 通信的一个简短且不完整的介绍，旨在帮助理解控制
+器与驱动程序的局限（见下文列表）并便于手动测试。)
 
 
 The ELM327 has two modes:
+(ELM327 有两种模式：)
 
 - Command mode
+  (命令模式)
 - Reception mode
+  (接收模式)
 
 In command mode, it expects one command per line, terminated by CR.
 By default, the prompt is a "``>``", after which a command can be
 entered::
+(在命令模式下，它期望每行一条命令，并以 CR 结尾。默认提示符为
+"``>``"，其后即可输入命令：)
 
     >ATE1
     OK
@@ -138,10 +183,13 @@ entered::
 The init script in the driver switches off several configuration options
 that are only meaningful in the original OBD scenario the chip is meant
 for, and are actually a hindrance for can327.
+(驱动程序中的初始化脚本会关掉若干配置选项：这些选项只在芯片原本面向的
+OBD 场景中才有意义，对 can327 而言反而碍事。)
 
 
 When a command is not recognized, such as by an older version of the
 ELM327, a question mark is printed as a response instead of OK::
+(当命令不被识别时（例如旧版 ELM327），会以问号代替 OK 作为应答：)
 
     >ATUNKNOWN
     ?
@@ -149,11 +197,14 @@ ELM327, a question mark is printed as a response instead of OK::
 
 At present, can327 does not evaluate this response. See the section
 below on known limitations for details.
+(目前 can327 不会评估这个应答。详情见下文已知局限一节。)
 
 
 When a CAN frame is to be sent, the target address is configured, after
 which the frame is sent as a command that consists of the data's hex
 dump::
+(发送 CAN 帧时，先配置目标地址，随后把帧作为一条由数据十六进制转储构成
+的命令发送出去：)
 
     >ATSH123
     OK
@@ -165,6 +216,9 @@ The above interaction sends the SFF frame "``DE AD BE EF 12 34 56 78``"
 with (11 bit) CAN ID ``0x123``.
 For this to function, the controller must be configured for SFF sending
 mode (using "``AT PB``", see code or datasheet).
+(上述交互发送了 SFF 帧 "``DE AD BE EF 12 34 56 78``"，其 CAN ID 为
+``0x123``（11 位）。要使其正常工作，控制器必须配置为 SFF 发送模式
+（使用 "``AT PB``" 命令，参见代码或数据手册）。)
 
 
 Once a frame has been sent and wait-for-reply mode is on (``ATR1``,
@@ -172,16 +226,23 @@ configured on ``listen-only=off``), or when the reply timeout expires
 and the driver sets the controller into monitoring mode (``ATMA``),
 the ELM327 will send one line for each received CAN frame, consisting
 of CAN ID, DLC, and data::
+(帧发送完毕且等待应答模式开启时（``ATR1``，在 ``listen-only=off`` 时
+配置），或者应答超时、驱动程序将控制器置入监听模式（``ATMA``）时，
+ELM327 会为每个收到的 CAN 帧输出一行，内容包括 CAN ID、DLC 和数据：)
 
     123 8 DEADBEEF12345678
 
 For EFF (29 bit) CAN frames, the address format is slightly different,
 which can327 uses to tell the two apart::
+(对于 EFF（29 位）CAN 帧，地址格式略有不同，can327 正是利用这一点来
+区分两者：)
 
     12 34 56 78 8 DEADBEEF12345678
 
 The ELM327 will receive both SFF and EFF frames - the current CAN
 config (``ATPB``) does not matter.
+(ELM327 会同时接收 SFF 和 EFF 帧——当前的 CAN 配置（``ATPB``）无关
+紧要。)
 
 
 If the ELM327's internal UART sending buffer runs full, it will abort
@@ -189,20 +250,28 @@ the monitoring mode, print "BUFFER FULL" and drop back into command
 mode. Note that in this case, unlike with other error messages, the
 error message may appear on the same line as the last (usually
 incomplete) data frame::
+(如果 ELM327 内部的 UART 发送缓冲区满了，它会中止监听模式，打印
+"BUFFER FULL" 并退回命令模式。注意：在这种情况下，与其他错误消息不同，
+错误消息可能与最后一个（通常不完整的）数据帧出现在同一行：)
 
     12 34 56 78 8 DEADBEEF123 BUFFER FULL
 
 
 
 Known limitations of the controller
+(控制器的已知局限)
 ------------------------------------
 
 - Clone devices ("v1.5" and others)
+  (克隆设备（"v1.5" 等）)
 
   Sending RTR frames is not supported and will be dropped silently.
+  (不支持发送 RTR 帧，此类帧会被静默丢弃。)
 
   Receiving RTR with DLC 8 will appear to be a regular frame with
   the last received frame's DLC and payload.
+  (接收 DLC 为 8 的 RTR 帧时，它会表现为一个普通帧，并带有上一个收到
+  帧的 DLC 和有效载荷。)
 
   "``AT CSM``" (CAN Silent Monitoring, i.e. don't send CAN ACKs) is
   not supported, and is hard coded to ON. Thus, frames are not ACKed
@@ -213,49 +282,75 @@ Known limitations of the controller
   or the receive reply timeout runs out, the ELM327 will end reply
   reception mode on its own and can327 will fall back to "``AT MA``"
   in order to keep monitoring the bus.
+  ("``AT CSM``"（CAN 静默监听，即不发送 CAN ACK）不受支持，且被硬编码
+  为开启。因此监听期间帧不会被确认："``AT MA``"（Monitor All）将始终
+  处于"静默"状态。不过，在发送一帧之后，ELM327 会立即进入"接收应答"
+  模式，此时它确实会对接收到的每个帧发送 ACK。一旦总线归于沉寂、发生
+  错误（如 BUFFER FULL）或接收应答超时，ELM327 会自行结束应答接收
+  模式，can327 将退回 "``AT MA``" 以继续监听总线。)
 
   Other limitations may apply, depending on the clone and the quality
   of its firmware.
+  (其他局限视具体的克隆芯片及其固件质量而定。)
 
 
 - All versions
+  (所有版本)
 
   No full duplex operation is supported. The driver will switch
   between input/output mode as quickly as possible.
+  (不支持全双工操作。驱动程序会尽快在输入/输出模式之间切换。)
 
   The length of outgoing RTR frames cannot be set. In fact, some
   clones (tested with one identifying as "``v1.5``") are unable to
   send RTR frames at all.
+  (无法设置外发 RTR 帧的长度。事实上，某些克隆芯片（实测有一款自称
+  "``v1.5``"）根本无法发送 RTR 帧。)
 
   We don't have a way to get real-time notifications on CAN errors.
   While there is a command (``AT CS``) to retrieve some basic stats,
   we don't poll it as it would force us to interrupt reception mode.
+  (我们没有办法实时获得 CAN 错误通知。虽然有命令（``AT CS``）可以读取
+  一些基本统计信息，但我们不会轮询它，因为那将迫使我们中断接收模式。)
 
 
 - Versions prior to 1.4b
+  (1.4b 之前的版本)
 
   These versions do not send CAN ACKs when in monitoring mode (AT MA).
   However, they do send ACKs while waiting for a reply immediately
   after sending a frame. The driver maximizes this time to make the
   controller as useful as possible.
+  (这些版本在监听模式（AT MA）下不发送 CAN ACK。不过在发送一帧后等待
+  应答期间，它们会发送 ACK。驱动程序会尽量延长这段时间，让控制器发挥
+  最大效用。)
 
   Starting with version 1.4b, the ELM327 supports the "``AT CSM``"
   command, and the "listen-only" CAN option will take effect.
+  (从 1.4b 版本起，ELM327 支持 "``AT CSM``" 命令，"listen-only" CAN
+  选项才会生效。)
 
 
 - Versions prior to 1.4
+  (1.4 之前的版本)
 
   These chips do not support the "``AT PB``" command, and thus cannot
   change bitrate or SFF/EFF mode on-the-fly. This will have to be
   programmed by the user before attaching the line discipline. See the
   data sheet for details.
+  (这些芯片不支持 "``AT PB``" 命令，因此无法在运行中更改比特率或
+  SFF/EFF 模式。用户必须在挂接线路规程之前先行设置。详情参见数据
+  手册。)
 
 
 - Versions prior to 1.3
+  (1.3 之前的版本)
 
   These chips cannot be used at all with can327. They do not support
   the "``AT D1``" command, which is necessary to avoid parsing conflicts
   on incoming data, as well as distinction of RTR frame lengths.
+  (这些芯片完全无法与 can327 一起使用。它们不支持 "``AT D1``" 命令，
+  而该命令对于避免入站数据的解析冲突以及区分 RTR 帧长度都是必需的。)
 
   Specifically, this allows for easy distinction of SFF and EFF
   frames, and to check whether frames are complete. While it is possible
@@ -263,69 +358,102 @@ Known limitations of the controller
   sends us, this method fails when the ELM327's UART output buffer
   overruns. It may abort sending in the middle of the line, which will
   then be mistaken for something else.
+  (具体来说，该命令使得区分 SFF 与 EFF 帧、检查帧是否完整变得容易。
+  虽然可以从 ELM327 发来的行的长度推断出类型和长度，但当 ELM327 的
+  UART 输出缓冲区溢出时该方法就会失效：它可能在一行中途中止发送，随后
+  这些内容就会被误判为其他东西。)
 
 
 
 Known limitations of the driver
+(驱动程序的已知局限)
 --------------------------------
 
 - No 8/7 timing.
+  (不支持 8/7 时序。)
 
   ELM327 can only set CAN bitrates that are of the form 500000/n, where
   n is an integer divisor.
   However there is an exception: With a separate flag, it may set the
   speed to be 8/7 of the speed indicated by the divisor.
   This mode is not currently implemented.
+  (ELM327 只能设置形如 500000/n 的 CAN 比特率，其中 n 为整数分频系数。
+  但有一个例外：借助一个单独的标志位，它可以把速率设为分频系数所示速率
+  的 8/7。该模式目前尚未实现。)
 
 - No evaluation of command responses.
+  (不评估命令应答。)
 
   The ELM327 will reply with OK when a command is understood, and with ?
   when it is not. The driver does not currently check this, and simply
   assumes that the chip understands every command.
   The driver is built such that functionality degrades gracefully
   nevertheless. See the section on known limitations of the controller.
+  (命令被理解时 ELM327 会回复 OK，不被理解时则回复 ?。驱动程序目前不
+  检查这一点，只是假定芯片能理解每一条命令。不过驱动程序的设计保证了
+  功能仍能优雅地降级。参见控制器的已知局限一节。)
 
 - No use of hardware CAN ID filtering
+  (不使用硬件 CAN ID 过滤)
 
   An ELM327's UART sending buffer will easily overflow on heavy CAN bus
   load, resulting in the "``BUFFER FULL``" message. Using the hardware
   filters available through "``AT CF xxx``" and "``AT CM xxx``" would be
   helpful here, however SocketCAN does not currently provide a facility
   to make use of such hardware features.
+  (在 CAN 总线负载较重时，ELM327 的 UART 发送缓冲区很容易溢出，产生
+  "``BUFFER FULL``" 消息。通过 "``AT CF xxx``" 和 "``AT CM xxx``" 使用
+  硬件过滤器在这里会有所帮助，但 SocketCAN 目前尚未提供利用这类硬件
+  特性的机制。)
 
 
 
 Rationale behind the chosen configuration
+(所选配置背后的理由)
 ------------------------------------------
 
 ``AT E1``
   Echo on
+  (回显开启)
 
   We need this to be able to get a prompt reliably.
+  (我们需要它来可靠地获取提示符。)
 
 ``AT S1``
   Spaces on
+  (空格开启)
 
   We need this to distinguish 11/29 bit CAN addresses received.
+  (我们需要它来区分收到的 11/29 位 CAN 地址。)
 
   Note:
   We can usually do this using the line length (odd/even),
   but this fails if the line is not transmitted fully to
   the host (BUFFER FULL).
+  (注意：
+  通常可以借助行长度（奇偶）来区分，但如果该行未能完整地传输到主机
+  （BUFFER FULL），此法便行不通。)
 
 ``AT D1``
   DLC on
+  (DLC 开启)
 
   We need this to tell the "length" of RTR frames.
+  (我们需要它来判断 RTR 帧的"长度"。)
 
 
 
 A note on CAN bus termination
+(关于 CAN 总线终端电阻的说明)
 ------------------------------
 
 Your adapter may have resistors soldered in which are meant to terminate
 the bus. This is correct when it is plugged into a OBD-II socket, but
 not helpful when trying to tap into the middle of an existing CAN bus.
+(您的适配器上可能焊有用于终结总线的电阻。当适配器插入 OBD-II 插座时，
+这是正确的做法；但若想从现有 CAN 总线中间接入，这些电阻就帮不上忙了。)
 
 If communications don't work with the adapter connected, check for the
 termination resistors on its PCB and try removing them.
+(如果接上适配器后通信不正常，请检查其 PCB 上的终端电阻，并尝试将它们
+拆除。)

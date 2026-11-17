@@ -4,119 +4,180 @@
 Linux Base Driver for Intel(R) Ethernet Network Connection
 ==========================================================
 
+(Intel(R) 以太网网络连接的 Linux 基础驱动)
+
 Intel Gigabit Linux driver.
 Copyright(c) 1999 - 2013 Intel Corporation.
+(Intel 千兆位 Linux 驱动。
+版权所有 (c) 1999 - 2013 Intel Corporation。)
 
 Contents
+(目录)
 ========
 
 - Identifying Your Adapter
+  (识别你的网卡)
 - Command Line Parameters
+  (命令行参数)
 - Speed and Duplex Configuration
+  (速度与双工配置)
 - Additional Configurations
+  (其他配置)
 - Support
+  (支持)
 
 Identifying Your Adapter
+(识别你的网卡)
 ========================
 
 For more information on how to identify your adapter, go to the Adapter &
 Driver ID Guide at:
+(有关如何识别你的网卡的更多信息，请访问 Adapter & Driver ID Guide（网卡与驱动
+识别指南）：)
 
     http://support.intel.com/support/go/network/adapter/idguide.htm
 
 For the latest Intel network drivers for Linux, refer to the following
 website.  In the search field, enter your adapter name or type, or use the
 networking link on the left to search for your adapter:
+(有关面向 Linux 的最新 Intel 网络驱动程序，请参考以下网站。在搜索栏中输入你的
+网卡名称或类型，或者使用左侧的 networking（网络）链接来搜索你的网卡：)
 
     http://support.intel.com/support/go/network/adapter/home.htm
 
 Command Line Parameters
+(命令行参数)
 =======================
 
 The default value for each parameter is generally the recommended setting,
 unless otherwise noted.
+(除非另有说明，每个参数的默认值通常即为推荐的设置。)
 
 NOTES:
+(注意：)
+
 	For more information about the AutoNeg, Duplex, and Speed
         parameters, see the "Speed and Duplex Configuration" section in
         this document.
+        (有关 AutoNeg、Duplex 和 Speed 参数的更多信息，请参阅本文档中的
+        "Speed and Duplex Configuration"（速度与双工配置）一节。)
 
         For more information about the InterruptThrottleRate,
         RxIntDelay, TxIntDelay, RxAbsIntDelay, and TxAbsIntDelay
         parameters, see the application note at:
         http://www.intel.com/design/network/applnots/ap450.htm
+        (有关 InterruptThrottleRate、RxIntDelay、TxIntDelay、RxAbsIntDelay 与
+        TxAbsIntDelay 参数的更多信息，请参阅以下应用说明：
+        http://www.intel.com/design/network/applnots/ap450.htm)
 
 AutoNeg
+(自动协商)
 -------
 
 (Supported only on adapters with copper connections)
+(仅支持带有铜缆连接的网卡。)
 
 :Valid Range:   0x01-0x0F, 0x20-0x2F
+                (有效范围：0x01-0x0F, 0x20-0x2F)
 :Default Value: 0x2F
+                (默认值：0x2F)
 
 This parameter is a bit-mask that specifies the speed and duplex settings
 advertised by the adapter.  When this parameter is used, the Speed and
 Duplex parameters must not be specified.
+(该参数是一个位掩码，用于指定网卡对外通告的速度与双工设置。使用该参数时，不得
+再指定 Speed 和 Duplex 参数。)
 
 NOTE:
+(注意：)
+
        Refer to the Speed and Duplex section of this readme for more
        information on the AutoNeg parameter.
+       (有关 AutoNeg 参数的更多信息，请参阅本 readme 中的 Speed and Duplex
+       （速度与双工）一节。)
 
 Duplex
+(双工)
 ------
 
 (Supported only on adapters with copper connections)
+(仅支持带有铜缆连接的网卡。)
 
 :Valid Range:   0-2 (0=auto-negotiate, 1=half, 2=full)
+                (有效范围：0-2（0=自动协商，1=半双工，2=全双工）)
 :Default Value: 0
+                (默认值：0)
 
 This defines the direction in which data is allowed to flow.  Can be
 either one or two-directional.  If both Duplex and the link partner are
 set to auto-negotiate, the board auto-detects the correct duplex.  If the
 link partner is forced (either full or half), Duplex defaults to half-
 duplex.
+(该参数定义数据允许流动的方向，可以是单向或双向。如果 Duplex 与链路伙伴都设置
+为自动协商，网卡会自动检测正确的双工模式。如果链路伙伴被强制指定（全双工或半
+双工），Duplex 默认为半双工。)
 
 FlowControl
+(流量控制)
 -----------
 
 :Valid Range:   0-3 (0=none, 1=Rx only, 2=Tx only, 3=Rx&Tx)
+                (有效范围：0-3（0=无，1=仅 Rx，2=仅 Tx，3=Rx 与 Tx）)
 :Default Value: Reads flow control settings from the EEPROM
+                (默认值：从 EEPROM 读取流量控制设置)
 
 This parameter controls the automatic generation(Tx) and response(Rx)
 to Ethernet PAUSE frames.
+(该参数控制对以太网 PAUSE 帧的自动生成（Tx）与响应（Rx）。)
 
 InterruptThrottleRate
+(中断节流率)
 ---------------------
 
 (not supported on Intel(R) 82542, 82543 or 82544-based adapters)
+(基于 Intel(R) 82542、82543 或 82544 的网卡不支持该参数。)
 
 :Valid Range:
    0,1,3,4,100-100000 (0=off, 1=dynamic, 3=dynamic conservative,
    4=simplified balancing)
+   (有效范围：0,1,3,4,100-100000（0=关闭，1=动态，3=动态保守，
+   4=简化均衡）)
 :Default Value: 3
+                (默认值：3)
 
 The driver can limit the amount of interrupts per second that the adapter
 will generate for incoming packets. It does this by writing a value to the
 adapter that is based on the maximum amount of interrupts that the adapter
 will generate per second.
+(驱动程序可以限制网卡每秒为传入数据包产生的中断数量。其做法是向网卡写入一个
+数值，该数值基于网卡每秒将产生的最大中断数量。)
 
 Setting InterruptThrottleRate to a value greater or equal to 100
 will program the adapter to send out a maximum of that many interrupts
 per second, even if more packets have come in. This reduces interrupt
 load on the system and can lower CPU utilization under heavy load,
 but will increase latency as packets are not processed as quickly.
+(将 InterruptThrottleRate 设置为大于或等于 100 的值，会把网卡编程为每秒最多发出
+该数量的中断，即使有更多数据包到达也是如此。这可以减少系统的中断负载，并在高
+负载下降低 CPU 占用率，但由于数据包不能被尽快处理，延迟会增加。)
 
 The default behaviour of the driver previously assumed a static
 InterruptThrottleRate value of 8000, providing a good fallback value for
 all traffic types,but lacking in small packet performance and latency.
 The hardware can handle many more small packets per second however, and
 for this reason an adaptive interrupt moderation algorithm was implemented.
+(驱动程序此前的默认行为假定 InterruptThrottleRate 为固定值 8000，这对所有流量
+类型来说都是一个不错的兜底值，但在小数据包性能与延迟方面表现欠佳。然而硬件每
+秒本可处理更多小数据包，因此实现了一种自适应中断调节算法。)
 
 Since 7.3.x, the driver has two adaptive modes (setting 1 or 3) in which
 it dynamically adjusts the InterruptThrottleRate value based on the traffic
 that it receives. After determining the type of incoming traffic in the last
 timeframe, it will adjust the InterruptThrottleRate to an appropriate value
 for that traffic.
+(从 7.3.x 起，驱动程序拥有两种自适应模式（设置值 1 或 3），会根据收到的流量
+动态调整 InterruptThrottleRate 的值。在判定上一时间段内传入流量的类型之后，它会
+把 InterruptThrottleRate 调整为适合该流量的取值。)
 
 The algorithm classifies the incoming traffic every interval into
 classes.  Once the class is determined, the InterruptThrottleRate value is
@@ -125,36 +186,59 @@ adjusted to suit that traffic type the best. There are three classes defined:
 for small amounts of traffic and/or a significant percentage of small
 packets; and "Lowest latency", for almost completely small packets or
 minimal traffic.
+(该算法在每个时间间隔内对传入流量进行分类。一旦确定了类别，就会将
+InterruptThrottleRate 的值调整到最适合该流量类型。共定义了三个类别："Bulk
+traffic"（大批量流量），指大量正常大小的数据包；"Low latency"（低延迟），指少量
+流量和/或小数据包占比显著；以及 "Lowest latency"（最低延迟），指几乎全是小数据
+包或流量极小的情况。)
 
 In dynamic conservative mode, the InterruptThrottleRate value is set to 4000
 for traffic that falls in class "Bulk traffic". If traffic falls in the "Low
 latency" or "Lowest latency" class, the InterruptThrottleRate is increased
 stepwise to 20000. This default mode is suitable for most applications.
+(在动态保守模式下，属于 "Bulk traffic" 类别的流量其 InterruptThrottleRate 值被
+设为 4000。如果流量属于 "Low latency" 或 "Lowest latency" 类别，
+InterruptThrottleRate 会逐步提升到 20000。这一默认模式适用于大多数应用。)
 
 For situations where low latency is vital such as cluster or
 grid computing, the algorithm can reduce latency even more when
 InterruptThrottleRate is set to mode 1. In this mode, which operates
 the same as mode 3, the InterruptThrottleRate will be increased stepwise to
 70000 for traffic in class "Lowest latency".
+(对于集群或网格计算等低延迟至关重要的场景，将 InterruptThrottleRate 设置为
+模式 1 可以进一步降低延迟。该模式的运作方式与模式 3 相同，只是对属于 "Lowest
+latency" 类别的流量，InterruptThrottleRate 会逐步提升到 70000。)
 
 In simplified mode the interrupt rate is based on the ratio of TX and
 RX traffic.  If the bytes per second rate is approximately equal, the
 interrupt rate will drop as low as 2000 interrupts per second.  If the
 traffic is mostly transmit or mostly receive, the interrupt rate could
 be as high as 8000.
+(在简化模式下，中断速率基于 TX 与 RX 流量之比。如果每秒字节数大致相等，中断
+速率会降至低至每秒 2000 次中断。如果流量以发送为主或以接收为主，中断速率可能
+高达 8000。)
 
 Setting InterruptThrottleRate to 0 turns off any interrupt moderation
 and may improve small packet latency, but is generally not suitable
 for bulk throughput traffic.
+(将 InterruptThrottleRate 设置为 0 会关闭一切中断调节，这可能改善小数据包的
+延迟，但通常不适合大批量吞吐流量。)
 
 NOTE:
+(注意：)
+
        InterruptThrottleRate takes precedence over the TxAbsIntDelay and
        RxAbsIntDelay parameters.  In other words, minimizing the receive
        and/or transmit absolute delays does not force the controller to
        generate more interrupts than what the Interrupt Throttle Rate
        allows.
+       (InterruptThrottleRate 的优先级高于 TxAbsIntDelay 和 RxAbsIntDelay
+       参数。换言之，将接收和/或发送绝对延迟降到最小，并不会迫使控制器产生
+       超过 Interrupt Throttle Rate 所允许数量的中断。)
 
 CAUTION:
+(警告：)
+
           If you are using the Intel(R) PRO/1000 CT Network Connection
           (controller 82547), setting InterruptThrottleRate to a value
           greater than 75,000, may hang (stop transmitting) adapters
@@ -164,13 +248,24 @@ CAUTION:
           the network connection.  To eliminate the potential for the
           hang, ensure that InterruptThrottleRate is set no greater
           than 75,000 and is not set to 0.
+          (如果你使用的是 Intel(R) PRO/1000 CT Network Connection（控制器
+          82547），在某些网络条件下，将 InterruptThrottleRate 设置为大于
+          75000 的值可能导致网卡挂起（停止发送）。发生这种情况时，系统事件
+          日志中会记录一条 NETDEV WATCHDOG 消息。此外，控制器会被自动复位，
+          恢复网络连接。为避免挂起的可能，请确保 InterruptThrottleRate 的
+          设置值不大于 75000，也不要设置为 0。)
 
 NOTE:
+(注意：)
+
        When e1000 is loaded with default settings and multiple adapters
        are in use simultaneously, the CPU utilization may increase non-
        linearly.  In order to limit the CPU utilization without impacting
        the overall throughput, we recommend that you load the driver as
        follows::
+       (当 e1000 以默认设置加载且同时使用多个网卡时，CPU 占用率可能呈非线性
+       增长。为了在不影响总体吞吐量的前提下限制 CPU 占用率，我们建议按以下
+       方式加载驱动：)
 
            modprobe e1000 InterruptThrottleRate=3000,3000,3000
 
@@ -180,34 +275,55 @@ NOTE:
        systems and is a good starting point, but the optimal value will
        be platform-specific.  If CPU utilization is not a concern, use
        RX_POLLING (NAPI) and default driver settings.
+       (这会把驱动程序的第一、第二和第三个实例的 InterruptThrottleRate 设置为
+       每秒 3000 次中断。每秒 2000 到 3000 次中断的范围在大多数系统上都能正常
+       工作，是一个不错的起点，但最优值因平台而异。如果不关心 CPU 占用率，可
+       使用 RX_POLLING (NAPI) 和默认驱动设置。)
 
 RxDescriptors
+(接收描述符数量)
 -------------
 
 :Valid Range:
  - 48-256 for 82542 and 82543-based adapters
  - 48-4096 for all other supported adapters
+
+ (有效范围：基于 82542 和 82543 的网卡为 48-256；其他所有受支持的网卡为
+ 48-4096。)
 :Default Value: 256
+                (默认值：256)
 
 This value specifies the number of receive buffer descriptors allocated
 by the driver.  Increasing this value allows the driver to buffer more
 incoming packets, at the expense of increased system memory utilization.
+(该值指定驱动程序分配的接收缓冲区描述符的数量。增大该值可让驱动程序缓冲更多
+的传入数据包，代价是系统内存占用增加。)
 
 Each descriptor is 16 bytes.  A receive buffer is also allocated for each
 descriptor and can be either 2048, 4096, 8192, or 16384 bytes, depending
 on the MTU setting. The maximum MTU size is 16110.
+(每个描述符为 16 字节。系统还会为每个描述符分配一个接收缓冲区，其大小视 MTU
+设置而定，可以是 2048、4096、8192 或 16384 字节。MTU 最大为 16110。)
 
 NOTE:
+(注意：)
+
        MTU designates the frame size.  It only needs to be set for Jumbo
        Frames.  Depending on the available system resources, the request
        for a higher number of receive descriptors may be denied.  In this
        case, use a lower number.
+       (MTU 指的是帧大小，只需在启用巨型帧（Jumbo Frames）时设置。在系统资源
+       允许的情况下，若请求更多数量的接收描述符可能被拒绝，此时请使用较小的
+       数值。)
 
 RxIntDelay
+(接收中断延迟)
 ----------
 
 :Valid Range:   0-65535 (0=off)
+                (有效范围：0-65535（0=关闭）)
 :Default Value: 0
+                (默认值：0)
 
 This value delays the generation of receive interrupts in units of 1.024
 microseconds.  Receive interrupt reduction can improve CPU efficiency if
@@ -216,22 +332,36 @@ extra latency to frame reception and can end up decreasing the throughput
 of TCP traffic.  If the system is reporting dropped receives, this value
 may be set too high, causing the driver to run out of available receive
 descriptors.
+(该值以 1.024 微秒为单位延迟接收中断的产生。若针对特定网络流量进行恰当调优，
+减少接收中断可以提高 CPU 效率。增大该值会给帧接收带来额外延迟，最终可能降低
+TCP 流量的吞吐量。如果系统报告接收丢包，说明该值可能设置得过高，导致驱动程序
+耗尽可用的接收描述符。)
 
 CAUTION:
+(警告：)
+
           When setting RxIntDelay to a value other than 0, adapters may
           hang (stop transmitting) under certain network conditions.  If
           this occurs a NETDEV WATCHDOG message is logged in the system
           event log.  In addition, the controller is automatically reset,
           restoring the network connection.  To eliminate the potential
           for the hang ensure that RxIntDelay is set to 0.
+          (将 RxIntDelay 设置为非 0 值时，在某些网络条件下网卡可能挂起（停止
+          发送）。发生这种情况时，系统事件日志中会记录一条 NETDEV WATCHDOG
+          消息。此外，控制器会被自动复位，恢复网络连接。为避免挂起的可能，
+          请确保将 RxIntDelay 设置为 0。)
 
 RxAbsIntDelay
+(接收绝对中断延迟)
 -------------
 
 (This parameter is supported only on 82540, 82545 and later adapters.)
+(该参数仅在 82540、82545 及更高版本的网卡上受支持。)
 
 :Valid Range:   0-65535 (0=off)
+                (有效范围：0-65535（0=关闭）)
 :Default Value: 128
+                (默认值：128)
 
 This value, in units of 1.024 microseconds, limits the delay in which a
 receive interrupt is generated.  Useful only if RxIntDelay is non-zero,
@@ -239,56 +369,87 @@ this value ensures that an interrupt is generated after the initial
 packet is received within the set amount of time.  Proper tuning,
 along with RxIntDelay, may improve traffic throughput in specific network
 conditions.
+(该值以 1.024 微秒为单位，限制产生接收中断的延迟。仅在 RxIntDelay 非零时才有
+用，它确保在收到初始数据包后的设定时间内会产生一次中断。与 RxIntDelay 配合
+恰当调优，可在特定网络条件下改善流量吞吐量。)
 
 Speed
+(速度)
 -----
 
 (This parameter is supported only on adapters with copper connections.)
+(该参数仅支持带有铜缆连接的网卡。)
 
 :Valid Settings: 0, 10, 100, 1000
+                 (有效设置：0, 10, 100, 1000)
 :Default Value:  0 (auto-negotiate at all supported speeds)
+                 (默认值：0（以所有受支持的速度自动协商）)
 
 Speed forces the line speed to the specified value in megabits per second
 (Mbps).  If this parameter is not specified or is set to 0 and the link
 partner is set to auto-negotiate, the board will auto-detect the correct
 speed.  Duplex should also be set when Speed is set to either 10 or 100.
+(Speed 将线路速度强制为指定的值（单位为兆比特每秒，Mbps）。如果未指定该参数或
+将其设为 0，且链路伙伴设置为自动协商，网卡将自动检测正确的速度。当 Speed 设置
+为 10 或 100 时，还应设置 Duplex。)
 
 TxDescriptors
+(发送描述符数量)
 -------------
 
 :Valid Range:
   - 48-256 for 82542 and 82543-based adapters
   - 48-4096 for all other supported adapters
+
+  (有效范围：基于 82542 和 82543 的网卡为 48-256；其他所有受支持的网卡为
+  48-4096。)
 :Default Value: 256
+                (默认值：256)
 
 This value is the number of transmit descriptors allocated by the driver.
 Increasing this value allows the driver to queue more transmits.  Each
 descriptor is 16 bytes.
+(该值是驱动程序分配的发送描述符的数量。增大该值可让驱动程序排队更多的发送。
+每个描述符为 16 字节。)
 
 NOTE:
+(注意：)
+
        Depending on the available system resources, the request for a
        higher number of transmit descriptors may be denied.  In this case,
        use a lower number.
+       (在系统资源允许的情况下，请求更多数量的发送描述符可能被拒绝。此时请
+       使用较小的数值。)
 
 TxIntDelay
+(发送中断延迟)
 ----------
 
 :Valid Range:   0-65535 (0=off)
+                (有效范围：0-65535（0=关闭）)
 :Default Value: 8
+                (默认值：8)
 
 This value delays the generation of transmit interrupts in units of
 1.024 microseconds.  Transmit interrupt reduction can improve CPU
 efficiency if properly tuned for specific network traffic.  If the
 system is reporting dropped transmits, this value may be set too high
 causing the driver to run out of available transmit descriptors.
+(该值以 1.024 微秒为单位延迟发送中断的产生。若针对特定网络流量进行恰当调优，
+减少发送中断可以提高 CPU 效率。如果系统报告发送丢包，说明该值可能设置得过高，
+导致驱动程序耗尽可用的发送描述符。)
 
 TxAbsIntDelay
+(发送绝对中断延迟)
 -------------
 
 (This parameter is supported only on 82540, 82545 and later adapters.)
+(该参数仅在 82540、82545 及更高版本的网卡上受支持。)
 
 :Valid Range:   0-65535 (0=off)
+                (有效范围：0-65535（0=关闭）)
 :Default Value: 32
+                (默认值：32)
 
 This value, in units of 1.024 microseconds, limits the delay in which a
 transmit interrupt is generated.  Useful only if TxIntDelay is non-zero,
@@ -296,81 +457,118 @@ this value ensures that an interrupt is generated after the initial
 packet is sent on the wire within the set amount of time.  Proper tuning,
 along with TxIntDelay, may improve traffic throughput in specific
 network conditions.
+(该值以 1.024 微秒为单位，限制产生发送中断的延迟。仅在 TxIntDelay 非零时才有
+用，它确保在初始数据包被发送到线路上之后的设定时间内会产生一次中断。与
+TxIntDelay 配合恰当调优，可在特定网络条件下改善流量吞吐量。)
 
 XsumRX
+(接收校验和卸载)
 ------
 
 (This parameter is NOT supported on the 82542-based adapter.)
+(基于 82542 的网卡不支持该参数。)
 
 :Valid Range:   0-1
+                (有效范围：0-1)
 :Default Value: 1
+                (默认值：1)
 
 A value of '1' indicates that the driver should enable IP checksum
 offload for received packets (both UDP and TCP) to the adapter hardware.
+(值为 '1' 表示驱动程序应当为接收到的数据包（UDP 和 TCP 均可）启用 IP 校验和
+卸载，交由网卡硬件处理。)
 
 Copybreak
+(复制阈值)
 ---------
 
 :Valid Range:   0-xxxxxxx (0=off)
+                (有效范围：0-xxxxxxx（0=关闭）)
 :Default Value: 256
+                (默认值：256)
 :Usage: modprobe e1000.ko copybreak=128
+        (用法：modprobe e1000.ko copybreak=128)
 
 Driver copies all packets below or equaling this size to a fresh RX
 buffer before handing it up the stack.
+(驱动程序会把所有小于或等于该大小的数据包先复制到一个新的 RX 缓冲区，再上交
+给协议栈。)
 
 This parameter is different than other parameters, in that it is a
 single (not 1,1,1 etc.) parameter applied to all driver instances and
 it is also available during runtime at
 /sys/module/e1000/parameters/copybreak
+(该参数与其他参数不同之处在于：它是一个应用于所有驱动程序实例的单一参数（而
+不是 1,1,1 之类的形式），并且在运行时也可以通过
+/sys/module/e1000/parameters/copybreak 进行设置。)
 
 SmartPowerDownEnable
+(智能断电使能)
 --------------------
 
 :Valid Range: 0-1
+              (有效范围：0-1)
 :Default Value:  0 (disabled)
+                 (默认值：0（禁用）)
 
 Allows PHY to turn off in lower power states. The user can turn off
 this parameter in supported chipsets.
+(允许 PHY 在低功耗状态下关闭。在支持的芯片组上，用户可以禁用该参数。)
 
 Speed and Duplex Configuration
+(速度与双工配置)
 ==============================
 
 Three keywords are used to control the speed and duplex configuration.
 These keywords are Speed, Duplex, and AutoNeg.
+(使用三个关键字来控制速度与双工配置，即 Speed、Duplex 和 AutoNeg。)
 
 If the board uses a fiber interface, these keywords are ignored, and the
 fiber interface board only links at 1000 Mbps full-duplex.
+(如果网卡使用光纤接口，这些关键字将被忽略，光纤接口网卡只能以 1000 Mbps 全双工
+方式连接。)
 
 For copper-based boards, the keywords interact as follows:
+(对于基于铜缆的网卡，这些关键字的相互作用如下：)
 
 - The default operation is auto-negotiate.  The board advertises all
   supported speed and duplex combinations, and it links at the highest
   common speed and duplex mode IF the link partner is set to auto-negotiate.
+  (默认操作是自动协商。网卡会通告所有受支持的速度与双工组合；如果链路伙伴设置
+  为自动协商，则以双方共同支持的最高速度和双工模式连接。)
 
 - If Speed = 1000, limited auto-negotiation is enabled and only 1000 Mbps
   is advertised (The 1000BaseT spec requires auto-negotiation.)
+  (如果 Speed = 1000，则启用受限的自动协商，且只通告 1000 Mbps（1000BaseT 规范
+  要求自动协商）。)
 
 - If Speed = 10 or 100, then both Speed and Duplex should be set.  Auto-
   negotiation is disabled, and the AutoNeg parameter is ignored.  Partner
   SHOULD also be forced.
+  (如果 Speed = 10 或 100，则应同时设置 Speed 和 Duplex。自动协商被禁用，
+  AutoNeg 参数被忽略。链路伙伴端也应强制指定。)
 
 The AutoNeg parameter is used when more control is required over the
 auto-negotiation process.  It should be used when you wish to control which
 speed and duplex combinations are advertised during the auto-negotiation
 process.
+(当需要对自动协商过程进行更多控制时，可使用 AutoNeg 参数。当你希望控制自动协商
+过程中通告哪些速度与双工组合时，就应使用它。)
 
 The parameter may be specified as either a decimal or hexadecimal value as
 determined by the bitmap below.
+(该参数可以按下面位图所示，以十进制或十六进制值指定。)
 
 ============== ====== ====== ======= ======= ====== ====== ======= ======
 Bit position   7      6      5       4       3      2      1       0
 Decimal Value  128    64     32      16      8      4      2       1
 Hex value      80     40     20      10      8      4      2       1
 Speed (Mbps)   N/A    N/A    1000    N/A     100    100    10      10
-Duplex                       Full            Full   Half   Full    Half
+Duplex (双工)                 Full            Full   Half   Full    Half
 ============== ====== ====== ======= ======= ====== ====== ======= ======
 
 Some examples of using AutoNeg::
+(使用 AutoNeg 的一些示例：)
 
   modprobe e1000 AutoNeg=0x01 (Restricts autonegotiation to 10 Half)
   modprobe e1000 AutoNeg=1 (Same as above)
@@ -383,76 +581,109 @@ Some examples of using AutoNeg::
   modprobe e1000 AutoNeg=32 (Same as above)
 
 Note that when this parameter is used, Speed and Duplex must not be specified.
+(注意，使用该参数时不得再指定 Speed 和 Duplex。)
 
 If the link partner is forced to a specific speed and duplex, then this
 parameter should not be used.  Instead, use the Speed and Duplex parameters
 previously mentioned to force the adapter to the same speed and duplex.
+(如果链路伙伴被强制指定为特定的速度和双工，则不应使用该参数；而应使用前文提到的
+Speed 和 Duplex 参数，把网卡强制为相同的速度和双工。)
 
 Additional Configurations
+(其他配置)
 =========================
 
 Jumbo Frames
+(巨型帧)
 ------------
 
   Jumbo Frames support is enabled by changing the MTU to a value larger than
   the default of 1500.  Use the ifconfig command to increase the MTU size.
   For example::
+  (将 MTU 改为大于默认值 1500 的数值即可启用巨型帧（Jumbo Frames）支持。使用
+  ifconfig 命令来增大 MTU 大小，例如：)
 
        ifconfig eth<x> mtu 9000 up
 
   This setting is not saved across reboots.  It can be made permanent if
   you add::
+  (该设置在重启后不会保留。如果你把下面这一行：)
 
        MTU=9000
 
   to the file /etc/sysconfig/network-scripts/ifcfg-eth<x>.  This example
   applies to the Red Hat distributions; other distributions may store this
   setting in a different location.
+  (添加到文件 /etc/sysconfig/network-scripts/ifcfg-eth<x> 中，即可使其永久生效。
+  此示例适用于 Red Hat 系列发行版；其他发行版可能将该设置存放在不同的位置。)
 
 Notes:
+(注意：)
+
   Degradation in throughput performance may be observed in some Jumbo frames
   environments. If this is observed, increasing the application's socket buffer
   size and/or increasing the /proc/sys/net/ipv4/tcp_*mem entry values may help.
   See the specific application manual and /usr/src/linux*/Documentation/
   networking/ip-sysctl.txt for more details.
+  (在某些巨型帧环境中，可能会观察到吞吐性能下降。如果出现这种情况，增大应用
+  程序的套接字缓冲区大小和/或增大 /proc/sys/net/ipv4/tcp_*mem 各表项的值可能有
+  所帮助。更多细节请参阅相应应用程序的手册以及
+  /usr/src/linux*/Documentation/networking/ip-sysctl.txt。)
 
   - The maximum MTU setting for Jumbo Frames is 16110.  This value coincides
     with the maximum Jumbo Frames size of 16128.
+    (巨型帧的 MTU 最大可设置为 16110。该值与最大巨型帧大小 16128 相对应。)
 
   - Using Jumbo frames at 10 or 100 Mbps is not supported and may result in
     poor performance or loss of link.
+    (不支持在 10 或 100 Mbps 下使用巨型帧，否则可能导致性能不佳或链路丢失。)
 
   - Adapters based on the Intel(R) 82542 and 82573V/E controller do not
     support Jumbo Frames. These correspond to the following product names::
+    (基于 Intel(R) 82542 和 82573V/E 控制器的网卡不支持巨型帧。对应的产品的
+    名称如下：)
 
      Intel(R) PRO/1000 Gigabit Server Adapter
      Intel(R) PRO/1000 PM Network Connection
 
 ethtool
+(ethtool 工具)
 -------
 
   The driver utilizes the ethtool interface for driver configuration and
   diagnostics, as well as displaying statistical information.  The ethtool
   version 1.6 or later is required for this functionality.
+  (驱动程序利用 ethtool 接口进行驱动配置与诊断，以及显示统计信息。此功能需要
+  ethtool 1.6 或更高版本。)
 
   The latest release of ethtool can be found from
   https://www.kernel.org/pub/software/network/ethtool/
+  (ethtool 的最新版本可从
+  https://www.kernel.org/pub/software/network/ethtool/ 获取。)
 
 Enabling Wake on LAN (WoL)
+(启用局域网唤醒 (WoL))
 --------------------------
 
   WoL is configured through the ethtool utility.
+  (WoL 通过 ethtool 工具进行配置。)
 
   WoL will be enabled on the system during the next shut down or reboot.
   For this driver version, in order to enable WoL, the e1000 driver must be
   loaded when shutting down or rebooting the system.
+  (WoL 将在系统下一次关机或重启时启用。对于本版本的驱动，要启用 WoL，必须在
+  关机或重启系统时已加载 e1000 驱动。)
 
 Support
+(支持)
 =======
 
 For general information, go to the Intel support website at:
 http://support.intel.com
+(一般信息请访问 Intel 支持网站：http://support.intel.com。)
 
 If an issue is identified with the released source code on the supported
 kernel with a supported adapter, email the specific information related
 to the issue to intel-wired-lan@lists.osuosl.org.
+(如果在受支持的内核上使用受支持的网卡时发现已发布源代码存在问题，请把与该问题
+相关的具体信息发送电子邮件至 intel-wired-lan@lists.osuosl.org。)

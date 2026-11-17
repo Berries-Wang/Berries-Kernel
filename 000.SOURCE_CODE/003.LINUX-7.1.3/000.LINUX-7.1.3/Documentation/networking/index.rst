@@ -1,9 +1,13 @@
 Networking
 ==========
 
+(网络)
+
 Refer to :ref:`netdev-FAQ` for a guide on netdev development process specifics.
+(有关 netdev 开发流程细节的指南，请参阅 :ref:`netdev-FAQ`。)
 
 Contents:
+(目录：)
 
 .. toctree::
    :maxdepth: 2

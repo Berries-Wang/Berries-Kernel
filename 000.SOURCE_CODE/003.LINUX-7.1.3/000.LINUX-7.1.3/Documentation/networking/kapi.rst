@@ -2,16 +2,21 @@
 Linux Networking and Network Devices APIs
 =========================================
 
+(Linux 网络与网络设备 API)
+
 Linux Networking
+(Linux 网络)
 ================
 
 Networking Base Types
+(网络基础类型)
 ---------------------
 
 .. kernel-doc:: include/linux/net.h
    :internal:
 
 Socket Buffer Functions
+(套接字缓冲区函数)
 -----------------------
 
 .. kernel-doc:: include/linux/skbuff.h
@@ -36,12 +41,14 @@ Socket Buffer Functions
    :export:
 
 Socket Filter
+(套接字过滤器)
 -------------
 
 .. kernel-doc:: net/core/filter.c
    :export:
 
 Generic Network Statistics
+(通用网络统计)
 --------------------------
 
 .. kernel-doc:: include/uapi/linux/gen_stats.h
@@ -54,6 +61,7 @@ Generic Network Statistics
    :export:
 
 SUN RPC subsystem
+(SUN RPC 子系统)
 -----------------
 
 .. kernel-doc:: net/sunrpc/xdr.c
@@ -84,9 +92,11 @@ SUN RPC subsystem
    :export:
 
 Network device support
+(网络设备支持)
 ======================
 
 Driver Support
+(驱动支持)
 --------------
 
 .. kernel-doc:: net/core/dev.c
@@ -108,6 +118,7 @@ Driver Support
    :internal:
 
 PHY Support
+(PHY 支持)
 -----------
 
 .. kernel-doc:: drivers/net/phy/phy.c
@@ -138,11 +149,14 @@ PHY Support
    :internal:
 
 PHYLINK
+(PHYLINK)
 -------
 
   PHYLINK interfaces traditional network drivers with PHYLIB, fixed-links,
   and SFF modules (eg, hot-pluggable SFP) that may contain PHYs.  PHYLINK
   provides management of the link state and link modes.
+  (PHYLINK 将传统网络驱动程序与 PHYLIB、固定链路(fixed-links)以及可能包含 PHY 的 SFF
+  模块(例如可热插拔的 SFP)连接起来。PHYLINK 提供对链路状态和链路模式的管理。)
 
 .. kernel-doc:: include/linux/phylink.h
    :internal:
@@ -150,6 +164,7 @@ PHYLINK
 .. kernel-doc:: drivers/net/phy/phylink.c
 
 SFP support
+(SFP 支持)
 -----------
 
 .. kernel-doc:: drivers/net/phy/sfp-bus.c

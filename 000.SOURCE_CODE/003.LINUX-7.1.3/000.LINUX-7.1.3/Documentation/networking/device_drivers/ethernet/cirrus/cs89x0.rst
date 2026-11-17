@@ -4,19 +4,27 @@
 Cirrus Logic LAN CS8900/CS8920 Ethernet Adapters
 ================================================
 
+(Cirrus Logic LAN CS8900/CS8920 以太网适配器)
+
 .. note::
 
    This document was contributed by Cirrus Logic for kernel 2.2.5.  This version
    has been updated for 2.3.48 by Andrew Morton.
+   (本文档由 Cirrus Logic 为内核 2.2.5 撰写。本版本已由 Andrew Morton 针对
+   2.3.48 进行了更新。)
 
    Still, this is too outdated! A major cleanup is needed here.
+   (尽管如此，这些内容还是太过陈旧了！这里需要进行一次大清理。)
 
 Cirrus make a copy of this driver available at their website, as
 described below.  In general, you should use the driver version which
 comes with your Linux distribution.
+(Cirrus 在其网站上提供了该驱动的一个副本，如下文所述。一般来说，你应当
+使用你的 Linux 发行版自带的驱动版本。)
 
 
 Linux Network Interface Driver ver. 2.00 <kernel 2.3.48>
+(Linux 网络接口驱动，版本 2.00 <kernel 2.3.48>)
 
 
 .. TABLE OF CONTENTS
@@ -59,9 +67,13 @@ Linux Network Interface Driver ver. 2.00 <kernel 2.3.48>
 1. Cirrus Logic LAN CS8900/CS8920 Ethernet Adapters
 ===================================================
 
+(1. Cirrus Logic LAN CS8900/CS8920 以太网适配器)
+
 
 1.1. Product Overview
 =====================
+
+(1.1. 产品概述)
 
 The CS8900-based ISA Ethernet Adapters from Cirrus Logic follow
 IEEE 802.3 standards and support half or full-duplex operation in ISA bus
@@ -69,36 +81,50 @@ computers on 10 Mbps Ethernet networks.  The adapters are designed for operation
 in 16-bit ISA or EISA bus expansion slots and are available in
 10BaseT-only or 3-media configurations (10BaseT, 10Base2, and AUI for 10Base-5
 or fiber networks).
+(Cirrus Logic 基于 CS8900 的 ISA 以太网适配器遵循 IEEE 802.3 标准，在 ISA
+总线计算机的 10 Mbps 以太网网络上支持半双工或全双工操作。这些适配器设计
+用于 16 位 ISA 或 EISA 总线扩展槽，有仅 10BaseT 或三介质两种配置
+(10BaseT、10Base2，以及用于 10Base-5 或光纤网络的 AUI)。)
 
 CS8920-based adapters are similar to the CS8900-based adapter with additional
 features for Plug and Play (PnP) support and Wakeup Frame recognition.  As
 such, the configuration procedures differ somewhat between the two types of
 adapters.  Refer to the "Adapter Configuration" section for details on
 configuring both types of adapters.
+(基于 CS8920 的适配器与基于 CS8900 的适配器类似，但额外增加了对即插即用
+(PnP) 支持和唤醒帧识别的特性。因此，两类适配器的配置过程略有不同。有关
+配置这两类适配器的详细信息，请参阅 "适配器配置" 一节。)
 
 
 1.2. Driver Description
 =======================
 
+(1.2. 驱动描述)
+
 The CS8900/CS8920 Ethernet Adapter driver for Linux supports the Linux
 v2.3.48 or greater kernel.  It can be compiled directly into the kernel
 or loaded at run-time as a device driver module.
+(Linux 的 CS8900/CS8920 以太网适配器驱动支持 Linux v2.3.48 或更高版本的
+内核。它既可以直接编译进内核，也可以在运行时作为设备驱动模块加载。)
 
 1.2.1 Driver Name: cs89x0
+(1.2.1 驱动名称：cs89x0)
 
 1.2.2 Files in the Driver Archive:
+(1.2.2 驱动压缩包中的文件：)
 
 The files in the driver at Cirrus' website include:
+(Cirrus 网站上该驱动中的文件包括：)
 
   ===================  ====================================================
-  readme.txt           this file
-  build                batch file to compile cs89x0.c.
-  cs89x0.c             driver C code
-  cs89x0.h             driver header file
-  cs89x0.o             pre-compiled module (for v2.2.5 kernel)
-  config/Config.in     sample file to include cs89x0 driver in the kernel.
-  config/Makefile      sample file to include cs89x0 driver in the kernel.
-  config/Space.c       sample file to include cs89x0 driver in the kernel.
+  readme.txt           this file (本文件)
+  build                batch file to compile cs89x0.c. (编译 cs89x0.c 的批处理文件。)
+  cs89x0.c             driver C code (驱动 C 代码)
+  cs89x0.h             driver header file (驱动头文件)
+  cs89x0.o             pre-compiled module (for v2.2.5 kernel) (预编译模块，针对 v2.2.5 内核)
+  config/Config.in     sample file to include cs89x0 driver in the kernel. (将 cs89x0 驱动纳入内核的示例文件。)
+  config/Makefile      sample file to include cs89x0 driver in the kernel. (将 cs89x0 驱动纳入内核的示例文件。)
+  config/Space.c       sample file to include cs89x0 driver in the kernel. (将 cs89x0 驱动纳入内核的示例文件。)
   ===================  ====================================================
 
 
@@ -106,71 +132,112 @@ The files in the driver at Cirrus' website include:
 1.3. System Requirements
 ------------------------
 
+(1.3. 系统需求)
+
 The following hardware is required:
+(需要以下硬件：)
 
    * Cirrus Logic LAN (CS8900/20-based) Ethernet ISA Adapter
+     (Cirrus Logic LAN(基于 CS8900/20 的)以太网 ISA 适配器)
 
    * IBM or IBM-compatible PC with:
+     (IBM 或 IBM 兼容 PC，且满足：)
+
      * An 80386 or higher processor
+       (80386 或更高处理器)
+
      * 16 bytes of contiguous IO space available between 210h - 370h
+       (在 210h - 370h 之间有 16 字节可用的连续 IO 空间)
+
      * One available IRQ (5,10,11,or 12 for the CS8900, 3-7,9-15 for CS8920).
+       (一个可用的 IRQ(CS8900 为 5、10、11 或 12，CS8920 为 3-7、9-15)。)
 
    * Appropriate cable (and connector for AUI, 10BASE-2) for your network
      topology.
+     (适合你的网络拓扑的电缆(以及 AUI、10BASE-2 所需的连接器)。)
 
 The following software is required:
+(需要以下软件：)
 
 * LINUX kernel version 2.3.48 or higher
+(LINUX 内核 2.3.48 或更高版本)
 
    * CS8900/20 Setup Utility (DOS-based)
+     (CS8900/20 设置工具(基于 DOS))
 
    * LINUX kernel sources for your kernel (if compiling into kernel)
+     (与你所用内核对应的 LINUX 内核源码(若编译进内核))
 
    * GNU Toolkit (gcc and make) v2.6 or above (if compiling into kernel
      or a module)
+     (GNU 工具集(gcc 和 make)v2.6 或以上版本(若编译进内核或编译为模块))
 
 
 
 1.4. Licensing Information
 --------------------------
 
+(1.4. 许可信息)
+
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
 Foundation, version 1.
+(本程序是自由软件；你可以根据自由软件基金会发布的 GNU 通用公共许可证
+第 1 版的条款对其进行再分发和/或修改。)
 
 This program is distributed in the hope that it will be useful, but WITHOUT
 ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
 more details.
+(分发本程序的目的是希望它有用，但不提供任何担保；甚至不提供适销性或
+特定用途适用性的默示担保。更多细节请参阅 GNU 通用公共许可证。)
 
 For a full copy of the GNU General Public License, write to the Free Software
 Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+(如需 GNU 通用公共许可证的完整副本，请致信：Free Software Foundation,
+Inc., 675 Mass Ave, Cambridge, MA 02139, USA。)
 
 
 
 2. Adapter Installation and Configuration
 =========================================
 
+(2. 适配器的安装与配置)
+
 Both the CS8900 and CS8920-based adapters can be configured using parameters
 stored in an on-board EEPROM. You must use the DOS-based CS8900/20 Setup
 Utility if you want to change the adapter's configuration in EEPROM.
+(基于 CS8900 和 CS8920 的适配器都可以使用存储在板载 EEPROM 中的参数进行
+配置。如果要更改 EEPROM 中适配器的配置，必须使用基于 DOS 的 CS8900/20
+设置工具。)
 
 When loading the driver as a module, you can specify many of the adapter's
 configuration parameters on the command-line to override the EEPROM's settings
 or for interface configuration when an EEPROM is not used. (CS8920-based
 adapters must use an EEPROM.) See Section 3.0 LOADING THE DRIVER AS A MODULE.
+(以模块方式加载驱动时，你可以在命令行上指定适配器的许多配置参数，以覆盖
+EEPROM 中的设置，或在未使用 EEPROM 时进行接口配置。(基于 CS8920 的适配器
+必须使用 EEPROM。)参见第 3.0 节 "以模块方式加载驱动"。)
 
 Since the CS8900/20 Setup Utility is a DOS-based application, you must install
 and configure the adapter in a DOS-based system using the CS8900/20 Setup
 Utility before installation in the target LINUX system.  (Not required if
 installing a CS8900-based adapter and the default configuration is acceptable.)
+(由于 CS8900/20 设置工具是一个基于 DOS 的应用程序，在将适配器安装到目标
+LINUX 系统之前，你必须先在基于 DOS 的系统中使用 CS8900/20 设置工具安装
+并配置适配器。(若安装基于 CS8900 的适配器且默认配置可以接受，则无需
+如此。))
 
 
 2.1. CS8900-based Adapter Configuration
 ---------------------------------------
 
+(2.1. 基于 CS8900 的适配器配置)
+
 CS8900-based adapters shipped from Cirrus Logic have been configured
 with the following "default" settings::
+(Cirrus Logic 出厂的基于 CS8900 的适配器已按以下 "默认" 设置进行了
+配置：)
 
   Operation Mode:      Memory Mode
   IRQ:                 10
@@ -185,10 +252,14 @@ with the following "default" settings::
 You should only change the default configuration settings if conflicts with
 another adapter exists. To change the adapter's configuration, run the
 CS8900/20 Setup Utility.
+(只有在与另一个适配器发生冲突时才应更改默认配置设置。要更改适配器的
+配置，请运行 CS8900/20 设置工具。)
 
 
 2.2. CS8920-based Adapter Configuration
 ---------------------------------------
+
+(2.2. 基于 CS8920 的适配器配置)
 
 CS8920-based adapters are shipped from Cirrus Logic configured as Plug
 and Play (PnP) enabled.  However, since the cs89x0 driver does NOT
@@ -197,6 +268,11 @@ run the CS8900/20 Setup Utility to disable PnP and configure the
 adapter before installation in the target Linux system.  Failure to do
 this will leave the adapter inactive and the driver will be unable to
 communicate with the adapter.
+(Cirrus Logic 出厂的基于 CS8920 的适配器默认配置为启用即插即用 (PnP)。
+但由于 cs89x0 驱动不支持 PnP，在将适配器安装到目标 Linux 系统之前，你
+必须把 CS8920 适配器装到一台基于 DOS 的 PC 上，并运行 CS8900/20 设置
+工具来禁用 PnP 并对适配器进行配置。否则适配器将保持未激活状态，驱动
+将无法与之通信。)
 
 ::
 
@@ -215,19 +291,27 @@ communicate with the adapter.
 3. Loading the Driver as a Module
 =================================
 
+(3. 以模块方式加载驱动)
+
 If the driver is compiled as a loadable module, you can load the driver module
 with the 'modprobe' command.  Many of the adapter's configuration parameters can
 be specified as command-line arguments to the load command.  This facility
 provides a means to override the EEPROM's settings or for interface
 configuration when an EEPROM is not used.
+(如果驱动被编译为可加载模块，你可以用 'modprobe' 命令加载该驱动模块。
+适配器的许多配置参数都可以作为命令行参数在加载命令中指定。这一机制
+提供了一种覆盖 EEPROM 设置的手段，也可在未使用 EEPROM 时用于接口配置。)
 
 Example::
+(示例：)
 
     insmod cs89x0.o io=0x200 irq=0xA media=aui
 
 This example loads the module and configures the adapter to use an IO port base
 address of 200h, interrupt 10, and use the AUI media connection.  The following
 configuration options are available on the command line::
+(此示例加载模块，并将适配器配置为使用 IO 端口基地址 200h、中断 10，以及
+AUI 介质连接。命令行上可以使用以下配置选项：)
 
   io=###               - specify IO address (200h-360h)
   irq=##               - specify interrupt level
@@ -246,12 +330,16 @@ configuration options are available on the command line::
 			 for debugging)
 
 **Notes:**
+(注：)
 
 a) If an EEPROM is present, any specified command-line parameter
    will override the corresponding configuration value stored in
    EEPROM.
+   (a) 如果存在 EEPROM，指定的任何命令行参数都会覆盖 EEPROM 中存储的
+   相应配置值。)
 
 b) The "io" parameter must be specified on the command-line.
+   (b) 必须在命令行上指定 "io" 参数。)
 
 c) The driver's hardware probe routine is designed to avoid
    writing to I/O space until it knows that there is a cs89x0
@@ -262,14 +350,23 @@ c) The driver's hardware probe routine is designed to avoid
    to partially initialise the hardware before trying to
    identify the card.  This could be dangerous if you are
    not sure that there is a cs89x0 card at the provided address.
+   (c) 驱动的硬件探测例程设计为：在确认所写地址处确实存在 cs89x0 卡之前，
+   避免写入 I/O 空间。这可能给设备探测带来问题。为避免这种行为，请给
+   ``io=`` 模块参数加一。这实际上并不会改变 I/O 地址，而是一个标志，
+   告诉驱动在尝试识别网卡之前先对硬件进行部分初始化。如果你不确定所给
+   地址处是否存在 cs89x0 卡，这样做可能有危险。)
 
    For example, to scan for an adapter located at IO base 0x300,
    specify an IO address of 0x301.
+   (例如，要扫描位于 IO 基地址 0x300 处的适配器，应指定 IO 地址为
+   0x301。)
 
 d) The "duplex=auto" parameter is only supported for the CS8920.
+   (d) "duplex=auto" 参数仅 CS8920 支持。)
 
 e) The minimum command-line configuration required if an EEPROM is
    not present is:
+   (e) 如果没有 EEPROM，所需的最小命令行配置为：)
 
    io
    irq
@@ -277,24 +374,34 @@ e) The minimum command-line configuration required if an EEPROM is
 
 f) The following additional parameters are CS89XX defaults (values
    used with no EEPROM or command-line argument).
+   (f) 以下附加参数为 CS89XX 的默认值(在没有 EEPROM 或命令行参数时
+   使用的值)。)
 
    * DMA Burst = enabled
    * IOCHRDY Enabled = enabled
    * UseSA = enabled
    * CS8900 defaults to half-duplex if not specified on command-line
+     (CS8900 若未在命令行指定则默认为半双工)
    * CS8920 defaults to autoneg if not specified on command-line
+     (CS8920 若未在命令行指定则默认为自动协商)
    * Use reset defaults for other config parameters
+     (其他配置参数使用复位默认值)
    * dma_mode = 0
 
 g) You can use ifconfig to set the adapter's Ethernet address.
+   (g) 可以使用 ifconfig 设置适配器的以太网地址。)
 
 h) Many Linux distributions use the 'modprobe' command to load
    modules.  This program uses the '/etc/conf.modules' file to
    determine configuration information which is passed to a driver
    module when it is loaded.  All the configuration options which are
    described above may be placed within /etc/conf.modules.
+   (h) 许多 Linux 发行版使用 'modprobe' 命令加载模块。该程序使用
+   '/etc/conf.modules' 文件来确定加载驱动模块时传递给它的配置信息。
+   上述所有配置选项都可以写入 /etc/conf.modules。)
 
    For example::
+   (例如：)
 
      > cat /etc/conf.modules
      ...
@@ -306,38 +413,57 @@ h) Many Linux distributions use the 'modprobe' command to load
    ethernet driver for this machine should use the cs89x0 driver.  We
    are asking 'modprobe' to pass the 'io', 'dma' and 'use_dma'
    arguments to the driver when it is loaded.
+   (在这个例子中，我们告诉模块系统：本机的以太网驱动应使用 cs89x0
+   驱动；并请 'modprobe' 在加载驱动时向其传递 'io'、'dma' 和 'use_dma'
+   参数。)
 
 i) Cirrus recommend that the cs89x0 use the ISA DMA channels 5, 6 or
    7.  You will probably find that other DMA channels will not work.
+   (i) Cirrus 建议 cs89x0 使用 ISA DMA 通道 5、6 或 7。你很可能会发现
+   其他 DMA 通道无法工作。)
 
 j) The cs89x0 supports DMA for receiving only.  DMA mode is
    significantly more efficient.  Flooding a 400 MHz Celeron machine
    with large ping packets consumes 82% of its CPU capacity in non-DMA
    mode.  With DMA this is reduced to 45%.
+   (j) cs89x0 仅支持接收方向的 DMA。DMA 模式的效率显著更高。用大 ping
+   数据包灌满一台 400 MHz Celeron 机器，非 DMA 模式会消耗其 82% 的 CPU
+   处理能力，而使用 DMA 可降至 45%。)
 
 k) If your Linux kernel was compiled with inbuilt plug-and-play
    support you will be able to find information about the cs89x0 card
    with the command::
+   (k) 如果你的 Linux 内核编译时内建了即插即用支持，你可以用以下命令
+   查找有关 cs89x0 卡的信息：)
 
      cat /proc/isapnp
 
 l) If during DMA operation you find erratic behavior or network data
    corruption you should use your PC's BIOS to slow the EISA bus clock.
+   (l) 如果在 DMA 操作期间发现异常行为或网络数据损坏，你应当使用 PC 的
+   BIOS 降低 EISA 总线时钟频率。)
 
 m) If the cs89x0 driver is compiled directly into the kernel
    (non-modular) then its I/O address is automatically determined by
    ISA bus probing.  The IRQ number, media options, etc are determined
    from the card's EEPROM.
+   (m) 如果 cs89x0 驱动被直接编译进内核(非模块形式)，其 I/O 地址将由
+   ISA 总线探测自动确定。IRQ 号、介质选项等则由网卡的 EEPROM 确定。)
 
 n) If the cs89x0 driver is compiled directly into the kernel, DMA
    mode may be selected by providing the kernel with a boot option
    'cs89x0_dma=N' where 'N' is the desired DMA channel number (5, 6 or 7).
+   (n) 如果 cs89x0 驱动被直接编译进内核，可以通过向内核提供引导选项
+   'cs89x0_dma=N' 来选择 DMA 模式，其中 'N' 是所需的 DMA 通道号
+   (5、6 或 7)。)
 
    Kernel boot options may be provided on the LILO command line::
+   (内核引导选项可以在 LILO 命令行上提供：)
 
 	LILO boot: linux cs89x0_dma=5
 
    or they may be placed in /etc/lilo.conf::
+   (或者可以把它们放入 /etc/lilo.conf：)
 
 	image=/boot/bzImage-2.3.48
 	  append="cs89x0_dma=5"
@@ -347,37 +473,54 @@ n) If the cs89x0 driver is compiled directly into the kernel, DMA
 
    The DMA Rx buffer size is hardwired to 16 kbytes in this mode.
    (64k mode is not available).
+   (此模式下 DMA 接收缓冲区大小被硬编码为 16 KB。(64K 模式不可用。))
 
 
 4. Compiling the Driver
 =======================
 
+(4. 编译驱动)
+
 The cs89x0 driver can be compiled directly into the kernel or compiled into
 a loadable device driver module.
+(cs89x0 驱动既可以直接编译进内核，也可以编译为可加载的设备驱动模块。)
 
 Just use the standard way to configure the driver and compile the Kernel.
+(只需按标准方式配置驱动并编译内核即可。)
 
 
 4.1. Compiling the Driver to Support Rx DMA
 -------------------------------------------
 
+(4.1. 编译驱动以支持 Rx DMA)
+
 The compile-time optionality for DMA was removed in the 2.3 kernel
 series.  DMA support is now unconditionally part of the driver.  It is
 enabled by the 'use_dma=1' module option.
+(2.3 内核系列移除了 DMA 的编译期可选性。DMA 支持现在无条件地成为驱动的
+一部分，由 'use_dma=1' 模块选项启用。)
 
 
 5. Testing and Troubleshooting
 ==============================
 
+(5. 测试与故障排查)
+
 5.1. Known Defects and Limitations
 ----------------------------------
 
+(5.1. 已知缺陷与限制)
+
 Refer to the RELEASE.TXT file distributed as part of this archive for a list of
 known defects, driver limitations, and work arounds.
+(本压缩包中附带的 RELEASE.TXT 文件列出了已知缺陷、驱动限制及相应的
+解决方法。)
 
 
 5.2. Testing the Adapter
 ------------------------
+
+(5.2. 测试适配器)
 
 Once the adapter has been installed and configured, the diagnostic option of
 the CS8900/20 Setup Utility can be used to test the functionality of the
@@ -387,6 +530,11 @@ assigned. You can use the diagnostics 'Network Test' to test the ability of the
 adapter to communicate across the Ethernet with another PC equipped with a
 CS8900/20-based adapter card (it must also be running the CS8900/20 Setup
 Utility).
+(适配器安装并配置完成后，可以使用 CS8900/20 设置工具的诊断选项来测试
+适配器及其网络连接的功能。使用诊断的 'Self Test'(自检)选项，可以按你
+指定的硬件配置测试适配器的功能。使用诊断的 'Network Test'(网络测试)
+可以测试适配器跨以太网与另一台装有基于 CS8900/20 适配卡的 PC 通信的
+能力(对方也必须运行 CS8900/20 设置工具)。)
 
 .. note::
 
@@ -394,157 +542,241 @@ Utility).
 	 DOS-only operating system environment.  DO NOT run the diagnostics
 	 from a DOS or command prompt session under Windows 95, Windows NT,
 	 OS/2, or other operating system.
+	 (设置工具的诊断功能设计为在纯 DOS 操作系统环境中运行。切勿在
+	 Windows 95、Windows NT、OS/2 或其他操作系统下的 DOS 或命令提示符
+	 会话中运行诊断。)
 
 To run the diagnostics tests on the CS8900/20 adapter:
+(要在 CS8900/20 适配器上运行诊断测试，请按以下步骤操作：)
 
    1.  Boot DOS on the PC and start the CS8900/20 Setup Utility.
+       (在 PC 上引导 DOS 并启动 CS8900/20 设置工具。)
 
    2.  The adapter's current configuration is displayed.  Hit the ENTER key to
        get to the main menu.
+       (屏幕显示适配器的当前配置。按回车键进入主菜单。)
 
    4.  Select 'Diagnostics' (ALT-G) from the main menu.
+       (从主菜单中选择 'Diagnostics'(诊断)(ALT-G)。)
+
        * Select 'Self-Test' to test the adapter's basic functionality.
+         (选择 'Self-Test'(自检)以测试适配器的基本功能。)
+
        * Select 'Network Test' to test the network connection and cabling.
+         (选择 'Network Test'(网络测试)以测试网络连接和布线。)
 
 
 5.2.1. Diagnostic Self-test
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+(5.2.1. 诊断自检)
+
 The diagnostic self-test checks the adapter's basic functionality as well as
 its ability to communicate across the ISA bus based on the system resources
 assigned during hardware configuration.  The following tests are performed:
+(诊断自检会检查适配器的基本功能，以及其在硬件配置期间所分配系统资源下的
+跨 ISA 总线通信能力。将执行以下测试：)
 
    * IO Register Read/Write Test
+     (IO 寄存器读/写测试)
 
      The IO Register Read/Write test insures that the CS8900/20 can be
      accessed in IO mode, and that the IO base address is correct.
+     (IO 寄存器读/写测试确保可以以 IO 模式访问 CS8900/20，且 IO 基地址
+     正确。)
 
    * Shared Memory Test
+     (共享内存测试)
 
      The Shared Memory test insures the CS8900/20 can be accessed in memory
      mode and that the range of memory addresses assigned does not conflict
      with other devices in the system.
+     (共享内存测试确保可以以内存模式访问 CS8900/20，且所分配的内存地址
+     范围与系统中的其他设备不冲突。)
 
    * Interrupt Test
+     (中断测试)
 
      The Interrupt test insures there are no conflicts with the assigned IRQ
      signal.
+     (中断测试确保与所分配的 IRQ 信号没有冲突。)
 
    * EEPROM Test
+     (EEPROM 测试)
 
      The EEPROM test insures the EEPROM can be read.
+     (EEPROM 测试确保 EEPROM 可以被读取。)
 
    * Chip RAM Test
+     (芯片 RAM 测试)
 
      The Chip RAM test insures the 4K of memory internal to the CS8900/20 is
      working properly.
+     (芯片 RAM 测试确保 CS8900/20 内部的 4K 内存工作正常。)
 
    * Internal Loop-back Test
+     (内部环回测试)
 
      The Internal Loop Back test insures the adapter's transmitter and
      receiver are operating properly.  If this test fails, make sure the
      adapter's cable is connected to the network (check for LED activity for
      example).
+     (内部环回测试确保适配器的发送器和接收器工作正常。如果此测试失败，
+     请确认适配器的电缆已连接到网络(例如检查 LED 是否有活动)。)
 
    * Boot PROM Test
+     (Boot PROM 测试)
 
      The Boot PROM  test insures the Boot PROM is present, and can be read.
      Failure indicates the Boot PROM  was not successfully read due to a
      hardware problem or due to a conflicts on the Boot PROM address
      assignment. (Test only applies if the adapter is configured to use the
      Boot PROM option.)
+     (Boot PROM 测试确保 Boot PROM 存在且可被读取。失败表明由于硬件问题
+     或 Boot PROM 地址分配冲突，未能成功读取 Boot PROM。(仅当适配器配置
+     为使用 Boot PROM 选项时才执行此测试。))
 
 Failure of a test item indicates a possible system resource conflict with
 another device on the ISA bus.  In this case, you should use the Manual Setup
 option to reconfigure the adapter by selecting a different value for the system
 resource that failed.
+(某项测试失败表明可能与 ISA 总线上的其他设备存在系统资源冲突。此时，
+你应当使用 Manual Setup(手动设置)选项，为失败的系统资源选择另一个值，
+重新配置适配器。)
 
 
 5.2.2. Diagnostic Network Test
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+(5.2.2. 诊断网络测试)
+
 The Diagnostic Network Test verifies a working network connection by
 transferring data between two CS8900/20 adapters installed in different PCs
 on the same network. (Note: the diagnostic network test should not be run
 between two nodes across a router.)
+(诊断网络测试通过在同一网络中不同 PC 上安装的两块 CS8900/20 适配器之间
+传输数据，来验证网络连接是否正常。(注意：诊断网络测试不应跨路由器在
+两个节点之间运行。))
 
 This test requires that each of the two PCs have a CS8900/20-based adapter
 installed and have the CS8900/20 Setup Utility running.  The first PC is
 configured as a Responder and the other PC is configured as an Initiator.
 Once the Initiator is started, it sends data frames to the Responder which
 returns the frames to the Initiator.
+(此测试要求两台 PC 都安装了基于 CS8900/20 的适配器，并且都在运行
+CS8900/20 设置工具。第一台 PC 配置为 Responder(应答方)，另一台 PC 配置
+为 Initiator(发起方)。发起方启动后，向应答方发送数据帧，应答方再将这些
+帧返回给发起方。)
 
 The total number of frames received and transmitted are displayed on the
 Initiator's display, along with a count of the number of frames received and
 transmitted OK or in error.  The test can be terminated anytime by the user at
 either PC.
+(发起方的屏幕上会显示接收和发送的帧总数，以及成功或出错的收发帧计数。
+用户可在任意时刻在任一台 PC 上终止测试。)
 
 To setup the Diagnostic Network Test:
+(诊断网络测试的设置步骤如下：)
 
     1.  Select a PC with a CS8900/20-based adapter and a known working network
 	connection to act as the Responder.  Run the CS8900/20 Setup Utility
 	and select 'Diagnostics -> Network Test -> Responder' from the main
 	menu.  Hit ENTER to start the Responder.
+	(选择一台装有基于 CS8900/20 的适配器且网络连接确定正常的 PC 作为
+	应答方。运行 CS8900/20 设置工具，在主菜单中选择 'Diagnostics ->
+	Network Test -> Responder'。按回车键启动应答方。)
 
     2.  Return to the PC with the CS8900/20-based adapter you want to test and
 	start the CS8900/20 Setup Utility.
+	(回到装有你要测试的基于 CS8900/20 适配器的 PC，启动 CS8900/20 设置
+	工具。)
 
     3.  From the main menu, Select 'Diagnostic -> Network Test -> Initiator'.
 	Hit ENTER to start the test.
+	(在主菜单中选择 'Diagnostic -> Network Test -> Initiator'。按回车键
+	开始测试。)
 
 You may stop the test on the Initiator at any time while allowing the Responder
 to continue running.  In this manner, you can move to additional PCs and test
 them by starting the Initiator on another PC without having to stop/start the
 Responder.
+(你可以随时在发起方停止测试，而让应答方继续运行。这样，你可以转到其他
+PC，在另一台 PC 上启动发起方来测试它们，而无需停止/重启应答方。)
 
 
 
 5.3. Using the Adapter's LEDs
 -----------------------------
 
+(5.3. 使用适配器的 LED 指示灯)
+
 The 2 and 3-media adapters have two LEDs visible on the back end of the board
 located near the 10Base-T connector.
+(双介质和三介质适配器在板卡尾端靠近 10Base-T 连接器处有两个可见的
+LED 指示灯。)
 
 Link Integrity LED: A "steady" ON of the green LED indicates a valid 10Base-T
 connection.  (Only applies to 10Base-T.  The green LED has no significance for
 a 10Base-2 or AUI connection.)
+(链路完整性 LED：绿色 LED "稳定" 常亮表示 10Base-T 连接有效。(仅适用于
+10Base-T。绿色 LED 对 10Base-2 或 AUI 连接没有意义。))
 
 TX/RX LED: The yellow LED lights briefly each time the adapter transmits or
 receives data. (The yellow LED will appear to "flicker" on a typical network.)
+(TX/RX LED：适配器每次发送或接收数据时，黄色 LED 都会短暂亮起。(在典型
+网络上，黄色 LED 看起来会 "闪烁"。))
 
 
 5.4. Resolving I/O Conflicts
 ----------------------------
 
+(5.4. 解决 I/O 冲突)
+
 An IO conflict occurs when two or more adapter use the same ISA resource (IO
 address, memory address or IRQ).  You can usually detect an IO conflict in one
 of four ways after installing and or configuring the CS8900/20-based adapter:
+(当两个或多个适配器使用相同的 ISA 资源(IO 地址、内存地址或 IRQ)时，就
+会发生 IO 冲突。在安装和/或配置基于 CS8900/20 的适配器之后，通常可以
+通过以下四种方式之一发现 IO 冲突：)
 
     1.  The system does not boot properly (or at all).
+	(系统无法正常引导(或完全无法引导)。)
 
     2.  The driver cannot communicate with the adapter, reporting an "Adapter
 	not found" error message.
+	(驱动无法与适配器通信，报告 "Adapter not found"(未找到适配器)
+	错误消息。)
 
     3.  You cannot connect to the network or the driver will not load.
+	(你无法连接到网络，或驱动无法加载。)
 
     4.  If you have configured the adapter to run in memory mode but the driver
 	reports it is using IO mode when loading, this is an indication of a
 	memory address conflict.
+	(如果你已将适配器配置为以内存模式运行，但驱动加载时报告它正在使用
+	IO 模式，这表明存在内存地址冲突。)
 
 If an IO conflict occurs, run the CS8900/20 Setup Utility and perform a
 diagnostic self-test.  Normally, the ISA resource in conflict will fail the
 self-test.  If so, reconfigure the adapter selecting another choice for the
 resource in conflict.  Run the diagnostics again to check for further IO
 conflicts.
+(如果发生 IO 冲突，请运行 CS8900/20 设置工具并执行诊断自检。通常，发生
+冲突的 ISA 资源会使自检失败。若果真如此，请为冲突的资源选择另一个选项，
+重新配置适配器。再次运行诊断以检查是否还有其他 IO 冲突。)
 
 In some cases, such as when the PC will not boot, it may be necessary to remove
 the adapter and reconfigure it by installing it in another PC to run the
 CS8900/20 Setup Utility.  Once reinstalled in the target system, run the
 diagnostics self-test to ensure the new configuration is free of conflicts
 before loading the driver again.
+(在某些情况下，例如 PC 无法引导时，可能需要取下适配器，将其安装到另一
+台 PC 上运行 CS8900/20 设置工具来重新配置。重新装回目标系统后，再次
+加载驱动之前，请先运行诊断自检，确保新配置没有冲突。)
 
 When manually configuring the adapter, keep in mind the typical ISA system
 resource usage as indicated in the tables below.
+(手动配置适配器时，请留意下表中所示的典型 ISA 系统资源占用情况。)
 
 ::
 
@@ -572,10 +804,15 @@ resource usage as indicated in the tables below.
 6. Technical Support
 ====================
 
+(6. 技术支持)
+
 6.1. Contacting Cirrus Logic's Technical Support
 ------------------------------------------------
 
+(6.1. 联系 Cirrus Logic 技术支持)
+
 Cirrus Logic's CS89XX Technical Application Support can be reached at::
+(可以通过以下方式联系 Cirrus Logic 的 CS89XX 技术应用支持：)
 
   Telephone  :(800) 888-5016 (from inside U.S. and Canada)
 	     :(512) 442-7555 (from outside the U.S. and Canada)
@@ -587,60 +824,96 @@ Cirrus Logic's CS89XX Technical Application Support can be reached at::
 6.2. Information Required before Contacting Technical Support
 -------------------------------------------------------------
 
+(6.2. 联系技术支持前所需的信息)
+
 Before contacting Cirrus Logic for technical support, be prepared to provide as
 Much of the following information as possible.
+(在联系 Cirrus Logic 寻求技术支持之前，请准备好尽可能多地提供以下
+信息。)
 
 1.) Adapter type (CRD8900, CDB8900, CDB8920, etc.)
+(1.) 适配器类型(CRD8900、CDB8900、CDB8920 等)。)
 
 2.) Adapter configuration
+(2.) 适配器配置)
 
     * IO Base, Memory Base, IO or memory mode enabled, IRQ, DMA channel
+      (IO 基址、内存基址、启用的是 IO 还是内存模式、IRQ、DMA 通道)
     * Plug and Play enabled/disabled (CS8920-based adapters only)
+      (即插即用启用/禁用(仅限基于 CS8920 的适配器))
     * Configured for media auto-detect or specific media type (which type).
+      (配置为介质自动检测还是特定介质类型(哪种类型)。)
 
 3.) PC System's Configuration
+(3.) PC 系统配置)
 
     * Plug and Play system (yes/no)
+      (是否为即插即用系统(是/否))
     * BIOS (make and version)
+      (BIOS(厂商和版本))
     * System make and model
+      (系统的厂商和型号)
     * CPU (type and speed)
+      (CPU(类型和速度))
     * System RAM
+      (系统内存)
     * SCSI Adapter
+      (SCSI 适配器)
 
 4.) Software
+(4.) 软件)
 
     * CS89XX driver and version
+      (CS89XX 驱动及其版本)
     * Your network operating system and version
+      (你的网络操作系统及其版本)
     * Your system's OS version
+      (你系统的操作系统版本)
     * Version of all protocol support files
+      (所有协议支持文件的版本)
 
 5.) Any Error Message displayed.
+(5.) 显示的任何错误消息。)
 
 
 
 6.3 Obtaining the Latest Driver Version
 ---------------------------------------
 
+(6.3. 获取最新的驱动版本)
+
 You can obtain the latest CS89XX drivers and support software from Cirrus Logic's
 Web site.  You can also contact Cirrus Logic's Technical Support (email:
 ethernet@crystal.cirrus.com) and request that you be registered for automatic
 software-update notification.
+(你可以从 Cirrus Logic 的网站获取最新的 CS89XX 驱动和支持软件。你也可以
+联系 Cirrus Logic 技术支持(email: ethernet@crystal.cirrus.com)，申请注册
+以获得自动软件更新通知。)
 
 Cirrus Logic maintains a web page at http://www.cirrus.com with the
 latest drivers and technical publications.
+(Cirrus Logic 在 http://www.cirrus.com 维护着一个网页，提供最新的驱动和
+技术文档。)
 
 
 6.4. Current maintainer
 -----------------------
 
+(6.4. 当前维护者)
+
 In February 2000 the maintenance of this driver was assumed by Andrew
 Morton.
+(2000 年 2 月起，该驱动的维护工作由 Andrew Morton 接手。)
 
 6.5 Kernel module parameters
 ----------------------------
 
+(6.5. 内核模块参数)
+
 For use in embedded environments with no cs89x0 EEPROM, the kernel boot
 parameter ``cs89x0_media=`` has been implemented.  Usage is::
+(为了在无 cs89x0 EEPROM 的嵌入式环境中使用，内核引导参数
+``cs89x0_media=`` 已经实现。用法如下：)
 
 	cs89x0_media=rj45    or
 	cs89x0_media=aui     or

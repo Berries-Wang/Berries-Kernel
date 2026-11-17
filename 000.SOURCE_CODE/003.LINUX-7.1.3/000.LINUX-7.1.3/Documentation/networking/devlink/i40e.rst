@@ -4,74 +4,92 @@
 i40e devlink support
 ====================
 
+(i40e devlink 支持)
+
 This document describes the devlink features implemented by the ``i40e``
 device driver.
+(本文档描述 ``i40e`` 设备驱动所实现的 devlink 功能。)
 
 Parameters
 ==========
+(参数)
 
 .. list-table:: Generic parameters implemented
     :widths: 5 5 90
 
-    * - Name
-      - Mode
-      - Notes
+    * - Name (名称)
+      - Mode (模式)
+      - Notes (备注)
     * - ``max_mac_per_vf``
       - runtime
       - Controls the maximum number of MAC addresses a VF can use
         on i40e devices.
+        (控制 i40e 设备上一个 VF 可使用的 MAC 地址最大数量。)
 
         By default (``0``), the driver enforces its internally calculated per-VF
         MAC filter limit, which is based on the number of allocated VFS.
+        (默认情况下(``0``)，驱动会强制执行其内部计算的每 VF MAC 过滤器上限，该上限基于已分配的 VF 数量。)
 
         If set to a non-zero value, this parameter acts as a strict cap:
         the driver will use the user-provided value instead of its internal
         calculation.
+        (若设置为非零值，该参数将作为严格上限：驱动会使用用户提供的值，而不是其内部计算结果。)
 
         **Important notes:**
+        (重要提示：)
 
         - This value **must be set before enabling SR-IOV**.
           Attempting to change it while SR-IOV is enabled will return an error.
+          (该值 **必须** 在启用 SR-IOV 之前设置。在 SR-IOV 已启用的情况下尝试修改该值将返回错误。)
         - MAC filters are a **shared hardware resource** across all VFs.
           Setting a high value may cause other VFs to be starved of filters.
+          (MAC 过滤器是所有 VF 共享的硬件资源。设置过高的值可能导致其他 VF 分不到过滤器。)
         - This value is a **Administrative policy**. The hardware may return
           errors when its absolute limit is reached, regardless of the value
           set here.
+          (该值属于一种 **管理策略**。当达到硬件的绝对上限时，无论此处设置的值为何，硬件都可能返回错误。)
 
         The default value is ``0`` (internal calculation is used).
+        (默认值为 ``0``，即使用内部计算结果。)
 
 
 Info versions
 =============
+(Info 版本)
 
 The ``i40e`` driver reports the following versions
+(``i40e`` 驱动报告以下版本)
 
 .. list-table:: devlink info versions implemented
     :widths: 5 5 5 90
 
-    * - Name
-      - Type
-      - Example
-      - Description
+    * - Name (名称)
+      - Type (类型)
+      - Example (示例)
+      - Description (描述)
     * - ``board.id``
       - fixed
       - K15190-000
       - The Product Board Assembly (PBA) identifier of the board.
+        (该板卡的产品板组装 (Product Board Assembly, PBA) 标识符。)
     * - ``fw.mgmt``
       - running
       - 9.130
       - 2-digit version number of the management firmware that controls the
         PHY, link, etc.
+        (控制 PHY、链路等的管理固件的两位版本号。)
     * - ``fw.mgmt.api``
       - running
       - 1.15
       - 2-digit version number of the API exported over the AdminQ by the
         management firmware. Used by the driver to identify what commands
         are supported.
+        (管理固件通过 AdminQ 导出的 API 的两位版本号。驱动用它来识别支持哪些命令。)
     * - ``fw.mgmt.build``
       - running
       - 73618
       - Build number of the source for the management firmware.
+        (管理固件源码的构建编号。)
     * - ``fw.undi``
       - running
       - 1.3429.0
@@ -82,12 +100,15 @@ The ``i40e`` driver reports the following versions
         non-breaking changes and reset to 1 when the major version is
         incremented. The patch version is normally 0 but is incremented when
         a fix is delivered as a patch against an older base Option ROM.
+        (包含 UEFI 驱动的 Option ROM 的版本。该版本以 ``major.minor.patch`` 格式报告。每当发生重大破坏性变更，或次版本即将溢出时，主版本就会递增。次版本针对非破坏性变更递增，并在主版本递增时重置为 1。补丁版本通常为 0，但当修复以针对较旧基础 Option ROM 的补丁形式发布时会递增。)
     * - ``fw.psid.api``
       - running
       - 9.30
       - Version defining the format of the flash contents.
+        (定义 flash 内容格式的版本。)
     * - ``fw.bundle_id``
       - running
       - 0x8000e5f3
       - Unique identifier of the firmware image file that was loaded onto
         the device. Also referred to as the EETRACK identifier of the NVM.
+        (加载到设备上的固件镜像文件的唯一标识符。也称为 NVM 的 EETRACK 标识符。)

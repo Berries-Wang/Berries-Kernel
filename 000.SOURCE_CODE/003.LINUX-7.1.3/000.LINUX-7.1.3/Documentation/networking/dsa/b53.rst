@@ -4,62 +4,82 @@
 Broadcom RoboSwitch Ethernet switch driver
 ==========================================
 
+(Broadcom RoboSwitch 以太网交换机驱动)
+
 The Broadcom RoboSwitch Ethernet switch family is used in quite a range of
 xDSL router, cable modems and other multimedia devices.
+(Broadcom RoboSwitch 以太网交换机系列广泛用于各类 xDSL 路由器、电缆调制解调器和其他多媒体设备。)
 
 The actual implementation supports the devices BCM5325E, BCM5365, BCM539x,
 BCM53115 and BCM53125 as well as BCM63XX.
+(当前实现支持 BCM5325E、BCM5365、BCM539x、BCM53115 和 BCM53125 等器件，以及 BCM63XX。)
 
 Implementation details
+(实现细节)
 ======================
 
 The driver is located in ``drivers/net/dsa/b53/`` and is implemented as a
 DSA driver; see ``Documentation/networking/dsa/dsa.rst`` for details on the
 subsystem and what it provides.
+(驱动位于 ``drivers/net/dsa/b53/`` ，实现为一个 DSA 驱动；关于该子系统及其提供的功能的细节，参见 ``Documentation/networking/dsa/dsa.rst`` 。)
 
 The switch is, if possible, configured to enable a Broadcom specific 4-bytes
 switch tag which gets inserted by the switch for every packet forwarded to the
 CPU interface, conversely, the CPU network interface should insert a similar
 tag for packets entering the CPU port. The tag format is described in
 ``net/dsa/tag_brcm.c``.
+(在可能的情况下，交换机会被配置为启用 Broadcom 特有的 4 字节交换机标签，交换机为每个转发到 CPU 接口的数据包插入该标签；反过来，CPU 网络接口也应为进入 CPU 端口的数据包插入类似的标签。标签格式在 ``net/dsa/tag_brcm.c`` 中描述。)
 
 The configuration of the device depends on whether or not tagging is
 supported.
+(设备的配置取决于是否支持打标签 (tagging)。)
 
 The interface names and example network configuration are used according the
 configuration described in the :ref:`dsa-config-showcases`.
+(接口名称和示例网络配置遵循 :ref:`dsa-config-showcases` 中描述的配置。)
 
 Configuration with tagging support
+(支持打标签的配置)
 ----------------------------------
 
 The tagging based configuration is desired. It is not specific to the b53
 DSA driver and will work like all DSA drivers which supports tagging.
+(基于标签的配置是期望的配置方式。它并非 b53 DSA 驱动所特有，其工作方式与所有支持打标签的 DSA 驱动相同。)
 
 See :ref:`dsa-tagged-configuration`.
+(参见 :ref:`dsa-tagged-configuration`。)
 
 Configuration without tagging support
+(不支持打标签的配置)
 -------------------------------------
 
 Older models (5325, 5365) support a different tag format that is not supported
 yet. 539x and 531x5 require managed mode and some special handling, which is
 also not yet supported. The tagging support is disabled in these cases and the
 switch need a different configuration.
+(较旧的型号（5325、5365）支持另一种标签格式，但目前尚不支持。539x 和 531x5 需要受管模式 (managed mode) 和一些特殊处理，这也尚未支持。在这些情况下，打标签支持被禁用，交换机需要不同的配置。)
 
 The configuration slightly differ from the :ref:`dsa-vlan-configuration`.
+(该配置与 :ref:`dsa-vlan-configuration` 略有不同。)
 
 The b53 tags the CPU port in all VLANs, since otherwise any PVID untagged
 VLAN programming would basically change the CPU port's default PVID and make
 it untagged, undesirable.
+(b53 在所有 VLAN 中都给 CPU 端口打标签，否则任何 PVID untagged 的 VLAN 编程基本上都会改变 CPU 端口的默认 PVID 并使其变为 untagged，这是不希望出现的。)
 
 In difference to the configuration described in :ref:`dsa-vlan-configuration`
 the default VLAN 1 has to be removed from the user interface configuration in
 single port and gateway configuration, while there is no need to add an extra
 VLAN configuration in the bridge showcase.
+(与 :ref:`dsa-vlan-configuration` 中描述的配置不同，在单端口 (single port) 和网关 (gateway) 配置中，必须从用户接口配置中移除默认的 VLAN 1；而在网桥 (bridge) 示例配置中则无需添加额外的 VLAN 配置。)
 
 single port
+(单端口)
 ~~~~~~~~~~~
+
 The configuration can only be set up via VLAN tagging and bridge setup.
 By default packages are tagged with vid 1:
+(该配置只能通过 VLAN 打标签和网桥设置来搭建。默认情况下数据包以 vid 1 打标签：)
 
 .. code-block:: sh
 
@@ -106,6 +126,7 @@ By default packages are tagged with vid 1:
 
 
 bridge
+(网桥)
 ~~~~~~
 
 .. code-block:: sh
@@ -141,6 +162,7 @@ bridge
   ip link set dev br0 up
 
 gateway
+(网关)
 ~~~~~~~
 
 .. code-block:: sh

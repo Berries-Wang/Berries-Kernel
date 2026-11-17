@@ -4,6 +4,8 @@
 Linux X.25 Project
 ==================
 
+(Linux X.25 项目)
+
 As my third year dissertation at University I have taken it upon myself to
 write an X.25 implementation for Linux. My aim is to provide a complete X.25
 Packet Layer and a LAPB module to allow for "normal" X.25 to be run using
@@ -11,6 +13,7 @@ Linux. There are two sorts of X.25 cards available, intelligent ones that
 implement LAPB on the card itself, and unintelligent ones that simply do
 framing, bit-stuffing and checksumming. These both need to be handled by the
 system.
+(作为我在大学的三年级毕业论文，我自告奋勇为 Linux 编写一个 X.25 实现。我的目标是提供一个完整的 X.25 分组层 (Packet Layer) 和一个 LAPB 模块，以便在 Linux 上运行"正常"的 X.25。市面上有两类 X.25 网卡：一类是智能卡，在卡上自行实现 LAPB;另一类是非智能卡，只做成帧、比特填充和校验和计算。这两类都需要由系统来处理。)
 
 I therefore decided to write the implementation such that as far as the
 Packet Layer is concerned, the link layer was being performed by a lower
@@ -18,28 +21,35 @@ layer of the Linux kernel and therefore it did not concern itself with
 implementation of LAPB. Therefore the LAPB modules would be called by
 unintelligent X.25 card drivers and not by intelligent ones, this would
 provide a uniform device driver interface, and simplify configuration.
+(因此我决定把实现写成：对分组层而言，链路层好像是由 Linux 内核的更低层完成的，分组层因此无需关心 LAPB 的实现。这样 LAPB 模块将由非智能 X.25 网卡驱动调用，而不是由智能网卡驱动调用，从而提供统一的设备驱动接口，并简化配置。)
 
 To confuse matters a little, an 802.2 LLC implementation is also possible
 which could allow X.25 to be run over an Ethernet (or Token Ring) and
 conform with the JNT "Pink Book", this would have a different interface to
 the Packet Layer but there would be no confusion since the class of device
 being served by the LLC would be completely separate from LAPB.
+(稍微复杂一点的是，还可以有 802.2 LLC 实现，它可以让 X.25 运行在以太网(或令牌环)之上并符合 JNT "Pink Book" 规范。它与分组层的接口不同，但不会产生混淆，因为由 LLC 服务的设备类别与 LAPB 完全分离。)
 
 Just when you thought that it could not become more confusing, another
 option appeared, XOT. This allows X.25 Packet Layer frames to operate over
 the Internet using TCP/IP as a reliable link layer. RFC1613 specifies the
 format and behaviour of the protocol. If time permits this option will also
 be actively considered.
+(就在你以为情况不会再更复杂的时候，又出现了另一个选项：XOT。它允许 X.25 分组层帧使用 TCP/IP 作为可靠链路层在互联网上运行。RFC1613 规定了该协议的格式和行为。如果时间允许，这个选项也会被积极考虑。)
 
 A linux-x25 mailing list has been created at vger.kernel.org to support the
 development and use of Linux X.25. It is early days yet, but interested
 parties are welcome to subscribe to it. Just send a message to
 majordomo@vger.kernel.org with the following in the message body:
+(已在 vger.kernel.org 创建了 linux-x25 邮件列表来支持 Linux X.25 的开发和使用。虽然目前还为时尚早，但欢迎感兴趣的人士订阅。只需向 majordomo@vger.kernel.org 发送一封邮件，并在邮件正文中写入以下内容：)
 
 subscribe linux-x25
+(订阅命令：subscribe linux-x25)
 end
+(结束命令：end)
 
 The contents of the Subject line are ignored.
+(主题 (Subject) 行的内容会被忽略。)
 
 Jonathan
 

@@ -4,17 +4,25 @@
 Linux and the 3Com EtherLink III Series Ethercards (driver v1.18c and higher)
 =============================================================================
 
+(Linux 与 3Com EtherLink III 系列以太网卡，驱动 v1.18c 及更高版本)
+
 This file contains the instructions and caveats for v1.18c and higher versions
 of the 3c509 driver. You should not use the driver without reading this file.
+(本文件包含 3c509 驱动 v1.18c 及更高版本的使用说明与注意事项。在不阅读本文件的情况下，请不要使用该驱动。)
 
 release 1.0
+(发布 1.0)
 
 28 February 2002
+(2002 年 2 月 28 日)
 
 Current maintainer (corrections to):
   Maciej W. Rozycki <macro@orcam.me.uk>
 
+(当前维护者，勘误请发送至：Maciej W. Rozycki <macro@orcam.me.uk>)
+
 Introduction
+(简介)
 ============
 
 The following are notes and information on using the 3Com EtherLink III series
@@ -24,28 +32,38 @@ be (but sometimes are) confused with the similarly-numbered PCI-bus "3c905"
 (aka "Vortex" or "Boomerang") series.  Kernel support for the 3c509 family is
 provided by the module 3c509.c, which has code to support all of the following
 models:
+(以下是在 Linux 中使用 3Com EtherLink III 系列以太网卡的说明与信息。这些网卡通常以使用最广的那款网卡的 3Com 型号 3c509 为人所知。它们都是 10mb/s 的 ISA 总线网卡，不应与编号相近的 PCI 总线 "3c905"（又称 "Vortex" 或 "Boomerang"）系列相混淆，但有时确实会被混淆。3c509 家族的内核支持由模块 3c509.c 提供，该模块包含对以下所有型号的支持代码：)
 
  - 3c509 (original ISA card)
+   (3c509（最初的 ISA 卡）)
  - 3c509B (later revision of the ISA card; supports full-duplex)
+   (3c509B（ISA 卡的后续修订版；支持全双工）)
  - 3c589 (PCMCIA)
+   (3c589（PCMCIA）)
  - 3c589B (later revision of the 3c589; supports full-duplex)
+   (3c589B（3c589 的后续修订版；支持全双工）)
  - 3c579 (EISA)
+   (3c579（EISA）)
 
 Large portions of this documentation were heavily borrowed from the guide
 written the original author of the 3c509 driver, Donald Becker. The master
 copy of that document, which contains notes on older versions of the driver,
 currently resides on Scyld web server: http://www.scyld.com/.
+(本文档的大部分内容大量借鉴自 3c509 驱动原作者 Donald Becker 撰写的指南。该文档的主副本（包含对驱动较旧版本的说明）目前存放在 Scyld 网络服务器上：http://www.scyld.com/。)
 
 
 Special Driver Features
+(驱动的特殊功能)
 =======================
 
 Overriding card settings
+(覆盖网卡设置)
 
 The driver allows boot- or load-time overriding of the card's detected IOADDR,
 IRQ, and transceiver settings, although this capability shouldn't generally be
 needed except to enable full-duplex mode (see below). An example of the syntax
 for LILO parameters for doing this::
+(驱动允许在启动时或加载时覆盖网卡检测到的 IOADDR、IRQ 和收发器设置，不过除了启用全双工模式（见下文）之外，通常并不需要用到这一功能。用于此目的的 LILO 参数语法示例：)
 
     ether=10,0x310,3,0x3c509,eth0
 
@@ -55,16 +73,19 @@ with other card types when overriding the I/O address. When the driver is
 loaded as a module, only the IRQ may be overridden. For example,
 setting two cards to IRQ10 and IRQ11 is done by using the irq module
 option::
+(这会把找到的第一块 3c509 网卡配置为 IRQ 10、基础 I/O 0x310、收发器类型 3（10base2）。在覆盖 I/O 地址时必须设置标志 "0x3c509"，以避免与其他类型的网卡冲突。当驱动以模块方式加载时，只能覆盖 IRQ。例如，通过 irq 模块选项把两块网卡分别设置为 IRQ10 和 IRQ11：)
 
    options 3c509 irq=10,11
 
 
 Full-duplex mode
+(全双工模式)
 ================
 
 The v1.18c driver added support for the 3c509B's full-duplex capabilities.
 In order to enable and successfully use full-duplex mode, three conditions
 must be met:
+(v1.18c 版驱动增加了对 3c509B 全双工能力的支持。要启用并成功使用全双工模式，必须满足三个条件：)
 
 (a) You must have a Etherlink III card model whose hardware supports full-
 duplex operations. Currently, the only members of the 3c509 family that are
@@ -72,22 +93,27 @@ positively known to support full-duplex are the 3c509B (ISA bus) and 3c589B
 (PCMCIA) cards. Cards without the "B" model designation do *not* support
 full-duplex mode; these include the original 3c509 (no "B"), the original
 3c589, the 3c529 (MCA bus), and the 3c579 (EISA bus).
+(你必须使用硬件支持全双工操作的 Etherlink III 网卡型号。目前，3c509 家族中确定支持全双工的只有 3c509B（ISA 总线）和 3c589B（PCMCIA）卡。型号不带 "B" 标记的卡并不支持全双工模式，包括最初的 3c509（无 "B"）、最初的 3c589、3c529（MCA 总线）以及 3c579（EISA 总线）。)
 
 (b) You must be using your card's 10baseT transceiver (i.e., the RJ-45
 connector), not its AUI (thick-net) or 10base2 (thin-net/coax) interfaces.
 AUI and 10base2 network cabling is physically incapable of full-duplex
 operation.
+(你必须使用网卡的 10baseT 收发器（即 RJ-45 连接器），而不是 AUI（粗缆）或 10base2（细缆/同轴）接口。AUI 和 10base2 网络布线在物理上无法进行全双工操作。)
 
 (c) Most importantly, your 3c509B must be connected to a link partner that is
 itself full-duplex capable. This is almost certainly one of two things: a full-
 duplex-capable  Ethernet switch (*not* a hub), or a full-duplex-capable NIC on
 another system that's connected directly to the 3c509B via a crossover cable.
+(最重要的是，你的 3c509B 必须连接到自身支持全双工的链路对端。这几乎必然是以下两者之一：支持全双工的以太网交换机（而非集线器），或者通过交叉电缆直接连到 3c509B 的另一台系统上支持全双工的网卡。)
 
 Full-duplex mode can be enabled using 'ethtool'.
+(可以使用 'ethtool' 启用全双工模式。)
 
 .. warning::
 
   Extremely important caution concerning full-duplex mode
+  (关于全双工模式的极其重要警告)
 
   Understand that the 3c509B's hardware's full-duplex support is much more
   limited than that provide by more modern network interface cards. Although
@@ -102,21 +128,24 @@ Full-duplex mode can be enabled using 'ethtool'.
   collisions. This is one of very rare circumstances where disabling auto-
   negotiation and forcing the duplex mode of a network interface card or switch
   would ever be necessary or desirable.
+  (请务必了解，3c509B 硬件的全双工支持远比更现代的网络接口卡有限。虽然在网络物理层它完全支持全双工操作，但该卡的设计早于当前以太网自动协商 (N-way) 规范的编写。这意味着 3c509B 家族在任何情况下、无论如何初始化，都不能也不会与其链路对端自动协商出全双工连接。如果启用了 3c509B 的全双工模式，其链路对端很可能也需要被独立地强制为全双工模式；否则会出现各种麻烦的故障——至少你会看到数量巨大的数据包冲突。这是极少数必须禁用自动协商并强制网卡或交换机双工模式的情形之一。)
 
 
 Available Transceiver Types
+(可用的收发器类型)
 ===========================
 
 For versions of the driver v1.18c and above, the available transceiver types are:
+(对于 v1.18c 及以上版本的驱动，可用的收发器类型如下：)
 
 == =========================================================================
-0  transceiver type from EEPROM config (normally 10baseT); force half-duplex
-1  AUI (thick-net / DB15 connector)
-2  (undefined)
-3  10base2 (thin-net == coax / BNC connector)
-4  10baseT (RJ-45 connector); force half-duplex mode
-8  transceiver type and duplex mode taken from card's EEPROM config settings
-12 10baseT (RJ-45 connector); force full-duplex mode
+0  transceiver type from EEPROM config (normally 10baseT); force half-duplex (收发器类型取自 EEPROM 配置（通常为 10baseT）；强制半双工)
+1  AUI (thick-net / DB15 connector) (AUI（粗缆 / DB15 连接器）)
+2  (undefined) (未定义)
+3  10base2 (thin-net == coax / BNC connector) (10base2（细缆 == 同轴 / BNC 连接器）)
+4  10baseT (RJ-45 connector); force half-duplex mode (10baseT（RJ-45 连接器）；强制半双工模式)
+8  transceiver type and duplex mode taken from card's EEPROM config settings (收发器类型与双工模式取自网卡的 EEPROM 配置设置)
+12 10baseT (RJ-45 connector); force full-duplex mode (10baseT（RJ-45 连接器）；强制全双工模式)
 == =========================================================================
 
 Prior to driver version 1.18c, only transceiver codes 0-4 were supported. Note
@@ -126,14 +155,18 @@ This insured that merely upgrading the driver from an earlier version would
 never automatically enable full-duplex mode in an existing installation;
 it must always be explicitly enabled via one of these code in order to be
 activated.
+(在驱动版本 1.18c 之前，仅支持收发器代码 0-4。注意，新的收发器代码 8 和 12 是唯一能够启用全双工模式的代码，无论网卡检测到的 EEPROM 设置如何。这确保了仅仅把驱动从较早版本升级，绝不会在现有安装中自动启用全双工模式；必须始终通过这些代码之一显式启用才能激活。)
 
 The transceiver type can be changed using 'ethtool'.
+(可以使用 'ethtool' 更改收发器类型。)
 
 
 Interpretation of error messages and common problems
+(错误消息的解读与常见问题)
 ----------------------------------------------------
 
 Error Messages
+(错误消息)
 ^^^^^^^^^^^^^^
 
 eth0: Infinite loop in interrupt, status 2011.
@@ -141,15 +174,19 @@ These are "mostly harmless" message indicating that the driver had too much
 work during that interrupt cycle. With a status of 0x2011 you are receiving
 packets faster than they can be removed from the card. This should be rare
 or impossible in normal operation. Possible causes of this error report are:
+(这些是"基本无害"的消息，表示驱动在该中断周期内的工作量过大。当状态为 0x2011 时，你接收数据包的速度超过了从网卡上取走它们的速度。在正常操作中这种情况应当罕见甚至不可能发生。可能导致此错误报告的原因有：)
 
    - a "green" mode enabled that slows the processor down when there is no
      keyboard activity.
+     (启用了某种"绿色"模式，在没有键盘活动时会降低处理器速度。)
 
    - some other device or device driver hogging the bus or disabling interrupts.
      Check /proc/interrupts for excessive interrupt counts. The timer tick
      interrupt should always be incrementing faster than the others.
+     (其他设备或设备驱动霸占总线或禁用中断。请检查 /proc/interrupts 中是否存在过多的中断计数。时钟滴答中断的计数应当始终比其他中断增长得更快。)
 
 No received packets
+(收不到数据包)
 ^^^^^^^^^^^^^^^^^^^
 
 If a 3c509, 3c562 or 3c589 can successfully transmit packets, but never
@@ -161,89 +198,108 @@ use the same ISA IRQ line. The common conflict is with a sound card on IRQ10
 or IRQ5, and the easiest solution is to move the 3c509 to a different
 interrupt line. If the device is receiving packets but 'ping' doesn't work,
 you have a routing problem.
+(如果 3c509、3c562 或 3c589 能够成功发送数据包，但从不接收数据包（如 /proc/net/dev 或 'ifconfig' 所报告的那样），你很可能遇到了中断线问题。请检查 /proc/interrupts 以确认网卡确实在产生中断。如果中断计数没有增长，你很可能遇到了两台设备争用同一条 ISA IRQ 线的物理冲突。常见的冲突是与声卡争用 IRQ10 或 IRQ5，最简单的解决办法是把 3c509 移到另一条中断线上。如果设备在接收数据包但 'ping' 不通，那就是路由问题。)
 
 Tx Carrier Errors Reported in /proc/net/dev
+(/proc/net/dev 中报告的 Tx 载波错误)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 
 If an EtherLink III appears to transmit packets, but the "Tx carrier errors"
 field in /proc/net/dev increments as quickly as the Tx packet count, you
 likely have an unterminated network or the incorrect media transceiver selected.
+(如果 EtherLink III 看起来在发送数据包，但 /proc/net/dev 中的 "Tx carrier errors" 字段增长速度与 Tx 数据包计数一样快，你很可能遇到了未终结的网络，或者选择了错误的介质收发器。)
 
 3c509B card is not detected on machines with an ISA PnP BIOS.
+(3c509B 卡在带 ISA PnP BIOS 的机器上检测不到。)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 While the updated driver works with most PnP BIOS programs, it does not work
 with all. This can be fixed by disabling PnP support using the 3Com-supplied
 setup program.
+(虽然更新后的驱动能与大多数 PnP BIOS 程序配合工作，但并非与全部都兼容。可以用 3Com 提供的设置程序禁用 PnP 支持来解决这个问题。)
 
 3c509 card is not detected on overclocked machines
+(3c509 卡在超频的机器上检测不到)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Increase the delay time in id_read_eeprom() from the current value, 500,
 to an absurdly high value, such as 5000.
+(把 id_read_eeprom() 中的延迟时间从当前值 500 增加到一个高得离谱的值，例如 5000。)
 
 
 Decoding Status and Error Messages
+(状态与错误消息解码)
 ----------------------------------
 
 
 The bits in the main status register are:
+(主状态寄存器中的各位如下：)
 
 =====	======================================
-value 	description
+value 	description (描述)
 =====	======================================
-0x01 	Interrupt latch
-0x02 	Tx overrun, or Rx underrun
-0x04 	Tx complete
-0x08 	Tx FIFO room available
-0x10 	A complete Rx packet has arrived
-0x20 	A Rx packet has started to arrive
-0x40 	The driver has requested an interrupt
-0x80 	Statistics counter nearly full
+0x01 	Interrupt latch (中断锁存)
+0x02 	Tx overrun, or Rx underrun (Tx 溢出，或 Rx 欠载)
+0x04 	Tx complete (Tx 完成)
+0x08 	Tx FIFO room available (Tx FIFO 有可用空间)
+0x10 	A complete Rx packet has arrived (一个完整的 Rx 数据包已到达)
+0x20 	A Rx packet has started to arrive (一个 Rx 数据包开始到达)
+0x40 	The driver has requested an interrupt (驱动已请求中断)
+0x80 	Statistics counter nearly full (统计计数器接近满)
 =====	======================================
 
 The bits in the transmit (Tx) status word are:
+(发送 (Tx) 状态字中的各位如下：)
 
 =====	============================================
-value	description
+value	description (描述)
 =====	============================================
-0x02	Out-of-window collision.
-0x04	Status stack overflow (normally impossible).
-0x08	16 collisions.
-0x10	Tx underrun (not enough PCI bus bandwidth).
-0x20	Tx jabber.
-0x40	Tx interrupt requested.
-0x80	Status is valid (this should always be set).
+0x02	Out-of-window collision. (窗外冲突。)
+0x04	Status stack overflow (normally impossible). (状态栈溢出（通常不可能发生）。)
+0x08	16 collisions. (16 次冲突。)
+0x10	Tx underrun (not enough PCI bus bandwidth). (Tx 欠载（PCI 总线带宽不足）。)
+0x20	Tx jabber. (Tx 超长发送。)
+0x40	Tx interrupt requested. (已请求 Tx 中断。)
+0x80	Status is valid (this should always be set). (状态有效（此位应始终被置位）。)
 =====	============================================
 
 
 When a transmit error occurs the driver produces a status message such as::
+(当发生发送错误时，驱动会产生如下所示的状态消息：)
 
    eth0: Transmit error, Tx status register 82
 
 The two values typically seen here are:
+(这里通常看到的两个值是：)
 
 0x82
+(0x82)
 ^^^^
 
 Out of window collision. This typically occurs when some other Ethernet
 host is incorrectly set to full duplex on a half duplex network.
+(窗外冲突 (out of window collision)。这通常发生在某个其他以太网主机在半双工网络上被错误地设置为全双工时。)
 
 0x88
+(0x88)
 ^^^^
 
 16 collisions. This typically occurs when the network is exceptionally busy
 or when another host doesn't correctly back off after a collision. If this
 error is mixed with 0x82 errors it is the result of a host incorrectly set
 to full duplex (see above).
+(16 次冲突。这通常发生在网络异常繁忙，或另一台主机在冲突后未正确退避时。如果此错误与 0x82 错误混在一起出现，则是因为某台主机被错误地设置为全双工（见上文）。)
 
 Both of these errors are the result of network problems that should be
 corrected. They do not represent driver malfunction.
+(这两种错误都是网络问题导致的结果，应当予以纠正。它们不代表驱动故障。)
 
 
 Revision history (this file)
+(修订历史（本文件）)
 ============================
 
 28Feb02 v1.0  DR   New; major portions based on Becker original 3c509 docs
+(2002 年 2 月 28 日 v1.0  DR  新建；大部分内容基于 Becker 的原始 3c509 文档)
 

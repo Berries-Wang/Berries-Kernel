@@ -5,24 +5,34 @@
 Intel(R) PRO/Wireless 2915ABG Driver for Linux
 ==============================================
 
+(Linux 的 Intel(R) PRO/Wireless 2915ABG 驱动程序)
+
 
 Support for:
+(支持以下设备：)
 
 - Intel(R) PRO/Wireless 2200BG Network Connection
+  (Intel(R) PRO/Wireless 2200BG 网络连接)
 - Intel(R) PRO/Wireless 2915ABG Network Connection
+  (Intel(R) PRO/Wireless 2915ABG 网络连接)
 
 Note: The Intel(R) PRO/Wireless 2915ABG Driver for Linux and Intel(R)
 PRO/Wireless 2200BG Driver for Linux is a unified driver that works on
 both hardware adapters listed above. In this document the Intel(R)
 PRO/Wireless 2915ABG Driver for Linux will be used to reference the
 unified driver.
+(注意：Linux 的 Intel(R) PRO/Wireless 2915ABG 驱动程序与 Linux 的 Intel(R) PRO/Wireless 2200BG 驱动程序是一个统一驱动，适用于上面列出的两种硬件适配器。在本文档中，将使用 Linux 的 Intel(R) PRO/Wireless 2915ABG 驱动程序来指代该统一驱动。)
 
 Copyright |copy| 2004-2006, Intel Corporation
+(版权所有 |copy| 2004-2006，Intel Corporation)
 
 README.ipw2200
+(README.ipw2200)
 
 :Version: 1.1.2
+(版本：1.1.2)
 :Date: March 30, 2006
+(日期：2006 年 3 月 30 日)
 
 
 .. Index
@@ -45,9 +55,11 @@ README.ipw2200
 
 
 0. IMPORTANT INFORMATION BEFORE USING THIS DRIVER
+(0. 使用此驱动程序前的重要信息)
 =================================================
 
 Important Notice FOR ALL USERS OR DISTRIBUTORS!!!!
+(致所有用户或分发者的重要通知！！！！)
 
 Intel wireless LAN adapters are engineered, manufactured, tested, and
 quality checked to ensure that they meet all necessary local and
@@ -64,6 +76,7 @@ software driver are designed to carefully control parameters that affect
 radio operation and to ensure electromagnetic compliance (EMC). These
 parameters include, without limitation, RF power, spectrum usage,
 channel scanning, and human exposure.
+(Intel 无线局域网适配器经过精心设计、制造、测试和质量检查，以确保其满足其被指定和/或标记销往地区所需的所有当地及政府监管机构要求。由于无线局域网通常是与雷达、卫星以及其他持证和未持证设备共享频谱的无证设备，因此有时需要动态地检测、规避和限制使用，以避免对这些设备造成干扰。在许多情况下，在获得使用产品的认证或批准之前，Intel 必须提供测试数据以证明其符合地区及当地法规。Intel 无线局域网的 EEPROM、固件和软件驱动程序经过精心设计，可仔细控制影响无线电工作的参数并确保电磁兼容性 (EMC)。这些参数包括但不限于射频功率、频谱使用、信道扫描和人体暴露。)
 
 For these reasons Intel cannot permit any manipulation by third parties
 of the software provided in binary format with the wireless WLAN
@@ -78,12 +91,14 @@ with the modified products, including without limitation, claims under
 the warranty and/or issues arising from regulatory non-compliance, and
 (iii) Intel will not provide or be required to assist in providing
 support to any third parties for such modified products.
+(基于这些原因，Intel 不允许任何第三方操纵随无线 WLAN 适配器以二进制格式提供的软件 (例如 EEPROM 和固件)。此外，如果你在 Intel 无线局域网适配器上使用任何已被未经授权方操纵过的补丁、实用工具或代码 (即未经 Intel 验证的补丁、实用工具或代码 (包括开源代码修改))，则 (i) 你将全权负责确保产品的法规符合性，(ii) 对于与修改后产品相关的任何问题，包括但不限于保修索赔和/或因不符合法规而产生的问题，Intel 在任何责任理论下均不承担责任，(iii) Intel 不会为此类修改后的产品向任何第三方提供支持，也不会被要求协助提供此类支持。)
 
 Note: Many regulatory agencies consider Wireless LAN adapters to be
 modules, and accordingly, condition system-level regulatory approval
 upon receipt and review of test data documenting that the antennas and
 system configuration do not cause the EMC and radio operation to be
 non-compliant.
+(注意：许多监管机构将无线局域网适配器视为模块，因此，以收到并审查证明天线和系统配置不会导致 EMC 和无线电工作不合规的测试数据，作为系统级法规批准的前提条件。)
 
 The drivers available for download from SourceForge are provided as a
 part of a development project.  Conformance to local regulatory
@@ -91,102 +106,147 @@ requirements is the responsibility of the individual developer.  As
 such, if you are interested in deploying or shipping a driver as part of
 solution intended to be used for purposes other than development, please
 obtain a tested driver from Intel Customer Support at:
+(可从 SourceForge 下载的驱动程序是开发项目的一部分。符合当地法规要求是每个开发者自己的责任。因此，如果你有兴趣将驱动程序部署或交付为预期用于开发以外用途的解决方案的一部分，请从以下 Intel 客户支持部门获取经过测试的驱动程序：)
 
 http://support.intel.com
 
 
 1. Introduction
+(1. 简介)
 ===============
 
 The following sections attempt to provide a brief introduction to using
 the Intel(R) PRO/Wireless 2915ABG Driver for Linux.
+(以下各节试图简要介绍 Linux 的 Intel(R) PRO/Wireless 2915ABG 驱动程序的使用方法。)
 
 This document is not meant to be a comprehensive manual on
 understanding or using wireless technologies, but should be sufficient
 to get you moving without wires on Linux.
+(本文档并非一本理解或使用无线技术的全面手册，但应当足以让你在 Linux 上摆脱线缆自由行动。)
 
 For information on building and installing the driver, see the INSTALL
 file.
+(有关构建和安装驱动程序的信息，请参阅 INSTALL 文件。)
 
 
 1.1. Overview of Features
+(1.1. 功能概述)
 -------------------------
 The current release (1.1.2) supports the following features:
+(当前版本 (1.1.2) 支持以下特性：)
 
 + BSS mode (Infrastructure, Managed)
+  (BSS 模式 (基础结构，受管))
 + IBSS mode (Ad-Hoc)
+  (IBSS 模式 (Ad-Hoc))
 + WEP (OPEN and SHARED KEY mode)
+  (WEP (OPEN 和 SHARED KEY 模式))
 + 802.1x EAP via wpa_supplicant and xsupplicant
+  (通过 wpa_supplicant 和 xsupplicant 支持 802.1x EAP)
 + Wireless Extension support
+  (无线扩展支持)
 + Full B and G rate support (2200 and 2915)
+  (完整的 B 和 G 速率支持 (2200 和 2915))
 + Full A rate support (2915 only)
+  (完整的 A 速率支持 (仅 2915))
 + Transmit power control
+  (发送功率控制)
 + S state support (ACPI suspend/resume)
+  (S 状态支持 (ACPI 挂起/恢复))
 
 The following features are currently enabled, but not officially
 supported:
+(以下特性目前已启用，但不受官方支持：)
 
 + WPA
+  (WPA)
 + long/short preamble support
+  (长/短前导码支持)
 + Monitor mode (aka RFMon)
+  (监听模式 (又称 RFMon))
 
 The distinction between officially supported and enabled is a reflection
 on the amount of validation and interoperability testing that has been
 performed on a given feature.
+(官方支持与已启用之间的区别反映了对给定特性所进行的验证和互操作性测试的工作量。)
 
 
 
 1.2. Command Line Parameters
+(1.2. 命令行参数)
 ----------------------------
 
 Like many modules used in the Linux kernel, the Intel(R) PRO/Wireless
 2915ABG Driver for Linux allows configuration options to be provided
 as module parameters.  The most common way to specify a module parameter
 is via the command line.
+(与 Linux 内核中使用的许多模块一样，Linux 的 Intel(R) PRO/Wireless 2915ABG 驱动程序允许以模块参数的形式提供配置选项。指定模块参数最常见的方式是通过命令行。)
 
 The general form is::
+(一般形式为：)
 
     % modprobe ipw2200 parameter=value
 
 Where the supported parameter are:
+(支持的参数如下：)
 
   associate
+  (associate：自动扫描与关联)
+
 	Set to 0 to disable the auto scan-and-associate functionality of the
 	driver.  If disabled, the driver will not attempt to scan
 	for and associate to a network until it has been configured with
 	one or more properties for the target network, for example configuring
 	the network SSID.  Default is 0 (do not auto-associate)
+	(设为 0 可禁用驱动程序的自动扫描并关联功能。如果禁用，驱动程序在针对目标网络配置了一个或多个属性 (例如配置网络 SSID) 之前，不会尝试扫描并关联到网络。默认值为 0 (不自动关联))
 
 	Example: % modprobe ipw2200 associate=0
+	(示例： % modprobe ipw2200 associate=0)
 
   auto_create
+  (auto_create：自动创建)
+
 	Set to 0 to disable the auto creation of an Ad-Hoc network
 	matching the channel and network name parameters provided.
 	Default is 1.
+	(设为 0 可禁用自动创建与所提供的信道和网络名称参数相匹配的 Ad-Hoc 网络。默认值为 1。)
 
   channel
+  (channel：信道)
+
 	channel number for association.  The normal method for setting
 	the channel would be to use the standard wireless tools
 	(i.e. `iwconfig eth1 channel 10`), but it is useful sometimes
 	to set this while debugging.  Channel 0 means 'ANY'
+	(用于关联的信道编号。设置信道的常规方法是使用标准无线工具 (即 `iwconfig eth1 channel 10`)，但有时在调试时设置它会很有用。信道 0 表示 'ANY' (任意))
 
   debug
+  (debug：调试)
+
 	If using a debug build, this is used to control the amount of debug
 	info is logged.  See the 'dvals' and 'load' script for more info on
 	how to use this (the dvals and load scripts are provided as part
 	of the ipw2200 development snapshot releases available from the
 	SourceForge project at http://ipw2200.sf.net)
+	(如果使用调试版本，此参数用于控制记录的调试信息数量。有关其用法的更多信息，请参阅 'dvals' 和 'load' 脚本 (这两个脚本作为 ipw2200 开发快照版本的一部分提供，可从 http://ipw2200.sf.net 上的 SourceForge 项目获取))
 
   led
+  (led：LED)
+
 	Can be used to turn on experimental LED code.
 	0 = Off, 1 = On.  Default is 1.
+	(可用于打开实验性的 LED 代码。0 = 关，1 = 开。默认值为 1。)
 
   mode
+  (mode：模式)
+
 	Can be used to set the default mode of the adapter.
 	0 = Managed, 1 = Ad-Hoc, 2 = Monitor
+	(可用于设置适配器的默认模式。0 = 受管 (Managed)，1 = Ad-Hoc，2 = 监听 (Monitor))
 
 
 1.3. Wireless Extension Private Methods
+(1.3. 无线扩展私有方法)
 ---------------------------------------
 
 As an interface designed to handle generic hardware, there are certain
@@ -194,81 +254,107 @@ capabilities not exposed through the normal Wireless Tool interface.  As
 such, a provision is provided for a driver to declare custom, or
 private, methods.  The Intel(R) PRO/Wireless 2915ABG Driver for Linux
 defines several of these to configure various settings.
+(作为一个为处理通用硬件而设计的接口，某些能力并未通过常规的无线工具接口暴露出来。因此，提供了让驱动程序声明自定义 (即私有) 方法的机制。Linux 的 Intel(R) PRO/Wireless 2915ABG 驱动程序定义了其中若干方法，用于配置各种设置。)
 
 The general form of using the private wireless methods is::
+(使用私有无线方法的一般形式为：)
 
 	% iwpriv $IFNAME method parameters
 
 Where $IFNAME is the interface name the device is registered with
 (typically eth1, customized via one of the various network interface
 name managers, such as ifrename)
+(其中 $IFNAME 是设备注册时使用的接口名称 (通常为 eth1，可通过各种网络接口名称管理器 (如 ifrename) 之一进行自定义))
 
 The supported private methods are:
+(支持的私有方法如下：)
 
   get_mode
+  (get_mode：获取模式)
+
 	Can be used to report out which IEEE mode the driver is
 	configured to support.  Example:
+	(可用于报告驱动程序被配置为支持哪种 IEEE 模式。示例：)
 
 	% iwpriv eth1 get_mode
 	eth1	get_mode:802.11bg (6)
+	(输出示例：eth1 的 get_mode 结果为 802.11bg (6))
 
   set_mode
+  (set_mode：设置模式)
+
 	Can be used to configure which IEEE mode the driver will
 	support.
+	(可用于配置驱动程序将支持哪种 IEEE 模式。)
 
 	Usage::
+	(用法：)
 
 	    % iwpriv eth1 set_mode {mode}
 
 	Where {mode} is a number in the range 1-7:
+	(其中 {mode} 是 1-7 范围内的数字：)
 
 	==	=====================
-	1	802.11a (2915 only)
+	1	802.11a (2915 only) (仅限 2915)
 	2	802.11b
-	3	802.11ab (2915 only)
+	3	802.11ab (2915 only) (仅限 2915)
 	4	802.11g
-	5	802.11ag (2915 only)
+	5	802.11ag (2915 only) (仅限 2915)
 	6	802.11bg
-	7	802.11abg (2915 only)
+	7	802.11abg (2915 only) (仅限 2915)
 	==	=====================
 
   get_preamble
+  (get_preamble：获取前导码)
+
 	Can be used to report configuration of preamble length.
+	(可用于报告前导码长度的配置。)
 
   set_preamble
+  (set_preamble：设置前导码)
+
 	Can be used to set the configuration of preamble length:
+	(可用于设置前导码长度的配置：)
 
 	Usage::
+	(用法：)
 
 	    % iwpriv eth1 set_preamble {mode}
 
 	Where {mode} is one of:
+	(其中 {mode} 为以下之一：)
 
 	==	========================================
-	1	Long preamble only
-	0	Auto (long or short based on connection)
+	1	Long preamble only (仅长前导码)
+	0	Auto (long or short based on connection) (自动 (根据连接选择长或短))
 	==	========================================
 
 
 1.4. Sysfs Helper Files
+(1.4. Sysfs 辅助文件)
 -----------------------
 
 The Linux kernel provides a pseudo file system that can be used to
 access various components of the operating system.  The Intel(R)
 PRO/Wireless 2915ABG Driver for Linux exposes several configuration
 parameters through this mechanism.
+(Linux 内核提供了一个伪文件系统，可用于访问操作系统的各种组件。Linux 的 Intel(R) PRO/Wireless 2915ABG 驱动程序通过此机制暴露了若干配置参数。)
 
 An entry in the sysfs can support reading and/or writing.  You can
 typically query the contents of a sysfs entry through the use of cat,
 and can set the contents via echo.  For example::
+(sysfs 中的条目可以支持读和/或写。通常可以使用 cat 查询 sysfs 条目的内容，并可以通过 echo 设置内容。例如：)
 
     % cat /sys/bus/pci/drivers/ipw2200/debug_level
 
 Will report the current debug level of the driver's logging subsystem
 (only available if CONFIG_IPW2200_DEBUG was configured when the driver
 was built).
+(将报告驱动程序日志子系统的当前调试级别 (仅当构建驱动程序时配置了 CONFIG_IPW2200_DEBUG 时可用)。)
 
 You can set the debug level via::
+(可以通过以下方式设置调试级别：)
 
     % echo $VALUE > /sys/bus/pci/drivers/ipw2200/debug_level
 
@@ -276,74 +362,96 @@ Where $VALUE would be a number in the case of this sysfs entry.  The
 input to sysfs files does not have to be a number.  For example, the
 firmware loader used by hotplug utilizes sysfs entries for transferring
 the firmware image from user space into the driver.
+(对于这个 sysfs 条目，$VALUE 是一个数字。写入 sysfs 文件的输入不一定是数字。例如，hotplug 使用的固件加载器利用 sysfs 条目将固件映像从用户空间传输到驱动程序中。)
 
 The Intel(R) PRO/Wireless 2915ABG Driver for Linux exposes sysfs entries
 at two levels -- driver level, which apply to all instances of the driver
 (in the event that there are more than one device installed) and device
 level, which applies only to the single specific instance.
+(Linux 的 Intel(R) PRO/Wireless 2915ABG 驱动程序在两个级别上暴露 sysfs 条目 -- 驱动程序级别 (适用于驱动程序的所有实例，以应对安装了多于一个设备的情况) 和设备级别 (仅适用于单个特定实例)。)
 
 
 1.4.1 Driver Level Sysfs Helper Files
+(1.4.1 驱动程序级别的 Sysfs 辅助文件)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For the driver level files, look in /sys/bus/pci/drivers/ipw2200/
+(驱动程序级别的文件请查看 /sys/bus/pci/drivers/ipw2200/)
 
   debug_level
+  (debug_level：调试级别)
+
 	This controls the same global as the 'debug' module parameter
+	(它控制与 'debug' 模块参数相同的全局变量)
 
 
 
 1.4.2 Device Level Sysfs Helper Files
+(1.4.2 设备级别的 Sysfs 辅助文件)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 For the device level files, look in::
+(设备级别的文件请查看：)
 
 	/sys/bus/pci/drivers/ipw2200/{PCI-ID}/
 
 For example:::
+(例如：)
 
 	/sys/bus/pci/drivers/ipw2200/0000:02:01.0
 
 For the device level files, see /sys/bus/pci/drivers/ipw2200:
+(设备级别的文件位于 /sys/bus/pci/drivers/ipw2200，内容如下：)
 
   rf_kill
+  (rf_kill：射频禁用)
+
 	read -
+	(读 -)
 
 	==  =========================================
-	0   RF kill not enabled (radio on)
-	1   SW based RF kill active (radio off)
-	2   HW based RF kill active (radio off)
-	3   Both HW and SW RF kill active (radio off)
+	0   RF kill not enabled (radio on) (RF kill 未启用 (无线电开启))
+	1   SW based RF kill active (radio off) (基于软件的 RF kill 生效 (无线电关闭))
+	2   HW based RF kill active (radio off) (基于硬件的 RF kill 生效 (无线电关闭))
+	3   Both HW and SW RF kill active (radio off) (硬件和软件 RF kill 均生效 (无线电关闭))
 	==  =========================================
 
 	write -
+	(写 -)
 
 	==  ==================================================
-	0   If SW based RF kill active, turn the radio back on
-	1   If radio is on, activate SW based RF kill
+	0   If SW based RF kill active, turn the radio back on (如果基于软件的 RF kill 生效，重新打开无线电)
+	1   If radio is on, activate SW based RF kill (如果无线电开启，激活基于软件的 RF kill)
 	==  ==================================================
 
 	.. note::
 
 	   If you enable the SW based RF kill and then toggle the HW
 	   based RF kill from ON -> OFF -> ON, the radio will NOT come back on
+	   (注意：如果你启用了基于软件的 RF kill，然后将基于硬件的 RF kill 从 开 -> 关 -> 开 切换，无线电将不会重新开启)
 
   ucode
+  (ucode：微码)
+
 	read-only access to the ucode version number
+	(对 ucode 版本号的只读访问)
 
   led
+  (led：LED)
+
 	read -
 
 	==  =================
-	0   LED code disabled
-	1   LED code enabled
+	0   LED code disabled (LED 代码禁用)
+	1   LED code enabled (LED 代码启用)
 	==  =================
 
 	write -
+	(写 -)
 
 	==  ================
-	0   Disable LED code
-	1   Enable LED code
+	0   Disable LED code (禁用 LED 代码)
+	1   Enable LED code (启用 LED 代码)
 	==  ================
 
 
@@ -351,92 +459,110 @@ For the device level files, see /sys/bus/pci/drivers/ipw2200:
 
 	   The LED code has been reported to hang some systems when
 	   running ifconfig and is therefore disabled by default.
+	   (注意：据报道，LED 代码在运行 ifconfig 时会使某些系统挂起，因此默认禁用)
 
 
 1.5. Supported channels
+(1.5. 支持的信道)
 -----------------------
 
 Upon loading the Intel(R) PRO/Wireless 2915ABG Driver for Linux, a
 message stating the detected geography code and the number of 802.11
 channels supported by the card will be displayed in the log.
+(加载 Linux 的 Intel(R) PRO/Wireless 2915ABG 驱动程序时，日志中将显示一条消息，说明检测到的地理代码以及网卡支持的 802.11 信道数量。)
 
 The geography code corresponds to a regulatory domain as shown in the
 table below.
+(地理代码对应一个管制域，如下表所示。)
 
 	+------+----------------------------+--------------------+
 	|      |			    | Supported channels |
-	| Code |        Geography	    +----------+---------+
+        | Code | Geography (地理)           +----------+---------+
 	|      |			    | 802.11bg | 802.11a |
 	+======+============================+==========+=========+
-	| ---  | Restricted 		    |  11      |   0     |
+        | ---  | Restricted (受限)          |  11      |   0     |
 	+------+----------------------------+----------+---------+
-	| ZZF  | Custom US/Canada 	    |  11      |   8     |
+        | ZZF  | Custom US/Canada (美/加)   |  11      |   8     |
 	+------+----------------------------+----------+---------+
-	| ZZD  | Rest of World 		    |  13      |   0     |
+        | ZZD  | Rest of World (其他地区)   |  13      |   0     |
 	+------+----------------------------+----------+---------+
 	| ZZA  | Custom USA & Europe & High |  11      |  13     |
 	+------+----------------------------+----------+---------+
-	| ZZB  | Custom NA & Europe	    |  11      |  13     |
+        | ZZB  |Custom NA & Europe(北美欧洲)|  11      |  13     |
 	+------+----------------------------+----------+---------+
-	| ZZC  | Custom Japan 		    |  11      |   4     |
+        | ZZC  | Custom Japan (日本)        |  11      |   4     |
 	+------+----------------------------+----------+---------+
-	| ZZM  | Custom  		    |  11      |   0     |
+        | ZZM  | Custom (自定义)            |  11      |   0     |
 	+------+----------------------------+----------+---------+
-	| ZZE  | Europe 		    |  13      |  19     |
+        | ZZE  | Europe (欧洲)              |  13      |  19     |
 	+------+----------------------------+----------+---------+
-	| ZZJ  | Custom Japan 		    |  14      |   4     |
+        | ZZJ  | Custom Japan (日本)        |  14      |   4     |
 	+------+----------------------------+----------+---------+
-	| ZZR  | Rest of World		    |  14      |   0     |
+        | ZZR  | Rest of World (其他地区)   |  14      |   0     |
 	+------+----------------------------+----------+---------+
-	| ZZH  | High Band		    |  13      |   4     |
+        | ZZH  | High Band (高频段)         |  13      |   4     |
 	+------+----------------------------+----------+---------+
-	| ZZG  | Custom Europe		    |  13      |   4     |
+        | ZZG  | Custom Europe (欧洲)       |  13      |   4     |
 	+------+----------------------------+----------+---------+
-	| ZZK  | Europe 		    |  13      |  24     |
+        | ZZK  | Europe (欧洲)              |  13      |  24     |
 	+------+----------------------------+----------+---------+
-	| ZZL  | Europe 		    |  11      |  13     |
+        | ZZL  | Europe (欧洲)              |  11      |  13     |
 	+------+----------------------------+----------+---------+
 
 2.  Ad-Hoc Networking
+(2. Ad-Hoc 网络)
 =====================
 
 When using a device in an Ad-Hoc network, it is useful to understand the
 sequence and requirements for the driver to be able to create, join, or
 merge networks.
+(在 Ad-Hoc 网络中使用设备时，了解驱动程序能够创建、加入或合并网络的流程和要求是很有用的。)
 
 The following attempts to provide enough information so that you can
 have a consistent experience while using the driver as a member of an
 Ad-Hoc network.
+(以下内容试图提供足够的信息，使你在作为 Ad-Hoc 网络成员使用该驱动程序时能够获得一致的体验。)
 
 2.1. Joining an Ad-Hoc Network
+(2.1. 加入 Ad-Hoc 网络)
 ------------------------------
 
 The easiest way to get onto an Ad-Hoc network is to join one that
 already exists.
+(进入 Ad-Hoc 网络最简单的方式是加入一个已经存在的网络。)
 
 2.2. Creating an Ad-Hoc Network
+(2.2. 创建 Ad-Hoc 网络)
 -------------------------------
 
 An Ad-Hoc networks is created using the syntax of the Wireless tool.
+(Ad-Hoc 网络使用无线工具的语法创建。)
 
 For Example:
+(例如：)
 iwconfig eth1 mode ad-hoc essid testing channel 2
+(示例命令：iwconfig eth1 mode ad-hoc essid testing channel 2)
 
 2.3. Merging Ad-Hoc Networks
+(2.3. 合并 Ad-Hoc 网络)
 ----------------------------
 
 
 3. Interaction with Wireless Tools
+(3. 与无线工具的交互)
 ==================================
 
 3.1 iwconfig mode
+(3.1 iwconfig 模式)
 -----------------
 
 When configuring the mode of the adapter, all run-time configured parameters
 are reset to the value used when the module was loaded.  This includes
 channels, rates, ESSID, etc.
+(配置适配器模式时，所有运行时配置的参数都会重置为模块加载时所使用的值。这包括信道、速率、ESSID 等。)
 
 3.2 iwconfig sens
+(3.2 iwconfig sens)
 -----------------
 
 The 'iwconfig ethX sens XX' command will not set the signal sensitivity
@@ -444,23 +570,29 @@ threshold, as described in iwconfig documentation, but rather the number
 of consecutive missed beacons that will trigger handover, i.e. roaming
 to another access point. At the same time, it will set the disassociation
 threshold to 3 times the given value.
+('iwconfig ethX sens XX' 命令不会像 iwconfig 文档所描述的那样设置信号灵敏度阈值，而是设置将触发切换 (即漫游到另一个接入点) 的连续丢失信标数量。同时，它还会将解除关联阈值设置为给定值的 3 倍。)
 
 
 4.  About the Version Numbers
+(4. 关于版本号)
 =============================
 
 Due to the nature of open source development projects, there are
 frequently changes being incorporated that have not gone through
 a complete validation process.  These changes are incorporated into
 development snapshot releases.
+(由于开源开发项目的性质，经常会纳入一些尚未经过完整验证过程的更改。这些更改会被纳入开发快照版本中。)
 
 Releases are numbered with a three level scheme:
+(版本采用三级编号方案：)
 
 	major.minor.development
+	(主版本.次版本.开发版本)
 
 Any version where the 'development' portion is 0 (for example
 1.0.0, 1.1.0, etc.) indicates a stable version that will be made
 available for kernel inclusion.
+(任何 'development' 部分为 0 的版本 (例如 1.0.0、1.1.0 等) 表示稳定版本，将可用于内核纳入。)
 
 Any version where the 'development' portion is not a 0 (for
 example 1.0.1, 1.1.5, etc.) indicates a development version that is
@@ -469,58 +601,75 @@ and functionality of the development releases are not know.  We make
 efforts to try and keep all snapshots reasonably stable, but due to the
 frequency of their release, and the desire to get those releases
 available as quickly as possible, unknown anomalies should be expected.
+(任何 'development' 部分不为 0 的版本 (例如 1.0.1、1.1.5 等) 表示开发版本，提供给测试和前沿用户使用。开发版本的稳定性和功能尚不可知。我们努力尝试让所有快照保持合理的稳定性，但由于发布频繁，且希望尽快提供这些版本，应当预期会出现未知异常。)
 
 The major version number will be incremented when significant changes
 are made to the driver.  Currently, there are no major changes planned.
+(当对驱动程序进行重大更改时，主版本号将会递增。目前没有计划进行重大更改。)
 
 5. Firmware installation
+(5. 固件安装)
 ========================
 
 The driver requires a firmware image, download it and extract the
 files under /lib/firmware (or wherever your hotplug's firmware.agent
 will look for firmware files)
+(该驱动程序需要固件映像，请下载并将其中的文件解压到 /lib/firmware 下 (或者你的 hotplug 的 firmware.agent 查找固件文件的任何位置))
 
 The firmware can be downloaded from the following URL:
+(固件可以从以下 URL 下载：)
 
     http://ipw2200.sf.net/
 
 
 6. Support
+(6. 支持)
 ==========
 
 For direct support of the 1.0.0 version, you can contact
 http://supportmail.intel.com, or you can use the open source project
 support.
+(要获得 1.0.0 版本的直接支持，你可以联系 http://supportmail.intel.com，或者使用开源项目支持。)
 
 For general information and support, go to:
+(一般信息和支持，请访问：)
 
     http://ipw2200.sf.net/
 
 
 7. License
+(7. 许可证)
 ==========
 
   Copyright |copy| 2003 - 2006 Intel Corporation. All rights reserved.
+  (版权所有 |copy| 2003 - 2006 Intel Corporation。保留所有权利。)
 
   This program is free software; you can redistribute it and/or modify it
   under the terms of the GNU General Public License version 2 as
   published by the Free Software Foundation.
+  (本程序是自由软件；你可以根据自由软件基金会发布的 GNU 通用公共许可证第 2 版的条款对其进行再分发和/或修改。)
 
   This program is distributed in the hope that it will be useful, but WITHOUT
   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
   FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
   more details.
+  (本程序的分发是希望它有用，但不附带任何保证；甚至没有适销性或特定用途适用性的默示保证。详情请参阅 GNU 通用公共许可证。)
 
   You should have received a copy of the GNU General Public License along with
   this program; if not, write to the Free Software Foundation, Inc., 59
   Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+  (你应该已随本程序收到一份 GNU 通用公共许可证的副本；如果没有，请致函 Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA。)
 
   The full GNU General Public License is included in this distribution in the
   file called LICENSE.
+  (完整的 GNU 通用公共许可证已包含在本发行版中名为 LICENSE 的文件中。)
 
   Contact Information:
+  (联系信息：)
 
   James P. Ketrenos <ipw2100-admin@linux.intel.com>
+  (James P. Ketrenos <ipw2100-admin@linux.intel.com>)
 
   Intel Corporation, 5200 N.E. Elam Young Parkway, Hillsboro, OR 97124-6497
+  (Intel Corporation, 5200 N.E. Elam Young Parkway, Hillsboro, OR 97124-6497)
 

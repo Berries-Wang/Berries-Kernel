@@ -3,9 +3,13 @@
 Ethernet Device Drivers
 =======================
 
+(以太网设备驱动)
+
 Device drivers for Ethernet and Ethernet-based virtual function devices.
+(以太网及基于以太网的虚拟功能设备的设备驱动。)
 
 Contents:
+(目录：)
 
 .. toctree::
    :maxdepth: 2

@@ -4,96 +4,137 @@
 Linux Base Driver for the Intel(R) PRO/100 Family of Adapters
 =============================================================
 
+(Intel(R) PRO/100 系列适配器的 Linux 基础驱动)
+
 June 1, 2018
+(2018 年 6 月 1 日)
 
 Contents
+(目录)
 ========
 
 - In This Release
+  (本版内容)
 - Identifying Your Adapter
+  (识别你的适配器)
 - Building and Installation
+  (构建与安装)
 - Driver Configuration Parameters
+  (驱动配置参数)
 - Additional Configurations
+  (其他配置)
 - Known Issues
+  (已知问题)
 - Support
+  (支持)
 
 
 In This Release
+(本版内容)
 ===============
 
 This file describes the Linux Base Driver for the Intel(R) PRO/100 Family of
 Adapters. This driver includes support for Itanium(R)2-based systems.
+(本文件描述 Intel(R) PRO/100 系列适配器的 Linux 基础驱动。该驱动包含对基于 Itanium(R)2 的系统的支持。)
 
 For questions related to hardware requirements, refer to the documentation
 supplied with your Intel PRO/100 adapter.
+(与硬件要求相关的问题，请参阅随 Intel PRO/100 适配器提供的文档。)
 
 The following features are now available in supported kernels:
+(受支持的内核现已提供以下特性：)
+
  - Native VLANs
+   (原生 VLAN)
  - Channel Bonding (teaming)
+   (通道绑定 (teaming))
  - SNMP
+   (SNMP)
 
 Channel Bonding documentation can be found in the Linux kernel source:
 /Documentation/networking/bonding.rst
+(通道绑定文档位于 Linux 内核源码中：/Documentation/networking/bonding.rst)
 
 
 Identifying Your Adapter
+(识别你的适配器)
 ========================
 
 For information on how to identify your adapter, and for the latest Intel
 network drivers, refer to the Intel Support website:
 https://www.intel.com/support
+(关于如何识别适配器以及获取最新 Intel 网络驱动的信息，请参阅 Intel 支持网站：https://www.intel.com/support)
 
 Driver Configuration Parameters
+(驱动配置参数)
 ===============================
 
 The default value for each parameter is generally the recommended setting,
 unless otherwise noted.
+(除非另有说明，每个参数的默认值通常就是推荐的设置。)
 
 Rx Descriptors:
+(Rx 描述符：)
+
    Number of receive descriptors. A receive descriptor is a data
    structure that describes a receive buffer and its attributes to the network
    controller. The data in the descriptor is used by the controller to write
    data from the controller to host memory. In the 3.x.x driver the valid range
    for this parameter is 64-256. The default value is 256. This parameter can be
    changed using the command::
+   (接收描述符的数量。接收描述符是一种向网络控制器描述接收缓冲区及其属性的数据结构。控制器使用描述符中的数据把数据从控制器写到主机内存。在 3.x.x 驱动中，此参数的有效范围是 64-256，默认值为 256。可以使用以下命令修改：)
 
      ethtool -G eth? rx n
 
    Where n is the number of desired Rx descriptors.
+   (其中 n 是所需的 Rx 描述符数量。)
 
 Tx Descriptors:
+(Tx 描述符：)
+
    Number of transmit descriptors. A transmit descriptor is a data
    structure that describes a transmit buffer and its attributes to the network
    controller. The data in the descriptor is used by the controller to read
    data from the host memory to the controller. In the 3.x.x driver the valid
    range for this parameter is 64-256. The default value is 128. This parameter
    can be changed using the command::
+   (发送描述符的数量。发送描述符是一种向网络控制器描述发送缓冲区及其属性的数据结构。控制器使用描述符中的数据把数据从主机内存读到控制器。在 3.x.x 驱动中，此参数的有效范围是 64-256，默认值为 128。可以使用以下命令修改：)
 
      ethtool -G eth? tx n
 
    Where n is the number of desired Tx descriptors.
+   (其中 n 是所需的 Tx 描述符数量。)
 
 Speed/Duplex:
+(Speed/Duplex：)
+
    The driver auto-negotiates the link speed and duplex settings by
    default. The ethtool utility can be used as follows to force speed/duplex.::
+   (驱动默认自动协商链路速度和双工设置。可以使用 ethtool 工具按如下方式强制指定速度/双工：)
 
      ethtool -s eth?  autoneg off speed {10|100} duplex {full|half}
 
    NOTE: setting the speed/duplex to incorrect values will cause the link to
    fail.
+   (注意：将速度/双工设置为不正确的值会导致链路失效。)
 
 Event Log Message Level:
+(Event Log Message Level：)
+
    The driver uses the message level flag to log events
    to syslog. The message level can be set at driver load time. It can also be
    set using the command::
+   (驱动使用消息级别标志把事件记录到 syslog。消息级别可以在驱动加载时设置，也可以使用以下命令设置：)
 
      ethtool -s eth? msglvl n
 
 
 Additional Configurations
+(其他配置)
 =========================
 
 Configuring the Driver on Different Distributions
+(在不同发行版上配置驱动)
 -------------------------------------------------
 
 Configuring a network driver to load properly when the system is started
@@ -105,28 +146,34 @@ the proper way to configure a network device for your system, refer to
 your distribution documentation.  If during this process you are asked
 for the driver or module name, the name for the Linux Base Driver for
 the Intel PRO/100 Family of Adapters is e100.
+(让网络驱动在系统启动时正确加载，其配置方式因发行版而异。通常，配置过程包括向 `/etc/modprobe.d/*.conf` 添加别名行，以及编辑其他系统启动脚本和/或配置文件。许多流行的 Linux 发行版都自带可代你完成这些修改的工具。要了解在你的系统上配置网络设备的正确方法，请参阅你的发行版文档。如果在此过程中被问到驱动或模块名，Intel PRO/100 系列适配器的 Linux 基础驱动的名称是 e100。)
 
 As an example, if you install the e100 driver for two PRO/100 adapters
 (eth0 and eth1), add the following to a configuration file in
 /etc/modprobe.d/::
+(例如，如果你为两个 PRO/100 适配器 (eth0 和 eth1) 安装 e100 驱动，请将以下内容添加到 /etc/modprobe.d/ 下的一个配置文件中：)
 
        alias eth0 e100
        alias eth1 e100
 
 Viewing Link Messages
+(查看链路消息)
 ---------------------
 
 In order to see link messages and other Intel driver information on your
 console, you must set the dmesg level up to six.  This can be done by
 entering the following on the command line before loading the e100
 driver::
+(要在控制台上查看链路消息和其他 Intel 驱动信息，必须将 dmesg 级别提高到 6。这可以在加载 e100 驱动之前在命令行输入以下命令完成：)
 
        dmesg -n 6
 
 If you wish to see all messages issued by the driver, including debug
 messages, set the dmesg level to eight.
+(如果想查看驱动发出的所有消息（包括调试消息），请将 dmesg 级别设为 8。)
 
 NOTE: This setting is not saved across reboots.
+(注意：此设置在重启后不会保留。)
 
 ethtool
 -------
@@ -134,26 +181,34 @@ ethtool
 The driver utilizes the ethtool interface for driver configuration and
 diagnostics, as well as displaying statistical information.  The ethtool
 version 1.6 or later is required for this functionality.
+(驱动使用 ethtool 接口进行驱动配置、诊断以及统计信息的显示。此功能需要 ethtool 1.6 或更高版本。)
 
 The latest release of ethtool can be found from
 https://www.kernel.org/pub/software/network/ethtool/
+(ethtool 的最新版本可以从 https://www.kernel.org/pub/software/network/ethtool/ 获取。)
 
 Enabling Wake on LAN (WoL)
+(启用 Wake on LAN (WoL))
 --------------------------
+
 WoL is provided through the ethtool utility.  For instructions on
 enabling WoL with ethtool, refer to the ethtool man page.  WoL will be
 enabled on the system during the next shut down or reboot.  For this
 driver version, in order to enable WoL, the e100 driver must be loaded
 when shutting down or rebooting the system.
+(WoL 通过 ethtool 工具提供。关于如何用 ethtool 启用 WoL，请参阅 ethtool 手册页。WoL 会在系统下次关机或重启时启用。对于此驱动版本，要启用 WoL，在系统关机或重启时必须已加载 e100 驱动。)
 
 NAPI
 ----
 
 NAPI (Rx polling mode) is supported in the e100 driver.
+(e100 驱动支持 NAPI（Rx 轮询模式）。)
 
 See :ref:`Documentation/networking/napi.rst <napi>` for more information.
+(更多信息参见 :ref:`Documentation/networking/napi.rst <napi>`。)
 
 Multiple Interfaces on Same Ethernet Broadcast Network
+(同一以太网广播网络上的多个接口)
 ------------------------------------------------------
 
 Due to the default ARP behavior on Linux, it is not possible to have one
@@ -161,25 +216,34 @@ system on two IP networks in the same Ethernet broadcast domain
 (non-partitioned switch) behave as expected.  All Ethernet interfaces
 will respond to IP traffic for any IP address assigned to the system.
 This results in unbalanced receive traffic.
+(由于 Linux 默认的 ARP 行为，无法让同一以太网广播域（未分区的交换机）内两个 IP 网络上的一个系统按预期工作。所有以太网接口都会响应分配给该系统的任何 IP 地址的 IP 流量。这会导致接收流量不均衡。)
 
 If you have multiple interfaces in a server, either turn on ARP
 filtering by
+(如果服务器上有多个接口，可以通过以下方式之一开启 ARP 过滤：)
 
 (1) entering::
+(1) 输入：)
 
 	echo 1 > /proc/sys/net/ipv4/conf/all/arp_filter
 
     (this only works if your kernel's version is higher than 2.4.5), or
+    (这仅在内核版本高于 2.4.5 时有效)，或者
 
 (2) installing the interfaces in separate broadcast domains (either
     in different switches or in a switch partitioned to VLANs).
+    ((2) 将各接口安装在不同的广播域中（使用不同的交换机，或使用按 VLAN 分区的交换机）。)
 
 
 Support
+(支持)
 =======
+
 For general information, go to the Intel support website at:
 https://www.intel.com/support/
+(一般信息请访问 Intel 支持网站：https://www.intel.com/support/)
 
 If an issue is identified with the released source code on a supported kernel
 with a supported adapter, email the specific information related to the issue
 to intel-wired-lan@lists.osuosl.org.
+(如果在受支持的内核上使用受支持的适配器时发现已发布源码存在问题，请将与该问题相关的具体信息发送电子邮件至 intel-wired-lan@lists.osuosl.org。)

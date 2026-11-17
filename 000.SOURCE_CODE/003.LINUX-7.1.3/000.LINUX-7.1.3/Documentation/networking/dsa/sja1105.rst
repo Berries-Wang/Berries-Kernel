@@ -2,34 +2,53 @@
 NXP SJA1105 switch driver
 =========================
 
+(NXP SJA1105 交换机驱动)
+
 Overview
+(概述)
 ========
 
 The NXP SJA1105 is a family of 10 SPI-managed automotive switches:
+(NXP SJA1105 是一个包含 10 款由 SPI 管理的汽车级交换机的产品家族：)
 
 - SJA1105E: First generation, no TTEthernet
+  (第一代，无 TTEthernet)
 - SJA1105T: First generation, TTEthernet
+  (第一代，有 TTEthernet)
 - SJA1105P: Second generation, no TTEthernet, no SGMII
+  (第二代，无 TTEthernet，无 SGMII)
 - SJA1105Q: Second generation, TTEthernet, no SGMII
+  (第二代，有 TTEthernet，无 SGMII)
 - SJA1105R: Second generation, no TTEthernet, SGMII
+  (第二代，无 TTEthernet，有 SGMII)
 - SJA1105S: Second generation, TTEthernet, SGMII
+  (第二代，有 TTEthernet，有 SGMII)
 - SJA1110A: Third generation, TTEthernet, SGMII, integrated 100base-T1 and
   100base-TX PHYs
+  (第三代，TTEthernet，SGMII，集成 100base-T1 与 100base-TX PHY)
 - SJA1110B: Third generation, TTEthernet, SGMII, 100base-T1, 100base-TX
+  (第三代，TTEthernet，SGMII，100base-T1，100base-TX)
 - SJA1110C: Third generation, TTEthernet, SGMII, 100base-T1, 100base-TX
+  (第三代，TTEthernet，SGMII，100base-T1，100base-TX)
 - SJA1110D: Third generation, TTEthernet, SGMII, 100base-T1
+  (第三代，TTEthernet，SGMII，100base-T1)
 
 Being automotive parts, their configuration interface is geared towards
 set-and-forget use, with minimal dynamic interaction at runtime. They
 require a static configuration to be composed by software and packed
 with CRC and table headers, and sent over SPI.
+(作为汽车级器件，它们的配置接口面向"一次设置、此后不再干预"的使用方式，运行
+时几乎没有动态交互。它们要求由软件构造一份静态配置，连同 CRC 与表头一起打包，
+并通过 SPI 发送。)
 
 The static configuration is composed of several configuration tables. Each
 table takes a number of entries. Some configuration tables can be (partially)
 reconfigured at runtime, some not. Some tables are mandatory, some not:
+(静态配置由若干张配置表组成，每张表接受若干表项。有些配置表可以（部分）在
+运行时重新配置，有些则不行；有些表是必需的，有些不是：)
 
 ============================= ================== =============================
-Table                          Mandatory          Reconfigurable
+Table (表)                     Mandatory (必需)     Reconfigurable (可否重配置)
 ============================= ================== =============================
 Schedule                       no                 no
 Schedule entry points          if Scheduling      no
@@ -48,7 +67,7 @@ L2 Lookup Params               no                 partially (fully on P/Q/R/S)
 L2 Forwarding Params           yes                no
 Clock Sync Params              no                 no
 AVB Params                     no                 no
-General Params                 yes                partially
+General Params                 yes                partially (部分)
 Retagging                      no                 yes
 xMII Params                    yes                no
 SGMII                          no                 yes
@@ -57,6 +76,7 @@ SGMII                          no                 yes
 
 Also the configuration is write-only (software cannot read it back from the
 switch except for very few exceptions).
+(此外，该配置是只写的（除极少数例外，软件无法从交换机读回配置）。)
 
 The driver creates a static configuration at probe time, and keeps it at
 all times in memory, as a shadow for the hardware state. When required to
@@ -64,8 +84,13 @@ change a hardware setting, the static configuration is also updated.
 If that changed setting can be transmitted to the switch through the dynamic
 reconfiguration interface, it is; otherwise the switch is reset and
 reprogrammed with the updated static configuration.
+(驱动程序在 probe 时构造一份静态配置，并始终将其保留在内存中，作为硬件状态的
+影子。当需要更改某个硬件设置时，静态配置也会同步更新。如果该变更可以通过
+动态重配置接口发送给交换机，就直接发送；否则就复位交换机，并用更新后的静态
+配置重新编程。)
 
 Switching features
+(交换功能)
 ==================
 
 The driver supports the configuration of L2 forwarding rules in hardware for
@@ -74,6 +99,10 @@ be restricted through two methods: either at the L2 forwarding level (isolate
 one bridge's ports from another's) or at the VLAN port membership level
 (isolate ports within the same bridge). The final forwarding decision taken by
 the hardware is a logical AND of these two sets of rules.
+(驱动程序支持在硬件中配置 L2 转发规则以实现端口桥接。端口之间的转发、广播与
+泛洪域可以通过两种方式加以限制：要么在 L2 转发层面（把一个网桥的端口与另一个
+网桥的端口隔离开），要么在 VLAN 端口成员关系层面（隔离同一网桥内的端口）。
+硬件最终做出的转发决定是这两组规则的逻辑与。)
 
 The hardware tags all traffic internally with a port-based VLAN (pvid), or it
 decodes the VLAN information from the 802.1Q tag. Advanced VLAN classification
@@ -81,33 +110,50 @@ is not possible. Once attributed a VLAN tag, frames are checked against the
 port's membership rules and dropped at ingress if they don't match any VLAN.
 This behavior is available when switch ports join a bridge with
 ``vlan_filtering 1``.
+(硬件在内部用基于端口的 VLAN（pvid）为所有流量打标签，或者从 802.1Q 标签中
+解析 VLAN 信息。不支持更高级的 VLAN 分类。一旦被赋予 VLAN 标签，帧就会对照
+端口的成员规则进行检查，若不匹配任何 VLAN 则在入口处被丢弃。当交换机端口加入
+带有 ``vlan_filtering 1`` 的网桥时，此行为可用。)
 
 Normally the hardware is not configurable with respect to VLAN awareness, but
 by changing what TPID the switch searches 802.1Q tags for, the semantics of a
 bridge with ``vlan_filtering 0`` can be kept (accept all traffic, tagged or
 untagged), and therefore this mode is also supported.
+(通常情况下，硬件的 VLAN 感知能力是不可配置的，但通过更改交换机搜索 802.1Q
+标签时所用的 TPID，可以保持 ``vlan_filtering 0`` 网桥的语义（接受所有流量，
+无论有无标签），因此该模式同样受支持。)
 
 Segregating the switch ports in multiple bridges is supported (e.g. 2 + 2), but
 all bridges should have the same level of VLAN awareness (either both have
 ``vlan_filtering`` 0, or both 1).
+(支持把交换机端口划分到多个网桥中（例如 2 + 2），但所有网桥应具有相同的 VLAN
+感知级别（要么都是 ``vlan_filtering`` 0，要么都是 1）。)
 
 Topology and loop detection through STP is supported.
+(支持通过 STP 进行拓扑与环路检测。)
 
 Offloads
+(硬件卸载)
 ========
 
 Time-aware scheduling
+(时间感知调度)
 ---------------------
 
 The switch supports a variation of the enhancements for scheduled traffic
 specified in IEEE 802.1Q-2018 (formerly 802.1Qbv). This means it can be used to
 ensure deterministic latency for priority traffic that is sent in-band with its
 gate-open event in the network schedule.
+(该交换机支持 IEEE 802.1Q-2018（前身为 802.1Qbv）中规定的计划流量增强功能的一
+个变体。这意味着可以用它来确保优先级流量的确定性时延——这些流量与其在网络
+调度中的开门事件在带内发送。)
 
 This capability can be managed through the tc-taprio offload ('flags 2'). The
 difference compared to the software implementation of taprio is that the latter
 would only be able to shape traffic originated from the CPU, but not
 autonomously forwarded flows.
+(该能力可以通过 tc-taprio 卸载（'flags 2'）来管理。与 taprio 的软件实现相比，
+区别在于后者只能整形来自 CPU 的流量，而无法处理自主转发的流。)
 
 The device has 8 traffic classes, and maps incoming frames to one of them based
 on the VLAN PCP bits (if no VLAN is present, the port-based default is used).
@@ -124,16 +170,31 @@ net devices are no longer able to do that. To inject frames into a hardware TX
 queue with VLAN awareness active, it is necessary to create a VLAN
 sub-interface on the DSA conduit port, and send normal (0x8100) VLAN-tagged
 towards the switch, with the VLAN PCP bits set appropriately.
+(该设备有 8 个流量类别，并根据 VLAN PCP 位将传入帧映射到其中之一（若无 VLAN，
+则使用基于端口的默认值）。如前几节所述，根据 ``vlan_filtering`` 的取值，交换机
+识别为 VLAN 的 EtherType 要么是常见的 0x8100，要么是驱动程序内部用于打标签的
+自定义值。因此，在独立模式或 ``vlan_filtering=0`` 的网桥模式下使用时，交换机
+会忽略 VLAN PCP，因为它无法识别 0x8100 EtherType。在这些模式下，只有 DSA 网络
+设备能把帧注入特定的 TX 队列——它们在发出时填充打标签头部的 PCP 字段。使用
+``vlan_filtering=1`` 时，行为正好相反：卸载的流可以根据 VLAN PCP 引导到 TX
+队列，但 DSA 网络设备不再能做到这一点。要在 VLAN 感知开启的情况下把帧注入
+硬件 TX 队列，必须在 DSA conduit 端口上创建 VLAN 子接口，并向交换机发送普通
+的（0x8100）带 VLAN 标签的帧，同时适当设置 VLAN PCP 位。)
 
 Management traffic (having DMAC 01-80-C2-xx-xx-xx or 01-19-1B-xx-xx-xx) is the
 notable exception: the switch always treats it with a fixed priority and
 disregards any VLAN PCP bits even if present. The traffic class for management
 traffic has a value of 7 (highest priority) at the moment, which is not
 configurable in the driver.
+(管理流量（DMAC 为 01-80-C2-xx-xx-xx 或 01-19-1B-xx-xx-xx）是一个显著的例外：
+交换机始终以固定优先级处理它，即使存在 VLAN PCP 位也一概忽略。目前管理流量的
+流量类别值为 7（最高优先级），驱动程序中不可配置。)
 
 Below is an example of configuring a 500 us cyclic schedule on egress port
 ``swp5``. The traffic class gate for management traffic (7) is open for 100 us,
 and the gates for all other traffic classes are open for 400 us::
+(下面是在发出端口 ``swp5`` 上配置 500 us 周期调度的示例。管理流量的流量类别
+门（7）开启 100 us，其余所有流量类别的门开启 400 us：)
 
   #!/bin/bash
 
@@ -176,34 +237,52 @@ are hardware restrictions related to the fact that no gate event may trigger
 simultaneously on two ports. The driver checks the consistency of the schedules
 against this restriction and errors out when appropriate. Schedule analysis is
 needed to avoid this, which is outside the scope of the document.
+(可以在多个发出端口上应用 tc-taprio 卸载。由于不允许任何门事件同时在两个端口
+上触发，这里存在硬件限制。驱动程序会对照该限制检查调度的一致性，并在适当时
+报错退出。要避免这一限制需要进行调度分析，这超出了本文档的范围。)
 
 Routing actions (redirect, trap, drop)
+(路由动作（redirect、trap、drop）)
 --------------------------------------
 
 The switch is able to offload flow-based redirection of packets to a set of
 destination ports specified by the user. Internally, this is implemented by
 making use of Virtual Links, a TTEthernet concept.
+(交换机能够按流把数据包重定向到用户指定的一组目的端口，并在硬件上卸载。其内部
+实现利用了虚拟链路（Virtual Links）——一个 TTEthernet 概念。)
 
 The driver supports 2 types of keys for Virtual Links:
+(驱动程序为虚拟链路支持两类键值：)
 
 - VLAN-aware virtual links: these match on destination MAC address, VLAN ID and
   VLAN PCP.
+  (VLAN 感知的虚拟链路：按目的 MAC 地址、VLAN ID 和 VLAN PCP 匹配。)
 - VLAN-unaware virtual links: these match on destination MAC address only.
+  (VLAN 不感知的虚拟链路：仅按目的 MAC 地址匹配。)
 
 The VLAN awareness state of the bridge (vlan_filtering) cannot be changed while
 there are virtual link rules installed.
+(在已安装虚拟链路规则的情况下，网桥的 VLAN 感知状态（vlan_filtering）不能
+更改。)
 
 Composing multiple actions inside the same rule is supported. When only routing
 actions are requested, the driver creates a "non-critical" virtual link. When
 the action list also contains tc-gate (more details below), the virtual link
 becomes "time-critical" (draws frame buffers from a reserved memory partition,
 etc).
+(支持在同一条规则中组合多个动作。当只请求路由动作时，驱动程序会创建一条
+"非时间关键"（non-critical）虚拟链路。当动作列表还包含 tc-gate（详见下文）
+时，该虚拟链路变为"时间关键"（time-critical，从保留内存分区中获取帧缓冲区
+等）。)
 
 The 3 routing actions that are supported are "trap", "drop" and "redirect".
+(支持的 3 种路由动作是 "trap"、"drop" 和 "redirect"。)
 
 Example 1: send frames received on swp2 with a DA of 42:be:24:9b:76:20 to the
 CPU and to swp3. This type of key (DA only) when the port's VLAN awareness
 state is off::
+(示例 1：把 swp2 上收到的、DA 为 42:be:24:9b:76:20 的帧发送到 CPU 和 swp3。
+这是端口 VLAN 感知状态为关时的键类型（仅 DA）：)
 
   tc qdisc add dev swp2 clsact
   tc filter add dev swp2 ingress flower skip_sw dst_mac 42:be:24:9b:76:20 \
@@ -212,11 +291,14 @@ state is off::
 
 Example 2: drop frames received on swp2 with a DA of 42:be:24:9b:76:20, a VID
 of 100 and a PCP of 0::
+(示例 2：丢弃 swp2 上收到的、DA 为 42:be:24:9b:76:20、VID 为 100 且 PCP 为 0
+的帧：)
 
   tc filter add dev swp2 ingress protocol 802.1Q flower skip_sw \
           dst_mac 42:be:24:9b:76:20 vlan_id 100 vlan_prio 0 action drop
 
 Time-based ingress policing
+(基于时间的入口策略)
 ---------------------------
 
 The TTEthernet hardware abilities of the switch can be constrained to act
@@ -225,6 +307,10 @@ IEEE 802.1Q-2018 (formerly 802.1Qci). This means it can be used to perform
 tight timing-based admission control for up to 1024 flows (identified by a
 tuple composed of destination MAC address, VLAN ID and VLAN PCP). Packets which
 are received outside their expected reception window are dropped.
+(可以把该交换机的 TTEthernet 硬件能力约束为行为类似于 IEEE 802.1Q-2018（前身
+为 802.1Qci）中规定的每流过滤与策略（PSFP）子句。这意味着可以用它对最多 1024
+条流执行严格基于时间的准入控制（流由目的 MAC 地址、VLAN ID 与 VLAN PCP 组成的
+元组标识）。在预期接收窗口之外收到的数据包会被丢弃。)
 
 This capability can be managed through the offload of the tc-gate action. As
 routing actions are intrinsic to virtual links in TTEthernet (which performs
@@ -232,6 +318,10 @@ explicit routing of time-critical traffic and does not leave that in the hands
 of the FDB, flooding etc), the tc-gate action may never appear alone when
 asking sja1105 to offload it. One (or more) redirect or trap actions must also
 follow along.
+(该能力可以通过 tc-gate 动作的卸载来管理。由于路由动作是 TTEthernet 中虚拟
+链路固有的（TTEthernet 对时间关键流量执行显式路由，而不把它交给 FDB、泛洪等
+机制），在请求 sja1105 卸载 tc-gate 时，它绝不能单独出现，必须同时跟随一个或
+多个 redirect 或 trap 动作。)
 
 Example: create a tc-taprio schedule that is phase-aligned with a tc-gate
 schedule (the clocks must be synchronized by a 1588 application stack, which is
@@ -239,8 +329,13 @@ outside the scope of this document). No packet delivered by the sender will be
 dropped. Note that the reception window is larger than the transmission window
 (and much more so, in this example) to compensate for the packet propagation
 delay of the link (which can be determined by the 1588 application stack).
+(示例：创建一个与 tc-gate 调度相位对齐的 tc-taprio 调度（时钟必须由 1588 应用
+协议栈同步，这超出了本文档的范围）。发送方发出的数据包都不会被丢弃。注意，
+接收窗口大于发送窗口（本例中更是如此），以补偿链路的数据包传播时延（可由
+1588 应用协议栈测定）。)
 
 Receiver (sja1105)::
+(接收方（sja1105）：)
 
   tc qdisc add dev swp2 clsact
   now=$(phc_ctl /dev/ptp1 get | awk '/clock time is/ {print $5}') && \
@@ -255,6 +350,7 @@ Receiver (sja1105)::
           action trap
 
 Sender::
+(发送方：)
 
   now=$(phc_ctl /dev/ptp0 get | awk '/clock time is/ {print $5}') && \
           sec=$(echo $now | awk -F. '{print $1}') && \
@@ -273,11 +369,17 @@ The engine used to schedule the ingress gate operations is the same that the
 one used for the tc-taprio offload. Therefore, the restrictions regarding the
 fact that no two gate actions (either tc-gate or tc-taprio gates) may fire at
 the same time (during the same 200 ns slot) still apply.
+(用于调度入口门操作与 tc-taprio 卸载的是同一个引擎。因此，任何两个门动作
+（无论是 tc-gate 还是 tc-taprio 门）都不得在同一时间（同一 200 ns 时隙内）
+触发的限制仍然适用。)
 
 To come in handy, it is possible to share time-triggered virtual links across
 more than 1 ingress port, via flow blocks. In this case, the restriction of
 firing at the same time does not apply because there is a single schedule in
 the system, that of the shared virtual link::
+(作为便利，可以通过流块（flow blocks）把时间触发的虚拟链路共享到多于 1 个
+入口端口上。这种情况下，同时触发的限制不再适用，因为系统中只有一份调度，
+即共享虚拟链路的调度：)
 
   tc qdisc add dev swp2 ingress_block 1 clsact
   tc qdisc add dev swp3 ingress_block 1 clsact
@@ -292,41 +394,63 @@ Hardware statistics for each flow are also available ("pkts" counts the number
 of dropped frames, which is a sum of frames dropped due to timing violations,
 lack of destination ports and MTU enforcement checks). Byte-level counters are
 not available.
+(每条流也有硬件统计可用（"pkts" 计数被丢弃的帧数，它是因违反时间要求、缺少
+目的端口以及 MTU 强制检查而被丢弃的帧数之和）。没有字节级计数器。)
 
 Limitations
+(限制)
 ===========
 
 The SJA1105 switch family always performs VLAN processing. When configured as
 VLAN-unaware, frames carry a different VLAN tag internally, depending on
 whether the port is standalone or under a VLAN-unaware bridge.
+(SJA1105 交换机家族始终执行 VLAN 处理。当配置为 VLAN 不感知时，帧在内部携带的
+VLAN 标签会有所不同，具体取决于端口是独立端口还是处于 VLAN 不感知网桥之下。)
 
 The virtual link keys are always fixed at {MAC DA, VLAN ID, VLAN PCP}, but the
 driver asks for the VLAN ID and VLAN PCP when the port is under a VLAN-aware
 bridge. Otherwise, it fills in the VLAN ID and PCP automatically, based on
 whether the port is standalone or in a VLAN-unaware bridge, and accepts only
 "VLAN-unaware" tc-flower keys (MAC DA).
+(虚拟链路的键始终固定为 {MAC DA, VLAN ID, VLAN PCP}，但当端口处于 VLAN 感知
+网桥之下时，驱动程序会要求提供 VLAN ID 和 VLAN PCP。否则，它会根据端口是
+独立端口还是位于 VLAN 不感知网桥中自动填入 VLAN ID 和 PCP，并且只接受
+"VLAN 不感知"的 tc-flower 键（MAC DA）。)
 
 The existing tc-flower keys that are offloaded using virtual links are no
 longer operational after one of the following happens:
+(在发生下列任一情况后，使用虚拟链路卸载的既有 tc-flower 键将不再有效：)
 
 - port was standalone and joins a bridge (VLAN-aware or VLAN-unaware)
+  (端口原为独立端口，随后加入了网桥（VLAN 感知或 VLAN 不感知）)
 - port is part of a bridge whose VLAN awareness state changes
+  (端口所在的网桥其 VLAN 感知状态发生变化)
 - port was part of a bridge and becomes standalone
+  (端口原属于某个网桥，随后变为独立端口)
 - port was standalone, but another port joins a VLAN-aware bridge and this
   changes the global VLAN awareness state of the bridge
+  (端口原为独立端口，但另一个端口加入了 VLAN 感知网桥，从而改变了网桥的
+  全局 VLAN 感知状态)
 
 The driver cannot veto all these operations, and it cannot update/remove the
 existing tc-flower filters either. So for proper operation, the tc-flower
 filters should be installed only after the forwarding configuration of the port
 has been made, and removed by user space before making any changes to it.
+(驱动程序无法否决所有这些操作，也无法更新/移除既有的 tc-flower 过滤器。因此，
+为了正确运行，tc-flower 过滤器应当只在端口的转发配置完成之后安装，并且由
+用户空间在对转发配置做任何更改之前先行移除。)
 
 Device Tree bindings and board design
+(设备树绑定与板级设计)
 =====================================
 
 This section references ``Documentation/devicetree/bindings/net/dsa/nxp,sja1105.yaml``
 and aims to showcase some potential switch caveats.
+(本节引用 ``Documentation/devicetree/bindings/net/dsa/nxp,sja1105.yaml`` ，旨在
+展示该交换机一些潜在的注意事项。)
 
 RMII PHY role and out-of-band signaling
+(RMII PHY 角色与带外信令)
 ---------------------------------------
 
 In the RMII spec, the 50 MHz clock signals are either driven by the MAC or by
@@ -354,8 +478,24 @@ frames that follow along. This looks like packet loss with some link partners
 but not with others.
 The take-away is that in RMII mode, the SJA1105 must be let to drive the
 reference clock if connected to a PHY.
+(在 RMII 规范中，50 MHz 时钟信号要么由 MAC 驱动，要么由外部晶振驱动（而不是
+由 PHY 驱动）。但该规范相当宽松，有些设备会在若干方面超出规范。一些 PHY 违背
+规范，出于"好心"提供了自行产生 50 MHz 时钟的输出引脚。另一方面，SJA1105 只有
+二值可配置性——当处于 RMII MAC 角色时，它也会尝试驱动时钟信号。为避免这种
+情况发生，必须把它置于 RMII PHY 角色。但这样做会带来一些意想不到的后果。
+在 RMII 规范中，PHY 可以通过 RXD[1:0] 发送额外的带外信号。这些实际上是在每
+个帧的前导码之前发送的一些额外码字（/J/ 和 /K/）。RMII 规范并未为 MAC 定义
+这种带外信令机制。因此，当把 SJA1105 端口置于 PHY 角色以避免时钟信号上有
+2 个驱动器时，不可避免地会形成 RMII PHY 到 PHY 的连接。SJA1105 完全模拟
+PHY 接口，并在帧前导码之前生成 /J/ 和 /K/ 符号，而真正的 PHY 并不会被期望
+理解这些符号。于是 PHY 只是把从 SJA1105-as-PHY 收到的额外符号编码到
+100Base-Tx 线路上。在线路的另一端，有些链路伙伴可能会丢弃这些额外符号，而
+另一些则可能因无法处理它们而丢弃随后的整个以太网帧。这表现为对某些链路伙伴
+丢包，而对另一些则不丢包。结论是：在 RMII 模式下，如果 SJA1105 连接的是
+PHY，就必须让它来驱动参考时钟。)
 
 RGMII fixed-link and internal delays
+(RGMII fixed-link 与内部时延)
 ------------------------------------
 
 As mentioned in the bindings document, the second generation of devices has
@@ -382,8 +522,23 @@ As to why would a fixed-link interface ever change link speeds: there are
 Ethernet controllers out there which come out of reset in 100 Mbps mode, and
 their driver inevitably needs to change the speed and clock frequency if it's
 required to work at gigabit.
+(如绑定文档所述，第二代器件的 MAC 中带有可调延迟线，可用于建立正确的 RGMII
+时序预算。上电后，它们能够以 73.8 度到 101.7 度之间的相位差平移 Rx 与 Tx
+时钟。问题在于，延迟线需要锁定到频率稳定的时钟信号上。这意味着在旧频率时钟
+与新频率时钟之间必须至少有 2 微秒的静默期，否则锁定丢失，必须复位延迟线
+（下电再上电）。在 RGMII 中，时钟频率随链路速度变化（1000 Mbps 时为 125 MHz，
+100 Mbps 时为 25 MHz，10 Mbps 时为 2.5 MHz），而链路速度在 AN（自动协商）
+过程中可能发生变化。当交换机端口通过 RGMII fixed-link 连接到一个链路状态
+生命周期不受 Linux 控制的链路伙伴（例如另一个 SoC）时，延迟线将保持未锁定
+（且不生效）状态，直到有人工干预（对交换机端口执行 ifdown/ifup）。结论是：
+在 RGMII 模式下，只有当链路伙伴从不改变链路速度，或者其改变方式与交换机端口
+相协调时（实际上即 fixed-link 两端都在同一个 Linux 系统的控制之下），交换机
+的内部时延才是可靠的。至于 fixed-link 接口为什么会改变链路速度：市面上有
+一些以太网控制器复位后处于 100 Mbps 模式，如果要求它们工作在千兆速率，其
+驱动程序就不可避免地需要更改速度和时钟频率。)
 
 MDIO bus and PHY management
+(MDIO 总线与 PHY 管理)
 ---------------------------
 
 The SJA1105 does not have an MDIO bus and does not perform in-band AN either.
@@ -392,11 +547,18 @@ A board would need to hook up the PHYs connected to the switch to any other
 MDIO bus available to Linux within the system (e.g. to the DSA conduit's MDIO
 bus). Link state management then works by the driver manually keeping in sync
 (over SPI commands) the MAC link speed with the settings negotiated by the PHY.
+(SJA1105 没有 MDIO 总线，也不执行带内自动协商（AN）。因此交换机设备不会提供
+任何链路状态通知。板卡需要把连接到交换机的 PHY 接到系统中 Linux 可用的其他
+任意 MDIO 总线上（例如 DSA conduit 的 MDIO 总线）。链路状态管理的工作方式是
+驱动程序（通过 SPI 命令）手动保持 MAC 链路速度与 PHY 协商出的设置同步。)
 
 By comparison, the SJA1110 supports an MDIO slave access point over which its
 internal 100base-T1 PHYs can be accessed from the host. This is, however, not
 used by the driver, instead the internal 100base-T1 and 100base-TX PHYs are
 accessed through SPI commands, modeled in Linux as virtual MDIO buses.
+(相比之下，SJA1110 支持 MDIO 从端访问点，主机可以通过它访问其内部的
+100base-T1 PHY。不过驱动程序并不使用它，而是通过 SPI 命令访问内部的
+100base-T1 与 100base-TX PHY，在 Linux 中建模为虚拟 MDIO 总线。)
 
 The microcontroller attached to the SJA1110 port 0 also has an MDIO controller
 operating in master mode, however the driver does not support this either,
@@ -404,11 +566,17 @@ since the microcontroller gets disabled when the Linux driver operates.
 Discrete PHYs connected to the switch ports should have their MDIO interface
 attached to an MDIO controller from the host system and not to the switch,
 similar to SJA1105.
+(连接在 SJA1110 端口 0 上的微控制器也有一个工作于主模式的 MDIO 控制器，但
+驱动程序同样不支持它，因为当 Linux 驱动运行时该微控制器会被禁用。连接到
+交换机端口的独立 PHY 应当把其 MDIO 接口接到主机系统的某个 MDIO 控制器上，
+而不是接到交换机上，与 SJA1105 相同。)
 
 Port compatibility matrix
+(端口兼容性矩阵)
 -------------------------
 
 The SJA1105 port compatibility matrix is:
+(SJA1105 的端口兼容性矩阵如下：)
 
 ===== ============== ============== ==============
 Port   SJA1105E/T     SJA1105P/Q     SJA1105R/S
@@ -422,6 +590,7 @@ Port   SJA1105E/T     SJA1105P/Q     SJA1105R/S
 
 
 The SJA1110 port compatibility matrix is:
+(SJA1110 的端口兼容性矩阵如下：)
 
 ===== ============== ============== ============== ==============
 Port   SJA1110A       SJA1110B       SJA1110C       SJA1110D

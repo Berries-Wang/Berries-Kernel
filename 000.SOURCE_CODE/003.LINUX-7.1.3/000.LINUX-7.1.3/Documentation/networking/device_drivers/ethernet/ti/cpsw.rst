@@ -4,7 +4,10 @@
 Texas Instruments CPSW ethernet driver
 ======================================
 
+(Texas Instruments CPSW 以太网驱动)
+
 Multiqueue & CBS & MQPRIO
+(多队列 & CBS & MQPRIO)
 =========================
 
 
@@ -12,32 +15,52 @@ The cpsw has 3 CBS shapers for each external ports. This document
 describes MQPRIO and CBS Qdisc offload configuration for cpsw driver
 based on examples. It potentially can be used in audio video bridging
 (AVB) and time sensitive networking (TSN).
+(cpsw 的每个外部端口有 3 个 CBS 整形器 (shaper)。本文以示例为基础描述
+cpsw 驱动的 MQPRIO 和 CBS Qdisc 卸载配置。它潜在地可用于音视频桥接
+(AVB) 和时间敏感网络 (TSN)。)
 
 The following examples were tested on AM572x EVM and BBB boards.
+(以下示例已在 AM572x EVM 和 BBB 开发板上测试过。)
 
 Test setup
+(测试环境)
 ==========
 
 Under consideration two examples with AM572x EVM running cpsw driver
 in dual_emac mode.
+(下面考虑两个示例，均使用以 dual_emac 模式运行 cpsw 驱动的 AM572x EVM。)
 
 Several prerequisites:
+(几个前提条件：)
 
 - TX queues must be rated starting from txq0 that has highest priority
+  (TX 队列必须从优先级最高的 txq0 开始依次设定速率)
 - Traffic classes are used starting from 0, that has highest priority
+  (流量类从优先级最高的 0 开始使用)
 - CBS shapers should be used with rated queues
+  (CBS 整形器应与设定了速率的队列配合使用)
 - The bandwidth for CBS shapers has to be set a little bit more then
   potential incoming rate, thus, rate of all incoming tx queues has
   to be a little less
+  (CBS 整形器的带宽必须设置为略高于潜在的流入速率，因此，所有流入的
+  tx 队列的速率都要略低一些)
 - Real rates can differ, due to discreetness
+  (由于离散性，实际速率可能会有所不同)
 - Map skb-priority to txq is not enough, also skb-priority to l2 prio
   map has to be created with ip or vconfig tool
+  (仅把 skb-priority 映射到 txq 并不够，还必须用 ip 或 vconfig 工具创建
+  skb-priority 到 l2 优先级的映射)
 - Any l2/socket prio (0 - 7) for classes can be used, but for
   simplicity default values are used: 3 and 2
+  (各流量类可以使用任何 l2/套接字优先级 (0 - 7)，但为简单起见这里使用
+  默认值：3 和 2)
 - only 2 classes tested: A and B, but checked and can work with more,
   maximum allowed 4, but only for 3 rate can be set.
+  (仅测试了 2 个流量类：A 和 B，但已验证可以支持更多，最多允许 4 个，
+  但只能为其中 3 个设定速率。)
 
 Test setup for examples
+(示例的测试环境)
 =======================
 
 ::
@@ -66,15 +89,22 @@ Test setup for examples
 
 
 Example 1: One port tx AVB configuration scheme for target board
+(示例 1：目标板的单端口 tx AVB 配置方案)
 ----------------------------------------------------------------
 
 (prints and scheme for AM572x evm, applicable for single port boards)
+(AM572x EVM 的打印输出与示意图，适用于单端口开发板)
 
 - tc - traffic class
+  (tc - 流量类)
 - txq - transmit queue
+  (txq - 发送队列)
 - p - priority
+  (p - 优先级)
 - f - fifo (cpsw fifo)
+  (f - fifo (cpsw fifo))
 - S - shaper configured
+  (S - 已配置整形器)
 
 ::
 
@@ -303,9 +333,11 @@ Example 1: One port tx AVB configuration scheme for target board
 	$ ethtool -L eth0 rx 1 tx 1
 
 Example 2: Two port tx AVB configuration scheme for target board
+(示例 2：目标板的双端口 tx AVB 配置方案)
 ----------------------------------------------------------------
 
 (prints and scheme for AM572x evm, for dual emac boards only)
+(AM572x EVM 的打印输出与示意图，仅适用于双 EMAC 开发板)
 
 ::
 

@@ -4,37 +4,51 @@
 DM9000 Network driver
 =====================
 
+(DM9000 网络驱动)
+
 Copyright 2008 Simtec Electronics,
+(版权所有 2008 Simtec Electronics，)
 
 	  Ben Dooks <ben@simtec.co.uk> <ben-linux@fluff.org>
+	  (Ben Dooks <ben@simtec.co.uk> <ben-linux@fluff.org>)
 
 
 Introduction
+(简介)
 ------------
 
 This file describes how to use the DM9000 platform-device based network driver
 that is contained in the files drivers/net/dm9000.c and drivers/net/dm9000.h.
+(本文件描述如何使用基于平台设备 (platform device) 的 DM9000 网络驱动，该驱动位于文件 drivers/net/dm9000.c 和 drivers/net/dm9000.h 中。)
 
 The driver supports three DM9000 variants, the DM9000E which is the first chip
 supported as well as the newer DM9000A and DM9000B devices. It is currently
 maintained and tested by Ben Dooks, who should be CC: to any patches for this
 driver.
+(该驱动支持三种 DM9000 变体：最早支持的芯片 DM9000E，以及较新的 DM9000A 和 DM9000B 设备。它目前由 Ben Dooks 维护和测试，任何针对此驱动的补丁都应抄送 (CC:) 给他。)
 
 
 Defining the platform device
+(定义平台设备)
 ----------------------------
 
 The minimum set of resources attached to the platform device are as follows:
+(平台设备所需的最小资源集如下：)
 
     1) The physical address of the address register
+       (1. 地址寄存器的物理地址)
     2) The physical address of the data register
+       (2. 数据寄存器的物理地址)
     3) The IRQ line the device's interrupt pin is connected to.
+       (3. 设备中断引脚连接到的 IRQ 线。)
 
 These resources should be specified in that order, as the ordering of the
 two address regions is important (the driver expects these to be address
 and then data).
+(这些资源应按上述顺序指定，因为两个地址区域的顺序很重要（驱动期望先是地址，然后是数据）。)
 
 An example from arch/arm/mach-s3c/mach-bast.c is::
+(来自 arch/arm/mach-s3c/mach-bast.c 的示例如下：)
 
   static struct resource bast_dm9k_resource[] = {
 	[0] = {
@@ -65,10 +79,12 @@ Note the setting of the IRQ trigger flag in bast_dm9k_resource[2].flags,
 as this will generate a warning if it is not present. The trigger from
 the flags field will be passed to request_irq() when registering the IRQ
 handler to ensure that the IRQ is setup correctly.
+(注意 bast_dm9k_resource[2].flags 中 IRQ 触发标志的设置，如果缺少该标志会产生警告。注册 IRQ 处理程序时，flags 字段中的触发类型会传递给 request_irq()，以确保 IRQ 被正确设置。)
 
 This shows a typical platform device, without the optional configuration
 platform data supplied. The next example uses the same resources, but adds
 the optional platform data to pass extra configuration data::
+(这展示了一个典型的平台设备，未提供可选的配置平台数据。下一个示例使用相同的资源，但添加了可选的平台数据以传递额外的配置数据：)
 
   static struct dm9000_plat_data bast_dm9k_platdata = {
 	.flags		= DM9000_PLATF_16BITONLY,
@@ -85,70 +101,92 @@ the optional platform data to pass extra configuration data::
   };
 
 The platform data is defined in include/linux/dm9000.h and described below.
+(平台数据定义在 include/linux/dm9000.h 中，并在下文描述。)
 
 
 Platform data
+(平台数据)
 -------------
 
 Extra platform data for the DM9000 can describe the IO bus width to the
 device, whether or not an external PHY is attached to the device and
 the availability of an external configuration EEPROM.
+(DM9000 的额外平台数据可以描述到设备的 IO 总线宽度、设备是否挂接了外部 PHY，以及是否存在外部配置 EEPROM。)
 
 The flags for the platform data .flags field are as follows:
+(平台数据 .flags 字段的标志如下：)
 
 DM9000_PLATF_8BITONLY
+(DM9000_PLATF_8BITONLY（仅 8 位 IO）)
 
 	The IO should be done with 8bit operations.
+	(IO 应使用 8 位操作完成。)
 
 DM9000_PLATF_16BITONLY
+(DM9000_PLATF_16BITONLY（仅 16 位 IO）)
 
 	The IO should be done with 16bit operations.
+	(IO 应使用 16 位操作完成。)
 
 DM9000_PLATF_32BITONLY
+(DM9000_PLATF_32BITONLY（仅 32 位 IO）)
 
 	The IO should be done with 32bit operations.
+	(IO 应使用 32 位操作完成。)
 
 DM9000_PLATF_EXT_PHY
+(DM9000_PLATF_EXT_PHY（外部 PHY）)
 
 	The chip is connected to an external PHY.
+	(芯片连接到外部 PHY。)
 
 DM9000_PLATF_NO_EEPROM
+(DM9000_PLATF_NO_EEPROM（无 EEPROM）)
 
 	This can be used to signify that the board does not have an
 	EEPROM, or that the EEPROM should be hidden from the user.
+	(可用于表示板卡没有 EEPROM，或应向用户隐藏该 EEPROM。)
 
 DM9000_PLATF_SIMPLE_PHY
+(DM9000_PLATF_SIMPLE_PHY（简单 PHY 轮询）)
 
 	Switch to using the simpler PHY polling method which does not
 	try and read the MII PHY state regularly. This is only available
 	when using the internal PHY. See the section on link state polling
 	for more information.
+	(改用更简单的 PHY 轮询方法，该方法不会定期读取 MII PHY 状态。这仅在使用内部 PHY 时可用。更多信息参见链路状态轮询一节。)
 
 	The config symbol DM9000_FORCE_SIMPLE_PHY_POLL, Kconfig entry
 	"Force simple NSR based PHY polling" allows this flag to be
 	forced on at build time.
+	(配置符号 DM9000_FORCE_SIMPLE_PHY_POLL（Kconfig 条目 "Force simple NSR based PHY polling"）允许在构建时强制开启此标志。)
 
 
 PHY Link state polling
+(PHY 链路状态轮询)
 ----------------------
 
 The driver keeps track of the link state and informs the network core
 about link (carrier) availability. This is managed by several methods
 depending on the version of the chip and on which PHY is being used.
+(驱动跟踪链路状态，并向网络核心通报链路（载波）可用性。根据芯片版本以及所使用的 PHY，这由几种不同的方法管理。)
 
 For the internal PHY, the original (and currently default) method is
 to read the MII state, either when the status changes if we have the
 necessary interrupt support in the chip or every two seconds via a
 periodic timer.
+(对于内部 PHY，最初（也是当前默认）的方法是读取 MII 状态：如果芯片具备必要的中断支持，则在状态变化时读取；否则通过周期性定时器每两秒读取一次。)
 
 To reduce the overhead for the internal PHY, there is now the option
 of using the DM9000_FORCE_SIMPLE_PHY_POLL config, or DM9000_PLATF_SIMPLE_PHY
 platform data option to read the summary information without the
 expensive MII accesses. This method is faster, but does not print
 as much information.
+(为了降低内部 PHY 的开销，现在可以选择使用 DM9000_FORCE_SIMPLE_PHY_POLL 配置，或 DM9000_PLATF_SIMPLE_PHY 平台数据选项，在不进行昂贵的 MII 访问的情况下读取摘要信息。这种方法更快，但打印的信息较少。)
 
 When using an external PHY, the driver currently has to poll the MII
 link status as there is no method for getting an interrupt on link change.
+(使用外部 PHY 时，由于没有在链路变化时获取中断的方法，驱动目前必须轮询 MII 链路状态。)
 
 
 DM9000A / DM9000B
@@ -156,12 +194,15 @@ DM9000A / DM9000B
 
 These chips are functionally similar to the DM9000E and are supported easily
 by the same driver. The features are:
+(这些芯片在功能上与 DM9000E 相似，可由同一驱动轻松支持。其特性有：)
 
    1) Interrupt on internal PHY state change. This means that the periodic
       polling of the PHY status may be disabled on these devices when using
       the internal PHY.
+      (1) 内部 PHY 状态变化中断。这意味着使用内部 PHY 时，这些设备可以禁用对 PHY 状态的周期性轮询。)
 
    2) TCP/UDP checksum offloading, which the driver does not currently support.
+      (2) TCP/UDP 校验和卸载，驱动目前不支持该功能。)
 
 
 ethtool
@@ -169,3 +210,4 @@ ethtool
 
 The driver supports the ethtool interface for access to the driver
 state information, the PHY state and the EEPROM.
+(驱动支持 ethtool 接口，用于访问驱动状态信息、PHY 状态和 EEPROM。)

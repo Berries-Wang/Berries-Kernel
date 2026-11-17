@@ -2,28 +2,41 @@
 IEEE 802.15.4 Developer's Guide
 ===============================
 
+(IEEE 802.15.4 开发者指南)
+
 Introduction
+(简介)
 ============
+
 The IEEE 802.15.4 working group focuses on standardization of the bottom
 two layers: Medium Access Control (MAC) and Physical access (PHY). And there
 are mainly two options available for upper layers:
+(IEEE 802.15.4 工作组专注于最下面两层的标准化：介质访问控制 (MAC) 和物理层 (PHY)。上层主要有两种可选方案：)
 
 - ZigBee - proprietary protocol from the ZigBee Alliance
+  (ZigBee - ZigBee 联盟的专有协议)
 - 6LoWPAN - IPv6 networking over low rate personal area networks
+  (6LoWPAN - 低速个人区域网络上的 IPv6 组网)
 
 The goal of the Linux-wpan is to provide a complete implementation
 of the IEEE 802.15.4 and 6LoWPAN protocols. IEEE 802.15.4 is a stack
 of protocols for organizing Low-Rate Wireless Personal Area Networks.
+(Linux-wpan 的目标是提供 IEEE 802.15.4 和 6LoWPAN 协议的完整实现。IEEE 802.15.4 是用于组织低速无线个人区域网络的协议栈。)
 
 The stack is composed of three main parts:
+(该协议栈由三个主要部分组成：)
 
 - IEEE 802.15.4 layer;  We have chosen to use plain Berkeley socket API,
   the generic Linux networking stack to transfer IEEE 802.15.4 data
   messages and a special protocol over netlink for configuration/management
+  (IEEE 802.15.4 层；我们选择使用普通的 Berkeley 套接字 API 和通用 Linux 网络协议栈来传输 IEEE 802.15.4 数据消息，并使用 netlink 上的一个特殊协议进行配置/管理)
 - MAC - provides access to shared channel and reliable data delivery
+  (MAC - 提供对共享信道的访问和可靠数据传输)
 - PHY - represents device drivers
+  (PHY - 代表设备驱动)
 
 Socket API
+(套接字)
 ==========
 
 ::
@@ -34,8 +47,10 @@ The address family, socket addresses etc. are defined in the
 include/net/af_ieee802154.h header or in the special header
 in the userspace package (see either https://linux-wpan.org/wpan-tools.html
 or the git tree at https://github.com/linux-wpan/wpan-tools).
+(地址族、套接字地址等定义在 include/net/af_ieee802154.h 头文件中，或定义在用户态软件包的特殊头文件中（参见 https://linux-wpan.org/wpan-tools.html 或 https://github.com/linux-wpan/wpan-tools 处的 git 树）。)
 
 6LoWPAN Linux implementation
+(6LoWPAN 的 Linux 实现)
 ============================
 
 The IEEE 802.15.4 standard specifies an MTU of 127 bytes, yielding about 80
@@ -48,21 +63,30 @@ a Mesh Addressing header to support sub-IP forwarding, a Fragmentation header
 to support the IPv6 minimum MTU requirement [RFC2460], and stateless header
 compression for IPv6 datagrams (LOWPAN_HC1 and LOWPAN_HC2) to reduce the
 relatively large IPv6 and UDP headers down to (in the best case) several bytes.
+(IEEE 802.15.4 标准规定的 MTU 为 127 字节，在链路吞吐率不超过 250 kbps 的无线链路上，开启安全功能后实际 MAC 载荷约剩 80 字节。6LoWPAN 适配格式 [RFC4944] 就是为在这样的受限链路上承载 IPv6 数据报而制定的，它考虑了无线传感器网络等应用中预期的有限带宽、内存或能量资源。[RFC4944] 定义了支持 sub-IP 转发的 Mesh Addressing 头、支持 IPv6 最小 MTU 要求 [RFC2460] 的分片头，以及针对 IPv6 数据报的无状态头压缩 (LOWPAN_HC1 和 LOWPAN_HC2)，可将相对较大的 IPv6 和 UDP 头压缩到（最好情况下）几个字节。)
 
 In September 2011 the standard update was published - [RFC6282].
 It deprecates HC1 and HC2 compression and defines IPHC encoding format which is
 used in this Linux implementation.
+(2011 年 9 月发布了标准更新 - [RFC6282]。它废弃了 HC1 和 HC2 压缩，定义了 IPHC 编码格式，本 Linux 实现所使用的正是这一格式。)
 
 All the code related to 6lowpan you may find in files: net/6lowpan/*
 and net/ieee802154/6lowpan/*
+(与 6lowpan 相关的所有代码可在文件 net/6lowpan/* 和 net/ieee802154/6lowpan/* 中找到。)
 
 To setup a 6LoWPAN interface you need:
 1. Add IEEE802.15.4 interface and set channel and PAN ID;
 2. Add 6lowpan interface by command like:
 # ip link add link wpan0 name lowpan0 type lowpan
 3. Bring up 'lowpan0' interface
+(要建立一个 6LoWPAN 接口，你需要：
+1. 添加 IEEE802.15.4 接口并设置信道和 PAN ID；
+2. 用类似下面的命令添加 6lowpan 接口：
+# ip link add link wpan0 name lowpan0 type lowpan
+3. 启用 'lowpan0' 接口。)
 
 Drivers
+(驱动)
 =======
 
 Like with WiFi, there are several types of devices implementing IEEE 802.15.4.
@@ -71,9 +95,13 @@ exports a management (e.g. MLME) and data API.
 2) 'SoftMAC' or just radio. These types of devices are just radio transceivers
 possibly with some kinds of acceleration like automatic CRC computation and
 comparison, automagic ACK handling, address matching, etc.
+(与 WiFi 类似，实现 IEEE 802.15.4 的设备有多种类型。
+1) 'HardMAC'。MAC 层实现在设备本身中，设备导出管理（如 MLME）和数据 API。
+2) 'SoftMAC' 或纯粹的对讲机。这类设备只是无线收发器，可能带有某些加速功能，如自动 CRC 计算与比较、自动 ACK 处理、地址匹配等。)
 
 Each type of device requires a different approach to be hooked into the Linux
 kernel.
+(每种类型的设备都需要不同的方式才能挂接到 Linux 内核。)
 
 HardMAC
 -------
@@ -86,11 +114,13 @@ the skb->cb is used to provide additional data to the device's
 header_ops->create function. Be aware that this data can be overridden later
 (when socket code submits skb to qdisc), so if you need something from that cb
 later, you should store info in the skb->data on your own.
+(参见头文件 include/net/ieee802154_netdev.h。你必须实现 Linux net_device，且 .type = ARPHRD_IEEE802154。数据通过普通的 sk_buff 与套接字族代码交换。接收 skb 时，skb->cb 必须包含 struct ieee802154_mac_cb 中描述的附加信息。发送数据包时，skb->cb 用于向设备的 header_ops->create 函数提供附加数据。注意，这些数据之后可能被覆盖（当套接字代码把 skb 提交给 qdisc 时），因此如果之后还需要 cb 中的内容，你应该自行把信息保存在 skb->data 中。)
 
 To hook the MLME interface you have to populate the ml_priv field of your
 net_device with a pointer to struct ieee802154_mlme_ops instance. The fields
 assoc_req, assoc_resp, disassoc_req, start_req, and scan_req are optional.
 All other fields are required.
+(要挂接 MLME 接口，你需要把 net_device 的 ml_priv 字段填为指向 struct ieee802154_mlme_ops 实例的指针。字段 assoc_req、assoc_resp、disassoc_req、start_req 和 scan_req 是可选的，其余所有字段都是必需的。)
 
 SoftMAC
 -------
@@ -98,55 +128,70 @@ SoftMAC
 The MAC is the middle layer in the IEEE 802.15.4 Linux stack. At the moment, it
 provides an interface for driver registration and management of slave
 interfaces.
+(MAC 是 IEEE 802.15.4 Linux 协议栈的中间层。目前它提供驱动注册以及 slave 接口管理的接口。)
 
 NOTE: Currently the only monitor device type is supported - it's IEEE 802.15.4
 stack interface for network sniffers (e.g. WireShark).
+(注意：目前只支持 monitor 设备类型 - 它是 IEEE 802.15.4 协议栈面向网络嗅探器（如 WireShark）的接口。)
 
 This layer is going to be extended soon.
+(这一层很快就会得到扩展。)
 
 See header include/net/mac802154.h and several drivers in
 drivers/net/ieee802154/.
+(参见头文件 include/net/mac802154.h 以及 drivers/net/ieee802154/ 下的若干驱动。)
 
 Fake drivers
+(模拟驱动)
 ------------
 
 In addition there is a driver available which simulates a real device with
 SoftMAC (fakelb - IEEE 802.15.4 loopback driver) interface. This option
 provides a possibility to test and debug the stack without usage of real hardware.
+(此外还有一个可用的驱动，它用 SoftMAC（fakelb - IEEE 802.15.4 环回驱动）接口模拟真实设备。该选项使你可以在不使用真实硬件的情况下测试和调试协议栈。)
 
 Device drivers API
+(设备驱动 API)
 ==================
 
 The include/net/mac802154.h defines following functions:
+(include/net/mac802154.h 定义了以下函数：)
 
 .. c:function:: struct ieee802154_dev *ieee802154_alloc_device (size_t priv_size, struct ieee802154_ops *ops)
 
 Allocation of IEEE 802.15.4 compatible device.
+(分配一个 IEEE 802.15.4 兼容设备。)
 
 .. c:function:: void ieee802154_free_device(struct ieee802154_dev *dev)
 
 Freeing allocated device.
+(释放已分配的设备。)
 
 .. c:function:: int ieee802154_register_device(struct ieee802154_dev *dev)
 
 Register PHY in the system.
+(在系统中注册 PHY。)
 
 .. c:function:: void ieee802154_unregister_device(struct ieee802154_dev *dev)
 
 Freeing registered PHY.
+(释放已注册的 PHY。)
 
 .. c:function:: void ieee802154_rx_irqsafe(struct ieee802154_hw *hw, struct sk_buff *skb, u8 lqi)
 
 Telling 802.15.4 module there is a new received frame in the skb with
 the RF Link Quality Indicator (LQI) from the hardware device.
+(告知 802.15.4 模块：skb 中有一个新收到的帧，其中带有来自硬件设备的射频链路质量指示 (LQI)。)
 
 .. c:function:: void ieee802154_xmit_complete(struct ieee802154_hw *hw, struct sk_buff *skb, bool ifs_handling)
 
 Telling 802.15.4 module the frame in the skb is or going to be
 transmitted through the hardware device
+(告知 802.15.4 模块：skb 中的帧已经或即将通过硬件设备发送。)
 
 The device driver must implement the following callbacks in the IEEE 802.15.4
 operations structure at least::
+(设备驱动至少必须在 IEEE 802.15.4 操作结构中实现以下回调：)
 
    struct ieee802154_ops {
         ...
@@ -162,23 +207,29 @@ operations structure at least::
 .. c:function:: int start(struct ieee802154_hw *hw)
 
 Handler that 802.15.4 module calls for the hardware device initialization.
+(802.15.4 模块调用此处理函数来初始化硬件设备。)
 
 .. c:function:: void stop(struct ieee802154_hw *hw)
 
 Handler that 802.15.4 module calls for the hardware device cleanup.
+(802.15.4 模块调用此处理函数来清理硬件设备。)
 
 .. c:function:: int xmit_async(struct ieee802154_hw *hw, struct sk_buff *skb)
 
 Handler that 802.15.4 module calls for each frame in the skb going to be
 transmitted through the hardware device.
+(802.15.4 模块对 skb 中每个将要通过硬件设备发送的帧调用此处理函数。)
 
 .. c:function:: int ed(struct ieee802154_hw *hw, u8 *level)
 
 Handler that 802.15.4 module calls for Energy Detection from the hardware
 device.
+(802.15.4 模块调用此处理函数从硬件设备进行能量检测。)
 
 .. c:function:: int set_channel(struct ieee802154_hw *hw, u8 page, u8 channel)
 
 Set radio for listening on specific channel of the hardware device.
+(设置硬件设备的无线电台以侦听特定信道。)
 
 Moreover IEEE 802.15.4 device operations structure should be filled.
+(此外，还应填写 IEEE 802.15.4 设备操作结构。)

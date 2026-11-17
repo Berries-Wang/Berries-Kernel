@@ -4,62 +4,73 @@
 zl3073x devlink support
 =======================
 
+(zl3073x devlink 支持)
+
 This document describes the devlink features implemented by the ``zl3073x``
 device driver.
+(本文档描述 ``zl3073x`` 设备驱动所实现的 devlink 功能。)
 
 Parameters
 ==========
+(参数)
 
 .. list-table:: Generic parameters implemented
    :widths: 5 5 90
 
-   * - Name
-     - Mode
-     - Notes
+   * - Name (名称)
+     - Mode (模式)
+     - Notes (备注)
    * - ``clock_id``
      - driverinit
      - Set the clock ID that is used by the driver for registering DPLL devices
        and pins.
+       (设置驱动注册 DPLL 设备和引脚时所使用的时钟 ID。)
 
 Info versions
 =============
+(Info 版本)
 
 The ``zl3073x`` driver reports the following versions
+(``zl3073x`` 驱动报告以下版本)
 
 .. list-table:: devlink info versions implemented
     :widths: 5 5 5 90
 
-    * - Name
-      - Type
-      - Example
-      - Description
+    * - Name (名称)
+      - Type (类型)
+      - Example (示例)
+      - Description (描述)
     * - ``asic.id``
       - fixed
       - 1E94
-      - Chip identification number
+      - Chip identification number (芯片识别编号)
     * - ``asic.rev``
       - fixed
       - 300
-      - Chip revision number
+      - Chip revision number (芯片修订版本号)
     * - ``fw``
       - running
       - 7006
-      - Firmware version number
+      - Firmware version number (固件版本号)
     * - ``custom_cfg``
       - running
       - 1.3.0.1
-      - Device configuration version customized by OEM
+      - Device configuration version customized by OEM (OEM 定制的设备配置版本)
 
 Flash Update
 ============
+(Flash 更新)
 
 The ``zl3073x`` driver implements support for flash update using the
 ``devlink-flash`` interface. It supports updating the device flash using a
 combined flash image ("bundle") that contains multiple components (firmware
 parts and configurations).
+(``zl3073x`` 驱动通过 ``devlink-flash`` 接口实现了对 flash 更新的支持。它支持使用包含多个组件(固件部分和配置)的组合 flash 镜像 ("bundle") 来更新设备 flash。)
 
 During the flash procedure, the standard firmware interface is not available,
 so the driver unregisters all DPLLs and associated pins, and re-registers them
 once the flash procedure is complete.
+(在 flash 操作期间，标准固件接口不可用，因此驱动会注销所有 DPLL 及其关联的引脚，并在 flash 过程完成后重新注册它们。)
 
 The driver does not support any overwrite mask flags.
+(该驱动不支持任何 overwrite 掩码标志。)
