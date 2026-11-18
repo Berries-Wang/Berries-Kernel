@@ -68,10 +68,11 @@
 6. **脚注/尾注引用不要在中文注释里重复**：表格单元格英文含 `[#]_` 时，中文注释直接写"……"即可，再写一个 `[#]_` 就变成 2 引用对 1 定义（proc.rst 实例）；
 7. **reST 标记不要照搬直译**：`_any_` 不是斜体语义，会被解析成引用标记（mmap_prepare.rst 报 Unknown target）——斜体用 `*任意一个*`；
 8. **中文行紧贴上一节下划线（相邻节无空行）是合法构造**，不要当成坏标题去"修"；zh_CN 原生档的 overline 中文标题（`===` / `标题` / `===`）同样合法。
+9. **flat-table 单元格 `-` 后双空格（`-  文字`，文字起始列=9）时，中文续行禁止按惯例缩进 8 列**——差 1 列即触发内核 rstFlatTable 解析器报 "two-level bullet list expected, but row N does not contain a second-level bullet list"，以 `SystemMessagePropagation` **中止整个构建**（sphinx parallel build error，return code 2）。中文续行（含多行英文单元格后的中文块及其折行）必须精确对齐**文字起始列** = 单元格 `-` 行缩进 + 1 + `-` 后空格数；TAB 续行按 tab_width=8 展开后比较。docutils 单机解析对形状静默，唯一 oracle=真实构建。实例：ext-ctrls-codec-stateless.rst 10 处（2026-11-18 修复，含 L1629/4205/4209/4213/4217/4707/4287/4299/5073）。
 
 ### 质检门（每批完成必过）
 
 - **oracle = 真实构建，且必须 `gmake O=kernel-docs-output cleandocs` 后全量重建**。增量构建对未变更文件复用缓存 doctree 且**不重新输出警告**——"错误变少"是假象（364→18 的假修复教训）；
-- 构建日志 grep 清零项：`SEVERE`、`toc.no_title`、`Unknown target name`、`Title level inconsistent`、`Title underline too short`；`Unexpected indentation`/`Malformed table` 属 `::`-家族遗留（存量约 405 条，round-2 QA 统一"译文移块后"处理，新批次不得新增）；
+- 构建日志 grep 清零项：`SEVERE`、`toc.no_title`、`Unknown target name`、`Title level inconsistent`、`Title underline too short`、`SystemMessagePropagation`（flat-table 续行错列等中止类，见禁忌 9）；`Unexpected indentation`/`Malformed table` 属 `::`-家族遗留（存量约 405 条，round-2 QA 统一"译文移块后"处理，新批次不得新增）；
 - 辅助扫描脚本在 [009.IGNORE/net-trans-tools/qa/](009.IGNORE/net-trans-tools/qa/)：`scan-broken-titles.py`（坏标题形状）、`fix-broken-titles.py`（机械修复，幂等）、`scan-colon-shape.py`（`::` 形状清单）；
 - docutils 单机诊断会误报 `include::` 路径、未知指令/角色（sphinx 扩展），过滤后再看，最终以 sphinx 构建为准。

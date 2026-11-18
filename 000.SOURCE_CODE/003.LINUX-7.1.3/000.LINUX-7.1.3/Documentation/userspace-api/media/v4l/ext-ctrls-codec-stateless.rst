@@ -1627,7 +1627,7 @@ FWHT Flags(FWHT 标志)
     * - ``V4L2_MPEG2_PIC_FLAG_CONCEALMENT_MV``
       - 0x00000004
       -  If set motion vectors are coded for intra macroblocks.
-        (如果置位，则为帧内宏块编码运动矢量。)
+         (如果置位，则为帧内宏块编码运动矢量。)
     * - ``V4L2_MPEG2_PIC_FLAG_Q_SCALE_TYPE``
       - 0x00000008
       - This flag affects the inverse quantization process.
@@ -4203,19 +4203,19 @@ semantics" of :ref:`av1`.
     * - __u8
       - ``y_pri_strength[V4L2_AV1_CDEF_MAX]``
       -  Specifies the strength of the primary filter.
-        (指定主滤波器的强度。)
+         (指定主滤波器的强度。)
     * - __u8
       - ``y_sec_strength[V4L2_AV1_CDEF_MAX]``
       -  Specifies the strength of the secondary filter.
-        (指定次级滤波器的强度。)
+         (指定次级滤波器的强度。)
     * - __u8
       - ``uv_pri_strength[V4L2_AV1_CDEF_MAX]``
       -  Specifies the strength of the primary filter.
-        (指定主滤波器的强度。)
+         (指定主滤波器的强度。)
     * - __u8
       - ``uv_sec_strength[V4L2_AV1_CDEF_MAX]``
       -  Specifies the strength of the secondary filter.
-        (指定次级滤波器的强度。)
+         (指定次级滤波器的强度。)
 
 .. c:type:: v4l2_av1_segment_feature
 
@@ -4284,8 +4284,8 @@ semantics"。)
       -  Indicates the highest numbered segment id that has some
          enabled feature. This is used when decoding the segment id to only decode
          choices corresponding to used segments.
-        (指示启用了某些特征的最高编号分段 id。解码分段 id 时使用它，以便只
-        解码与已用分段对应的选项。)
+         (指示启用了某些特征的最高编号分段 id。解码分段 id 时使用它，以便只
+         解码与已用分段对应的选项。)
     * - __u8
       - ``feature_enabled[V4L2_AV1_MAX_SEGMENTS]``
       - Bitmask defining which features are enabled in each segment. Use
@@ -4296,7 +4296,7 @@ semantics"。)
       - ``feature_data[V4L2_AV1_MAX_SEGMENTS][V4L2_AV1_SEG_LVL_MAX]``
       -  Data attached to each feature. Data entry is only valid if the feature
          is enabled.
-        (附属于每个特征的数据。只有特征启用时数据项才有效。)
+         (附属于每个特征的数据。只有特征启用时数据项才有效。)
 
 .. _av1_segmentation_flags:
 
@@ -4705,7 +4705,7 @@ AV1 Tx mode as described in section 6.8.21 "TX mode semantics" of :ref:`av1`.
     * - ``V4L2_AV1_TX_MODE_ONLY_4X4``
       - 0
       -  The inverse transform will use only 4x4 transforms.
-        (逆变换将只使用 4x4 变换。)
+         (逆变换将只使用 4x4 变换。)
     * - ``V4L2_AV1_TX_MODE_LARGEST``
       - 1
       - The inverse transform will use the largest transform size that fits
@@ -5070,7 +5070,7 @@ AV1 Tx mode as described in section 6.8.21 "TX mode semantics" of :ref:`av1`.
       - ``num_cb_points``
       -  Specifies the number of points for the piece-wise linear scaling
          function of the cb component.
-        (指定 cb 分量分段线性缩放函数的点数。)
+         (指定 cb 分量分段线性缩放函数的点数。)
     * - __u8
       - ``point_cb_value[V4L2_AV1_MAX_NUM_CB_POINTS]``
       - Represents the x coordinate for the i-th point of the
