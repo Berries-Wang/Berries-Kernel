@@ -1,8 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=================
-Process Addresses
-=================
+===========================
+Process Addresses(进程地址)
+===========================
 
 .. toctree::
    :maxdepth: 3
@@ -10,41 +10,49 @@ Process Addresses
 
 Userland memory ranges are tracked by the kernel via Virtual Memory Areas or
 'VMA's of type :c:struct:`!struct vm_area_struct`.
+(用户态内存范围由内核通过虚拟内存区域 (Virtual Memory Area, VMA)——即 :c:struct:`!struct vm_area_struct` 类型的对象——来跟踪。)
 
 Each VMA describes a virtually contiguous memory range with identical
 attributes, each described by a :c:struct:`!struct vm_area_struct`
 object. Userland access outside of VMAs is invalid except in the case where an
 adjacent stack VMA could be extended to contain the accessed address.
+(每个 VMA 描述一段属性相同的、虚拟地址连续的内存范围，每个范围由一个 :c:struct:`!struct vm_area_struct` 对象描述。VMA 之外的用户态访问是无效的，除非相邻的栈 VMA 可以扩展到包含被访问的地址。)
 
 All VMAs are contained within one and only one virtual address space, described
 by a :c:struct:`!struct mm_struct` object which is referenced by all tasks (that is,
 threads) which share the virtual address space. We refer to this as the
 :c:struct:`!mm`.
+(所有 VMA 都包含在一个且仅一个虚拟地址空间中；该地址空间由一个 :c:struct:`!struct mm_struct` 对象描述，共享该虚拟地址空间的所有任务(即线程)都引用它。我们将其称为 :c:struct:`!mm`。)
 
 Each mm object contains a maple tree data structure which describes all VMAs
 within the virtual address space.
+(每个 mm 对象都包含一个 maple tree 数据结构，用于描述该虚拟地址空间中的所有 VMA。)
 
 .. note:: An exception to this is the 'gate' VMA which is provided by
           architectures which use :c:struct:`!vsyscall` and is a global static
           object which does not belong to any specific mm.
+          (注意：一个例外是由使用 :c:struct:`!vsyscall` 的架构提供的 'gate' VMA——它是一个全局静态对象，不属于任何特定的 mm。)
 
--------
-Locking
--------
+-------------
+Locking(加锁)
+-------------
 
 The kernel is designed to be highly scalable against concurrent read operations
 on VMA **metadata** so a complicated set of locks are required to ensure memory
 corruption does not occur.
+(内核设计为对 VMA **元数据** 的并发读操作具有高度可扩展性，因此需要一套复杂的锁来确保不会发生内存损坏。)
 
 .. note:: Locking VMAs for their metadata does not have any impact on the memory
           they describe nor the page tables that map them.
+          (注意：为 VMA 的元数据加锁，对其描述的内存本身或映射它们的页表没有任何影响。)
 
-Terminology
------------
+Terminology(术语)
+-----------------
 
 * **mmap locks** - Each MM has a read/write semaphore :c:member:`!mmap_lock`
   which locks at a process address space granularity which can be acquired via
   :c:func:`!mmap_read_lock`, :c:func:`!mmap_write_lock` and variants.
+  (**mmap 锁** - 每个 MM 都有一个读/写信号量 :c:member:`!mmap_lock`，它以进程地址空间为粒度加锁，可通过 :c:func:`!mmap_read_lock`、:c:func:`!mmap_write_lock` 及其变体获取。)
 * **VMA locks** - The VMA lock is at VMA granularity (of course) which behaves
   as a read/write semaphore in practice. A VMA read lock is obtained via
   :c:func:`!lock_vma_under_rcu` (and unlocked via :c:func:`!vma_end_read`) and a
@@ -52,6 +60,7 @@ Terminology
   (all VMA write locks are unlocked
   automatically when the mmap write lock is released). To take a VMA write lock
   you **must** have already acquired an :c:func:`!mmap_write_lock`.
+  (**VMA 锁** - VMA 锁当然是以 VMA 为粒度的，实际表现如同读/写信号量。VMA 读锁通过 :c:func:`!lock_vma_under_rcu` 获取(并通过 :c:func:`!vma_end_read` 解锁)，写锁通过 vma_start_write() 或 vma_start_write_killable() 获取(mmap 写锁释放时，所有 VMA 写锁都会自动解锁)。要获取 VMA 写锁，你 **必须** 已经持有 :c:func:`!mmap_write_lock`。)
 * **rmap locks** - When trying to access VMAs through the reverse mapping via a
   :c:struct:`!struct address_space` or :c:struct:`!struct anon_vma` object
   (reachable from a folio via :c:member:`!folio->mapping`). VMAs must be stabilised via
@@ -59,57 +68,73 @@ Terminology
   anonymous memory and :c:func:`!i_mmap_[try]lock_read` or
   :c:func:`!i_mmap_[try]lock_write` for file-backed memory. We refer to these
   locks as the reverse mapping locks, or 'rmap locks' for brevity.
+  (**rmap 锁** - 当试图通过反向映射(经由 :c:struct:`!struct address_space` 或 :c:struct:`!struct anon_vma` 对象——可从 folio 的 :c:member:`!folio->mapping` 到达)访问 VMA 时使用。匿名内存必须通过 :c:func:`!anon_vma_[try]lock_read` 或 :c:func:`!anon_vma_[try]lock_write` 使 VMA 保持稳定，文件映射内存则使用 :c:func:`!i_mmap_[try]lock_read` 或 :c:func:`!i_mmap_[try]lock_write`。我们把这些锁称为反向映射锁，简称 'rmap 锁'。)
 
 We discuss page table locks separately in the dedicated section below.
+(页表锁将在下面的专门章节中单独讨论。)
 
 The first thing **any** of these locks achieve is to **stabilise** the VMA
 within the MM tree. That is, guaranteeing that the VMA object will not be
 deleted from under you nor modified (except for some specific fields
 described below).
+(这些锁中 **任何** 一个锁首先做到的，都是让 VMA 在 MM 树中 **保持稳定** (stabilise)。也就是说，保证 VMA 对象不会在你脚下被删除，也不会被修改(下文描述的某些特定字段除外)。)
 
 Stabilising a VMA also keeps the address space described by it around.
+(稳定一个 VMA 同时也保证其描述的地址空间继续存在。)
 
-Lock usage
-----------
+Lock usage(锁的使用)
+--------------------
 
 If you want to **read** VMA metadata fields or just keep the VMA stable, you
 must do one of the following:
+(如果想 **读取** VMA 元数据字段，或只是让 VMA 保持稳定，必须做到以下之一：)
 
 * Obtain an mmap read lock at the MM granularity via :c:func:`!mmap_read_lock` (or a
   suitable variant), unlocking it with a matching :c:func:`!mmap_read_unlock` when
   you're done with the VMA, *or*
+  (以 MM 为粒度通过 :c:func:`!mmap_read_lock`(或合适的变体)获取 mmap 读锁，用完 VMA 后用匹配的 :c:func:`!mmap_read_unlock` 解锁，*或者*)
 * Try to obtain a VMA read lock via :c:func:`!lock_vma_under_rcu`. This tries to
   acquire the lock atomically so might fail, in which case fall-back logic is
   required to instead obtain an mmap read lock if this returns :c:macro:`!NULL`,
   *or*
+  (尝试通过 :c:func:`!lock_vma_under_rcu` 获取 VMA 读锁。它以原子方式尝试获取锁，因此可能失败；若返回 :c:macro:`!NULL`，则需要回退逻辑改为获取 mmap 读锁，*或者*)
 * Acquire an rmap lock before traversing the locked interval tree (whether
   anonymous or file-backed) to obtain the required VMA.
+  (在遍历加了锁的区间树(无论匿名还是文件映射)以取得所需 VMA 之前，先获取 rmap 锁。)
 
 If you want to **write** VMA metadata fields, then things vary depending on the
 field (we explore each VMA field in detail below). For the majority you must:
+(如果想 **写入** VMA 元数据字段，情况因字段而异(下文将详细讨论每个 VMA 字段)。对大多数字段你必须：)
 
 * Obtain an mmap write lock at the MM granularity via :c:func:`!mmap_write_lock` (or a
   suitable variant), unlocking it with a matching :c:func:`!mmap_write_unlock` when
   you're done with the VMA, *and*
+  (以 MM 为粒度通过 :c:func:`!mmap_write_lock`(或合适的变体)获取 mmap 写锁，用完 VMA 后用匹配的 :c:func:`!mmap_write_unlock` 解锁，*并且*)
 * Obtain a VMA write lock via :c:func:`!vma_start_write` for each VMA you wish to
   modify, which will be released automatically when :c:func:`!mmap_write_unlock` is
   called.
+  (对你想修改的每个 VMA，通过 :c:func:`!vma_start_write` 获取 VMA 写锁；当调用 :c:func:`!mmap_write_unlock` 时它会自动释放。)
 * If you want to be able to write to **any** field, you must also hide the VMA
   from the reverse mapping by obtaining an **rmap write lock**.
+  (如果希望对 **任何** 字段都可写，还必须获取 **rmap 写锁**，把 VMA 从反向映射中隐藏起来。)
 
 VMA locks are special in that you must obtain an mmap **write** lock **first**
 in order to obtain a VMA **write** lock. A VMA **read** lock however can be
 obtained without any other lock (:c:func:`!lock_vma_under_rcu` will acquire then
 release an RCU lock to lookup the VMA for you).
+(VMA 锁的特殊之处在于：要获取 VMA **写** 锁，必须 **先** 获取 mmap **写** 锁。而 VMA **读** 锁可以在不持有任何其他锁的情况下获取(:c:func:`!lock_vma_under_rcu` 会获取再释放一个 RCU 锁来替你查找 VMA)。)
 
 This constrains the impact of writers on readers, as a writer can interact with
 one VMA while a reader interacts with another simultaneously.
+(这限制了写者对读者的影响：写者与一个 VMA 交互时，读者可以同时与另一个 VMA 交互。)
 
 .. note:: The primary users of VMA read locks are page fault handlers, which
           means that without a VMA write lock, page faults will run concurrent with
           whatever you are doing.
+          (注意：VMA 读锁的主要使用者是缺页异常处理程序，这意味着如果没有 VMA 写锁，缺页异常将与你的操作并发运行。)
 
 Examining all valid lock states:
+(下面列出所有合法的加锁状态组合。)
 
 .. table::
 
@@ -128,9 +153,11 @@ Examining all valid lock states:
              attempting to do the reverse is invalid as it can result in deadlock - if
              another task already holds an mmap write lock and attempts to acquire a VMA
              write lock that will deadlock on the VMA read lock.
+             (警告：虽然可以在持有 mmap 读锁的同时获取 VMA 锁，但反过来做是无效的，可能导致死锁——如果另一个任务已持有 mmap 写锁并尝试获取 VMA 写锁，它将死等 VMA 读锁。)
 
 All of these locks behave as read/write semaphores in practice, so you can
 obtain either a read or a write lock for each of these.
+(实践中所有这些锁都表现为读/写信号量，因此对每一种锁都可以获取读锁或写锁。)
 
 .. note:: Generally speaking, a read/write semaphore is a class of lock which
           permits concurrent readers. However a write lock can only be obtained
@@ -139,38 +166,50 @@ obtain either a read or a write lock for each of these.
 
           This renders read locks on a read/write semaphore concurrent with other
           readers and write locks exclusive against all others holding the semaphore.
+          (注意：一般而言，读/写信号量是一类允许读者并发持有的锁。但只有当所有读者都离开临界区(并让等待中的读者继续等待)之后，才能获取写锁。
 
-VMA fields
-^^^^^^^^^^
+          这意味着读/写信号量上的读锁可以与其他读者并发，而写锁对持有该信号量的所有其他人是排他的。)
+
+VMA fields(VMA 字段)
+^^^^^^^^^^^^^^^^^^^^
 
 We can subdivide :c:struct:`!struct vm_area_struct` fields by their purpose, which makes it
 easier to explore their locking characteristics:
+(我们可以按用途对 :c:struct:`!struct vm_area_struct` 的字段进行分类，这样更容易考察它们的加锁特性：)
 
 .. note:: We exclude VMA lock-specific fields here to avoid confusion, as these
           are in effect an internal implementation detail.
+          (注意：为避免混淆，这里不列出 VMA 锁专用的字段，它们实际上是内部实现细节。)
 
 .. table:: Virtual layout fields
 
    ===================== ======================================== ===========
-   Field                 Description                              Write lock
+   Field(字段)           Description(描述)                        Write lock
    ===================== ======================================== ===========
    :c:member:`!vm_start` Inclusive start virtual address of range mmap write,
                          VMA describes.                           VMA write,
                                                                   rmap write.
+                         (VMA 所描述范围的起始虚拟地址，包含式。)   (mmap 写锁、VMA 写锁、rmap 写锁。)
    :c:member:`!vm_end`   Exclusive end virtual address of range   mmap write,
                          VMA describes.                           VMA write,
                                                                   rmap write.
+                         (VMA 所描述范围的结束虚拟地址，不包含式。) (mmap 写锁、VMA 写锁、rmap 写锁。)
    :c:member:`!vm_pgoff` Describes the page offset into the file, mmap write,
                          the original page offset within the      VMA write,
                          virtual address space (prior to any      rmap write.
                          :c:func:`!mremap`), or PFN if a PFN map
                          and the architecture does not support
                          :c:macro:`!CONFIG_ARCH_HAS_PTE_SPECIAL`.
+                         (描述指向文件的页偏移——即虚拟地址空间中最初的页偏移(在任何
+                         :c:func:`!mremap` 之前)；若为 PFN 映射且架构不支持
+                         :c:macro:`!CONFIG_ARCH_HAS_PTE_SPECIAL`，则为 PFN。)
+                                                                  (mmap 写锁、VMA 写锁、rmap 写锁。)
    ===================== ======================================== ===========
 
 These fields describes the size, start and end of the VMA, and as such cannot be
 modified without first being hidden from the reverse mapping since these fields
 are used to locate VMAs within the reverse mapping interval trees.
+(这些字段描述 VMA 的大小、起点和终点，因此如果不先把 VMA 从反向映射中隐藏，就不能修改它们——因为这些字段被用来在反向映射区间树中定位 VMA。)
 
 .. table:: Core fields
 

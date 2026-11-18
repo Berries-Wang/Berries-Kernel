@@ -1,148 +1,187 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-The tip tree handbook
-=====================
+The tip tree handbook(tip 树手册)
+=================================
 
-What is the tip tree?
----------------------
+What is the tip tree?(什么是 tip 树？)
+--------------------------------------
 
 The tip tree is a collection of several subsystems and areas of
 development. The tip tree is both a direct development tree and an
 aggregation tree for several sub-maintainer trees. The tip tree gitweb URL
 is: https://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git
+(tip 树是多个子系统和开发领域的集合。tip 树既是直接开发树，也是若干子维护者树的聚合树。tip 树的 gitweb URL 为：https://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git)
 
 The tip tree contains the following subsystems:
+(tip 树包含以下子系统：)
 
    - **x86 architecture**
+     (**x86 架构**)
 
      The x86 architecture development takes place in the tip tree except
      for the x86 KVM and XEN specific parts which are maintained in the
      corresponding subsystems and routed directly to mainline from
      there. It's still good practice to Cc the x86 maintainers on
      x86-specific KVM and XEN patches.
+     (x86 架构开发在 tip 树中进行，但 x86 KVM 和 XEN 特定的部分除外——它们在相应的子系统中维护，并从那里直接进入主线。不过，在 x86 特定的 KVM 和 XEN 补丁上 Cc x86 维护者仍然是好习惯。)
 
      Some x86 subsystems have their own maintainers in addition to the
      overall x86 maintainers.  Please Cc the overall x86 maintainers on
      patches touching files in arch/x86 even when they are not called out
      by the MAINTAINER file.
+     (一些 x86 子系统除了整体 x86 维护者之外还有自己的维护者。对于触及 arch/x86 中文件的补丁，即使 MAINTAINER 文件没有明确列出，也请 Cc 整体 x86 维护者。)
 
      Note, that ``x86@kernel.org`` is not a mailing list. It is merely a
      mail alias which distributes mails to the x86 top-level maintainer
      team. Please always Cc the Linux Kernel mailing list (LKML)
      ``linux-kernel@vger.kernel.org``, otherwise your mail ends up only in
      the private inboxes of the maintainers.
+     (注意，``x86@kernel.org`` 不是邮件列表。它只是一个把邮件分发给 x86 顶层维护者团队的邮件别名。请始终 Cc Linux 内核邮件列表（LKML） ``linux-kernel@vger.kernel.org``，否则你的邮件只会进入维护者的私人收件箱。)
 
    - **Scheduler**
+     (调度器)
 
      Scheduler development takes place in the -tip tree, in the
      sched/core branch - with occasional sub-topic trees for
      work-in-progress patch-sets.
+     (调度器开发在 -tip 树的 sched/core 分支中进行——进行中的补丁集偶尔会有子主题树。)
 
    - **Locking and atomics**
+     (锁与原子操作)
 
      Locking development (including atomics and other synchronization
      primitives that are connected to locking) takes place in the -tip
      tree, in the locking/core branch - with occasional sub-topic trees
      for work-in-progress patch-sets.
+     (锁开发（包括原子操作以及与锁相关的其他同步原语）在 -tip 树的 locking/core 分支中进行——进行中的补丁集偶尔会有子主题树。)
 
    - **Generic interrupt subsystem and interrupt chip drivers**:
+     (通用中断子系统与中断芯片驱动)：)
 
      - interrupt core development happens in the irq/core branch
+       (中断核心开发在 irq/core 分支进行)
 
      - interrupt chip driver development also happens in the irq/core
        branch, but the patches are usually applied in a separate maintainer
        tree and then aggregated into irq/core
+       (中断芯片驱动开发同样在 irq/core 分支进行，但补丁通常先应用在单独的维护者树中，然后再聚合进 irq/core)
 
    - **Time, timers, timekeeping, NOHZ and related chip drivers**:
+     (时间、定时器、时间记账、NOHZ 及相关芯片驱动)：)
 
      - timekeeping, clocksource core, NTP and alarmtimer development
        happens in the timers/core branch, but patches are usually applied in
        a separate maintainer tree and then aggregated into timers/core
+       (时间记账、clocksource 核心、NTP 和 alarmtimer 开发在 timers/core 分支进行，但补丁通常先应用在单独的维护者树中，然后再聚合进 timers/core)
 
      - clocksource/event driver development happens in the timers/core
        branch, but patches are mostly applied in a separate maintainer tree
        and then aggregated into timers/core
+       (clocksource/事件驱动开发在 timers/core 分支进行，但补丁大多先应用在单独的维护者树中，然后再聚合进 timers/core)
 
    - **Performance counters core, architecture support and tooling**:
+     (性能计数器核心、架构支持与工具)：)
 
      - perf core and architecture support development happens in the
        perf/core branch
+       (perf 核心与架构支持开发在 perf/core 分支进行)
 
      - perf tooling development happens in the perf tools maintainer
        tree and is aggregated into the tip tree.
+       (perf 工具开发在 perf tools 维护者树进行，并聚合进 tip 树。)
 
    - **CPU hotplug core**
+     (CPU 热插拔核心)
 
    - **RAS core**
+     (RAS 核心)
 
      Mostly x86-specific RAS patches are collected in the tip ras/core
      branch.
+     (主要是 x86 特定的 RAS 补丁收集在 tip 树的 ras/core 分支中。)
 
    - **EFI core**
+     (EFI 核心)
 
      EFI development in the efi git tree. The collected patches are
      aggregated in the tip efi/core branch.
+     (EFI 开发在 efi git 树进行。收集的补丁聚合在 tip 树的 efi/core 分支中。)
 
    - **RCU**
+     (RCU)
 
      RCU development happens in the linux-rcu tree. The resulting changes
      are aggregated into the tip core/rcu branch.
+     (RCU 开发在 linux-rcu 树进行。产生的更改聚合进 tip 树的 core/rcu 分支。)
 
    - **Various core code components**:
+     (各种核心代码组件)：)
 
        - debugobjects
+         (debugobjects)
 
        - objtool
+         (objtool)
 
        - random bits and pieces
+         (零散的小组件)
 
 
-Patch submission notes
-----------------------
+Patch submission notes(补丁提交须知)
+------------------------------------
 
-Selecting the tree/branch
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Selecting the tree/branch(选择树/分支)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In general, development against the head of the tip tree master branch is
 fine, but for the subsystems which are maintained separately, have their
 own git tree and are only aggregated into the tip tree, development should
 take place against the relevant subsystem tree or branch.
+(一般来说，基于 tip 树 master 分支顶端进行开发是可以的，但对于单独维护、拥有自己的 git 树、只是聚合进 tip 树的子系统，开发应当基于相应的子系统树或分支进行。)
 
 Bug fixes which target mainline should always be applicable against the
 mainline kernel tree. Potential conflicts against changes which are already
 queued in the tip tree are handled by the maintainers.
+(针对主线的缺陷修复应当始终可以应用到主线内核树上。与 tip 树中已排队的更改之间的潜在冲突由维护者处理。)
 
-Patch subject
-^^^^^^^^^^^^^
+Patch subject(补丁主题)
+^^^^^^^^^^^^^^^^^^^^^^^
 
 The tip tree preferred format for patch subject prefixes is
 'subsys/component:', e.g. 'x86/apic:', 'x86/mm/fault:', 'sched/fair:',
 'genirq/core:'. Please do not use file names or complete file paths as
 prefix. 'git log path/to/file' should give you a reasonable hint in most
 cases.
+(tip 树偏好的补丁主题前缀格式是 'subsys/component:'，例如 'x86/apic:'、'x86/mm/fault:'、'sched/fair:'、'genirq/core:'。请不要使用文件名或完整文件路径作为前缀。在大多数情况下，'git log path/to/file' 能给你合理的提示。)
 
 The condensed patch description in the subject line should start with an
 uppercase letter and should be written in imperative tone.
+(主题行中的简短补丁描述应当以大写字母开头，并使用祈使语气书写。)
 
 
-Changelog
-^^^^^^^^^
+Changelog(变更日志)
+^^^^^^^^^^^^^^^^^^^
 
 The general rules about changelogs in the :ref:`Submitting patches guide
 <describe_changes>`, apply.
+(:ref:`Submitting patches guide
+<describe_changes>` 中关于变更日志的一般规则同样适用。)
 
 The tip tree maintainers set value on following these rules, especially on
 the request to write changelogs in imperative mood and not impersonating
 code or the execution of it. This is not just a whim of the
 maintainers. Changelogs written in abstract words are more precise and
 tend to be less confusing than those written in the form of novels.
+(tip 树维护者非常看重遵守这些规则，尤其是要求用祈使语气撰写变更日志、不要把代码或其执行过程拟人化。这不仅仅是维护者的怪癖。用抽象语言写成的变更日志更精确，而且往往比小说式的变更日志更不容易让人困惑。)
 
 It's also useful to structure the changelog into several paragraphs and not
 lump everything together into a single one. A good structure is to explain
 the context, the problem and the solution in separate paragraphs and this
 order.
+(把变更日志分成若干段落而不是把所有内容挤成一段也很有用。好的结构是按上下文、问题和解决方案的顺序分别用独立的段落来说明。)
 
 Examples for illustration:
+(用于说明的示例：)
 
   Example 1::
 
@@ -158,6 +197,8 @@ Examples for illustration:
     worker on same CPU and scans the domain->cpu_mask to get the domain
     pointer.
 
+  (示例 1：改进前)
+
   Improved version::
 
     x86/intel_rdt/mbm: Fix MBM overflow handler during CPU hotplug
@@ -171,6 +212,8 @@ Examples for illustration:
     in the same domain. The work could be flushed as well, but that would
     reschedule it on the same CPU.
 
+  (改进版本)
+
   Example 2::
 
     time: POSIX CPU timers: Ensure that variable is initialized
@@ -182,6 +225,8 @@ Examples for illustration:
     *oldval in an undefined manner. This is now prevented. We also exploit
     short-circuiting of && to sample the timer only if the result will
     actually be used to update *oldval.
+
+  (示例 2：改进前)
 
   Improved version::
 
@@ -197,6 +242,8 @@ Examples for illustration:
 
     Make the invocation conditional and check the return value.
 
+  (改进版本)
+
   Example 3::
 
     The entity can also be used for other purposes.
@@ -208,6 +255,8 @@ Examples for illustration:
     The entity can also be used for other purposes.
 
     Rename it to be more generic.
+
+  (示例 3：改进前与改进版本)
 
 
 For complex scenarios, especially race conditions and memory ordering
