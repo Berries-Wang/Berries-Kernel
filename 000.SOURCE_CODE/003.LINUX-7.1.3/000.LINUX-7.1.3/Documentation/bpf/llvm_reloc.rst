@@ -1,13 +1,14 @@
 .. SPDX-License-Identifier: (LGPL-2.1 OR BSD-2-Clause)
 
-====================
-BPF LLVM Relocations
-====================
+=====================================
+BPF LLVM Relocations(BPF LLVM 重定位)
+=====================================
 
 This document describes LLVM BPF backend relocation types.
+(本文档描述 LLVM BPF 后端的重定位类型。)
 
-Relocation Record
-=================
+Relocation Record(重定位记录)
+==============================
 
 LLVM BPF backend records each relocation with the following 16-byte
 ELF structure::
@@ -18,6 +19,8 @@ ELF structure::
     Elf64_Xword   r_info;    // Relocation type and symbol index.
   } Elf64_Rel;
 
+(LLVM BPF 后端使用以下 16 字节的 ELF 结构记录每个重定位。)
+
 For example, for the following code::
 
   int g1 __attribute__((section("sec")));
@@ -27,6 +30,8 @@ For example, for the following code::
   int test() {
     return g1 + g2 + l1 + l2;
   }
+
+(例如，对于以下代码：)
 
 Compiled with ``clang --target=bpf -O2 -c test.c``, the following is
 the code with ``llvm-objdump -dr test.o``::
@@ -48,6 +53,8 @@ the code with ``llvm-objdump -dr test.o``::
       14:       0f 10 00 00 00 00 00 00 r0 += r1
       15:       95 00 00 00 00 00 00 00 exit
 
+(用 clang --target=bpf -O2 -c test.c 编译后，以下是使用 llvm-objdump -dr test.o 看到的代码：)
+
 There are four relocations in the above for four ``LD_imm64`` instructions.
 The following ``llvm-readelf -r test.o`` shows the binary values of the four
 relocations::
@@ -58,6 +65,8 @@ relocations::
   0000000000000018  0000000700000001 R_BPF_64_64            0000000000000004 g2
   0000000000000038  0000000400000001 R_BPF_64_64            0000000000000000 sec
   0000000000000058  0000000400000001 R_BPF_64_64            0000000000000000 sec
+
+(上面共有四个重定位，对应四条 LD_imm64 指令。以下 llvm-readelf -r test.o 输出展示了这四个重定位的二进制值：)
 
 Each relocation is represented by ``Offset`` (8 bytes) and ``Info`` (8 bytes).
 For example, the first relocation corresponds to the first instruction
@@ -76,13 +85,20 @@ The following is the symbol table with ``llvm-readelf -s test.o``::
        6: 0000000000000000     4 OBJECT  GLOBAL DEFAULT     4 g1
        7: 0000000000000004     4 OBJECT  GLOBAL DEFAULT     4 g2
 
+(每个重定位由 ``Offset`` (8 字节) 与 ``Info`` (8 字节) 表示。例如，第一个重定位对应第一条指令 (Offset 0x0)，其对应的 ``Info`` 表明重定位类型为 ``R_BPF_64_64`` (类型 1)，以及符号表中的表项 (表项 6)。以下是通过 ``llvm-readelf -s test.o`` 得到的符号表：)
+
 The 6th entry is global variable ``g1`` with value 0.
+(第 6 个表项是值为 0 的全局变量 ``g1`` 。)
 
 Similarly, the second relocation is at ``.text`` offset ``0x18``, instruction 3,
 has a type of ``R_BPF_64_64`` and refers to entry 7 in the symbol table.
 The second relocation resolves to global variable ``g2`` which has a symbol
 value 4. The symbol value represents the offset from the start of ``.data``
 section where the initial value of the global variable ``g2`` is stored.
+(类似地，第二个重定位位于 ``.text`` 偏移 ``0x18`` 处、对应指令 3，其类型为
+``R_BPF_64_64`` ，指向符号表中的表项 7。第二个重定位解析为全局变量 ``g2`` ，
+其符号值为 4。符号值表示从 ``.data`` 节起始处算起的偏移量，全局变量 ``g2`` 的
+初始值即存储在该处。)
 
 The third and fourth relocations refer to static variables ``l1``
 and ``l2``. From the ``.rel.text`` section above, it is not clear
@@ -94,14 +110,22 @@ buffer, which is called ``A`` (addend). Looking at
 above insn ``7`` and ``11``, they have section offset ``8`` and ``12``.
 From symbol table, we can find that they correspond to entries ``2``
 and ``3`` for ``l1`` and ``l2``.
+(第三个和第四个重定位指向静态变量 ``l1`` 和 ``l2`` 。从上面的 ``.rel.text`` 节
+无法看出它们真正指向哪个符号，因为二者都指向符号表表项 4，即符号 ``sec`` ，
+其类型为 ``STT_SECTION`` ，代表一个节。因此对于静态变量或函数，节偏移量会被
+写入原始指令缓冲区，这个值被称为 ``A`` (addend，加数)。查看上面的指令 ``7``
+和 ``11`` ，它们的节偏移量分别为 ``8`` 和 ``12`` 。从符号表可以查出，它们分别
+对应 ``l1`` 与 ``l2`` 的表项 ``2`` 和 ``3`` 。)
 
 In general, the ``A`` is 0 for global variables and functions,
 and is the section offset or some computation result based on
 section offset for static variables/functions. The non-section-offset
 case refers to function calls. See below for more details.
+(一般而言，全局变量和函数的 ``A`` 为 0；静态变量/函数的 ``A`` 则是节偏移量，
+或基于节偏移量的某种计算结果。非节偏移量的情形对应函数调用。详见下文。)
 
-Different Relocation Types
-==========================
+Different Relocation Types(不同的重定位类型)
+============================================
 
 Six relocation types are supported. The following is an overview and
 ``S`` represents the value of the symbol in the symbol table::
@@ -114,6 +138,8 @@ Six relocation types are supported. The following is an overview and
   4     R_BPF_64_NODYLD32  .BTF[.ext] data  32       r_offset      S + A
   10    R_BPF_64_32        call insn        32       r_offset + 4  (S + A) / 8 - 1
 
+(支持六种重定位类型。以下是概览，其中 S 表示符号表中符号的值：)
+
 For example, ``R_BPF_64_64`` relocation type is used for ``ld_imm64`` instruction.
 The actual to-be-relocated data (0 or section offset)
 is stored at ``r_offset + 4`` and the read/write
@@ -121,11 +147,18 @@ data bitsize is 32 (4 bytes). The relocation can be resolved with
 the symbol value plus implicit addend. Note that the ``BitSize`` is 32 which
 means the section offset must be less than or equal to ``UINT32_MAX`` and this
 is enforced by LLVM BPF backend.
+(例如，``R_BPF_64_64`` 重定位类型用于 ``ld_imm64`` 指令。实际待重定位的数据
+(0 或节偏移量) 存储在 ``r_offset + 4`` 处，读/写数据的位宽为 32 (4 字节)。该
+重定位可用符号值加上隐式加数来解析。注意 ``BitSize`` 为 32，意味着节偏移量
+必须小于等于 ``UINT32_MAX`` ，这一点由 LLVM BPF 后端强制保证。)
 
 In another case, ``R_BPF_64_ABS64`` relocation type is used for normal 64-bit data.
 The actual to-be-relocated data is stored at ``r_offset`` and the read/write data
 bitsize is 64 (8 bytes). The relocation can be resolved with
 the symbol value plus implicit addend.
+(另一种情况是，``R_BPF_64_ABS64`` 重定位类型用于普通 64 位数据。实际待重定位
+的数据存储在 ``r_offset`` 处，读/写数据的位宽为 64 (8 字节)。该重定位可用符号
+值加上隐式加数来解析。)
 
 Both ``R_BPF_64_ABS32`` and ``R_BPF_64_NODYLD32`` types are for 32-bit data.
 But ``R_BPF_64_NODYLD32`` specifically refers to relocations in ``.BTF`` and
@@ -133,13 +166,20 @@ But ``R_BPF_64_NODYLD32`` specifically refers to relocations in ``.BTF`` and
 is involved, ``R_BPF_64_NODYLD32`` types of relocations should not be resolved
 to actual function/variable address. Otherwise, ``.BTF`` and ``.BTF.ext``
 become unusable by bcc and kernel.
+( ``R_BPF_64_ABS32`` 与 ``R_BPF_64_NODYLD32`` 两种类型都用于 32 位数据。但
+``R_BPF_64_NODYLD32`` 特指 ``.BTF`` 和 ``.BTF.ext`` 节中的重定位。对于 bcc 这类
+涉及 llvm ``ExecutionEngine RuntimeDyld`` 的情形， ``R_BPF_64_NODYLD32`` 类型的
+重定位不应被解析为实际的函数/变量地址，否则 ``.BTF`` 与 ``.BTF.ext`` 会变得
+对 bcc 和内核都不可用。)
 
 Type ``R_BPF_64_32`` is used for call instruction. The call target section
 offset is stored at ``r_offset + 4`` (32bit) and calculated as
 ``(S + A) / 8 - 1``.
+( ``R_BPF_64_32`` 类型用于 call 指令。call 目标的节偏移量存储在 ``r_offset + 4``
+处 (32 位)，并按 ``(S + A) / 8 - 1`` 计算。)
 
-Examples
-========
+Examples(示例)
+==============
 
 Types ``R_BPF_64_64`` and ``R_BPF_64_32`` are used to resolve ``ld_imm64``
 and ``call`` instructions. For example::
@@ -156,6 +196,9 @@ and ``call`` instructions. For example::
   int test(int a, int b) {
     return gfunc(a, b) +  lfunc(a, b) + global;
   }
+
+( ``R_BPF_64_64`` 与 ``R_BPF_64_32`` 类型用于解析 ``ld_imm64`` 与 ``call``
+指令。例如：)
 
 Compiled with ``clang --target=bpf -O2 -c test.c``, we will have
 following code with `llvm-objdump -dr test.o``::
@@ -191,17 +234,26 @@ following code with `llvm-objdump -dr test.o``::
          4:       0f 10 00 00 00 00 00 00 r0 += r1
          5:       95 00 00 00 00 00 00 00 exit
 
+(用 clang --target=bpf -O2 -c test.c 编译后，通过 llvm-objdump -dr test.o 可以
+看到如下代码：)
+
 The first relocation corresponds to ``gfunc(a, b)`` where ``gfunc`` has a value of 0,
 so the ``call`` instruction offset is ``(0 + 0)/8 - 1 = -1``.
 The second relocation corresponds to ``lfunc(a, b)`` where ``lfunc`` has a section
 offset ``0x18``, so the ``call`` instruction offset is ``(0 + 0x18)/8 - 1 = 2``.
 The third relocation corresponds to ld_imm64 of ``global``, which has a section
 offset ``0``.
+(第一个重定位对应 ``gfunc(a, b)`` ， ``gfunc`` 的值为 0，因此 ``call`` 指令的
+偏移为 ``(0 + 0)/8 - 1 = -1`` 。第二个重定位对应 ``lfunc(a, b)`` ， ``lfunc``
+的节偏移量为 ``0x18`` ，因此 ``call`` 指令的偏移为 ``(0 + 0x18)/8 - 1 = 2`` 。
+第三个重定位对应 ``global`` 的 ld_imm64，其节偏移量为 ``0`` 。)
 
 The following is an example to show how R_BPF_64_ABS64 could be generated::
 
   int global() { return 0; }
   struct t { void *g; } gbl = { global };
+
+(下面的示例展示了 R_BPF_64_ABS64 是如何产生的：)
 
 Compiled with ``clang --target=bpf -O2 -g -c test.c``, we will see a
 relocation below in ``.data`` section with command
@@ -211,8 +263,12 @@ relocation below in ``.data`` section with command
       Offset             Info             Type               Symbol's Value  Symbol's Name
   0000000000000000  0000000700000002 R_BPF_64_ABS64         0000000000000000 global
 
+(用 clang --target=bpf -O2 -g -c test.c 编译后，通过命令 llvm-readelf -r test.o
+可以看到 ``.data`` 节中有如下重定位：)
+
 The relocation says the first 8-byte of ``.data`` section should be
 filled with address of ``global`` variable.
+(该重定位表明 ``.data`` 节的前 8 字节应填入变量 ``global`` 的地址。)
 
 With ``llvm-readelf`` output, we can see that dwarf sections have a bunch of
 ``R_BPF_64_ABS32`` and ``R_BPF_64_ABS64`` relocations::
@@ -230,6 +286,9 @@ With ``llvm-readelf`` output, we can see that dwarf sections have a bunch of
   0000000000000040  0000000400000003 R_BPF_64_ABS32         0000000000000000 .debug_str
   ......
 
+(从 llvm-readelf 的输出可以看到，dwarf 各节包含大量 ``R_BPF_64_ABS32`` 与
+``R_BPF_64_ABS64`` 重定位：)
+
 The .BTF/.BTF.ext sections has R_BPF_64_NODYLD32 relocations::
 
   Relocation section '.rel.BTF' at offset 0x538 contains 1 entries:
@@ -241,47 +300,66 @@ The .BTF/.BTF.ext sections has R_BPF_64_NODYLD32 relocations::
   000000000000002c  0000000200000004 R_BPF_64_NODYLD32      0000000000000000 .text
   0000000000000040  0000000200000004 R_BPF_64_NODYLD32      0000000000000000 .text
 
+( ``.BTF``/.BTF.ext 节则包含 ``R_BPF_64_NODYLD32`` 重定位：)
+
 .. _btf-co-re-relocations:
 
-=================
-CO-RE Relocations
-=================
+===============================
+CO-RE Relocations(CO-RE 重定位)
+===============================
 
 From object file point of view CO-RE mechanism is implemented as a set
 of CO-RE specific relocation records. These relocation records are not
 related to ELF relocations and are encoded in .BTF.ext section.
 See :ref:`Documentation/bpf/btf.rst <BTF_Ext_Section>` for more
 information on .BTF.ext structure.
+(从目标文件的角度看，CO-RE 机制实现为一组 CO-RE 专有的重定位记录。这些重定位
+记录与 ELF 重定位无关，被编码在 .BTF.ext 节中。关于 .BTF.ext 结构的更多信息，
+参见 :ref:`Documentation/bpf/btf.rst <BTF_Ext_Section>` 。)
 
 CO-RE relocations are applied to BPF instructions to update immediate
 or offset fields of the instruction at load time with information
 relevant for target kernel.
+( CO-RE 重定位作用于 BPF 指令，在加载时用与目标内核相关的信息更新指令的
+immediate 字段或 offset 字段。)
 
 Field to patch is selected basing on the instruction class:
+(待修补的字段根据指令类来选择：)
 
 * For BPF_ALU, BPF_ALU64, BPF_LD `immediate` field is patched;
+  (对于 BPF_ALU、BPF_ALU64、BPF_LD，修补的是 immediate 字段；)
 * For BPF_LDX, BPF_STX, BPF_ST `offset` field is patched;
+  (对于 BPF_LDX、BPF_STX、BPF_ST，修补的是 offset 字段；)
 * BPF_JMP, BPF_JMP32 instructions **should not** be patched.
+  ( BPF_JMP、BPF_JMP32 指令 **不应** 被修补。)
 
-Relocation kinds
-================
+Relocation kinds(重定位种类)
+============================
 
 There are several kinds of CO-RE relocations that could be split in
 three groups:
+( CO-RE 重定位有若干种类，可分为三组：)
 
 * Field-based - patch instruction with field related information, e.g.
   change offset field of the BPF_LDX instruction to reflect offset
   of a specific structure field in the target kernel.
+  (字段类 (Field-based) —— 用字段相关信息修补指令，例如修改 BPF_LDX 指令的
+  offset 字段，以反映特定结构体字段在目标内核中的偏移量。)
 
 * Type-based - patch instruction with type related information, e.g.
   change immediate field of the BPF_ALU move instruction to 0 or 1 to
   reflect if specific type is present in the target kernel.
+  (类型类 (Type-based) —— 用类型相关信息修补指令，例如把 BPF_ALU 传送指令的
+  immediate 字段改为 0 或 1，以反映特定类型是否存在于目标内核中。)
 
 * Enum-based - patch instruction with enum related information, e.g.
   change immediate field of the BPF_LD_IMM64 instruction to reflect
   value of a specific enum literal in the target kernel.
+  (枚举类 (Enum-based) —— 用枚举相关信息修补指令，例如修改 BPF_LD_IMM64 指令
+  的 immediate 字段，以反映特定枚举字面量在目标内核中的值。)
 
 The complete list of relocation kinds is represented by the following enum:
+(重定位种类的完整列表由以下枚举表示：)
 
 .. code-block:: c
 
@@ -302,10 +380,13 @@ The complete list of relocation kinds is represented by the following enum:
  };
 
 Notes:
+(说明：)
 
 * ``BPF_CORE_FIELD_LSHIFT_U64`` and ``BPF_CORE_FIELD_RSHIFT_U64`` are
   supposed to be used to read bitfield values using the following
   algorithm:
+  ( ``BPF_CORE_FIELD_LSHIFT_U64`` 与 ``BPF_CORE_FIELD_RSHIFT_U64`` 应当用于
+  按以下算法读取位域值：)
 
   .. code-block:: c
 
@@ -322,32 +403,46 @@ Notes:
 
 * The ``BPF_CORE_TYPE_MATCHES`` queries matching relation, defined as
   follows:
+  ( ``BPF_CORE_TYPE_MATCHES`` 查询匹配关系，其定义如下：)
 
   * for integers: types match if size and signedness match;
+    (对于整数：大小与符号性均匹配时类型匹配；)
   * for arrays & pointers: target types are recursively matched;
+    (对于数组与指针：递归匹配目标类型；)
   * for structs & unions:
+    (对于结构体与联合：)
 
     * local members need to exist in target with the same name;
+      (本地成员必须以相同的名字存在于目标中；)
 
     * for each member we recursively check match unless it is already behind a
       pointer, in which case we only check matching names and compatible kind;
+      (对每个成员递归检查匹配，除非它已在指针之后——此时只检查名字匹配与
+      兼容的类别；)
 
   * for enums:
+    (对于枚举：)
 
     * local variants have to have a match in target by symbolic name (but not
       numeric value);
+      (本地变体必须按符号名 (而不是数值) 在目标中找到匹配；)
 
     * size has to match (but enum may match enum64 and vice versa);
+      (大小必须匹配 (但 enum 可以匹配 enum64，反之亦然)；)
 
   * for function pointers:
+    (对于函数指针：)
 
     * number and position of arguments in local type has to match target;
+      (本地类型中参数的个数与位置必须与目标匹配；)
     * for each argument and the return value we recursively check match.
+      (对每个参数及返回值递归检查匹配。)
 
-CO-RE Relocation Record
-=======================
+CO-RE Relocation Record(CO-RE 重定位记录)
+=========================================
 
 Relocation record is encoded as the following structure:
+(重定位记录被编码为如下结构：)
 
 .. code-block:: c
 
@@ -360,18 +455,25 @@ Relocation record is encoded as the following structure:
 
 * ``insn_off`` - instruction offset (in bytes) within a code section
   associated with this relocation;
+  ( ``insn_off`` ——本重定位所关联的代码节内以字节计的指令偏移；)
 
 * ``type_id`` - BTF type ID of the "root" (containing) entity of a
   relocatable type or field;
+  ( ``type_id`` ——可重定位类型或字段的"根" (包含者) 实体的 BTF 类型 ID；)
 
 * ``access_str_off`` - offset into corresponding .BTF string section.
   String interpretation depends on specific relocation kind:
+  ( ``access_str_off`` ——指向对应 .BTF 字符串节的偏移。字符串的解读取决于
+  具体的重定位种类：)
 
   * for field-based relocations, string encodes an accessed field using
     a sequence of field and array indices, separated by colon (:). It's
     conceptually very close to LLVM's `getelementptr <GEP_>`_ instruction's
     arguments for identifying offset to a field. For example, consider the
     following C code:
+    (对于字段类重定位，字符串使用由冒号 (:) 分隔的字段索引与数组索引序列来
+    编码被访问的字段。它在概念上与 LLVM 的 `getelementptr <GEP_>`_ 指令用于
+    标识字段偏移的参数非常接近。例如，考虑以下 C 代码：)
 
     .. code-block:: c
 
@@ -383,38 +485,55 @@ Relocation record is encoded as the following structure:
        struct sample *s;
 
     * Access to ``s[0].a`` would be encoded as ``0:0``:
+      (访问 ``s[0].a`` 会被编码为 ``0:0`` ：)
 
       * ``0``: first element of ``s`` (as if ``s`` is an array);
+        ( ``0`` ： ``s`` 的第一个元素 (如同 ``s`` 是数组)；)
       * ``0``: index of field ``a`` in ``struct sample``.
+        ( ``0`` ：字段 ``a`` 在 ``struct sample`` 中的索引。)
 
     * Access to ``s->a`` would be encoded as ``0:0`` as well.
+      (访问 ``s->a`` 同样会被编码为 ``0:0`` 。)
     * Access to ``s->b`` would be encoded as ``0:1``:
+      (访问 ``s->b`` 会被编码为 ``0:1`` ：)
 
       * ``0``: first element of ``s``;
+        ( ``0`` ： ``s`` 的第一个元素；)
       * ``1``: index of field ``b`` in ``struct sample``.
+        ( ``1`` ：字段 ``b`` 在 ``struct sample`` 中的索引。)
 
     * Access to ``s[1].c[5]`` would be encoded as ``1:2:0:5``:
+      (访问 ``s[1].c[5]`` 会被编码为 ``1:2:0:5`` ：)
 
       * ``1``: second element of ``s``;
+        ( ``1`` ： ``s`` 的第二个元素；)
       * ``2``: index of anonymous structure field in ``struct sample``;
+        ( ``2`` ：匿名结构体字段在 ``struct sample`` 中的索引；)
       * ``0``: index of field ``c`` in anonymous structure;
+        ( ``0`` ：字段 ``c`` 在匿名结构体中的索引；)
       * ``5``: access to array element #5.
+        ( ``5`` ：访问数组元素 #5。)
 
   * for type-based relocations, string is expected to be just "0";
+    (对于类型类重定位，字符串应当就是 "0"；)
 
   * for enum value-based relocations, string contains an index of enum
      value within its enum type;
 
+    (对于枚举值类重定位，字符串包含枚举值在其枚举类型内的索引；)
+
 * ``kind`` - one of ``enum bpf_core_relo_kind``.
+  ( ``kind`` —— ``enum bpf_core_relo_kind`` 之一。)
 
 .. _GEP: https://llvm.org/docs/LangRef.html#getelementptr-instruction
 
 .. _btf_co_re_relocation_examples:
 
-CO-RE Relocation Examples
-=========================
+CO-RE Relocation Examples(CO-RE 重定位示例)
+===========================================
 
 For the following C code:
+(对于以下 C 代码：)
 
 .. code-block:: c
 
@@ -427,6 +546,7 @@ For the following C code:
  enum bar { U, V };
 
 With the following BTF definitions:
+(使用如下 BTF 定义：)
 
 .. code-block::
 
@@ -444,6 +564,8 @@ With the following BTF definitions:
 
 Field offset relocations are generated automatically when
 ``__attribute__((preserve_access_index))`` is used, for example:
+(使用 ``__attribute__((preserve_access_index))`` 时会自动生成字段偏移重定位，
+例如：)
 
 .. code-block:: c
 
@@ -463,6 +585,7 @@ Field offset relocations are generated automatically when
 
 All relocation kinds could be requested via built-in functions.
 E.g. field-based relocations:
+(所有重定位种类都可以通过内建函数来请求。例如字段类重定位：)
 
 .. code-block:: c
 
@@ -498,6 +621,7 @@ E.g. field-based relocations:
 
 
 Type-based relocations:
+(类型类重定位：)
 
 .. code-block:: c
 
@@ -528,6 +652,7 @@ Type-based relocations:
     29:     exit
 
 Enum-based relocations:
+(枚举类重定位：)
 
 .. code-block:: c
 

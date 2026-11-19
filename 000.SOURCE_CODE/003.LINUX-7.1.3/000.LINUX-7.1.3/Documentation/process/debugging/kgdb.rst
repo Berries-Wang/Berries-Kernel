@@ -23,6 +23,7 @@ is mainly aimed at doing some analysis to aid in development or
 diagnosing kernel problems. You can access some symbols by name in
 kernel built-ins or in kernel modules if the code was built with
 ``CONFIG_KALLSYMS``.
+(Kdb 是一个简单的 shell 风格接口，可以在系统控制台上通过键盘或串口控制台使用。你可以用它检查内存、寄存器、进程列表、dmesg，甚至设置断点停在特定位置。Kdb 不是源码级调试器，不过你可以设置断点并执行一些基本的内核运行控制。Kdb 主要用于做一些辅助开发或诊断内核问题的分析。如果代码在编译时启用了 ``CONFIG_KALLSYMS`` ，你还可以按名称访问内核内建或内核模块中的一些符号。)
 
 Kgdb is intended to be used as a source level debugger for the Linux
 kernel. It is used along with gdb to debug a Linux kernel. The
@@ -186,7 +187,7 @@ Usage::
 
 The order listed above must be observed if you use any of the optional
 configurations together.
-(如果同时使用任何可选配置，必须遵守上面列出的顺序。
+(如果同时使用任何可选配置，必须遵守上面列出的顺序。)
 
 Abbreviations:
 
@@ -194,7 +195,7 @@ Abbreviations:
 
 -  kbd = Keyboard
 
-(缩写含义：
+(缩写含义：)
 
 -  kms = Kernel Mode Setting(内核模式设置)
 
@@ -430,7 +431,7 @@ Run time parameter: ``kgdbreboot`` (运行时参数 kgdbreboot)
 The kgdbreboot feature allows you to change how the debugger deals with
 the reboot notification. You have 3 choices for the behavior. The
 default behavior is always set to 0.
-(kgdbreboot 特性让你改变调试器处理重启通知的方式。行为有 3 种选择，默认行为始终为 0。
+(kgdbreboot 特性让你改变调试器处理重启通知的方式。行为有 3 种选择，默认行为始终为 0。)
 
 .. tabularcolumns:: |p{0.4cm}|p{11.5cm}|p{5.6cm}|
 

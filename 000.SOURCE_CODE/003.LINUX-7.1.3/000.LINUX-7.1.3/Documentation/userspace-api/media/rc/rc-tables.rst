@@ -2,9 +2,9 @@
 
 .. _Remote_controllers_tables:
 
-************************
-Remote controller tables
-************************
+**************************************
+Remote controller tables(遥控器键码表)
+**************************************
 
 Unfortunately, for several years, there was no effort to create uniform
 IR keycodes for different devices. This caused the same IR keyname to be
@@ -12,15 +12,23 @@ mapped completely differently on different IR devices. This resulted
 that the same IR keyname to be mapped completely different on different
 IR's. Due to that, V4L2 API now specifies a standard for mapping Media
 keys on IR.
+(遗憾的是，多年来一直没有人努力为不同的设备创建统一的 IR 键码。这导致同一个
+IR 键名在不同的 IR 设备上映射得完全不同，其结果是同一个 IR 键名在不同 IR 上
+得到完全不同的映射。正因如此，V4L2 API 现在为 Media 键在 IR 上的映射规定了一个
+标准。)
 
 This standard should be used by both V4L/DVB drivers and userspace
 applications
+(V4L/DVB 驱动与用户态应用都应当遵循这一标准。)
 
 The modules register the remote as keyboard within the linux input
 layer. This means that the IR key strokes will look like normal keyboard
 key strokes (if CONFIG_INPUT_KEYBOARD is enabled). Using the event
 devices (CONFIG_INPUT_EVDEV) it is possible for applications to access
 the remote via /dev/input/event devices.
+(这些模块在 Linux 输入层内把遥控器注册为键盘。这意味着 IR 按键动作看起来就像
+普通的键盘按键（如果启用了 CONFIG_INPUT_KEYBOARD）。借助 event 设备
+（CONFIG_INPUT_EVDEV），应用可以通过 /dev/input/event 设备访问遥控器。)
 
 
 .. _rc_standard_keymap:
@@ -35,21 +43,21 @@ the remote via /dev/input/event devices.
 
     -  .. row 1
 
-       -  Key code
+       -  Key code (键码)
 
-       -  Meaning
+       -  Meaning (含义)
 
-       -  Key examples on IR
+       -  Key examples on IR (IR 上的按键示例)
 
     -  .. row 2
 
-       -  **Numeric keys**
+       -  **Numeric keys** (数字键)
 
     -  .. row 3
 
        -  ``KEY_NUMERIC_0``
 
-       -  Keyboard digit 0
+       -  Keyboard digit 0 (键盘数字 0)
 
        -  0
 
@@ -57,7 +65,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_NUMERIC_1``
 
-       -  Keyboard digit 1
+       -  Keyboard digit 1 (键盘数字 1)
 
        -  1
 
@@ -65,7 +73,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_NUMERIC_2``
 
-       -  Keyboard digit 2
+       -  Keyboard digit 2 (键盘数字 2)
 
        -  2
 
@@ -73,7 +81,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_NUMERIC_3``
 
-       -  Keyboard digit 3
+       -  Keyboard digit 3 (键盘数字 3)
 
        -  3
 
@@ -81,7 +89,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_NUMERIC_4``
 
-       -  Keyboard digit 4
+       -  Keyboard digit 4 (键盘数字 4)
 
        -  4
 
@@ -89,7 +97,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_NUMERIC_5``
 
-       -  Keyboard digit 5
+       -  Keyboard digit 5 (键盘数字 5)
 
        -  5
 
@@ -97,7 +105,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_NUMERIC_6``
 
-       -  Keyboard digit 6
+       -  Keyboard digit 6 (键盘数字 6)
 
        -  6
 
@@ -105,7 +113,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_NUMERIC_7``
 
-       -  Keyboard digit 7
+       -  Keyboard digit 7 (键盘数字 7)
 
        -  7
 
@@ -113,7 +121,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_NUMERIC_8``
 
-       -  Keyboard digit 8
+       -  Keyboard digit 8 (键盘数字 8)
 
        -  8
 
@@ -121,19 +129,19 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_NUMERIC_9``
 
-       -  Keyboard digit 9
+       -  Keyboard digit 9 (键盘数字 9)
 
        -  9
 
     -  .. row 13
 
-       -  **Movie play control**
+       -  **Movie play control** (影片播放控制)
 
     -  .. row 14
 
        -  ``KEY_FORWARD``
 
-       -  Instantly advance in time
+       -  Instantly advance in time (在时间上即时快进)
 
        -  >> / FORWARD
 
@@ -141,7 +149,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_BACK``
 
-       -  Instantly go back in time
+       -  Instantly go back in time (在时间上即时后退)
 
        -  <<< / BACK
 
@@ -149,7 +157,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_FASTFORWARD``
 
-       -  Play movie faster
+       -  Play movie faster (以更快的速度播放影片)
 
        -  >>> / FORWARD
 
@@ -157,7 +165,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_REWIND``
 
-       -  Play movie back
+       -  Play movie back (倒退播放影片)
 
        -  REWIND / BACKWARD
 
@@ -165,7 +173,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_NEXT``
 
-       -  Select next chapter / sub-chapter / interval
+       -  Select next chapter / sub-chapter / interval (选择下一个章节/子章节/区间)
 
        -  NEXT / SKIP
 
@@ -173,7 +181,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_PREVIOUS``
 
-       -  Select previous chapter / sub-chapter / interval
+       -  Select previous chapter / sub-chapter / interval (选择上一个章节/子章节/区间)
 
        -  << / PREV / PREVIOUS
 
@@ -181,7 +189,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_AGAIN``
 
-       -  Repeat the video or a video interval
+       -  Repeat the video or a video interval (重复播放视频或视频区间)
 
        -  REPEAT / LOOP / RECALL
 
@@ -189,7 +197,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_PAUSE``
 
-       -  Pause stream
+       -  Pause stream (暂停流)
 
        -  PAUSE / FREEZE
 
@@ -197,7 +205,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_PLAY``
 
-       -  Play movie at the normal timeshift
+       -  Play movie at the normal timeshift (以正常时移速度播放影片)
 
        -  NORMAL TIMESHIFT / LIVE / >
 
@@ -205,7 +213,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_PLAYPAUSE``
 
-       -  Alternate between play and pause
+       -  Alternate between play and pause (在播放与暂停之间切换)
 
        -  PLAY / PAUSE
 
@@ -213,7 +221,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_STOP``
 
-       -  Stop stream
+       -  Stop stream (停止流)
 
        -  STOP
 
@@ -221,7 +229,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_RECORD``
 
-       -  Start/stop recording stream
+       -  Start/stop recording stream (开始/停止录制流)
 
        -  CAPTURE / REC / RECORD/PAUSE
 
@@ -229,7 +237,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_CAMERA``
 
-       -  Take a picture of the image
+       -  Take a picture of the image (对画面拍照)
 
        -  CAMERA ICON / CAPTURE / SNAPSHOT
 
@@ -237,7 +245,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_SHUFFLE``
 
-       -  Enable shuffle mode
+       -  Enable shuffle mode (启用随机播放模式)
 
        -  SHUFFLE
 
@@ -245,7 +253,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_TIME``
 
-       -  Activate time shift mode
+       -  Activate time shift mode (激活时移模式)
 
        -  TIME SHIFT
 
@@ -253,7 +261,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_TITLE``
 
-       -  Allow changing the chapter
+       -  Allow changing the chapter (允许更改章节)
 
        -  CHAPTER
 
@@ -261,19 +269,19 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_SUBTITLE``
 
-       -  Allow changing the subtitle
+       -  Allow changing the subtitle (允许更改字幕)
 
        -  SUBTITLE
 
     -  .. row 31
 
-       -  **Image control**
+       -  **Image control** (图像控制)
 
     -  .. row 32
 
        -  ``KEY_BRIGHTNESSDOWN``
 
-       -  Decrease Brightness
+       -  Decrease Brightness (降低亮度)
 
        -  BRIGHTNESS DECREASE
 
@@ -281,7 +289,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_BRIGHTNESSUP``
 
-       -  Increase Brightness
+       -  Increase Brightness (提高亮度)
 
        -  BRIGHTNESS INCREASE
 
@@ -290,7 +298,7 @@ the remote via /dev/input/event devices.
        -  ``KEY_ANGLE``
 
        -  Switch video camera angle (on videos with more than one angle
-	  stored)
+	  stored) (切换视频摄像机角度，适用于存储了多个角度的视频)
 
        -  ANGLE / SWAP
 
@@ -298,7 +306,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_EPG``
 
-       -  Open the Elecrowonic Play Guide (EPG)
+       -  Open the Elecrowonic Play Guide (EPG) (打开电子节目指南)
 
        -  EPG / GUIDE
 
@@ -306,19 +314,19 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_TEXT``
 
-       -  Activate/change closed caption mode
+       -  Activate/change closed caption mode (激活/切换隐藏字幕模式)
 
        -  CLOSED CAPTION/TELETEXT / DVD TEXT / TELETEXT / TTX
 
     -  .. row 37
 
-       -  **Audio control**
+       -  **Audio control** (音频控制)
 
     -  .. row 38
 
        -  ``KEY_AUDIO``
 
-       -  Change audio source
+       -  Change audio source (切换音源)
 
        -  AUDIO SOURCE / AUDIO / MUSIC
 
@@ -326,7 +334,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_MUTE``
 
-       -  Mute/unmute audio
+       -  Mute/unmute audio (静音/取消静音)
 
        -  MUTE / DEMUTE / UNMUTE
 
@@ -334,7 +342,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_VOLUMEDOWN``
 
-       -  Decrease volume
+       -  Decrease volume (降低音量)
 
        -  VOLUME- / VOLUME DOWN
 
@@ -342,7 +350,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_VOLUMEUP``
 
-       -  Increase volume
+       -  Increase volume (提高音量)
 
        -  VOLUME+ / VOLUME UP
 
@@ -350,7 +358,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_MODE``
 
-       -  Change sound mode
+       -  Change sound mode (切换声音模式)
 
        -  MONO/STEREO
 
@@ -358,19 +366,19 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_LANGUAGE``
 
-       -  Select Language
+       -  Select Language (选择语言)
 
        -  1ST / 2ND LANGUAGE / DVD LANG / MTS/SAP / MTS SEL
 
     -  .. row 44
 
-       -  **Channel control**
+       -  **Channel control** (频道控制)
 
     -  .. row 45
 
        -  ``KEY_CHANNEL``
 
-       -  Go to the next favorite channel
+       -  Go to the next favorite channel (跳到下一个收藏频道)
 
        -  ALT / CHANNEL / CH SURFING / SURF / FAV
 
@@ -378,7 +386,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_CHANNELDOWN``
 
-       -  Decrease channel sequentially
+       -  Decrease channel sequentially (按顺序减小频道号)
 
        -  CHANNEL - / CHANNEL DOWN / DOWN
 
@@ -386,7 +394,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_CHANNELUP``
 
-       -  Increase channel sequentially
+       -  Increase channel sequentially (按顺序增大频道号)
 
        -  CHANNEL + / CHANNEL UP / UP
 
@@ -394,7 +402,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_DIGITS``
 
-       -  Use more than one digit for channel
+       -  Use more than one digit for channel (频道号使用多位数字)
 
        -  PLUS / 100/ 1xx / xxx / -/-- / Single Double Triple Digit
 
@@ -402,19 +410,19 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_SEARCH``
 
-       -  Start channel autoscan
+       -  Start channel autoscan (开始频道自动搜索)
 
        -  SCAN / AUTOSCAN
 
     -  .. row 50
 
-       -  **Colored keys**
+       -  **Colored keys** (彩色键)
 
     -  .. row 51
 
        -  ``KEY_BLUE``
 
-       -  IR Blue key
+       -  IR Blue key (IR 蓝色键)
 
        -  BLUE
 
@@ -422,7 +430,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_GREEN``
 
-       -  IR Green Key
+       -  IR Green Key (IR 绿色键)
 
        -  GREEN
 
@@ -430,7 +438,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_RED``
 
-       -  IR Red key
+       -  IR Red key (IR 红色键)
 
        -  RED
 
@@ -438,19 +446,19 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_YELLOW``
 
-       -  IR Yellow key
+       -  IR Yellow key (IR 黄色键)
 
        -  YELLOW
 
     -  .. row 55
 
-       -  **Media selection**
+       -  **Media selection** (媒体选择)
 
     -  .. row 56
 
        -  ``KEY_CD``
 
-       -  Change input source to Compact Disc
+       -  Change input source to Compact Disc (把输入源切换到 CD)
 
        -  CD
 
@@ -458,7 +466,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_DVD``
 
-       -  Change input to DVD
+       -  Change input to DVD (把输入切换到 DVD)
 
        -  DVD / DVD MENU
 
@@ -466,7 +474,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_EJECTCLOSECD``
 
-       -  Open/close the CD/DVD player
+       -  Open/close the CD/DVD player (打开/关闭 CD/DVD 播放机)
 
        -  -> ) / CLOSE / OPEN
 
@@ -474,7 +482,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_MEDIA``
 
-       -  Turn on/off Media application
+       -  Turn on/off Media application (打开/关闭媒体应用)
 
        -  PC/TV / TURN ON/OFF APP
 
@@ -482,7 +490,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_PC``
 
-       -  Selects from TV to PC
+       -  Selects from TV to PC (从 TV 切换到 PC)
 
        -  PC
 
@@ -490,7 +498,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_RADIO``
 
-       -  Put into AM/FM radio mode
+       -  Put into AM/FM radio mode (进入 AM/FM 收音机模式)
 
        -  RADIO / TV/FM / TV/RADIO / FM / FM/RADIO
 
@@ -498,7 +506,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_TV``
 
-       -  Select tv mode
+       -  Select tv mode (选择电视模式)
 
        -  TV / LIVE TV
 
@@ -506,7 +514,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_TV2``
 
-       -  Select Cable mode
+       -  Select Cable mode (选择有线模式)
 
        -  AIR/CBL
 
@@ -514,7 +522,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_VCR``
 
-       -  Select VCR mode
+       -  Select VCR mode (选择录像机模式)
 
        -  VCR MODE / DTR
 
@@ -522,19 +530,19 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_VIDEO``
 
-       -  Alternate between input modes
+       -  Alternate between input modes (在输入模式之间循环切换)
 
        -  SOURCE / SELECT / DISPLAY / SWITCH INPUTS / VIDEO
 
     -  .. row 66
 
-       -  **Power control**
+       -  **Power control** (电源控制)
 
     -  .. row 67
 
        -  ``KEY_POWER``
 
-       -  Turn on/off computer
+       -  Turn on/off computer (打开/关闭计算机)
 
        -  SYSTEM POWER / COMPUTER POWER
 
@@ -542,7 +550,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_POWER2``
 
-       -  Turn on/off application
+       -  Turn on/off application (打开/关闭应用)
 
        -  TV ON/OFF / POWER
 
@@ -550,7 +558,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_SLEEP``
 
-       -  Activate sleep timer
+       -  Activate sleep timer (激活睡眠定时器)
 
        -  SLEEP / SLEEP TIMER
 
@@ -558,19 +566,19 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_SUSPEND``
 
-       -  Put computer into suspend mode
+       -  Put computer into suspend mode (让计算机进入挂起模式)
 
        -  STANDBY / SUSPEND
 
     -  .. row 71
 
-       -  **Window control**
+       -  **Window control** (窗口控制)
 
     -  .. row 72
 
        -  ``KEY_CLEAR``
 
-       -  Stop stream and return to default input video/audio
+       -  Stop stream and return to default input video/audio (停止流并返回默认输入视频/音频)
 
        -  CLEAR / RESET / BOSS KEY
 
@@ -578,7 +586,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_CYCLEWINDOWS``
 
-       -  Minimize windows and move to the next one
+       -  Minimize windows and move to the next one (最小化窗口并切换到下一个)
 
        -  ALT-TAB / MINIMIZE / DESKTOP
 
@@ -586,7 +594,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_FAVORITES``
 
-       -  Open the favorites stream window
+       -  Open the favorites stream window (打开收藏流窗口)
 
        -  TV WALL / Favorites
 
@@ -594,7 +602,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_MENU``
 
-       -  Call application menu
+       -  Call application menu (调出应用菜单)
 
        -  2ND CONTROLS (USA: MENU) / DVD/MENU / SHOW/HIDE CTRL
 
@@ -602,7 +610,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_NEW``
 
-       -  Open/Close Picture in Picture
+       -  Open/Close Picture in Picture (打开/关闭画中画)
 
        -  PIP
 
@@ -610,7 +618,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_OK``
 
-       -  Send a confirmation code to application
+       -  Send a confirmation code to application (向应用发送确认码)
 
        -  OK / ENTER / RETURN
 
@@ -618,7 +626,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_ASPECT_RATIO``
 
-       -  Select screen aspect ratio
+       -  Select screen aspect ratio (选择屏幕宽高比)
 
        -  4:3 16:9 SELECT
 
@@ -626,19 +634,19 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_FULL_SCREEN``
 
-       -  Put device into zoom/full screen mode
+       -  Put device into zoom/full screen mode (让设备进入缩放/全屏模式)
 
        -  ZOOM / FULL SCREEN / ZOOM+ / HIDE PANEL / SWITCH
 
     -  .. row 80
 
-       -  **Navigation keys**
+       -  **Navigation keys** (导航键)
 
     -  .. row 81
 
        -  ``KEY_ESC``
 
-       -  Cancel current operation
+       -  Cancel current operation (取消当前操作)
 
        -  CANCEL / BACK
 
@@ -646,7 +654,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_HELP``
 
-       -  Open a Help window
+       -  Open a Help window (打开帮助窗口)
 
        -  HELP
 
@@ -654,7 +662,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_HOMEPAGE``
 
-       -  Navigate to Homepage
+       -  Navigate to Homepage (转到主页)
 
        -  HOME
 
@@ -662,7 +670,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_INFO``
 
-       -  Open On Screen Display
+       -  Open On Screen Display (打开屏幕信息显示)
 
        -  DISPLAY INFORMATION / OSD
 
@@ -670,7 +678,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_WWW``
 
-       -  Open the default browser
+       -  Open the default browser (打开默认浏览器)
 
        -  WEB
 
@@ -678,7 +686,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_UP``
 
-       -  Up key
+       -  Up key (向上键)
 
        -  UP
 
@@ -686,7 +694,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_DOWN``
 
-       -  Down key
+       -  Down key (向下键)
 
        -  DOWN
 
@@ -694,7 +702,7 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_LEFT``
 
-       -  Left key
+       -  Left key (向左键)
 
        -  LEFT
 
@@ -702,19 +710,19 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_RIGHT``
 
-       -  Right key
+       -  Right key (向右键)
 
        -  RIGHT
 
     -  .. row 90
 
-       -  **Miscellaneous keys**
+       -  **Miscellaneous keys** (其他键)
 
     -  .. row 91
 
        -  ``KEY_DOT``
 
-       -  Return a dot
+       -  Return a dot (输入一个点)
 
        -  .
 
@@ -722,13 +730,14 @@ the remote via /dev/input/event devices.
 
        -  ``KEY_FN``
 
-       -  Select a function
+       -  Select a function (选择一个功能)
 
        -  FUNCTION
 
 
 It should be noted that, sometimes, there some fundamental missing keys
 at some cheaper IR's. Due to that, it is recommended to:
+(应当注意的是，一些廉价的遥控器有时会缺少某些基本按键。正因如此，建议：)
 
 
 .. _rc_keymap_notes:
@@ -741,19 +750,19 @@ at some cheaper IR's. Due to that, it is recommended to:
     -  .. row 1
 
        -  On simpler IR's, without separate channel keys, you need to map UP
-	  as ``KEY_CHANNELUP``
+	  as ``KEY_CHANNELUP`` (在没有独立频道键的较简单遥控器上，需要把 UP 映射为 KEY_CHANNELUP)
 
     -  .. row 2
 
        -  On simpler IR's, without separate channel keys, you need to map
-	  DOWN as ``KEY_CHANNELDOWN``
+	  DOWN as ``KEY_CHANNELDOWN`` (在没有独立频道键的较简单遥控器上，需要把 DOWN 映射为 KEY_CHANNELDOWN)
 
     -  .. row 3
 
        -  On simpler IR's, without separate volume keys, you need to map
-	  LEFT as ``KEY_VOLUMEDOWN``
+	  LEFT as ``KEY_VOLUMEDOWN`` (在没有独立音量键的较简单遥控器上，需要把 LEFT 映射为 KEY_VOLUMEDOWN)
 
     -  .. row 4
 
        -  On simpler IR's, without separate volume keys, you need to map
-	  RIGHT as ``KEY_VOLUMEUP``
+	  RIGHT as ``KEY_VOLUMEUP`` (在没有独立音量键的较简单遥控器上，需要把 RIGHT 映射为 KEY_VOLUMEUP)

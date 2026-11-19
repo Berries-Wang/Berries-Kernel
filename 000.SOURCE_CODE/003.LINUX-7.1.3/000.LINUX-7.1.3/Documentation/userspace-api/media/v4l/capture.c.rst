@@ -1,8 +1,8 @@
 .. SPDX-License-Identifier: GFDL-1.1-no-invariants-or-later
 .. c:namespace:: V4L
 
-file: media/v4l/capture.c
-=========================
+file: media/v4l/capture.c(V4L2 视频采集示例源码)
+================================================
 
 .. code-block:: c
 

@@ -859,11 +859,13 @@ should be treated.  Common tags might include a version descriptor if
 the multiple versions of the patch have been sent out in response to
 comments (i.e., "v1, v2, v3"), or "RFC" to indicate a request for
 comments.
+(``summary phrase`` 前面可以加上用方括号括起来的标签： "Subject: [PATCH <tag>...] <summary phrase>" 。这些标签不算 summary phrase 的一部分，而是描述该补丁应当如何对待。常见的标签包括：当补丁因评审意见而发出多个版本时使用的版本描述符(即 "v1, v2, v3")，以及表示征求意见 (request for comments) 的 "RFC"。)
 
 If there are four patches in a patch series the individual patches may
 be numbered like this: 1/4, 2/4, 3/4, 4/4. This assures that developers
 understand the order in which the patches should be applied and that
 they have reviewed or applied all of the patches in the patch series.
+(如果一个补丁系列中有四个补丁，各个补丁可以按 1/4、2/4、3/4、4/4 这样的方式编号。这能让开发者明白补丁应当应用的顺序，并确认他们已评审或应用了系列中的全部补丁。)
 
 Here are some good example Subjects::
 
@@ -871,6 +873,8 @@ Here are some good example Subjects::
     Subject: [PATCH v2 01/27] x86: fix eflags tracking
     Subject: [PATCH v2] sub/sys: Condensed patch summary
     Subject: [PATCH v2 M/N] sub/sys: Condensed patch summary
+
+(下面是一些好的主题行示例：)
 
 From Line(From 行)
 ^^^^^^^^^^^^^^^^^^

@@ -1,25 +1,27 @@
 .. _development_coding:
 
-Getting the code right
-======================
+Getting the code right(把代码写对)
+==================================
 
 While there is much to be said for a solid and community-oriented design
 process, the proof of any kernel development project is in the resulting
 code.  It is the code which will be examined by other developers and merged
 (or not) into the mainline tree.  So it is the quality of this code which
 will determine the ultimate success of the project.
+(虽然关于坚实且面向社区的设计流程有很多可说的，但任何内核开发项目的证明都在于最终产生的代码。正是代码会被其他开发者审视，并(或)被合并进主线树。因此，决定项目最终成败的正是这段代码的质量。)
 
 This section will examine the coding process.  We'll start with a look at a
 number of ways in which kernel developers can go wrong.  Then the focus
 will shift toward doing things right and the tools which can help in that
 quest.
+(本节将考察编码过程。我们先来看内核开发者可能出错的若干方式；然后重点将转向正确行事，以及能在这项事业中助力的工具。)
 
 
-Pitfalls
----------
+Pitfalls(陷阱)
+--------------
 
-Coding style
-************
+Coding style(编码风格)
+**********************
 
 The kernel has long had a standard coding style, described in
 :ref:`Documentation/process/coding-style.rst <codingstyle>`.  For much of
@@ -27,6 +29,7 @@ that time, the policies described in that file were taken as being, at most,
 advisory.  As a result, there is a substantial amount of code in the kernel
 which does not meet the coding style guidelines.  The presence of that code
 leads to two independent hazards for kernel developers.
+(内核早已有一套标准编码风格，记载于 :ref:`Documentation/process/coding-style.rst <codingstyle>` 。在大部分时间里，该文件中描述的规则充其量被当作参考建议。结果是，内核中存在大量不符合编码风格指南的代码。这些代码的存在给内核开发者带来两个相互独立的隐患。)
 
 The first of these is to believe that the kernel coding standards do not
 matter and are not enforced.  The truth of the matter is that adding new
@@ -36,12 +39,14 @@ before they will even review it.  A code base as large as the kernel
 requires some uniformity of code to make it possible for developers to
 quickly understand any part of it.  So there is no longer room for
 strangely-formatted code.
+(第一个隐患是认为内核编码规范无关紧要、也不会被强制执行。事实是，如果不按标准编写代码，向内核添加新代码会非常困难；许多开发者会要求先重新格式化代码，然后才肯审阅。像内核这样庞大的代码库需要一定的代码一致性，才能让开发者快速理解其中任何部分。因此，格式怪异的代码已经没有容身之地。)
 
 Occasionally, the kernel's coding style will run into conflict with an
 employer's mandated style.  In such cases, the kernel's style will have to
 win before the code can be merged.  Putting code into the kernel means
 giving up a degree of control in a number of ways - including control over
 how the code is formatted.
+(偶尔，内核的编码风格会与雇主强制要求的风格发生冲突。在这种情况下，代码要能被合并，就必须让内核风格获胜。把代码放入内核意味着在多个方面放弃一定程度的控制权——包括对代码格式方式的控制。)
 
 The other trap is to assume that code which is already in the kernel is
 urgently in need of coding style fixes.  Developers may start to generate
@@ -52,11 +57,13 @@ they tend to get a chilly reception.  So this type of patch is best
 avoided.  It is natural to fix the style of a piece of code while working
 on it for other reasons, but coding style changes should not be made for
 their own sake.
+(另一个陷阱是认为已经在内核中的代码亟需编码风格修复。开发者可能开始生成重新格式化的补丁，作为熟悉流程的方式，或者作为把自己的名字写进内核变更日志的方式——或者两者兼而有之。但纯粹的编码风格修复会被开发社区视为噪音；它们往往受到冷遇。所以最好避免这类补丁。在因为其他原因处理某段代码时顺手修一修它的风格是自然的，但不应为改风格而改风格。)
 
 The coding style document also should not be read as an absolute law which
 can never be transgressed.  If there is a good reason to go against the
 style (a line which becomes far less readable if split to fit within the
 80-column limit, for example), just do it.
+(编码风格文档也不应被读作永远不可违背的绝对法律。如果有充分的理由违背风格(例如某行代码若拆分以适应 80 列限制会大大降低可读性)，那就直接那么做。)
 
 Note that you can also use the ``clang-format`` tool to help you with
 these rules, to quickly re-format parts of your code automatically,
@@ -65,11 +72,16 @@ typos and possible improvements. It is also handy for sorting ``#includes``,
 for aligning variables/macros, for reflowing text and other similar tasks.
 See the file :ref:`Documentation/dev-tools/clang-format.rst <clangformat>`
 for more details.
+(注意，你还可以使用 ``clang-format`` 工具来帮助你遵守这些规则：快速自动重新格式化代码的一部分，或检查整个文件以发现编码风格错误、拼写错误与可能的改进。它在给 ``#includes`` 排序、对齐变量/宏、重排文本以及其他类似任务上也很好用。详情见 :ref:`Documentation/dev-tools/clang-format.rst <clangformat>` 文件。)
 
 Some basic editor settings, such as indentation and line endings, will be
 set automatically if you are using an editor that is compatible with
 EditorConfig. See the official EditorConfig website for more information:
 https://editorconfig.org/
+(一些基本的编辑器设置(如缩进与行尾)在你使用兼容 EditorConfig 的编辑器时会被自动设置。更多信息请看 EditorConfig 官方网站：https://editorconfig.org/)
+
+Abstraction layers(抽象层)
+**************************
 
 Abstraction layers
 ******************
@@ -81,6 +93,7 @@ involving several million lines of code could do otherwise and survive.
 But experience has shown that excessive or premature abstraction can be
 just as harmful as premature optimization.  Abstraction should be used to
 the level required and no further.
+(计算机科学教授们教导学生以灵活性与信息隐藏之名大量使用抽象层。诚然，内核大量使用抽象；任何涉及数百万行代码的项目不这样做都无法存活。但经验表明，过度或过早的抽象与过早优化一样有害。抽象应当用到所需的程度为止，不可更进一步。)
 
 At a simple level, consider a function which has an argument which is
 always passed as zero by all callers.  One could retain that argument just
@@ -92,17 +105,24 @@ extra flexibility arises, it does not do so in a way which matches the
 programmer's early expectation.  Kernel developers will routinely submit
 patches to remove unused arguments; they should, in general, not be added
 in the first place.
+(举个简单的例子：考虑一个函数，其某个参数总是被所有调用者传 0。你可以保留这个参数，以防将来有人需要用它提供的额外灵活性。但到那时，实现这个额外参数的代码很可能已经以某种从未被察觉的微妙方式损坏了——因为它从未被使用过。或者，当对额外灵活性的需求出现时，其形式与程序员早年的预期并不一致。内核开发者会例行提交移除未使用参数的补丁；一般而言，这样的参数一开始就不应该被添加。)
 
 Abstraction layers which hide access to hardware - often to allow the bulk
 of a driver to be used with multiple operating systems - are especially
 frowned upon.  Such layers obscure the code and may impose a performance
 penalty; they do not belong in the Linux kernel.
+(隐藏硬件访问的抽象层——通常是为了让驱动的大部分可用于多个操作系统——尤其不受欢迎。这类层把代码弄得晦涩难懂，还可能带来性能损失；它们不属于 Linux 内核。)
 
 On the other hand, if you find yourself copying significant amounts of code
 from another kernel subsystem, it is time to ask whether it would, in fact,
 make sense to pull out some of that code into a separate library or to
 implement that functionality at a higher level.  There is no value in
 replicating the same code throughout the kernel.
+(另一方面，如果你发现自己在从另一个内核子系统大量拷贝代码，那么是时候问一问：把这些代码的一部分抽到独立的库中，或在更高层级实现该功能，是否实际上更有意义。在内核中到处复制相同的代码没有任何价值。)
+
+
+#ifdef and preprocessor use in general(#ifdef 与预处理器的使用)
+***************************************************************
 
 
 #ifdef and preprocessor use in general
@@ -114,6 +134,7 @@ flexibility into a source file.  But the preprocessor is not C, and heavy
 use of it results in code which is much harder for others to read and
 harder for the compiler to check for correctness.  Heavy preprocessor use
 is almost always a sign of code which needs some cleanup work.
+(C 预处理器对某些 C 程序员似乎构成一种强大的诱惑，他们把它看作把大量灵活性高效地编码进一个源文件的手段。但预处理器不是 C；大量使用它会让代码更难被他人阅读，也更难被编译器检查正确性。重度使用预处理器几乎总是代码需要清理的信号。)
 
 Conditional compilation with #ifdef is, indeed, a powerful feature, and it
 is used within the kernel.  But there is little desire to see code which is
@@ -123,6 +144,7 @@ Conditionally-compiled code can be confined to functions which, if the code
 is not to be present, simply become empty.  The compiler will then quietly
 optimize out the call to the empty function.  The result is far cleaner
 code which is easier to follow.
+(用 #ifdef 做条件编译确实是一个强大的特性，内核中也在使用它。但几乎没有人愿意看到到处撒满 #ifdef 块的代码。一般规则是：#ifdef 的使用应尽可能限定在头文件中。条件编译的代码可以限定在一些函数里——如果这些代码不需要存在，这些函数就变成空函数。编译器随后会悄悄地把对空函数的调用优化掉。其结果干净得多，也更容易读懂。)
 
 C preprocessor macros present a number of hazards, including possible
 multiple evaluation of expressions with side effects and no type safety.
@@ -130,6 +152,11 @@ If you are tempted to define a macro, consider creating an inline function
 instead.  The code which results will be the same, but inline functions are
 easier to read, do not evaluate their arguments multiple times, and allow
 the compiler to perform type checking on the arguments and return value.
+(C 预处理器宏带来许多隐患，包括可能对带副作用的表达式进行多次求值，以及缺乏类型安全。如果你打算定义一个宏，考虑改为创建一个内联函数。产生的代码效果相同，但内联函数更易读、不会对参数多次求值，并允许编译器对参数与返回值进行类型检查。)
+
+
+Inline functions(内联函数)
+**************************
 
 
 Inline functions
@@ -145,16 +172,23 @@ slow execution dramatically.  Inline functions, as a rule, should be quite
 small and relatively rare.  The cost of a function call, after all, is not
 that high; the creation of large numbers of inline functions is a classic
 example of premature optimization.
+(不过，内联函数自身也有隐患。程序员可能迷恋于避免函数调用所带来的表面效率，而在源文件中塞满内联函数。然而，这些函数实际上可能降低性能。由于它们的代码会在每个调用点复制，它们最终使编译出的内核体积膨胀。这又会对处理器的内存缓存造成压力，可能显著拖慢执行速度。作为一条规则，内联函数应当相当小且相对少见。毕竟，函数调用的代价并不高；大量创建内联函数是过早优化的经典例子。)
 
 In general, kernel programmers ignore cache effects at their peril.  The
 classic time/space tradeoff taught in beginning data structures classes
 often does not apply to contemporary hardware.  Space *is* time, in that a
 larger program will run slower than one which is more compact.
+(一般来说，内核程序员忽视缓存效应后果自负。入门数据结构课程所教授的经典时间/空间权衡往往不适用于当代硬件。空间 *就是* 时间：更大的程序会比更紧凑的程序运行得慢。)
 
 More recent compilers take an increasingly active role in deciding whether
 a given function should actually be inlined or not.  So the liberal
 placement of "inline" keywords may not just be excessive; it could also be
 irrelevant.
+(较新的编译器在决定某个给定函数是否真正内联方面扮演着越来越积极的角色。因此，随意放置 "inline" 关键字不仅可能过度；它还可能无关紧要。)
+
+
+Locking(加锁)
+*************
 
 
 Locking
@@ -167,12 +201,14 @@ networking in Linux was considered substandard at best, and the Devicescape
 stack offered the promise of fixing that situation.  Yet, this code did not
 actually make it into the mainline until June 2007 (2.6.22).  What
 happened?
+(2006 年 5 月， "Devicescape" 网络栈在盛大的宣传之下以 GPL 许可发布，并可供收编进主线内核。这份馈赠是受欢迎的好消息；Linux 对无线网络的支持充其量算不上标准，而 Devicescape 栈带来了改善这一局面的希望。然而，这段代码直到 2007 年 6 月(2.6.22)才真正进入主线。发生了什么？)
 
 This code showed a number of signs of having been developed behind
 corporate doors.  But one large problem in particular was that it was not
 designed to work on multiprocessor systems.  Before this networking stack
 (now called mac80211) could be merged, a locking scheme needed to be
 retrofitted onto it.
+(这段代码显示出许多在公司门后开发的迹象。但一个特别大的问题是：它不是为多处理器系统设计的。在这个网络栈(现在称为 mac80211)能被合并之前，需要为其加装一套加锁方案。)
 
 Once upon a time, Linux kernel code could be developed without thinking
 about the concurrency issues presented by multiprocessor systems.  Now,
@@ -180,6 +216,7 @@ however, this document is being written on a dual-core laptop.  Even on
 single-processor systems, work being done to improve responsiveness will
 raise the level of concurrency within the kernel.  The days when kernel
 code could be written without thinking about locking are long past.
+(曾经，Linux 内核代码可以在不考虑多处理器系统带来的并发问题的情况下开发。然而如今，本文档是在一台双核笔记本上写成的。即使在单处理器系统上，为改善响应性所做的工作也会提高内核内部的并发程度。不加思考加锁就能写内核代码的日子早已一去不复返。)
 
 Any resource (data structures, hardware registers, etc.) which could be
 accessed concurrently by more than one thread must be protected by a lock.
@@ -188,6 +225,11 @@ locking after the fact is a rather more difficult task.  Kernel developers
 should take the time to understand the available locking primitives well
 enough to pick the right tool for the job.  Code which shows a lack of
 attention to concurrency will have a difficult path into the mainline.
+(任何可能被多个线程并发访问的资源(数据结构、硬件寄存器等)都必须用锁保护。编写新代码时应当铭记这一要求；事后加装加锁是相当更难的任务。内核开发者应当花时间充分理解可用的加锁原语，以便为工作挑对工具。对并发缺乏关注的代码，进入主线的道路会很艰难。)
+
+
+Regressions(回归)
+*****************
 
 
 Regressions
@@ -200,19 +242,22 @@ regressions have become most unwelcome in the mainline kernel.  With few
 exceptions, changes which cause regressions will be backed out if the
 regression cannot be fixed in a timely manner.  Far better to avoid the
 regression in the first place.
+(最后一个值得一提的隐患是：做出一个(可能带来巨大改进的)变更却导致现有用户的某些东西损坏，这种事很有诱惑力。这类变更被称为 "回归"(regression)，回归在主线内核中已变得极不受欢迎。除少数例外，导致回归的变更如果不能被及时修复，就会被回退。最好是从一开始就避免回归。)
 
 It is often argued that a regression can be justified if it causes things
 to work for more people than it creates problems for.  Why not make a
 change if it brings new functionality to ten systems for each one it
 breaks?  The best answer to this question was expressed by Linus in July
 2007:
+(对这个问题的最好回答是 Linus 在 2007 年 7 月所表达的：)
 
 ::
-
 	So we don't fix bugs by introducing new problems.  That way lies
 	madness, and nobody ever knows if you actually make any real
 	progress at all. Is it two steps forwards, one step back, or one
 	step forward and two steps back?
+
+(所以我们不能靠引入新问题来修复缺陷。那条路通向疯狂，而且没有人知道你是否真的取得了任何实质性进展。究竟是两步前进、一步后退，还是一步前进、两步后退？)
 
 (https://lwn.net/Articles/243460/).
 
@@ -223,10 +268,11 @@ interfaces particularly challenging: since they cannot be changed in
 incompatible ways, they must be done right the first time.  For this
 reason, a great deal of thought, clear documentation, and wide review for
 user-space interfaces is always required.
+(一类尤其不受欢迎的回归是对用户空间 ABI 的任何形式的更改。一个接口一旦导出给用户空间，就必须无限期地得到支持。这一事实使得创建用户空间接口特别具有挑战性：由于它们不能以不兼容的方式更改，它们必须第一次就做对。因此，用户空间接口总是需要大量的思考、清晰的文档与广泛的评审。)
 
 
-Code checking tools
--------------------
+Code checking tools(代码检查工具)
+---------------------------------
 
 For now, at least, the writing of error-free code remains an ideal that few
 of us can reach.  What we can hope to do, though, is to catch and fix as
@@ -236,6 +282,7 @@ array of tools which can catch a wide variety of obscure problems in an
 automated way.  Any problem caught by the computer is a problem which will
 not afflict a user later on, so it stands to reason that the automated
 tools should be used whenever possible.
+(至少就目前而言，写出无错代码仍是少数人能企及的理想。不过我们能指望的，是在代码进入主线内核之前捕获并修复尽可能多的错误。为此，内核开发者们整理了一组令人印象深刻的工具，能够以自动化的方式捕捉各种隐蔽问题。计算机捕捉到的任何问题都是日后不会困扰用户的问题，因此可以说，只要可能就应当使用这些自动化工具。)
 
 The first step is simply to heed the warnings produced by the compiler.
 Contemporary versions of gcc can detect (and warn about) a large number of
@@ -244,35 +291,43 @@ Code submitted for review should, as a rule, not produce any compiler
 warnings.  When silencing warnings, take care to understand the real cause
 and try to avoid "fixes" which make the warning go away without addressing
 its cause.
+(第一步很简单：留意编译器产生的警告。当代版本的 gcc 能够检测(并警告)大量潜在错误。这些警告往往指向真实的问题。作为规则，提交评审的代码不应产生任何编译器警告。在消除警告时，务必理解其真正原因，并避免那些只让警告消失而不解决问题的 "修复" 。)
 
 Note that not all compiler warnings are enabled by default.  Build the
 kernel with "make KCFLAGS=-W" to get the full set.
+(注意，并非所有编译器警告都默认启用。用 "make KCFLAGS=-W" 构建内核可获得完整集合。)
 
 The kernel provides several configuration options which turn on debugging
 features; most of these are found in the "kernel hacking" submenu.  Several
 of these options should be turned on for any kernel used for development or
 testing purposes.  In particular, you should turn on:
+(内核提供了若干用于开启调试功能的配置选项；其中大部分位于 "kernel hacking" 子菜单中。对于任何用于开发或测试目的的内核，其中若干选项都应开启。特别是，你应当开启：)
 
  - FRAME_WARN to get warnings for stack frames larger than a given amount.
    The output generated can be verbose, but one need not worry about
    warnings from other parts of the kernel.
+   (FRAME_WARN——对超过给定大小的栈帧给出警告。其输出可能冗长，但不必担心来自内核其他部分的警告。)
 
  - DEBUG_OBJECTS will add code to track the lifetime of various objects
    created by the kernel and warn when things are done out of order.  If
    you are adding a subsystem which creates (and exports) complex objects
    of its own, consider adding support for the object debugging
    infrastructure.
+   (DEBUG_OBJECTS——添加代码来跟踪内核创建的各类对象的生命周期，并在事情做得顺序不对时发出警告。如果你正在添加一个会创建(并导出)自身复杂对象的子系统，考虑为对象调试基础设施添加支持。)
 
  - DEBUG_SLAB can find a variety of memory allocation and use errors; it
    should be used on most development kernels.
+   (DEBUG_SLAB——能发现各种内存分配与使用错误；应当用于大多数开发内核。)
 
  - DEBUG_SPINLOCK, DEBUG_ATOMIC_SLEEP, and DEBUG_MUTEXES will find a
    number of common locking errors.
+   (DEBUG_SPINLOCK、DEBUG_ATOMIC_SLEEP 与 DEBUG_MUTEXES——能发现许多常见的加锁错误。)
 
 There are quite a few other debugging options, some of which will be
 discussed below.  Some of them have a significant performance impact and
 should not be used all of the time.  But some time spent learning the
 available options will likely be paid back many times over in short order.
+(还有相当多其他调试选项，其中一些将在下文讨论。它们中的一些有显著的性能影响，不应一直开启。但花一些时间了解可用选项，很快就会得到成倍的回报。)
 
 One of the heavier debugging tools is the locking checker, or "lockdep."
 This tool will track the acquisition and release of every lock (spinlock or
@@ -286,6 +341,7 @@ developers and users) in a deployed system; lockdep allows them to be found
 in an automated manner ahead of time.  Code with any sort of non-trivial
 locking should be run with lockdep enabled before being submitted for
 inclusion.
+(较重的调试工具之一是加锁检查器，即 "lockdep" 。该工具会跟踪系统中每一把锁(自旋锁或互斥锁)的获取与释放、锁之间相互获取的顺序、当前的中断环境等等。它随后可以确保锁总是以相同的顺序获取、相同的中断假设适用于所有情形，等等。换言之，lockdep 能找出系统在罕见情形下可能死锁的若干场景。这类问题在已部署的系统中可能非常痛苦(对开发者和用户皆然)；lockdep 允许提前以自动化方式找到它们。任何具有非平凡加锁行为的代码都应在提交收录之前以启用 lockdep 的方式运行。)
 
 As a diligent kernel programmer, you will, beyond doubt, check the return
 status of any operation (such as a memory allocation) which can fail.  The
@@ -293,6 +349,7 @@ fact of the matter, though, is that the resulting failure recovery paths
 are, probably, completely untested.  Untested code tends to be broken code;
 you could be much more confident of your code if all those error-handling
 paths had been exercised a few times.
+(作为一个勤勉的内核程序员，你无疑会检查任何可能失败的操作(如内存分配)的返回状态。但事实是，由此产生的失败恢复路径很可能完全未被测试过。未经测试的代码往往是损坏的代码；如果所有那些错误处理路径都被演练过几次，你会对自己的代码更有信心。)
 
 The kernel provides a fault injection framework which can do exactly that,
 especially where memory allocations are involved.  With fault injection
@@ -302,6 +359,7 @@ Running with fault injection enabled allows the programmer to see how the
 code responds when things go badly.  See
 Documentation/fault-injection/fault-injection.rst for more information on
 how to use this facility.
+(内核提供了一个故障注入框架，恰好可以做到这一点，尤其是在涉及内存分配时。启用故障注入后，可配置百分比的内存分配会被强制失败；这些失败可以限定在特定的代码范围内。在启用故障注入的情况下运行，让程序员能看到代码在情况变糟时的反应。关于如何使用该设施，见 Documentation/fault-injection/fault-injection.rst 。)
 
 Other kinds of errors can be found with the "sparse" static analysis tool.
 With sparse, the programmer can be warned about confusion between
@@ -311,6 +369,7 @@ flags is expected, and so on.  Sparse must be installed separately (it can
 be found at https://sparse.wiki.kernel.org/index.php/Main_Page if your
 distributor does not package it); it can then be run on the code by adding
 "C=1" to your make command.
+(其他种类的错误可以用 "sparse" 静态分析工具发现。借助 sparse，程序员可以获得关于用户空间与内核空间地址混淆、大小端数量混用、在需要一组位标志之处传入整数值等问题的警告。sparse 必须单独安装(如果你的发行版没有打包它，可以在 https://sparse.wiki.kernel.org/index.php/Main_Page 找到)；然后通过在 make 命令中添加 "C=1" 来对代码运行它。)
 
 The "Coccinelle" tool (http://coccinelle.lip6.fr/) is able to find a wide
 variety of potential coding problems; it can also propose fixes for those
@@ -319,6 +378,7 @@ under the scripts/coccinelle directory; running "make coccicheck" will run
 through those semantic patches and report on any problems found.  See
 :ref:`Documentation/dev-tools/coccinelle.rst <devtools_coccinelle>`
 for more information.
+("Coccinelle" 工具(http://coccinelle.lip6.fr/)能够发现各种潜在的编码问题；它还能为这些问题提出修复建议。相当多面向内核的 "语义补丁" 打包在 scripts/coccinelle 目录下；运行 "make coccicheck" 会遍历这些语义补丁并报告发现的任何问题。更多信息见 :ref:`Documentation/dev-tools/coccinelle.rst <devtools_coccinelle>` 。)
 
 Other kinds of portability errors are best found by compiling your code for
 other architectures.  If you do not happen to have an S/390 system or a
@@ -327,8 +387,15 @@ step.  A large set of cross compilers for x86 systems can be found at
 
 	https://www.kernel.org/pub/tools/crosstool/
 
+(其他种类的可移植性错误最好通过为其他架构编译你的代码来发现。如果你手头恰好没有 S/390 系统或 Blackfin 开发板，你仍然可以执行编译这一步。面向 x86 系统的大量交叉编译器可以在以下地址找到)
+
 Some time spent installing and using these compilers will help avoid
 embarrassment later.
+(花些时间安装并使用这些编译器，将有助于避免日后的难堪。)
+
+
+Documentation(文档)
+-------------------
 
 
 Documentation
@@ -339,6 +406,7 @@ development.  Even so, adequate documentation will help to ease the merging
 of new code into the kernel, make life easier for other developers, and
 will be helpful for your users.  In many cases, the addition of
 documentation has become essentially mandatory.
+(在内核开发中，文档往往更多是例外而非常规。即便如此，充分的文档将有助于把新代码合并进内核、让其他开发者的日子更轻松，并对你的用户有所帮助。在许多情况下，添加文档实际上已成为强制要求。)
 
 The first piece of documentation for any patch is its associated
 changelog.  Log entries should describe the problem being solved, the form
@@ -347,20 +415,25 @@ effects on performance, and anything else that might be needed to
 understand the patch.  Be sure that the changelog says *why* the patch is
 worth applying; a surprising number of developers fail to provide that
 information.
+(任何补丁的第一份文档就是与之关联的变更日志。日志条目应描述正在解决的问题、解决方案的形式、参与补丁工作的人员、任何相关的性能影响，以及理解该补丁所需的任何其他内容。务必确保变更日志说明了补丁 *为什么* 值得应用；令人惊讶的是，相当多的开发者未能提供这一信息。)
 
 Any code which adds a new user-space interface - including new sysfs or
 /proc files - should include documentation of that interface which enables
 user-space developers to know what they are working with.  See
 Documentation/ABI/README for a description of how this documentation should
 be formatted and what information needs to be provided.
+(任何添加新用户空间接口的代码——包括新的 sysfs 或 /proc 文件——都应包含该接口的文档，让用户空间开发者知道他们面对的是什么。关于此类文档应当如何组织、需要提供哪些信息，见 Documentation/ABI/README 。)
 
 The file :ref:`Documentation/admin-guide/kernel-parameters.rst
 <kernelparameters>` describes all of the kernel's boot-time parameters.
 Any patch which adds new parameters should add the appropriate entries to
 this file.
+(文件 :ref:`Documentation/admin-guide/kernel-parameters.rst
+<kernelparameters>` 描述了内核所有的引导时参数。任何添加新参数的补丁都应向该文件添加相应条目。)
 
 Any new configuration options must be accompanied by help text which
 clearly explains the options and when the user might want to select them.
+(任何新的配置选项都必须附带帮助文本，清楚地解释该选项以及用户何时可能想选择它。)
 
 Internal API information for many subsystems is documented by way of
 specially-formatted comments; these comments can be extracted and formatted
@@ -372,6 +445,7 @@ comments for the future; indeed, this can be a useful activity for
 beginning kernel developers.  The format of these comments, along with some
 information on how to create kerneldoc templates can be found at
 :ref:`Documentation/doc-guide/ <doc_guide>`.
+(许多子系统的内部 API 信息通过特别格式的注释来记录；这些注释可以由 "kernel-doc" 脚本以多种方式提取并格式化。如果你在一个带有 kerneldoc 注释的子系统中工作，你应当维护它们，并视情况为对外提供的函数添加它们。即使在没有如此文档化的领域，为将来添加 kerneldoc 注释也没有坏处；事实上，这对内核开发新手来说是一项有益的活动。这些注释的格式，以及如何创建 kerneldoc 模板的一些信息，见 :ref:`Documentation/doc-guide/ <doc_guide>` 。)
 
 Anybody who reads through a significant amount of existing kernel code will
 note that, often, comments are most notable by their absence.  Once again,
@@ -379,6 +453,7 @@ the expectations for new code are higher than they were in the past;
 merging uncommented code will be harder.  That said, there is little desire
 for verbosely-commented code.  The code should, itself, be readable, with
 comments explaining the more subtle aspects.
+(任何通读过大量现有内核代码的人都会注意到：注释最引人注目的地方往往是它们的缺席。同样，对新建代码的期望比过去更高；合并没有注释的代码会更困难。话虽如此，也没人想要注释冗长的代码。代码本身应当是可读的，注释用来解释更微妙的方面。)
 
 Certain things should always be commented.  Uses of memory barriers should
 be accompanied by a line explaining why the barrier is necessary.  The
@@ -387,10 +462,11 @@ Major data structures need comprehensive documentation in general.
 Non-obvious dependencies between separate bits of code should be pointed
 out.  Anything which might tempt a code janitor to make an incorrect
 "cleanup" needs a comment saying why it is done the way it is.  And so on.
+(有些东西应当始终注释。内存屏障的使用应当附有一行解释为什么需要该屏障。数据结构的加锁规则通常需要在某处加以说明。主要的数据结构通常需要全面的文档。代码的各部分之间非显而易见的依赖应当指出。任何可能诱使代码清洁工做出错误 "清理" 的东西，都需要一条注释说明为什么它要这样写。诸如此类。)
 
 
-Internal API changes
---------------------
+Internal API changes(内部 API 变更)
+-----------------------------------
 
 The binary interface provided by the kernel to user space cannot be broken
 except under the most severe circumstances.  The kernel's internal
@@ -399,12 +475,14 @@ the need arises.  If you find yourself having to work around a kernel API,
 or simply not using a specific functionality because it does not meet your
 needs, that may be a sign that the API needs to change.  As a kernel
 developer, you are empowered to make such changes.
+(内核提供给用户空间的二进制接口除非在最严重的情况下不能被破坏。相比之下，内核的内部编程接口高度流动，可以在需要时更改。如果你发现自己不得不绕开某个内核 API，或者仅仅因为某个功能不满足你的需要而放弃使用它，这可能是一个信号：该 API 需要更改。作为内核开发者，你有权做出这样的更改。)
 
 There are, of course, some catches.  API changes can be made, but they need
 to be well justified.  So any patch making an internal API change should be
 accompanied by a description of what the change is and why it is
 necessary.  This kind of change should also be broken out into a separate
 patch, rather than buried within a larger patch.
+(当然，也有一些附带条件。API 变更可以做出，但必须有充分的理由。因此，任何做出内部 API 变更的补丁都应附带对变更是什么以及为什么必要的说明。这种变更还应拆分为单独的补丁，而不是埋在更大的补丁之中。)
 
 The other catch is that a developer who changes an internal API is
 generally charged with the task of fixing any code within the kernel tree
@@ -414,6 +492,7 @@ likely to conflict with work being done by other developers.  Needless to
 say, this can be a large job, so it is best to be sure that the
 justification is solid.  Note that the Coccinelle tool can help with
 wide-ranging API changes.
+(另一个附带条件是：更改内部 API 的开发者通常要负责修复内核树中所有被该变更破坏的代码。对于一个被广泛使用的函数，这一职责可能导致成百上千处更改——其中许多很可能与其他开发者的工作进行中的变更相冲突。不用说，这可能是项大工程，所以最好确保理由坚实。注意，Coccinelle 工具可以为大范围的 API 变更提供帮助。)
 
 When making an incompatible API change, one should, whenever possible,
 ensure that code which has not been updated is caught by the compiler.
@@ -423,3 +502,4 @@ a change that they need to respond to.  Supporting out-of-tree code is not
 something that kernel developers need to be worried about, but we also do
 not have to make life harder for out-of-tree developers than it needs to
 be.
+(做出不兼容的 API 变更时，应当尽可能确保未被更新的代码会被编译器捕获。这有助于你确信已经找到该接口在树内的所有使用处。它还会提醒树外代码的开发者：有一个变更需要他们响应。支持树外代码不是内核开发者需要操心的事，但我们也不必把树外开发者的日子弄得比必要的更难过。)
