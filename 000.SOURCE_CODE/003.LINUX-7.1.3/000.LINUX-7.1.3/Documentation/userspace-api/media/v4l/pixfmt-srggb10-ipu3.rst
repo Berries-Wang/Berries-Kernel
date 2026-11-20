@@ -6,27 +6,33 @@
 .. _v4l2-pix-fmt-ipu3-sgrbg10:
 .. _v4l2-pix-fmt-ipu3-srggb10:
 
-**********************************************************************************************************************************************
-V4L2_PIX_FMT_IPU3_SBGGR10 ('ip3b'), V4L2_PIX_FMT_IPU3_SGBRG10 ('ip3g'), V4L2_PIX_FMT_IPU3_SGRBG10 ('ip3G'), V4L2_PIX_FMT_IPU3_SRGGB10 ('ip3r')
-**********************************************************************************************************************************************
+***************************************************************************************************************************************************************************
+V4L2_PIX_FMT_IPU3_SBGGR10 ('ip3b'), V4L2_PIX_FMT_IPU3_SGBRG10 ('ip3g'), V4L2_PIX_FMT_IPU3_SGRBG10 ('ip3G'), V4L2_PIX_FMT_IPU3_SRGGB10 ('ip3r')(Intel IPU3 10 位 Bayer 格式)
+***************************************************************************************************************************************************************************
 
-====================
-10-bit Bayer formats
-====================
+======================================
+10-bit Bayer formats(10 位 Bayer 格式)
+======================================
 
-Description
-===========
+Description(描述)
+=================
 
 These four pixel formats are used by Intel IPU3 driver, they are raw
 sRGB / Bayer formats with 10 bits per sample with every 25 pixels packed
 to 32 bytes leaving 6 most significant bits padding in the last byte.
 The format is little endian.
+(这四种像素格式由 Intel IPU3 驱动使用，它们是每样本 10 位的原始 sRGB /
+Bayer 格式，每 25 个像素打包为 32 字节，最后一个字节中保留 6 个最高有效
+位作为填充。该格式为小端序。)
 
 In other respects this format is similar to :ref:`V4L2-PIX-FMT-SRGGB10`.
 Below is an example of a small image in V4L2_PIX_FMT_IPU3_SBGGR10 format.
+(在其他方面，该格式与 :ref:`V4L2-PIX-FMT-SRGGB10` 相似。下面是一个
+V4L2_PIX_FMT_IPU3_SBGGR10 格式的小图像示例。)
 
 **Byte Order.**
 Each cell is one byte.
+(**字节序。** 每个单元格为一个字节。)
 
 .. raw:: latex
 

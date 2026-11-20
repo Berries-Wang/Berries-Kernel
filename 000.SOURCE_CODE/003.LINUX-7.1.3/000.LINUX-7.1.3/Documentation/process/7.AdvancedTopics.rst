@@ -1,15 +1,16 @@
 .. _development_advancedtopics:
 
-Advanced topics
-===============
+Advanced topics(进阶主题)
+=========================
 
 At this point, hopefully, you have a handle on how the development process
 works.  There is still more to learn, however!  This section will cover a
 number of topics which can be helpful for developers wanting to become a
 regular part of the Linux kernel development process.
+(读到这里，希望你已经对开发流程有了基本认识。然而，要学的还有很多！本节将涵盖若干主题，它们对希望成为 Linux 内核开发流程常规参与者的开发者会有所帮助。)
 
-Managing patches with git
--------------------------
+Managing patches with git(用 git 管理补丁)
+------------------------------------------
 
 The use of distributed version control for the kernel began in early 2002,
 when Linus first started playing with the proprietary BitKeeper
@@ -19,6 +20,7 @@ control enabled an immediate acceleration of the kernel development
 project.  In current times, there are several free alternatives to
 BitKeeper.  For better or for worse, the kernel project has settled on git
 as its tool of choice.
+(内核使用分布式版本控制始于 2002 年初，当时 Linus 开始试用专有的 BitKeeper 应用程序。虽然 BitKeeper 颇有争议，但它所体现的软件版本管理方法却毋庸置疑。分布式版本控制立即使内核开发项目得以加速。如今，已有若干 BitKeeper 的自由替代品。无论好坏，内核项目最终选定 git 作为其首选工具。)
 
 Managing patches with git can make life much easier for the developer,
 especially as the volume of those patches grows.  Git also has its rough
@@ -28,12 +30,14 @@ teach the reader how to use git; that would be sufficient material for a
 long document in its own right.  Instead, the focus here will be on how git
 fits into the kernel development process in particular.  Developers who
 wish to come up to speed with git will find more information at:
+(用 git 管理补丁可以大大减轻开发者的负担，尤其是当补丁数量增长时。Git 也有其粗糙之处并暗藏某些危险；它是一个年轻而强大的工具，其开发者仍在不断打磨它。本文不打算教读者如何使用 git；那本身就足以构成长长的一篇文档。这里的重点将放在 git 如何特别地融入内核开发流程。希望快速上手 git 的开发者可在以下位置找到更多信息：)
 
 	https://git-scm.com/
 
 	https://www.kernel.org/pub/software/scm/git/docs/user-manual.html
 
 and on various tutorials found on the web.
+(以及网上各种教程。)
 
 The first order of business is to read the above sites and get a solid
 understanding of how git works before trying to use it to make patches
@@ -45,9 +49,11 @@ own terminology and concepts; a new user of git should know about refs,
 remote branches, the index, fast-forward merges, pushes and pulls, detached
 heads, etc.  It can all be a little intimidating at the outset, but the
 concepts are not that hard to grasp with a bit of study.
+(头等大事是先阅读上述站点，在使用 git 向他人提供补丁之前扎实地理解它的工作方式。使用 git 的开发者应能获取主线仓库的副本、查看修订历史、向树提交更改、使用分支等。了解 git 改写历史的工具(如 rebase)同样有用。Git 自有一套术语与概念；git 新用户应当了解 refs、远程分支、索引、快进合并、推送与拉取、分离头指针等。起初可能有点让人望而生畏，但稍加学习，这些概念并不难掌握。)
 
 Using git to generate patches for submission by email can be a good
 exercise while coming up to speed.
+(在上手过程中，用 git 生成供邮件提交的补丁不失为一个好的练习。)
 
 When you are ready to start putting up git trees for others to look at, you
 will, of course, need a server that can be pulled from.  Setting up such a
@@ -56,6 +62,7 @@ which is accessible to the Internet.  Otherwise, free, public hosting sites
 (GitHub, for example) are starting to appear on the net.  Established
 developers can get an account on kernel.org, but those are not easy to come
 by; see https://kernel.org/faq/ for more information.
+(当你准备好建立 git 树供他人查看时，当然需要一台可供拉取的服务器。如果你有一台能被互联网访问的系统，用 git-daemon 搭建这样的服务器相对简单。否则，网上也开始出现免费的公共托管站点(例如 GitHub)。资深开发者可以在 kernel.org 上获得账号，但这些账号并不容易取得；详见 https://kernel.org/faq/。)
 
 The normal git workflow involves the use of a lot of branches.  Each line
 of development can be separated into a separate "topic branch" and
@@ -65,6 +72,7 @@ development in any branch which you intend to ask others to pull from.
 Publicly-available branches should be created with care; merge in patches
 from development branches when they are in complete form and ready to go -
 not before.
+(正常的 git 工作流会用到大量分支。每条开发线都可以拆分到单独的"主题分支"中独立维护。git 里的分支开销很低，没有理由不放心使用。无论如何，都不应在任何打算请他人拉取的分支上做开发。公开分支的创建须谨慎；只在补丁完整成形、可以交付时才从开发分支合并进来——不要提前。)
 
 Git provides some powerful tools which can allow you to rewrite your
 development history.  An inconvenient patch (one which breaks bisection,
@@ -75,6 +83,7 @@ you have been working on it for months.  Changes can be transparently
 shifted from one branch to another.  And so on.  Judicious use of git's
 ability to revise history can help in the creation of clean patch sets with
 fewer problems.
+(Git 提供了一些强大的工具，可以改写你的开发历史。一个令人头疼的补丁(比如破坏二分查找，或带有其他明显缺陷)可以就地修复，或干脆从历史中消失。一个补丁系列可以被改写成仿佛是基于今天的主线写的，哪怕你已经为它工作了几个月。更改可以在分支之间透明地搬移。诸如此类。明智地使用 git 修改历史的能力，有助于创建问题更少的干净补丁集。)
 
 Excessive use of this capability can lead to other problems, though, beyond
 a simple obsession for the creation of the perfect project history.
@@ -86,6 +95,7 @@ have pulled into their repositories, you will make life much more difficult
 for those developers.  So a simple rule of thumb applies here: history
 which has been exported to others should generally be seen as immutable
 thereafter.
+(不过，过度使用这一能力会带来其他问题，而不仅仅是对打造完美项目历史的执念。改写历史会改写其中包含的更改，把一个(但愿)测试过的内核树变成未经测试的树。此外，如果开发者对项目历史没有一致的视图，就难以协作；如果你改写了其他开发者已拉取到他们仓库中的历史，你会让那些开发者的日子难过得多。所以这里有一条简单的经验法则：已导出给他人的历史，此后一般应视为不可变。)
 
 So, once you push a set of changes to your publicly-available server, those
 changes should not be rewritten.  Git will attempt to enforce this rule if
@@ -97,6 +107,7 @@ linux-next is one example.  But such actions should be rare.  This is one
 of the reasons why development should be done in private branches (which
 can be rewritten if necessary) and only moved into public branches when
 it's in a reasonably advanced state.
+(因此，一旦你把一组更改推送到公开服务器，这些更改就不应再被改写。如果你尝试推送不能产生快进合并的更改(即不共享同一历史的更改)，Git 会尝试强制执行这一规则。可以绕过这项检查，有时也确实有必要改写已导出的树。为避免 linux-next 中的冲突而在树之间搬移变更集就是一例。但这类操作应当罕见。这也是开发应在私有分支中进行(必要时可改写)、并只在相当成熟后才移入公开分支的原因之一。)
 
 As the mainline (or other tree upon which a set of changes is based)
 advances, it is tempting to merge with that tree to stay on the leading
@@ -110,6 +121,7 @@ release).  If you are nervous about specific changes, you can always
 perform test merges in a private branch.  The git "rerere" tool can be
 useful in such situations; it remembers how merge conflicts were resolved
 so that you don't have to do the same work twice.
+(随着主线(或变更集所基于的其他树)不断前进，人们难免想与之合并以保持领先。对私有分支而言，rebase 是跟上另一棵树的简单办法；但一旦树已导出给全世界，rebase 就不再是选项。那时必须做一次完整合并。偶尔合并是合理的，但过于频繁的合并会不必要地弄乱历史。这种情况下建议的技巧是少合并，且一般只在特定的发布节点(如主线 -rc 发布)合并。如果你对某些特定更改感到不安，随时可以在私有分支中做试验性合并。git 的 "rerere" 工具在这类情况下很有用；它会记住合并冲突是如何解决的，让你不必重复做同样的工作。)
 
 One of the biggest recurring complaints about tools like git is this: the
 mass movement of patches from one repository to another makes it easy to
@@ -117,6 +129,7 @@ slip in ill-advised changes which go into the mainline below the review
 radar.  Kernel developers tend to get unhappy when they see that kind of
 thing happening; putting up a git tree with unreviewed or off-topic patches
 can affect your ability to get trees pulled in the future.  Quoting Linus:
+(关于 git 这类工具，最大的反复出现的抱怨之一是：补丁在仓库之间的大规模流动，让欠考虑的更改容易溜过审查雷达进入主线。内核开发者看到这种事情往往会不高兴；挂出一棵含未经审查或离题补丁的 git 树，会影响你今后让树被拉取的能力。引用 Linus 的话：)
 
 ::
 
@@ -124,6 +137,8 @@ can affect your ability to get trees pulled in the future.  Quoting Linus:
 	need to know that you know what you're doing, and I need to be able
 	to trust things *without* then having to go and check every
 	individual change by hand.
+
+(引用 Linus 的话：你可以给我发补丁，但如果要我拉取你的 git 补丁，我需要知道你清楚自己在做什么，并且我必须能够*无需*随后逐一手工核对每一处更改，就信任这些内容。)
 
 (https://lwn.net/Articles/224135/).
 

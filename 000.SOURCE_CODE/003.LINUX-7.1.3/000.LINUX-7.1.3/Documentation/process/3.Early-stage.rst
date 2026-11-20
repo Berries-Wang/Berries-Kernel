@@ -1,23 +1,25 @@
 .. _development_early_stage:
 
-Early-stage planning
-====================
+Early-stage planning(早期规划)
+==============================
 
 When contemplating a Linux kernel development project, it can be tempting
 to jump right in and start coding.  As with any significant project,
 though, much of the groundwork for success is best laid before the first
 line of code is written.  Some time spent in early planning and
 communication can save far more time later on.
+(当考虑一个 Linux 内核开发项目时，人们很容易想直接上手开始写代码。不过，与任何重大项目一样，成功的许多基础工作最好在写出第一行代码之前就打好。在早期规划和沟通上花费一些时间，可以在日后省去多得多的时间。)
 
 
-Specifying the problem
-----------------------
+Specifying the problem(明确问题)
+--------------------------------
 
 Like any engineering project, a successful kernel enhancement starts with a
 clear description of the problem to be solved.  In some cases, this step is
 easy: when a driver is needed for a specific piece of hardware, for
 example.  In others, though, it is tempting to confuse the real problem
 with the proposed solution, and that can lead to difficulties.
+(与任何工程项目一样，一次成功的内核增强始于对所要解决问题的清晰描述。在某些情况下，这一步很容易：例如需要为某块特定硬件编写驱动程序时。但在另一些情况下，人们容易把真正的问题与设想的解决方案混为一谈，而这会带来麻烦。)
 
 Consider an example: some years ago, developers working with Linux audio
 sought a way to run applications without dropouts or other artifacts caused
@@ -26,6 +28,7 @@ kernel module intended to hook into the Linux Security Module (LSM)
 framework; this module could be configured to give specific applications
 access to the realtime scheduler.  This module was implemented and sent to
 the linux-kernel mailing list, where it immediately ran into problems.
+(不妨看一个例子：多年前，从事 Linux 音频开发的开发者们希望找到一种办法，让应用程序运行时不再因系统中过高的延迟而出现丢声或其他瑕疵。他们最终给出的方案是一个打算挂接到 Linux 安全模块(LSM)框架上的内核模块；该模块可以被配置为向特定应用程序授予实时调度器的访问权限。这个模块被实现出来并发到了 linux-kernel 邮件列表，随即就遇到了麻烦。)
 
 To the audio developers, this security module was sufficient to solve their
 immediate problem.  To the wider kernel community, though, it was seen as a
@@ -34,17 +37,21 @@ onto processes which they would not otherwise have) and a risk to system
 stability.  Their preferred solutions involved realtime scheduling access
 via the rlimit mechanism for the short term, and ongoing latency reduction
 work in the long term.
+(在音频开发者看来，这个安全模块足以解决他们的眼前问题。但在更广泛的内核社区看来，这是对 LSM 框架的滥用(该框架的本意并不是向进程授予它们原本不会拥有的特权)，也是对系统稳定性的威胁。他们更倾向于的解决方案是：短期内通过 rlimit 机制获得实时调度访问权限，长期则持续开展延迟削减工作。)
 
 The audio community, however, could not see past the particular solution
 they had implemented; they were unwilling to accept alternatives.  The
 resulting disagreement left those developers feeling disillusioned with the
 entire kernel development process; one of them went back to an audio list
 and posted this:
+(然而，音频社区无法跳出他们已经实现的那个特定方案；他们不愿意接受其他替代方案。由此产生的争执让这些开发者对整个内核开发流程感到幻灭；其中一人回到一个音频邮件列表，发了这样一条帖子：)
 
 	There are a number of very good Linux kernel developers, but they
 	tend to get outshouted by a large crowd of arrogant fools. Trying
 	to communicate user requirements to these people is a waste of
 	time. They are much too "intelligent" to listen to lesser mortals.
+
+(引文大意：Linux 内核开发者中有不少非常优秀的人，但他们往往被一大群傲慢的傻瓜的喧嚣所淹没。试图向这些人传达用户需求只是浪费时间；他们太"聪明"了，不屑倾听比自己低微的人。)
 
 (https://lwn.net/Articles/131776/).
 
@@ -54,26 +61,33 @@ the right solution to the problem than they were with a specific module.
 The moral of the story is to focus on the problem - not a specific solution
 - and to discuss it with the development community before investing in the
 creation of a body of code.
+(实际情况并非如此；与某个特定的模块相比，内核开发者更关心的是系统稳定性、长期维护，以及为问题找到正确的解决方案。这个故事的寓意是：专注于问题本身——而不是某个特定方案——并在投入编写大量代码之前，先与开发社区进行讨论。)
 
 So, when contemplating a kernel development project, one should obtain
 answers to a short set of questions:
+(因此，在考虑一个内核开发项目时，应当先就下面这一小组问题找到答案：)
 
  - What, exactly, is the problem which needs to be solved?
+   (确切地说，需要解决的问题是什么？)
 
  - Who are the users affected by this problem?  Which use cases should the
    solution address?
+   (受此问题影响的用户是谁？解决方案应当应对哪些使用场景？)
 
  - How does the kernel fall short in addressing that problem now?
+   (内核目前在解决该问题方面有哪些不足？)
 
 Only then does it make sense to start considering possible solutions.
+(只有在此之后，才开始考虑可能的解决方案才有意义。)
 
 
-Early discussion
-----------------
+Early discussion(早期讨论)
+--------------------------
 
 When planning a kernel development project, it makes great sense to hold
 discussions with the community before launching into implementation.  Early
 communication can save time and trouble in a number of ways:
+(在规划一个内核开发项目时，在动手实现之前先与社区展开讨论是非常明智的。早期的沟通可以在多个方面节省时间和减少麻烦：)
 
  - It may well be that the problem is addressed by the kernel in ways which
    you have not understood.  The Linux kernel is large and has a number of
@@ -83,14 +97,17 @@ communication can save time and trouble in a number of ways:
    driver which duplicated an existing driver that the new author had been
    unaware of.  Code which reinvents existing wheels is not only wasteful;
    it will also not be accepted into the mainline kernel.
+   (很可能内核已经以你尚未理解的方式解决了这个问题。Linux 内核非常庞大，拥有许多并非一目了然的功能与能力。并非所有内核能力都得到了人们期望的详尽文档记录，遗漏在所难免。本文作者就曾见过有人提交了一个完整驱动程序，结果却重复实现了新作者并不知道的现有驱动。重复发明现有轮子的代码不仅浪费，而且也不会被收入主线内核。)
 
  - There may be elements of the proposed solution which will not be
    acceptable for mainline merging.  It is better to find out about
    problems like this before writing the code.
+   (提议的解决方案中可能存在无法被主线合并接受的部分。最好在写代码之前就弄清这类问题。)
 
  - It's entirely possible that other developers have thought about the
    problem; they may have ideas for a better solution, and may be willing
    to help in the creation of that solution.
+   (完全可能有其他开发者已经思考过这个问题；他们也许有更好解决方案的想法，并可能愿意协助实现该方案。)
 
 Years of experience with the kernel development community have taught a
 clear lesson: kernel code which is designed and developed behind closed
@@ -98,12 +115,14 @@ doors invariably has problems which are only revealed when the code is
 released into the community.  Sometimes these problems are severe,
 requiring months or years of effort before the code can be brought up to
 the kernel community's standards.  Some examples include:
+(多年与内核开发社区打交道的经验给出了一条清晰的教训：在闭门造车中设计和开发的内核代码，必然会带着只有在代码发布给社区之后才暴露出来的问题。有时这些问题相当严重，需要数月甚至数年的努力才能把代码提升到内核社区的标准。一些例子包括：)
 
  - The Devicescape network stack was designed and implemented for
    single-processor systems.  It could not be merged into the mainline
    until it was made suitable for multiprocessor systems.  Retrofitting
    locking and such into code is a difficult task; as a result, the merging
    of this code (now called mac80211) was delayed for over a year.
+   (Devicescape 网络栈是为单处理器系统设计和实现的。直到它被改造得适用于多处理器系统之后，才得以合入主线。为既有代码补加锁之类的工作非常困难；因此，这段代码(现在称为 mac80211)的合并被推迟了一年多。)
 
  - The Reiser4 filesystem included a number of capabilities which, in the
    core kernel developers' opinion, should have been implemented in the
@@ -112,18 +131,21 @@ the kernel community's standards.  Some examples include:
    deadlocks.  The late revelation of these problems - and refusal to
    address some of them - has caused Reiser4 to stay out of the mainline
    kernel.
+   (Reiser4 文件系统包含许多能力，而在核心内核开发者看来，这些本应在虚拟文件系统层实现。它还包含一些功能，若不把系统暴露于用户引发的死锁之下就难以实现。这些问题的迟迟暴露——以及拒绝解决其中一些问题——导致 Reiser4 一直未能进入主线内核。)
 
  - The AppArmor security module made use of internal virtual filesystem
    data structures in ways which were considered to be unsafe and
    unreliable.  This concern (among others) kept AppArmor out of the
    mainline for years.
+   (AppArmor 安全模块以被认为不安全、不可靠的方式使用了内部虚拟文件系统数据结构。这一顾虑(以及其他因素)使 AppArmor 多年未能进入主线。)
 
 In each of these cases, a great deal of pain and extra work could have been
 avoided with some early discussion with the kernel developers.
+(在上述每一个案例中，只要尽早与内核开发者进行一些讨论，大量的痛苦和额外工作本都可以避免。)
 
 
-Who do you talk to?
--------------------
+Who do you talk to?(与谁沟通？)
+-------------------------------
 
 When developers decide to take their plans public, the next question will
 be: where do we start?  The answer is to find the right mailing list(s) and
@@ -132,6 +154,7 @@ the MAINTAINERS file for a relevant place to post.  If there is a suitable
 subsystem list, posting there is often preferable to posting on
 linux-kernel; you are more likely to reach developers with expertise in the
 relevant subsystem and the environment may be more supportive.
+(当开发者决定将他们的计划公之于众时，下一个问题就是：从哪里入手？答案是找到合适的邮件列表和合适的维护者。对于邮件列表，最好的办法是查看 MAINTAINERS 文件，找到相关的发布场所。如果存在合适的子系统列表，在那里发帖通常比发到 linux-kernel 更好；你更有可能接触到对该子系统有专业造诣的开发者，而且那里的环境也可能更友善。)
 
 Finding maintainers can be a bit harder.  Again, the MAINTAINERS file is
 the place to start.  That file tends to not always be up to date, though,
@@ -143,9 +166,11 @@ currently active within the subsystem of interest.  Look at who is writing
 patches, and who, if anybody, is attaching Signed-off-by lines to those
 patches.  Those are the people who will be best placed to help with a new
 development project.
+(寻找维护者可能要更难一些。同样，MAINTAINERS 文件是入手之处。不过该文件并不总是最新的，而且并非所有子系统都登记在内。MAINTAINERS 文件中列出的人，事实上可能并不是目前实际担当该角色的人。因此，当不确定该联系谁时，一个有用的技巧是使用 git(尤其是 "git log")来查看当前在相关子系统中谁在活跃。看看谁在提交补丁，以及谁(如果有人)在为这些补丁附加 Signed-off-by 行。这些人才是最有能力帮助新开发项目的人。)
 
 The task of finding the right maintainer is sometimes challenging enough
 that the kernel developers have added a script to ease the process:
+(寻找合适维护者的任务有时颇具挑战，以至于内核开发者们加入了一个脚本来简化这一过程：)
 
 ::
 
@@ -159,19 +184,22 @@ list of people to Cc for your patches.  There are a number of options
 regulating how hard get_maintainer.pl will search for maintainers; please be
 careful about using the more aggressive options as you may end up including
 developers who have no real interest in the code you are modifying.
+(当给定 "-f" 选项时，该脚本会返回给定文件或目录的当前维护者。如果在命令行上传入一个补丁，它会列出可能应当接收该补丁副本的维护者。这是获取补丁 Cc 名单的首选方式(与 "-f" 选项不同)。还有许多选项用于调节 get_maintainer.pl 查找维护者的力度；使用那些较为激进的选项时请务必小心，否则最终可能把对你所修改代码毫无兴趣的开发者也囊括进来。)
 
 If all else fails, talking to Andrew Morton can be an effective way to
 track down a maintainer for a specific piece of code.
+(如果所有办法都行不通，与 Andrew Morton 谈一谈往往也能有效地找到特定代码的维护者。)
 
 
-When to post?
--------------
+When to post?(何时发布？)
+-------------------------
 
 If possible, posting your plans during the early stages can only be
 helpful.  Describe the problem being solved and any plans that have been
 made on how the implementation will be done.  Any information you can
 provide can help the development community provide useful input on the
 project.
+(如果可能，在早期阶段公布你的计划只会带来好处。描述你正在解决的问题，以及你为如何实现而制定的任何计划。你能提供的任何信息，都有助于开发社区为该项目提供有用的意见。)
 
 One discouraging thing which can happen at this stage is not a hostile
 reaction, but, instead, little or no reaction at all.  The sad truth of the
@@ -181,16 +209,18 @@ back them up, and (3) nobody is obligated to review or comment on ideas
 posted by others.  Beyond that, high-level designs often hide problems
 which are only revealed when somebody actually tries to implement those
 designs; for that reason, kernel developers would rather see the code.
+(在这一阶段可能发生的令人沮丧的事情，不是敌意的反应，而是几乎或完全没有反应。令人遗憾的事实是：(1) 内核开发者往往很忙；(2) 有宏大计划却很少有代码(甚至连写出代码的前景都没有)来支撑的人并不少见；(3) 没有任何人有义务对他人的想法进行评审或评论。除此之外，高层次的设计常常掩盖了只有在有人真正尝试实现这些设计时才会暴露的问题；因此，内核开发者更愿意直接看到代码。)
 
 If a request-for-comments posting yields little in the way of comments, do
 not assume that it means there is no interest in the project.
 Unfortunately, you also cannot assume that there are no problems with your
 idea.  The best thing to do in this situation is to proceed, keeping the
 community informed as you go.
+(如果一次 request-for-comments(RFC) 帖子收到的评论寥寥，不要据此认定社区对这个项目没有兴趣。不过很遗憾，你也不能认定你的想法没有任何问题。在这种情形下，最好的做法是继续推进，并随时让社区了解你的进展。)
 
 
-Getting official buy-in
------------------------
+Getting official buy-in(获得官方认可)
+-------------------------------------
 
 If your work is being done in a corporate environment - as most Linux
 kernel work is - you must, obviously, have permission from suitably
@@ -199,6 +229,7 @@ public mailing list.  The posting of code which has not been cleared for
 release under a GPL-compatible license can be especially problematic; the
 sooner that a company's management and legal staff can agree on the posting
 of a kernel development project, the better off everybody involved will be.
+(如果你的工作是在公司环境中进行的——大多数 Linux 内核工作都是如此——那么在把公司的计划或代码发布到公共邮件列表之前，你显然必须获得相应有权限的管理者的许可。发布尚未获准以 GPL 兼容许可证发布的代码尤其麻烦；公司的管理层和法律人员越早就内核开发项目的发布达成一致，所有相关人员就越受益。)
 
 Some readers may be thinking at this point that their kernel work is
 intended to support a product which does not yet have an officially
@@ -206,6 +237,7 @@ acknowledged existence.  Revealing their employer's plans on a public
 mailing list may not be a viable option.  In cases like this, it is worth
 considering whether the secrecy is really necessary; there is often no real
 need to keep development plans behind closed doors.
+(此时，一些读者可能在想：他们的内核工作是为了支持一款尚未获得官方承认存在的产品。在公共邮件列表上公开雇主的计划也许并不是一个可行的选择。在这种情况下，值得考虑这种保密是否真的有必要；把开发计划藏在闭门造车之中往往并没有真正的必要。)
 
 That said, there are also cases where a company legitimately cannot
 disclose its plans early in the development process.  Companies with
@@ -216,8 +248,10 @@ best option is often to hire an outside developer to review the plans under
 a non-disclosure agreement.  The Linux Foundation operates an NDA program
 designed to help with this sort of situation; more information can be found
 at:
+(话虽如此，也确实存在公司确实无法在开发过程早期公开其计划的情况。拥有经验丰富的内核开发者的公司，可以选择以开环方式继续推进，并假定自己日后能够避免严重的集成问题。而对于没有这类内部专长的公司，最好的选择往往是聘请一位外部开发者在保密协议下审阅这些计划。Linux 基金会运作着一个旨在帮助此类情况的 NDA 项目；更多信息可以在以下网址找到：)
 
     https://www.linuxfoundation.org/nda/
 
 This kind of review is often enough to avoid serious problems later on
 without requiring public disclosure of the project.
+(这种形式的审查往往足以避免日后出现严重问题，同时又无需公开披露该项目。)

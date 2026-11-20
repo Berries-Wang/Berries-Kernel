@@ -1,10 +1,10 @@
 .. _development_process_intro:
 
-Introduction
-============
+Introduction(引言)
+==================
 
-Executive summary
------------------
+Executive summary(内容提要)
+---------------------------
 
 The rest of this section covers the scope of the kernel development process
 and the kinds of frustrations that developers and their employers can
@@ -13,6 +13,10 @@ merged into the official ("mainline") kernel, including automatic
 availability to users, community support in many forms, and the ability to
 influence the direction of kernel development.  Code contributed to the
 Linux kernel must be made available under a GPL-compatible license.
+(本节其余部分涵盖内核开发过程的范围，以及开发者及其雇主在其中可能遇到的种种
+挫折。内核代码应当被合并进官方("主线")内核的理由有很多，包括能够自动提供给
+用户使用、各种形式的社区支持，以及影响内核发展方向的能力。贡献给 Linux 内核的
+代码必须以与 GPL 兼容的许可证提供。)
 
 :ref:`development_process` introduces the development process, the kernel
 release cycle, and the mechanics of the merge window.  The various phases in
@@ -20,35 +24,51 @@ the patch development, review, and merging cycle are covered.  There is some
 discussion of tools and mailing lists.  Developers wanting to get started
 with kernel development are encouraged to track down and fix bugs as an
 initial exercise.
+(development_process 一节介绍开发过程、内核发布周期以及合并窗口的运作机制。
+其中涵盖补丁开发、审查与合并周期的各个阶段，也讨论了一些工具和邮件列表。想要
+开始参与内核开发的开发者，不妨以查找并修复 bug 作为最初的练习。)
 
 :ref:`development_early_stage` covers early-stage project planning, with an
 emphasis on involving the development community as soon as possible.
+(development_early_stage 一节涵盖早期阶段的项目规划，重点强调尽早让开发社区
+参与进来。)
 
 :ref:`development_coding` is about the coding process; several pitfalls which
 have been encountered by other developers are discussed.  Some requirements for
 patches are covered, and there is an introduction to some of the tools
 which can help to ensure that kernel patches are correct.
+(development_coding 一节讨论编码过程；其中谈到其他开发者曾遇到过的若干陷阱，
+介绍补丁需要满足的一些要求，并引入了一些有助于确保内核补丁正确性的工具。)
 
 :ref:`development_posting` talks about the process of posting patches for
 review. To be taken seriously by the development community, patches must be
 properly formatted and described, and they must be sent to the right place.
 Following the advice in this section should help to ensure the best
 possible reception for your work.
+(development_posting 一节讲述提交补丁供审查的过程。要获得开发社区的认真对待，
+补丁必须正确地格式化并加以描述，而且必须发送到正确的地方。遵循本节的建议应该
+有助于让你的工作得到尽可能好的回应。)
 
 :ref:`development_followthrough` covers what happens after posting patches; the
 job is far from done at that point.  Working with reviewers is a crucial part
 of the development process; this section offers a number of tips on how to
 avoid problems at this important stage.  Developers are cautioned against
 assuming that the job is done when a patch is merged into the mainline.
+(development_followthrough 一节涵盖提交补丁之后会发生什么；到那时工作还远没有
+结束。与审查者协作是开发过程中至关重要的一环；本节给出若干建议，帮助你在这一
+重要阶段避免问题。需要提醒开发者的是，不要以为补丁合入主线之后就万事大吉。)
 
 :ref:`development_advancedtopics` introduces a couple of "advanced" topics:
 managing patches with git and reviewing patches posted by others.
+(development_advancedtopics 一节介绍几个"高级"主题：使用 git 管理补丁，以及
+审查他人提交的补丁。)
 
 :ref:`development_conclusion` concludes the document with pointers to sources
 for more information on kernel development.
+(development_conclusion 一节给出更多内核开发信息来源的指引，作为全文的收尾。)
 
-What this document is about
----------------------------
+What this document is about(本文档的主题)
+-----------------------------------------
 
 The Linux kernel, at over 8 million lines of code and well over 1000
 contributors to each release, is one of the largest and most active free
@@ -57,6 +77,11 @@ kernel has evolved into a best-of-breed operating system component which
 runs on pocket-sized digital music players, desktop PCs, the largest
 supercomputers in existence, and all types of systems in between.  It is a
 robust, efficient, and scalable solution for almost any situation.
+(Linux 内核拥有超过 800 万行代码，每个版本的贡献者都远超 1000 人，是现存规模
+最大、最为活跃的自由软件项目之一。自 1991 年卑微起步以来，这个内核已经演进成
+一个出类拔萃的操作系统组件，运行在口袋大小的数字音乐播放器、桌面 PC、现存最大
+的超级计算机以及介于其间的各类系统上。对几乎任何场景而言，它都是一个健壮、高效
+且可扩展的解决方案。)
 
 With the growth of Linux has come an increase in the number of developers
 (and companies) wishing to participate in its development.  Hardware
@@ -68,6 +93,12 @@ other software vendors who base their products on Linux have a clear
 interest in the capabilities, performance, and reliability of the Linux
 kernel.  And end users, too, will often wish to change Linux to make it
 better suit their needs.
+(随着 Linux 的成长，希望参与其开发的开发者(和公司)数量也在增加。硬件厂商希望
+确保 Linux 良好支持他们的产品，使这些产品对 Linux 用户更具吸引力。把 Linux
+用作一体化产品组件的嵌入式系统厂商，希望 Linux 尽可能胜任手头的任务。基于
+Linux 构建产品的发行商和其他软件厂商，对 Linux 内核的能力、性能和可靠性有着
+切身的利益关切。而最终用户也常常希望自己动手修改 Linux，让它更好地满足自身
+需求。)
 
 One of the most compelling features of Linux is that it is accessible to
 these developers; anybody with the requisite skills can improve Linux and
@@ -77,6 +108,11 @@ process.  But, if anything, the kernel is even more open than most other
 free software projects.  A typical three-month kernel development cycle can
 involve over 1000 developers working for more than 100 different companies
 (or for no company at all).
+(Linux 最引人注目的特性之一是它对这些开发者是开放的：任何具备相应技能的人都可以
+改进 Linux 并影响其发展方向。专有产品无法提供这种开放性，而这正是自由软件过程
+的特征。而即便与其他自由软件项目相比，内核也要开放得多。一个典型的为期三个月的
+内核开发周期，可能有超过 1000 名来自 100 多家不同公司(或者不属于任何公司)的
+开发者参与。)
 
 Working with the kernel development community is not especially hard.  But,
 that notwithstanding, many potential contributors have experienced
@@ -86,6 +122,10 @@ smoothly (and produce a high-quality product) in an environment where
 thousands of lines of code are being changed every day.  So it is not
 surprising that Linux kernel development process differs greatly from
 proprietary development methods.
+(与内核开发社区共事并不特别困难。尽管如此，许多潜在的贡献者在尝试做内核工作时
+都曾遇到过困难。内核社区已经演化出自己独特的运作方式，使其能够在每天有数千行
+代码被修改的环境中顺畅运转(并产出高质量的产品)。因此，Linux 内核开发过程与
+专有开发方法大相径庭也就不足为奇了。)
 
 The kernel's development process may come across as strange and
 intimidating to new developers, but there are good reasons and solid
@@ -94,6 +134,10 @@ community's ways (or, worse, who tries to flout or circumvent them) will
 have a frustrating experience in store.  The development community, while
 being helpful to those who are trying to learn, has little time for those
 who will not listen or who do not care about the development process.
+(内核的开发过程对新开发者来说可能显得古怪而令人生畏，但它背后有充分的理由和
+扎实的经验。不理解内核社区行事方式(或者更糟，试图蔑视或绕开它们)的开发者，
+等待他的将是令人沮丧的经历。开发社区乐于帮助那些试图学习的人，但对那些不肯
+倾听、不在乎开发过程的人则没什么耐心。)
 
 It is hoped that those who read this document will be able to avoid that
 frustrating experience.  There is a lot of material here, but the effort
@@ -101,21 +145,30 @@ involved in reading it will be repaid in short order.  The development
 community is always in need of developers who will help to make the kernel
 better; the following text should help you - or those who work for you -
 join our community.
+(希望阅读本文档的人能够避免那种令人沮丧的经历。这里的内容很多，但阅读它所付出
+的努力很快就会得到回报。开发社区始终需要愿意帮助改进内核的开发者；下面的文字
+应当能帮助你——或者你的雇员——加入我们的社区。)
 
-Credits
--------
+Credits(致谢)
+-------------
 
 This document was written by Jonathan Corbet, corbet@lwn.net.  It has been
 improved by comments from Johannes Berg, James Berry, Alex Chiang, Roland
 Dreier, Randy Dunlap, Jake Edge, Jiri Kosina, Matt Mackall, Arthur Marsh,
 Amanda McPherson, Andrew Morton, Andrew Price, Tsugikazu Shibata, and
 Jochen Voß.
+(本文档由 Jonathan Corbet 撰写(corbet@lwn.net)。Johannes Berg、James Berry、
+Alex Chiang、Roland Dreier、Randy Dunlap、Jake Edge、Jiri Kosina、Matt
+Mackall、Arthur Marsh、Amanda McPherson、Andrew Morton、Andrew Price、
+Tsugikazu Shibata 以及 Jochen Voß 等人的意见使它得以改进。)
 
 This work was supported by the Linux Foundation; thanks especially to
 Amanda McPherson, who saw the value of this effort and made it all happen.
+(这项工作得到了 Linux 基金会的支持；特别感谢 Amanda McPherson，她看到了这项
+工作的价值并促成了它的实现。)
 
-The importance of getting code into the mainline
-------------------------------------------------
+The importance of getting code into the mainline(让代码进入主线的重要性)
+------------------------------------------------------------------------
 
 Some companies and developers occasionally wonder why they should bother
 learning how to work with the kernel community and get their code into the
@@ -124,10 +177,16 @@ Torvalds and used as a base by Linux distributors).  In the short term,
 contributing code can look like an avoidable expense; it seems easier to
 just keep the code separate and support users directly.  The truth of the
 matter is that keeping code separate ("out of tree") is a false economy.
+(一些公司和开发者偶尔会疑惑，为什么要费心学习如何与内核社区协作并把自己的代码
+送入主线内核("主线"指由 Linus Torvalds 维护、被 Linux 发行版用作基础的内核)。
+短期来看，贡献代码像是一笔可以避免的开支；似乎把代码单独放着、直接支持用户更
+容易。而事实是，把代码单独放着("树外")是一种虚假的省钱。)
 
 As a way of illustrating the costs of out-of-tree code, here are a few
 relevant aspects of the kernel development process; most of these will be
 discussed in greater detail later in this document.  Consider:
+(为了说明树外代码的代价，下面列出内核开发过程的几个相关方面；其中大部分将在
+本文档后面更详细地讨论。请考虑：)
 
 - Code which has been merged into the mainline kernel is available to all
   Linux users.  It will automatically be present on all distributions which
@@ -135,6 +194,9 @@ discussed in greater detail later in this document.  Consider:
   of supporting multiple versions of multiple distributions; it all just
   works, for the developer and for the user.  Incorporation into the
   mainline solves a large number of distribution and support problems.
+  (已合入主线内核的代码对所有 Linux 用户可用。它会自动出现在所有启用了它的
+  发行版中。不需要驱动光盘、下载，也没有支持多个发行版多个版本带来的麻烦；无论
+  对开发者还是用户，一切开箱即用。进入主线解决了一大批发行和支持方面的问题。)
 
 - While kernel developers strive to maintain a stable interface to user
   space, the internal kernel API is in constant flux.  The lack of a stable
@@ -150,10 +212,21 @@ discussed in greater detail later in this document.  Consider:
   to also fix any code that breaks as the result of that change.  So code
   which has been merged into the mainline has significantly lower
   maintenance costs.
+  (尽管内核开发者努力维护面向用户空间的稳定接口，内核内部 API 却处于持续变动
+  之中。缺乏稳定的内部接口是一个刻意的设计决定；它允许随时进行根本性的改进，
+  并造就更高质量的代码。但这一政策的一个结果是，任何树外代码都需要持续维护，
+  才能与新内核配合工作。维护树外代码需要投入大量工作，仅仅是为了让代码继续
+  可用。
+
+  相反，位于主线中的代码不需要这些工作，这源于一条简单的规则：任何做出 API
+  修改的开发者，也必须修复因该修改而失效的代码。因此，已合入主线的代码维护成本
+  显著更低。)
 
 - Beyond that, code which is in the kernel will often be improved by other
   developers.  Surprising results can come from empowering your user
   community and customers to improve your product.
+  (除此之外，内核中的代码常常会被其他开发者改进。让你的用户社区和客户有能力
+  改进你的产品，可能带来意想不到的结果。)
 
 - Kernel code is subjected to review, both before and after merging into
   the mainline.  No matter how strong the original developer's skills are,
@@ -162,11 +235,17 @@ discussed in greater detail later in this document.  Consider:
   especially true for code which has been developed in a closed
   environment; such code benefits strongly from review by outside
   developers.  Out-of-tree code is lower-quality code.
+  (内核代码会接受审查，合入主线之前和之后都是如此。无论原作者的技能多么过硬，
+  这一审查过程总会找出代码可以改进之处。审查常常会发现严重的 bug 和安全问题。
+  对在封闭环境中开发的代码而言尤其如此；这类代码从外部开发者的审查中获益巨大。
+  树外代码就是质量更低的代码。)
 
 - Participation in the development process is your way to influence the
   direction of kernel development.  Users who complain from the sidelines
   are heard, but active developers have a stronger voice - and the ability
   to implement changes which make the kernel work better for their needs.
+  (参与开发过程是你影响内核发展方向的方式。在旁边抱怨的用户也会被听到，但活跃
+  的开发者拥有更大的话语权——并且有能力实现让内核更好地满足其需求的改变。)
 
 - When code is maintained separately, the possibility that a third party
   will contribute a different implementation of a similar feature always
@@ -175,6 +254,10 @@ discussed in greater detail later in this document.  Consider:
   unpleasant alternatives of either (1) maintaining a nonstandard feature
   out of tree indefinitely, or (2) abandoning your code and migrating your
   users over to the in-tree version.
+  (当代码被单独维护时，第三方贡献相似功能的另一种实现的可能性始终存在。一旦
+  发生，你的代码要被合并就会变得困难得多——甚至毫无可能。那时你将面临令人不快
+  的两个选择：(1) 在树外无限期维护一个非标准特性，或者 (2) 放弃你的代码，把
+  用户迁移到树内版本。)
 
 - Contribution of code is the fundamental action which makes the whole
   process work.  By contributing your code you can add new functionality to
@@ -183,12 +266,19 @@ discussed in greater detail later in this document.  Consider:
   thinking about doing so), you clearly have an interest in the continued
   success of this platform; contributing code is one of the best ways to
   help ensure that success.
+  (贡献代码是让整个过程得以运转的根本行动。通过贡献你的代码，你可以为内核增加
+  新功能，并为其他内核开发者提供有用的能力和范例。如果你已经为 Linux 开发代码
+  (或正在考虑这样做)，你显然关心这个平台的持续成功；贡献代码是帮助确保这种
+  成功的最好方式之一。)
 
 All of the reasoning above applies to any out-of-tree kernel code,
 including code which is distributed in proprietary, binary-only form.
 There are, however, additional factors which should be taken into account
 before considering any sort of binary-only kernel code distribution.  These
 include:
+(以上所有论述适用于任何树外内核代码，包括以专有的纯二进制形式分发的代码。
+不过，在考虑任何形式的纯二进制内核代码分发之前，还有一些额外的因素需要纳入
+考量。它们包括：)
 
 - The legal issues around the distribution of proprietary kernel modules
   are cloudy at best; quite a few kernel copyright holders believe that
@@ -199,11 +289,18 @@ include:
   legal advice.  The true legal status of closed-source modules can only be
   determined by the courts.  But the uncertainty which haunts those modules
   is there regardless.
+  (围绕专有内核模块分发的法律问题充其量是模糊不清的；相当多内核版权持有者
+  认为，大多数纯二进制模块是内核的衍生产品，因此分发它们违反 GNU 通用公共
+  许可证(下文还会详述)。本文作者不是律师，本文档中的任何内容都不应被视为
+  法律建议。闭源模块真正的法律地位只能由法院来判定。但萦绕在这些模块之上的
+  不确定性无论如何都存在。)
 
 - Binary modules greatly increase the difficulty of debugging kernel
   problems, to the point that most kernel developers will not even try.  So
   the distribution of binary-only modules will make it harder for your
   users to get support from the community.
+  (二进制模块极大增加了调试内核问题的难度，以至于大多数内核开发者连试都不愿
+  试。因此，分发纯二进制模块会让你的用户更难从社区获得支持。)
 
 - Support is also harder for distributors of binary-only modules, who must
   provide a version of the module for every distribution and every kernel
@@ -211,11 +308,16 @@ include:
   be required to provide reasonably comprehensive coverage, and your users
   will have to upgrade your module separately every time they upgrade their
   kernel.
+  (对纯二进制模块的分发者来说，支持同样更加困难：他们必须为他们想支持的每一个
+  发行版和每一个内核版本提供一个模块版本。要提供相当全面的覆盖，可能需要同一
+  模块的几十个构建版本，而你的用户每次升级内核时都得单独升级你的模块。)
 
 - Everything that was said above about code review applies doubly to
   closed-source code.  Since this code is not available at all, it cannot
   have been reviewed by the community and will, beyond doubt, have serious
   problems.
+  (上文关于代码审查的一切论述都加倍适用于闭源代码。由于这些代码完全不可获得，
+  它不可能经过社区审查，而且毫无疑问会存在严重问题。)
 
 Makers of embedded systems, in particular, may be tempted to disregard much
 of what has been said in this section in the belief that they are shipping
@@ -226,9 +328,14 @@ capabilities to your product.  But these products, too, have a limited
 commercial life, after which a new version must be released.  At that
 point, vendors whose code is in the mainline and well maintained will be
 much better positioned to get the new product ready for market quickly.
+(嵌入式系统的厂商尤其可能无视本节所说的许多内容，自认为他们交付的是一个使用
+冻结内核版本、发布后无需继续开发的自成体系的产品。这种论调忽视了广泛代码审查
+的价值，也忽视了让用户能够为你的产品增加能力的价值。而且这类产品的商业寿命同样
+有限，之后必须发布新版本。到那时，代码在主线中且维护良好的厂商，将更有可能在
+短时间内把新产品准备好推向市场。)
 
-Licensing
----------
+Licensing(许可证)
+-----------------
 
 Code is contributed to the Linux kernel under a number of licenses, but all
 code must be compatible with version 2 of the GNU General Public License
@@ -238,10 +345,16 @@ GPLv2 (with, optionally, language allowing distribution under later
 versions of the GPL) or the three-clause BSD license.  Any contributions
 which are not covered by a compatible license will not be accepted into the
 kernel.
+(贡献给 Linux 内核的代码采用多种许可证，但所有代码都必须与 GNU 通用公共许可证
+第 2 版 (GPLv2) 兼容，后者是覆盖内核整体发行的许可证。实践中，这意味着所有代码
+贡献要么由 GPLv2 覆盖(可选地加上允许按 GPL 更高版本分发的措辞)，要么由三条款
+BSD 许可证覆盖。任何不被兼容许可证覆盖的贡献都不会被内核接受。)
 
 Copyright assignments are not required (or requested) for code contributed
 to the kernel.  All code merged into the mainline kernel retains its
 original ownership; as a result, the kernel now has thousands of owners.
+(贡献给内核的代码不需要(也不会被要求)转让版权。所有合入主线内核的代码都保留
+其原始所有权；因此，内核如今拥有数千位所有者。)
 
 One implication of this ownership structure is that any attempt to change
 the licensing of the kernel is doomed to almost certain failure.  There are
@@ -249,6 +362,9 @@ few practical scenarios where the agreement of all copyright holders could
 be obtained (or their code removed from the kernel).  So, in particular,
 there is no prospect of a migration to version 3 of the GPL in the
 foreseeable future.
+(这种所有权结构的一个含义是，任何改变内核许可证的尝试都注定几乎必然失败。
+几乎不存在能取得全部版权持有者同意(或把其代码从内核移除)的现实场景。因此，
+尤其是在可预见的未来，迁移到 GPL 第 3 版毫无可能。)
 
 It is imperative that all code contributed to the kernel be legitimately
 free software.  For that reason, code from contributors without a known
@@ -258,6 +374,11 @@ with the kernel under the GPL.  Code which has not been licensed as free
 software by its owner, or which risks creating copyright-related problems for
 the kernel (such as code which derives from reverse-engineering efforts lacking
 proper safeguards) cannot be contributed.
+(所有贡献给内核的代码都必须是正当的自由软件，这一点至关重要。因此，来自身份
+不明贡献者或匿名贡献者的代码将不会被接受。所有贡献者都必须对其代码 "sign
+off"(签署声明)，声明该代码可以随内核以 GPL 许可证分发。未被其所有者以自由软件
+许可证授权的代码，或者可能给内核带来版权相关问题的代码(例如源自缺乏妥善保障
+的逆向工程工作的代码)，都不能被贡献进来。)
 
 Questions about copyright-related issues are common on Linux development
 mailing lists.  Such questions will normally receive no shortage of
@@ -266,3 +387,7 @@ questions are not lawyers and cannot provide legal advice.  If you have
 legal questions relating to Linux source code, there is no substitute for
 talking with a lawyer who understands this field.  Relying on answers
 obtained on technical mailing lists is a risky affair.
+(与版权相关的问题在 Linux 开发邮件列表上很常见。这类问题通常会得到大量回答，
+但应当记住，回答问题的人不是律师，不能提供法律建议。如果你有与 Linux 源码相关
+的法律问题，没有任何东西可以替代与懂这一领域的律师交谈。依赖技术邮件列表上
+获得的回答是一件冒险的事。)

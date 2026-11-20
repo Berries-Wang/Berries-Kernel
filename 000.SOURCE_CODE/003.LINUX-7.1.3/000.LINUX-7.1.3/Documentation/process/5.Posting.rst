@@ -1,7 +1,7 @@
 .. _development_posting:
 
-Posting patches
-===============
+Posting patches(提交补丁)
+=========================
 
 Sooner or later, the time comes when your work is ready to be presented to
 the community for review and, eventually, inclusion into the mainline
@@ -12,10 +12,17 @@ document will attempt to cover these expectations in reasonable detail;
 more information can also be found in the files
 :ref:`Documentation/process/submitting-patches.rst <submittingpatches>`
 and :ref:`Documentation/process/submit-checklist.rst <submitchecklist>`.
+(迟早会有这样一个时刻：你的工作已经准备好提交给社区评审，并最终进入主
+线内核。不出所料，内核开发社区已经形成了一套用于提交补丁的约定与流程；
+遵循它们会让所有相关者的生活轻松许多。本文将尝试以合理的详细程度涵盖这
+些期望；更多信息还可以在
+:ref:`Documentation/process/submitting-patches.rst <submittingpatches>`
+和 :ref:`Documentation/process/submit-checklist.rst <submitchecklist>`
+这两个文件中找到。)
 
 
-When to post
-------------
+When to post(何时提交)
+----------------------
 
 There is a constant temptation to avoid posting patches before they are
 completely "ready."  For simple patches, that is not a problem.  If the
@@ -29,13 +36,17 @@ good idea to say so in the posting itself.  Also mention any major work
 which remains to be done and any known problems.  Fewer people will look at
 patches which are known to be half-baked, but those who do will come in
 with the idea that they can help you drive the work in the right direction.
+(提交尚未被认为可以合并的代码时，最好在提交说明中直接言明这一点。同时
+也要提及尚待完成的重大工作以及任何已知问题。会去看已知半生不熟的补丁的
+人会少一些，但那些去看的人会抱着帮你把工作推向正确方向的想法而来。)
 
 
-Before creating patches
------------------------
+Before creating patches(创建补丁之前)
+-------------------------------------
 
 There are a number of things which should be done before you consider
 sending patches to the development community.  These include:
+(在把补丁发送给开发社区之前，有一些事情应当先做好。包括：)
 
  - Test the code to the extent that you can.  Make use of the kernel's
    debugging tools, ensure that the kernel will build with all reasonable
@@ -46,24 +57,36 @@ sending patches to the development community.  These include:
    Note that this may be mandatory when affecting some subsystems. For
    example, library functions (resides under lib/) are extensively used
    almost everywhere and expected to be tested appropriately.
+   (在你力所能及的范围内测试代码。利用内核的调试工具，确保内核能在所
+   有合理的配置选项组合下构建，使用交叉编译器为不同架构构建，等等。添
+   加测试——很可能使用 KUnit 之类的现有测试框架——并把它们作为系列中
+   的一个独立成员 (有关补丁系列的更多信息见下一节)。注意，当改动影响某
+   些子系统时这可能是强制要求。例如，库函数 (位于 lib/ 之下) 几乎在所有
+   地方都被大量使用，因而被期望得到适当的测试。)
 
  - Make sure your code is compliant with the kernel coding style
    guidelines.
+   (确保你的代码符合内核编码风格准则。)
 
  - Does your change have performance implications?  If so, you should run
    benchmarks showing what the impact (or benefit) of your change is; a
    summary of the results should be included with the patch.
+   (你的改动是否影响性能？如果是，你应当运行基准测试，展示你的改动的
+   影响 (或收益)；结果摘要应随补丁一并提交。)
 
  - Be sure that you have the right to post the code.  If this work was done
    for an employer, the employer likely has a right to the work and must be
    agreeable with its release under the GPL.
+   (确保你有权提交这些代码。如果这项工作是为雇主完成的，雇主很可能对
+   该工作享有权利，并且必须同意其在 GPL 之下发布。)
 
 As a general rule, putting in some extra thought before posting code almost
 always pays back the effort in short order.
+(作为一般规则，在提交代码之前多花一些心思思考，几乎总会很快得到回报。)
 
 
-Patch preparation
------------------
+Patch preparation(补丁的准备)
+-----------------------------
 
 The preparation of patches for posting can be a surprising amount of work,
 but, once again, attempting to save time here is not generally advisable
@@ -74,18 +97,27 @@ general rule, a patch should be based on the current mainline as found in
 Linus's git tree.  When basing on mainline, start with a well-known release
 point - a stable or -rc release - rather than branching off the mainline at
 an arbitrary spot.
+(补丁必须针对内核的特定版本来准备。作为一般规则，补丁应当基于 Linus 的
+git 树中当前的 mainline。基于 mainline 时，应从一个众所周知的发布点开
+始——stable 或 -rc 发布——而不是在 mainline 的任意位置分叉。)
 
 It may become necessary to make versions against -mm, linux-next, or a
 subsystem tree, though, to facilitate wider testing and review.  Depending
 on the area of your patch and what is going on elsewhere, basing a patch
 against these other trees can require a significant amount of work
 resolving conflicts and dealing with API changes.
+(不过，为了便于更广泛的测试与评审，可能有必要针对 -mm、linux-next 或某
+个子系统树制作版本。取决于补丁涉及的领域以及其他地方正在进行的工作，基
+于这些其他树的补丁可能需要大量解决冲突和处理 API 变更的工作。)
 
 Only the most simple changes should be formatted as a single patch;
 everything else should be made as a logical series of changes.  Splitting
 up patches is a bit of an art; some developers spend a long time figuring
 out how to do it in the way that the community expects.  There are a few
 rules of thumb, however, which can help considerably:
+(只有最简单的改动才应格式化为单个补丁；其他一切都应作为逻辑上的一系列
+改动来提交。拆分补丁是一门艺术；一些开发者会花很长时间琢磨如何以社区期
+望的方式完成它。不过有一些经验法则可以提供很大帮助：)
 
  - The patch series you post will almost certainly not be the series of
    changes found in your working revision control system.  Instead, the
@@ -93,6 +125,9 @@ rules of thumb, however, which can help considerably:
    split apart in ways which make sense.  The developers are interested in
    discrete, self-contained changes, not the path you took to get to those
    changes.
+   (你提交的补丁系列几乎肯定不会是你工作版本控制系统里那一系列改动。
+   相反，需要以最终形态审视你所做的改动，然后按有意义的方式拆分开。开发
+   者关心的是离散的、自包含的改动，而不是你走到这些改动所经历的路径。)
 
  - Each logically independent change should be formatted as a separate
    patch.  These changes can be small ("add a field to this structure") or
@@ -100,12 +135,19 @@ rules of thumb, however, which can help considerably:
    conceptually small and amenable to a one-line description.  Each patch
    should make a specific change which can be reviewed on its own and
    verified to do what it says it does.
+   (每个逻辑上独立的改动都应格式化为单独的补丁。这些改动可以很小 ("给
+   这个结构体加一个字段")，也可以很大 (例如添加一个重要的新驱动)，但它们
+   应当在概念上足够小，能够用一行描述概括。每个补丁都应做出一个具体的改
+   动，可独立评审，并能验证它确实做到了其所声称的事情。)
 
  - As a way of restating the guideline above: do not mix different types of
    changes in the same patch.  If a single patch fixes a critical security
    bug, rearranges a few structures, and reformats the code, there is a
    good chance that it will be passed over and the important fix will be
    lost.
+   (作为对上述准则的重申：不要在同一补丁中混合不同类型的改动。如果单
+   个补丁既修复了一个关键安全缺陷，又重排了几个结构体，还重新格式化了代
+   码，那么它很可能被直接略过，而重要的修复将随之丢失。)
 
  - Each patch should yield a kernel which builds and runs properly; if your
    patch series is interrupted in the middle, the result should still be a
@@ -113,12 +155,19 @@ rules of thumb, however, which can help considerably:
    scenario when the "git bisect" tool is used to find regressions; if the
    result is a broken kernel, you will make life harder for developers and
    users who are engaging in the noble work of tracking down problems.
+   (每个补丁所产生的内核都应能正常构建和运行；如果你的补丁系列在中间
+   被打断，其结果仍应是一个可用的内核。部分应用补丁系列是使用 "git
+   bisect" 工具查找回归时的常见情形；如果结果是内核损坏，你会给从事追踪
+   问题这项高尚工作的开发者和用户添麻烦。)
 
  - Do not overdo it, though.  One developer once posted a set of edits
    to a single file as 500 separate patches - an act which did not make him
    the most popular person on the kernel mailing list.  A single patch can
    be reasonably large as long as it still contains a single *logical*
    change.
+   (但也不要做过头。曾有一位开发者把对单个文件的修改拆成 500 个独立的
+   补丁提交——此举并没能让他成为内核邮件列表上最受欢迎的人。只要补丁仍
+   然只包含一个 *逻辑上* 的改动，它完全可以相当大。)
 
  - It can be tempting to add a whole new infrastructure with a series of
    patches, but to leave that infrastructure unused until the final patch
@@ -127,23 +176,34 @@ rules of thumb, however, which can help considerably:
    finger the last patch as the one which caused the problem, even though
    the real bug is elsewhere.  Whenever possible, a patch which adds new
    code should make that code active immediately.
+   (用一系列补丁添加一整套新基础设施、却让它一直闲置到系列最后一个补丁
+   才整体启用的做法很有诱惑力，但应尽量避免；如果该系列引入了回归，二分
+   查找会把最后一个补丁指认为问题根源，而真正的缺陷在别处。只要可能，添
+   加新代码的补丁就应当让这些代码立即被激活使用。)
 
 Working to create the perfect patch series can be a frustrating process
 which takes quite a bit of time and thought after the "real work" has been
 done.  When done properly, though, it is time well spent.
+(努力打造完美的补丁系列可能是一个令人沮丧的过程，需要在"真正的工作"
+完成之后花费相当多的时间和思考。但如果做得得当，这些时间是值得花的。)
 
 
-Patch formatting and changelogs
--------------------------------
+Patch formatting and changelogs(补丁格式与变更日志)
+---------------------------------------------------
 
 So now you have a perfect series of patches for posting, but the work is
 not done quite yet.  Each patch needs to be formatted into a message which
 quickly and clearly communicates its purpose to the rest of the world.  To
 that end, each patch will be composed of the following:
+(现在你有了一个完美的待提交补丁系列，但工作还没有完全结束。每个补丁都
+需要格式化成一条消息，快速而清晰地向世人传达其目的。为此，每个补丁将由
+以下部分组成：)
 
  - An optional "From" line naming the author of the patch.  This line is
    only necessary if you are passing on somebody else's patch via email,
    but it never hurts to add it when in doubt.
+   (可选的 "From" 行，注明补丁的作者。只有当你通过邮件转发别人的补丁时
+   才需要这一行，但拿不准时加上它也无妨。)
 
  - A one-line description of what the patch does.  This message should be
    enough for a reader who sees it with no other context to figure out the
@@ -156,12 +216,20 @@ that end, each patch will be composed of the following:
 
 	gpio: fix build on CONFIG_GPIO_SYSFS=n
 
+   (一行描述，说明该补丁做什么。这条消息应当足以让没有任何上下文的读
+   者弄清补丁的范围；它就是会出现在"简短形式"变更日志中的那一行。这条
+   消息通常以相关子系统名开头，后接补丁的目的。例如：)
+
  - A blank line followed by a detailed description of the contents of the
    patch.  This description can be as long as is required; it should say
    what the patch does and why it should be applied to the kernel.
+   (一个空行，其后是对补丁内容的详细描述。这段描述可以按需要任意长；
+   它应说明补丁做什么，以及为什么应当把它应用到内核。)
 
  - One or more tag lines, with, at a minimum, one Signed-off-by: line from
    the author of the patch.  Tags will be described in more detail below.
+   (一个或多个标签行，其中至少有一行来自补丁作者的 Signed-off-by:。
+   标签将在下文更详细地描述。)
 
 The items above, together, form the changelog for the patch.  Writing good
 changelogs is a crucial but often-neglected art; it's worth spending
@@ -174,6 +242,13 @@ hunters wondering whether the patch is responsible for a problem they are
 chasing, users who want to know how the kernel has changed, and more.  A
 good changelog conveys the needed information to all of these people in the
 most direct and concise way possible.
+(以上各项共同构成补丁的变更日志。写好变更日志是一门至关重要却常被忽
+略的艺术，值得再花一点时间讨论这个问题。撰写变更日志时应当记住，会有许
+多不同的人阅读你的文字。其中包括需要决定是否纳入补丁的子系统维护者和评
+审者、正在决定补丁是否应回移 (backport) 到其他内核的发行版厂商和其他维
+护者、想知道该补丁是否与他们正在追查的问题有关的缺陷猎手、想了解内核如
+何变化的用户，等等。好的变更日志以尽可能直接、简洁的方式把所需信息传达
+给所有这些人。)
 
 To that end, the summary line should describe the effects of and motivation
 for the change as well as possible given the one-line constraint.  The
@@ -188,23 +263,40 @@ changed, detail those changes and how other developers should respond.  In
 general, the more you can put yourself into the shoes of everybody who will
 be reading your changelog, the better that changelog (and the kernel as a
 whole) will be.
+(为此，摘要行应在一行的限制内尽可能描述清楚改动的影响与动机。详细描
+述随后可以对上述主题加以展开，并提供任何需要的补充信息。如果补丁修复了
+一个缺陷，应尽可能引用引入该缺陷的提交 (引用提交时请同时提供提交 ID 和
+标题)。如果问题与特定的日志或编译器输出相关，应附上这些输出，以帮助其
+他在寻找同一问题解法的人。如果改动是为了支撑后续补丁中的其他改动，应予
+以说明。如果内部 API 发生了变化，应详细说明这些变化以及其他开发者应如
+何应对。总的说来，你越能设身处地为每一位变更日志的读者着想，这份变更日
+志 (以及整个内核) 就会越好。)
 
 Needless to say, the changelog should be the text used when committing the
 change to a revision control system.  It will be followed by:
+(不用说，变更日志应当就是向版本控制系统提交该改动时所使用的文字。其
+后是：)
 
  - The patch itself, in the unified ("-u") patch format.  Using the "-p"
    option to diff will associate function names with changes, making the
    resulting patch easier for others to read.
+   (补丁本身，采用 unified ("-u") 补丁格式。给 diff 使用 "-p" 选项会把
+   函数名与改动关联起来，使得到的补丁更易于他人阅读。)
 
 The tags already briefly mentioned above are used to provide insights how
 the patch came into being. They are described in detail in the
 :ref:`Documentation/process/submitting-patches.rst <submittingpatches>`
 document; what follows here is a brief summary.
+(上面已经简要提到的那些标签用于说明补丁是如何产生的。它们在
+:ref:`Documentation/process/submitting-patches.rst <submittingpatches>`
+文档中有详细描述；这里只做一个简短的总结。)
 
 One tag is used to refer to earlier commits which introduced problems fixed by
 the patch::
 
 	Fixes: 1f2e3d4c5b6a ("The first line of the commit specified by the first 12 characters of its SHA-1 ID")
+
+(有一个标签用于引用那些引入了本补丁所修复问题的更早提交。)
 
 Another tag is used for linking web pages with additional backgrounds or
 details, for example an earlier discussion which leads to the patch or a
@@ -212,32 +304,51 @@ document with a specification implemented by the patch::
 
 	Link: https://example.com/somewhere.html  optional-other-stuff
 
+(另一个标签用于链接提供更多背景或细节的网页，例如引出该补丁的较早讨
+论、或包含该补丁所实现规范的文档。)
+
 As per guidance from the Chief Penguin, a Link: tag should only be added to
 a commit if it leads to useful information that is not found in the commit
 itself.
+(根据"首席企鹅"的指导意见，只有当链接指向提交本身所没有的有用信息时，
+才应向提交添加 Link: 标签。)
 
 If the URL points to a public bug report being fixed by the patch, use the
 "Closes:" tag instead::
 
 	Closes: https://example.com/issues/1234  optional-other-stuff
 
+(如果 URL 指向的是该补丁正在修复的公开缺陷报告，则应改用 "Closes:"
+标签。)
+
 Some bug trackers have the ability to close issues automatically when a
 commit with such a tag is applied. Some bots monitoring mailing lists can
 also track such tags and take certain actions. Private bug trackers and
 invalid URLs are forbidden.
+(一些缺陷跟踪器能够在应用带这种标签的提交时自动关闭相应条目。一些监控
+邮件列表的机器人也能跟踪这类标签并采取特定动作。私有缺陷跟踪器和无效
+URL 均被禁止。)
 
 Another kind of tag is used to document who was involved in the development of
 the patch. Each of these uses this format::
 
 	tag: Full Name <email address>  optional-other-stuff
 
+(另一类标签用于记录谁参与了补丁的开发。每一项都使用如下格式：)
+
 The tags in common use are:
+(常用的标签有：)
 
  - Signed-off-by: this is a developer's certification that he or she has
    the right to submit the patch for inclusion into the kernel.  It is an
    agreement to the Developer's Certificate of Origin, the full text of
    which can be found in :ref:`Documentation/process/submitting-patches.rst <submittingpatches>`
    Code without a proper signoff cannot be merged into the mainline.
+   (Signed-off-by: 这是开发者的一种认证，表明他或她有权提交该补丁以便
+   纳入内核。它表示同意开发者来源证书 (Developer's Certificate of
+   Origin)，其全文可在
+   :ref:`Documentation/process/submitting-patches.rst <submittingpatches>`
+   中找到。没有恰当签名的代码无法合并进主线。)
 
  - Co-developed-by: states that the patch was co-created by several developers;
    it is a used to give attribution to co-authors (in addition to the author
@@ -245,17 +356,30 @@ The tags in common use are:
    Every Co-developed-by: must be immediately followed by a Signed-off-by: of
    the associated co-author.  Details and examples can be found in
    :ref:`Documentation/process/submitting-patches.rst <submittingpatches>`.
+   (Co-developed-by: 表明该补丁由多位开发者共同完成；当多个人共同完成一
+   个补丁时，用它来为合作者署名 (除 From: 标签所署名的作者之外)。每个
+   Co-developed-by: 后面必须紧跟相应合作者的 Signed-off-by:。细节与示例
+   可在
+   :ref:`Documentation/process/submitting-patches.rst <submittingpatches>`
+   中找到。)
 
  - Acked-by: indicates an agreement by another developer (often a
    maintainer of the relevant code) that the patch is appropriate for
    inclusion into the kernel.
+   (Acked-by: 表示另一位开发者 (通常是相关代码的维护者) 同意该补丁适合
+   纳入内核。)
 
  - Tested-by: states that the named person has tested the patch and found
    it to work.
+   (Tested-by: 表明所署名的人已经测试过该补丁并确认其可用。)
 
  - Reviewed-by: the named developer has reviewed the patch for correctness;
    see the reviewer's statement in :ref:`Documentation/process/submitting-patches.rst <submittingpatches>`
    for more detail.
+   (Reviewed-by: 所署名的开发者已就该补丁的正确性进行过评审；更详细的
+   说明见
+   :ref:`Documentation/process/submitting-patches.rst <submittingpatches>`
+   中的评审者声明。)
 
  - Reported-by: names a user who reported a problem which is fixed by this
    patch; this tag is used to give credit to the (often underappreciated)
@@ -264,13 +388,21 @@ The tags in common use are:
    the report, unless the report is not available on the web. The Link: tag
    can be used instead of Closes: if the patch fixes a part of the issue(s)
    being reported.
+   (Reported-by: 署名报告了本补丁所修复问题的用户；该标签用于向那些测
+   试我们的代码、并在事情不正常时告知我们的人 (往往未被充分赏识) 表示感
+   谢。注意，该标签之后应跟一个指向报告的 Closes: 标签，除非该报告在网
+   上不可得。如果补丁只修复了所报告问题的一部分，可以用 Link: 标签代替
+   Closes:。)
 
  - A Suggested-by: tag indicates that the patch idea is suggested by the person
    named and ensures credit to the person for the idea. This will, hopefully,
    inspire them to help us again in the future.
+   (Suggested-by: 标签表明补丁的思路由所署名的人提出，并确保为其想法记
+   功。希望这能激励他们将来再次帮助我们。)
 
  - Cc: the named person received a copy of the patch and had the
    opportunity to comment on it.
+   (Cc: 所署名的人收到了补丁的副本，并有机会对其发表意见。)
 
 Be careful in the addition of the aforementioned tags to your patches, as all
 except for Cc:, Reported-by:, and Suggested-by: need explicit permission of the
@@ -281,22 +413,35 @@ and Suggested-by: did the reporting or suggestion in public. Note,
 bugzilla.kernel.org is a public place in this sense, but email addresses
 used there are private; so do not expose them in tags, unless the person
 used them in earlier contributions.
+(向补丁添加上述标签时要小心，因为除 Cc:、Reported-by: 和 Suggested-by:
+之外的所有标签都需要被署名者的明确许可。对这三个标签而言，如果该人曾以
+该姓名和电子邮件地址向 Linux 内核贡献过代码 (依据 lore 存档或提交历史可
+查)，则隐式许可即视为充分——且就 Reported-by: 和 Suggested-by: 而言，
+其报告或建议必须是公开发表过的。注意，就此意义而言 bugzilla.kernel.org
+是公开场所，但其中使用的电子邮件地址是私密的；因此不要在标签中暴露这些
+地址，除非该人曾在早先的贡献中使用过它们。)
 
 
-Sending the patch
------------------
+Sending the patch(发送补丁)
+---------------------------
 
 Before you mail your patches, there are a couple of other things you should
 take care of:
+(在邮寄补丁之前，还有几件事需要处理：)
 
  - Are you sure that your mailer will not corrupt the patches?  Patches
    which have had gratuitous white-space changes or line wrapping performed
    by the mail client will not apply at the other end, and often will not
    be examined in any detail.  If there is any doubt at all, mail the patch
    to yourself and convince yourself that it shows up intact.
+   (你确定你的邮件客户端不会破坏补丁吗？被邮件客户端擅自改动空白字符或
+   折行的补丁在另一端将无法应用，而且往往不会得到任何细致的检视。只要
+   有任何疑虑，就把补丁寄给自己，确认它能完好无损地送达。)
 
    :ref:`Documentation/process/email-clients.rst <email_clients>` has some
    helpful hints on making specific mail clients work for sending patches.
+   (:ref:`Documentation/process/email-clients.rst <email_clients>` 中有一
+   些让特定邮件客户端能够正常发送补丁的实用建议。)
 
  - Are you sure your patch is free of silly mistakes?  You should always
    run patches through scripts/checkpatch.pl and address the complaints it
@@ -304,36 +449,56 @@ take care of:
    embodiment of a fair amount of thought about what kernel patches should
    look like, is not smarter than you.  If fixing a checkpatch.pl complaint
    would make the code worse, don't do it.
+   (你确定补丁中没有低级错误吗？你应当始终让补丁过一遍
+   scripts/checkpatch.pl 并处理它提出的抱怨。请记住，checkpatch.pl 虽然
+   凝结了大量关于内核补丁应当是什么样子的思考，但它并不比你聪明。如果修
+   复某个 checkpatch.pl 抱怨反而会让代码变差，那就别改。)
 
 Patches should always be sent as plain text.  Please do not send them as
 attachments; that makes it much harder for reviewers to quote sections of
 the patch in their replies.  Instead, just put the patch directly into your
 message.
+(补丁应当始终以纯文本形式发送。请不要以附件形式发送；那会让评审者在回
+复中引用补丁的片段变得困难得多。直接把补丁放进你的消息正文即可。)
 
 When mailing patches, it is important to send copies to anybody who might
 be interested in it.  Unlike some other projects, the kernel encourages
 people to err on the side of sending too many copies; don't assume that the
 relevant people will see your posting on the mailing lists.  In particular,
 copies should go to:
+(邮寄补丁时，向任何可能感兴趣的人发送副本很重要。与其他一些项目不同，
+内核鼓励人们宁可多发副本；不要假定相关的人一定会在邮件列表上看到你的发
+帖。具体而言，副本应发送给：)
 
  - The maintainer(s) of the affected subsystem(s).  As described earlier,
    the MAINTAINERS file is the first place to look for these people.
+   (受影响子系统的维护者。如前所述，MAINTAINERS 文件是查找这些人的首要
+   去处。)
 
  - Other developers who have been working in the same area - especially
    those who might be working there now.  Using git to see who else has
    modified the files you are working on can be helpful.
+   (一直在同一领域工作的其他开发者——尤其是现在可能正在那里工作的人。
+   使用 git 查看还有谁修改过你正在处理的文件会很有帮助。)
 
  - If you are responding to a bug report or a feature request, copy the
    original poster as well.
+   (如果你是在回复缺陷报告或功能请求，也要抄送原始发帖人。)
 
  - Send a copy to the relevant mailing list, or, if nothing else applies,
    the linux-kernel list.
+   (向相关邮件列表发送副本；如果没有任何列表适用，则发给 linux-kernel
+   列表。)
 
  - If you are fixing a bug, think about whether the fix should go into the
    next stable update.  If so, stable@vger.kernel.org should get a copy of
    the patch.  Also add a "Cc: stable@vger.kernel.org" to the tags within
    the patch itself; that will cause the stable team to get a notification
    when your fix goes into the mainline.
+   (如果你在修复一个缺陷，考虑一下该修复是否应进入下一个 stable 更新。
+   如果是，stable@vger.kernel.org 应得到补丁的副本。同时在补丁自身的标
+   签中加上 "Cc: stable@vger.kernel.org"；这样当你的修复进入主线时，
+   stable 团队会收到通知。)
 
 When selecting recipients for a patch, it is good to have an idea of who
 you think will eventually accept the patch and get it merged.  While it
@@ -342,6 +507,11 @@ them, things are not normally done that way.  Linus is busy, and there are
 subsystem maintainers who watch over specific parts of the kernel.  Usually
 you will be wanting that maintainer to merge your patches.  If there is no
 obvious maintainer, Andrew Morton is often the patch target of last resort.
+(选择补丁收件人时，最好先想清楚你认为谁最终会接受补丁并将其合并。虽然
+可以直接把补丁发给 Linus Torvalds 并由他合并，但通常事情不是这么做的。
+Linus 很忙，而且有子系统维护者看管着内核的特定部分。通常你会希望由那个
+维护者来合并你的补丁。如果没有明显的维护者，Andrew Morton 往往是补丁的
+最后求助对象。)
 
 Patches need good subject lines.  The canonical format for a patch line is
 something like:
@@ -350,15 +520,22 @@ something like:
 
 	[PATCH nn/mm] subsys: one-line description of the patch
 
+(补丁需要好的主题行。补丁主题行的规范格式大致如下：)
+
 where "nn" is the ordinal number of the patch, "mm" is the total number of
 patches in the series, and "subsys" is the name of the affected subsystem.
 Clearly, nn/mm can be omitted for a single, standalone patch.
+(其中 "nn" 是补丁的序号，"mm" 是系列中补丁的总数，"subsys" 是受影响子
+系统的名称。显然，对于单个独立补丁，nn/mm 可以省略。)
 
 If you have a significant series of patches, it is customary to send an
 introductory description as part zero.  This convention is not universally
 followed though; if you use it, remember that information in the
 introduction does not make it into the kernel changelogs.  So please ensure
 that the patches, themselves, have complete changelog information.
+(如果你有一个规模可观的补丁系列，惯例是随第 0 部分发送一段介绍性描述。
+不过这一惯例并非人人遵循；如果你采用它，请记住引言中的信息不会进入内核
+变更日志。所以请确保补丁本身带有完整的变更日志信息。)
 
 In general, the second and following parts of a multi-part patch should be
 sent as a reply to the first part so that they all thread together at the
@@ -366,3 +543,7 @@ receiving end.  Tools like git and quilt have commands to mail out a set of
 patches with the proper threading.  If you have a long series, though, and
 are using git, please stay away from the --chain-reply-to option to avoid
 creating exceptionally deep nesting.
+(一般而言，多部分补丁的第二部分及以后各部分应作为对第一部分的回复发
+送，以便它们在接收端串成一个话题。git 和 quilt 等工具都有以正确线程方式
+邮寄一组补丁的命令。不过，如果你有一个很长的系列并且在使用 git，请避免
+使用 --chain-reply-to 选项，以免产生过深的嵌套。)

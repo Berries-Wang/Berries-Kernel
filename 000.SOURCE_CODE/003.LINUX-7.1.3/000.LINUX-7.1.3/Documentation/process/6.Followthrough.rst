@@ -1,7 +1,7 @@
 .. _development_followthrough:
 
-Followthrough
-=============
+Followthrough(后续跟进)
+=======================
 
 At this point, you have followed the guidelines given so far and, with the
 addition of your own engineering skills, have posted a perfect series of
@@ -9,6 +9,7 @@ patches.  One of the biggest mistakes that even experienced kernel
 developers can make is to conclude that their work is now done.  In truth,
 posting patches indicates a transition into the next stage of the process,
 with, possibly, quite a bit of work yet to be done.
+(此时，你已经遵循了目前给出的各项准则，并凭借自己的工程技能提交了一系列完美的补丁。即使是经验丰富的内核开发者，也会犯的一个最大错误，就是认为自己的工作到此已经完成。事实上，提交补丁标志着流程进入下一个阶段，可能还有相当多的工作有待完成。)
 
 It is a rare patch which is so good at its first posting that there is no
 room for improvement.  The kernel development process recognizes this fact,
@@ -17,16 +18,18 @@ code.  You, as the author of that code, will be expected to work with the
 kernel community to ensure that your code is up to the kernel's quality
 standards.  A failure to participate in this process is quite likely to
 prevent the inclusion of your patches into the mainline.
+(很少有补丁在第一次提交时就完美到没有改进的余地。内核开发流程承认这一事实，因此非常注重对已提交代码的改进。作为代码的作者，你将被期望与内核社区合作，确保你的代码达到内核的质量标准。不参与这一过程，很可能导致你的补丁无法进入主线。)
 
 
-Working with reviewers
-----------------------
+Working with reviewers(与评审者协作)
+------------------------------------
 
 A patch of any significance will result in a number of comments from other
 developers as they review the code.  Working with reviewers can be, for
 many developers, the most intimidating part of the kernel development
 process.  Life can be made much easier, though, if you keep a few things in
 mind:
+(任何有分量的补丁，都会在其他开发者评审代码时收到大量评论。对许多开发者来说，与评审者协作可能是内核开发流程中最令人畏惧的部分。不过，记住以下几点可以让这件事容易得多：)
 
  - If you have explained your patch well, reviewers will understand its
    value and why you went to the trouble of writing it.  But that value
@@ -35,6 +38,7 @@ mind:
    Many of the changes you may be asked to make - from coding style tweaks
    to substantial rewrites - come from the understanding that Linux will
    still be around and under development a decade from now.
+   (如果你已经把补丁解释清楚，评审者会理解它的价值，以及你为何费心编写它。但这并不能阻止他们提出一个根本性的问题：五到十年之后，维护一个包含这段代码的内核会是什么样子？你可能被要求做出的许多修改——从编码风格微调到大改重写——都源于这样一种认识：十年之后 Linux 依然存在并处于开发之中。)
 
  - Code review is hard work, and it is a relatively thankless occupation;
    people remember who wrote kernel code, but there is little lasting fame
@@ -43,6 +47,7 @@ mind:
    review which seems angry, insulting, or outright offensive, resist the
    impulse to respond in kind.  Code review is about the code, not about
    the people, and code reviewers are not attacking you personally.
+   (代码评审是一项艰苦的工作，而且相对而言是一件吃力不讨好的事情；人们记得是谁写了内核代码，但对评审代码的人却少有持久的名声。因此评审者会变得脾气暴躁，尤其是当他们看到同样的错误一遍又一遍地重复出现时。如果你收到一条看起来愤怒、侮辱性甚至公然冒犯的评审意见，请克制以牙还牙的冲动。代码评审针对的是代码，而不是人，评审者并不是在对你个人进行攻击。)
 
  - Similarly, code reviewers are not trying to promote their employers'
    agendas at the expense of your own.  Kernel developers often expect to
@@ -50,6 +55,7 @@ mind:
    employer could change.  They truly are, almost without exception,
    working toward the creation of the best kernel they can; they are not
    trying to create discomfort for their employers' competitors.
+   (同样，代码评审者也不是在牺牲你的利益来推进他们雇主的议程。内核开发者通常期望自己在多年之后仍在从事内核工作，但他们也明白自己的雇主可能会更换。几乎无一例外，他们确实在为创造出力所能及的最好的内核而努力；他们并不是在为难其雇主的竞争对手。)
 
  - Be prepared for seemingly silly requests for coding style changes
    and requests to factor out some of your code to shared parts of
@@ -57,6 +63,7 @@ mind:
    the same. Sometimes this means that the clever hack in your driver
    to get around a problem actually needs to become a generalized
    kernel feature ready for next time.
+   (请做好准备，接受一些看似愚蠢的编码风格修改要求，以及把你的部分代码抽取到内核共享部分的要求。维护者的工作之一就是让代码风格保持一致。有时这意味着，你驱动中为了绕过某个问题而想出的聪明小技巧，实际上需要变成一个通用化的内核特性，以便下次使用。)
 
 What all of this comes down to is that, when reviewers send you comments,
 you need to pay attention to the technical observations that they are
@@ -65,6 +72,7 @@ from happening.  When you get review comments on a patch, take the time to
 understand what the reviewer is trying to say.  If possible, fix the things
 that the reviewer is asking you to fix.  And respond back to the reviewer:
 thank them, and describe how you will answer their questions.
+(归根结底，当评审者给你发送评论时，你需要关注他们提出的那些技术层面的观察。不要让他们的表达方式或你自己的自尊心妨碍这一点。当你收到对某个补丁的评审意见时，花点时间弄清评审者想表达什么。如果可能，就修好评审者要求你修的东西。并且要回复评审者：感谢他们，并说明你将如何回答他们的问题。)
 
 Note that you do not have to agree with every change suggested by
 reviewers.  If you believe that the reviewer has misunderstood your code,
@@ -76,16 +84,19 @@ agree with the reviewer, take some time to think things over again.  It can
 be easy to become blinded by your own solution to a problem to the point
 that you don't realize that something is fundamentally wrong or, perhaps,
 you're not even solving the right problem.
+(注意，你不必同意评审者建议的每一处修改。如果你认为评审者误解了你的代码，请解释实际发生的情况。如果你对建议的修改有技术上的异议，请说明理由，并论证你的解决方案。如果你的解释言之有理，评审者会接受它们。不过，如果你的解释没有说服力——尤其是当其他人也开始赞同评审者时——请花点时间重新思考。人很容易被自己对某个问题的解决方案蒙蔽，以至于意识不到哪里从根本上出了问题，或者，甚至根本没有解决正确的问题。)
 
 Andrew Morton has suggested that every review comment which does not result
 in a code change should result in an additional code comment instead; that
 can help future reviewers avoid the questions which came up the first time
 around.
+(Andrew Morton 建议：每一条没有导致代码修改的评审意见，都应该促成一条额外的代码注释；这可以帮助未来的评审者避免第一次出现过的那些疑问。)
 
 One fatal mistake is to ignore review comments in the hope that they will
 go away.  They will not go away.  If you repost code without having
 responded to the comments you got the time before, you're likely to find
 that your patches go nowhere.
+(一个致命的错误是无视评审意见，指望它们会自行消失。它们不会消失。如果你重新提交代码时没有回应上一次收到的评论，你的补丁很可能会原地踏步。)
 
 Speaking of reposting code: please bear in mind that reviewers are not
 going to remember all the details of the code you posted the last time
@@ -95,6 +106,7 @@ place for this kind of information.  Reviewers should not have to search
 through list archives to familiarize themselves with what was said last
 time; if you help them get a running start, they will be in a better mood
 when they revisit your code.
+(说到重新提交代码：请记住，评审者不会记得你上次提交的代码的所有细节。因此，提醒评审者之前提出过的问题以及你是如何处理的，总是个好主意；补丁变更日志是放置这类信息的好地方。评审者不应该为了解上次讨论的内容而不得不翻查邮件列表存档；如果你能帮助他们快速进入状态，他们重新审视你的代码时心情会更好。)
 
 What if you've tried to do everything right and things still aren't going
 anywhere?  Most technical disagreements can be resolved through discussion,
@@ -106,10 +118,11 @@ kernel development community; he can often unjam a situation which seems to
 be hopelessly blocked.  Appealing to Andrew should not be done lightly,
 though, and not before all other alternatives have been explored.  And bear
 in mind, of course, that he may not agree with you either.
+(如果你已经把每件事都做对了，事情却仍然毫无进展，该怎么办？大多数技术分歧可以通过讨论解决，但有时必须由某个人来做决定。如果你真诚地认为这个决定错误地不利于你，你可以尝试向"更高权威"申诉。在撰写本文时，这个更高权威往往是 Andrew Morton。Andrew 在内核开发社区中享有极高的威望；他常常能解开看似陷入僵局的困境。不过，向 Andrew 申诉不应轻率为之，也不应在穷尽了所有其他途径之前进行。当然，也要记住，他可能同样不会赞同你。)
 
 
-What happens next
------------------
+What happens next(接下来会发生什么)
+-----------------------------------
 
 If a patch is considered to be a good thing to add to the kernel, and once
 most of the review issues have been resolved, the next step is usually
@@ -118,11 +131,13 @@ subsystem to the next; each maintainer has his or her own way of doing
 things.  In particular, there may be more than one tree - one, perhaps,
 dedicated to patches planned for the next merge window, and another for
 longer-term work.
+(如果一个补丁被认为值得加入内核，并且大多数评审问题都已解决，下一步通常是进入某个子系统维护者的树。具体如何运作因子系统而异；每位维护者都有自己的做事方式。特别是，可能存在不止一棵树——也许一棵专门用于计划进入下一个合并窗口的补丁，另一棵用于较长期的工作。)
 
 For patches applying to areas for which there is no obvious subsystem tree
 (memory management patches, for example), the default tree often ends up
 being -mm.  Patches which affect multiple subsystems can also end up going
 through the -mm tree.
+(对于那些没有明显子系统树的领域的补丁(例如内存管理补丁)，默认的树往往是 -mm。影响多个子系统的补丁最终也可能经由 -mm 树。)
 
 Inclusion into a subsystem tree can bring a higher level of visibility to a
 patch.  Now other developers working with that tree will get the patch by
@@ -130,6 +145,7 @@ default.  Subsystem trees typically feed linux-next as well, making their
 contents visible to the development community as a whole.  At this point,
 there's a good chance that you will get more comments from a new set of
 reviewers; these comments need to be answered as in the previous round.
+(进入子系统树可以让补丁获得更高的可见度。此时，在该树上工作的其他开发者会默认得到这个补丁。子系统树通常还会汇入 linux-next，使其内容对整个开发社区可见。到了这一步，你很有可能会收到来自一批新评审者的更多评论；与上一轮一样，这些评论需要一一回应。)
 
 What may also happen at this point, depending on the nature of your patch,
 is that conflicts with work being done by others turn up.  In the worst
@@ -141,12 +157,14 @@ everything applies cleanly.  This work can be a pain, but count your
 blessings: before the advent of the linux-next tree, these conflicts often
 only turned up during the merge window and had to be addressed in a hurry.
 Now they can be resolved at leisure, before the merge window opens.
+(取决于补丁的性质，此时也可能出现与其他人正在进行的工作相冲突的情况。在最坏的情况下，严重的补丁冲突可能导致某些工作被搁置，以便先将其余补丁打磨成型并合并。另一些时候，冲突的解决会涉及与其他开发者协作，并可能需要在树之间移动一些补丁，以确保一切都能干净地应用。这项工作可能很痛苦，但也请知足：在 linux-next 树出现之前，这类冲突往往到合并窗口期间才冒出来，而且必须匆忙处理。现在可以在合并窗口开启之前从容地解决了。)
 
 Some day, if all goes well, you'll log on and see that your patch has been
 merged into the mainline kernel.  Congratulations!  Once the celebration is
 complete (and you have added yourself to the MAINTAINERS file), though, it
 is worth remembering an important little fact: the job still is not done.
 Merging into the mainline brings its own challenges.
+(终有一天，如果一切顺利，你登录后会发现你的补丁已经合并进了主线内核。恭喜！不过，在庆祝完毕(并且你已把自己加进 MAINTAINERS 文件)之后，值得记住一个重要的小事实：工作仍未结束。合并进主线会带来它自己的挑战。)
 
 To begin with, the visibility of your patch has increased yet again.  There
 may be a new round of comments from developers who had not been aware of
@@ -154,12 +172,14 @@ the patch before.  It may be tempting to ignore them, since there is no
 longer any question of your code being merged.  Resist that temptation,
 though; you still need to be responsive to developers who have questions or
 suggestions.
+(首先，你的补丁的可见度又一次提高了。可能会有新一轮来自此前未曾注意到该补丁的开发者的评论。既然代码已经不再有合并与否的悬念，无视这些评论可能很有诱惑力。不过，请抵制这种诱惑；对于有疑问或建议的开发者，你仍然需要及时回应。)
 
 More importantly, though: inclusion into the mainline puts your code into
 the hands of a much larger group of testers.  Even if you have contributed
 a driver for hardware which is not yet available, you will be surprised by
 how many people will build your code into their kernels.  And, of course,
 where there are testers, there will be bug reports.
+(更重要的是：进入主线会把你的代码交到规模大得多的测试者手中。即使你贡献的是尚无硬件可用的驱动，你也会惊讶于会有多少人把你的代码编进他们的内核。而且，当然，有测试者的地方就会有 bug 报告。)
 
 The worst sort of bug reports are regressions.  If your patch causes a
 regression, you'll find an uncomfortable number of eyes upon you;
@@ -169,6 +189,7 @@ will almost certainly be removed during the stabilization period.  Beyond
 negating all of the work you have done to get your patch into the mainline,
 having a patch pulled as the result of a failure to fix a regression could
 well make it harder for you to get work merged in the future.
+(最糟糕的一类 bug 报告是回归(regression)。如果你的补丁引发了回归，你会发现有令人不安的众多目光注视着你；回归需要尽快修复。如果你不愿意或无法修复该回归(而且没有别人替你修)，你的补丁几乎肯定会在稳定期被移除。这不仅让你为使补丁进入主线所做的全部工作付诸东流，而且，因未能修复回归而导致补丁被撤下，很可能让你将来更难合并工作。)
 
 After any regressions have been dealt with, there may be other, ordinary
 bugs to deal with.  The stabilization period is your best opportunity to
@@ -177,6 +198,7 @@ release is as solid as possible.  So, please, answer bug reports, and fix
 the problems if at all possible.  That's what the stabilization period is
 for; you can start creating cool new patches once any problems with the old
 ones have been taken care of.
+(在所有回归处理完毕之后，可能还有其他普通 bug 需要处理。稳定期是你修复这些 bug、并确保你的代码在主线内核版本中首秀尽可能稳固的最佳时机。所以，请回应 bug 报告，并在力所能及的范围内修复问题。稳定期就是为此而存在的；一旦旧补丁的问题处理完毕，你就可以开始编写酷炫的新补丁了。)
 
 And don't forget that there are other milestones which may also create bug
 reports: the next mainline stable release, when prominent distributors pick
@@ -187,10 +209,11 @@ development community remembers developers who lose interest in their code
 after it's merged.  The next time you post a patch, they will be evaluating
 it with the assumption that you will not be around to maintain it
 afterward.
+(不要忘记，还有其他里程碑同样可能产生 bug 报告：下一个主线稳定版本发布时、知名发行版采用包含你补丁的内核版本时，等等。持续回应这些报告是对自己工作抱有基本自豪感的体现。如果这还不足以成为动力，那么也值得考虑：开发社区会记住那些在代码合并后就失去兴趣的开发者。下次你提交补丁时，他们评估它的前提假设将是你不会在事后维护它。)
 
 
-Other things that can happen
------------------------------
+Other things that can happen(其他可能发生的事情)
+------------------------------------------------
 
 One day, you may open your mail client and see that somebody has mailed you
 a patch to your code.  That is one of the advantages of having your code
@@ -199,6 +222,7 @@ either forward it on to the subsystem maintainer (be sure to include a
 proper From: line so that the attribution is correct, and add a signoff of
 your own), or send an Acked-by: response back and let the original poster
 send it upward.
+(某一天，你可能会打开邮件客户端，发现有人给你代码的补丁寄了过来。毕竟，这正是把代码公开放在外面带来的好处之一。如果你认同这个补丁，可以把它转发给子系统维护者(务必包含正确的 From: 行以便归属无误，并加上你自己的签收 Sign-off)，或者回复一个 Acked-by: 然后让原提交者把补丁向上提交。)
 
 If you disagree with the patch, send a polite response explaining why.  If
 possible, tell the author what changes need to be made to make the patch
@@ -207,6 +231,7 @@ are opposed by the author and maintainer of the code, but it only goes so
 far.  If you are seen as needlessly blocking good work, those patches will
 eventually flow around you and get into the mainline anyway.  In the Linux
 kernel, nobody has absolute veto power over any code.  Except maybe Linus.
+(如果你不认同这个补丁，请礼貌地回复并说明原因。如果可能，请告诉作者需要做哪些修改才能让补丁为你所接受。对合并遭到代码作者和维护者反对的补丁确实存在一定的阻力，但这种阻力也就到此为止。如果你被视为在无谓地阻挡优秀的工作，这些补丁最终会绕过你并照样进入主线。在 Linux 内核中，没有人对任何代码拥有绝对的否决权。也许 Linus 除外。)
 
 On very rare occasion, you may see something completely different: another
 developer posts a different solution to your problem.  At that point,
@@ -217,3 +242,4 @@ really only one way to respond: be pleased that your problem got solved and
 get on with your work.  Having one's work shoved aside in this manner can
 be hurtful and discouraging, but the community will remember your reaction
 long after they have forgotten whose patch actually got merged.
+(在极其罕见的情况下，你可能会看到完全不同的事情：另一位开发者针对你的问题提交了另一种解决方案。届时，两个补丁之一很可能不会被合并，而"我的补丁先提交"并不被视为有说服力的技术论据。如果别人的补丁取代了你的补丁并进入主线，实际上只有一种回应方式：为你的问题得到解决而高兴，然后继续自己的工作。以这种方式被挤到一边可能会让人受伤和沮丧，但在社区早已忘记谁的补丁真正被合并之后很久，他们仍会记得你的反应。)

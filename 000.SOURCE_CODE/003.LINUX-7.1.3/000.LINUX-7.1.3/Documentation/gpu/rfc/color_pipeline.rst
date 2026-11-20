@@ -475,7 +475,7 @@ notwithstanding.
 
 
 Driver Forward/Backward Compatibility(驱动前向/向后兼容性)
-=========================================================
+==========================================================
 
 As this is uAPI drivers can't regress color pipelines that have been
 introduced for a given HW generation. New HW generations are free to

@@ -2,17 +2,18 @@
 
 .. _frontend-property-terrestrial-systems:
 
-***********************************************
-Properties used on terrestrial delivery systems
-***********************************************
+***********************************************************************
+Properties used on terrestrial delivery systems(地面传送系统使用的属性)
+***********************************************************************
 
 
 .. _dvbt-params:
 
-DVB-T delivery system
-=====================
+DVB-T delivery system(DVB-T 传送系统)
+=====================================
 
 The following parameters are valid for DVB-T:
+(以下参数对 DVB-T 有效：)
 
 -  :ref:`DTV_API_VERSION <DTV-API-VERSION>`
 
@@ -44,17 +45,21 @@ The following parameters are valid for DVB-T:
 
 In addition, the :ref:`DTV QoS statistics <frontend-stat-properties>`
 are also valid.
+(此外，DTV QoS 统计信息也是有效的。)
 
 
 .. _dvbt2-params:
 
-DVB-T2 delivery system
-======================
+DVB-T2 delivery system(DVB-T2 传送系统)
+========================================
 
 DVB-T2 support is currently in the early stages of development, so
 expect that this section may grow and become more detailed with time.
+(对 DVB-T2 的支持目前还处于开发的早期阶段，因此可以预期本节内容会随着
+时间推移而增长并变得更加详细。)
 
 The following parameters are valid for DVB-T2:
+(以下参数对 DVB-T2 有效：)
 
 -  :ref:`DTV_API_VERSION <DTV-API-VERSION>`
 
@@ -88,38 +93,53 @@ The following parameters are valid for DVB-T2:
 
 In addition, the :ref:`DTV QoS statistics <frontend-stat-properties>`
 are also valid.
+(此外，DTV QoS 统计信息也是有效的。)
 
 
 .. _isdbt:
 
-ISDB-T delivery system
-======================
+ISDB-T delivery system(ISDB-T 传送系统)
+=======================================
 
 This ISDB-T/ISDB-Tsb API extension should reflect all information needed
 to tune any ISDB-T/ISDB-Tsb hardware. Of course it is possible that some
 very sophisticated devices won't need certain parameters to tune.
+(这一 ISDB-T/ISDB-Tsb API 扩展应当反映调谐任何 ISDB-T/ISDB-Tsb 硬件所需的
+全部信息。当然，某些非常复杂的设备在调谐时可能不需要其中的某些参数。)
 
 The information given here should help application writers to know how
 to handle ISDB-T and ISDB-Tsb hardware using the Linux Digital TV API.
+(这里给出的信息应当能帮助应用程序编写者了解如何使用 Linux 数字电视 API
+来操作 ISDB-T 与 ISDB-Tsb 硬件。)
 
 The details given here about ISDB-T and ISDB-Tsb are just enough to
 basically show the dependencies between the needed parameter values, but
 surely some information is left out. For more detailed information see
 the following documents:
+(这里给出的关于 ISDB-T 与 ISDB-Tsb 的细节只够基本地展示所需参数值之间的
+依赖关系，但肯定遗漏了一些信息。更详细的信息参见以下文档：)
 
 ARIB STD-B31 - "Transmission System for Digital Terrestrial Television
 Broadcasting" and
+(ARIB STD-B31 - "Transmission System for Digital Terrestrial Television
+Broadcasting"（《数字地面电视广播传输系统》）以及)
 
 ARIB TR-B14 - "Operational Guidelines for Digital Terrestrial Television
 Broadcasting".
+(ARIB TR-B14 - "Operational Guidelines for Digital Terrestrial Television
+Broadcasting"（《数字地面电视广播运营指南》）。)
 
 In order to understand the ISDB specific parameters, one has to have
 some knowledge the channel structure in ISDB-T and ISDB-Tsb. I.e. it has
 to be known to the reader that an ISDB-T channel consists of 13
 segments, that it can have up to 3 layer sharing those segments, and
 things like that.
+(要理解 ISDB 特有的参数，必须对 ISDB-T 与 ISDB-Tsb 的信道结构有所了解。
+也就是说，读者必须知道一个 ISDB-T 信道由 13 个段 (segment) 组成、最多
+可以有 3 个层 (layer) 共享这些段之类的知识。)
 
 The following parameters are valid for ISDB-T:
+(以下参数对 ISDB-T 有效：)
 
 -  :ref:`DTV_API_VERSION <DTV-API-VERSION>`
 
@@ -177,14 +197,16 @@ The following parameters are valid for ISDB-T:
 
 In addition, the :ref:`DTV QoS statistics <frontend-stat-properties>`
 are also valid.
+(此外，DTV QoS 统计信息也是有效的。)
 
 
 .. _atsc-params:
 
-ATSC delivery system
-====================
+ATSC delivery system(ATSC 传送系统)
+===================================
 
 The following parameters are valid for ATSC:
+(以下参数对 ATSC 有效：)
 
 -  :ref:`DTV_API_VERSION <DTV-API-VERSION>`
 
@@ -202,14 +224,16 @@ The following parameters are valid for ATSC:
 
 In addition, the :ref:`DTV QoS statistics <frontend-stat-properties>`
 are also valid.
+(此外，DTV QoS 统计信息也是有效的。)
 
 
 .. _atscmh-params:
 
-ATSC-MH delivery system
-=======================
+ATSC-MH delivery system(ATSC-MH 传送系统)
+=========================================
 
 The following parameters are valid for ATSC-MH:
+(以下参数对 ATSC-MH 有效：)
 
 -  :ref:`DTV_API_VERSION <DTV-API-VERSION>`
 
@@ -255,14 +279,16 @@ The following parameters are valid for ATSC-MH:
 
 In addition, the :ref:`DTV QoS statistics <frontend-stat-properties>`
 are also valid.
+(此外，DTV QoS 统计信息也是有效的。)
 
 
 .. _dtmb-params:
 
-DTMB delivery system
-====================
+DTMB delivery system(DTMB 传送系统)
+===================================
 
 The following parameters are valid for DTMB:
+(以下参数对 DTMB 有效：)
 
 -  :ref:`DTV_API_VERSION <DTV-API-VERSION>`
 
@@ -292,3 +318,4 @@ The following parameters are valid for DTMB:
 
 In addition, the :ref:`DTV QoS statistics <frontend-stat-properties>`
 are also valid.
+(此外，DTV QoS 统计信息也是有效的。)

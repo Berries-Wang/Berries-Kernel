@@ -2,24 +2,34 @@
 
 .. _program_types_and_elf:
 
-Program Types and ELF Sections
-==============================
+=================================================
+Program Types and ELF Sections(程序类型与 ELF 节)
+=================================================
 
 The table below lists the program types, their attach types where relevant and the ELF section
 names supported by libbpf for them. The ELF section names follow these rules:
+(下表列出了各程序类型、相关的附加类型 (attach type)，以及 libbpf 为它们支持的
+ELF 节名称。ELF 节名称遵循以下规则：)
 
 - ``type`` is an exact match, e.g. ``SEC("socket")``
+  (``type`` 表示精确匹配，例如 ``SEC("socket")``)
 - ``type+`` means it can be either exact ``SEC("type")`` or well-formed ``SEC("type/extras")``
   with a '``/``' separator between ``type`` and ``extras``.
+  (``type+`` 表示既可以是精确的 ``SEC("type")``，也可以是格式良好的
+  ``SEC("type/extras")``，即 ``type`` 与 ``extras`` 之间以 '``/``' 分隔。)
 
 When ``extras`` are specified, they provide details of how to auto-attach the BPF program.  The
 format of ``extras`` depends on the program type, e.g. ``SEC("tracepoint/<category>/<name>")``
 for tracepoints or ``SEC("usdt/<path>:<provider>:<name>")`` for USDT probes. The extras are
 described in more detail in the footnotes.
+(指定 ``extras`` 时，它们给出如何自动附加 (auto-attach) BPF 程序的细节。
+``extras`` 的格式取决于程序类型，例如 tracepoint 使用
+``SEC("tracepoint/<category>/<name>")``，USDT 探针使用
+``SEC("usdt/<path>:<provider>:<name>")``。各 extras 在脚注中有更详细的说明。)
 
 
 +-------------------------------------------+----------------------------------------+----------------------------------+-----------+
-| Program Type                              | Attach Type                            | ELF Section Name                 | Sleepable |
+| Program Type(程序类型)                    | Attach Type(附加类型)                  | ELF Section Name(ELF 节名称)     | Sleepable |
 +===========================================+========================================+==================================+===========+
 | ``BPF_PROG_TYPE_CGROUP_DEVICE``           | ``BPF_CGROUP_DEVICE``                  | ``cgroup/dev``                   |           |
 +-------------------------------------------+----------------------------------------+----------------------------------+-----------+
@@ -234,24 +244,47 @@ described in more detail in the footnotes.
 .. rubric:: Footnotes
 
 .. [#fentry] The ``fentry`` attach format is ``fentry[.s]/<function>``.
+             (``fentry`` 的附加格式为 ``fentry[.s]/<function>``。)
 .. [#kprobe] The ``kprobe`` attach format is ``kprobe/<function>[+<offset>]``. Valid
              characters for ``function`` are ``a-zA-Z0-9_.`` and ``offset`` must be a valid
              non-negative integer.
+             (``kprobe`` 的附加格式为 ``kprobe/<function>[+<offset>]``。
+             ``function`` 的有效字符为 ``a-zA-Z0-9_.``，且 ``offset`` 必须是
+             有效的非负整数。)
 .. [#ksyscall] The ``ksyscall`` attach format is ``ksyscall/<syscall>``.
+               (``ksyscall`` 的附加格式为 ``ksyscall/<syscall>``。)
 .. [#uprobe] The ``uprobe`` attach format is ``uprobe[.s]/<path>:<function>[+<offset>]``.
+             (``uprobe`` 的附加格式为 ``uprobe[.s]/<path>:<function>[+<offset>]``。)
 .. [#upmul] The ``uprobe.multi`` attach format is ``uprobe.multi[.s]/<path>:<function-pattern>``
             where ``function-pattern`` supports ``*`` and ``?`` wildcards.
+            (``uprobe.multi`` 的附加格式为
+            ``uprobe.multi[.s]/<path>:<function-pattern>``，其中
+            ``function-pattern`` 支持 ``*`` 与 ``?`` 通配符。)
 .. [#usdt] The ``usdt`` attach format is ``usdt/<path>:<provider>:<name>``.
+           (``usdt`` 的附加格式为 ``usdt/<path>:<provider>:<name>``。)
 .. [#kpmulti] The ``kprobe.multi`` attach format is ``kprobe.multi/<pattern>`` where ``pattern``
               supports ``*`` and ``?`` wildcards. Valid characters for pattern are
               ``a-zA-Z0-9_.*?``.
+              (``kprobe.multi`` 的附加格式为 ``kprobe.multi/<pattern>``，其中
+              ``pattern`` 支持 ``*`` 与 ``?`` 通配符。pattern 的有效字符为
+              ``a-zA-Z0-9_.*?``。)
 .. [#lsm] The ``lsm`` attachment format is ``lsm[.s]/<hook>``.
+          (``lsm`` 的附加格式为 ``lsm[.s]/<hook>``。)
 .. [#rawtp] The ``raw_tp`` attach format is ``raw_tracepoint[.w]/<tracepoint>``.
+            (``raw_tp`` 的附加格式为 ``raw_tracepoint[.w]/<tracepoint>``。)
 .. [#tc_legacy] The ``tc``, ``classifier`` and ``action`` attach types are deprecated, use
                 ``tcx/*`` instead.
+                (``tc``、``classifier`` 与 ``action`` 附加类型已废弃，请改用
+                ``tcx/*``。)
 .. [#struct_ops] The ``struct_ops`` attach format supports ``struct_ops[.s]/<name>`` convention,
                  but ``name`` is ignored and it is recommended to just use plain
                  ``SEC("struct_ops[.s]")``. The attachments are defined in a struct initializer
                  that is tagged with ``SEC(".struct_ops[.link]")``.
+                 (``struct_ops`` 附加格式支持 ``struct_ops[.s]/<name>`` 的写法，
+                 但 ``name`` 会被忽略，建议直接使用 ``SEC("struct_ops[.s]")``。
+                 附加项定义在带有 ``SEC(".struct_ops[.link]")`` 标记的结构体
+                 初始化器中。)
 .. [#tp] The ``tracepoint`` attach format is ``tracepoint/<category>/<name>``.
+         (``tracepoint`` 的附加格式为 ``tracepoint/<category>/<name>``。)
 .. [#iter] The ``iter`` attach format is ``iter[.s]/<struct-name>``.
+           (``iter`` 的附加格式为 ``iter[.s]/<struct-name>``。)

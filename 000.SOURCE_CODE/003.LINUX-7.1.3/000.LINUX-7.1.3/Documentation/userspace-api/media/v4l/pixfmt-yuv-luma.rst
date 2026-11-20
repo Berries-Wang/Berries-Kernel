@@ -3,21 +3,26 @@
 
 .. _yuv-luma-only:
 
-*****************
-Luma-Only Formats
-*****************
+*****************************
+Luma-Only Formats(仅亮度格式)
+*****************************
 
 This family of formats only store the luma component of a Y'CbCr image. They
 are often referred to as greyscale formats.
+(这一类格式只存储 Y'CbCr 图像的亮度(luma)分量。它们通常被称为灰度格式。)
 
 .. note::
 
    - In all the tables that follow, bit 7 is the most significant bit in a byte.
+     (在下文所有表格中，位 7 是字节中的最高有效位。)
    - Formats are described with the minimum number of pixels needed to create a
      byte-aligned repeating pattern. `...` indicates repetition of the pattern.
+     (格式以构成字节对齐重复图案所需的最少像素数来描述。 `...` 表示图案的重复。)
    - Y'\ :sub:`x`\ [9:2] denotes bits 9 to 2 of the Y' value for pixel at column
      `x`.
+     (Y'x[9:2] 表示第 x 列像素的 Y' 值的第 9 位到第 2 位。)
    - `0` denotes padding bits set to 0.
+     ( `0` 表示被置为 0 的填充位。)
 
 
 .. raw:: latex
@@ -30,15 +35,15 @@ are often referred to as greyscale formats.
     :header-rows: 1
     :stub-columns: 0
 
-    * - Identifier
-      - Code
-      - Byte 0
-      - Byte 1
-      - Byte 2
-      - Byte 3
-      - Byte 4
-      - Byte 5
-      - Byte 6
+    * - Identifier(标识符)
+      - Code(代码)
+      - Byte 0(字节 0)
+      - Byte 1(字节 1)
+      - Byte 2(字节 2)
+      - Byte 3(字节 3)
+      - Byte 4(字节 4)
+      - Byte 5(字节 5)
+      - Byte 6(字节 6)
 
     * .. _V4L2-PIX-FMT-GREY:
 
@@ -206,11 +211,14 @@ are often referred to as greyscale formats.
     than 16 bits. For example, 10 bits per pixel uses values in the range 0 to
     1023. For the IPU3_Y10 format 25 pixels are packed into 32 bytes, which
     leaves the 6 most significant bits of the last byte padded with 0.
+    (对于 Y16 和 Y16_BE 格式，实际采样精度可能低于 16 位。例如，每像素 10 位时取值范围为 0 到 1023。对于 IPU3_Y10 格式，25 个像素被打包进 32 字节，最后一个字节最高的 6 个有效位以 0 填充。)
 
     For Y012 and Y12 formats, Y012 places its data in the 12 high bits, with
     padding zeros in the 4 low bits, in contrast to the Y12 format, which has
     its padding located in the most significant bits of the 16 bit word.
+    (对于 Y012 和 Y12 格式：Y012 把数据放在高 12 位，低 4 位为填充零；而 Y12 格式的填充位于 16 位字的最高有效位。)
 
     The 'P' variations of the Y10, Y12 and Y14 formats are packed according to
     the RAW10, RAW12 and RAW14 packing scheme as defined by the MIPI CSI-2
     specification.
+    (Y10、Y12 和 Y14 格式的 'P' 变体按照 MIPI CSI-2 规范定义的 RAW10、RAW12 和 RAW14 打包方案进行打包。)

@@ -83,7 +83,7 @@ drivers/staging/.
 (下表列出从用户空间可见的 ioctl，不包括来自 drivers/staging/ 的那些。)
 
 ====  =====  ========================================================= ================================================================
-Code  Seq#    Include File(包含文件)                                   Comments(备注)
+Code  Seq#    Include File(包含文件)                                       Comments(备注)
       (hex)
 ====  =====  ========================================================= ================================================================
 0x00  00-1F  linux/fs.h                                                conflict!(冲突！)
@@ -249,7 +249,7 @@ Code  Seq#    Include File(包含文件)                                   Comme
 'c'   00-7F  linux/coda.h                                              conflict!(冲突！)
 'c'   00-1F  linux/chio.h                                              conflict!(冲突！)
 'c'   80-9F  arch/s390/include/asm/chsc.h                              conflict!(冲突！)
-'c'   A0-AF  arch/x86/include/asm/msr.h conflict!
+'c'   A0-AF  arch/x86/include/asm/msr.h conflict!(冲突！)
 'd'   00-FF  linux/char/drm/drm.h                                      conflict!(冲突！)
 'd'   02-40  pcmcia/ds.h                                               conflict!(冲突！)
 'd'   F0-FF  linux/digi1.h
@@ -317,7 +317,7 @@ Code  Seq#    Include File(包含文件)                                   Comme
 'v'   00-1F  linux/fs.h                                                conflict!(冲突！)
 'v'   00-0F  linux/sonypi.h                                            conflict!(冲突！)
 'v'   00-0F  media/v4l2-subdev.h                                       conflict!(冲突！)
-'v'   20-27  arch/powerpc/include/uapi/asm/vas-api.h                   VAS API
+'v'   20-27  arch/powerpc/include/uapi/asm/vas-api.h                   VAS API(虚拟地址空间接口)
 'v'   C0-FF  linux/meye.h                                              conflict!(冲突！)
 'w'   all                                                              CERN SCI driver(CERN SCI 驱动)
 'y'   00-1F                                                            packet based user level communications
@@ -370,24 +370,24 @@ Code  Seq#    Include File(包含文件)                                   Comme
                                                                        <mailto:kvm@vger.kernel.org> (基于内核的虚拟机)
 0xAE  40-FF  linux/kvm.h                                               Kernel-based Virtual Machine
                                                                        <mailto:kvm@vger.kernel.org> (基于内核的虚拟机)
-0xAE  20-3F  linux/nitro_enclaves.h                                    Nitro Enclaves
+0xAE  20-3F  linux/nitro_enclaves.h                                    Nitro Enclaves(安全飞地)
 0xAF  00-1F  linux/fsl_hypervisor.h                                    Freescale hypervisor(Freescale 虚拟机监控器)
 0xB0  all                                                              RATIO devices in development:
                                                                        <mailto:vgo@ratio.de> (开发中的 RATIO 设备：)
 0xB1  00-1F                                                            PPPoX
                                                                        <mailto:mostrows@styx.uwaterloo.ca>
 0xB2  00     arch/powerpc/include/uapi/asm/papr-vpd.h                  powerpc/pseries VPD API
-                                                                       <mailto:linuxppc-dev@lists.ozlabs.org>
+                                                                       <mailto:linuxppc-dev@lists.ozlabs.org> (powerpc/pseries VPD 接口)
 0xB2  01-02  arch/powerpc/include/uapi/asm/papr-sysparm.h              powerpc/pseries system parameter API
-                                                                       <mailto:linuxppc-dev@lists.ozlabs.org>
+                                                                       <mailto:linuxppc-dev@lists.ozlabs.org> (powerpc/pseries 系统参数接口)
 0xB2  03-05  arch/powerpc/include/uapi/asm/papr-indices.h              powerpc/pseries indices API
-                                                                       <mailto:linuxppc-dev@lists.ozlabs.org>
+                                                                       <mailto:linuxppc-dev@lists.ozlabs.org> (powerpc/pseries 索引接口)
 0xB2  06-07  arch/powerpc/include/uapi/asm/papr-platform-dump.h        powerpc/pseries Platform Dump API
-                                                                       <mailto:linuxppc-dev@lists.ozlabs.org>
+                                                                       <mailto:linuxppc-dev@lists.ozlabs.org> (powerpc/pseries 平台转储接口)
 0xB2  08     arch/powerpc/include/uapi/asm/papr-physical-attestation.h powerpc/pseries Physical Attestation API
-                                                                       <mailto:linuxppc-dev@lists.ozlabs.org>
+                                                                       <mailto:linuxppc-dev@lists.ozlabs.org> (powerpc/pseries 物理证明接口)
 0xB2  09     arch/powerpc/include/uapi/asm/papr-hvpipe.h               powerpc/pseries HVPIPE API
-                                                                       <mailto:linuxppc-dev@lists.ozlabs.org>
+                                                                       <mailto:linuxppc-dev@lists.ozlabs.org> (powerpc/pseries HVPIPE 接口)
 0xB3  00     linux/mmc/ioctl.h
 0xB4  00-0F  linux/gpio.h                                              <mailto:linux-gpio@vger.kernel.org>
 0xB5  00-0F  uapi/linux/rpmsg.h                                        <mailto:linux-remoteproc@vger.kernel.org>
