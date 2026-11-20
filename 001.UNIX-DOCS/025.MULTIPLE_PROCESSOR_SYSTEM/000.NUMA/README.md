@@ -15,7 +15,7 @@
 ---
 ## 图示
 - ![20260126111608.jpg](./999.IMGS/20260126111608.jpg)
-   + UPI (Intel Ultra Path Interconnect)，在NUMA中扮演 “跨处理器桥梁”角色<sup>A cache-coherent, link-based Interconnect specification for Intel processors. Also known as Intel® UPI：一种用于英特尔® 处理器的、基于链路的缓存一致性互连规范。亦被称为英特尔® UPI。<sup>([Second Generation Intel® Xeon® Scalable Processors](./998.REFS/2nd-gen-xeon-scalable-datasheet-vol-1.pdf))</sup></sup>
+   + UPI (Intel Ultra Path Interconnect)，在NUMA中扮演 “跨处理器桥梁”角色<sup>A cache-coherent, link-based Interconnect specification for Intel processors. Also known as Intel® UPI：一种用于英特尔® 处理器的、基于链路的缓存一致性互连规范。亦被称为英特尔® UPI。<sup>([Second Generation Intel® Xeon® Scalable Processors](../../../007.BOOKs/2nd-gen-xeon-scalable-datasheet-vol-1.pdf))</sup></sup>
      - 参考:[Intel® Xeon® Processor Scalable Family Technical Overview#Intel® Ultra Path Interconnect (Intel® UPI)](./999.IMGS/Screenshot%202026-01-26%20at%2007-56-17%20英特尔®至强®处理器可扩展系列技术概述%20---%20Intel®%20Xeon®%20Processor%20Scalable%20Family%20Technical%20Overview.png)
    + UPI 在 NUMA 中的具体位置: 在 NUMA 架构下，每一颗 CPU 都有自己直连的本地内存（Local Memory）。但如果 CPU 0 想要访问 CPU 1 挂载的内存，它就必须跨越物理边界,UPI 就是这条边界上的高速公路：
      - 本地访问： CPU 0 → 本地内存控制器 → 本地 RAM（延迟低，带宽大）。
@@ -31,10 +31,10 @@
   + MZ73-LM2
   + 结构框图 (Node = Socket + 所属于他的内存插槽 , 不同Node之间访问方式)
      - ![20251103100323.jpg](./999.IMGS/20251103100323.jpg)
-     - 参考手册：[User Manual: 对该图(该主板)有详细介绍](./999.IMGS/server_manual_e_mz73lm2_e_v3.0.pdf)
+     - 参考手册：[User Manual: 对该图(该主板)有详细介绍](../../../007.BOOKs/server_manual_e_mz73lm2_e_v3.0.pdf)
      - GMI : AMD的高速互连技术，用于连接多个处理器和加速器，提供高带宽和低延迟的数据传输。功能与Intel UPI类似,参考资料:
-       + [4TH GEN AMD EPYC™ PROCESSOR ARCHITECTURE](./998.REFS/4th-gen-epyc-processor-architecture-white-paper.pdf)
-       + [TUNING GUIDE AMD EPYC 9004#Figure 2-9: Two EPYC 9004 Processors connect through 4 xGMI links (NPS1)](./998.REFS/58011-epyc-9004-tg-bios-and-workload.pdf)
+       + [4TH GEN AMD EPYC™ PROCESSOR ARCHITECTURE](../../../007.BOOKs/4th-gen-epyc-processor-architecture-white-paper.pdf)
+       + [TUNING GUIDE AMD EPYC 9004#Figure 2-9: Two EPYC 9004 Processors connect through 4 xGMI links (NPS1)](../../../007.BOOKs/58011-epyc-9004-tg-bios-and-workload.pdf)
          - ![wechat_2026-01-26_081151_181.png](./999.IMGS/wechat_2026-01-26_081151_181.png)
   + [https://www.gigabyte.cn/Enterprise/Server-Motherboard/MZ73-LM2-rev-3x](https://www.gigabyte.cn/Enterprise/Server-Motherboard/MZ73-LM2-rev-3x)
        - ![0aa08cb3-6ba2-4100-9082-4f2103a8d9f8.png](./999.IMGS/0aa08cb3-6ba2-4100-9082-4f2103a8d9f8.png)
