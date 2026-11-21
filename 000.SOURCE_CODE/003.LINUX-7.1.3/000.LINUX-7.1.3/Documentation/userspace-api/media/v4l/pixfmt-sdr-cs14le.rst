@@ -3,24 +3,30 @@
 
 .. _V4L2-SDR-FMT-CS14LE:
 
-****************************
-V4L2_SDR_FMT_CS14LE ('CS14')
-****************************
+**********************************************************
+V4L2_SDR_FMT_CS14LE ('CS14')(复数有符号 14 位小端 IQ 样本)
+**********************************************************
+
 
 Complex signed 14-bit little endian IQ sample
+(复数有符号 14 位小端 IQ 样本。)
 
 
-Description
-===========
+Description(描述)
+=================
 
 This format contains sequence of complex number samples. Each complex
 number consist two parts, called In-phase and Quadrature (IQ). Both I
 and Q are represented as a 14 bit signed little endian number. I value
 comes first and Q value after that. 14 bit value is stored in 16 bit
 space with unused high bits padded with 0.
+(该格式包含一系列复数样本。每个复数由两部分组成，称为同相（In-phase）与
+正交（Quadrature，IQ）。I 和 Q 都表示为 14 位有符号小端数。I 值在前，Q 值
+在后。14 位值存储在 16 位空间中，未用的高位以 0 填充。)
 
 **Byte Order.**
 Each cell is one byte.
+(**字节序。** 每个单元格为一字节。)
 
 
 .. flat-table::

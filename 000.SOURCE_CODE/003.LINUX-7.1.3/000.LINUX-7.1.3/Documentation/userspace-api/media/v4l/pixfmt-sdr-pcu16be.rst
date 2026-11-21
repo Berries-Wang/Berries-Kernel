@@ -3,14 +3,15 @@
 
 .. _V4L2-SDR-FMT-PCU16BE:
 
-******************************
-V4L2_SDR_FMT_PCU16BE ('PC16')
-******************************
+****************************************************
+V4L2_SDR_FMT_PCU16BE ('PC16')(16 位大端 IQ 样本格式)
+****************************************************
 
 Planar complex unsigned 16-bit big endian IQ sample
+(平面复数无符号 16 位大端 IQ 样本。)
 
-Description
-===========
+Description(描述)
+=================
 
 This format contains a sequence of complex number samples. Each complex
 number consist of two parts called In-phase and Quadrature (IQ). Both I
@@ -20,9 +21,15 @@ padded with 0. I value starts first and Q value starts at an offset
 equalling half of the buffer size (i.e.) offset = buffersize/2. Out of
 the 16 bits, bit 15:2 (14 bit) is data and bit 1:0 (2 bit) can be any
 value.
+(此格式包含一个复数样本序列。每个复数由两部分组成，称为同相 (In-phase) 和
+正交 (Quadrature) (IQ)。I 和 Q 都表示为存储在 32 位空间中的 16 位无符号
+大端数。32 位空间中剩余的未用位用 0 填充。I 值先开始，Q 值从等于缓冲区大小
+一半的偏移处开始 (即 offset = buffersize/2)。在 16 位中，位 15:2 (14 位) 是
+数据，位 1:0 (2 位) 可以是任意值。)
 
 **Byte Order.**
 Each cell is one byte.
+(字节序。每个单元格为一个字节。)
 
 .. flat-table::
     :header-rows:  1

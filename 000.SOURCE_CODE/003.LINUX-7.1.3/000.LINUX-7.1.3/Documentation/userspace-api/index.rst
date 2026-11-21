@@ -1,6 +1,6 @@
-=====================================
-The Linux kernel user-space API guide
-=====================================
+==================================================================
+The Linux kernel user-space API guide(Linux 内核用户空间 API 指南)
+==================================================================
 
 .. _man-pages: https://www.kernel.org/doc/man-pages/
 
@@ -8,10 +8,13 @@ While much of the kernel's user-space API is documented elsewhere
 (particularly in the man-pages_ project), some user-space information can
 also be found in the kernel tree itself.  This manual is intended to be the
 place where this information is gathered.
+(内核用户空间 API 的很大一部分已在别处文档化 (尤其在 man-pages_ 项目
+中)，但一些用户空间信息也可以在内核源码树本身中找到。本手册旨在成为
+汇集这些信息的地方。)
 
 
-System calls
-============
+System calls(系统调用)
+======================
 
 .. toctree::
    :maxdepth: 1
@@ -23,8 +26,8 @@ System calls
    mseal
    rseq
 
-Security-related interfaces
-===========================
+Security-related interfaces(安全相关接口)
+=========================================
 
 .. toctree::
    :maxdepth: 1
@@ -38,8 +41,8 @@ Security-related interfaces
    tee
    check_exec
 
-Devices and I/O
-===============
+Devices and I/O(设备与 I/O)
+===========================
 
 .. toctree::
    :maxdepth: 1
@@ -55,8 +58,8 @@ Devices and I/O
    vduse
    isapnp
 
-Everything else
-===============
+Everything else(其他内容)
+=========================
 
 .. toctree::
    :maxdepth: 1

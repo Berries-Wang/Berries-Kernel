@@ -1,7 +1,7 @@
 .. SPDX-License-Identifier: GPL-2.0 OR GFDL-1.1-no-invariants-or-later
 
-file: uapi/v4l/keytable.c
-=========================
+file: uapi/v4l/keytable.c(uapi/v4l/keytable.c 文件)
+===================================================
 
 .. code-block:: c
 

@@ -3,9 +3,9 @@
 
 .. _videodev:
 
-***************************************
-Video For Linux Two Header uAPI Symbols
-***************************************
+*******************************************************************************
+Video For Linux Two Header uAPI Symbols(Video For Linux Two 头文件 uAPI 符号)
+*******************************************************************************
 
 .. kernel-include:: include/uapi/linux/videodev2.h
     :generate-cross-refs:

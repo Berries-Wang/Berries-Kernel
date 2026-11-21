@@ -46,11 +46,11 @@ Key types(键类型)
 -----------------
 
 1. Mandatory, fully standardised.
+   (强制，完全标准化。)
 2. Optional, fully standardised.
+   (可选，完全标准化。)
 3. Driver specific.
-(1. 强制，完全标准化。)
-(2. 可选，完全标准化。)
-(3. 驱动特有。)
+   (驱动特有。)
 
 Data types(数据类型)
 --------------------

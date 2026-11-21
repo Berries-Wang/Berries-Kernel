@@ -3,11 +3,12 @@
 
 .. _meta-formats:
 
-****************
-Metadata Formats
-****************
+****************************
+Metadata Formats(元数据格式)
+****************************
 
 These formats are used for the :ref:`metadata` interface only.
+(这些格式仅用于 :ref:`metadata` 接口。)
 
 
 .. toctree::

@@ -2,9 +2,9 @@
 
 .. _xe-device-wedging:
 
-==================
-Xe Device Wedging
-==================
+==================================
+Xe Device Wedging(Xe 设备 wedging)
+==================================
 
 .. kernel-doc:: drivers/gpu/drm/xe/xe_device.c
    :doc: Xe Device Wedging

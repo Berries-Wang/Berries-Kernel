@@ -2,9 +2,9 @@
    This is a simple wrapper to bring atomic_bitops.txt into the RST world
    until such a time as that file can be converted directly.
 
-=============
-Atomic bitops
-=============
+=============================
+Atomic bitops(原子位操作)
+=============================
 
 .. raw:: latex
 

@@ -675,6 +675,8 @@ Standard Plane Properties(标准 Plane 属性)
 
 .. _plane_composition_properties:
 
+.. _plane composition properties:
+
 Plane Composition Properties(Plane 合成属性)
 --------------------------------------------
 
@@ -688,6 +690,8 @@ Damage Tracking Properties(损坏跟踪属性)
 
 .. kernel-doc:: drivers/gpu/drm/drm_plane.c
    :doc: damage tracking
+
+.. _color management properties:
 
 Color Management Properties(颜色管理属性)
 -----------------------------------------

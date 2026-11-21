@@ -2,9 +2,9 @@
 
 .. _frontend_fcalls:
 
-#######################
-Frontend Function Calls
-#######################
+#####################################
+Frontend Function Calls(前端函数调用)
+#####################################
 
 .. toctree::
     :maxdepth: 1

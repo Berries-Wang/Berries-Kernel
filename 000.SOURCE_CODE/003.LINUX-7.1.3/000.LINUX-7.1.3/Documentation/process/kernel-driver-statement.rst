@@ -1,10 +1,10 @@
 .. _process_statement_driver:
 
-Kernel Driver Statement
------------------------
+Kernel Driver Statement(内核驱动声明)
+-------------------------------------
 
-Position Statement on Linux Kernel Modules
-==========================================
+Position Statement on Linux Kernel Modules(关于 Linux 内核模块的立场声明)
+=========================================================================
 
 
 We, the undersigned Linux kernel developers, consider any closed-source
@@ -19,9 +19,11 @@ Therefore, in order to take full advantage of the cost savings and
 shared support benefits open source has to offer, we urge vendors to
 adopt a policy of supporting their customers on Linux with open-source
 kernel code.
+(我们，下方签名的 Linux 内核开发者，认为任何闭源的 Linux 内核模块或驱动都是有害且不可取的。我们一再发现它们损害 Linux 用户、企业以及整个 Linux 生态系统。这类模块否定了 Linux 开发模式的开放性、稳定性、灵活性与可维护性，使其用户无法获得 Linux 社区的专业支持。提供闭源内核模块的厂商迫使客户放弃 Linux 的关键优势，或者另选厂商。因此，为了充分利用开源所能带来的成本节约与共享支持的好处，我们敦促厂商采取以开源内核代码在 Linux 上支持其客户的政策。)
 
 We speak only for ourselves, and not for any company we might work for
 today, have in the past, or will in the future.
+(我们只代表自己发言，而不代表我们今天、过去或将来可能供职的任何公司。)
 
  - Dave Airlie
  - Nick Andrew

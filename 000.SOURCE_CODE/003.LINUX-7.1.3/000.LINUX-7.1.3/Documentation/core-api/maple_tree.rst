@@ -120,16 +120,14 @@ for other options.
 The Maple Tree uses RCU and an internal spinlock to synchronise access:
 (枫树使用 RCU 和一个内部自旋锁来同步访问：)
 
-Takes RCU read lock:
-(获取 RCU 读锁：)
+Takes RCU read lock: (获取 RCU 读锁：)
  * mtree_load()
  * mt_find()
  * mt_for_each()
  * mt_next()
  * mt_prev()
 
-Takes ma_lock internally:
-(在内部获取 ma_lock：)
+Takes ma_lock internally: (在内部获取 ma_lock：)
  * mtree_store()
  * mtree_store_range()
  * mtree_insert()
@@ -148,6 +146,10 @@ removing the object from the tree between looking up the object and
 incrementing the refcount.  You can also use RCU to avoid dereferencing
 freed memory, but an explanation of that is beyond the scope of this
 document.
+(如果你想利用内部锁来保护存入 Maple Tree 的数据结构，可以在调用 mtree_load() 之前先调用
+mtree_lock()，并在调用 mtree_unlock() 之前对找到的对象获取一个引用计数。这样可以防止存储操
+作在查找对象与递增引用计数之间把对象从树中移除。你也可以使用 RCU 来避免解引用已释放的内存，
+但对此的说明超出了本文档的范围。)
 
 .. _maple-tree-advanced-api:
 

@@ -128,6 +128,7 @@ the sliced VBI API is unsupported or ``type`` is invalid.
 .. [#f1]
 
    See also :ref:`vbi-525` and :ref:`vbi-625`.
+   (另请参阅 :ref:`vbi-525` 与 :ref:`vbi-625`。)
 
 .. raw:: latex
 

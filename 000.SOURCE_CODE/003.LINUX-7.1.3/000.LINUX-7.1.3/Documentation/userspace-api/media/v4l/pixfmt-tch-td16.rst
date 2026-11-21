@@ -10,20 +10,26 @@ V4L2_TCH_FMT_DELTA_TD16 ('TD16')
 *man V4L2_TCH_FMT_DELTA_TD16(2)*
 
 16-bit signed little endian Touch Delta
+(16 位有符号小端触摸增量数据。)
 
 
-Description
-===========
+Description(描述)
+=================
 
 This format represents delta data from a touch controller.
+(此格式表示来自触摸控制器的增量 (delta) 数据。)
 
 Delta values may range from -32768 to 32767. Typically the values will vary
 through a small range depending on whether the sensor is touched or not. The
 full value may be seen if one of the touchscreen nodes has a fault or the line
 is not connected.
+(增量值的范围可以从 -32768 到 32767。通常这些值会在一个小范围内变化，
+具体取决于传感器是否被触摸。如果某个触摸屏节点有故障或线路未连接，
+则可能看到完整的取值。)
 
 **Byte Order.**
 Each cell is one byte.
+( **字节序。** 每个单元是一个字节。)
 
 .. flat-table::
     :header-rows:  0

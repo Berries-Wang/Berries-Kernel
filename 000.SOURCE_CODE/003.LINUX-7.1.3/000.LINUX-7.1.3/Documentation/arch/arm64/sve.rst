@@ -645,7 +645,6 @@ In A64 state, SVE adds the following:
 * FPSR and FPCR are retained from ARMv8-A, and interact with SVE floating-point
   operations in a similar way to the way in which they interact with ARMv8
   floating-point operations::
-  (FPSR 和 FPCR 从 ARMv8-A 保留，并与 SVE 浮点运算交互，方式类似于它们与 ARMv8 浮点运算的交互方式：)
 
          8VL-1                       128               0  bit index
         +----          ////            -----------------+
@@ -669,6 +668,9 @@ In A64 state, SVE adds the following:
     FFR |                       |               +-----+
         +----       ////      --+            VL |     |
                                                 +-----+
+
+
+  (FPSR 和 FPCR 从 ARMv8-A 保留，并与 SVE 浮点运算交互，方式类似于它们与 ARMv8 浮点运算的交互方式：)
 
 (*) callee-save:
     This only applies to bits [63:0] of Z-/V-registers.

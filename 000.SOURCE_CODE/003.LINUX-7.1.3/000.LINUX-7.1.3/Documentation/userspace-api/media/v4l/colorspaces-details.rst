@@ -801,7 +801,7 @@ scaled to [-128…128] and then clipped to [-128…127].
    and ``V4L2_QUANTIZATION_FULL_RANGE``.
    (JPEG 标准实际上并不存储色彩空间信息。因此如果使用的不是 sRGB，驱动就必须显式设置该信息。实际上， ``V4L2_COLORSPACE_JPEG`` 可以视为 ``V4L2_COLORSPACE_SRGB`` 、 ``V4L2_XFER_FUNC_SRGB`` 、 ``V4L2_YCBCR_ENC_601`` 和 ``V4L2_QUANTIZATION_FULL_RANGE`` 的缩写。)
 
-***************************************
+*********************************************************
 Detailed Transfer Function Descriptions(传递函数详细说明)
 *********************************************************
 

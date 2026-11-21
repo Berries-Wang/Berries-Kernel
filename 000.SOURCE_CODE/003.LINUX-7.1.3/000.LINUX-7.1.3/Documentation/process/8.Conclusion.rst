@@ -1,7 +1,8 @@
 .. _development_conclusion:
 
-For more information
-====================
+==============================
+For more information(更多信息)
+==============================
 
 There are numerous sources of information on Linux kernel development and
 related topics.  First among those will always be the Documentation
@@ -12,49 +13,72 @@ kernel APIs are documented using the kerneldoc mechanism; "make htmldocs"
 or "make pdfdocs" can be used to generate those documents in HTML or PDF
 format (though the version of TeX shipped by some distributions runs into
 internal limits and fails to process the documents properly).
+(关于 Linux 内核开发及相关主题，有大量的信息来源。其中最主要的永远是
+内核源码发行版中的 Documentation 目录。可以从顶层的
+:ref:`process/howto.rst <process_howto>` 开始；也请阅读
+:ref:`process/submitting-patches.rst <submittingpatches>`。许多内核内
+部 API 使用 kerneldoc 机制编写文档；"make htmldocs" 或 "make pdfdocs"
+可用于以 HTML 或 PDF 格式生成这些文档 (不过某些发行版自带的 TeX 版本
+会遇到内部限制，无法正确处理这些文档)。)
 
 Various web sites discuss kernel development at all levels of detail.  Your
 author would like to humbly suggest https://lwn.net/ as a source;
 information on many specific kernel topics can be found via the LWN kernel
 index at:
+(各种网站以不同的详细程度讨论内核开发。笔者想谦逊地推荐
+https://lwn.net/ 作为一个信息来源；许多具体内核主题的信息可以通过
+LWN 内核索引查找，地址是：)
 
 	https://lwn.net/Kernel/Index/
 
 Beyond that, a valuable resource for kernel developers is:
+(除此之外，对内核开发者来说一个宝贵的资源是：)
 
 	https://kernelnewbies.org/
 
 And, of course, one should not forget https://kernel.org/, the definitive
 location for kernel release information.
+(当然，也不要忘记 https://kernel.org/ ——内核发布信息的权威地点。)
 
 There are a number of books on kernel development:
+(关于内核开发有一些书籍：)
 
 	Linux Device Drivers, 3rd Edition (Jonathan Corbet, Alessandro
 	Rubini, and Greg Kroah-Hartman).  Online at
 	https://lwn.net/Kernel/LDD3/.
+	(《Linux Device Drivers》第 3 版 (Jonathan Corbet、Alessandro
+	Rubini 与 Greg Kroah-Hartman)。在线阅读：https://lwn.net/Kernel/LDD3/。)
 
 	Linux Kernel Development (Robert Love).
+	(《Linux Kernel Development》(Robert Love)。)
 
 	Understanding the Linux Kernel (Daniel Bovet and Marco Cesati).
+	(《Understanding the Linux Kernel》(Daniel Bovet 与 Marco Cesati)。)
 
 All of these books suffer from a common fault, though: they tend to be
 somewhat obsolete by the time they hit the shelves, and they have been on
 the shelves for a while now.  Still, there is quite a bit of good
 information to be found there.
+(不过，所有这些书都有一个共同的缺点：等到它们上架时往往已有些过时，
+而这些书上架已经有一段时间了。尽管如此，其中仍能找到不少有价值的信
+息。)
 
 Documentation for git can be found at:
+(git 的文档可在以下位置找到：)
 
 	https://www.kernel.org/pub/software/scm/git/docs/
 
 	https://www.kernel.org/pub/software/scm/git/docs/user-manual.html
 
 
-Conclusion
-==========
+Conclusion(结语)
+================
 
 Congratulations to anybody who has made it through this long-winded
 document.  Hopefully it has provided a helpful understanding of how the
 Linux kernel is developed and how you can participate in that process.
+(恭喜每一位读完这篇冗长文档的读者。希望它帮助你了解了 Linux 内核是如
+何开发的，以及你如何参与这一过程。)
 
 In the end, it's the participation that matters.  Any open source software
 project is no more than the sum of what its contributors put into it.  The
@@ -62,6 +86,10 @@ Linux kernel has progressed as quickly and as well as it has because it has
 been helped by an impressively large group of developers, all of whom are
 working to make it better.  The kernel is a premier example of what can be
 done when thousands of people work together toward a common goal.
+(归根结底，重要的是参与。任何开源软件项目都不过是其贡献者投入的总
+和。Linux 内核之所以能如此快速且良好地发展，是因为它得到了一个规模
+惊人的开发者群体的帮助，他们所有人都在努力使它变得更好。内核是"成
+千上万的人为一个共同目标而协作所能成就之事"的卓越范例。)
 
 The kernel can always benefit from a larger developer base, though.  There
 is always more work to do.  But, just as importantly, most other
@@ -71,3 +99,8 @@ lower maintenance and distribution costs, a higher level of influence over
 the direction of kernel development, and more.  It is a situation where
 everybody involved wins.  Fire up your editor and come join us; you will be
 more than welcome.
+(不过，内核总是能从更大的开发者群体中受益。总有更多的工作要做。但
+同样重要的是，Linux 生态系统中其他大多数参与者也能通过为内核做贡献
+而受益。把代码合入主线是获得更高代码质量、更低维护与分发成本、对内
+核发展方向更高影响力等好处的关键。这是一个所有参与者都能共赢的局
+面。打开你的编辑器，来加入我们吧；你将受到热烈欢迎。)

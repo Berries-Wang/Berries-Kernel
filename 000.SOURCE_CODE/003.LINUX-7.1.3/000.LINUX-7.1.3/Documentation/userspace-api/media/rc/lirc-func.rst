@@ -2,8 +2,9 @@
 
 .. _lirc_func:
 
-LIRC Function Reference
-=======================
+======================================
+LIRC Function Reference(LIRC 函数参考)
+======================================
 
 
 .. toctree::

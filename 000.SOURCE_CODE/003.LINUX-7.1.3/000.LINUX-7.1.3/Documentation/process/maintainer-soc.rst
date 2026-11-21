@@ -1,8 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=============
-SoC Subsystem
-=============
+=========================
+SoC Subsystem(SoC 子系统)
+=========================
 
 Overview(概述)
 --------------
@@ -12,11 +12,14 @@ The main components of the subsystem are:
 (SoC 子系统是 SoC 相关代码的汇聚之地。该子系统的主要组成部分包括：)
 
 * devicetrees (DTS) for 32- & 64-bit ARM and RISC-V
+  (32 位与 64 位 ARM 及 RISC-V 的 devicetree(DTS)。)
 * 32-bit ARM board files (arch/arm/mach*)
+  (32 位 ARM 板级文件(arch/arm/mach*)。)
 * 32- & 64-bit ARM defconfigs
+  (32 位与 64 位 ARM 的 defconfig。)
 * SoC-specific drivers across architectures, in particular for 32- & 64-bit
   ARM, RISC-V and Loongarch
-(32 位与 64 位 ARM 及 RISC-V 的 devicetree(DTS)；32 位 ARM 板级文件(arch/arm/mach*)；32 位与 64 位 ARM 的 defconfig；跨架构的 SoC 专用驱动，尤其是 32 位与 64 位 ARM、RISC-V 和 Loongarch。)
+  (跨架构的 SoC 专用驱动，尤其是 32 位与 64 位 ARM、RISC-V 和 Loongarch。)
 
 These "SoC-specific drivers" do not include clock, GPIO etc drivers that have
 other top-level maintainers. The drivers/soc/ directory is generally meant

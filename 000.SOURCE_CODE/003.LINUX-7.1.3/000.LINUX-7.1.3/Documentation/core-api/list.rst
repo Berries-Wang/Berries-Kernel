@@ -729,13 +729,15 @@ For this, Linux provides us with list_swap().
 
 In the following example, we have a list with three entries, and swap two of
 them. This is our starting state in "State 0"::
-(在下面的例子中，我们有一个包含三个条目的链表，并交换其中两个。以下是我们 "状态 0" 的起始状态。)
 
          .-----------------------------------------.
          v                                         |
     .--------.   .-------.   .---------.   .-----. |
     | clowns |-->| Grock |-->| Dimitri |-->| Pic |-'
     '--------'   '-------'   '---------'   '-----'
+
+
+(在下面的例子中，我们有一个包含三个条目的链表，并交换其中两个。以下是我们 "状态 0" 的起始状态。)
 
 .. code-block:: c
 
@@ -774,7 +776,6 @@ Say we have two lists, in the following example one represented by a list head
 we call "knie" and one we call "stey". In a hypothetical circus acquisition,
 the two list of clowns should be spliced together. The following is our
 situation in "State 0"::
-(假设我们有两个链表，在下例中一个由称为 "knie" 的链表头表示，另一个称为 "stey"。在一次假想中的马戏团收购案里，这两个小丑链表应当被拼接起来。以下是我们 "状态 0" 的局面。)
 
         .-----------------------------------------.
         |                                         |
@@ -788,6 +789,9 @@ situation in "State 0"::
     .------.   .---------.   .-----.  |
     | stey |-->| Alfredo |-->| Pio |--'
     '------'   '---------'   '-----'
+
+
+(假设我们有两个链表，在下例中一个由称为 "knie" 的链表头表示，另一个称为 "stey"。在一次假想中的马戏团收购案里，这两个小丑链表应当被拼接起来。以下是我们 "状态 0" 的局面。)
 
 The function to splice these two lists together is list_splice(). Our example
 code is as follows:
@@ -819,7 +823,6 @@ code is as follows:
 The list_splice() call here adds all the entries in ``stey`` to the list
 ``dimitri``'s ``node`` list_head is in, after the ``node`` of ``dimitri``. A
 somewhat surprising diagram of the resulting "State 1" follows::
-(这里的 list_splice() 调用把 ``stey`` 中的所有条目添加到 ``dimitri`` 的 ``node`` list_head 所在的链表中 ``dimitri`` 的 ``node`` 之后。以下是有些出人意料的 "状态 1" 结果图。)
 
         .-----------------------------------------------------------------.
         |                                                                 |
@@ -833,6 +836,9 @@ somewhat surprising diagram of the resulting "State 1" follows::
     .------.  |
     | stey |--'
     '------'
+
+
+(这里的 list_splice() 调用把 ``stey`` 中的所有条目添加到 ``dimitri`` 的 ``node`` list_head 所在的链表中 ``dimitri`` 的 ``node`` 之后。以下是有些出人意料的 "状态 1" 结果图。)
 
 Traversing the ``stey`` list no longer results in correct behavior. A call of
 list_for_each() on ``stey`` results in an infinite loop, as it never returns

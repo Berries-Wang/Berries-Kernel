@@ -10,18 +10,22 @@ V4L2_TCH_FMT_TU16 ('TU16')
 *man V4L2_TCH_FMT_TU16(2)*
 
 16-bit unsigned little endian raw touch data
+(16 位无符号小端原始触摸数据。)
 
 
-Description
-===========
+Description(描述)
+=================
 
 This format represents unsigned 16-bit data from a touch controller.
+(此格式表示来自触摸控制器的无符号 16 位数据。)
 
 This may be used for output for raw and reference data. Values may range from
 0 to 65535.
+(这可用于输出原始数据与参考数据。取值范围可以从 0 到 65535。)
 
 **Byte Order.**
 Each cell is one byte.
+( **字节序。** 每个单元是一个字节。)
 
 
 .. flat-table::

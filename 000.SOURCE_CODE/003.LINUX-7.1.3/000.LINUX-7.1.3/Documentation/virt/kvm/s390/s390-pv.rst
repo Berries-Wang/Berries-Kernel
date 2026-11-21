@@ -1,25 +1,29 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=========================================
-s390 (IBM Z) Ultravisor and Protected VMs
-=========================================
+=================================================================================
+s390 (IBM Z) Ultravisor and Protected VMs(s390（IBM Z）Ultravisor 与受保护虚拟机)
+=================================================================================
 
-Summary
--------
+Summary(摘要)
+-------------
+
 Protected virtual machines (PVM) are KVM VMs that do not allow KVM to
 access VM state like guest memory or guest registers. Instead, the
 PVMs are mostly managed by a new entity called Ultravisor (UV). The UV
 provides an API that can be used by PVMs and KVM to request management
 actions.
+(受保护虚拟机（PVM）是不允许 KVM 访问客户机内存或客户机寄存器等虚拟机状态的 KVM 虚拟机。相反，PVM 主要由一个称为 Ultravisor（UV）的新实体管理。UV 提供一个可供 PVM 和 KVM 用来请求管理操作的 API。)
 
 Each guest starts in non-protected mode and then may make a request to
 transition into protected mode. On transition, KVM registers the guest
 and its VCPUs with the Ultravisor and prepares everything for running
 it.
+(每个客户机都以非保护模式启动，然后可以请求转换到保护模式。在转换时，KVM 向 Ultravisor 注册客户机及其 VCPU，并为运行它做好一切准备。)
 
 The Ultravisor will secure and decrypt the guest's boot memory
 (i.e. kernel/initrd). It will safeguard state changes like VCPU
 starts/stops and injected interrupts while the guest is running.
+(Ultravisor 将保护并解密客户机的引导内存（即 kernel/initrd）。它会在客户机运行期间守护诸如 VCPU 启动/停止和注入中断之类的状态更改。)
 
 As access to the guest's state, such as the SIE state description, is
 normally needed to be able to run a VM, some changes have been made in
@@ -27,13 +31,15 @@ the behavior of the SIE instruction. A new format 4 state description
 has been introduced, where some fields have different meanings for a
 PVM. SIE exits are minimized as much as possible to improve speed and
 reduce exposed guest state.
+(由于运行虚拟机通常需要访问客户机的状态（例如 SIE 状态描述），SIE 指令的行为已做出一些更改。引入了一种新的格式 4 状态描述，其中一些字段对 PVM 有不同的含义。SIE 退出被尽可能减少，以提高速度并减少暴露的客户机状态。)
 
 
-Interrupt injection
--------------------
+Interrupt injection(中断注入)
+-----------------------------
 Interrupt injection is safeguarded by the Ultravisor. As KVM doesn't
 have access to the VCPUs' lowcores, injection is handled via the
 format 4 state description.
+(中断注入由 Ultravisor 保护。由于 KVM 无法访问 VCPU 的 lowcore，注入通过格式 4 状态描述处理。)
 
 Machine check, external, IO and restart interruptions each can be
 injected on SIE entry via a bit in the interrupt injection control
@@ -41,6 +47,7 @@ field (offset 0x54). If the guest cpu is not enabled for the interrupt
 at the time of injection, a validity interception is recognized. The
 format 4 state description contains fields in the interception data
 block where data associated with the interrupt can be transported.
+(机器检查、外部、IO 和重启中断各自都可以在 SIE 进入时通过中断注入控制字段（偏移 0x54）中的一个位注入。如果在注入时客户机 CPU 未针对该中断启用，则会识别出有效性拦截（validity interception）。格式 4 状态描述在拦截数据块中包含一些字段，可以在其中传输与该中断相关的数据。)
 
 Program and Service Call exceptions have another layer of
 safeguarding; they can only be injected for instructions that have
@@ -48,10 +55,11 @@ been intercepted into KVM. The exceptions need to be a valid outcome
 of an instruction emulation by KVM, e.g. we can never inject a
 addressing exception as they are reported by SIE since KVM has no
 access to the guest memory.
+(程序异常和 Service Call 异常还有另一层保护；它们只能针对已被拦截进 KVM 的指令注入。这些异常必须是 KVM 模拟指令的有效结果，例如我们绝不能注入寻址异常，因为它们由 SIE 报告，而 KVM 无法访问客户机内存。)
 
 
-Mask notification interceptions
--------------------------------
+Mask notification interceptions(掩码通知拦截)
+---------------------------------------------
 KVM cannot intercept lctl(g) and lpsw(e) anymore in order to be
 notified when a PVM enables a certain class of interrupt.  As a
 replacement, two new interception codes have been introduced: One
@@ -59,13 +67,15 @@ indicating that the contents of CRs 0, 6, or 14 have been changed,
 indicating different interruption subclasses; and one indicating that
 PSW bit 13 has been changed, indicating that a machine check
 intervention was requested and those are now enabled.
+(KVM 不再能够拦截 lctl(g) 和 lpsw(e)，以便在 PVM 启用某一类中断时得到通知。作为替代，引入了两个新的拦截代码：一个表示 CR 0、6 或 14 的内容已更改，表明不同的中断子类；另一个表示 PSW 位 13 已更改，表明已请求机器检查介入且这些现已启用。)
 
-Instruction emulation
----------------------
+Instruction emulation(指令模拟)
+-------------------------------
 With the format 4 state description for PVMs, the SIE instruction already
 interprets more instructions than it does with format 2. It is not able
 to interpret every instruction, but needs to hand some tasks to KVM;
 therefore, the SIE and the ultravisor safeguard emulation inputs and outputs.
+(有了用于 PVM 的格式 4 状态描述，SIE 指令已经比使用格式 2 时解释更多指令。它无法解释每一条指令，需要把某些任务交给 KVM；因此，SIE 和 ultravisor 会对模拟的输入和输出进行保护。)
 
 The control structures associated with SIE provide the Secure
 Instruction Data Area (SIDA), the Interception Parameters (IP) and the
@@ -74,9 +84,11 @@ the instruction data, such as I/O data structures, are filtered.
 Instruction data is copied to and from the SIDA when needed.  Guest
 GRs are put into / retrieved from the Secure Interception General
 Register Save Area.
+(与 SIE 相关的控制结构提供安全指令数据区（SIDA）、拦截参数（IP）和安全拦截通用寄存器保存区。客户机 GR 和大部分指令数据（例如 I/O 数据结构）会被过滤。指令数据在需要时被复制到 SIDA 或从 SIDA 复制出来。客户机 GR 被放入安全拦截通用寄存器保存区或从中取出。)
 
 Only GR values needed to emulate an instruction will be copied into this
 save area and the real register numbers will be hidden.
+(只有模拟指令所需的 GR 值会被复制到该保存区中，并且真实的寄存器编号会被隐藏。)
 
 The Interception Parameters state description field still contains
 the bytes of the instruction text, but with pre-set register values
@@ -84,6 +96,7 @@ instead of the actual ones. I.e. each instruction always uses the same
 instruction text, in order not to leak guest instruction text.
 This also implies that the register content that a guest had in r<n>
 may be in r<m> from the hypervisor's point of view.
+(状态描述中的拦截参数字段仍包含指令文本的字节，但使用预设的寄存器值代替实际值。也就是说，每条指令始终使用相同的指令文本，以免泄露客户机指令文本。这也意味着，从管理程序的角度看，客户机放在 r<n> 中的寄存器内容可能在 r<m> 中。)
 
 The Secure Instruction Data Area contains instruction storage
 data. Instruction data, i.e. data being referenced by an instruction
@@ -92,16 +105,18 @@ intercepted, the SIE will only allow data and program interrupts for
 this instruction to be moved to the guest via the two data areas
 discussed before. Other data is either ignored or results in validity
 interceptions.
+(安全指令数据区包含指令存储数据。指令数据（例如指令所引用的数据，如 sclp 的 SCCB）通过 SIDA 传送。当一条指令被拦截时，SIE 将只允许该指令的数据和程序中断通过前面讨论的两个数据区传送到客户机。其他数据要么被忽略，要么导致有效性拦截。)
 
 
-Instruction emulation interceptions
------------------------------------
+Instruction emulation interceptions(指令模拟拦截)
+-------------------------------------------------
 There are two types of SIE secure instruction intercepts: the normal
 and the notification type. Normal secure instruction intercepts will
 make the guest pending for instruction completion of the intercepted
 instruction type, i.e. on SIE entry it is attempted to complete
 emulation of the instruction with the data provided by KVM. That might
 be a program exception or instruction completion.
+(SIE 安全指令拦截有两种类型：普通类型和通知类型。普通安全指令拦截会使客户机等待被拦截指令类型的指令完成，即在 SIE 进入时尝试使用 KVM 提供的数据完成该指令的模拟。这可能是程序异常或指令完成。)
 
 The notification type intercepts inform KVM about guest environment
 changes due to guest instruction interpretation. Such an interception
@@ -110,7 +125,8 @@ the new lowcore location. On SIE reentry, any KVM data in the data areas
 is ignored and execution continues as if the guest instruction had
 completed. For that reason KVM is not allowed to inject a program
 interrupt.
+(通知类型拦截向 KVM 通知由于客户机指令解释导致的客户机环境更改。例如，对于 store prefix 指令会识别出这种拦截，以提供新的 lowcore 位置。在重新进入 SIE 时，数据区中的任何 KVM 数据都会被忽略，执行继续进行，仿佛客户机指令已经完成。因此，不允许 KVM 注入程序中断。)
 
-Links
------
+Links(链接)
+-----------
 `KVM Forum 2019 presentation <https://static.sched.com/hosted_files/kvmforum2019/3b/ibm_protected_vms_s390x.pdf>`_

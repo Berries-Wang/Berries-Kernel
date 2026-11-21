@@ -1,15 +1,18 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-Maxim Integrated MAX2175 RF to bits tuner driver
-================================================
+Maxim Integrated MAX2175 RF to bits tuner driver(MAX2175 射频转比特调谐器驱动)
+==============================================================================
 
 The MAX2175 driver implements the following driver-specific controls:
+(MAX2175 驱动实现了以下驱动专属控制：)
 
-``V4L2_CID_MAX2175_I2S_ENABLE``
--------------------------------
+``V4L2_CID_MAX2175_I2S_ENABLE``(I2S 输出使能)
+---------------------------------------------------------------------
     Enable/Disable I2S output of the tuner. This is a private control
     that can be accessed only using the subdev interface.
     Refer to Documentation/driver-api/media/v4l2-controls.rst for more details.
+    (启用/禁用调谐器的 I2S 输出。这是一个私有控制项，只能通过 subdev 接口
+    访问。更多细节参见 Documentation/driver-api/media/v4l2-controls.rst。)
 
 .. flat-table::
     :header-rows:  0
@@ -17,13 +20,14 @@ The MAX2175 driver implements the following driver-specific controls:
     :widths:       1 4
 
     * - ``(0)``
-      - I2S output is disabled.
+      - I2S output is disabled.(I2S 输出已禁用。)
     * - ``(1)``
-      - I2S output is enabled.
+      - I2S output is enabled.(I2S 输出已启用。)
 
-``V4L2_CID_MAX2175_HSLS``
--------------------------
+``V4L2_CID_MAX2175_HSLS``(高边/低边)
+------------------------------------------------------------------------
     The high-side/low-side (HSLS) control of the tuner for a given band.
+    (调谐器在给定频段的高边/低边 (high-side/low-side, HSLS) 控制。)
 
 .. flat-table::
     :header-rows:  0
@@ -31,16 +35,21 @@ The MAX2175 driver implements the following driver-specific controls:
     :widths:       1 4
 
     * - ``(0)``
-      - The LO frequency position is below the desired frequency.
+      - The LO frequency position is below the desired frequency.(LO 频率
+        位置低于期望频率。)
     * - ``(1)``
-      - The LO frequency position is above the desired frequency.
+      - The LO frequency position is above the desired frequency.(LO 频率
+        位置高于期望频率。)
 
-``V4L2_CID_MAX2175_RX_MODE (menu)``
------------------------------------
+``V4L2_CID_MAX2175_RX_MODE (menu)``(接收模式)
+------------------------------------------------------------------------
     The Rx mode controls a number of preset parameters of the tuner like
     sample clock (sck), sampling rate etc. These multiple settings are
     provided under one single label called Rx mode in the datasheet. The
     list below shows the supported modes with a brief description.
+    (接收 (Rx) 模式控制调谐器的若干预设参数，例如采样时钟 (sck)、采样率
+    等。这些多项设置在数据手册中以一个叫做 Rx 模式的单一标签提供。下面的
+    列表列出了支持的模式及其简要说明。)
 
 .. flat-table::
     :header-rows:  0
@@ -50,15 +59,19 @@ The MAX2175 driver implements the following driver-specific controls:
     * - ``"Europe modes"``
     * - ``"FM 1.2" (0)``
       - This configures FM band with a sample rate of 0.512 million
-        samples/sec with a 10.24 MHz sck.
+        samples/sec with a 10.24 MHz sck.(配置 FM 频段，采样率为每秒
+        0.512 百万样本，sck 为 10.24 MHz。)
     * - ``"DAB 1.2" (1)``
       - This configures VHF band with a sample rate of 2.048 million
-        samples/sec with a 32.768 MHz sck.
+        samples/sec with a 32.768 MHz sck.(配置 VHF 频段，采样率为每秒
+        2.048 百万样本，sck 为 32.768 MHz。)
 
     * - ``"North America modes"``
     * - ``"FM 1.0" (0)``
       - This configures FM band with a sample rate of 0.7441875 million
-        samples/sec with a 14.88375 MHz sck.
+        samples/sec with a 14.88375 MHz sck.(配置 FM 频段，采样率为每秒
+        0.7441875 百万样本，sck 为 14.88375 MHz。)
     * - ``"DAB 1.2" (1)``
       - This configures FM band with a sample rate of 0.372 million
-        samples/sec with a 7.441875 MHz sck.
+        samples/sec with a 7.441875 MHz sck.(配置 FM 频段，采样率为每秒
+        0.372 百万样本，sck 为 7.441875 MHz。)

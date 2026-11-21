@@ -64,7 +64,7 @@ Usage(用法)
 Kernel BPF(内核侧 BPF)
 ----------------------
 bpf_redirect_map()(重定向数据包)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. code-block:: c
 
     long bpf_redirect_map(struct bpf_map *map, u32 key, u64 flags)

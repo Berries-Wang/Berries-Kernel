@@ -3,24 +3,29 @@
 
 .. _V4L2-PIX-FMT-Z16:
 
-*************************
-V4L2_PIX_FMT_Z16 ('Z16 ')
-*************************
+****************************************
+V4L2_PIX_FMT_Z16 ('Z16 ')(16 位深度格式)
+****************************************
 
 
 16-bit depth data with distance values at each pixel
+(每个像素都带有距离值的 16 位深度数据。)
 
 
-Description
-===========
+Description(描述)
+=================
 
 This is a 16-bit format, representing depth data. Each pixel is a
 distance to the respective point in the image coordinates. Distance unit
 can vary and has to be negotiated with the device separately. Each pixel
 is stored in a 16-bit word in the little endian byte order.
+(这是一种 16 位格式，表示深度数据。每个像素是到图像坐标系中相应点的距离值。
+距离单位可以变化，需要与设备另行协商。每个像素以小端字节序存储在一个 16 位
+字中。)
 
 **Byte Order.**
 Each cell is one byte.
+(字节序。每个单元格为一个字节。)
 
 
 

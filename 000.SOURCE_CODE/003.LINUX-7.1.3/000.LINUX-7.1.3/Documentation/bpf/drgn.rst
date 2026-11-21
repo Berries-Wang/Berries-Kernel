@@ -1,36 +1,41 @@
 .. SPDX-License-Identifier: (LGPL-2.1 OR BSD-2-Clause)
 
-==============
-BPF drgn tools
-==============
+=============================
+BPF drgn tools(BPF drgn 工具)
+=============================
 
 drgn scripts is a convenient and easy to use mechanism to retrieve arbitrary
 kernel data structures. drgn is not relying on kernel UAPI to read the data.
 Instead it's reading directly from ``/proc/kcore`` or vmcore and pretty prints
 the data based on DWARF debug information from vmlinux.
+(drgn 脚本是一种便捷易用的机制，可用于读取任意的内核数据结构。drgn 不依赖内核 UAPI 来读取数据，而是直接从 ``/proc/kcore`` 或 vmcore 读取，并基于 vmlinux 的 DWARF 调试信息对数据进行美化输出。)
 
 This document describes BPF related drgn tools.
+(本文档描述与 BPF 相关的 drgn 工具。)
 
 See `drgn/tools`_ for all tools available at the moment and `drgn/doc`_ for
 more details on drgn itself.
+(当前所有可用的工具见 drgn/tools，关于 drgn 本身的更多细节见 drgn/doc。)
 
-bpf_inspect.py
---------------
+bpf_inspect.py(原名)
+--------------------
 
-Description
-===========
+Description(描述)
+=================
 
 `bpf_inspect.py`_ is a tool intended to inspect BPF programs and maps. It can
 iterate over all programs and maps in the system and print basic information
 about these objects, including id, type and name.
+(bpf_inspect.py 是一个用于检查 BPF 程序与 map 的工具。它可以遍历系统中所有的程序和 map，并打印这些对象的基本信息，包括 id、类型与名称。)
 
 The main use-case `bpf_inspect.py`_ covers is to show BPF programs of types
 ``BPF_PROG_TYPE_EXT`` and ``BPF_PROG_TYPE_TRACING`` attached to other BPF
 programs via ``freplace``/``fentry``/``fexit``/``fsession`` mechanisms, since
 there is no user-space API to get this information.
+(bpf_inspect.py 覆盖的主要使用场景是显示通过 ``freplace`` / ``fentry`` / ``fexit`` / ``fsession`` 机制附加到其他 BPF 程序上的 ``BPF_PROG_TYPE_EXT`` 与 ``BPF_PROG_TYPE_TRACING`` 类型的 BPF 程序，因为没有用户空间 API 可以获取这一信息。)
 
-Getting started
-===============
+Getting started(入门)
+=====================
 
 List BPF programs (full names are obtained from BTF)::
 
@@ -39,12 +44,16 @@ List BPF programs (full names are obtained from BTF)::
       4632: BPF_PROG_TYPE_CGROUP_SOCK_ADDR   tw_ipt_bind
      49464: BPF_PROG_TYPE_RAW_TRACEPOINT     raw_tracepoint__sched_process_exit
 
+(列出 BPF 程序(完整名称取自 BTF)：)
+
 List BPF maps::
 
       % sudo bpf_inspect.py map
         2577: BPF_MAP_TYPE_HASH                tw_ipt_vips
         4050: BPF_MAP_TYPE_STACK_TRACE         stack_traces
         4069: BPF_MAP_TYPE_PERCPU_ARRAY        ned_dctcp_cntr
+
+(列出 BPF map：)
 
 Find BPF programs attached to BPF program ``test_pkt_access``::
 
@@ -58,19 +67,26 @@ Find BPF programs attached to BPF program ``test_pkt_access``::
          659: BPF_PROG_TYPE_EXT                new_get_skb_ifindex              linked:[650->23: BPF_TRAMP_REPLACE test_pkt_access->get_skb_ifindex()]
          660: BPF_PROG_TYPE_EXT                new_get_constant                 linked:[650->19: BPF_TRAMP_REPLACE test_pkt_access->get_constant()]
 
+(查找附加到 BPF 程序 ``test_pkt_access`` 上的 BPF 程序：)
+
 It can be seen that there is a program ``test_pkt_access``, id 650 and there
 are multiple other tracing and ext programs attached to functions in
 ``test_pkt_access``.
+(可以看到存在一个程序 ``test_pkt_access``(id 650)，并且有多个其他 tracing 与 ext 程序附加到 ``test_pkt_access`` 中的各个函数上。)
 
 For example the line::
 
          658: BPF_PROG_TYPE_EXT                new_get_skb_len                  linked:[650->16: BPF_TRAMP_REPLACE test_pkt_access->get_skb_len()]
 
+(例如下面这一行：)
+
 , means that BPF program id 658, type ``BPF_PROG_TYPE_EXT``, name
 ``new_get_skb_len`` replaces (``BPF_TRAMP_REPLACE``) function ``get_skb_len()``
 that has BTF id 16 in BPF program id 650, name ``test_pkt_access``.
+(表示 BPF 程序 id 658、类型 ``BPF_PROG_TYPE_EXT`` 、名称 ``new_get_skb_len`` 替换( ``BPF_TRAMP_REPLACE`` )了 BPF 程序 id 650(名称 ``test_pkt_access`` )中 BTF id 为 16 的函数 ``get_skb_len()`` 。)
 
 Getting help:
+(获取帮助：)
 
 .. code-block:: none
 
@@ -90,13 +106,15 @@ Getting help:
         prog (p)      list BPF programs
         map (m)       list BPF maps
 
-Customization
-=============
+Customization(定制)
+===================
 
 The script is intended to be customized by developers to print relevant
 information about BPF programs, maps and other objects.
+(该脚本旨在供开发者定制，以打印关于 BPF 程序、map 及其他对象的相关信息。)
 
 For example, to print ``struct bpf_prog_aux`` for BPF program id 53077:
+(例如，要打印 BPF 程序 id 53077 的 ``struct bpf_prog_aux`` ：)
 
 .. code-block:: none
 
@@ -204,6 +222,8 @@ It produces the output::
                     .func = (void (*)(struct callback_head *))0x0,
             },
     }
+
+(它会产生如下输出：)
 
 
 .. Links

@@ -1,8 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=================================
-The PPC KVM paravirtual interface
-=================================
+=======================================================
+The PPC KVM paravirtual interface(PPC KVM 半虚拟化接口)
+=======================================================
 
 The basic execution principle by which KVM on PowerPC works is to run all kernel
 space code in PR=1 which is user space. This way we trap all privileged
@@ -246,14 +246,14 @@ for example.
 Hypercall ABIs in KVM on PowerPC(PowerPC 上 KVM 的超调用 ABI)
 =============================================================
 
-1) KVM hypercalls (ePAPR)
+1) KVM hypercalls (ePAPR)(1) KVM 超调用(ePAPR)
 
 These are ePAPR compliant hypercall implementation (mentioned above). Even
 generic hypercalls are implemented here, like the ePAPR idle hcall. These are
 available on all targets.
 (这些是符合 ePAPR 的超调用实现(如上所述)。即使是通用超调用也在这里实现，例如 ePAPR idle hcall。它们在所有目标上都可用。)
 
-2) PAPR hypercalls
+2) PAPR hypercalls(2) PAPR 超调用)
 
 PAPR hypercalls are needed to run server PowerPC PAPR guests (-M pseries in QEMU).
 These are the same hypercalls that pHyp, the POWER hypervisor, implements. Some of
@@ -261,7 +261,7 @@ them are handled in the kernel, some are handled in user space. This is only
 available on book3s_64.
 (运行服务器级 PowerPC PAPR 客户机(QEMU 中的 -M pseries)时需要 PAPR 超调用。这些与 POWER hypervisor pHyp 所实现的超调用相同。其中一些在内核中处理，另一些在用户空间处理。仅在 book3s_64 上可用。)
 
-3) OSI hypercalls
+3) OSI hypercalls(3) OSI 超调用)
 
 Mac-on-Linux is another user of KVM on PowerPC, which has its own hypercall (long
 before KVM). This is supported to maintain compatibility. All these hypercalls get

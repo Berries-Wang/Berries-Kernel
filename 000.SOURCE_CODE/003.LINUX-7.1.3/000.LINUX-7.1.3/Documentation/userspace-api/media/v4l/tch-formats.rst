@@ -3,11 +3,12 @@
 
 .. _tch-formats:
 
-*************
-Touch Formats
-*************
+***********************
+Touch Formats(触摸格式)
+***********************
 
 These formats are used for :ref:`touch` interface only.
+(这些格式仅用于 :ref:`touch` 接口。)
 
 
 .. toctree::

@@ -2,8 +2,9 @@
 
 .. _lirc_dev:
 
-LIRC Device Interface
-=====================
+====================================
+LIRC Device Interface(LIRC 设备接口)
+====================================
 
 
 .. toctree::

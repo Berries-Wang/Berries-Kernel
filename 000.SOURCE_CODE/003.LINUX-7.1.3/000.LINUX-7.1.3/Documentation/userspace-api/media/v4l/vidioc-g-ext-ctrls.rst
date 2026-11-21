@@ -616,7 +616,6 @@ still cause this situation.
     :stub-columns: 0
     :widths:       3 1 4
 
-	``count`` 等于 0 时被忽略。)
     * - ``V4L2_CTRL_CLASS_USER``
       - 0x980000
       - The class containing user controls. These controls are described

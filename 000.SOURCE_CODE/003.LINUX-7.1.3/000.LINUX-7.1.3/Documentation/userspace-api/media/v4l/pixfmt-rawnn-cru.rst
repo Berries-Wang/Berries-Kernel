@@ -5,27 +5,31 @@
 .. _v4l2-pix-fmt-raw-cru14:
 .. _v4l2-pix-fmt-raw-cru20:
 
-**********************************************************************************************************************************
-V4L2_PIX_FMT_RAW_CRU10 ('CR10'), V4L2_PIX_FMT_RAW_CRU12 ('CR12'), V4L2_PIX_FMT_RAW_CRU14 ('CR14'), V4L2_PIX_FMT_RAW_CRU20 ('CR20')
-**********************************************************************************************************************************
+******************************************************************************************************************************************************
+V4L2_PIX_FMT_RAW_CRU10 ('CR10'), V4L2_PIX_FMT_RAW_CRU12 ('CR12'), V4L2_PIX_FMT_RAW_CRU14 ('CR14'), V4L2_PIX_FMT_RAW_CRU20 ('CR20')(64 位打包 RAW 格式)
+******************************************************************************************************************************************************
 
-===============================================================
-Renesas RZ/V2H Camera Receiver Unit 64-bit packed pixel formats
-===============================================================
+=============================================================================================================
+Renesas RZ/V2H Camera Receiver Unit 64-bit packed pixel formats(瑞萨 RZ/V2H 摄像机接收单元 64 位打包像素格式)
+=============================================================================================================
 
 | V4L2_PIX_FMT_RAW_CRU10 (CR10)
 | V4L2_PIX_FMT_RAW_CRU12 (CR12)
 | V4L2_PIX_FMT_RAW_CRU14 (CR14)
 | V4L2_PIX_FMT_RAW_CRU20 (CR20)
 
-Description
-===========
+Description(描述)
+=================
 
 These pixel formats are some of the RAW outputs for the Camera Receiver Unit in
 the Renesas RZ/V2H SoC. They are raw formats which pack pixels contiguously into
 64-bit units, with the 4 or 8 most significant bits padded.
+(这些像素格式是瑞萨 RZ/V2H SoC 中摄像机接收单元 (Camera Receiver Unit) 的
+一些 RAW 输出。它们是原始格式，把像素连续打包成 64 位单元，最高 4 或 8 位
+做填充。)
 
 **Byte Order**
+(字节序)
 
 .. flat-table:: RAW formats
     :header-rows:  2

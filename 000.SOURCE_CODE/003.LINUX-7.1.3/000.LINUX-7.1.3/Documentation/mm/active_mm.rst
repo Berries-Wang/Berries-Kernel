@@ -1,12 +1,16 @@
-=========
-Active MM
-=========
+==================
+Active MM(活动 MM)
+==================
 
 Note, the mm_count refcount may no longer include the "lazy" users
 (running tasks with ->active_mm == mm && ->mm == NULL) on kernels
 with CONFIG_MMU_LAZY_TLB_REFCOUNT=n. Taking and releasing these lazy
 references must be done with mmgrab_lazy_tlb() and mmdrop_lazy_tlb()
 helpers, which abstract this config option.
+(注意，在 CONFIG_MMU_LAZY_TLB_REFCOUNT=n 的内核上，mm_count 引用计数
+可能不再包含"懒惰"(lazy)用户(即 ->active_mm == mm && ->mm == NULL
+的运行任务)。获取和释放这些懒惰引用必须使用 mmgrab_lazy_tlb() 和
+mmdrop_lazy_tlb() 辅助函数，它们封装了这个配置选项。)
 
 ::
 

@@ -3,11 +3,12 @@
 
 .. _sdr-formats:
 
-***********
-SDR Formats
-***********
+*********************
+SDR Formats(SDR 格式)
+*********************
 
 These formats are used for :ref:`SDR <sdr>` interface only.
+(这些格式仅用于 :ref:`SDR <sdr>` 接口。)
 
 
 .. toctree::

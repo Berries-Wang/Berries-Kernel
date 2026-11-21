@@ -1,14 +1,14 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===============================================
-ARM Virtual Interrupt Translation Service (ITS)
-===============================================
-(ARM 虚拟中断转换服务(ITS))
+==========================================================================
+ARM Virtual Interrupt Translation Service (ITS)(ARM 虚拟中断转换服务(ITS))
+==========================================================================
 
 Device types supported:
 (支持的设备类型：)
 
   KVM_DEV_TYPE_ARM_VGIC_ITS    ARM Interrupt Translation Service Controller
+  (KVM_DEV_TYPE_ARM_VGIC_ITS    ARM 中断转换服务控制器)
 
 The ITS allows MSI(-X) interrupts to be injected into guests. This extension is
 optional.  Creating a virtual ITS controller also requires a host GICv3 (see
@@ -160,27 +160,26 @@ KVM_IRQFD assignments:
 (恢复 GIC、ITS 和 KVM_IRQFD 分配时，必须遵循以下顺序：)
 
 a) restore all guest memory and create vcpus
+   (恢复所有客户机内存并创建 vCPU。)
 b) restore all redistributors
+   (恢复所有 redistributor。)
 c) provide the ITS base address
    (KVM_DEV_ARM_VGIC_GRP_ADDR)
+   (提供 ITS 基地址(KVM_DEV_ARM_VGIC_GRP_ADDR)。)
 d) restore the ITS in the following order:
+   (按以下顺序恢复 ITS：)
 
      1. Restore GITS_CBASER
+        (恢复 GITS_CBASER)
      2. Restore all other ``GITS_`` registers, except GITS_CTLR!
+        (恢复除 ``GITS_`` 之外的所有其他寄存器，GITS_CTLR 除外！)
      3. Load the ITS table data (KVM_DEV_ARM_ITS_RESTORE_TABLES)
+        (载入 ITS 表数据(KVM_DEV_ARM_ITS_RESTORE_TABLES)。)
      4. Restore GITS_CTLR
+        (恢复 GITS_CTLR)
 
 e) restore KVM_IRQFD assignments for MSIs
-(a) 恢复所有客户机内存并创建 vCPU
-b) 恢复所有 redistributor
-c) 提供 ITS 基地址
-   (KVM_DEV_ARM_VGIC_GRP_ADDR)
-d) 按以下顺序恢复 ITS：
-     1. 恢复 GITS_CBASER
-     2. 恢复除 GITS_CTLR 之外的所有其他 ``GITS_`` 寄存器！
-     3. 载入 ITS 表数据(KVM_DEV_ARM_ITS_RESTORE_TABLES)
-     4. 恢复 GITS_CTLR
-e) 恢复 MSI 的 KVM_IRQFD 分配
+   (恢复 MSI 的 KVM_IRQFD 分配。)
 
 Then vcpus can be started.
 (之后就可以启动 vCPU 了。)
@@ -204,9 +203,10 @@ ITS Table ABI REV0:(ITS 表 ABI REV0)
    bits:     | 63| 62 ... 49 | 48 ... 5 | 4 ... 0 |
    values:   | V |   next    | ITT_addr |  Size   |
 
- (设备表条目(DTE)：
+ (设备表条目(DTE)：)
 
  where:
+ (其中：)
 
  - V indicates whether the entry is valid. If not, other fields
    are not meaningful.
@@ -226,9 +226,10 @@ ITS Table ABI REV0:(ITS 表 ABI REV0)
    bits:     | 63| 62 ..  52  | 51 ... 16 | 15  ...   0 |
    values:   | V |    RES0    |  RDBase   |    ICID     |
 
- (集合表条目(CTE)：
+ (集合表条目(CTE)：)
 
  where:
+ (其中：)
 
  - V indicates whether the entry is valid. If not, other fields are
    not meaningful.
@@ -245,9 +246,10 @@ ITS Table ABI REV0:(ITS 表 ABI REV0)
    bits:     | 63 ... 48 | 47 ... 16 | 15 ... 0 |
    values:   |    next   |   pINTID  |  ICID    |
 
- (中断转换条目(ITE)：
+ (中断转换条目(ITE)：)
 
  where:
+ (其中：)
 
  - next: equals to 0 if this entry is the last one; otherwise it corresponds
    to the EventID offset to the next ITE capped by 2^16 -1.

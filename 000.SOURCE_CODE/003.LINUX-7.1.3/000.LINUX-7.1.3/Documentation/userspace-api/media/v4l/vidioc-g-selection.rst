@@ -75,20 +75,6 @@ rounding behaviour. The struct :c:type:`v4l2_selection`
 ``flags`` field must be set to one of the following:
 (要更改裁剪(合成)矩形，需把结构体 :c:type:`v4l2_selection` 的 ``type`` 字段设为相应的缓冲区类型。下一步是把结构体 :c:type:`v4l2_selection` 的 ``target`` 值设为 ``V4L2_SEL_TGT_CROP``(``V4L2_SEL_TGT_COMPOSE``)。其他 target 请参阅表 :ref:`v4l2-selections-common` 或 :ref:`selection-api`。结构体 :c:type:`v4l2_rect` 的 ``r`` 矩形需设为期望的活动区域。结构体 :c:type:`v4l2_selection` 的 ``reserved`` 字段会被忽略，必须以零填充。驱动可以调整所请求矩形的坐标。应用可以引入约束来控制取整行为。结构体 :c:type:`v4l2_selection` 的 ``flags`` 字段必须设为以下之一：)
 
-To change the cropping (composing) rectangle set the struct
-:c:type:`v4l2_selection` ``type`` field to the
-respective buffer type. The next step is setting the
-value of struct :c:type:`v4l2_selection` ``target`` to
-``V4L2_SEL_TGT_CROP`` (``V4L2_SEL_TGT_COMPOSE``). Please refer to table
-:ref:`v4l2-selections-common` or :ref:`selection-api` for additional
-targets. The struct :c:type:`v4l2_rect` ``r`` rectangle need
-to be set to the desired active area. Field struct
-:c:type:`v4l2_selection` ``reserved`` is ignored and
-must be filled with zeros. The driver may adjust coordinates of the
-requested rectangle. An application may introduce constraints to control
-rounding behaviour. The struct :c:type:`v4l2_selection`
-``flags`` field must be set to one of the following:
-
 -  ``0`` - The driver can adjust the rectangle size freely and shall
    choose a crop/compose rectangle as close as possible to the requested
    one.

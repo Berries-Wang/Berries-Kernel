@@ -2,9 +2,9 @@
 
 .. _xe-usage-stats:
 
-========================================
-Xe DRM client usage stats implementation
-========================================
+====================================================================
+Xe DRM client usage stats implementation(Xe DRM 客户端使用统计实现)
+====================================================================
 
 .. kernel-doc:: drivers/gpu/drm/xe/xe_drm_client.c
    :doc: DRM Client usage stats

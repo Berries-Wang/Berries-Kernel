@@ -2,9 +2,9 @@
 
 .. c:type:: dvb_frontend_event
 
-***************
-frontend events
-***************
+*************************
+frontend events(前端事件)
+*************************
 
 
 .. code-block:: c

@@ -1,8 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-====
-GPIO
-====
+===================
+GPIO(通用输入/输出)
+===================
 
 .. toctree::
     :maxdepth: 1

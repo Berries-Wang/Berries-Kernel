@@ -1,9 +1,9 @@
 .. SPDX-License-Identifier: GFDL-1.1-no-invariants-or-later
 .. c:namespace:: V4L
 
-*****************
-Selection targets
-*****************
+***************************
+Selection targets(选择目标)
+***************************
 
 
 .. _sel-targets-capture:
@@ -19,3 +19,4 @@ Selection targets
 
 
 See :ref:`v4l2-selection-targets` for more information.
+(更多信息请参阅 :ref:`v4l2-selection-targets` 。)

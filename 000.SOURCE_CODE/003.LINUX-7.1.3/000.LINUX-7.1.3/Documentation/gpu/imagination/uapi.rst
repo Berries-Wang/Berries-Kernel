@@ -1,29 +1,30 @@
-====
-UAPI
-====
+==================
+UAPI(用户空间 API)
+==================
 The sources associated with this section can be found in ``pvr_drm.h``.
+(与本节相关的源代码可以在 ``pvr_drm.h`` 中找到。)
 
 .. kernel-doc:: include/uapi/drm/pvr_drm.h
    :doc: PowerVR UAPI
 
-OBJECT ARRAYS
-=============
+OBJECT ARRAYS(对象数组)
+=======================
 .. kernel-doc:: include/uapi/drm/pvr_drm.h
    :identifiers: drm_pvr_obj_array
 
 .. kernel-doc:: include/uapi/drm/pvr_drm.h
    :identifiers: DRM_PVR_OBJ_ARRAY
 
-IOCTLS
-======
+IOCTLS(IOCTL 接口)
+==================
 .. kernel-doc:: include/uapi/drm/pvr_drm.h
    :doc: PowerVR IOCTL interface
 
 .. kernel-doc:: include/uapi/drm/pvr_drm.h
    :identifiers: PVR_IOCTL
 
-DEV_QUERY
----------
+DEV_QUERY(DEV_QUERY 设备查询)
+-----------------------------
 .. kernel-doc:: include/uapi/drm/pvr_drm.h
    :doc: PowerVR IOCTL DEV_QUERY interface
 
@@ -50,8 +51,8 @@ DEV_QUERY
                  drm_pvr_static_data_area
                  drm_pvr_dev_query_static_data_areas
 
-CREATE_BO
----------
+CREATE_BO(创建 BO)
+------------------
 .. kernel-doc:: include/uapi/drm/pvr_drm.h
    :doc: PowerVR IOCTL CREATE_BO interface
 
@@ -61,16 +62,16 @@ CREATE_BO
 .. kernel-doc:: include/uapi/drm/pvr_drm.h
    :doc: Flags for CREATE_BO
 
-GET_BO_MMAP_OFFSET
-------------------
+GET_BO_MMAP_OFFSET(获取 BO MMAP 偏移)
+-------------------------------------
 .. kernel-doc:: include/uapi/drm/pvr_drm.h
    :doc: PowerVR IOCTL GET_BO_MMAP_OFFSET interface
 
 .. kernel-doc:: include/uapi/drm/pvr_drm.h
    :identifiers: drm_pvr_ioctl_get_bo_mmap_offset_args
 
-CREATE_VM_CONTEXT and DESTROY_VM_CONTEXT
-----------------------------------------
+CREATE_VM_CONTEXT and DESTROY_VM_CONTEXT(创建与销毁 VM 上下文)
+--------------------------------------------------------------
 .. kernel-doc:: include/uapi/drm/pvr_drm.h
    :doc: PowerVR IOCTL CREATE_VM_CONTEXT and DESTROY_VM_CONTEXT interfaces
 
@@ -78,8 +79,8 @@ CREATE_VM_CONTEXT and DESTROY_VM_CONTEXT
    :identifiers: drm_pvr_ioctl_create_vm_context_args
                  drm_pvr_ioctl_destroy_vm_context_args
 
-VM_MAP and VM_UNMAP
--------------------
+VM_MAP and VM_UNMAP(VM 映射与取消映射)
+--------------------------------------
 .. kernel-doc:: include/uapi/drm/pvr_drm.h
    :doc: PowerVR IOCTL VM_MAP and VM_UNMAP interfaces
 
@@ -87,8 +88,8 @@ VM_MAP and VM_UNMAP
    :identifiers: drm_pvr_ioctl_vm_map_args
                  drm_pvr_ioctl_vm_unmap_args
 
-CREATE_CONTEXT and DESTROY_CONTEXT
-----------------------------------
+CREATE_CONTEXT and DESTROY_CONTEXT(创建与销毁上下文)
+----------------------------------------------------
 .. kernel-doc:: include/uapi/drm/pvr_drm.h
    :doc: PowerVR IOCTL CREATE_CONTEXT and DESTROY_CONTEXT interfaces
 
@@ -106,8 +107,8 @@ CREATE_CONTEXT and DESTROY_CONTEXT
 .. kernel-doc:: include/uapi/drm/pvr_drm.h
    :identifiers: drm_pvr_ioctl_destroy_context_args
 
-CREATE_FREE_LIST and DESTROY_FREE_LIST
---------------------------------------
+CREATE_FREE_LIST and DESTROY_FREE_LIST(创建与销毁空闲列表)
+----------------------------------------------------------
 .. kernel-doc:: include/uapi/drm/pvr_drm.h
    :doc: PowerVR IOCTL CREATE_FREE_LIST and DESTROY_FREE_LIST interfaces
 
@@ -117,8 +118,8 @@ CREATE_FREE_LIST and DESTROY_FREE_LIST
 .. kernel-doc:: include/uapi/drm/pvr_drm.h
    :identifiers: drm_pvr_ioctl_destroy_free_list_args
 
-CREATE_HWRT_DATASET and DESTROY_HWRT_DATASET
---------------------------------------------
+CREATE_HWRT_DATASET and DESTROY_HWRT_DATASET(创建与销毁 HWRT 数据集)
+--------------------------------------------------------------------
 .. kernel-doc:: include/uapi/drm/pvr_drm.h
    :doc: PowerVR IOCTL CREATE_HWRT_DATASET and DESTROY_HWRT_DATASET interfaces
 
@@ -132,8 +133,8 @@ CREATE_HWRT_DATASET and DESTROY_HWRT_DATASET
 .. kernel-doc:: include/uapi/drm/pvr_drm.h
    :identifiers: drm_pvr_ioctl_destroy_hwrt_dataset_args
 
-SUBMIT_JOBS
------------
+SUBMIT_JOBS(提交作业)
+---------------------
 .. kernel-doc:: include/uapi/drm/pvr_drm.h
    :doc: PowerVR IOCTL SUBMIT_JOBS interface
 
@@ -161,8 +162,8 @@ SUBMIT_JOBS
                  drm_pvr_hwrt_data_ref
                  drm_pvr_job
 
-Internal notes
-==============
+Internal notes(内部说明)
+========================
 .. kernel-doc:: drivers/gpu/drm/imagination/pvr_device.h
    :doc: IOCTL validation helpers
 

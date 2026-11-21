@@ -3,21 +3,24 @@
 
 .. _V4L2-PIX-FMT-UV8:
 
-************************
-V4L2_PIX_FMT_UV8 ('UV8')
-************************
+*******************************************
+V4L2_PIX_FMT_UV8 ('UV8')(UV 平面交错格式)
+*******************************************
 
 
 UV plane interleaved
+(UV 平面交错。)
 
 
-Description
-===========
+Description(描述)
+=================
 
 In this format there is no Y plane, Only CbCr plane. ie (UV interleaved)
+(此格式中没有 Y 平面，只有 CbCr 平面，即 (UV 交错)。)
 
 **Byte Order.**
 Each cell is one byte.
+(字节序。每个单元格为一个字节。)
 
 
 

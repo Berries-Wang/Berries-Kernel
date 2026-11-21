@@ -8,7 +8,7 @@ name if both are equally fit for a particular use case.
 (设备驱动可以使用 ktime_get() 以及 linux/timekeeping.h 中声明的众多相关函数读取当前时间。根据经验法则，如果两个访问接口都同样适合某个特定用途，应优先选择名字更短的那个。)
 
 Basic ktime_t based interfaces(基于 ktime_t 的基本接口)
-------------------------------------------------------
+-------------------------------------------------------
 
 The recommended simplest form returns an opaque ktime_t, with variants
 that return time for different clock references:

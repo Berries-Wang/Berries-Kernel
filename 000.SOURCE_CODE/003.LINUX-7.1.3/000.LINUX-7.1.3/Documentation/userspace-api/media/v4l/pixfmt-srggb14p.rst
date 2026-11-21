@@ -6,9 +6,9 @@
 .. _v4l2-pix-fmt-sgbrg14p:
 .. _v4l2-pix-fmt-sgrbg14p:
 
-*******************************************************************************************************************************
-V4L2_PIX_FMT_SRGGB14P ('pREE'), V4L2_PIX_FMT_SGRBG14P ('pgEE'), V4L2_PIX_FMT_SGBRG14P ('pGEE'), V4L2_PIX_FMT_SBGGR14P ('pBEE'),
-*******************************************************************************************************************************
+*****************************************************************************************************************************************************
+V4L2_PIX_FMT_SRGGB14P ('pREE'), V4L2_PIX_FMT_SGRBG14P ('pgEE'), V4L2_PIX_FMT_SGBRG14P ('pGEE'), V4L2_PIX_FMT_SBGGR14P ('pBEE'),(14 位打包 Bayer 格式)
+*****************************************************************************************************************************************************
 
 *man V4L2_PIX_FMT_SRGGB14P(2)*
 
@@ -16,24 +16,32 @@ V4L2_PIX_FMT_SGRBG14P
 V4L2_PIX_FMT_SGBRG14P
 V4L2_PIX_FMT_SBGGR14P
 14-bit packed Bayer formats
+(14 位打包 Bayer 格式)
 
 
-Description
-===========
+Description(描述)
+=================
 
 These four pixel formats are packed raw sRGB / Bayer formats with 14
 bits per colour. Every four consecutive samples are packed into seven
 bytes. Each of the first four bytes contain the eight high order bits
 of the pixels, and the three following bytes contains the six least
 significant bits of each pixel, in the same order.
+(这四种像素格式是每种颜色 14 位的打包 raw sRGB/Bayer 格式。每四个连续的
+样本被打包进七个字节。前四个字节中的每一个包含像素的高 8 位，随后的三个
+字节包含每个像素的 6 个最低有效位，顺序相同。)
 
 Each n-pixel row contains n/2 green samples and n/2 blue or red samples,
 with alternating green-red and green-blue rows. They are conventionally
 described as GRGR... BGBG..., RGRG... GBGB..., etc. Below is an example
 of one of these formats:
+(每个 n 像素的行包含 n/2 个绿色样本和 n/2 个蓝色或红色样本，绿-红行与
+绿-蓝行交替出现。它们通常被描述为 GRGR... BGBG...、RGRG... GBGB... 等。
+下面是其中一种格式的示例：)
 
 **Byte Order.**
 Each cell is one byte.
+(字节序。每个单元格是一个字节。)
 
 .. raw:: latex
 

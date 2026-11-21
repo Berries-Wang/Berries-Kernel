@@ -1,8 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-============================
-Obsolete GPIO Userspace APIs
-============================
+============================================================
+Obsolete GPIO Userspace APIs(已弃用的 GPIO 用户空间 API)
+============================================================
 
 .. toctree::
     :maxdepth: 1

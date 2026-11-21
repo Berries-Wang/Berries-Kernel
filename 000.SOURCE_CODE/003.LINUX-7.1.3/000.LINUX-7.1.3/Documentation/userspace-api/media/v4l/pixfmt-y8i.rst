@@ -9,18 +9,23 @@ V4L2_PIX_FMT_Y8I ('Y8I ')
 
 
 Interleaved grey-scale image, e.g. from a stereo-pair
+(交织的灰度图像，例如来自立体对。)
 
 
-Description
-===========
+Description(描述)
+=================
 
 This is a grey-scale image with a depth of 8 bits per pixel, but with
 pixels from 2 sources interleaved. Each pixel is stored in a 16-bit
 word. E.g. the R200 RealSense camera stores pixel from the left sensor
 in lower and from the right sensor in the higher 8 bits.
+(这是一幅每像素 8 位深度的灰度图像，但来自 2 个源的像素交织在一起。
+每个像素存储在一个 16 位字中。例如，R200 RealSense 相机把来自左侧传
+感器的像素存储在低 8 位中，把来自右侧传感器的像素存储在高 8 位中。)
 
 **Byte Order.**
 Each cell is one byte.
+( **字节序。** 每个单元是一个字节。)
 
 
 

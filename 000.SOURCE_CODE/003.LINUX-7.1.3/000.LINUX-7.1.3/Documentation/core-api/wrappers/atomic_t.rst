@@ -2,9 +2,9 @@
    This is a simple wrapper to bring atomic_t.txt into the RST world
    until such a time as that file can be converted directly.
 
-============
-Atomic types
-============
+======================
+Atomic types(原子类型)
+======================
 
 .. raw:: latex
 
@@ -16,4 +16,3 @@ Atomic types
 .. raw:: latex
 
     \normalsize
-

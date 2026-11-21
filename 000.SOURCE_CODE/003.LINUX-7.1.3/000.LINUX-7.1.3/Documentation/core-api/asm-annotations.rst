@@ -126,6 +126,7 @@ This section covers ``SYM_FUNC_*`` and ``SYM_CODE_*`` enumerated above.
 names that have a ``.L`` prefix do not emit symbol table entries. ``.L``
 prefixed symbols can be used within a code region, but should be avoided for
 denoting a range of code via ``SYM_*_START/END`` annotations.
+( ``objtool`` 要求所有代码都必须包含在一个 ELF 符号内。以 ``.L`` 为前缀的符号名不会生成符号表条目。 ``.L`` 前缀的符号可以在代码区域内部使用，但应避免用它们通过 ``SYM_*_START/END`` 注记来标示一段代码的范围。)
 
 * ``SYM_FUNC_START`` and ``SYM_FUNC_START_LOCAL`` are supposed to be **the
   most frequent markings**. They are used for functions with standard calling

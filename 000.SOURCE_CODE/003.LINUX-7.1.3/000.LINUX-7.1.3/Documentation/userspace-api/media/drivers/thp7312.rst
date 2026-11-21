@@ -1,16 +1,19 @@
 .. SPDX-License-Identifier: GPL-2.0-only
 
-THine THP7312 ISP driver
-========================
+THine THP7312 ISP driver(THine THP7312 ISP 驱动)
+================================================
 
 The THP7312 driver implements the following driver-specific controls:
+(THP7312 驱动实现以下驱动专属控制：)
 
 ``V4L2_CID_THP7312_LOW_LIGHT_COMPENSATION``
     Enable/Disable auto-adjustment, based on lighting conditions, of the frame
     rate when auto-exposure is enabled.
+    (启用/停用自动调整：在启用自动曝光时，根据光照条件自动调整帧率。)
 
 ``V4L2_CID_THP7312_AUTO_FOCUS_METHOD``
     Set method of auto-focus. Only takes effect when auto-focus is enabled.
+    (设置自动对焦方式。仅在启用自动对焦时生效。)
 
     .. flat-table::
         :header-rows:  0
@@ -18,11 +21,11 @@ The THP7312 driver implements the following driver-specific controls:
         :widths:       1 4
 
         * - ``0``
-          - Contrast-based auto-focus
+          - Contrast-based auto-focus(基于对比度的自动对焦)
         * - ``1``
-          - PDAF
+          - PDAF(相位检测自动对焦)
         * - ``2``
-          - Hybrid of contrast-based and PDAF
+          - Hybrid of contrast-based and PDAF(基于对比度与 PDAF 的混合自动对焦)
 
     Supported values for the control depend on the camera sensor module
     connected to the THP7312. If the module doesn't have a focus lens actuator,
@@ -30,10 +33,16 @@ The THP7312 driver implements the following driver-specific controls:
     controllable focus lens but the sensor doesn't support PDAF, only the
     contrast-based auto-focus value will be valid. Otherwise all values for the
     controls will be supported.
+    (该控件支持的取值取决于连接到 THP7312 的摄像头传感器模组。若模组没有对焦
+    镜头执行器，THP7312 驱动将不会暴露此控件。若模组有可控对焦镜头但传感器
+    不支持 PDAF，则只有基于对比度的自动对焦值有效。否则，该控件的全部取值
+    都将受支持。)
 
 ``V4L2_CID_THP7312_NOISE_REDUCTION_AUTO``
     Enable/Disable auto noise reduction.
+    (启用/停用自动降噪。)
 
 ``V4L2_CID_THP7312_NOISE_REDUCTION_ABSOLUTE``
     Set the noise reduction strength, where 0 is the weakest and 10 is the
     strongest.
+    (设置降噪强度，0 最弱，10 最强。)

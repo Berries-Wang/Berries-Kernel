@@ -2,23 +2,27 @@
 
 .. include:: <isonum.txt>
 
-########################################
-Linux Media Infrastructure userspace API
-########################################
+########################################################################
+Linux Media Infrastructure userspace API(Linux 媒体基础设施用户空间 API)
+########################################################################
 
 This section contains the  driver development information and Kernel APIs
 used by media devices.
+(本节包含媒体设备所使用的驱动开发信息与内核 API。)
 
 Please see:
+(请参阅：)
 
 Documentation/admin-guide/media/index.rst
 
   - for usage information about media subsystem and supported drivers;
+    (关于媒体子系统与受支持驱动程序的用法信息；)
 
 Documentation/driver-api/media/index.rst
 
   - for driver development information and Kernel APIs used by
     media devices;
+    (关于媒体设备所使用的驱动开发信息与内核 API；)
 
 
 .. toctree::
@@ -65,3 +69,7 @@ GNU General Public License::
   more details.
 
   For more details see the file COPYING in the source distribution of Linux.
+
+(请注意，媒体用户空间 API 中的一些文档，在其源代码中被明确说明时，
+是以 GNU Free Documentation License 1.1 版与 GNU General Public License
+双重许可的。)

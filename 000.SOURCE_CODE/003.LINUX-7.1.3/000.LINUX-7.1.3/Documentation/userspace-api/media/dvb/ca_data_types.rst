@@ -2,8 +2,8 @@
 
 .. _ca_data_types:
 
-*************
-CA Data Types
-*************
+**************************
+CA Data Types(CA 数据类型)
+**************************
 
 .. kernel-doc:: include/uapi/linux/dvb/ca.h

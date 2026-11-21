@@ -2,9 +2,9 @@
 
 .. _cec_header:
 
-****************
-CEC uAPI Symbols
-****************
+*******************************
+CEC uAPI Symbols(CEC uAPI 符号)
+*******************************
 
 .. kernel-include:: include/uapi/linux/cec.h
     :generate-cross-refs:

@@ -3,20 +3,24 @@
 
 .. _packed-hsv:
 
-******************
-Packed HSV formats
-******************
+*********************************
+Packed HSV formats(打包 HSV 格式)
+*********************************
 
-Description
-===========
+Description(描述)
+=================
 
 The *hue* (h) is measured in degrees, the equivalence between degrees and LSBs
 depends on the hsv-encoding used, see :ref:`colorspaces`.
 The *saturation* (s) and the *value* (v) are measured in percentage of the
 cylinder: 0 being the smallest value and 255 the maximum.
+(色度 *hue* (h) 以度为单位度量，度与 LSB 之间的等效关系取决于所使用的
+hsv 编码，参见 :ref:`colorspaces`。饱和度 *saturation* (s) 与明度 *value* (v)
+以柱体的百分比度量：0 为最小值，255 为最大值。)
 
 
 The values are packed in 24 or 32 bit formats.
+(这些值打包成 24 位或 32 位格式。)
 
 
 .. raw:: latex
@@ -156,3 +160,4 @@ The values are packed in 24 or 32 bit formats.
     \endgroup
 
 Bit 7 is the most significant bit.
+(位 7 是最高有效位。)

@@ -1,8 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-=======
-Devices
-=======
+=============
+Devices(设备)
+=============
 
 .. toctree::
    :maxdepth: 2

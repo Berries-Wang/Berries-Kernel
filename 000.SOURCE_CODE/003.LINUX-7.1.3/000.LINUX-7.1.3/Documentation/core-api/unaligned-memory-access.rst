@@ -356,9 +356,11 @@ For some ethernet hardware that cannot DMA to unaligned addresses like
 required to copy the incoming frame into an aligned buffer. Because this is
 unnecessary on architectures that can do unaligned accesses, the code can be
 made dependent on CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS like so::
+
 (对于某些不能 DMA 到 4*n+2 之类非对齐地址的以太网硬件，或者非以太网硬件，这就
 可能成为问题，此时需要把收到的帧复制到一个对齐的缓冲区中。由于在能够进行非对齐
 访问的体系结构上这是不必要的，可以像下面这样让代码依赖于
+
 CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS：)
 
 	#ifdef CONFIG_HAVE_EFFICIENT_UNALIGNED_ACCESS

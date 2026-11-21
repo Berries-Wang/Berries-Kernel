@@ -2,8 +2,8 @@
 
 .. _frontend_legacy_types:
 
-Frontend Legacy Data Types
-==========================
+Frontend Legacy Data Types(前端旧式数据类型)
+============================================
 
 
 .. toctree::
@@ -17,12 +17,14 @@ Frontend Legacy Data Types
 
 .. _frontend_legacy_fcalls:
 
-Frontend Legacy Function Calls
-==============================
+Frontend Legacy Function Calls(前端旧式函数调用)
+================================================
 
 Those functions are defined at DVB version 3. The support is kept in the
 kernel due to compatibility issues only. Their usage is strongly not
 recommended
+(这些函数定义于 DVB 版本 3。出于兼容性考虑，内核中仅保留对它们的支持。
+强烈不建议使用。)
 
 
 .. toctree::

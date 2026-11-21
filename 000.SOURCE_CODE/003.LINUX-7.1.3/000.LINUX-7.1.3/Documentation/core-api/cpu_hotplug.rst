@@ -120,8 +120,6 @@ Using CPU hotplug(使用 CPU 热插拔)
 The kernel option *CONFIG_HOTPLUG_CPU* needs to be enabled. It is currently
 available on multiple architectures including ARM, MIPS, PowerPC and X86. The
 configuration is done via the sysfs interface::
-(需要启用内核选项 *CONFIG_HOTPLUG_CPU*。它目前可用于包括 ARM、MIPS、PowerPC
-与 X86 在内的多种架构。配置通过 sysfs 接口完成：)
 
  $ ls -lh /sys/devices/system/cpu
  total 0
@@ -138,6 +136,10 @@ configuration is done via the sysfs interface::
  -r--r--r--  1 root root 4.0K Dec 21 16:33 online
  -r--r--r--  1 root root 4.0K Dec 21 16:33 possible
  -r--r--r--  1 root root 4.0K Dec 21 16:33 present
+
+
+(需要启用内核选项 *CONFIG_HOTPLUG_CPU*。它目前可用于包括 ARM、MIPS、PowerPC
+与 X86 在内的多种架构。配置通过 sysfs 接口完成：)
 
 (需要启用内核选项 *CONFIG_HOTPLUG_CPU*。它目前可用于包括 ARM、MIPS、
 PowerPC 与 X86 在内的多种架构。配置通过 sysfs 接口完成：)

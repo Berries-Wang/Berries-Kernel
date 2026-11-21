@@ -1,24 +1,31 @@
-===================
-Testing BPF on s390
-===================
+=======================================
+Testing BPF on s390(在 s390 上测试 BPF)
+=======================================
 
-1. Introduction
-***************
+1. Introduction(1. 简介)
+************************
 
 IBM Z are mainframe computers, which are descendants of IBM System/360 from
 year 1964. They are supported by the Linux kernel under the name "s390". This
 document describes how to test BPF in an s390 QEMU guest.
+(IBM Z 是大型主机计算机，是 1964 年 IBM System/360 的后代。Linux 内核以 "s390" 为名支持它们。本文档描述如何在 s390 QEMU 客户机中测试 BPF。)
 
-2. One-time setup
-*****************
+2. One-time setup(2. 一次性设置)
+********************************
 
 The following is required to build and run the test suite:
+(构建并运行测试套件需要以下各项：)
 
   * s390 GCC
+    (s390 GCC)
   * s390 development headers and libraries
+    (s390 开发头文件与库)
   * Clang with BPF support
+    (支持 BPF 的 Clang)
   * QEMU with s390 support
+    (支持 s390 的 QEMU)
   * Disk image with s390 rootfs
+    (带有 s390 rootfs 的磁盘镜像)
 
 Debian supports installing compiler and libraries for s390 out of the box.
 Users of other distros may use debootstrap in order to set up a Debian chroot::
@@ -32,6 +39,8 @@ Users of other distros may use debootstrap in order to set up a Debian chroot::
   sudo mount --rbind /proc ./s390-toolchain/proc
   sudo mount --rbind /sys ./s390-toolchain/sys
   sudo chroot ./s390-toolchain
+
+(Debian 开箱即支持为 s390 安装编译器与库。其他发行版的用户可以使用 debootstrap 来搭建 Debian chroot：)
 
 Once on Debian, the build prerequisites can be installed as follows::
 
@@ -59,6 +68,8 @@ Once on Debian, the build prerequisites can be installed as follows::
     libelf-dev:s390x \
     libncurses-dev
 
+(进入 Debian 后，可以按如下方式安装构建所需的前置依赖：)
+
 Latest Clang targeting BPF can be installed as follows::
 
   git clone https://github.com/llvm/llvm-project.git
@@ -73,6 +84,8 @@ Latest Clang targeting BPF can be installed as follows::
   make
   sudo make install
   export PATH=/opt/clang-bpf/bin:$PATH
+
+(可以按如下方式安装面向 BPF 的最新 Clang：)
 
 The disk image can be prepared using a loopback mount and debootstrap::
 
@@ -99,8 +112,10 @@ The disk image can be prepared using a loopback mount and debootstrap::
   sudo umount ./s390.rootfs
   sudo losetup -d /dev/loopX
 
-3. Compilation
-**************
+(磁盘镜像可以使用回环挂载与 debootstrap 来准备：)
+
+3. Compilation(3. 编译)
+***********************
 
 In addition to the usual Kconfig options required to run the BPF test suite, it
 is also helpful to select::
@@ -110,8 +125,11 @@ is also helpful to select::
   CONFIG_NET_9P_VIRTIO=y
   CONFIG_VIRTIO_PCI=y
 
+(除了运行 BPF 测试套件所需的常规 Kconfig 选项之外，选择以下选项也很有帮助：)
+
 as that would enable a very easy way to share files with the s390 virtual
 machine.
+(这样将启用一种非常简便的与 s390 虚拟机共享文件的方式。)
 
 Compiling kernel, modules and testsuite, as well as preparing gdb scripts to
 simplify debugging, can be done using the following commands::
@@ -124,8 +142,10 @@ simplify debugging, can be done using the following commands::
     INSTALL_PATH=$PWD/tools/testing/selftests/kselftest_install \
     install
 
-4. Running the test suite
-*************************
+(编译内核、模块与测试套件，以及准备用于简化调试的 gdb 脚本，都可以使用以下命令完成：)
+
+4. Running the test suite(4. 运行测试套件)
+******************************************
 
 The virtual machine can be started as follows::
 
@@ -143,11 +163,15 @@ The virtual machine can be started as follows::
     -netdev user,id=net0 \
     -device virtio-net-ccw,netdev=net0
 
+(虚拟机可以按如下方式启动：)
+
 When using this on a real IBM Z, ``-enable-kvm`` may be added for better
 performance. When starting the virtual machine for the first time, disk image
 setup must be finalized using the following command::
 
   /debootstrap/debootstrap --second-stage
+
+(在真实的 IBM Z 上使用时，可以加上 ``-enable-kvm`` 以获得更好的性能。首次启动虚拟机时，必须使用以下命令完成磁盘镜像的设置收尾：)
 
 Directory with the code built on the host as well as ``/proc`` and ``/sys``
 need to be mounted as follows::
@@ -157,44 +181,58 @@ need to be mounted as follows::
   mount -t proc proc /proc
   mount -t sysfs sys /sys
 
+(在主机上构建的代码所在目录，以及 ``/proc`` 与 ``/sys``，需要按如下方式挂载：)
+
 After that, the test suite can be run using the following commands::
 
   cd /linux/tools/testing/selftests/kselftest_install
   ./run_kselftest.sh
+
+(之后，可以使用以下命令运行测试套件：)
 
 As usual, tests can be also run individually::
 
   cd /linux/tools/testing/selftests/bpf
   ./test_verifier
 
-5. Debugging
-************
+(与往常一样，测试也可以单独运行：)
+
+5. Debugging(5. 调试)
+*********************
 
 It is possible to debug the s390 kernel using QEMU GDB stub, which is activated
 by passing ``-s`` to QEMU.
+(可以通过 QEMU GDB stub 调试 s390 内核，向 QEMU 传入 ``-s`` 即可激活它。)
 
 It is preferable to turn KASLR off, so that gdb would know where to find the
 kernel image in memory, by building the kernel with::
 
   RANDOMIZE_BASE=n
 
+(最好关闭 KASLR，让 gdb 知道在内存中的何处寻找内核镜像，方法是使用以下选项构建内核：)
+
 GDB can then be attached using the following command::
 
   gdb-multiarch -ex 'target remote localhost:1234' ./vmlinux
 
-6. Network
-**********
+(然后可以使用以下命令连接 GDB：)
+
+6. Network(6. 网络)
+*******************
 
 In case one needs to use the network in the virtual machine in order to e.g.
 install additional packages, it can be configured using::
 
   dhclient eth0
 
-7. Links
-********
+(如果需要在虚拟机中使用网络(例如安装额外的软件包)，可以使用以下命令配置：)
+
+7. Links(7. 链接)
+*****************
 
 This document is a compilation of techniques, whose more comprehensive
 descriptions can be found by following these links:
+(本文档是对一些技术的汇编，更全面的说明可以通过以下链接找到：)
 
 - `Debootstrap <https://wiki.debian.org/EmDebian/CrossDebootstrap>`_
 - `Multiarch <https://wiki.debian.org/Multiarch/HOWTO>`_

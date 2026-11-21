@@ -1,9 +1,9 @@
-======================
-Memory Management APIs
-======================
+====================================
+Memory Management APIs(内存管理 API)
+====================================
 
-User Space Memory Access
-========================
+User Space Memory Access(用户空间内存访问)
+==========================================
 
 .. kernel-doc:: arch/x86/include/asm/uaccess.h
    :internal:
@@ -16,8 +16,8 @@ User Space Memory Access
 
 .. _mm-api-gfp-flags:
 
-Memory Allocation Controls
-==========================
+Memory Allocation Controls(内存分配控制)
+========================================
 
 .. kernel-doc:: include/linux/gfp_types.h
    :doc: Page mobility and placement hints
@@ -31,8 +31,8 @@ Memory Allocation Controls
 .. kernel-doc:: include/linux/gfp_types.h
    :doc: Useful GFP flag combinations
 
-The Slab Cache
-==============
+The Slab Cache(Slab 缓存)
+=========================
 
 .. kernel-doc:: include/linux/slab.h
    :internal:
@@ -46,23 +46,23 @@ The Slab Cache
 .. kernel-doc:: mm/util.c
    :functions: kfree_const kvmalloc_node kvfree
 
-Virtually Contiguous Mappings
-=============================
+Virtually Contiguous Mappings(虚拟连续映射)
+===========================================
 
 .. kernel-doc:: mm/vmalloc.c
    :export:
 
-File Mapping and Page Cache
-===========================
+File Mapping and Page Cache(文件映射与页缓存)
+=============================================
 
-Filemap
--------
+Filemap(文件映射)
+-----------------
 
 .. kernel-doc:: mm/filemap.c
    :export:
 
-Readahead
----------
+Readahead(预读)
+---------------
 
 .. kernel-doc:: mm/readahead.c
    :doc: Readahead Overview
@@ -70,14 +70,14 @@ Readahead
 .. kernel-doc:: mm/readahead.c
    :export:
 
-Writeback
----------
+Writeback(回写)
+---------------
 
 .. kernel-doc:: mm/page-writeback.c
    :export:
 
-Truncate
---------
+Truncate(截断)
+--------------
 
 .. kernel-doc:: mm/truncate.c
    :export:
@@ -85,14 +85,14 @@ Truncate
 .. kernel-doc:: include/linux/pagemap.h
    :internal:
 
-Memory pools
-============
+Memory pools(内存池)
+====================
 
 .. kernel-doc:: mm/mempool.c
    :export:
 
-More Memory Management Functions
-================================
+More Memory Management Functions(更多内存管理函数)
+==================================================
 
 .. kernel-doc:: mm/memory.c
    :export:

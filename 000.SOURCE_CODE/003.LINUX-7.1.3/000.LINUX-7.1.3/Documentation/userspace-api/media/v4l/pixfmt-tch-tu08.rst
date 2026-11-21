@@ -3,24 +3,28 @@
 
 .. _V4L2-TCH-FMT-TU08:
 
-**************************
-V4L2_TCH_FMT_TU08 ('TU08')
-**************************
+**************************************************
+V4L2_TCH_FMT_TU08 ('TU08')(8 位无符号原始触摸数据)
+**************************************************
 
 *man V4L2_TCH_FMT_TU08(2)*
 
 8-bit unsigned raw touch data
+(8 位无符号原始触摸数据。)
 
-Description
-===========
+Description(描述)
+=================
 
 This format represents unsigned 8-bit data from a touch controller.
+(此格式表示来自触摸控制器的无符号 8 位数据。)
 
 This may be used for output for raw and reference data. Values may range from
 0 to 255.
+(这可用于原始数据和参考数据的输出。数值范围可以从 0 到 255。)
 
 **Byte Order.**
 Each cell is one byte.
+(字节序。每个单元格为一个字节。)
 
 
 

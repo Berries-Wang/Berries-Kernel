@@ -1,11 +1,14 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-DW100 dewarp driver
-===================
+=====================================
+DW100 dewarp driver(DW100 去畸变驱动)
+=====================================
 
 The Vivante DW100 Dewarp Processor IP core found on i.MX8MP SoC applies a
 programmable geometrical transformation on the input image to correct distortion
 introduced by lenses.
+(i.MX8MP SoC 上的 Vivante DW100 Dewarp Processor IP 核对输入图像施加一
+个可编程的几何变换，以校正镜头引入的畸变。)
 
 The transformation function is exposed by the hardware as a grid map with 16x16
 pixel macroblocks indexed using X, Y vertex coordinates.
@@ -34,6 +37,8 @@ pixel macroblocks indexed using X, Y vertex coordinates.
 
             Grid of Image Blocks for Dewarping Map
 
+(变换功能由硬件以网格图 (grid map) 的形式暴露，网格图以 X、Y 顶点坐标
+索引 16x16 像素宏块。)
 
 Each x, y coordinate register uses 16 bits to record the coordinate address in
 an unsigned 12.4 fixed point format (UQ12.4).
@@ -48,13 +53,20 @@ an unsigned 12.4 fixed point format (UQ12.4).
 
                            Remap Register Layout
 
+(每个 x、y 坐标寄存器使用 16 位，以无符号 12.4 定点格式 (UQ12.4) 记录
+坐标地址。)
+
 The dewarping map is set from applications using the
 V4L2_CID_DW100_DEWARPING_16x16_VERTEX_MAP control. The control contains
 an array of u32 values storing (x, y) destination coordinates for each
 vertex of the grid. The x coordinate is stored in the 16 LSBs and the y
 coordinate in the 16 MSBs.
+(去畸变映射由应用程序通过 V4L2_CID_DW100_DEWARPING_16x16_VERTEX_MAP
+控件设置。该控件包含一个 u32 值数组，存储网格每个顶点的 (x, y) 目的坐
+标。x 坐标存储在低 16 位 (LSB) 中，y 坐标存储在高 16 位 (MSB) 中。)
 
 The number of elements in the array must match the image size:
+(数组中元素的数量必须与图像尺寸匹配：)
 
 .. code-block:: C
 
@@ -62,11 +74,15 @@ The number of elements in the array must match the image size:
 
 If the control has not been set by the application, the driver uses an identity
 map.
+(如果应用程序没有设置该控件，驱动程序使用恒等映射 (identity map)。)
 
 More details on the DW100 hardware operations can be found in
 *chapter 13.15 DeWarp* of IMX8MP_ reference manual.
+(关于 DW100 硬件操作的更多细节，可在 IMX8MP_ 参考手册的
+*第 13.15 章 DeWarp* 中找到。)
 
 The Vivante DW100 m2m driver implements the following driver-specific control:
+(Vivante DW100 m2m 驱动实现了以下驱动专用控件：)
 
 ``V4L2_CID_DW100_DEWARPING_16x16_VERTEX_MAP (__u32 array)``
     Specifies to DW100 driver its dewarping map (aka LUT) blob as described in
@@ -80,5 +96,12 @@ The Vivante DW100 m2m driver implements the following driver-specific control:
     upper bits and X in the lower bits. The driver modifies the dimensions of
     this control when the sink format is changed, to reflect the new input
     resolution.
+    (以 U32 动态数组的形式，向 DW100 驱动指定其去畸变映射 (即 LUT) 数据
+    块 (blob)，如 IMX8MP_ 参考手册的 *第 13.15.2.3 章 Dewarping Remap* 所
+    述。图像被划分为许多小的 16x16 块。如果图像的宽度/高度不能被 16 整
+    除，则最右/最下块的大小为余数。去畸变映射只保存块的顶点坐标。去畸
+    变网格图由 x 和 y 的顶点坐标组成。每个 x、y 坐标寄存器使用 16 位
+    (UQ12.4) 记录坐标地址，Y 坐标在高位，X 在低位。当 sink 格式改变时，
+    驱动程序会修改该控件的尺寸，以反映新的输入分辨率。)
 
 .. _IMX8MP: https://www.nxp.com/webapp/Download?colCode=IMX8MPRM

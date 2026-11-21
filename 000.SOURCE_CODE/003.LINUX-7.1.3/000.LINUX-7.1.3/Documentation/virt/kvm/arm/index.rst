@@ -1,8 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-===
-ARM
-===
+==============
+ARM(ARM 架构)
+==============
 
 .. toctree::
    :maxdepth: 2

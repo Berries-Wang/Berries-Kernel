@@ -15,24 +15,33 @@ V4L2_PIX_FMT_SGRBG10P
 V4L2_PIX_FMT_SGBRG10P
 V4L2_PIX_FMT_SBGGR10P
 10-bit packed Bayer formats
+(V4L2_PIX_FMT_SGRBG10P、V4L2_PIX_FMT_SGBRG10P、V4L2_PIX_FMT_SBGGR10P
+——10 位打包 Bayer 格式。)
 
 
-Description
-===========
+Description(描述)
+=================
 
 These four pixel formats are packed raw sRGB / Bayer formats with 10
 bits per sample. Every four consecutive samples are packed into 5
 bytes. Each of the first 4 bytes contain the 8 high order bits
 of the pixels, and the 5th byte contains the 2 least significants
 bits of each pixel, in the same order.
+(这四种像素格式是每样本 10 位的打包 (packed) raw sRGB / Bayer 格式。
+每四个连续样本打包进 5 个字节。前 4 个字节各包含像素的高 8 个有效
+位，第 5 个字节按相同顺序包含每个像素的 2 个最低有效位。)
 
 Each n-pixel row contains n/2 green samples and n/2 blue or red samples,
 with alternating green-red and green-blue rows. They are conventionally
 described as GRGR... BGBG..., RGRG... GBGB..., etc. Below is an example
 of a small V4L2_PIX_FMT_SBGGR10P image:
+(每个 n 像素行包含 n/2 个绿色样本和 n/2 个蓝色或红色样本，绿-红与
+绿-蓝行交替。它们通常被描述为 GRGR... BGBG...、RGRG... GBGB... 等。
+下面是一个小型 V4L2_PIX_FMT_SBGGR10P 图像的示例：)
 
 **Byte Order.**
 Each cell is one byte.
+( **字节序。** 每个单元是一个字节。)
 
 .. tabularcolumns:: |p{2.4cm}|p{1.4cm}|p{1.2cm}|p{1.2cm}|p{1.2cm}|p{9.3cm}|
 

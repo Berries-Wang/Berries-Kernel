@@ -2,17 +2,18 @@
 
 .. _frontend-property-satellite-systems:
 
-*********************************************
-Properties used on satellite delivery systems
-*********************************************
+*********************************************************************
+Properties used on satellite delivery systems(卫星传送系统使用的属性)
+*********************************************************************
 
 
 .. _dvbs-params:
 
-DVB-S delivery system
-=====================
+DVB-S delivery system(DVB-S 传送系统)
+=====================================
 
 The following parameters are valid for DVB-S:
+(以下参数对 DVB-S 有效：)
 
 -  :ref:`DTV_API_VERSION <DTV-API-VERSION>`
 
@@ -36,8 +37,10 @@ The following parameters are valid for DVB-S:
 
 In addition, the :ref:`DTV QoS statistics <frontend-stat-properties>`
 are also valid.
+(此外，:ref:`DTV QoS statistics <frontend-stat-properties>` 也有效。)
 
 Future implementations might add those two missing parameters:
+(未来的实现可能会添加那两个缺失的参数：)
 
 -  :ref:`DTV_DISEQC_MASTER <DTV-DISEQC-MASTER>`
 
@@ -46,11 +49,12 @@ Future implementations might add those two missing parameters:
 
 .. _dvbs2-params:
 
-DVB-S2 delivery system
-======================
+DVB-S2 delivery system(DVB-S2 传送系统)
+=======================================
 
 In addition to all parameters valid for DVB-S, DVB-S2 supports the
 following parameters:
+(除对 DVB-S 有效的所有参数之外，DVB-S2 还支持以下参数：)
 
 -  :ref:`DTV_MODULATION <DTV-MODULATION>`
 
@@ -64,25 +68,28 @@ following parameters:
 
 In addition, the :ref:`DTV QoS statistics <frontend-stat-properties>`
 are also valid.
+(此外，:ref:`DTV QoS statistics <frontend-stat-properties>` 也有效。)
 
 
 .. _turbo-params:
 
-Turbo code delivery system
-==========================
+Turbo code delivery system(Turbo 码传送系统)
+============================================
 
 In addition to all parameters valid for DVB-S, turbo code supports the
 following parameters:
+(除对 DVB-S 有效的所有参数之外，turbo 码还支持以下参数：)
 
 -  :ref:`DTV_MODULATION <DTV-MODULATION>`
 
 
 .. _isdbs-params:
 
-ISDB-S delivery system
-======================
+ISDB-S delivery system(ISDB-S 传送系统)
+=======================================
 
 The following parameters are valid for ISDB-S:
+(以下参数对 ISDB-S 有效：)
 
 -  :ref:`DTV_API_VERSION <DTV-API-VERSION>`
 

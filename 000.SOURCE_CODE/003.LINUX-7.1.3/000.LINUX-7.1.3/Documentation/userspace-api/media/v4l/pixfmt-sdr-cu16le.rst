@@ -3,24 +3,29 @@
 
 .. _V4L2-SDR-FMT-CU16LE:
 
-****************************
-V4L2_SDR_FMT_CU16LE ('CU16')
-****************************
+**********************************************************
+V4L2_SDR_FMT_CU16LE ('CU16')(复数无符号 16 位小端 IQ 样本)
+**********************************************************
 
 
 Complex unsigned 16-bit little endian IQ sample
+(复数无符号 16 位小端 IQ 样本。)
 
 
-Description
-===========
+Description(描述)
+=================
 
 This format contains sequence of complex number samples. Each complex
 number consist two parts, called In-phase and Quadrature (IQ). Both I
 and Q are represented as a 16 bit unsigned little endian number. I value
 comes first and Q value after that.
+(该格式包含一系列复数样本。每个复数由两部分组成，称为同相（In-phase）与
+正交（Quadrature，IQ）。I 和 Q 都表示为 16 位无符号小端数。I 值在前，Q 值
+在后。)
 
 **Byte Order.**
 Each cell is one byte.
+(**字节序。** 每个单元格为一字节。)
 
 
 .. flat-table::

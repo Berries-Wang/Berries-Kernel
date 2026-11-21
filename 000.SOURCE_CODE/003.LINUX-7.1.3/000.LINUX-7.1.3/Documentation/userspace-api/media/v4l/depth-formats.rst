@@ -3,11 +3,12 @@
 
 .. _depth-formats:
 
-*************
-Depth Formats
-*************
+***********************
+Depth Formats(深度格式)
+***********************
 
 Depth data provides distance to points, mapped onto the image plane
+(深度数据提供到各点的距离，并映射到图像平面上。)
 
 
 .. toctree::

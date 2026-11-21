@@ -1,11 +1,12 @@
 .. _dcn_blocks:
 
-==========
-DCN Blocks
-==========
+==================
+DCN Blocks(DCN 块)
+==================
 
 In this section, you will find some extra details about some of the DCN blocks
 and the code documentation when it is automatically generated.
+(本节提供关于部分 DCN 块的一些额外细节，以及在自动生成时的代码文档。)
 
 DCHUBBUB
 --------

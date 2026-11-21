@@ -19,6 +19,7 @@ verifier log.
 
 The BTF specification contains two parts,
 (BTF 规范包含两个部分：)
+
   * BTF kernel API
     (BTF 内核 API)
   * BTF ELF file format
@@ -145,6 +146,8 @@ The following sections detail encoding of each kind.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``struct btf_type`` encoding requirement:
+(struct btf_type 编码要求：name_off 为指向某个有效名称的偏移，该名称与一个变量或 .data/.bss/.rodata 之一相关联；info.kind_flag 为 0；info.kind 为 BTF_KIND_DATASEC；info.vlen 为变量个数；size 为节的总大小（字节）（编译时为 0，由 libbpf 等 BPF 加载器修补为实际大小）。)
+
  * ``name_off``: any valid offset
  * ``info.kind_flag``: 0
  * ``info.kind``: BTF_KIND_INT
@@ -247,6 +250,7 @@ No additional type data follow ``btf_type``.
 
 The ``struct btf_array`` encoding:
 (struct btf_array 的编码：)
+
   * ``type``: the element type
     (type：元素类型。)
   * ``index_type``: the index type
@@ -281,9 +285,9 @@ chained representation for multidimensional arrays.
 (目前，pahole 和 llvm 都会把多维数组折叠成一维数组，例如对于 a[5][6]，btf_array.nelems 等于 30。这是因为最初的用例是映射美化打印——整个数组都会被转储出来，一维数组就够用了。随着更多 BTF 用法被发掘，pahole 和 llvm 可以改为为多维数组生成正确的链式表示。)
 
 2.2.4 BTF_KIND_STRUCT(2.2.4 结构体)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 2.2.5 BTF_KIND_UNION(2.2.5 联合体)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``struct btf_type`` encoding requirement:
   * ``name_off``: 0 or offset to a valid C identifier
@@ -305,6 +309,7 @@ chained representation for multidimensional arrays.
 
 ``struct btf_member`` encoding:
 (struct btf_member 的编码：)
+
   * ``name_off``: offset to a valid C identifier
     (name_off：指向有效 C 标识符的偏移。)
   * ``type``: the member type
@@ -362,6 +367,7 @@ exist.
 
 The ``btf_enum`` encoding:
 (btf_enum 的编码：)
+
   * ``name_off``: offset to a valid C identifier
     (name_off：指向有效 C 标识符的偏移。)
   * ``val``: any value
@@ -462,7 +468,7 @@ signature is defined by ``type``. The subprogram is thus an instance of that
 type. The BTF_KIND_FUNC may in turn be referenced by a func_info in the
 :ref:`BTF_Ext_Section` (ELF) or in the arguments to :ref:`BPF_Prog_Load`
 (ABI).
-(BTF_KIND_FUNC 定义的不是类型，而是一个子程序（函数），其签名由 type 定义。因此，该子程序就是该类型的一个实例。BTF_KIND_FUNC 反过来可以被 :ref:`BTF_Ext_Section`（ELF）中的 func_info 或 :ref:`BPF_Prog_Load`（ABI）的参数引用。)
+(BTF_KIND_FUNC 定义的不是类型，而是一个子程序（函数），其签名由 type 定义。因此，该子程序就是该类型的一个实例。BTF_KIND_FUNC 反过来可以被 :ref:`BTF_Ext_Section` （ELF）中的 func_info 或 :ref:`BPF_Prog_Load` （ABI）的参数引用。)
 
 Currently, only linkage values of BTF_FUNC_STATIC and BTF_FUNC_GLOBAL are
 supported in the kernel.
@@ -546,7 +552,6 @@ map definition.
   * ``info.vlen``: # of variables
   * ``size``: total section size in bytes (0 at compilation time, patched
               to actual size by BPF loaders such as libbpf)
-    (struct btf_type 编码要求：name_off 为指向某个有效名称的偏移，该名称与一个变量或 .data/.bss/.rodata 之一相关联；info.kind_flag 为 0；info.kind 为 BTF_KIND_DATASEC；info.vlen 为变量个数；size 为节的总大小（字节）（编译时为 0，由 libbpf 等 BPF 加载器修补为实际大小）。)
 
 ``btf_type`` is followed by ``info.vlen`` number of ``struct btf_var_secinfo``.::
 
@@ -560,6 +565,7 @@ map definition.
 
 ``struct btf_var_secinfo`` encoding:
 (struct btf_var_secinfo 的编码：)
+
   * ``type``: the type of the BTF_KIND_VAR variable
     (type：BTF_KIND_VAR 变量的类型。)
   * ``offset``: the in-section offset of the variable
@@ -681,6 +687,7 @@ attribute-list of the attribute specifier.
 
 The ``btf_enum64`` encoding:
 (btf_enum64 的编码：)
+
   * ``name_off``: offset to a valid C identifier
     (name_off：指向有效 C 标识符的偏移。)
   * ``val_lo32``: lower 32-bit value for a 64-bit value
@@ -731,6 +738,7 @@ that value will be sign extended into 8 bytes.
 
 The following bpf syscall command involves BTF:
 (以下 bpf 系统调用命令会涉及 BTF：)
+
    * BPF_BTF_LOAD: load a blob of BTF data into kernel
      (BPF_BTF_LOAD：把一块 BTF 数据加载进内核)
    * BPF_MAP_CREATE: map creation with btf key and value type info.
@@ -856,6 +864,7 @@ size to kernel make it possible to extend the record itself in the future.
 
 Below are requirements for func_info:
 (以下是 func_info 的要求：)
+
   * func_info[0].insn_off must be 0.
     (func_info[0].insn_off 必须为 0。)
   * the func_info insn_off is in strictly increasing order and matches
@@ -864,6 +873,7 @@ Below are requirements for func_info:
 
 Below are requirements for line_info:
 (以下是 line_info 的要求：)
+
   * the first insn in each func must have a line_info record pointing to it.
     (每个函数的第一条 insn 必须有一条指向它的 line_info 记录。)
   * the line_info insn_off is in strictly increasing order.

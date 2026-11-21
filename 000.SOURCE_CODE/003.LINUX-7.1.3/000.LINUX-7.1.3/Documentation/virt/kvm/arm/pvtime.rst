@@ -1,18 +1,25 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-Paravirtualized time support for arm64
-======================================
+================================================================
+Paravirtualized time support for arm64(arm64 的半虚拟化时间支持)
+================================================================
 
 Arm specification DEN0057/A defines a standard for paravirtualised time
 support for AArch64 guests:
+(Arm 规范 DEN0057/A 为 AArch64 客户机的半虚拟化时间支持定义了一个标
+准：)
 
 https://developer.arm.com/docs/den0057/a
 
 KVM/arm64 implements the stolen time part of this specification by providing
 some hypervisor service calls to support a paravirtualized guest obtaining a
 view of the amount of time stolen from its execution.
+(KVM/arm64 通过提供一些管理程序服务调用，实现了该规范中的被窃取时间
+(stolen time) 部分，以支持半虚拟化的客户机了解其执行中被窃取的时间
+量。)
 
 Two new SMCCC compatible hypercalls are defined:
+(定义了两个新的 SMCCC 兼容超级调用：)
 
 * PV_TIME_FEATURES: 0xC5000020
 * PV_TIME_ST:       0xC5000021
@@ -21,8 +28,12 @@ These are only available in the SMC64/HVC64 calling convention as
 paravirtualized time is not available to 32 bit Arm guests. The existence of
 the PV_TIME_FEATURES hypercall should be probed using the SMCCC 1.1
 ARCH_FEATURES mechanism before calling it.
+(这些超级调用仅在 SMC64/HVC64 调用约定中可用，因为 32 位 Arm 客户机
+无法使用半虚拟化时间。在调用 PV_TIME_FEATURES 超级调用之前，应使用
+SMCCC 1.1 的 ARCH_FEATURES 机制探测其是否存在。)
 
 PV_TIME_FEATURES
+(PV_TIME_FEATURES 超级调用：)
 
     ============= ========    =================================================
     Function ID:  (uint32)    0xC5000020
@@ -33,6 +44,7 @@ PV_TIME_FEATURES
     ============= ========    =================================================
 
 PV_TIME_ST
+(PV_TIME_ST 超级调用：)
 
     ============= ========    ==============================================
     Function ID:  (uint32)    0xC5000021
@@ -45,38 +57,57 @@ The IPA returned by PV_TIME_ST should be mapped by the guest as normal memory
 with inner and outer write back caching attributes, in the inner shareable
 domain. A total of 16 bytes from the IPA returned are guaranteed to be
 meaningfully filled by the hypervisor (see structure below).
+(PV_TIME_ST 返回的 IPA 应由客户机按普通内存映射，使用内外写回缓存属
+性，处于内部可共享 (inner shareable) 域。从返回的 IPA 起共 16 字节保
+证会被管理程序有意义地填充 (见下面的结构)。)
 
 PV_TIME_ST returns the structure for the calling VCPU.
+(PV_TIME_ST 返回针对调用 VCPU 的结构。)
 
-Stolen Time
------------
+Stolen Time(被窃取时间)
+-----------------------
 
 The structure pointed to by the PV_TIME_ST hypercall is as follows:
+(PV_TIME_ST 超级调用所指向的结构如下：)
 
 +-------------+-------------+-------------+----------------------------+
 | Field       | Byte Length | Byte Offset | Description                |
+| (字段)      | (字节长度)  | (字节偏移)  | (描述)                     |
 +=============+=============+=============+============================+
 | Revision    |      4      |      0      | Must be 0 for version 1.0  |
+| (版本)      |             |             | (对于版本 1.0 必须为 0。)  |
 +-------------+-------------+-------------+----------------------------+
 | Attributes  |      4      |      4      | Must be 0                  |
+| (属性)      |             |             | (必须为 0。)               |
 +-------------+-------------+-------------+----------------------------+
 | Stolen time |      8      |      8      | Stolen time in unsigned    |
 |             |             |             | nanoseconds indicating how |
 |             |             |             | much time this VCPU thread |
 |             |             |             | was involuntarily not      |
 |             |             |             | running on a physical CPU. |
+| (被窃取时间)|             |             | (被窃取时间，以无符号纳秒表|
+|             |             |             | 示，指示该 VCPU 线程在物理 |
+|             |             |             | CPU 上非自愿未运行的时间。)|
 +-------------+-------------+-------------+----------------------------+
 
 All values in the structure are stored little-endian.
+(结构中的所有值都以小端序存储。)
 
 The structure will be updated by the hypervisor prior to scheduling a VCPU. It
 will be present within a reserved region of the normal memory given to the
 guest. The guest should not attempt to write into this memory. There is a
 structure per VCPU of the guest.
+(该结构会在调度 VCPU 之前由管理程序更新。它将位于交给客户机的普通内存
+的一个保留区域内。客户机不应尝试写入这块内存。客户机的每个 VCPU 都有
+一个这样的结构。)
 
 It is advisable that one or more 64k pages are set aside for the purpose of
 these structures and not used for other purposes, this enables the guest to map
 the region using 64k pages and avoids conflicting attributes with other memory.
+(建议专门划出一个或多个 64k 页面用于这些结构而不作他用，这使客户机能
+够用 64k 页面映射该区域，并避免与其他内存的属性冲突。)
 
 For the user space interface see
 :ref:`Documentation/virt/kvm/devices/vcpu.rst <kvm_arm_vcpu_pvtime_ctrl>`.
+(用户空间接口参见
+:ref:`Documentation/virt/kvm/devices/vcpu.rst <kvm_arm_vcpu_pvtime_ctrl>` 。)

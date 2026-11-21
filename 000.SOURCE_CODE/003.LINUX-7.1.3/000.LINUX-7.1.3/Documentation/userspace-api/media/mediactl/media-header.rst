@@ -2,9 +2,9 @@
 
 .. _media_header:
 
-*****************************
-Media controller uAPI symbols
-*****************************
+*********************************************************
+Media controller uAPI symbols(Media controller uAPI 符号)
+*********************************************************
 
 .. kernel-include:: include/uapi/linux/media.h
     :generate-cross-refs:

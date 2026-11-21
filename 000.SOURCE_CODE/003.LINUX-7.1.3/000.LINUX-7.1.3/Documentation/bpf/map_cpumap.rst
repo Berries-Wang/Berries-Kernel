@@ -1,21 +1,24 @@
 .. SPDX-License-Identifier: GPL-2.0-only
 .. Copyright (C) 2022 Red Hat, Inc.
 
-===================
-BPF_MAP_TYPE_CPUMAP
-===================
+=============================
+BPF_MAP_TYPE_CPUMAP(CPU 映射)
+=============================
 
 .. note::
    - ``BPF_MAP_TYPE_CPUMAP`` was introduced in kernel version 4.15
+     (``BPF_MAP_TYPE_CPUMAP`` 在内核版本 4.15 中引入)
 
 .. kernel-doc:: kernel/bpf/cpumap.c
  :doc: cpu map
 
 An example use-case for this map type is software based Receive Side Scaling (RSS).
+(这种映射类型的一个示例用例是基于软件的接收侧扩展 (RSS)。)
 
 The CPUMAP represents the CPUs in the system indexed as the map-key, and the
 map-value is the config setting (per CPUMAP entry). Each CPUMAP entry has a dedicated
 kernel thread bound to the given CPU to represent the remote CPU execution unit.
+(CPUMAP 以系统中的 CPU 作为映射键 (map-key) 来索引，映射值 (map-value) 是配置设置(每个 CPUMAP 表项一个)。每个 CPUMAP 表项都有一个专用的内核线程绑定到给定的 CPU，用以代表远程 CPU 执行单元。)
 
 Starting from Linux kernel version 5.9 the CPUMAP can run a second XDP program
 on the remote CPU. This allows an XDP program to split its processing across
@@ -24,12 +27,13 @@ the packets) needs to do minimal packet processing and the remote CPU (to which
 the packet is directed) can afford to spend more cycles processing the frame. The
 initial CPU is where the XDP redirect program is executed. The remote CPU
 receives raw ``xdp_frame`` objects.
+(从 Linux 内核版本 5.9 开始，CPUMAP 可以在远程 CPU 上运行第二个 XDP 程序。这使得 XDP 程序可以将其处理拆分到多个 CPU 上。例如这样一种场景：初始 CPU(看到/接收到数据包的那个)只需做最少的数据包处理，而远程 CPU(数据包被定向到的那个)可以花费更多的周期来处理该帧。初始 CPU 是执行 XDP 重定向程序的地方。远程 CPU 接收原始的 ``xdp_frame`` 对象。)
 
-Usage
-=====
+Usage(用法)
+===========
 
-Kernel BPF
-----------
+Kernel BPF(内核 BPF)
+--------------------
 bpf_redirect_map()
 ^^^^^^^^^^^^^^^^^^
 .. code-block:: c
@@ -38,17 +42,21 @@ bpf_redirect_map()
 
 Redirect the packet to the endpoint referenced by ``map`` at index ``key``.
 For ``BPF_MAP_TYPE_CPUMAP`` this map contains references to CPUs.
+(将数据包重定向到 ``map`` 中由索引 ``key`` 引用的端点。对于 ``BPF_MAP_TYPE_CPUMAP`` ，此映射包含对 CPU 的引用。)
 
 The lower two bits of ``flags`` are used as the return code if the map lookup
 fails. This is so that the return value can be one of the XDP program return
 codes up to ``XDP_TX``, as chosen by the caller.
+(``flags`` 的低两位在映射查找失败时被用作返回码。这样，返回值就可以是由调用者选择的、不超过 ``XDP_TX`` 的某个 XDP 程序返回码。)
 
-User space
-----------
+User space(用户空间)
+--------------------
 .. note::
     CPUMAP entries can only be updated/looked up/deleted from user space and not
     from an eBPF program. Trying to call these functions from a kernel eBPF
     program will result in the program failing to load and a verifier warning.
+    (CPUMAP 表项只能从用户空间进行更新/查找/删除，而不能从 eBPF 程序中操作。
+    试图从内核 eBPF 程序中调用这些函数会导致程序加载失败，并产生一个校验器警告。)
 
 bpf_map_update_elem()
 ^^^^^^^^^^^^^^^^^^^^^
@@ -59,6 +67,7 @@ bpf_map_update_elem()
 CPU entries can be added or updated using the ``bpf_map_update_elem()``
 helper. This helper replaces existing elements atomically. The ``value`` parameter
 can be ``struct bpf_cpumap_val``.
+(CPU 表项可以使用 ``bpf_map_update_elem()`` 辅助函数来添加或更新。该辅助函数以原子方式替换已有元素。 ``value`` 参数可以是 ``struct bpf_cpumap_val`` 。)
 
  .. code-block:: c
 
@@ -74,6 +83,7 @@ The flags argument can be one of the following:
   - BPF_ANY: Create a new element or update an existing element.
   - BPF_NOEXIST: Create a new element only if it did not exist.
   - BPF_EXIST: Update an existing element.
+    (flags 参数可以是以下之一：BPF_ANY 创建新元素或更新已有元素；BPF_NOEXIST 仅当元素不存在时才创建新元素；BPF_EXIST 更新已有元素。)
 
 bpf_map_lookup_elem()
 ^^^^^^^^^^^^^^^^^^^^^
@@ -83,6 +93,7 @@ bpf_map_lookup_elem()
 
 CPU entries can be retrieved using the ``bpf_map_lookup_elem()``
 helper.
+(CPU 表项可以使用 ``bpf_map_lookup_elem()`` 辅助函数来获取。)
 
 bpf_map_delete_elem()
 ^^^^^^^^^^^^^^^^^^^^^
@@ -93,14 +104,16 @@ bpf_map_delete_elem()
 CPU entries can be deleted using the ``bpf_map_delete_elem()``
 helper. This helper will return 0 on success, or negative error in case of
 failure.
+(CPU 表项可以使用 ``bpf_map_delete_elem()`` 辅助函数来删除。该辅助函数在成功时返回 0，失败时返回负的错误码。)
 
-Examples
-========
-Kernel
-------
+Examples(示例)
+==============
+Kernel(内核)
+------------
 
 The following code snippet shows how to declare a ``BPF_MAP_TYPE_CPUMAP`` called
 ``cpu_map`` and how to redirect packets to a remote CPU using a round robin scheme.
+(以下代码片段展示了如何声明一个名为 ``cpu_map`` 的 ``BPF_MAP_TYPE_CPUMAP`` ，以及如何使用轮询 (round robin) 方案将数据包重定向到远程 CPU。)
 
 .. code-block:: c
 
@@ -153,11 +166,12 @@ The following code snippet shows how to declare a ``BPF_MAP_TYPE_CPUMAP`` called
         return bpf_redirect_map(&cpu_map, cpu_dest, 0);
     }
 
-User space
-----------
+User space(用户空间)
+--------------------
 
 The following code snippet shows how to dynamically set the max_entries for a
 CPUMAP to the max number of cpus available on the system.
+(以下代码片段展示了如何将 CPUMAP 的 max_entries 动态设置为系统上可用 CPU 的最大数量。)
 
 .. code-block:: c
 
@@ -171,7 +185,7 @@ CPUMAP to the max number of cpus available on the system.
         return 0;
     }
 
-References
-===========
+References(参考)
+================
 
 - https://developers.redhat.com/blog/2021/05/13/receive-side-scaling-rss-with-ebpf-and-cpumap#redirecting_into_a_cpumap

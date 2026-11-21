@@ -1,6 +1,6 @@
-=================
-Backlight support
-=================
+===========================
+Backlight support(背光支持)
+===========================
 
 .. kernel-doc:: drivers/video/backlight/backlight.c
    :doc: overview

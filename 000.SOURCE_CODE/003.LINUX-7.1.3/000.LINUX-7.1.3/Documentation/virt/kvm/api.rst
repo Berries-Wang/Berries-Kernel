@@ -6105,14 +6105,18 @@ SIGNAL_EVENT 超级调用仍会触发 KVM_EXIT_HYPERV_HCALL 用户态退出。)
   };
 
 The conn_id field should fit within 24 bits::
-(conn_id 字段应当能容纳在 24 位之内：)
 
   #define KVM_HYPERV_CONN_ID_MASK		0x00ffffff
 
+
+(conn_id 字段应当能容纳在 24 位之内：)
+
 The acceptable values for the flags field are::
-(flags 字段可接受的取值：)
 
   #define KVM_HYPERV_EVENTFD_DEASSIGN	(1 << 0)
+
+
+(flags 字段可接受的取值：)
 
 :Returns: 0 on success,
  	  -EINVAL if conn_id or flags is outside the allowed range,
@@ -6548,13 +6552,14 @@ guest should have access.
 
 In this mode each filter event will contain an event select, mask, match, and
 exclude value.  To encode a masked event use::
-(在此模式下，每个过滤事件将包含一个事件选择、掩码 (mask)、匹配值 (match) 与排除
-位 (exclude)。要编码一个掩码事件，使用：)
 
   KVM_PMU_ENCODE_MASKED_ENTRY()
 
+
+(在此模式下，每个过滤事件将包含一个事件选择、掩码 (mask)、匹配值 (match) 与排除
+位 (exclude)。要编码一个掩码事件，使用：)
+
 An encoded event will follow this layout::
-(编码后的事件遵循如下布局：)
 
   Bits   Description
   ----   -----------
@@ -6565,6 +6570,9 @@ An encoded event will follow this layout::
   36:54  unused
   55     exclude bit
   63:56  umask mask
+
+
+(编码后的事件遵循如下布局：)
 
 When the guest attempts to program the PMU, these steps are followed in
 determining if the guest should have access:
@@ -6603,10 +6611,12 @@ select are set when called on Intel.
 的高位 (35:32) 中有任何一位被置位，则返回 -EINVAL。)
 
 Valid values for 'action'::
-(action 的有效取值：)
 
   #define KVM_PMU_EVENT_ALLOW 0
   #define KVM_PMU_EVENT_DENY 1
+
+
+(action 的有效取值：)
 
 Via this API, KVM userspace can also control the behavior of the VM's fixed
 counters (if any) by configuring the "action" and "fixed_counter_bitmap" fields.

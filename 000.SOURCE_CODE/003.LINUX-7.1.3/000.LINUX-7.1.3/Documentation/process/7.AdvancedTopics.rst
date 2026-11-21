@@ -148,23 +148,26 @@ should not be making changes to the core memory management code.  And, most
 importantly, do not use a git tree to bypass the review process.  Post an
 occasional summary of the tree to the relevant list, and, when the time is
 right, request that the tree be included in linux-next.
+(要避免这种情况，应确保给定分支中的所有补丁都紧密围绕相关主题；"驱动修复"分支不应去改动核心内存管理代码。最重要的是，不要用 git 树绕过审查流程。偶尔把该树的摘要发到相关邮件列表，并在时机合适时申请把该树纳入 linux-next。)
 
 If and when others start to send patches for inclusion into your tree,
 don't forget to review them.  Also ensure that you maintain the correct
 authorship information; the git "am" tool does its best in this regard, but
 you may have to add a "From:" line to the patch if it has been relayed to
 you via a third party.
+(如果其他人开始向你的树发送补丁以求收录，不要忘记审查它们。同时确保维护正确的作者信息；git 的 "am" 工具在这方面已尽力而为，但如果补丁是经第三方转交的，你可能仍需在补丁中添加一行 "From:"。)
 
 When requesting a pull, be sure to give all the relevant information: where
 your tree is, what branch to pull, and what changes will result from the
 pull.  The git request-pull command can be helpful in this regard; it will
 format the request as other developers expect, and will also check to be
 sure that you have remembered to push those changes to the public server.
+(请求拉取时，务必给出所有相关信息：你的树在哪里、要拉取哪个分支、拉取会产生哪些更改。git request-pull 命令在这方面很有帮助；它会按其他开发者期望的格式生成请求，还会检查你是否记得把这些更改推送到公共服务器。)
 
 .. _development_advancedtopics_reviews:
 
-Reviewing patches
------------------
+Reviewing patches(审查补丁)
+---------------------------
 
 Some readers will certainly object to putting this section with "advanced
 topics" on the grounds that even beginning kernel developers should be
@@ -173,6 +176,7 @@ learn how to program in the kernel environment than by looking at code
 posted by others.  In addition, reviewers are forever in short supply; by
 looking at code you can make a significant contribution to the process as a
 whole.
+(肯定有读者会反对把本节归入"进阶主题"，理由是就连刚入门的内核开发者也应该参与审查补丁。确实，学习在内核环境下编程，没有比阅读别人发布的代码更好的途径。此外，审查者永远处于短缺状态；通过阅读代码，你可以为整个流程做出重要贡献。)
 
 Reviewing code can be an intimidating prospect, especially for a new kernel
 developer who may well feel nervous about questioning code - in public -
@@ -182,12 +186,14 @@ piece of advice for reviewers (all reviewers) is this: phrase review
 comments as questions rather than criticisms.  Asking "how does the lock
 get released in this path?" will always work better than stating "the
 locking here is wrong."
+(审查代码可能是一件令人生畏的事，尤其是对新内核开发者而言——公开质疑那些经验更丰富的人发布的代码，难免让人紧张。不过，即便是最有经验的开发者写的代码也有改进空间。给审查者(所有审查者)的最佳建议也许是：把审查意见表述为提问，而非批评。问"这条路径上的锁是如何释放的？"总是比断言"这里的加锁有问题"效果更好。)
 
 Another technique that is useful in case of a disagreement is to ask for others
 to chime in. If a discussion reaches a stalemate after a few exchanges,
 then call for opinions of other reviewers or maintainers. Often those in
 agreement with a reviewer remain silent unless called upon.
 The opinion of multiple people carries exponentially more weight.
+(出现分歧时，另一个有用的技巧是请其他人参与讨论。如果几轮交流后讨论陷入僵局，就征询其他审查者或维护者的意见。认同某个审查者的人往往在被点名之前保持沉默。多方意见的分量会成倍增加。)
 
 Different developers will review code from different points of view.  Some
 are mostly concerned with coding style and whether code lines have trailing
@@ -198,6 +204,7 @@ security issues, duplication of code found elsewhere, adequate
 documentation, adverse effects on performance, user-space ABI changes, etc.
 All types of review, if they lead to better code going into the kernel, are
 welcome and worthwhile.
+(不同的开发者会从不同角度审查代码。有人主要关注编码风格以及代码行尾是否有空白字符；有人首要关注补丁所实施的更改整体上对内核是否是好事；还有人会检查有问题的加锁、过度的栈使用、潜在的安全问题、与其他地方代码的重复、文档是否充分、对性能的负面影响、用户空间 ABI 变更等等。各类审查，只要能让进入内核的代码变得更好，都值得欢迎且有意义。)
 
 There is no strict requirement to use specific tags like ``Reviewed-by``.
 In fact reviews in plain English are more informative and encouraged
@@ -205,7 +212,9 @@ even when a tag is provided, e.g. "I looked at aspects A, B and C of this
 submission and it looks good to me."
 Some form of a review message or reply is obviously necessary otherwise
 maintainers will not know that the reviewer has looked at the patch at all!
+(并不强制要求使用 ``Reviewed-by`` 这类特定标签。事实上，用平实的英文给出审查意见信息量更大，即使提供了标签也值得鼓励，例如"我审查了本次提交的 A、B、C 三个方面，在我看来没问题。"。某种形式的审查消息或回复显然是必要的，否则维护者根本不知道审查者看过这个补丁！)
 
 Last but not least patch review may become a negative process, focused
 on pointing out problems. Please throw in a compliment once in a while,
 particularly for newbies!
+(最后同样重要的是：补丁审查可能沦为一种消极的过程，只顾指出问题。请偶尔给出一句称赞，对新手尤其如此！)

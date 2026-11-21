@@ -3,8 +3,8 @@
 
 .. _dmx_types:
 
-****************
-Demux Data Types
-****************
+********************************
+Demux Data Types(解复用数据类型)
+********************************
 
 .. kernel-doc:: include/uapi/linux/dvb/dmx.h

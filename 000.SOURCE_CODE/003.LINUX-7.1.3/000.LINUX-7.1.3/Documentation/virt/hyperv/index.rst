@@ -1,8 +1,8 @@
 .. SPDX-License-Identifier: GPL-2.0
 
-======================
-Hyper-V Enlightenments
-======================
+========================================
+Hyper-V Enlightenments(Hyper-V 增强功能)
+========================================
 
 .. toctree::
    :maxdepth: 1

@@ -857,7 +857,6 @@ For all of the Kconfig* configuration files throughout the source tree,
 the indentation is somewhat different.  Lines under a ``config`` definition
 are indented with one tab, while help text is indented an additional two
 spaces.  Example::
-(对于整个源码树中所有 Kconfig* 配置文件，缩进方式有些不同。``config`` 定义之下的行用一个制表符缩进，而帮助文本则在此基础上再缩进两个空格。示例：)
 
   config AUDIT
 	bool "Auditing support"
@@ -868,14 +867,19 @@ spaces.  Example::
 	  logging of avc messages output).  Does not do system-call
 	  auditing without CONFIG_AUDITSYSCALL.
 
+
+(对于整个源码树中所有 Kconfig* 配置文件，缩进方式有些不同。``config`` 定义之下的行用一个制表符缩进，而帮助文本则在此基础上再缩进两个空格。示例：)
+
 Seriously dangerous features (such as write support for certain
 filesystems) should advertise this prominently in their prompt string::
-(具有严重危险性的特性 (比如某些文件系统的写支持)，应当在它们的提示字符串中醒目地声明这一点：)
 
   config ADFS_FS_RW
 	bool "ADFS write support (DANGEROUS)"
 	depends on ADFS_FS
 	...
+
+
+(具有严重危险性的特性 (比如某些文件系统的写支持)，应当在它们的提示字符串中醒目地声明这一点：)
 
 For full documentation on the configuration files, see the file
 Documentation/kbuild/kconfig-language.rst.
@@ -1180,11 +1184,13 @@ difficult-to-find bugs.  If the C language included a strong distinction
 between integers and booleans then the compiler would find these mistakes
 for us... but it doesn't.  To help prevent such bugs, always follow this
 convention::
-(把这两种表示方式搞混，是难查 bug 的丰饶温床。如果 C 语言对整数和布尔值有严格的区分，编译器本可以替我们找出这些错误……但它没有。为帮助预防此类 bug，请始终遵循以下约定：)
 
 	If the name of a function is an action or an imperative command,
 	the function should return an error-code integer.  If the name
 	is a predicate, the function should return a "succeeded" boolean.
+
+
+(把这两种表示方式搞混，是难查 bug 的丰饶温床。如果 C 语言对整数和布尔值有严格的区分，编译器本可以替我们找出这些错误……但它没有。为帮助预防此类 bug，请始终遵循以下约定：)
 
 For example, ``add work`` is a command, and the add_work() function returns 0
 for success or -EBUSY for failure.  In the same way, ``PCI device present`` is

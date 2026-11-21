@@ -2,9 +2,9 @@
 
 .. _lirc_header:
 
-*****************
-LIRC uAPI symbols
-*****************
+*********************************
+LIRC uAPI symbols(LIRC uAPI 符号)
+*********************************
 
 .. contents:: Table of Contents
    :depth: 2
@@ -17,4 +17,3 @@ LIRC uAPI symbols
     :exception-file: lirc.h.rst.exceptions
     :toc:
     :warn-broken:
-

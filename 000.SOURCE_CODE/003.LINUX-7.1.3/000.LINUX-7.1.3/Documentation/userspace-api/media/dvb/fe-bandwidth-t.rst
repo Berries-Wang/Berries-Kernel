@@ -1,8 +1,8 @@
 .. SPDX-License-Identifier: GFDL-1.1-no-invariants-or-later
 
-******************
-Frontend bandwidth
-******************
+****************************
+Frontend bandwidth(前端带宽)
+****************************
 
 .. c:type:: fe_bandwidth
 
@@ -13,9 +13,9 @@ Frontend bandwidth
 
     -  .. row 1
 
-       -  ID
+       -  ID(编号)
 
-       -  Description
+       -  Description(描述)
 
     -  .. row 2
 
@@ -24,6 +24,7 @@ Frontend bandwidth
 	  ``BANDWIDTH_AUTO``
 
        -  Autodetect bandwidth (if supported)
+          (自动检测带宽 (如果支持)。)
 
     -  .. row 3
 

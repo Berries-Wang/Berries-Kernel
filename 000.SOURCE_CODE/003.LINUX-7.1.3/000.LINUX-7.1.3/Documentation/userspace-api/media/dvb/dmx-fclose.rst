@@ -3,40 +3,46 @@
 
 .. _dmx_fclose:
 
-========================
+==============================================
+Digital TV demux close()(数字电视解复用器关闭)
+==============================================
+
+Name(名称)
+----------
+
 Digital TV demux close()
-========================
+(数字电视解复用器关闭。)
 
-Name
-----
-
-Digital TV demux close()
-
-Synopsis
---------
+Synopsis(概要)
+--------------
 
 .. c:function:: int close(int fd)
 
-Arguments
----------
+Arguments(参数)
+---------------
 
 ``fd``
   File descriptor returned by a previous call to
   :c:func:`open()`.
+  (由之前对 :c:func:`open()` 的调用返回的文件描述符。)
 
-Description
------------
+Description(描述)
+-----------------
 
 This system call deactivates and deallocates a filter that was
 previously allocated via the :c:func:`open()` call.
+(此系统调用去激活并释放之前通过 :c:func:`open()` 调用分配的过滤器。)
 
-Return Value
-------------
+Return Value(返回值)
+--------------------
 
 On success 0 is returned.
+(成功时返回 0。)
 
 On error, -1 is returned and the ``errno`` variable is set
 appropriately.
+(出错时返回 -1，并相应设置 ``errno`` 变量。)
 
 The generic error codes are described at the
 :ref:`Generic Error Codes <gen-errors>` chapter.
+(通用错误码在 :ref:`Generic Error Codes <gen-errors>` 一章中描述。)
