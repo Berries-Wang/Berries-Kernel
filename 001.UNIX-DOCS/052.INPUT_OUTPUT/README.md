@@ -1,11 +1,15 @@
 # 输入输出设备(I/O设备)
 > 学习: <br/> [007.BOOKs/现代操作系统/现代操作系统.epub](../../007.BOOKs/现代操作系统/现代操作系统.epub)#1.3.5 I/O 设备 （部分翻译有问题，参考:[007.BOOKs/现代操作系统/Modern Operating Systems 5th Edition-PDF-01.pdf](../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf)学习） <br/> - [001.UNIX-DOCS/052.INPUT_OUTPUT/023.MMIO(内存映射IO)](023.MMIO(内存映射IO)/README.md)
 
+- I/O devices can be roughly divided into two categories: block devices and character devices. (I/O设备通常被分为两种类型： 块设备 和 字符设备) <sup>[007.BOOKs/现代操作系统/Modern Operating Systems 5th Edition-PDF-01.pdf#P338](../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf)</sup>
+
 ![ScreenShot_2026-10-20_152022_034.png](../999.IMGS/ScreenShot_2026-10-20_152022_034.png)
-- 如上图，I/O设备一般包括两个部分：设备控制器 和 设备本身
+- 如上图，I/O设备一般包括两个部分：设备控制器 和 设备本身 <sup>I/O units often consist of a mechanical component and an electronic component. It is possible to separate the two parts to provide a more modular and general design. The electronic component is called the device controller or adapter. On personal computers, it often takes the form of a chip on the motherboard or a printed circuit card that can be inserted into a (PCIe) expansion slot. The mechanical component is the device itself. （I/O单元通常由机械部件和电子部件组成。可以将这两部分分离，以提供更加模块化和通用的设计。电子部件称为设备控制器或适配器。在个人计算机上，它通常表现为主板上的芯片或可插入（PCIe）扩展槽的印刷电路卡。机械部件则是设备本身。）[007.BOOKs/现代操作系统/Modern Operating Systems 5th Edition-PDF-01.pdf#P339](../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf) </sup>
   + 设备控制器：控制器是插在电路板上的一块芯片或一组芯片，这块电路板物理地控制设备。它从操作系统接收命令，例如，从设备读数据，并且完成数据的处理。
     - 控制器的任务是为操作系统提供一个简单的接口: CPU通过「设备驱动程序（device driver）<sup>每类设备控制器都是不同的，所以，需要不同的软件进行控制。专门与控制器对话，发出命令并接收响应的软件，称为设备驱动程序（device driver）</sup>」来和「设备控制器」交流（发送请求），由控制器来控制设备来执行任务
     - 操作系统看到的是对控制器的接口(**每个设备控制器都有少量的用于通信的寄存器**<sup>操作系统只需通过设备驱动程序向磁盘控制器的寄存器写入一条高层命令(“从 2 号盘读 11206 号扇区”)，控制器芯片内嵌的一颗微控制器便运行厂商固件，把这条命令翻译成换算扇区号、寻道、读取、校验、组字入内存等一整套物理操作——机械细节全部被控制器消化，操作系统完全看不到；在此期间 CPU 不必空等，驱动程序启动设备后即返回，操作系统转去调度别的进程；控制器传送完毕后，经由中断控制器向 CPU 发出中断并报上设备编号，CPU 保存现场、切入内核态，按设备编号查中断向量找到该设备驱动程序中的中断处理程序，由它读取设备状态、把数据交给被阻塞的调用者，一次 I/O 至此完成(大块数据可交由 DMA 芯片代为搬运，完成后同样以中断通知)</sup>)
+      + Every controller has a small number of registers that are used to communicate with it. <sup>[现代操作系统/Modern Operating Systems 5th Edition-PDF-01.pdf#P31](../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf) </sup>
+      + The controller is a chip (or a set of chips) that physically controls the device. It accepts commands from the operating system,  <sup>[现代操作系统/Modern Operating Systems 5th Edition-PDF-01.pdf#P29](../../007.BOOKs/现代操作系统/Modern%20Operating%20Systems%205th%20Edition-PDF-01.pdf) </sup>
   + 设备自身: 设备本身有个相对简单的接口，这是因为接口既不能做很多工作，又已经被标准化了。标准化是有必要的，这样任何一个IDE磁盘控制器就可以适应任一种IDE磁盘
 
 ## 本目录索引
@@ -16,6 +20,7 @@
 - [005.MOS5-10.5.2-Networking网络IO.md](005.MOS5-10.5.2-Networking网络IO.md) —— 10.5.2 Networking：socket 体系与 sk_buff
 - [006.块设备与字符设备两大组件.md](006.块设备与字符设备两大组件.md) —— 10.5.4 I/O 系统两大组件：块特殊文件 + 字符特殊文件
 - [008.IO调度器-电梯算法与死线.md](008.IO调度器-电梯算法与死线.md) —— I/O 调度器(电梯/死线/mq-deadline/BFQ/Kyber)
+- [007.MOS5-1.3.4-IO设备全篇翻译.md](007.MOS5-1.3.4-IO设备全篇翻译.md) —— §1.3.4 I/O Devices 全篇翻译（书页 29–32/PDF 58–61）：14 段英文逐字+中文对照+Fig 1-11，控制器/驱动程序/三种 I/O 方式/中断/DMA 的第 1 章总览
 
 ### 子目录（迁移汇总）
 | 子目录 | 内容 | 来源 |
