@@ -53,7 +53,11 @@
 - CPU ◄──► CPU: 原图**没有标注**类型和速率；它是双路 CPU 之间的片间互连（Intel 平台为 UPI、AMD 平台为 xGMI——这句是补充的背景，图上没有）。
 - 左上角 `2x 200Gbps`: BF3 B3220 的上行（N/S 网络）。
 - NVMe 各自在最外侧，直连所属 CPU 的外侧边缘，不经过 PCIe Switch。
-
+- 参考:
+  + [GIGABYTE-gigabyte-server_manual_e_G493-ZB4_v3.0.pdf#P14](../../007.BOOKs/GIGABYTE-gigabyte-server_manual_e_G493-ZB4_v3.0.pdf)
+  + [Accelerate AI outcomes with modular, automated and proven enterprise AI. NVIDIA 2-8-5-200, ERA configuration endorsed for the Dell AI Factory with NVIDIA](../../007.BOOKs/098.NVIDIA/nvidia-2-8-5-200-era-configuration-endorsed-for-the-dell-ai-factory-with-nvidia-brief-en-dl11113p-original.pdf) -> 有更清晰的图
+    + [NVIDIA Reference Architectures](https://docs.nvidia.com/reference-architectures/index.html#nvidiatab-overview)
+    + [G493-ZB4-AAP1](https://www.gigabyte.cn/Enterprise/GPU-Server/G493-ZB4-AAP1-rev-3x#Support-Manual)
 ## 逐线对照
 
 | 起点 | 终点 | 图上标注 | 数量 |
