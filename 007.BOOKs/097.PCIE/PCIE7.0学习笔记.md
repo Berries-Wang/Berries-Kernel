@@ -25,7 +25,7 @@
 
 ## 1.1 Link（链路）：两个部件之间的双单工通道
 
-**§1.2 PCI Express Link（原文, p.140）** "A Link represents a dual-simplex communications channel between two components. The fundamental PCI Express Link consists of two, low-voltage, differentially driven signal pairs: a Transmit pair and a Receive pair."（译文：Link（链路）表示两个部件之间的双单工通信通道。最基本的 PCI Express Link 由两对低压差分驱动信号对组成：一对发送（Transmit pair）和一对接收（Receive pair）。）
+**§1.2 PCI Express Link（原文, p.140）** "A Link represents a dual-simplex communications channel between two components. The fundamental PCI Express Link consists of two, low-voltage, differentially driven signal pairs: a Transmit pair and a Receive pair ..."（译文：Link（链路）表示两个部件之间的双单工通信通道。最基本的 PCI Express Link 由两对低压差分驱动信号对组成：一对发送（Transmit pair）和一对接收（Receive pair）。）
 
 **术语表 Link（原文, p.122）** "The collection of two Ports and their interconnecting Lanes. A Link is a dual-simplex communications path between two components."（译文：链路是两个端口（Port）及其互连 Lane 的集合。链路是两个部件之间的一条双单工通信通路。）
 
@@ -131,14 +131,14 @@
 | 状态 | 原文（译文） | 页 |
 |---|---|---|
 | Recovery | "Recovery allows a configured Link to change the data rate of operation if desired, re-establish bit lock, Symbol lock or Block alignment, and Lane-to-Lane de-skew."（译文：已配置好的链路可在 Recovery 中改速率、重建比特锁/符号锁/块对齐、重新去偏斜） | p.522 |
-| L0 | "L0 is the normal operational state where data and control packets can be transmitted and received."（译文：正常工作态，收发数据与控制包；所有电源管理状态都从这里进入） | p.522 |
+| L0 | "L0 is the normal operational state where data and control packets can be transmitted and received. All power management states are entered from this state."（译文：正常工作态，可收发数据包与控制包；所有电源管理状态都从这里进入） | p.522 |
 | L0s | "L0s allows a Link to quickly enter and recover from a power conservation state without going through Recovery."（译文：省电态，进出快、不用经过 Recovery） | p.522 |
 | L0p | "L0p enables a Link to have some Lanes active while the remaining Lanes will be in electrical idle state."（译文：L0 的子状态：部分 Lane 工作、其余 Lane 电气空闲） | p.522 |
 | L1 | "The L1 state allows an additional power savings over L0s at the cost of additional resume latency."（译文：比 L0s 更省电，代价是恢复更慢） | p.531 |
-| L2 | "Power can be aggressively conserved in L2. Most of the Transmitter and Receiver may be shut off."（译文：主电源可关，仅保留辅助电源） | p.531 |
-| Disabled | "The intent of the Disabled state is to allow a configured Link to be disabled as long as directed or until Electrical Idle is exited (i.e., due to a hot removal and insertion) after entering Disabled."（译文：让已配置的链路被禁用（典型场景：热拔插期间）） | p.532 |
+| L2 | "Power can be aggressively conserved in L2. Most of the Transmitter and Receiver may be shut off. ... Main power and clocks are not guaranteed, but Aux power is available."（译文：L2 中可以最大限度地省电，大部分发送器与接收器可以关断；主电源与时钟不保证可用，但辅助电源可用） | p.531 |
+| Disabled | "The intent of the Disabled state is to allow a configured Link to be disabled as long as directed or until Electrical Idle is exited (i.e., due to a hot removal and insertion) after entering Disabled."（译文：让一条已配置的链路按指示保持禁用，或保持到进入 Disabled 之后电气空闲被退出（例如热拔出与插入）为止） | p.532 |
 | Loopback | "Loopback is intended for test and fault isolation use."（译文：测试与故障隔离用） | p.532 |
-| Hot Reset | "The intent of the Hot Reset state is to allow a configured Link and associated downstream device to be reset using in-band signaling." | 用带内信号复位链路及其下游设备 | p.533 |
+| Hot Reset | "The intent of the Hot Reset state is to allow a configured Link and associated downstream device to be reset using in-band signaling."（译文：用带内信号复位一条已配置的链路及其下游设备） | p.533 |
 
 与多卡/省电最相关的是 **L0p**（部分 Lane 休眠，带宽随负载收缩）：
 
@@ -152,7 +152,7 @@
 ![Figure 4-66 Example of L0p flow in a x16 Link](./imgs/fig4-66-l0p.png)
 
 **工程理解（本人整理）**：开机瞬间每条插槽都在跑这套"握手"，所以——
-- 插一半、金手指脏污 → Detect 阶段失败 → 设备消失或降速；
+- 插一半、金手指脏污 → Detect 阶段找不到对端（设备消失），或只有部分 lane 被检测到而降宽（x16 变 x8/x1）；信号质量差引起的降速发生在后续 EQ 阶段（见 §4.6.1）；
 - 协商出的宽度/速率可以在 `lspci -vv` 的 `LnkSta` 里直接看到（见第三部分 §3.2）；
 - 速率变更（升速/降速）走 **Recovery** 状态，不需要重新枚举设备——所以"链路跑到一半自己降速"在系统看来只是静默的一次 Recovery。
 
@@ -252,7 +252,7 @@ Gen6/Gen7（64、128 GT/s）相对 Gen5 有三个结构性变化，Table 1-1 里
 **§1.3.1（原文, p.142-143）—— RC 的 P2P 能力是可选的** "The capability to route peer-to-peer transactions between hierarchy domains through an RC is optional and implementation dependent. An RC is permitted to 'take ownership' of Requests that pass peer-to-peer between Root Ports, reforming and potentially splitting a Request such that it may appear to the ultimate Completer that the RC was the origin of the Request, and subsequently the RC must reform the Completion(s) being returned to the original Requester. Alternately, an RC implementation may incorporate a real or virtual Switch internally within the Root Complex to enable full peer-to-peer support in a software transparent way."（译文：通过 RC 在不同层次域之间路由点对点（peer-to-peer）事务的能力是**可选的、实现相关的**。RC 允许"接管"（take ownership）在 Root Port 之间点对点传递的请求——重组（并可能拆分）请求，使最终完成者看到的请求发起者是 RC，RC 随后也必须重组返回给原始请求者的完成包。另一种做法是 RC 内部实现一个真实或虚拟的 Switch，以软件透明的方式提供完全的点对点支持。）
 
 **【工程整理】这段对 AI 多卡机极其重要**：
-- 两块 GPU 各挂在不同 Root Port 上时，GPU→GPU 的 P2P 要么被 RC 直接转发，要么被 RC "接管"后经主机内存中转（拷贝两次，速度骤降）。具体行为取决于芯片组/固件/ACS 配置。
+- 两块 GPU 各挂在不同 Root Port 上时，GPU→GPU 的 P2P 要么被 RC 直接转发，要么被 RC "接管"后代理转发（重组请求，性能取决于 RC 实现）；实现不支持、也不"接管"时，请求得不到正常响应，只能由驱动回退到经主机内存中转（拷贝两次，速度骤降）。具体行为取决于芯片组/固件/ACS 配置，以及卡型与驱动是否支持 P2P（见 §4.4）。
 - 注意规范说的是"层次域之间（= 同一 RC 的不同 Root Port 之间）"；**跨 RC**（双路 CPU）的情形 Base Spec 没有给出保证条款，见 §4.4.1 的三层范围表。
 
 **§1.3.1（原文, p.143）—— RC 的拆包特权** "Unlike the rules for a Switch, an RC is generally permitted to split a packet into smaller packets when routing transactions peer-to-peer between hierarchy domains ... For example, an RC is permitted to split a single packet with a 256-byte payload into two packets of 128 bytes payload each."（译文：与 Switch 的规则不同，RC 在层次域之间路由点对点事务时，通常允许把一个包拆分成更小的包（例如 256 字节负载拆成两个 128 字节）。（对比记忆：Switch **不允许**拆包，见 §2.4。））
@@ -277,7 +277,7 @@ Gen6/Gen7（64、128 GT/s）相对 Gen5 有三个结构性变化，Table 1-1 里
 
 ## 2.4 Switch：树枝分叉点
 
-**术语表 Switch（原文, p.128）** "A defined System Element that connects two or more Ports to allow Packets to be routed from one Port to another. To configuration software, a Switch appears as a collection of virtual PCI-to-PCI Bridges."（译文：Switch 是一种已定义的系统元素，连接两个或更多端口，使包能从一个端口路由到另一个端口。对配置软件而言，Switch 表现为一组虚拟 PCI-to-PCI 桥。）
+**术语表 Switch（原文, p.128）** "A defined System Element that connects two or more Ports to allow Packets to be routed from one Port to another. To configuration software, a Switch appears as a collection of virtual PCI-to-PCI Bridges [PCI-to-PCI-Bridge]."（译文：Switch 是一种已定义的系统元素，连接两个或更多端口，使包能从一个端口路由到另一个端口。对配置软件而言，Switch 表现为一组虚拟 PCI-to-PCI 桥。）
 
 **§1.3.3 Switch（原文, p.145）**
 
@@ -290,7 +290,7 @@ Gen6/Gen7（64、128 GT/s）相对 Gen5 有三个结构性变化，Table 1-1 里
 
 **§1.3.3（原文, p.145）—— 转发规则（多卡 P2P 的法理基础）**
 
-- "A Switch forwards transactions using PCI Bridge mechanisms; e.g., address-based routing (except when engaged in a Multicast)."（译文：Switch 用 PCI 桥的机制转发事务，例如基于地址的路由（多播除外）。）
+- "A Switch forwards transactions using PCI Bridge mechanisms; e.g., address-based routing (except when engaged in a Multicast, as defined in Section 6.14)."（译文：Switch 用 PCI 桥的机制转发事务，例如基于地址的路由（参与多播时除外，多播的定义见第 6.14 节）。）
 - "Except as noted in this document, a Switch must forward all types of Transaction Layer Packets (TLPs) between any set of Ports."（译文：除特别说明外，Switch **必须在任意端口集合之间转发所有类型的 TLP**。）
 - "A Switch is not allowed to split a packet into smaller packets."（译文：Switch **不允许**把包拆小（RC 可以，Switch 不行）。）
 
@@ -336,7 +336,7 @@ Gen6/Gen7（64、128 GT/s）相对 Gen5 有三个结构性变化，Table 1-1 里
 
 **§4.2.5.11.1（原文, p.519）** "Support for formation of a crosslink is optional. In this context, a Downstream Port connected to a Downstream Port or an Upstream Port connected to an Upstream Port is a crosslink."（译文：crosslink（交叉链路）的形成是可选的：**DSP 接 DSP 或 USP 接 USP** 就构成 crosslink。）
 
-**【工程整理】** 正常拓扑是"上级 DSP → 下级 USP"；crosslink 允许两个"同侧"端口直连（如两台独立机箱的 Switch 互连、板卡间背板直连），训练状态机里有专门的随机超时机制决定谁当 Downstream 角色。DIY 外置 GPU 扩展坞互联时可能遇到。
+**【工程整理】** 正常拓扑是"上级 DSP → 下级 USP"；crosslink 允许两个"同侧"端口直连（DSP 接 DSP 或 USP 接 USP）。这种接法下两侧都可能争当 Downstream 角色，训练状态机为此安排了随机超时（Tcrosslink）来决定角色。该能力是可选的，常见桌面平台并不依赖它，DIY 装机基本用不到。
 
 ## 2.6 本章小结
 
@@ -376,7 +376,7 @@ Gen6/Gen7（64、128 GT/s）相对 Gen5 有三个结构性变化，Table 1-1 里
 **【工程整理】三个结论**：
 1. **今天你能装出来的 PCIe 一定是一棵树**：非树形/多路径只在 UIO 下被"允许"，其管理机制明确划在规范之外（PCI-SIG 材料中标注为 "still WIP"）。规划桌面 AI 中心时按树来算带宽，不要假设有多路径冗余。
 2. **UIO 是多卡 P2P 的带宽解锁器**：传统 PCIe 在整条路径上强制生产者-消费者排序，P2P 流量容易被别的流量"顶住"；UIO 把排序责任交给请求方，中间 fabric 不再为排序负责。这对多 GPU/加速器系统是主要收益点。
-3. **门槛很高**：UIO 要求整条路径（GPU、Switch、RC）都跑 Flit 模式，即 64 GT/s 及以上代际，且都要支持并启用 UIO。Gen5 及以下的桌面平台用不上。
+3. **门槛很高**：UIO 要求整条路径（GPU、Switch、RC）都使用 Flit 模式，且都支持并启用 UIO。Flit 模式只有在支持超过 32 GT/s 的速率时才是强制项（§1.3），所以实际上意味着整条路径都得是 Gen6（64 GT/s）及以上代际的设备。Gen5 及以下的桌面平台用不上。
 
 ---
 
@@ -500,7 +500,7 @@ CPU Root Port ──x16 Gen4──→ Switch
 | 链路段 | 期望协商 | 判据 |
 |---|---|---|
 | CPU Root Port → GPU | x16 Gen4/Gen5（视 CPU/主板） | `lspci -vv` LnkSta 应无 downgraded |
-| CPU → PCH（DMI，规范上是普通 PCIe 链路） | x8 Gen4 级别 | 所有 PCH 设备共享，勿把大流量设备挂 PCH |
+| CPU → PCH（DMI，规范上是普通 PCIe 链路） | x4 或 x8 Gen4（因平台而异） | 所有 PCH 设备共享这一条上行，勿把大流量设备挂 PCH |
 | PCH → NVMe/M.2 | x4 Gen4/Gen5 | 单盘极限 ≈ 7.9 / 15.8 GB/s |
 | Switch 下行 → GPU | x16 | 若卡是 x16 而协商出 x8，先查主板布线和 BIOS |
 | Switch 上行 | 至少与聚合流量同量级 | 过载比核算（§3.4.2） |
@@ -644,7 +644,7 @@ sudo lspci -vv | grep -iE "AtomicOp"     # 关注 GPU、Root Port、Switch 端�
 
 **同节（原文, p.1304）** "The Resizable BAR Capability and Control registers are permitted to indicate the ability to operate at 4 GB or greater only if the associated BAR is a 64-bit BAR."（译文：只有当对应 BAR 是 64 位 BAR 时，Resizable BAR 才允许指示 ≥4GB 的能力。）
 
-【工程整理】GPU 显存动辄几十 GB，而传统 BAR 只有 256MB：CPU 每次 DMA 读显存都要在 256MB 窗口内挪动指针。开 ReBAR（BIOS: Above 4G Decoding + Resizable BAR）后 CPU 可直接映射全部显存，对推理服务的 CPU↔GPU 小块传输、内存映射加载都有实际收益。**Above 4G Decoding 与 ReBAR 通常要一起开。**
+【工程整理】GPU 显存动辄几十 GB，而传统 BAR 通常只有 256MB：CPU 侧能直接映射的显存窗口只有 256MB，要访问窗口之外的显存，驱动得先搬动这个窗口（aperture），而且经 BAR 的 MMIO 访问本身很慢。它限制的是 **CPU 访问显存**，并不改变 GPU 自身的 DMA 带宽。开 ReBAR（BIOS: Above 4G Decoding + Resizable BAR）后 CPU 可以一次性映射整块显存，省去窗口搬移，对需要 CPU 直接读写显存的路径（小块拷贝、模型加载等）有实际收益。**Above 4G Decoding 与 ReBAR 通常要一起开。**
 
 ### 4.5.2 ACS / IOMMU（虚拟化与 P2P 隔离）
 
@@ -699,7 +699,7 @@ ACS 里与多卡 P2P 直接冲突的一项：
 sudo lspci -vv | grep -E "DevCap:|DevCtl:" | grep -i payload    # DevCap 为能力上限，DevCtl 为当前设定
 ```
 
-当前桌面平台上 GPU/网卡常见设定为 256 bytes；大于 256 bytes 的档位属于 7.0 扩展，需整条路径支持。
+当前桌面平台上，Gen5 及以下 GPU/网卡的 Max_Payload_Size Supported 上限多为 256 bytes，实际设定值（DevCtl）常见 128 或 256 bytes，由 BIOS/系统软件按全路径的最小公共能力统一配置。1024~4096 bytes 档位是 6.0 规范随 Flit 模式新增的（并非 7.0 的新增内容），要用上需整条路径（含 RC、Switch）都支持。
 
 ### 4.5.5 事务属性：No Snoop / Relaxed Ordering / ID-Based Ordering
 
@@ -713,7 +713,7 @@ sudo lspci -vv | grep -E "DevCap:|DevCtl:" | grep -i payload    # DevCap 为能�
 | 1 | No Snoop | "Hardware enforced cache coherency not expected" | 不期望由硬件保证缓存一致性（即不需要 snoop CPU 缓存） |
 
 **【工程整理】** TLP 头里有 3 个属性位：No Snoop、Relaxed Ordering、ID-Based Ordering（规范 Figure 2-35）。它们由**请求方设备**置位：
-- **No Snoop**：GPU/网卡 DMA 访问的通常是驱动分配的、不与 CPU 缓存共享的缓冲区（显存、锁页内存等），置位后 RC 不必再去探测 CPU 缓存，降低延迟与总线流量。
+- **No Snoop**：告诉路径上的硬件"这次事务不要求硬件维护缓存一致性"。典型对象是不在主机缓存一致性域内的目标，例如 CPU 经 BAR 访问独立 GPU 的显存；置位后 RC 不必再去探测（snoop）CPU 缓存，降低延迟与总线流量。注意锁页主机内存仍在一致性域内，GPU 对它做 DMA 时该位为 0，不能当作 No Snoop 的例子。
 - **Relaxed Ordering / ID-Based Ordering**：允许比默认更宽松的完成顺序，减少队头阻塞，提高多队列并行度；大块 DMA 传输普遍受益。
 - 因为只是"提示"，平台可以忽略它们——所以同一张卡在不同平台上的 DMA 性能可能不同。
 
