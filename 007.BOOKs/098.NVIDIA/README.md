@@ -7,6 +7,7 @@
 |-|-|-|
 |- GB10 统一内存架构（Unified Memory Architecture）|- 与 Grace Hopper 思路不同：GB10 是单一物理内存池（128GB LPDDR5x 由 CPU/GPU 共享，GPU 可直接分配 >100GiB），S-die（CPU）与 G-die（GPU）经 C2C + Arm AMBA CHI-G 实现封装内芯片级缓存一致性；无页迁移概念|- [NVIDIA GB10 Superchip Whitepaper#P5](../../007.BOOKs/098.NVIDIA/nvidia-gb10-superchip-whitepaper.pdf) <br/> - [NVIDIA GB10 Superchip Whitepaper#P15](../../007.BOOKs/098.NVIDIA/nvidia-gb10-superchip-whitepaper.pdf)|
 |-|-|-|
+|- GPU 内部执行流程（SM / warp / 线程块调度，GH100 精读）|- 线程由谁执行、三层调度与调度单位、与 OS 线程的区别、CPU↔GPU 数据交互、Figure 7 逐块精读|- [002.GPU内部执行流程.md](002.GPU内部执行流程.md) <br/> - 官方图摘录：[imgs/](imgs/)|
 
 ---
 
